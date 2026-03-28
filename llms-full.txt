@@ -9982,39 +9982,123 @@ Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst
 
 # Callback Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures how fast each mocking library can register and execute callbacks during mock method invocations, both simple callbacks and callbacks with argument capture.
+Callback registration and execution:
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "Callback Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for callback registration and execution.
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.555Z*
 
 ---
 
 ## Mock Benchmark: CombinedWorkflow
 
-# Combined Workflow Benchmark
+# CombinedWorkflow Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark simulates a real-world test scenario measuring the complete workflow: create mocks → configure setups → invoke methods → verify calls. This represents the most realistic usage pattern.
+Full workflow: create → setup → invoke → verify:
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "CombinedWorkflow Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for full workflow: create → setup → invoke → verify.
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.555Z*
 
 ---
 
@@ -10022,19 +10106,61 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # Invocation Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures the overhead of calling methods on mock objects. Once mocks are set up, this measures the per-call cost of dispatching through the mock.
+Calling methods on mock objects:
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "Invocation Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for calling methods on mock objects.
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.555Z*
 
 ---
 
@@ -10042,25 +10168,61 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # MockCreation Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures how fast each mocking library can create mock instances of interfaces. This is critical for test performance since every test typically creates one or more mocks.
+Mock instance creation performance:
 
-**Libraries compared:**
-- **TUnit.Mocks** — Source-generated mock factories (no runtime proxy generation)
-- **Moq** — Runtime proxy generation via Castle.DynamicProxy
-- **NSubstitute** — Runtime proxy generation via Castle.DynamicProxy
-- **FakeItEasy** — Runtime proxy generation via Castle.DynamicProxy
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "MockCreation Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for mock instance creation performance.
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.556Z*
 
 ---
 
@@ -10068,19 +10230,61 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # Setup Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures how fast each mocking library can configure mock behaviors including return values, argument matchers, and multiple setups.
+Mock behavior configuration (returns, matchers):
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "Setup Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for mock behavior configuration (returns, matchers).
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.556Z*
 
 ---
 
@@ -10088,13 +10292,53 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # Verification Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures how fast each mocking library can verify that methods were called with expected arguments and the correct number of times.
+Verifying mock method calls:
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "Verification Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for verifying mock method calls.
 
 ---
 
@@ -10102,13 +10346,17 @@ This benchmark measures how fast each mocking library can verify that methods we
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
+*Last generated: 2026-03-28T16:42:10.556Z*
+
 ---
 
 ## Mock Library Benchmarks
 
 
-:::info Awaiting First Run
-These benchmarks will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+These benchmarks were automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
 ## 🚀 Overview
@@ -10124,12 +10372,14 @@ These benchmarks compare **TUnit.Mocks** (source-generated, AOT-compatible) agai
 
 ## 📊 Benchmark Categories
 
-- [Mock Creation](MockCreation) - Mock instance creation performance
-- [Setup](Setup) - Mock behavior configuration (returns, matchers)
-- [Invocation](Invocation) - Calling methods on mock objects
-- [Verification](Verification) - Verifying mock method calls
+Click on any benchmark to view detailed results:
+
 - [Callback](Callback) - Callback registration and execution
-- [Combined Workflow](CombinedWorkflow) - Full workflow: create → setup → invoke → verify
+- [CombinedWorkflow](CombinedWorkflow) - Full workflow: create → setup → invoke → verify
+- [Invocation](Invocation) - Calling methods on mock objects
+- [MockCreation](MockCreation) - Mock instance creation performance
+- [Setup](Setup) - Mock behavior configuration (returns, matchers)
+- [Verification](Verification) - Verifying mock method calls
 
 ## 📈 What's Measured
 
@@ -10144,8 +10394,9 @@ Each benchmark category tests a specific aspect of mocking library usage:
 
 ## 🔧 Methodology
 
-- **Tool**: BenchmarkDotNet
+- **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
 - **OS**: Ubuntu Latest (GitHub Actions)
+- **Runtime**: .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
 - **Statistical Rigor**: Multiple iterations with warm-up and outlier detection
 - **Memory**: Allocation tracking enabled via `[MemoryDiagnoser]`
 
@@ -10169,6 +10420,8 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
+
+*Last generated: 2026-03-28T16:42:10.556Z*
 
 ---
 
