@@ -530,7 +530,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         foreach (var r in model.Resources)
         {
-            if (r is IResourceWithoutLifetime)
+            // IComputeResource covers containers, projects, executables, etc.
+            // This is more robust than checking IResourceWithoutLifetime, which was
+            // removed from ParameterResource/ConnectionStringResource in Aspire 13.2.0.
+            if (r is not IComputeResource)
             {
                 skipped ??= [];
                 skipped.Add(r.Name);
@@ -543,7 +546,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         if (skipped is { Count: > 0 })
         {
-            LogProgress($"Skipping {skipped.Count} resource(s) without lifecycle: [{string.Join(", ", skipped)}]");
+            LogProgress($"Skipping {skipped.Count} non-compute resource(s): [{string.Join(", ", skipped)}]");
         }
 
         return waitable;
