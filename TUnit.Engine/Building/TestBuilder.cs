@@ -283,9 +283,11 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     DataSourceAttribute = methodDataSource,
-                                    InitializedAttributes = testBuilderContext.InitializedAttributes,  // Preserve attributes from parent context
-                                    ClassConstructor = testBuilderContext.ClassConstructor  // Preserve ClassConstructor for instance creation
+                                    InitializedAttributes = testBuilderContext.InitializedAttributes,
+                                    ClassConstructor = testBuilderContext.ClassConstructor
                                 };
+
+                                testBuilderContext.CopyStateBagTo(contextAccessor.Current);
 
                                 var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                 classData = classDataUnwrapped;
@@ -476,7 +478,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     ResolvedMethodGenericArguments = Type.EmptyTypes
                                 };
 
-                                // StateBag and Events are lazy-initialized
                                 var testSpecificContext = new TestBuilderContext
                                 {
                                     TestMetadata = metadata.MethodMetadata,
@@ -484,6 +485,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = methodDataSource,
                                     InitializedAttributes = attributes
                                 };
+
+                                testBuilderContext.CopyStateBagTo(testSpecificContext);
 
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                                 test.Context.SkipReason = skipReason;
@@ -535,7 +538,6 @@ internal sealed class TestBuilder : ITestBuilder
                             ResolvedMethodGenericArguments = Type.EmptyTypes
                         };
 
-                        // StateBag and Events are lazy-initialized
                         var testSpecificContext = new TestBuilderContext
                         {
                             TestMetadata = metadata.MethodMetadata,
@@ -543,6 +545,8 @@ internal sealed class TestBuilder : ITestBuilder
                             DataSourceAttribute = classDataSource,
                             InitializedAttributes = attributes
                         };
+
+                        testBuilderContext.CopyStateBagTo(testSpecificContext);
 
                         var test = await BuildTestAsync(metadata, testData, testSpecificContext, cancellationToken: cancellationToken);
                         test.Context.SkipReason = skipReason;
@@ -1882,4 +1886,5 @@ internal sealed class TestBuilder : ITestBuilder
     {
         return _filterMatcher.CouldMatchFilter(metadata, filter);
     }
+
 }

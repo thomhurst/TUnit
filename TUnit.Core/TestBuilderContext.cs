@@ -40,6 +40,14 @@ public record TestBuilderContext
         set => _stateBag = value;
     }
 
+    internal void CopyStateBagTo(TestBuilderContext target)
+    {
+        if (_stateBag is { IsEmpty: false } bag)
+        {
+            target.StateBag = new ConcurrentDictionary<string, object?>(bag);
+        }
+    }
+
     public TestContextEvents Events
     {
         get => _events ??= new TestContextEvents();
