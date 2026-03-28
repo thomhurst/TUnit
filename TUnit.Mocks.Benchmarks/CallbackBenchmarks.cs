@@ -71,7 +71,7 @@ public class CallbackBenchmarks
         var lastMessage = "";
         var mock = Mock.Of<ILogger>();
         mock.Log(TUnitArg.Any<string>(), TUnitArg.Any<string>())
-            .Callback(() => lastMessage = "logged");
+            .Callback(args => lastMessage = (string)args[1]!);
 
         var logger = mock.Object;
         logger.Log("INFO", "Test message 1");
