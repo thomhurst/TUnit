@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using FakeItEasy;
 using Moq;
 using NSubstitute;
@@ -6,7 +7,7 @@ using NSubstitute;
 namespace TUnit.Mocks.Benchmarks;
 
 [MemoryDiagnoser]
-[SimpleJob(warmupCount: 3, iterationCount: 10)]
+[ShortRunJob]
 [JsonExporterAttribute.Full]
 [MarkdownExporterAttribute.GitHub]
 public class InvocationBenchmarks
