@@ -6,6 +6,37 @@
         <Using Include="TUnit.Core" />
     </ItemGroup>
 
-    <!-- Polyfill package injection lives in buildTransitive targets (applies to both direct and transitive consumers) -->
+    <!-- Auto-include Polyfill package for compile-time type generation -->
+    <PropertyGroup>
+        <_TUnitPolyfillVersion>9.23.0</_TUnitPolyfillVersion>
+        <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
+    </PropertyGroup>
+
+    <!-- Add Polyfill for non-CPM projects -->
+    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' != 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
+        <PackageReference Include="Polyfill" Version="$(_TUnitPolyfillVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>compile; analyzers</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Add Polyfill for CPM projects (using VersionOverride to bypass CPM requirement) -->
+    <ItemGroup Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(ManagePackageVersionsCentrally)' == 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
+        <PackageReference Include="Polyfill" VersionOverride="$(_TUnitPolyfillVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>compile; analyzers</IncludeAssets>
+            <ExcludeAssets>runtime; native; contentfiles; build; buildtransitive</ExcludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Validate Polyfill availability and provide helpful messages if issues occur -->
+    <Target Name="_TUnitEnsurePolyfill"
+            BeforeTargets="GenerateBuildDependencyFile"
+            Condition="'$(EnableTUnitPolyfills)' != 'false' and '$(_TUnitNeedsPolyfill)' == 'true' and '$(_PolyfillAlreadyDefined)' != 'true'">
+        <Warning Condition="!Exists('$(NuGetPackageRoot)polyfill')"
+                 Code="TUNIT001"
+                 Text="TUnit attempted to automatically add Polyfill package for $(TargetFramework) but it may not be available. If you encounter issues, you can manually add it or disable automatic injection with &lt;EnableTUnitPolyfills&gt;false&lt;/EnableTUnitPolyfills&gt;." />
+    </Target>
 
 </Project>
