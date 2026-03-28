@@ -17,6 +17,7 @@ jobs:
       group: "mock-benchmarks-${{ matrix.benchmark }}"
       cancel-in-progress: true
 
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
         with:

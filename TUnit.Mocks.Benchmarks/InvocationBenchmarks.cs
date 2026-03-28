@@ -6,7 +6,7 @@ using NSubstitute;
 namespace TUnit.Mocks.Benchmarks;
 
 [MemoryDiagnoser]
-[SimpleJob]
+[SimpleJob(warmupCount: 3, iterationCount: 10)]
 [JsonExporterAttribute.Full]
 [MarkdownExporterAttribute.GitHub]
 public class InvocationBenchmarks
