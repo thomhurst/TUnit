@@ -523,6 +523,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         return string.Join(Environment.NewLine, lines);
     }
 
+    // Opt-in: only wait for IComputeResource (containers, projects, executables).
+    // Non-compute resources (parameters, connection strings) never report healthy and would hang.
     private List<string> GetWaitableResourceNames(DistributedApplicationModel model)
     {
         var waitable = new List<string>();

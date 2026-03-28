@@ -65,6 +65,7 @@ public class WaitForHealthyReproductionTests
         }
         catch (InvalidOperationException)
         {
+            // Aspire throws InvalidOperationException for resources that can never become healthy
             timedOut = true;
         }
 
