@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-
 using FakeItEasy;
 using Moq;
 using NSubstitute;

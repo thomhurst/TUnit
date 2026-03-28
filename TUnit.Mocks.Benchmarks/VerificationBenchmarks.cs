@@ -1,9 +1,7 @@
 using BenchmarkDotNet.Attributes;
-
 using FakeItEasy;
 using Moq;
 using NSubstitute;
-
 
 namespace TUnit.Mocks.Benchmarks;
 
