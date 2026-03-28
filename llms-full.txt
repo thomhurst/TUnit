@@ -9994,7 +9994,14 @@ Callback registration and execution:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 2.828 μs | 0.0513 μs | 0.0455 μs | 7.28 KB |
+| Moq | 136.434 μs | 0.6351 μs | 0.4959 μs | 13.24 KB |
+| NSubstitute | 4.337 μs | 0.0635 μs | 0.0563 μs | 7.93 KB |
+| FakeItEasy | 4.793 μs | 0.0662 μs | 0.0619 μs | 7.44 KB |
+| **'TUnit.Mocks (with args)'** | 2.708 μs | 0.0299 μs | 0.0265 μs | 7.4 KB |
+| 'Moq (with args)' | 142.187 μs | 0.7043 μs | 0.5881 μs | 13.73 KB |
+| 'NSubstitute (with args)' | 4.886 μs | 0.0262 μs | 0.0245 μs | 8.53 KB |
+| 'FakeItEasy (with args)' | 5.857 μs | 0.1023 μs | 0.0957 μs | 9.4 KB |
 
 ## 📈 Visual Comparison
 
@@ -10021,9 +10028,9 @@ Callback registration and execution:
 }}%%
 xychart-beta
   title "Callback Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (with args)'", "'Moq (with args)'", "'NSubstitute (with args)'", "'FakeItEasy (with args)'"]
+  y-axis "Time (μs)" 0 --> 171
+  bar [2.828, 136.434, 4.337, 4.793, 2.708, 142.187, 4.886, 5.857]
 ```
 
 ## 🎯 Key Insights
@@ -10036,7 +10043,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.555Z*
+*Last generated: 2026-03-28T22:34:52.302Z*
 
 ---
 
@@ -10056,7 +10063,10 @@ Full workflow: create → setup → invoke → verify:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 6.513 μs | 0.1292 μs | 0.2329 μs | 15.85 KB |
+| Moq | 394.164 μs | 4.7436 μs | 4.2051 μs | 36.45 KB |
+| NSubstitute | 17.171 μs | 0.0753 μs | 0.0667 μs | 26.72 KB |
+| FakeItEasy | 18.689 μs | 0.1373 μs | 0.1284 μs | 25.63 KB |
 
 ## 📈 Visual Comparison
 
@@ -10083,9 +10093,9 @@ Full workflow: create → setup → invoke → verify:
 }}%%
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy"]
+  y-axis "Time (μs)" 0 --> 473
+  bar [6.513, 394.164, 17.171, 18.689]
 ```
 
 ## 🎯 Key Insights
@@ -10098,7 +10108,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.555Z*
+*Last generated: 2026-03-28T22:34:52.303Z*
 
 ---
 
@@ -10118,7 +10128,18 @@ Calling methods on mock objects:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 454.5 ns | 107.54 ns | 5.89 ns | 224 B |
+| Moq | 773.6 ns | 144.04 ns | 7.90 ns | 376 B |
+| NSubstitute | 751.4 ns | 485.33 ns | 26.60 ns | 304 B |
+| FakeItEasy | 1,683.0 ns | 257.66 ns | 14.12 ns | 944 B |
+| **'TUnit.Mocks (String)'** | 314.2 ns | 86.13 ns | 4.72 ns | 160 B |
+| 'Moq (String)' | 538.5 ns | 457.42 ns | 25.07 ns | 296 B |
+| 'NSubstitute (String)' | 587.4 ns | 73.87 ns | 4.05 ns | 272 B |
+| 'FakeItEasy (String)' | 1,476.6 ns | 245.43 ns | 13.45 ns | 776 B |
+| **'TUnit.Mocks (100 calls)'** | 44,747.7 ns | 19,324.27 ns | 1,059.23 ns | 23296 B |
+| 'Moq (100 calls)' | 77,566.7 ns | 25,798.33 ns | 1,414.09 ns | 37600 B |
+| 'NSubstitute (100 calls)' | 73,504.2 ns | 22,769.43 ns | 1,248.07 ns | 36448 B |
+| 'FakeItEasy (100 calls)' | 174,519.1 ns | 67,899.40 ns | 3,721.80 ns | 94400 B |
 
 ## 📈 Visual Comparison
 
@@ -10145,9 +10166,9 @@ Calling methods on mock objects:
 }}%%
 xychart-beta
   title "Invocation Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (String)'", "'Moq (String)'", "'NSubstitute (String)'", "'FakeItEasy (String)'", "'TUnit.Mocks (100 calls)'", "'Moq (100 calls)'", "'NSubstitute (100 calls)'", "'FakeItEasy (100 calls)'"]
+  y-axis "Time (ns)" 0 --> 209423
+  bar [454.5, 773.6, 751.4, 1683, 314.2, 538.5, 587.4, 1476.6, 44747.7, 77566.7, 73504.2, 174519.1]
 ```
 
 ## 🎯 Key Insights
@@ -10160,7 +10181,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.555Z*
+*Last generated: 2026-03-28T22:34:52.303Z*
 
 ---
 
@@ -10180,7 +10201,14 @@ Mock instance creation performance:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 2.654 μs | 0.0524 μs | 0.0583 μs | 4.47 KB |
+| Moq | 1.336 μs | 0.0232 μs | 0.0217 μs | 2 KB |
+| NSubstitute | 1.898 μs | 0.0184 μs | 0.0172 μs | 4.88 KB |
+| FakeItEasy | 1.924 μs | 0.0203 μs | 0.0190 μs | 2.65 KB |
+| **'TUnit.Mocks (Repository)'** | 1.862 μs | 0.0370 μs | 0.0363 μs | 4.47 KB |
+| 'Moq (Repository)' | 1.421 μs | 0.0053 μs | 0.0047 μs | 1.87 KB |
+| 'NSubstitute (Repository)' | 1.919 μs | 0.0201 μs | 0.0188 μs | 4.88 KB |
+| 'FakeItEasy (Repository)' | 1.915 μs | 0.0176 μs | 0.0164 μs | 2.65 KB |
 
 ## 📈 Visual Comparison
 
@@ -10207,9 +10235,9 @@ Mock instance creation performance:
 }}%%
 xychart-beta
   title "MockCreation Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (Repository)'", "'Moq (Repository)'", "'NSubstitute (Repository)'", "'FakeItEasy (Repository)'"]
+  y-axis "Time (μs)" 0 --> 4
+  bar [2.654, 1.336, 1.898, 1.924, 1.862, 1.421, 1.919, 1.915]
 ```
 
 ## 🎯 Key Insights
@@ -10222,7 +10250,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.556Z*
+*Last generated: 2026-03-28T22:34:52.303Z*
 
 ---
 
@@ -10242,7 +10270,14 @@ Mock behavior configuration (returns, matchers):
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 2.264 μs | 0.0451 μs | 0.1141 μs | 6.7 KB |
+| Moq | 415.965 μs | 3.6847 μs | 3.4467 μs | 28.52 KB |
+| NSubstitute | 5.508 μs | 0.0464 μs | 0.0434 μs | 9.06 KB |
+| FakeItEasy | 7.835 μs | 0.0264 μs | 0.0220 μs | 10.45 KB |
+| **'TUnit.Mocks (Multiple)'** | 2.533 μs | 0.0240 μs | 0.0225 μs | 7.79 KB |
+| 'Moq (Multiple)' | 113.073 μs | 0.5738 μs | 0.5086 μs | 16.53 KB |
+| 'NSubstitute (Multiple)' | 11.794 μs | 0.1676 μs | 0.1568 μs | 20.31 KB |
+| 'FakeItEasy (Multiple)' | 7.600 μs | 0.0713 μs | 0.0667 μs | 11.71 KB |
 
 ## 📈 Visual Comparison
 
@@ -10269,9 +10304,9 @@ Mock behavior configuration (returns, matchers):
 }}%%
 xychart-beta
   title "Setup Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (Multiple)'", "'Moq (Multiple)'", "'NSubstitute (Multiple)'", "'FakeItEasy (Multiple)'"]
+  y-axis "Time (μs)" 0 --> 500
+  bar [2.264, 415.965, 5.508, 7.835, 2.533, 113.073, 11.794, 7.6]
 ```
 
 ## 🎯 Key Insights
@@ -10284,7 +10319,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.556Z*
+*Last generated: 2026-03-28T22:34:52.304Z*
 
 ---
 
@@ -10304,7 +10339,18 @@ Verifying mock method calls:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 2.486 μs | 0.0313 μs | 0.0277 μs | 7.46 KB |
+| Moq | 339.597 μs | 4.0745 μs | 3.8113 μs | 23.75 KB |
+| NSubstitute | 6.110 μs | 0.0344 μs | 0.0305 μs | 9.83 KB |
+| FakeItEasy | 7.077 μs | 0.0264 μs | 0.0221 μs | 10.47 KB |
+| **'TUnit.Mocks (Never)'** | 2.560 μs | 0.0509 μs | 0.1005 μs | 4.92 KB |
+| 'Moq (Never)' | 85.057 μs | 0.5842 μs | 0.5179 μs | 6.76 KB |
+| 'NSubstitute (Never)' | 3.676 μs | 0.0429 μs | 0.0401 μs | 6.92 KB |
+| 'FakeItEasy (Never)' | 3.646 μs | 0.0466 μs | 0.0436 μs | 5.09 KB |
+| **'TUnit.Mocks (Multiple)'** | 3.776 μs | 0.0746 μs | 0.1183 μs | 9.61 KB |
+| 'Moq (Multiple)' | 476.869 μs | 4.0965 μs | 3.8318 μs | 33.89 KB |
+| 'NSubstitute (Multiple)' | 11.362 μs | 0.1486 μs | 0.1390 μs | 16.37 KB |
+| 'FakeItEasy (Multiple)' | 14.028 μs | 0.1627 μs | 0.1358 μs | 18.78 KB |
 
 ## 📈 Visual Comparison
 
@@ -10331,9 +10377,9 @@ Verifying mock method calls:
 }}%%
 xychart-beta
   title "Verification Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (Never)'", "'Moq (Never)'", "'NSubstitute (Never)'", "'FakeItEasy (Never)'", "'TUnit.Mocks (Multiple)'", "'Moq (Multiple)'", "'NSubstitute (Multiple)'", "'FakeItEasy (Multiple)'"]
+  y-axis "Time (μs)" 0 --> 573
+  bar [2.486, 339.597, 6.11, 7.077, 2.56, 85.057, 3.676, 3.646, 3.776, 476.869, 11.362, 14.028]
 ```
 
 ## 🎯 Key Insights
@@ -10346,7 +10392,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.556Z*
+*Last generated: 2026-03-28T22:34:52.304Z*
 
 ---
 
@@ -10421,7 +10467,7 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-03-28T16:42:10.556Z*
+*Last generated: 2026-03-28T22:34:52.304Z*
 
 ---
 

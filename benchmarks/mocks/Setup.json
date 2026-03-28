@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-28T16:42:10.556Z",
+  "timestamp": "2026-03-28T22:34:52.304Z",
   "category": "Setup",
   "description": "Mock behavior configuration (returns, matchers)",
   "environment": {
@@ -10,8 +10,83 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "NA",
-      "Error": "NA"
+      "Mean": "2.264 μs",
+      "Error": "0.0451 μs",
+      "StdDev": "0.1141 μs",
+      "Median": "2.208 μs",
+      "Gen0": "0.4082",
+      "Gen1": "0.0076",
+      "Allocated": "6.7 KB"
+    },
+    {
+      "Method": "Moq",
+      "Mean": "415.965 μs",
+      "Error": "3.6847 μs",
+      "StdDev": "3.4467 μs",
+      "Median": "414.863 μs",
+      "Gen0": "0.9766",
+      "Gen1": "-",
+      "Allocated": "28.52 KB"
+    },
+    {
+      "Method": "NSubstitute",
+      "Mean": "5.508 μs",
+      "Error": "0.0464 μs",
+      "StdDev": "0.0434 μs",
+      "Median": "5.497 μs",
+      "Gen0": "0.5493",
+      "Gen1": "0.0076",
+      "Allocated": "9.06 KB"
+    },
+    {
+      "Method": "FakeItEasy",
+      "Mean": "7.835 μs",
+      "Error": "0.0264 μs",
+      "StdDev": "0.0220 μs",
+      "Median": "7.827 μs",
+      "Gen0": "0.6256",
+      "Gen1": "0.0153",
+      "Allocated": "10.45 KB"
+    },
+    {
+      "Method": "'TUnit.Mocks (Multiple)'",
+      "Mean": "2.533 μs",
+      "Error": "0.0240 μs",
+      "StdDev": "0.0225 μs",
+      "Median": "2.533 μs",
+      "Gen0": "0.4730",
+      "Gen1": "0.0114",
+      "Allocated": "7.79 KB"
+    },
+    {
+      "Method": "'Moq (Multiple)'",
+      "Mean": "113.073 μs",
+      "Error": "0.5738 μs",
+      "StdDev": "0.5086 μs",
+      "Median": "112.936 μs",
+      "Gen0": "0.9766",
+      "Gen1": "0.7324",
+      "Allocated": "16.53 KB"
+    },
+    {
+      "Method": "'NSubstitute (Multiple)'",
+      "Mean": "11.794 μs",
+      "Error": "0.1676 μs",
+      "StdDev": "0.1568 μs",
+      "Median": "11.761 μs",
+      "Gen0": "1.2207",
+      "Gen1": "-",
+      "Allocated": "20.31 KB"
+    },
+    {
+      "Method": "'FakeItEasy (Multiple)'",
+      "Mean": "7.600 μs",
+      "Error": "0.0713 μs",
+      "StdDev": "0.0667 μs",
+      "Median": "7.608 μs",
+      "Gen0": "0.6714",
+      "Gen1": "0.0610",
+      "Allocated": "11.71 KB"
     }
   ]
 }

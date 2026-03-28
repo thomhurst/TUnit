@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-28T16:42:10.555Z",
+  "timestamp": "2026-03-28T22:34:52.302Z",
   "category": "Callback",
   "description": "Callback registration and execution",
   "environment": {
@@ -10,8 +10,75 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "NA",
-      "Error": "NA"
+      "Mean": "2.828 μs",
+      "Error": "0.0513 μs",
+      "StdDev": "0.0455 μs",
+      "Gen0": "0.4425",
+      "Gen1": "0.0114",
+      "Allocated": "7.28 KB"
+    },
+    {
+      "Method": "Moq",
+      "Mean": "136.434 μs",
+      "Error": "0.6351 μs",
+      "StdDev": "0.4959 μs",
+      "Gen0": "0.7324",
+      "Gen1": "0.4883",
+      "Allocated": "13.24 KB"
+    },
+    {
+      "Method": "NSubstitute",
+      "Mean": "4.337 μs",
+      "Error": "0.0635 μs",
+      "StdDev": "0.0563 μs",
+      "Gen0": "0.4578",
+      "Gen1": "-",
+      "Allocated": "7.93 KB"
+    },
+    {
+      "Method": "FakeItEasy",
+      "Mean": "4.793 μs",
+      "Error": "0.0662 μs",
+      "StdDev": "0.0619 μs",
+      "Gen0": "0.4272",
+      "Gen1": "0.0305",
+      "Allocated": "7.44 KB"
+    },
+    {
+      "Method": "'TUnit.Mocks (with args)'",
+      "Mean": "2.708 μs",
+      "Error": "0.0299 μs",
+      "StdDev": "0.0265 μs",
+      "Gen0": "0.4501",
+      "Gen1": "0.0114",
+      "Allocated": "7.4 KB"
+    },
+    {
+      "Method": "'Moq (with args)'",
+      "Mean": "142.187 μs",
+      "Error": "0.7043 μs",
+      "StdDev": "0.5881 μs",
+      "Gen0": "0.4883",
+      "Gen1": "-",
+      "Allocated": "13.73 KB"
+    },
+    {
+      "Method": "'NSubstitute (with args)'",
+      "Mean": "4.886 μs",
+      "Error": "0.0262 μs",
+      "StdDev": "0.0245 μs",
+      "Gen0": "0.5188",
+      "Gen1": "0.0076",
+      "Allocated": "8.53 KB"
+    },
+    {
+      "Method": "'FakeItEasy (with args)'",
+      "Mean": "5.857 μs",
+      "Error": "0.1023 μs",
+      "StdDev": "0.0957 μs",
+      "Gen0": "0.5493",
+      "Gen1": "0.0305",
+      "Allocated": "9.4 KB"
     }
   ]
 }

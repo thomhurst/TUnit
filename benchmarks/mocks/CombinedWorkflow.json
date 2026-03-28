@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-28T16:42:10.555Z",
+  "timestamp": "2026-03-28T22:34:52.303Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
@@ -10,8 +10,39 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "NA",
-      "Error": "NA"
+      "Mean": "6.513 μs",
+      "Error": "0.1292 μs",
+      "StdDev": "0.2329 μs",
+      "Gen0": "0.9689",
+      "Gen1": "0.0229",
+      "Allocated": "15.85 KB"
+    },
+    {
+      "Method": "Moq",
+      "Mean": "394.164 μs",
+      "Error": "4.7436 μs",
+      "StdDev": "4.2051 μs",
+      "Gen0": "1.9531",
+      "Gen1": "0.9766",
+      "Allocated": "36.45 KB"
+    },
+    {
+      "Method": "NSubstitute",
+      "Mean": "17.171 μs",
+      "Error": "0.0753 μs",
+      "StdDev": "0.0667 μs",
+      "Gen0": "1.6174",
+      "Gen1": "0.0305",
+      "Allocated": "26.72 KB"
+    },
+    {
+      "Method": "FakeItEasy",
+      "Mean": "18.689 μs",
+      "Error": "0.1373 μs",
+      "StdDev": "0.1284 μs",
+      "Gen0": "1.5564",
+      "Gen1": "0.0305",
+      "Allocated": "25.63 KB"
     }
   ]
 }
