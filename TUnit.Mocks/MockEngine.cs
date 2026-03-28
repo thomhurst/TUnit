@@ -141,7 +141,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Auto-track property setters: store value keyed by property name
         if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal) && args.Length > 0)
         {
-            AutoTrackValues[memberName.Substring(4)] = args[0];
+            AutoTrackValues[memberName[4..]] = args[0];
         }
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
@@ -229,7 +229,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && _autoTrackValues is not null && memberName.StartsWith("get_", StringComparison.Ordinal))
         {
-            if (_autoTrackValues.TryGetValue(memberName.Substring(4), out var trackedValue))
+            if (_autoTrackValues.TryGetValue(memberName[4..], out var trackedValue))
             {
                 if (trackedValue is TReturn typed) return typed;
                 if (trackedValue is null) return default(TReturn)!;
