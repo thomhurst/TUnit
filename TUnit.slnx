@@ -77,6 +77,8 @@
     <Project Path="TUnit.SourceGenerator.IncrementalTests/TUnit.SourceGenerator.IncrementalTests.csproj" />
     <Project Path="TUnit.Templates.Tests/TUnit.Templates.Tests.csproj" />
     <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />
+    <Project Path="TUnit.Aspire.Tests/TUnit.Aspire.Tests.csproj" />
+    <Project Path="TUnit.Aspire.Tests.AppHost/TUnit.Aspire.Tests.AppHost.csproj" />
   </Folder>
 
   <!-- Benchmarks -->

@@ -1,0 +1,95 @@
+using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
+
+namespace TUnit.Aspire.Tests;
+
+/// <summary>
+/// Reproduction and fix verification tests for https://github.com/thomhurst/TUnit/issues/5260
+/// </summary>
+public class WaitForHealthyReproductionTests
+{
+    [Test]
+    [Category("Docker")]
+    public async Task ParameterResource_DoesNotImplement_IResourceWithoutLifetime_InAspire13_2(CancellationToken ct)
+    {
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
+        await using var app = await builder.BuildAsync();
+
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var paramResource = model.Resources.First(r => r.Name == "my-secret");
+
+        await Assert.That(paramResource is IResourceWithoutLifetime).IsFalse();
+    }
+
+    [Test]
+    [Category("Docker")]
+    public async Task ParameterResource_IsNot_IComputeResource(CancellationToken ct)
+    {
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
+        await using var app = await builder.BuildAsync();
+
+        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var paramResource = model.Resources.First(r => r.Name == "my-secret");
+        var containerResource = model.Resources.First(r => r.Name == "nginx-no-healthcheck");
+
+        await Assert.That(paramResource is IComputeResource).IsFalse();
+        await Assert.That(containerResource is IComputeResource).IsTrue();
+    }
+
+    [Test]
+    [Category("Docker")]
+    public async Task WaitForResourceHealthyAsync_OnParameterResource_Hangs(CancellationToken ct)
+    {
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
+        await using var app = await builder.BuildAsync();
+        await app.StartAsync(ct);
+
+        var notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(15));
+
+        var timedOut = false;
+        try
+        {
+            await notificationService.WaitForResourceHealthyAsync("my-secret", cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            timedOut = true;
+        }
+        catch (InvalidOperationException)
+        {
+            // Aspire throws InvalidOperationException for resources that can never become healthy
+            timedOut = true;
+        }
+
+        await Assert.That(timedOut).IsTrue();
+    }
+
+    [Test]
+    [Category("Docker")]
+    public async Task AspireFixture_AllHealthy_Succeeds_AfterFix(CancellationToken ct)
+    {
+        var fixture = new HealthyFixture();
+
+        try
+        {
+            await fixture.InitializeAsync();
+        }
+        finally
+        {
+            await fixture.DisposeAsync();
+        }
+    }
+
+    private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
+    {
+        protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+    }
+}

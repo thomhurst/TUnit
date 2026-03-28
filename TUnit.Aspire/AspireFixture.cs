@@ -523,6 +523,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         return string.Join(Environment.NewLine, lines);
     }
 
+    // Opt-in: only wait for IComputeResource (containers, projects, executables).
+    // Non-compute resources (parameters, connection strings) never report healthy and would hang.
     private List<string> GetWaitableResourceNames(DistributedApplicationModel model)
     {
         var waitable = new List<string>();
@@ -530,7 +532,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         foreach (var r in model.Resources)
         {
-            if (r is IResourceWithoutLifetime)
+            if (r is not IComputeResource)
             {
                 skipped ??= [];
                 skipped.Add(r.Name);
@@ -543,7 +545,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         if (skipped is { Count: > 0 })
         {
-            LogProgress($"Skipping {skipped.Count} resource(s) without lifecycle: [{string.Join(", ", skipped)}]");
+            LogProgress($"Skipping {skipped.Count} non-compute resource(s): [{string.Join(", ", skipped)}]");
         }
 
         return waitable;
