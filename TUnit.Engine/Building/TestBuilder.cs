@@ -283,6 +283,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     DataSourceAttribute = methodDataSource,
+                                    StateBag = new ConcurrentDictionary<string, object?>(testBuilderContext.StateBag),  // Preserve StateBag from discovery context
                                     InitializedAttributes = testBuilderContext.InitializedAttributes,  // Preserve attributes from parent context
                                     ClassConstructor = testBuilderContext.ClassConstructor  // Preserve ClassConstructor for instance creation
                                 };
