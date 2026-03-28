@@ -21,15 +21,17 @@
     <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
   <ItemGroup>
-    <TfmSpecificPackageFile Include="TUnit.Engine.props">
-      <Pack>true</Pack>
-      <PackagePath>$(BuildTransitivePath)</PackagePath>
-    </TfmSpecificPackageFile>
-
+    <!-- Direct reference: full props with test project configuration -->
     <None Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
     </None>
+
+    <!-- Transitive reference: empty props (test project settings must not flow transitively) -->
+    <TfmSpecificPackageFile Include="TUnit.Engine.buildTransitive.props">
+      <Pack>true</Pack>
+      <PackagePath>$(BuildTransitivePath)TUnit.Engine.props</PackagePath>
+    </TfmSpecificPackageFile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />

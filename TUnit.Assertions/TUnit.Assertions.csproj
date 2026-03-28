@@ -27,25 +27,27 @@
     </ItemGroup>
 
     <ItemGroup>
-        <TfmSpecificPackageFile Include="TUnit.Assertions.props">
-            <Pack>true</Pack>
-            <PackagePath>$(BuildTransitivePath)</PackagePath>
-        </TfmSpecificPackageFile>
-
+        <!-- Direct reference: full props/targets with implicit usings -->
         <None Include="TUnit.Assertions.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
 
-        <TfmSpecificPackageFile Include="TUnit.Assertions.targets">
-            <Pack>true</Pack>
-            <PackagePath>$(BuildTransitivePath)</PackagePath>
-        </TfmSpecificPackageFile>
-
         <None Include="TUnit.Assertions.targets">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
+
+        <!-- Transitive reference: minimal props/targets (no implicit usings) -->
+        <TfmSpecificPackageFile Include="TUnit.Assertions.buildTransitive.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)TUnit.Assertions.props</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <TfmSpecificPackageFile Include="TUnit.Assertions.buildTransitive.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)TUnit.Assertions.targets</PackagePath>
+        </TfmSpecificPackageFile>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Intentionally empty: test project settings should not flow to transitive consumers -->
+<Project>
+</Project>

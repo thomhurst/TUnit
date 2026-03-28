@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Polyfill config only; no implicit usings or source-gen for transitive consumers -->
+<Project>
+
+    <PropertyGroup>
+        <!-- Default to enabling polyfills for older frameworks -->
+        <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
+        <!-- Use embedded Polyfill attributes to prevent type conflicts across projects -->
+        <PolyUseEmbeddedAttribute Condition="'$(PolyUseEmbeddedAttribute)' == ''">true</PolyUseEmbeddedAttribute>
+    </PropertyGroup>
+
+    <Target Name="DetectPolyfillReference" BeforeTargets="PrepareForBuild">
+        <!-- Check if Polyfill is already defined by user (via PackageReference or PackageVersion for CPM) -->
+        <ItemGroup>
+            <_PolyfillPackageReference Include="@(PackageReference)"
+                Condition="'%(PackageReference.Identity)' == 'Polyfill'" />
+            <_PolyfillPackageVersion Include="@(PackageVersion)"
+                Condition="'%(PackageVersion.Identity)' == 'Polyfill'" />
+        </ItemGroup>
+        <PropertyGroup>
+            <_PolyfillAlreadyDefined Condition="'@(_PolyfillPackageReference)' != '' Or '@(_PolyfillPackageVersion)' != ''">true</_PolyfillAlreadyDefined>
+        </PropertyGroup>
+    </Target>
+
+</Project>

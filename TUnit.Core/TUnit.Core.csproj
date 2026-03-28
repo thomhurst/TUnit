@@ -11,25 +11,27 @@
     </ItemGroup>
 
     <ItemGroup>
-        <TfmSpecificPackageFile Include="TUnit.Core.props">
-            <Pack>true</Pack>
-            <PackagePath>$(BuildTransitivePath)</PackagePath>
-        </TfmSpecificPackageFile>
-
+        <!-- Direct reference: full props/targets with implicit usings + source generation -->
         <None Include="TUnit.Core.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
 
-        <TfmSpecificPackageFile Include="TUnit.Core.targets">
-            <Pack>true</Pack>
-            <PackagePath>$(BuildTransitivePath)</PackagePath>
-        </TfmSpecificPackageFile>
-
         <None Include="TUnit.Core.targets">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
+
+        <!-- Transitive reference: minimal props/targets with only Polyfill support -->
+        <TfmSpecificPackageFile Include="TUnit.Core.buildTransitive.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)TUnit.Core.props</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.buildTransitive.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)TUnit.Core.targets</PackagePath>
+        </TfmSpecificPackageFile>
     </ItemGroup>
     <ItemGroup>
         <None
