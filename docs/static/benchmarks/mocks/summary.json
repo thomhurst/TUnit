@@ -1,0 +1,6 @@
+{
+  "categories": [],
+  "timestamp": "placeholder",
+  "environment": "Awaiting first benchmark run",
+  "libraries": ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy"]
+}
