@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-03-28T16:42:10.555Z",
+  "category": "Callback",
+  "description": "Callback registration and execution",
+  "environment": {
+    "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
+    "sdk": ".NET SDK 10.0.201",
+    "host": ".NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3"
+  },
+  "results": [
+    {
+      "Method": "TUnit.Mocks",
+      "Mean": "NA",
+      "Error": "NA"
+    }
+  ]
+}

@@ -1,21 +1,63 @@
 ---
 title: "Mock Benchmark: Callback"
-description: "Mock callback performance — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy"
-sidebar_position: 6
+description: "Callback registration and execution — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy"
+sidebar_position: 2
 ---
 
 # Callback Benchmark
 
-:::info Awaiting First Run
-This benchmark will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
-## 📊 About This Benchmark
+## 📊 Results
 
-This benchmark measures how fast each mocking library can register and execute callbacks during mock method invocations, both simple callbacks and callbacks with argument capture.
+Callback registration and execution:
+
+| Method | Mean | Error | StdDev | Allocated |
+|--------|------|-------|--------|-----------|
+| **TUnit.Mocks** | NA | NA | N/A | N/A |
+
+## 📈 Visual Comparison
+
+```mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "Callback Performance Comparison"
+  x-axis ["TUnit.Mocks"]
+  y-axis "Time (ns)" 0 --> 100
+  bar [0]
+```
+
+## 🎯 Key Insights
+
+This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for callback registration and execution.
 
 ---
 
 :::note Methodology
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
+
+*Last generated: 2026-03-28T16:42:10.555Z*

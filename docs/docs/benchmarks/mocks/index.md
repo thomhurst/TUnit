@@ -6,8 +6,10 @@ sidebar_position: 1
 
 # Mock Library Benchmarks
 
-:::info Awaiting First Run
-These benchmarks will be automatically populated after the first [Mock Benchmarks workflow](https://github.com/thomhurst/TUnit/actions/workflows/mock-benchmarks.yml) run completes.
+:::info Last Updated
+These benchmarks were automatically generated on **2026-03-28** from the latest CI run.
+
+**Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
 
 ## 🚀 Overview
@@ -23,12 +25,14 @@ These benchmarks compare **TUnit.Mocks** (source-generated, AOT-compatible) agai
 
 ## 📊 Benchmark Categories
 
-- [Mock Creation](MockCreation) - Mock instance creation performance
-- [Setup](Setup) - Mock behavior configuration (returns, matchers)
-- [Invocation](Invocation) - Calling methods on mock objects
-- [Verification](Verification) - Verifying mock method calls
+Click on any benchmark to view detailed results:
+
 - [Callback](Callback) - Callback registration and execution
-- [Combined Workflow](CombinedWorkflow) - Full workflow: create → setup → invoke → verify
+- [CombinedWorkflow](CombinedWorkflow) - Full workflow: create → setup → invoke → verify
+- [Invocation](Invocation) - Calling methods on mock objects
+- [MockCreation](MockCreation) - Mock instance creation performance
+- [Setup](Setup) - Mock behavior configuration (returns, matchers)
+- [Verification](Verification) - Verifying mock method calls
 
 ## 📈 What's Measured
 
@@ -43,8 +47,9 @@ Each benchmark category tests a specific aspect of mocking library usage:
 
 ## 🔧 Methodology
 
-- **Tool**: BenchmarkDotNet
+- **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
 - **OS**: Ubuntu Latest (GitHub Actions)
+- **Runtime**: .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
 - **Statistical Rigor**: Multiple iterations with warm-up and outlier detection
 - **Memory**: Allocation tracking enabled via `[MemoryDiagnoser]`
 
@@ -68,3 +73,5 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
+
+*Last generated: 2026-03-28T16:42:10.556Z*

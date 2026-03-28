@@ -1,6 +1,18 @@
 {
-  "categories": [],
-  "timestamp": "placeholder",
-  "environment": "Awaiting first benchmark run",
-  "libraries": ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy"]
+  "categories": [
+    "Callback",
+    "CombinedWorkflow",
+    "Invocation",
+    "MockCreation",
+    "Setup",
+    "Verification"
+  ],
+  "timestamp": "2026-03-28",
+  "environment": "Ubuntu Latest • .NET SDK 10.0.201",
+  "libraries": [
+    "TUnit.Mocks",
+    "Moq",
+    "NSubstitute",
+    "FakeItEasy"
+  ]
 }
