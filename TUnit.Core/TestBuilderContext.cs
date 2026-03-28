@@ -40,6 +40,8 @@ public record TestBuilderContext
         set => _stateBag = value;
     }
 
+    internal ConcurrentDictionary<string, object?>? RawStateBag => _stateBag;
+
     public TestContextEvents Events
     {
         get => _events ??= new TestContextEvents();

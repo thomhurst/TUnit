@@ -22,7 +22,6 @@ public class StateBagDataSourcePropagationTests
     [MethodDataSource(nameof(TestData))]
     public async Task StateBag_Data_From_DataSource_Should_Be_Available_In_TestContext(string value)
     {
-        await Assert.That(TestContext.Current!.StateBag.ContainsKey("DataGeneratedAt")).IsTrue();
         await Assert.That(TestContext.Current!.StateBag["DataGeneratedAt"]).IsEqualTo("2025-01-01");
         await Assert.That(TestContext.Current!.StateBag["GeneratorVersion"]).IsEqualTo("1.0");
     }
