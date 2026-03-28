@@ -530,9 +530,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         foreach (var r in model.Resources)
         {
-            // IComputeResource covers containers, projects, executables, etc.
-            // This is more robust than checking IResourceWithoutLifetime, which was
-            // removed from ParameterResource/ConnectionStringResource in Aspire 13.2.0.
             if (r is not IComputeResource)
             {
                 skipped ??= [];

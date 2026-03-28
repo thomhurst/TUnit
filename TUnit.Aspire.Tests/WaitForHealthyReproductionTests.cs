@@ -13,10 +13,6 @@ namespace TUnit.Aspire.Tests;
 /// </summary>
 public class WaitForHealthyReproductionTests
 {
-    /// <summary>
-    /// Confirms the Aspire 13.2.0 breaking change: ParameterResource no longer
-    /// implements IResourceWithoutLifetime.
-    /// </summary>
     [Test]
     [Category("Docker")]
     public async Task ParameterResource_DoesNotImplement_IResourceWithoutLifetime_InAspire13_2(CancellationToken ct)
@@ -30,10 +26,6 @@ public class WaitForHealthyReproductionTests
         await Assert.That(paramResource is IResourceWithoutLifetime).IsFalse();
     }
 
-    /// <summary>
-    /// Confirms that ParameterResource is NOT an IComputeResource,
-    /// so our fix correctly excludes it from the waitable list.
-    /// </summary>
     [Test]
     [Category("Docker")]
     public async Task ParameterResource_IsNot_IComputeResource(CancellationToken ct)
@@ -49,9 +41,6 @@ public class WaitForHealthyReproductionTests
         await Assert.That(containerResource is IComputeResource).IsTrue();
     }
 
-    /// <summary>
-    /// Confirms WaitForResourceHealthyAsync hangs on parameter resources.
-    /// </summary>
     [Test]
     [Category("Docker")]
     public async Task WaitForResourceHealthyAsync_OnParameterResource_Hangs(CancellationToken ct)
@@ -82,15 +71,11 @@ public class WaitForHealthyReproductionTests
         await Assert.That(timedOut).IsTrue();
     }
 
-    /// <summary>
-    /// With the IComputeResource fix, AspireFixture AllHealthy should succeed
-    /// even when the AppHost has parameter resources.
-    /// </summary>
     [Test]
     [Category("Docker")]
     public async Task AspireFixture_AllHealthy_Succeeds_AfterFix(CancellationToken ct)
     {
-        var fixture = new TestFixtureAllHealthy();
+        var fixture = new HealthyFixture();
 
         try
         {
@@ -101,9 +86,9 @@ public class WaitForHealthyReproductionTests
             await fixture.DisposeAsync();
         }
     }
-}
 
-public class TestFixtureAllHealthy : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
-{
-    protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+    private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
+    {
+        protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+    }
 }
