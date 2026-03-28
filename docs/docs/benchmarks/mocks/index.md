@@ -74,4 +74,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-03-28T16:42:10.556Z*
+*Last generated: 2026-03-28T22:34:52.304Z*

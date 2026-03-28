@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-28T16:42:10.556Z",
+  "timestamp": "2026-03-28T22:34:52.303Z",
   "category": "MockCreation",
   "description": "Mock instance creation performance",
   "environment": {
@@ -10,8 +10,83 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "NA",
-      "Error": "NA"
+      "Mean": "2.654 μs",
+      "Error": "0.0524 μs",
+      "StdDev": "0.0583 μs",
+      "Gen0": "0.2728",
+      "Gen1": "0.0057",
+      "Gen2": "-",
+      "Allocated": "4.47 KB"
+    },
+    {
+      "Method": "Moq",
+      "Mean": "1.336 μs",
+      "Error": "0.0232 μs",
+      "StdDev": "0.0217 μs",
+      "Gen0": "0.1221",
+      "Gen1": "-",
+      "Gen2": "-",
+      "Allocated": "2 KB"
+    },
+    {
+      "Method": "NSubstitute",
+      "Mean": "1.898 μs",
+      "Error": "0.0184 μs",
+      "StdDev": "0.0172 μs",
+      "Gen0": "0.2975",
+      "Gen1": "0.0019",
+      "Gen2": "-",
+      "Allocated": "4.88 KB"
+    },
+    {
+      "Method": "FakeItEasy",
+      "Mean": "1.924 μs",
+      "Error": "0.0203 μs",
+      "StdDev": "0.0190 μs",
+      "Gen0": "0.1602",
+      "Gen1": "0.0038",
+      "Gen2": "0.0019",
+      "Allocated": "2.65 KB"
+    },
+    {
+      "Method": "'TUnit.Mocks (Repository)'",
+      "Mean": "1.862 μs",
+      "Error": "0.0370 μs",
+      "StdDev": "0.0363 μs",
+      "Gen0": "0.2708",
+      "Gen1": "0.0076",
+      "Gen2": "-",
+      "Allocated": "4.47 KB"
+    },
+    {
+      "Method": "'Moq (Repository)'",
+      "Mean": "1.421 μs",
+      "Error": "0.0053 μs",
+      "StdDev": "0.0047 μs",
+      "Gen0": "0.1125",
+      "Gen1": "-",
+      "Gen2": "-",
+      "Allocated": "1.87 KB"
+    },
+    {
+      "Method": "'NSubstitute (Repository)'",
+      "Mean": "1.919 μs",
+      "Error": "0.0201 μs",
+      "StdDev": "0.0188 μs",
+      "Gen0": "0.2975",
+      "Gen1": "0.0019",
+      "Gen2": "-",
+      "Allocated": "4.88 KB"
+    },
+    {
+      "Method": "'FakeItEasy (Repository)'",
+      "Mean": "1.915 μs",
+      "Error": "0.0176 μs",
+      "StdDev": "0.0164 μs",
+      "Gen0": "0.1602",
+      "Gen1": "0.0038",
+      "Gen2": "0.0019",
+      "Allocated": "2.65 KB"
     }
   ]
 }
