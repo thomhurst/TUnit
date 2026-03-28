@@ -18,7 +18,10 @@ Full workflow: create → setup → invoke → verify:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | NA | NA | N/A | N/A |
+| **TUnit.Mocks** | 6.513 μs | 0.1292 μs | 0.2329 μs | 15.85 KB |
+| Moq | 394.164 μs | 4.7436 μs | 4.2051 μs | 36.45 KB |
+| NSubstitute | 17.171 μs | 0.0753 μs | 0.0667 μs | 26.72 KB |
+| FakeItEasy | 18.689 μs | 0.1373 μs | 0.1284 μs | 25.63 KB |
 
 ## 📈 Visual Comparison
 
@@ -45,9 +48,9 @@ Full workflow: create → setup → invoke → verify:
 }}%%
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
-  x-axis ["TUnit.Mocks"]
-  y-axis "Time (ns)" 0 --> 100
-  bar [0]
+  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy"]
+  y-axis "Time (μs)" 0 --> 473
+  bar [6.513, 394.164, 17.171, 18.689]
 ```
 
 ## 🎯 Key Insights
@@ -60,4 +63,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T16:42:10.555Z*
+*Last generated: 2026-03-28T22:34:52.303Z*
