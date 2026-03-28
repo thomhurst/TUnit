@@ -24,11 +24,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
     private readonly Lock _setupLock = new();
     private readonly ConcurrentQueue<CallRecord> _callHistory = new();
-    private readonly ConcurrentDictionary<string, object?> _autoTrackValues = new();
-    private readonly ConcurrentQueue<(string EventName, bool IsSubscribe)> _eventSubscriptions = new();
-    private readonly ConcurrentDictionary<string, Action> _onSubscribeCallbacks = new();
-    private readonly ConcurrentDictionary<string, Action> _onUnsubscribeCallbacks = new();
-    private readonly ConcurrentDictionary<string, IMock?> _autoMockCache = new();
+
+    // Lazily initialized — most mocks never use these features.
+    private ConcurrentDictionary<string, object?>? _autoTrackValues;
+    private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
+    private ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
+    private ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
+    private ConcurrentDictionary<string, IMock?>? _autoMockCache;
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -76,6 +78,21 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         Behavior = behavior;
     }
+
+    private ConcurrentDictionary<string, object?> AutoTrackValues
+        => _autoTrackValues ??= new();
+
+    private ConcurrentQueue<(string EventName, bool IsSubscribe)> EventSubscriptions
+        => _eventSubscriptions ??= new();
+
+    private ConcurrentDictionary<string, Action> OnSubscribeCallbacks
+        => _onSubscribeCallbacks ??= new();
+
+    private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
+        => _onUnsubscribeCallbacks ??= new();
+
+    private ConcurrentDictionary<string, IMock?> AutoMockCache
+        => _autoMockCache ??= new();
 
     /// <summary>
     /// Transitions the engine to the specified state. Null clears the state.
@@ -125,7 +142,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Auto-track property setters: store value keyed by property name
         if (AutoTrackProperties && memberName.StartsWith("set_", StringComparison.Ordinal) && args.Length > 0)
         {
-            _autoTrackValues[memberName.Substring(4)] = args[0];
+            AutoTrackValues[memberName.Substring(4)] = args[0];
         }
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
@@ -211,7 +228,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         callRecord.IsUnmatched = true;
 
         // Auto-track property getters: return stored value if available
-        if (AutoTrackProperties && memberName.StartsWith("get_", StringComparison.Ordinal))
+        if (AutoTrackProperties && _autoTrackValues is not null && memberName.StartsWith("get_", StringComparison.Ordinal))
         {
             if (_autoTrackValues.TryGetValue(memberName.Substring(4), out var trackedValue))
             {
@@ -236,7 +253,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
             var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = _autoMockCache.GetOrAdd(cacheKey, _ =>
+            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
                 return m;
@@ -465,6 +482,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
     {
+        if (_autoMockCache is null)
+        {
+            mock = null;
+            return false;
+        }
         return _autoMockCache.TryGetValue(cacheKey, out mock);
     }
 
@@ -483,11 +505,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         // Drain the queue
         while (_callHistory.TryDequeue(out _)) { }
 
-        _autoTrackValues.Clear();
-        while (_eventSubscriptions.TryDequeue(out _)) { }
-        _onSubscribeCallbacks.Clear();
-        _onUnsubscribeCallbacks.Clear();
-        _autoMockCache.Clear();
+        _autoTrackValues?.Clear();
+        if (_eventSubscriptions is not null)
+        {
+            while (_eventSubscriptions.TryDequeue(out _)) { }
+        }
+        _onSubscribeCallbacks?.Clear();
+        _onUnsubscribeCallbacks?.Clear();
+        _autoMockCache?.Clear();
     }
 
     /// <summary>
@@ -496,7 +521,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnSubscribe(string eventName, Action callback)
     {
-        _onSubscribeCallbacks[eventName] = callback;
+        OnSubscribeCallbacks[eventName] = callback;
     }
 
     /// <summary>
@@ -505,7 +530,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void OnUnsubscribe(string eventName, Action callback)
     {
-        _onUnsubscribeCallbacks[eventName] = callback;
+        OnUnsubscribeCallbacks[eventName] = callback;
     }
 
     /// <summary>
@@ -514,18 +539,18 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void RecordEventSubscription(string eventName, bool isSubscribe)
     {
-        _eventSubscriptions.Enqueue((eventName, isSubscribe));
+        EventSubscriptions.Enqueue((eventName, isSubscribe));
 
         if (isSubscribe)
         {
-            if (_onSubscribeCallbacks.TryGetValue(eventName, out var callback))
+            if (_onSubscribeCallbacks is not null && _onSubscribeCallbacks.TryGetValue(eventName, out var callback))
             {
                 callback();
             }
         }
         else
         {
-            if (_onUnsubscribeCallbacks.TryGetValue(eventName, out var callback))
+            if (_onUnsubscribeCallbacks is not null && _onUnsubscribeCallbacks.TryGetValue(eventName, out var callback))
             {
                 callback();
             }
@@ -538,6 +563,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public int GetEventSubscriberCount(string eventName)
     {
+        if (_eventSubscriptions is null) return 0;
         int count = 0;
         foreach (var (name, isSub) in _eventSubscriptions)
         {
@@ -555,6 +581,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool WasEventSubscribed(string eventName)
     {
+        if (_eventSubscriptions is null) return false;
         foreach (var (name, isSub) in _eventSubscriptions)
         {
             if (name == eventName && isSub) return true;
