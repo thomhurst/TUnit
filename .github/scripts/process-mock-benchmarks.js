@@ -51,7 +51,7 @@ function parseMarkdownTable(content) {
     if (values.length === headers.length) {
       const row = {};
       headers.forEach((header, idx) => {
-        row[header] = values[idx];
+        row[header] = decodeHtmlEntities(values[idx]);
       });
       data.push(row);
     }
@@ -75,6 +75,16 @@ function extractEnvironmentInfo(content) {
   }
 
   return info;
+}
+
+function decodeHtmlEntities(str) {
+  if (!str || !str.includes('&')) return str;
+  return str
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&');
 }
 
 function parseMeanValue(meanStr) {
