@@ -23,6 +23,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 {
     private string? _outputPath;
     private IMessageBus? _messageBus;
+    private string _resultsDirectory = "TestResults";
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
 
 #if NET
@@ -64,11 +65,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_outputPath))
-        {
-            _outputPath = GetDefaultOutputPath();
-        }
-
 #if NET
         _activityCollector = new ActivityCollector();
         _activityCollector.Start();
@@ -115,6 +111,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             if (string.IsNullOrEmpty(html))
             {
                 return;
+            }
+
+            if (string.IsNullOrEmpty(_outputPath))
+            {
+                _outputPath = GetDefaultOutputPath();
             }
 
             var outputPath = _outputPath!;
@@ -176,6 +177,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     internal void SetMessageBus(IMessageBus? messageBus)
     {
         _messageBus = messageBus;
+    }
+
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _resultsDirectory is guaranteed to be set before OnTestSessionFinishingAsync is invoked.
+    internal void SetResultsDirectory(string path)
+    {
+        _resultsDirectory = path;
     }
 
     private ReportData BuildReportData()
@@ -527,13 +535,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         };
     }
 
-    private static string GetDefaultOutputPath()
+    private string GetDefaultOutputPath()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
         var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
         var os = GetShortOsName();
         var tfm = GetShortFrameworkName();
-        return Path.GetFullPath(Path.Combine("TestResults", $"{sanitizedName}-{os}-{tfm}-report.html"));
+        return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
     }
 
     private static string GetShortOsName()

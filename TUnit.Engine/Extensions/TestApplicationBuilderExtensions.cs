@@ -7,6 +7,7 @@ using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Reporters;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
 
 #pragma warning disable TPEXP
 
@@ -79,6 +80,11 @@ public static class TestApplicationBuilderExtensions
             {
                 junitReporter.SetOutputPath(pathArgs[0]);
             }
+
+            // Set results directory as specified by --results-directory,
+            // so it can be used in the default output path if --report-html-filename is not provided
+            junitReporter.SetResultsDirectory(serviceProvider.GetRequiredService<IConfiguration>().GetTestResultDirectory());
+
             return junitReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
@@ -105,6 +111,10 @@ public static class TestApplicationBuilderExtensions
             // Inject the application-level message bus so PublishArtifactAsync works in
             // OnTestSessionFinishingAsync (called before the bus is drained/disabled).
             htmlReporter.SetMessageBus(serviceProvider.GetMessageBus());
+
+            // Set results directory as specified by --results-directory,
+            // so it can be used in the default output path if --report-html-filename is not provided
+            htmlReporter.SetResultsDirectory(serviceProvider.GetRequiredService<IConfiguration>().GetTestResultDirectory());
 
             return htmlReporter;
         });
