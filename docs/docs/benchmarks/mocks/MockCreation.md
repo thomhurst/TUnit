@@ -18,14 +18,18 @@ Mock instance creation performance:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1.277 μs | 0.0104 μs | 0.0097 μs | 1.12 KB |
-| Moq | 1.382 μs | 0.0143 μs | 0.0134 μs | 2 KB |
-| NSubstitute | 1.902 μs | 0.0084 μs | 0.0078 μs | 4.88 KB |
-| FakeItEasy | 1.862 μs | 0.0114 μs | 0.0101 μs | 2.65 KB |
-| **'TUnit.Mocks (Repository)'** | 1.270 μs | 0.0072 μs | 0.0067 μs | 1.12 KB |
-| 'Moq (Repository)' | 1.319 μs | 0.0048 μs | 0.0043 μs | 1.87 KB |
-| 'NSubstitute (Repository)' | 1.911 μs | 0.0093 μs | 0.0087 μs | 4.88 KB |
-| 'FakeItEasy (Repository)' | 1.883 μs | 0.0136 μs | 0.0114 μs | 2.65 KB |
+| **TUnit.Mocks** | 896.52 ns | 7.712 ns | 6.440 ns | 1157 B |
+| Imposter | 92.05 ns | 1.137 ns | 1.064 ns | 440 B |
+| Mockolate | 68.21 ns | 1.038 ns | 0.971 ns | 360 B |
+| Moq | 1,238.69 ns | 23.915 ns | 25.589 ns | 2048 B |
+| NSubstitute | 1,712.34 ns | 14.155 ns | 13.240 ns | 5000 B |
+| FakeItEasy | 1,541.71 ns | 14.183 ns | 13.267 ns | 2723 B |
+| **'TUnit.Mocks (Repository)'** | 900.00 ns | 6.735 ns | 6.300 ns | 1157 B |
+| 'Imposter (Repository)' | 148.53 ns | 1.299 ns | 1.151 ns | 696 B |
+| 'Mockolate (Repository)' | 67.44 ns | 1.021 ns | 0.955 ns | 360 B |
+| 'Moq (Repository)' | 1,184.33 ns | 5.376 ns | 4.766 ns | 1912 B |
+| 'NSubstitute (Repository)' | 1,674.00 ns | 13.613 ns | 12.734 ns | 5000 B |
+| 'FakeItEasy (Repository)' | 1,531.62 ns | 12.941 ns | 12.105 ns | 2723 B |
 
 ## 📈 Visual Comparison
 
@@ -52,9 +56,9 @@ Mock instance creation performance:
 }}%%
 xychart-beta
   title "MockCreation Performance Comparison"
-  x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (Repository)'", "'Moq (Repository)'", "'NSubstitute (Repository)'", "'FakeItEasy (Repository)'"]
-  y-axis "Time (μs)" 0 --> 3
-  bar [1.277, 1.382, 1.902, 1.862, 1.27, 1.319, 1.911, 1.883]
+  x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (Repository)'", "'Imposter (Repository)'", "'Mockolate (Repository)'", "'Moq (Repository)'", "'NSubstitute (Repository)'", "'FakeItEasy (Repository)'"]
+  y-axis "Time (ns)" 0 --> 2055
+  bar [896.52, 92.05, 68.21, 1238.69, 1712.34, 1541.71, 900, 148.53, 67.44, 1184.33, 1674, 1531.62]
 ```
 
 ## 🎯 Key Insights
@@ -67,4 +71,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-29T03:29:47.877Z*
+*Last generated: 2026-03-29T21:50:09.524Z*
