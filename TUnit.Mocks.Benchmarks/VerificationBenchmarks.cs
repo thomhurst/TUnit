@@ -1,5 +1,8 @@
 using BenchmarkDotNet.Attributes;
 using FakeItEasy;
+using Imposter.Abstractions;
+using Mockolate;
+using Mockolate.Verify;
 using Moq;
 using NSubstitute;
 
@@ -23,16 +26,39 @@ public class VerificationBenchmarks
         mock.Add(TUnitArg.Any<int>(), TUnitArg.Any<int>()).WasCalled(Times.Exactly(2));
     }
 
+    [Benchmark(Description = "Imposter")]
+    public void Imposter_Verify()
+    {
+        var imposter = ICalculatorService.Imposter();
+        imposter.Add(Arg<int>.Any(), Arg<int>.Any()).Returns(42);
+        var calc = imposter.Instance();
+        calc.Add(1, 2);
+        calc.Add(3, 4);
+
+        imposter.Add(Arg<int>.Any(), Arg<int>.Any()).Called(Count.Exactly(2));
+    }
+
+    [Benchmark(Description = "Mockolate")]
+    public void Mockolate_Verify()
+    {
+        var sut = ICalculatorService.CreateMock();
+        sut.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        sut.Add(1, 2);
+        sut.Add(3, 4);
+
+        sut.Mock.Verify.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Exactly(2);
+    }
+
     [Benchmark(Description = "Moq")]
     public void Moq_Verify()
     {
         var mock = new Moq.Mock<ICalculatorService>();
-        mock.Setup(x => x.Add(It.IsAny<int>(), It.IsAny<int>())).Returns(42);
+        mock.Setup(x => x.Add(Moq.It.IsAny<int>(), Moq.It.IsAny<int>())).Returns(42);
         var calc = mock.Object;
         calc.Add(1, 2);
         calc.Add(3, 4);
 
-        mock.Verify(x => x.Add(It.IsAny<int>(), It.IsAny<int>()), Moq.Times.Exactly(2));
+        mock.Verify(x => x.Add(Moq.It.IsAny<int>(), Moq.It.IsAny<int>()), Moq.Times.Exactly(2));
     }
 
     [Benchmark(Description = "NSubstitute")]
@@ -64,11 +90,26 @@ public class VerificationBenchmarks
         mock.Format(TUnitArg.Any<int>()).WasNeverCalled();
     }
 
+    [Benchmark(Description = "Imposter (Never)")]
+    public void Imposter_VerifyNever()
+    {
+        var imposter = ICalculatorService.Imposter();
+        _ = imposter.Instance();
+        imposter.Format(Arg<int>.Any()).Called(Count.Never());
+    }
+
+    [Benchmark(Description = "Mockolate (Never)")]
+    public void Mockolate_VerifyNever()
+    {
+        var sut = ICalculatorService.CreateMock();
+        sut.Mock.Verify.Format(Mockolate.It.IsAny<int>()).Never();
+    }
+
     [Benchmark(Description = "Moq (Never)")]
     public void Moq_VerifyNever()
     {
         var mock = new Moq.Mock<ICalculatorService>();
-        mock.Verify(x => x.Format(It.IsAny<int>()), Moq.Times.Never());
+        mock.Verify(x => x.Format(Moq.It.IsAny<int>()), Moq.Times.Never());
     }
 
     [Benchmark(Description = "NSubstitute (Never)")]
@@ -103,12 +144,47 @@ public class VerificationBenchmarks
         mock.Save(TUnitArg.Any<User>()).WasCalled(Times.Once);
     }
 
+    [Benchmark(Description = "Imposter (Multiple)")]
+    public void Imposter_VerifyMultiple()
+    {
+        var imposter = IUserRepository.Imposter();
+        imposter.GetById(Arg<int>.Any()).Returns(new User { Id = 1, Name = "Test" });
+        imposter.Exists(Arg<int>.Any()).Returns(true);
+
+        var repo = imposter.Instance();
+        repo.GetById(1);
+        repo.GetById(2);
+        repo.Exists(1);
+        repo.Save(new User { Id = 3, Name = "New" });
+
+        imposter.GetById(Arg<int>.Any()).Called(Count.Exactly(2));
+        imposter.Exists(Arg<int>.Any()).Called(Count.Once());
+        imposter.Save(Arg<User>.Any()).Called(Count.Once());
+    }
+
+    [Benchmark(Description = "Mockolate (Multiple)")]
+    public void Mockolate_VerifyMultiple()
+    {
+        var sut = IUserRepository.CreateMock();
+        sut.Mock.Setup.GetById(Mockolate.It.IsAny<int>()).Returns(new User { Id = 1, Name = "Test" });
+        sut.Mock.Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
+
+        sut.GetById(1);
+        sut.GetById(2);
+        sut.Exists(1);
+        sut.Save(new User { Id = 3, Name = "New" });
+
+        sut.Mock.Verify.GetById(Mockolate.It.IsAny<int>()).Exactly(2);
+        sut.Mock.Verify.Exists(Mockolate.It.IsAny<int>()).Once();
+        sut.Mock.Verify.Save(Mockolate.It.IsAny<User>()).Once();
+    }
+
     [Benchmark(Description = "Moq (Multiple)")]
     public void Moq_VerifyMultiple()
     {
         var mock = new Moq.Mock<IUserRepository>();
-        mock.Setup(x => x.GetById(It.IsAny<int>())).Returns(new User { Id = 1, Name = "Test" });
-        mock.Setup(x => x.Exists(It.IsAny<int>())).Returns(true);
+        mock.Setup(x => x.GetById(Moq.It.IsAny<int>())).Returns(new User { Id = 1, Name = "Test" });
+        mock.Setup(x => x.Exists(Moq.It.IsAny<int>())).Returns(true);
 
         var repo = mock.Object;
         repo.GetById(1);
@@ -116,9 +192,9 @@ public class VerificationBenchmarks
         repo.Exists(1);
         repo.Save(new User { Id = 3, Name = "New" });
 
-        mock.Verify(x => x.GetById(It.IsAny<int>()), Moq.Times.Exactly(2));
-        mock.Verify(x => x.Exists(It.IsAny<int>()), Moq.Times.Once());
-        mock.Verify(x => x.Save(It.IsAny<User>()), Moq.Times.Once());
+        mock.Verify(x => x.GetById(Moq.It.IsAny<int>()), Moq.Times.Exactly(2));
+        mock.Verify(x => x.Exists(Moq.It.IsAny<int>()), Moq.Times.Once());
+        mock.Verify(x => x.Save(Moq.It.IsAny<User>()), Moq.Times.Once());
     }
 
     [Benchmark(Description = "NSubstitute (Multiple)")]

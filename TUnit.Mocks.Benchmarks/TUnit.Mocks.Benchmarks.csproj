@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
     <PackageReference Include="BenchmarkDotNet.Annotations" />
+    <PackageReference Include="Imposter" />
+    <PackageReference Include="Mockolate" />
     <PackageReference Include="Moq" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="FakeItEasy" />
