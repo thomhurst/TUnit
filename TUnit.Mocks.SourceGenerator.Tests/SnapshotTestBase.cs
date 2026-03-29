@@ -47,7 +47,7 @@ public abstract class SnapshotTestBase
         ).WithReferences(_references.Value);
 
         var generator = new MockGenerator();
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
 
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
