@@ -121,6 +121,28 @@ const categoryDescriptions = {
   'CombinedWorkflow': 'Full workflow: create → setup → invoke → verify'
 };
 
+// Known library metadata for the overview table
+// Libraries not listed here will still appear in results — they just won't have
+// an "Approach" or "AOT" annotation in the overview table.
+const libraryMeta = {
+  'TUnit.Mocks': { approach: 'Source-generated at compile time', aot: true },
+  'Imposter':    { approach: 'Source-generated at compile time', aot: true },
+  'Mockolate':   { approach: 'Source-generated at compile time', aot: true },
+  'Moq':         { approach: 'Runtime proxy via Castle.DynamicProxy', aot: false },
+  'NSubstitute': { approach: 'Runtime proxy via Castle.DynamicProxy', aot: false },
+  'FakeItEasy':  { approach: 'Runtime proxy via Castle.DynamicProxy', aot: false },
+};
+
+function extractLibraryName(methodOrDescription) {
+  if (!methodOrDescription) return null;
+  // Strip surrounding single quotes: "'Moq (Repository)'" -> "Moq (Repository)"
+  let name = methodOrDescription.replace(/^'|'$/g, '');
+  // Take the part before the first '(' to get the base library name
+  const parenIdx = name.indexOf('(');
+  if (parenIdx > 0) name = name.substring(0, parenIdx);
+  return name.trim();
+}
+
 // Process results
 const categories = {};
 let environmentInfo = {};
@@ -169,6 +191,15 @@ allFiles.forEach(file => {
 
 const timestamp = new Date().toISOString().split('T')[0];
 
+// Derive the unique library names from the actual benchmark data
+const discoveredLibraries = [...new Set(
+  Object.values(categories)
+    .flat()
+    .map(row => extractLibraryName(row.Description || row.Method))
+    .filter(Boolean)
+)];
+console.log(`\n📦 Discovered libraries: ${discoveredLibraries.join(', ')}`);
+
 // Generate individual benchmark pages for each category
 console.log('\n📝 Generating documentation...');
 
@@ -179,7 +210,7 @@ Object.entries(categories).forEach(([category, data], index) => {
 
   const benchmarkPage = `---
 title: "Mock Benchmark: ${category}"
-description: "${description} — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy"
+description: "${description} — ${discoveredLibraries.join(' vs ')}"
 sidebar_position: ${index + 2}
 ---
 
@@ -265,9 +296,16 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 });
 
 // Generate index/overview page
+const libraryTableRows = discoveredLibraries.map(lib => {
+  const meta = libraryMeta[lib];
+  const approach = meta?.approach || 'Unknown';
+  const aot = meta ? (meta.aot ? '✅ Yes' : '❌ No') : '❓ Unknown';
+  return `| **${lib}** | ${approach} | ${aot} |`;
+}).join('\n');
+
 const indexPage = `---
 title: Mock Library Benchmarks
-description: Performance comparisons between TUnit.Mocks, Moq, NSubstitute, and FakeItEasy
+description: Performance comparisons between ${discoveredLibraries.join(', ')}
 sidebar_position: 1
 ---
 
@@ -281,14 +319,11 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 
 ## 🚀 Overview
 
-These benchmarks compare **TUnit.Mocks** (source-generated, AOT-compatible) against the most popular .NET mocking libraries that use runtime proxy generation:
+These benchmarks compare source-generated, AOT-compatible mocking libraries against the most popular .NET mocking libraries that use runtime proxy generation:
 
 | Library | Approach | AOT Compatible |
 |---------|----------|----------------|
-| **TUnit.Mocks** | Source-generated at compile time | ✅ Yes |
-| **Moq** | Runtime proxy via Castle.DynamicProxy | ❌ No |
-| **NSubstitute** | Runtime proxy via Castle.DynamicProxy | ❌ No |
-| **FakeItEasy** | Runtime proxy via Castle.DynamicProxy | ❌ No |
+${libraryTableRows}
 
 ## 📊 Benchmark Categories
 
@@ -367,7 +402,7 @@ const summary = {
   categories: Object.keys(categories),
   timestamp,
   environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}`,
-  libraries: ['TUnit.Mocks', 'Moq', 'NSubstitute', 'FakeItEasy']
+  libraries: discoveredLibraries
 };
 
 fs.writeFileSync(

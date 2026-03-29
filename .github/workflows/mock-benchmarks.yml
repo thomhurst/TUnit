@@ -180,10 +180,7 @@ jobs:
             - `mock-benchmark-summary` (aggregated overview)
 
             ### Libraries Compared
-            - **TUnit.Mocks** (source-generated, AOT-compatible)
-            - **Moq** (runtime proxy generation)
-            - **NSubstitute** (runtime proxy generation)
-            - **FakeItEasy** (runtime proxy generation)
+            Libraries are discovered dynamically from the benchmark output. See the generated `summary.json` for the full list.
 
             ### Changes
             - Updated mock benchmark data in `docs/static/benchmarks/mocks/latest.json`
