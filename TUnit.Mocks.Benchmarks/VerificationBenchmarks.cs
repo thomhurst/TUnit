@@ -94,6 +94,7 @@ public class VerificationBenchmarks
     public void Imposter_VerifyNever()
     {
         var imposter = ICalculatorService.Imposter();
+        _ = imposter.Instance();
         imposter.Format(Arg<int>.Any()).Called(Count.Never());
     }
 
