@@ -11,10 +11,20 @@
     </ItemGroup>
 
     <ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Core.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
         <None Include="TUnit.Core.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
 
         <None Include="TUnit.Core.targets">
             <Pack>true</Pack>
