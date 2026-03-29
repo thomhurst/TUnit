@@ -80,19 +80,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     private ConcurrentDictionary<string, object?> AutoTrackValues
-        => LazyInitializer.EnsureInitialized(ref _autoTrackValues);
+        => LazyInitializer.EnsureInitialized(ref _autoTrackValues)!;
 
     private ConcurrentQueue<(string EventName, bool IsSubscribe)> EventSubscriptions
-        => LazyInitializer.EnsureInitialized(ref _eventSubscriptions);
+        => LazyInitializer.EnsureInitialized(ref _eventSubscriptions)!;
 
     private ConcurrentDictionary<string, Action> OnSubscribeCallbacks
-        => LazyInitializer.EnsureInitialized(ref _onSubscribeCallbacks);
+        => LazyInitializer.EnsureInitialized(ref _onSubscribeCallbacks)!;
 
     private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
-        => LazyInitializer.EnsureInitialized(ref _onUnsubscribeCallbacks);
+        => LazyInitializer.EnsureInitialized(ref _onUnsubscribeCallbacks)!;
 
     private ConcurrentDictionary<string, IMock?> AutoMockCache
-        => LazyInitializer.EnsureInitialized(ref _autoMockCache);
+        => LazyInitializer.EnsureInitialized(ref _autoMockCache)!;
 
     /// <summary>
     /// Transitions the engine to the specified state. Null clears the state.
