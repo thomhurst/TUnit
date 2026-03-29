@@ -169,7 +169,9 @@ public static class Rules
         CreateDescriptor("TUnit0061", UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MissingPolyfillPackage =
-        CreateDescriptor("TUnit0080", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor("TUnit0073", UsageCategory, DiagnosticSeverity.Error,
+            customTags: [WellKnownDiagnosticTags.CompilationEnd],
+            helpLinkUri: "https://www.nuget.org/packages/Polyfill");
 
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
@@ -178,7 +180,8 @@ public static class Rules
         CreateDescriptor("TUnit0301", UsageCategory, DiagnosticSeverity.Warning);
 
 
-    private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
+    private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
+        string[]? customTags = null, string? helpLinkUri = null)
     {
         return new DiagnosticDescriptor(
             id: diagnosticId,
@@ -190,7 +193,9 @@ public static class Rules
             defaultSeverity: severity,
             isEnabledByDefault: true,
             description: new LocalizableResourceString(diagnosticId + "Description", Resources.ResourceManager,
-                typeof(Resources))
+                typeof(Resources)),
+            helpLinkUri: helpLinkUri,
+            customTags: customTags ?? []
         );
     }
 }

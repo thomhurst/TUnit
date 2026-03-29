@@ -7,10 +7,8 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class MissingPolyfillAnalyzer : ConcurrentDiagnosticAnalyzer
 {
-    private static readonly string[] RequiredTypes =
-    [
-        "System.Runtime.CompilerServices.ModuleInitializerAttribute",
-    ];
+    private static readonly ImmutableArray<string> RequiredTypes =
+        ImmutableArray.Create("System.Runtime.CompilerServices.ModuleInitializerAttribute");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Rules.MissingPolyfillPackage);
