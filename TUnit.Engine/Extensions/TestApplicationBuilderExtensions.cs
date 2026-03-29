@@ -80,6 +80,11 @@ public static class TestApplicationBuilderExtensions
             {
                 junitReporter.SetOutputPath(pathArgs[0]);
             }
+
+            // Set results directory as specified by --results-directory,
+            // so it can be used in the default output path if --report-html-filename is not provided
+            junitReporter.SetResultsDirectory(serviceProvider.GetRequiredService<IConfiguration>().GetTestResultDirectory());
+
             return junitReporter;
         });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);

@@ -16,6 +16,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 {
     private string _outputPath = null!;
     private bool _isEnabled;
+    private string _resultsDirectory = "TestResults";
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -33,16 +34,6 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         if (!explicitlyEnabled && !runningInGitLab)
         {
             return false;
-        }
-
-        // Determine output path (only if not already set via command-line argument)
-        if (string.IsNullOrEmpty(_outputPath))
-        {
-            var envPath = Environment.GetEnvironmentVariable(EnvironmentConstants.JUnitXmlOutputPath);
-
-            _outputPath = envPath is not null
-                ? PathValidator.ValidateAndNormalizePath(envPath, nameof(EnvironmentConstants.JUnitXmlOutputPath))
-                : GetDefaultOutputPath();
         }
 
         _isEnabled = true;
@@ -97,6 +88,16 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             return;
         }
 
+        // Determine output path (only if not already set via command-line argument)
+        if (string.IsNullOrEmpty(_outputPath))
+        {
+            var envPath = Environment.GetEnvironmentVariable(EnvironmentConstants.JUnitXmlOutputPath);
+
+            _outputPath = envPath is not null
+                ? PathValidator.ValidateAndNormalizePath(envPath, nameof(EnvironmentConstants.JUnitXmlOutputPath))
+                : GetDefaultOutputPath();
+        }
+
         // Write to file with retry logic
         await WriteXmlFileAsync(_outputPath, xmlContent, cancellation);
     }
@@ -108,14 +109,21 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         _outputPath = PathValidator.ValidateAndNormalizePath(path, nameof(path));
     }
 
-    private static string GetDefaultOutputPath()
+    // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
+    // so _resultsDirectory is guaranteed to be set before AfterRunAsync is invoked.
+    internal void SetResultsDirectory(string path)
+    {
+        _resultsDirectory = path;
+    }
+
+    private string GetDefaultOutputPath()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
 
         // Sanitize assembly name to remove any characters that could be used for path traversal
         var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
 
-        return Path.GetFullPath(Path.Combine("TestResults", $"{sanitizedName}-junit.xml"));
+        return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-junit.xml"));
     }
 
     private static async Task WriteXmlFileAsync(string path, string content, CancellationToken cancellationToken)
