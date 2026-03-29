@@ -1,6 +1,6 @@
 ---
 title: Mock Library Benchmarks
-description: Performance comparisons between TUnit.Mocks, Moq, NSubstitute, and FakeItEasy
+description: Performance comparisons between TUnit.Mocks, Imposter, Mockolate, Moq, NSubstitute, FakeItEasy
 sidebar_position: 1
 ---
 
@@ -14,11 +14,13 @@ These benchmarks were automatically generated on **2026-03-29** from the latest 
 
 ## 🚀 Overview
 
-These benchmarks compare **TUnit.Mocks** (source-generated, AOT-compatible) against the most popular .NET mocking libraries that use runtime proxy generation:
+These benchmarks compare source-generated, AOT-compatible mocking libraries against the most popular .NET mocking libraries that use runtime proxy generation:
 
 | Library | Approach | AOT Compatible |
 |---------|----------|----------------|
 | **TUnit.Mocks** | Source-generated at compile time | ✅ Yes |
+| **Imposter** | Source-generated at compile time | ✅ Yes |
+| **Mockolate** | Source-generated at compile time | ✅ Yes |
 | **Moq** | Runtime proxy via Castle.DynamicProxy | ❌ No |
 | **NSubstitute** | Runtime proxy via Castle.DynamicProxy | ❌ No |
 | **FakeItEasy** | Runtime proxy via Castle.DynamicProxy | ❌ No |
@@ -38,18 +40,18 @@ Click on any benchmark to view detailed results:
 
 Each benchmark category tests a specific aspect of mocking library usage:
 
-- **MockCreation** — How fast can each library create a mock instance?
-- **Setup** — How fast can you configure return values and argument matchers?
-- **Invocation** — Once set up, how fast are method calls on the mock?
-- **Verification** — How fast can you verify that methods were called correctly?
-- **Callback** — How fast are callbacks triggered during mock invocations?
-- **CombinedWorkflow** — The full real-world pattern: create → setup → invoke → verify
+- **MockCreation** — Mock instance creation performance
+- **Setup** — Mock behavior configuration (returns, matchers)
+- **Invocation** — Calling methods on mock objects
+- **Verification** — Verifying mock method calls
+- **Callback** — Callback registration and execution
+- **CombinedWorkflow** — Full workflow: create → setup → invoke → verify
 
 ## 🔧 Methodology
 
 - **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
 - **OS**: Ubuntu Latest (GitHub Actions)
-- **Runtime**: .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v4
+- **Runtime**: .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
 - **Statistical Rigor**: Multiple iterations with warm-up and outlier detection
 - **Memory**: Allocation tracking enabled via `[MemoryDiagnoser]`
 
@@ -74,4 +76,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-03-29T21:50:09.526Z*
+*Last generated: 2026-03-29T22:20:59.126Z*
