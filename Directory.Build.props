@@ -18,6 +18,16 @@
          This prevents GitVersion from spawning a process per project×TFM (153+ invocations). -->
     <DisableGitVersionTask>true</DisableGitVersionTask>
     <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
+    <!-- Re-enable GitVersion for core library projects when building locally, so that
+         strong-named assembly versions match what NuGet packages (e.g. Verify.TUnit) expect. -->
+    <_EnableLocalGitVersion Condition="'$(GITHUB_ACTIONS)' != 'true' and (
+        '$(MSBuildProjectName)' == 'TUnit.Core' or
+        '$(MSBuildProjectName)' == 'TUnit.Engine' or
+        '$(MSBuildProjectName)' == 'TUnit.Mocks' or
+        '$(MSBuildProjectName)' == 'TUnit.Assertions'
+    )">true</_EnableLocalGitVersion>
+    <DisableGitVersionTask Condition="'$(_EnableLocalGitVersion)' == 'true'">false</DisableGitVersionTask>
+    <GenerateGitVersionInformation Condition="'$(_EnableLocalGitVersion)' == 'true'">true</GenerateGitVersionInformation>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
