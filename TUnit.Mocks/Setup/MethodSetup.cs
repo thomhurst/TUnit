@@ -14,6 +14,7 @@ public sealed class MethodSetup
     private Lock? _behaviorLock;
     private List<IBehavior>? _behaviors;
     private List<EventRaiseInfo>? _eventRaises;
+    private EventRaiseInfo[]? _eventRaisesSnapshot;
     private Dictionary<int, object?>? _outRefAssignments;
     private int _callIndex;
 
@@ -87,6 +88,7 @@ public sealed class MethodSetup
         {
             var list = _eventRaises ??= new();
             list.Add(raiseInfo);
+            _eventRaisesSnapshot = null;
         }
     }
 
@@ -98,9 +100,14 @@ public sealed class MethodSetup
             return [];
         }
 
+        if (Volatile.Read(ref _eventRaisesSnapshot) is { } snapshot)
+        {
+            return snapshot;
+        }
+
         lock (_behaviorLock!)
         {
-            return _eventRaises!.ToList();
+            return _eventRaisesSnapshot = _eventRaises!.ToArray();
         }
     }
 
