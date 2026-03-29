@@ -107,7 +107,7 @@ public sealed class MethodSetup
 
         lock (EnsureBehaviorLock())
         {
-            return _eventRaisesSnapshot = _eventRaises!.ToArray();
+            return _eventRaisesSnapshot ??= _eventRaises!.ToArray();
         }
     }
 
