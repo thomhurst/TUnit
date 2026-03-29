@@ -30,9 +30,12 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IGreeter_MockImpl : global::IGreeter, global::TUnit.Mocks.IRaisable
+    internal sealed class IGreeter_MockImpl : global::IGreeter, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IGreeter> _engine;
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
         internal IGreeter_MockImpl(global::TUnit.Mocks.MockEngine<global::IGreeter> engine)
         {
@@ -83,7 +86,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string>> _lazyBuilder;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string>? _builder;
 
         internal IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -91,16 +94,15 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<string>>(() =>
-            {
-                var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-                _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
-            }
-            );
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup() => _lazyBuilder.Value;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup()
+        {
+            if (_builder is { } b) return b;
+            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+            _engine.AddSetup(setup);
+            return _builder = new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
+        }
 
         /// <inheritdoc />
         public IGreeter_Greet_M0_MockCall Returns(string value) { EnsureSetup().Returns(value); return this; }

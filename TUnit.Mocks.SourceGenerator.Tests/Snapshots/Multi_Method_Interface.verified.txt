@@ -30,9 +30,12 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class ICalculator_MockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable
+    internal sealed class ICalculator_MockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::ICalculator> _engine;
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
         internal ICalculator_MockImpl(global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
         {
@@ -142,7 +145,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<int>> _lazyBuilder;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
 
         internal ICalculator_Add_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -150,16 +153,15 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<int>>(() =>
-            {
-                var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-                _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
-            }
-            );
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup() => _lazyBuilder.Value;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
+        {
+            if (_builder is { } b) return b;
+            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+            _engine.AddSetup(setup);
+            return _builder = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
+        }
 
         /// <inheritdoc />
         public ICalculator_Add_M0_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }
@@ -231,7 +233,7 @@ namespace TUnit.Mocks.Generated
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private readonly global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<int>> _lazyBuilder;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
 
         internal ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -239,16 +241,15 @@ namespace TUnit.Mocks.Generated
             _memberId = memberId;
             _memberName = memberName;
             _matchers = matchers;
-            _lazyBuilder = new global::System.Lazy<global::TUnit.Mocks.Setup.MethodSetupBuilder<int>>(() =>
-            {
-                var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-                _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
-            }
-            );
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup() => _lazyBuilder.Value;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
+        {
+            if (_builder is { } b) return b;
+            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+            _engine.AddSetup(setup);
+            return _builder = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
+        }
 
         /// <inheritdoc />
         public ICalculator_Subtract_M1_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }

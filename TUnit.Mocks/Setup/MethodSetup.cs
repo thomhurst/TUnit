@@ -11,11 +11,13 @@ namespace TUnit.Mocks.Setup;
 public sealed class MethodSetup
 {
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Lock _behaviorLock = new();
-    private readonly List<IBehavior> _behaviors = new();
-    private readonly List<EventRaiseInfo> _eventRaises = new();
+    private Lock? _behaviorLock;
+    private List<IBehavior>? _behaviors;
+    private List<EventRaiseInfo>? _eventRaises;
     private Dictionary<int, object?>? _outRefAssignments;
     private int _callIndex;
+
+    private Lock EnsureBehaviorLock() => LazyInitializer.EnsureInitialized(ref _behaviorLock)!;
 
     public int MemberId { get; }
 
@@ -59,9 +61,10 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
-        lock (_behaviorLock)
+        lock (EnsureBehaviorLock())
         {
-            _behaviors.Add(behavior);
+            var list = _behaviors ??= new();
+            list.Add(behavior);
         }
     }
 
@@ -80,16 +83,22 @@ public sealed class MethodSetup
 
     public void AddEventRaise(EventRaiseInfo raiseInfo)
     {
-        lock (_behaviorLock)
+        lock (EnsureBehaviorLock())
         {
-            _eventRaises.Add(raiseInfo);
+            var list = _eventRaises ??= new();
+            list.Add(raiseInfo);
         }
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<EventRaiseInfo> GetEventRaises()
     {
-        lock (_behaviorLock)
+        if (_eventRaises is null)
+        {
+            return [];
+        }
+
+        lock (_behaviorLock!)
         {
             return _eventRaises.ToList();
         }
@@ -118,7 +127,7 @@ public sealed class MethodSetup
     /// <param name="value">The value to assign.</param>
     public void SetOutRefValue(int paramIndex, object? value)
     {
-        lock (_behaviorLock)
+        lock (EnsureBehaviorLock())
         {
             _outRefAssignments ??= new Dictionary<int, object?>();
             _outRefAssignments[paramIndex] = value;
@@ -133,7 +142,12 @@ public sealed class MethodSetup
     {
         get
         {
-            lock (_behaviorLock)
+            if (_behaviorLock is not { } lck)
+            {
+                return _outRefAssignments;
+            }
+
+            lock (lck)
             {
                 return _outRefAssignments;
             }
@@ -156,15 +170,22 @@ public sealed class MethodSetup
 
     public IBehavior? GetNextBehavior()
     {
-        lock (_behaviorLock)
+        if (_behaviors is null)
         {
-            if (_behaviors.Count == 0)
+            return null;
+        }
+
+        lock (_behaviorLock!)
+        {
+            if (_behaviors is not { Count: > 0 } behaviors)
+            {
                 return null;
+            }
 
             var index = _callIndex;
             if (_callIndex < int.MaxValue) _callIndex++;
             // Clamp to last behavior (last one repeats)
-            return _behaviors[Math.Min(index, _behaviors.Count - 1)];
+            return behaviors[Math.Min(index, behaviors.Count - 1)];
         }
     }
 }

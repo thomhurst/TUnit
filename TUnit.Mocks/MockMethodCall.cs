@@ -20,7 +20,7 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Lazy<MethodSetupBuilder<TReturn>> _lazyBuilder;
+    private MethodSetupBuilder<TReturn>? _builder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
@@ -29,15 +29,15 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
-        _lazyBuilder = new Lazy<MethodSetupBuilder<TReturn>>(() =>
-        {
-            var setup = new MethodSetup(_memberId, _matchers, _memberName);
-            _engine.AddSetup(setup);
-            return new MethodSetupBuilder<TReturn>(setup);
-        });
     }
 
-    private MethodSetupBuilder<TReturn> EnsureSetup() => _lazyBuilder.Value;
+    private MethodSetupBuilder<TReturn> EnsureSetup()
+    {
+        if (_builder is { } b) return b;
+        var setup = new MethodSetup(_memberId, _matchers, _memberName);
+        _engine.AddSetup(setup);
+        return _builder = new MethodSetupBuilder<TReturn>(setup);
+    }
 
     // IMethodSetup<TReturn> implementation
 

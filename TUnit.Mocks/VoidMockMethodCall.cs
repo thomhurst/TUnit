@@ -22,7 +22,7 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Lazy<VoidMethodSetupBuilder> _lazyBuilder;
+    private VoidMethodSetupBuilder? _builder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
@@ -37,19 +37,19 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
-        _lazyBuilder = new Lazy<VoidMethodSetupBuilder>(() =>
-        {
-            var setup = new MethodSetup(_memberId, _matchers, _memberName);
-            _engine.AddSetup(setup);
-            return new VoidMethodSetupBuilder(setup);
-        });
         if (eagerRegister)
         {
-            _ = _lazyBuilder.Value;
+            _ = EnsureSetup();
         }
     }
 
-    private VoidMethodSetupBuilder EnsureSetup() => _lazyBuilder.Value;
+    private VoidMethodSetupBuilder EnsureSetup()
+    {
+        if (_builder is { } b) return b;
+        var setup = new MethodSetup(_memberId, _matchers, _memberName);
+        _engine.AddSetup(setup);
+        return _builder = new VoidMethodSetupBuilder(setup);
+    }
 
     // IVoidMethodSetup implementation
 

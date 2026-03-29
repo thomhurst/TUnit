@@ -30,9 +30,12 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IRepository_MockImpl : global::IRepository, global::TUnit.Mocks.IRaisable
+    internal sealed class IRepository_MockImpl : global::IRepository, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IRepository> _engine;
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
         internal IRepository_MockImpl(global::TUnit.Mocks.MockEngine<global::IRepository> engine)
         {
