@@ -21,6 +21,11 @@
     <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
   <ItemGroup>
+    <TfmSpecificPackageFile Include="TUnit.Engine.props">
+      <Pack>true</Pack>
+      <PackagePath>$(BuildTransitivePath)</PackagePath>
+    </TfmSpecificPackageFile>
+
     <None Include="TUnit.Engine.props">
       <Pack>true</Pack>
       <PackagePath>$(BuildPath)</PackagePath>
