@@ -20,6 +20,7 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
+    // Not thread-safe: MockMethodCall instances are created per setup/verify call and owned by a single test thread.
     private MethodSetupBuilder<TReturn>? _builder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]

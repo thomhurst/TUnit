@@ -22,6 +22,7 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
+    // Not thread-safe: VoidMockMethodCall instances are created per setup/verify call and owned by a single test thread.
     private VoidMethodSetupBuilder? _builder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]

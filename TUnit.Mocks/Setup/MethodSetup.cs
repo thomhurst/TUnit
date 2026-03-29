@@ -93,14 +93,14 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<EventRaiseInfo> GetEventRaises()
     {
-        if (_eventRaises is null)
+        if (Volatile.Read(ref _eventRaises) is null)
         {
             return [];
         }
 
         lock (_behaviorLock!)
         {
-            return _eventRaises.ToList();
+            return _eventRaises!.ToList();
         }
     }
 
@@ -142,9 +142,10 @@ public sealed class MethodSetup
     {
         get
         {
-            if (_behaviorLock is not { } lck)
+            var lck = Volatile.Read(ref _behaviorLock);
+            if (lck is null)
             {
-                return _outRefAssignments;
+                return Volatile.Read(ref _outRefAssignments);
             }
 
             lock (lck)
@@ -170,7 +171,7 @@ public sealed class MethodSetup
 
     public IBehavior? GetNextBehavior()
     {
-        if (_behaviors is null)
+        if (Volatile.Read(ref _behaviors) is null)
         {
             return null;
         }
