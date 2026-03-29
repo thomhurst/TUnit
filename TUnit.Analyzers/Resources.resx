@@ -525,6 +525,15 @@
     <data name="TUnit0052Title" xml:space="preserve">
         <value>Multiple constructors found without [TestConstructor] attribute</value>
     </data>
+    <data name="TUnit0080Description" xml:space="preserve">
+        <value>TUnit requires certain types (such as ModuleInitializerAttribute) that are not available on older target frameworks. Install the 'Polyfill' NuGet package to provide these types.</value>
+    </data>
+    <data name="TUnit0080MessageFormat" xml:space="preserve">
+        <value>Type '{0}' is required by TUnit but is not available. Install the 'Polyfill' NuGet package: dotnet add package Polyfill</value>
+    </data>
+    <data name="TUnit0080Title" xml:space="preserve">
+        <value>Missing polyfill types required by TUnit</value>
+    </data>
     <data name="TUnit0301Description" xml:space="preserve">
         <value>Tuple types require reflection for property/field access which is not AOT-compatible. Consider using concrete types or value deconstruction.</value>
     </data>

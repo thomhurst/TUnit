@@ -168,6 +168,9 @@ public static class Rules
     public static readonly DiagnosticDescriptor NoAccessibleConstructor =
         CreateDescriptor("TUnit0061", UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor MissingPolyfillPackage =
+        CreateDescriptor("TUnit0080", UsageCategory, DiagnosticSeverity.Error);
+
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
 
