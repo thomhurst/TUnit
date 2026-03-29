@@ -133,29 +133,34 @@ const libraryMeta = {
   'FakeItEasy':  { approach: 'Runtime proxy via Castle.DynamicProxy', aot: false },
 };
 
-function extractLibraryName(methodOrDescription) {
-  if (!methodOrDescription) return null;
-  // Strip surrounding single quotes: "'Moq (Repository)'" -> "Moq (Repository)"
-  let name = methodOrDescription.replace(/^'|'$/g, '');
-  // Take the part before the first '(' to get the base library name
+const DEFAULT_VARIANT = '_default';
+
+function stripQuotes(str) {
+  return str.replace(/^'|'$/g, '');
+}
+
+function getLabel(row) {
+  return row.Description || row.Method || '';
+}
+
+function extractLibraryName(label) {
+  if (!label) return null;
+  let name = stripQuotes(label);
   const parenIdx = name.indexOf('(');
   if (parenIdx > 0) name = name.substring(0, parenIdx);
   return name.trim();
 }
 
-function extractVariant(methodOrDescription) {
-  if (!methodOrDescription) return null;
-  let name = methodOrDescription.replace(/^'|'$/g, '');
-  const match = name.match(/\(([^)]+)\)/);
+function extractVariant(label) {
+  if (!label) return null;
+  const match = stripQuotes(label).match(/\(([^)]+)\)/);
   return match ? match[1] : null;
 }
 
 function groupByVariant(data) {
   const groups = new Map();
   for (const row of data) {
-    const raw = row.Description || row.Method || '';
-    const variant = extractVariant(raw);
-    const key = variant || '_default';
+    const key = extractVariant(getLabel(row)) || DEFAULT_VARIANT;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(row);
   }
@@ -166,7 +171,7 @@ function renderTable(rows) {
   const header = `| Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|`;
   const body = rows.map(row => {
-    const lib = extractLibraryName(row.Description || row.Method);
+    const lib = extractLibraryName(getLabel(row));
     const name = lib?.includes('TUnit') ? `**${lib}**` : lib;
     return `| ${name} | ${row.Mean || 'N/A'} | ${row.Error || 'N/A'} | ${row.StdDev || 'N/A'} | ${row.Allocated || 'N/A'} |`;
   }).join('\n');
@@ -176,7 +181,7 @@ function renderTable(rows) {
 function renderChart(title, rows, unit) {
   const maxMean = Math.max(...rows.map(d => parseMeanValue(d.Mean)));
   const labels = rows.map(d => {
-    const lib = extractLibraryName(d.Description || d.Method) || '';
+    const lib = extractLibraryName(getLabel(d)) || '';
     return `"${lib.replace(/"/g, "'")}"`;
   }).join(', ');
   const values = rows.map(d => parseMeanValue(d.Mean)).join(', ');
@@ -256,13 +261,14 @@ allFiles.forEach(file => {
   }
 });
 
-const timestamp = new Date().toISOString().split('T')[0];
+const now = new Date().toISOString();
+const timestamp = now.split('T')[0];
 
 // Derive the unique library names from the actual benchmark data
 const discoveredLibraries = [...new Set(
   Object.values(categories)
     .flat()
-    .map(row => extractLibraryName(row.Description || row.Method))
+    .map(row => extractLibraryName(getLabel(row)))
     .filter(Boolean)
 )];
 console.log(`\n📦 Discovered libraries: ${discoveredLibraries.join(', ')}`);
@@ -278,8 +284,7 @@ Object.entries(categories).forEach(([category, data], index) => {
   // Build sections for each variant group
   const sections = [];
   for (const [variant, rows] of variantGroups) {
-    const isDefault = variant === '_default';
-    const sectionTitle = isDefault ? category : `${category} — ${variant}`;
+    const isDefault = variant === DEFAULT_VARIANT;
     const chartTitle = isDefault ? `${category} Performance Comparison` : `${category} (${variant}) Performance Comparison`;
 
     let section = '';
@@ -322,7 +327,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: ${new Date().toISOString()}*
+*Last generated: ${now}*
 `;
 
   fs.writeFileSync(path.join(OUTPUT_DIR, `${category}.md`), benchmarkPage);
@@ -330,7 +335,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
   // Generate individual JSON file
   const benchmarkJson = {
-    timestamp: new Date().toISOString(),
+    timestamp: now,
     category,
     description,
     environment: environmentInfo,
@@ -386,12 +391,9 @@ ${Object.keys(categories).map(category =>
 
 Each benchmark category tests a specific aspect of mocking library usage:
 
-- **MockCreation** — How fast can each library create a mock instance?
-- **Setup** — How fast can you configure return values and argument matchers?
-- **Invocation** — Once set up, how fast are method calls on the mock?
-- **Verification** — How fast can you verify that methods were called correctly?
-- **Callback** — How fast are callbacks triggered during mock invocations?
-- **CombinedWorkflow** — The full real-world pattern: create → setup → invoke → verify
+${Object.entries(categoryDescriptions).map(([cat, desc]) =>
+  `- **${cat}** — ${desc}`
+).join('\n')}
 
 ## 🔧 Methodology
 
@@ -422,7 +424,7 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: ${new Date().toISOString()}*
+*Last generated: ${now}*
 `;
 
 fs.writeFileSync(path.join(OUTPUT_DIR, 'index.md'), indexPage);
@@ -430,13 +432,13 @@ console.log(`  ✓ Created ${OUTPUT_DIR}/index.md`);
 
 // Generate latest.json
 const benchmarkData = {
-  timestamp: new Date().toISOString(),
+  timestamp: now,
   environment: environmentInfo,
   categories,
   stats: {
     categoryCount: Object.keys(categories).length,
     totalBenchmarks: Object.values(categories).reduce((sum, arr) => sum + arr.length, 0),
-    lastUpdated: new Date().toISOString()
+    lastUpdated: now
   }
 };
 
