@@ -1,22 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
-    <PropertyGroup>
-        <XunitPackageReferenceFound>false</XunitPackageReferenceFound>
-    </PropertyGroup>
-
-    <Target Name="SetXunitPackageReferenceFound" BeforeTargets="PrepareForBuild">
-        <!-- Filter PackageReference for xunit and xunit.v3 -->
-        <ItemGroup>
-            <_XunitReference Include="@(PackageReference)"
-                Condition="'%(PackageReference.Identity)' == 'xunit' Or '%(PackageReference.Identity)' == 'xunit.v3'" />
-        </ItemGroup>
-        <PropertyGroup>
-            <XunitPackageReferenceFound Condition="'@(_XunitReference)' != ''">true</XunitPackageReferenceFound>
-        </PropertyGroup>
-    </Target>
-
-    <PropertyGroup Condition="'$(XunitPackageReferenceFound)' == 'false'">
+    <PropertyGroup Condition="'$(TUnitImplicitUsings)' == ''">
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
     </PropertyGroup>
 
@@ -34,9 +19,7 @@
     </Target>
 
     <PropertyGroup>
-        <!-- Default to enabling polyfills for older frameworks -->
         <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
-        <!-- Use embedded Polyfill attributes to prevent type conflicts across projects -->
         <PolyUseEmbeddedAttribute Condition="'$(PolyUseEmbeddedAttribute)' == ''">true</PolyUseEmbeddedAttribute>
     </PropertyGroup>
 
