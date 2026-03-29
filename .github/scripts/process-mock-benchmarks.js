@@ -143,6 +143,73 @@ function extractLibraryName(methodOrDescription) {
   return name.trim();
 }
 
+function extractVariant(methodOrDescription) {
+  if (!methodOrDescription) return null;
+  let name = methodOrDescription.replace(/^'|'$/g, '');
+  const match = name.match(/\(([^)]+)\)/);
+  return match ? match[1] : null;
+}
+
+function groupByVariant(data) {
+  const groups = new Map();
+  for (const row of data) {
+    const raw = row.Description || row.Method || '';
+    const variant = extractVariant(raw);
+    const key = variant || '_default';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  }
+  return groups;
+}
+
+function renderTable(rows) {
+  const header = `| Library | Mean | Error | StdDev | Allocated |
+|---------|------|-------|--------|-----------|`;
+  const body = rows.map(row => {
+    const lib = extractLibraryName(row.Description || row.Method);
+    const name = lib?.includes('TUnit') ? `**${lib}**` : lib;
+    return `| ${name} | ${row.Mean || 'N/A'} | ${row.Error || 'N/A'} | ${row.StdDev || 'N/A'} | ${row.Allocated || 'N/A'} |`;
+  }).join('\n');
+  return `${header}\n${body}`;
+}
+
+function renderChart(title, rows, unit) {
+  const maxMean = Math.max(...rows.map(d => parseMeanValue(d.Mean)));
+  const labels = rows.map(d => {
+    const lib = extractLibraryName(d.Description || d.Method) || '';
+    return `"${lib.replace(/"/g, "'")}"`;
+  }).join(', ');
+  const values = rows.map(d => parseMeanValue(d.Mean)).join(', ');
+
+  return `\`\`\`mermaid
+%%{init: {
+  'theme':'base',
+  'themeVariables': {
+    'primaryColor': '#2563eb',
+    'primaryTextColor': '#1f2937',
+    'primaryBorderColor': '#1e40af',
+    'lineColor': '#6b7280',
+    'secondaryColor': '#7c3aed',
+    'tertiaryColor': '#dc2626',
+    'background': '#ffffff',
+    'pie1': '#2563eb',
+    'pie2': '#7c3aed',
+    'pie3': '#dc2626',
+    'pie4': '#f59e0b',
+    'pie5': '#10b981',
+    'pie6': '#06b6d4',
+    'pie7': '#ec4899',
+    'pie8': '#6366f1'
+  }
+}}%%
+xychart-beta
+  title "${title}"
+  x-axis [${labels}]
+  y-axis "Time (${unit})" 0 --> ${Math.ceil(maxMean * 1.2) || 100}
+  bar [${values}]
+\`\`\``;
+}
+
 // Process results
 const categories = {};
 let environmentInfo = {};
@@ -206,7 +273,24 @@ console.log('\n📝 Generating documentation...');
 Object.entries(categories).forEach(([category, data], index) => {
   const description = categoryDescriptions[category] || category;
   const unit = getUnit(data[0]?.Mean);
-  const maxMean = Math.max(...data.map(d => parseMeanValue(d.Mean)));
+  const variantGroups = groupByVariant(data);
+
+  // Build sections for each variant group
+  const sections = [];
+  for (const [variant, rows] of variantGroups) {
+    const isDefault = variant === '_default';
+    const sectionTitle = isDefault ? category : `${category} — ${variant}`;
+    const chartTitle = isDefault ? `${category} Performance Comparison` : `${category} (${variant}) Performance Comparison`;
+
+    let section = '';
+    if (!isDefault) {
+      section += `### ${variant}\n\n`;
+    }
+    section += renderTable(rows);
+    section += '\n\n';
+    section += renderChart(chartTitle, rows, unit);
+    sections.push(section);
+  }
 
   const benchmarkPage = `---
 title: "Mock Benchmark: ${category}"
@@ -226,42 +310,7 @@ This benchmark was automatically generated on **${timestamp}** from the latest C
 
 ${description}:
 
-| Method | Mean | Error | StdDev | Allocated |
-|--------|------|-------|--------|-----------|
-${data.map(row => {
-  const name = (row.Description || row.Method || '').includes('TUnit') ? `**${row.Description || row.Method}**` : (row.Description || row.Method);
-  return `| ${name} | ${row.Mean || 'N/A'} | ${row.Error || 'N/A'} | ${row.StdDev || 'N/A'} | ${row.Allocated || 'N/A'} |`;
-}).join('\n')}
-
-## 📈 Visual Comparison
-
-\`\`\`mermaid
-%%{init: {
-  'theme':'base',
-  'themeVariables': {
-    'primaryColor': '#2563eb',
-    'primaryTextColor': '#1f2937',
-    'primaryBorderColor': '#1e40af',
-    'lineColor': '#6b7280',
-    'secondaryColor': '#7c3aed',
-    'tertiaryColor': '#dc2626',
-    'background': '#ffffff',
-    'pie1': '#2563eb',
-    'pie2': '#7c3aed',
-    'pie3': '#dc2626',
-    'pie4': '#f59e0b',
-    'pie5': '#10b981',
-    'pie6': '#06b6d4',
-    'pie7': '#ec4899',
-    'pie8': '#6366f1'
-  }
-}}%%
-xychart-beta
-  title "${category} Performance Comparison"
-  x-axis [${data.map(d => `"${(d.Description || d.Method || '').replace(/"/g, "'")}"` ).join(', ')}]
-  y-axis "Time (${unit})" 0 --> ${Math.ceil(maxMean * 1.2) || 100}
-  bar [${data.map(d => parseMeanValue(d.Mean)).join(', ')}]
-\`\`\`
+${sections.join('\n\n---\n\n')}
 
 ## 🎯 Key Insights
 
