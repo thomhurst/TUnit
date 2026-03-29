@@ -40,13 +40,13 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [SetupTeardownTests](https://tunit.dev/docs/benchmarks/SetupTeardownTests): Performance benchmark results for SetupTeardownTests
 - [Performance Benchmarks](https://tunit.dev/docs/benchmarks/): Real-world performance comparisons between TUnit and other .NET testing frameworks
 - [Benchmark Methodology](https://tunit.dev/docs/benchmarks/methodology): How TUnit's performance benchmarks are measured and compared
-- [Mock Benchmark: Callback](https://tunit.dev/docs/benchmarks/mocks/Callback): Callback registration and execution — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Benchmark: CombinedWorkflow](https://tunit.dev/docs/benchmarks/mocks/CombinedWorkflow): Full workflow: create → setup → invoke → verify — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Benchmark: Invocation](https://tunit.dev/docs/benchmarks/mocks/Invocation): Calling methods on mock objects — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Benchmark: MockCreation](https://tunit.dev/docs/benchmarks/mocks/MockCreation): Mock instance creation performance — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Benchmark: Setup](https://tunit.dev/docs/benchmarks/mocks/Setup): Mock behavior configuration (returns, matchers) — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Benchmark: Verification](https://tunit.dev/docs/benchmarks/mocks/Verification): Verifying mock method calls — TUnit.Mocks vs Moq vs NSubstitute vs FakeItEasy
-- [Mock Library Benchmarks](https://tunit.dev/docs/benchmarks/mocks/): Performance comparisons between TUnit.Mocks, Moq, NSubstitute, and FakeItEasy
+- [Mock Benchmark: Callback](https://tunit.dev/docs/benchmarks/mocks/Callback): Callback registration and execution — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Benchmark: CombinedWorkflow](https://tunit.dev/docs/benchmarks/mocks/CombinedWorkflow): Full workflow: create → setup → invoke → verify — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Benchmark: Invocation](https://tunit.dev/docs/benchmarks/mocks/Invocation): Calling methods on mock objects — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Benchmark: MockCreation](https://tunit.dev/docs/benchmarks/mocks/MockCreation): Mock instance creation performance — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Benchmark: Setup](https://tunit.dev/docs/benchmarks/mocks/Setup): Mock behavior configuration (returns, matchers) — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Benchmark: Verification](https://tunit.dev/docs/benchmarks/mocks/Verification): Verifying mock method calls — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Mock Library Benchmarks](https://tunit.dev/docs/benchmarks/mocks/): Performance comparisons between TUnit.Mocks, Imposter, Mockolate, Moq, NSubstitute, FakeItEasy
 - [Attributes](https://tunit.dev/docs/comparison/attributes): Here are TUnit's equivalent attributes to other test frameworks.
 - [Framework Differences](https://tunit.dev/docs/comparison/framework-differences): TUnit is inspired by NUnit and xUnit — they're excellent frameworks that have served the .NET community well. TUnit was built to address some pain ...
 - [Aspire Integration Testing](https://tunit.dev/docs/examples/aspire): TUnit provides first-class support for [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/overview) integration testing through the `TUn...
