@@ -105,7 +105,7 @@ public sealed class MethodSetup
             return snapshot;
         }
 
-        lock (Volatile.Read(ref _behaviorLock)!)
+        lock (EnsureBehaviorLock())
         {
             return _eventRaisesSnapshot = _eventRaises!.ToArray();
         }
@@ -152,7 +152,7 @@ public sealed class MethodSetup
             var lck = Volatile.Read(ref _behaviorLock);
             if (lck is null)
             {
-                return Volatile.Read(ref _outRefAssignments);
+                return null;
             }
 
             lock (lck)
@@ -183,7 +183,7 @@ public sealed class MethodSetup
             return null;
         }
 
-        lock (Volatile.Read(ref _behaviorLock)!)
+        lock (EnsureBehaviorLock())
         {
             if (_behaviors is not { Count: > 0 } behaviors)
             {
