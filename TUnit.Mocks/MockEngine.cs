@@ -386,7 +386,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
-        if (_callHistory is not { } history)
+        if (Volatile.Read(ref _callHistory) is not { } history)
         {
             return [];
         }
@@ -407,7 +407,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        return _callHistory?.ToArray() ?? [];
+        return Volatile.Read(ref _callHistory)?.ToArray() ?? [];
     }
 
     /// <summary>
@@ -416,7 +416,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        if (_callHistory is not { } history)
+        if (Volatile.Read(ref _callHistory) is not { } history)
         {
             return [];
         }
@@ -482,7 +482,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        if (_callHistory is { } history)
+        if (Volatile.Read(ref _callHistory) is { } history)
         {
             foreach (var call in history)
             {

@@ -862,12 +862,14 @@ internal static class MockMembersBuilder
     private static void EmitEnsureSetup(CodeWriter writer, string builderType)
     {
         writer.AppendLine($"private {builderType} EnsureSetup() =>");
-        writer.AppendLine($"    global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>");
-        writer.AppendLine("    {");
-        writer.AppendLine("        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
-        writer.AppendLine("        _engine.AddSetup(setup);");
-        writer.AppendLine($"        return new {builderType}(setup);");
-        writer.AppendLine("    })!;");
+        writer.IncreaseIndent();
+        writer.AppendLine($"global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>");
+        writer.OpenBrace();
+        writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
+        writer.AppendLine("_engine.AddSetup(setup);");
+        writer.AppendLine($"return new {builderType}(setup);");
+        writer.CloseBrace(")!;");
+        writer.DecreaseIndent();
     }
 
 }
