@@ -22,6 +22,7 @@ internal static class MockCallSequence
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
+    // Lock is a struct in .NET 9+; no heap alloc — stored inline in the MockEngine object.
     private readonly Lock _setupLock = new();
     private Dictionary<int, List<MethodSetup>>? _setupsByMember;
     private ConcurrentQueue<CallRecord>? _callHistory;

@@ -20,8 +20,9 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    // Not thread-safe: MockMethodCall instances are created per setup/verify call and owned by a single test thread.
     private MethodSetupBuilder<TReturn>? _builder;
+    private bool _builderInitialized;
+    private object? _builderLock;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
@@ -32,13 +33,13 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
         _matchers = matchers;
     }
 
-    private MethodSetupBuilder<TReturn> EnsureSetup()
-    {
-        if (_builder is { } b) return b;
-        var setup = new MethodSetup(_memberId, _matchers, _memberName);
-        _engine.AddSetup(setup);
-        return _builder = new MethodSetupBuilder<TReturn>(setup);
-    }
+    private MethodSetupBuilder<TReturn> EnsureSetup() =>
+        LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
+        {
+            var setup = new MethodSetup(_memberId, _matchers, _memberName);
+            _engine.AddSetup(setup);
+            return new MethodSetupBuilder<TReturn>(setup);
+        })!;
 
     // IMethodSetup<TReturn> implementation
 

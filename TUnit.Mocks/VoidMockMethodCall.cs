@@ -22,8 +22,9 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    // Not thread-safe: VoidMockMethodCall instances are created per setup/verify call and owned by a single test thread.
     private VoidMethodSetupBuilder? _builder;
+    private bool _builderInitialized;
+    private object? _builderLock;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
@@ -44,13 +45,13 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
         }
     }
 
-    private VoidMethodSetupBuilder EnsureSetup()
-    {
-        if (_builder is { } b) return b;
-        var setup = new MethodSetup(_memberId, _matchers, _memberName);
-        _engine.AddSetup(setup);
-        return _builder = new VoidMethodSetupBuilder(setup);
-    }
+    private VoidMethodSetupBuilder EnsureSetup() =>
+        LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
+        {
+            var setup = new MethodSetup(_memberId, _matchers, _memberName);
+            _engine.AddSetup(setup);
+            return new VoidMethodSetupBuilder(setup);
+        })!;
 
     // IVoidMethodSetup implementation
 
