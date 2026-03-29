@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 using FakeItEasy;
+using Imposter.Abstractions;
+using Mockolate;
 using Moq;
 using NSubstitute;
 
@@ -15,6 +16,9 @@ public class InvocationBenchmarks
     private Mock<ICalculatorService>? _tunitMock;
     private ICalculatorService? _tunitObject;
     private Moq.Mock<ICalculatorService>? _moqMock;
+    private ICalculatorServiceImposter? _imposterMock;
+    private ICalculatorService? _imposterObject;
+    private ICalculatorService? _mockolateObject;
     private ICalculatorService? _moqObject;
     private ICalculatorService? _nsubObject;
     private ICalculatorService? _fakeObject;
@@ -28,10 +32,21 @@ public class InvocationBenchmarks
         _tunitMock.Format(TUnitArg.Any<int>()).Returns("formatted");
         _tunitObject = _tunitMock.Object;
 
+        // Imposter
+        _imposterMock = ICalculatorService.Imposter();
+        _imposterMock.Add(Arg<int>.Any(), Arg<int>.Any()).Returns(42);
+        _imposterMock.Format(Arg<int>.Any()).Returns("formatted");
+        _imposterObject = _imposterMock.Instance();
+
+        // Mockolate
+        _mockolateObject = ICalculatorService.CreateMock();
+        _mockolateObject.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        _mockolateObject.Mock.Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
+
         // Moq
         _moqMock = new Moq.Mock<ICalculatorService>();
-        _moqMock.Setup(x => x.Add(It.IsAny<int>(), It.IsAny<int>())).Returns(42);
-        _moqMock.Setup(x => x.Format(It.IsAny<int>())).Returns("formatted");
+        _moqMock.Setup(x => x.Add(Moq.It.IsAny<int>(), Moq.It.IsAny<int>())).Returns(42);
+        _moqMock.Setup(x => x.Format(Moq.It.IsAny<int>())).Returns("formatted");
         _moqObject = _moqMock.Object;
 
         // NSubstitute
@@ -49,6 +64,18 @@ public class InvocationBenchmarks
     public int TUnitMocks_Invoke()
     {
         return _tunitObject!.Add(1, 2);
+    }
+
+    [Benchmark(Description = "Imposter")]
+    public int Imposter_Invoke()
+    {
+        return _imposterObject!.Add(1, 2);
+    }
+
+    [Benchmark(Description = "Mockolate")]
+    public int Mockolate_Invoke()
+    {
+        return _mockolateObject!.Add(1, 2);
     }
 
     [Benchmark(Description = "Moq")]
@@ -73,6 +100,18 @@ public class InvocationBenchmarks
     public string TUnitMocks_InvokeString()
     {
         return _tunitObject!.Format(42);
+    }
+
+    [Benchmark(Description = "Imposter (String)")]
+    public string Imposter_InvokeString()
+    {
+        return _imposterObject!.Format(42);
+    }
+
+    [Benchmark(Description = "Mockolate (String)")]
+    public string Mockolate_InvokeString()
+    {
+        return _mockolateObject!.Format(42);
     }
 
     [Benchmark(Description = "Moq (String)")]
@@ -100,6 +139,30 @@ public class InvocationBenchmarks
         for (var i = 0; i < 100; i++)
         {
             sum += _tunitObject!.Add(i, i);
+        }
+
+        return sum;
+    }
+
+    [Benchmark(Description = "Imposter (100 calls)")]
+    public int Imposter_ManyInvocations()
+    {
+        var sum = 0;
+        for (var i = 0; i < 100; i++)
+        {
+            sum += _imposterObject!.Add(i, i);
+        }
+
+        return sum;
+    }
+
+    [Benchmark(Description = "Mockolate (100 calls)")]
+    public int Mockolate_ManyInvocations()
+    {
+        var sum = 0;
+        for (var i = 0; i < 100; i++)
+        {
+            sum += _mockolateObject!.Add(i, i);
         }
 
         return sum;

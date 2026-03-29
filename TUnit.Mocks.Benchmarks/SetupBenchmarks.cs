@@ -1,5 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using FakeItEasy;
+using Imposter.Abstractions;
+using Mockolate;
 using Moq;
 using NSubstitute;
 
@@ -21,13 +23,33 @@ public class SetupBenchmarks
         return mock.Object;
     }
 
+    [Benchmark(Description = "Imposter")]
+    public object Imposter_Setup()
+    {
+        var imposter = ICalculatorService.Imposter();
+        imposter.Add(Arg<int>.Any(), Arg<int>.Any()).Returns(42);
+        imposter.Format(Arg<int>.Any()).Returns("formatted");
+        imposter.Divide(Arg<double>.Any(), Arg<double>.Any()).Returns(1.5);
+        return imposter.Instance();
+    }
+
+    [Benchmark(Description = "Mockolate")]
+    public object Mockolate_Setup()
+    {
+        var sut = ICalculatorService.CreateMock();
+        sut.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        sut.Mock.Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
+        sut.Mock.Setup.Divide(Mockolate.It.IsAny<double>(), Mockolate.It.IsAny<double>()).Returns(1.5);
+        return sut;
+    }
+
     [Benchmark(Description = "Moq")]
     public object Moq_Setup()
     {
         var mock = new Moq.Mock<ICalculatorService>();
-        mock.Setup(x => x.Add(It.IsAny<int>(), It.IsAny<int>())).Returns(42);
-        mock.Setup(x => x.Format(It.IsAny<int>())).Returns("formatted");
-        mock.Setup(x => x.Divide(It.IsAny<double>(), It.IsAny<double>())).Returns(1.5);
+        mock.Setup(x => x.Add(Moq.It.IsAny<int>(), Moq.It.IsAny<int>())).Returns(42);
+        mock.Setup(x => x.Format(Moq.It.IsAny<int>())).Returns("formatted");
+        mock.Setup(x => x.Divide(Moq.It.IsAny<double>(), Moq.It.IsAny<double>())).Returns(1.5);
         return mock.Object;
     }
 
@@ -63,6 +85,30 @@ public class SetupBenchmarks
         return mock.Object;
     }
 
+    [Benchmark(Description = "Imposter (Multiple)")]
+    public object Imposter_MultipleSetups()
+    {
+        var imposter = IUserRepository.Imposter();
+        imposter.GetById(1).Returns(new User { Id = 1, Name = "Alice" });
+        imposter.GetById(2).Returns(new User { Id = 2, Name = "Bob" });
+        imposter.GetById(3).Returns(new User { Id = 3, Name = "Charlie" });
+        imposter.Exists(Arg<int>.Any()).Returns(true);
+        imposter.GetAll().Returns(new List<User>());
+        return imposter.Instance();
+    }
+
+    [Benchmark(Description = "Mockolate (Multiple)")]
+    public object Mockolate_MultipleSetups()
+    {
+        var sut = IUserRepository.CreateMock();
+        sut.Mock.Setup.GetById(1).Returns(new User { Id = 1, Name = "Alice" });
+        sut.Mock.Setup.GetById(2).Returns(new User { Id = 2, Name = "Bob" });
+        sut.Mock.Setup.GetById(3).Returns(new User { Id = 3, Name = "Charlie" });
+        sut.Mock.Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
+        sut.Mock.Setup.GetAll().Returns(new List<User>());
+        return sut;
+    }
+
     [Benchmark(Description = "Moq (Multiple)")]
     public object Moq_MultipleSetups()
     {
@@ -70,7 +116,7 @@ public class SetupBenchmarks
         mock.Setup(x => x.GetById(1)).Returns(new User { Id = 1, Name = "Alice" });
         mock.Setup(x => x.GetById(2)).Returns(new User { Id = 2, Name = "Bob" });
         mock.Setup(x => x.GetById(3)).Returns(new User { Id = 3, Name = "Charlie" });
-        mock.Setup(x => x.Exists(It.IsAny<int>())).Returns(true);
+        mock.Setup(x => x.Exists(Moq.It.IsAny<int>())).Returns(true);
         mock.Setup(x => x.GetAll()).Returns(new List<User>());
         return mock.Object;
     }

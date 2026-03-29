@@ -1,8 +1,9 @@
 using BenchmarkDotNet.Attributes;
 using FakeItEasy;
+using Imposter.Abstractions;
+using Mockolate;
 using Moq;
 using NSubstitute;
-using TUnit.Mocks;
 
 namespace TUnit.Mocks.Benchmarks;
 
@@ -17,6 +18,20 @@ public class MockCreationBenchmarks
     {
         var mock = Mock.Of<ICalculatorService>();
         return mock.Object;
+    }
+
+    [Benchmark(Description = "Imposter")]
+    public object Imposter_CreateMock()
+    {
+        var imposter = ICalculatorService.Imposter();
+        return imposter.Instance();
+    }
+
+    [Benchmark(Description = "Mockolate")]
+    public object Mockolate_CreateMock()
+    {
+        var sut = ICalculatorService.CreateMock();
+        return sut;
     }
 
     [Benchmark(Description = "Moq")]
@@ -45,6 +60,20 @@ public class MockCreationBenchmarks
     {
         var mock = Mock.Of<IUserRepository>();
         return mock.Object;
+    }
+
+    [Benchmark(Description = "Imposter (Repository)")]
+    public object Imposter_CreateMock_Repository()
+    {
+        var imposter = IUserRepository.Imposter();
+        return imposter.Instance();
+    }
+
+    [Benchmark(Description = "Mockolate (Repository)")]
+    public object Mockolate_CreateMock_Repository()
+    {
+        var sut = IUserRepository.CreateMock();
+        return sut;
     }
 
     [Benchmark(Description = "Moq (Repository)")]

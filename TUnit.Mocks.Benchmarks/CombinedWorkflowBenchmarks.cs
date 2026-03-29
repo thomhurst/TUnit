@@ -1,5 +1,8 @@
 using BenchmarkDotNet.Attributes;
 using FakeItEasy;
+using Imposter.Abstractions;
+using Mockolate;
+using Mockolate.Verify;
 using Moq;
 using NSubstitute;
 
@@ -42,6 +45,58 @@ public class CombinedWorkflowBenchmarks
         loggerMock.Log(TUnitArg.Any<string>(), TUnitArg.Any<string>()).WasCalled(Times.Once);
     }
 
+    [Benchmark(Description = "Imposter")]
+    public void Imposter_FullWorkflow()
+    {
+        // Create
+        var repoImposter = IUserRepository.Imposter();
+        var loggerImposter = ILogger.Imposter();
+
+        // Setup
+        repoImposter.GetById(1).Returns(new User { Id = 1, Name = "Alice", Email = "alice@test.com" });
+        repoImposter.Exists(1).Returns(true);
+        loggerImposter.IsEnabled(Arg<string>.Any()).Returns(true);
+
+        // Invoke
+        var repo = repoImposter.Instance();
+        var logger = loggerImposter.Instance();
+        var user = repo.GetById(1);
+        var exists = repo.Exists(1);
+        logger.Log("INFO", $"User {user!.Name} exists: {exists}");
+        repo.Save(new User { Id = 2, Name = "Bob" });
+
+        // Verify
+        repoImposter.GetById(1).Called(Count.Once());
+        repoImposter.Exists(1).Called(Count.Once());
+        repoImposter.Save(Arg<User>.Any()).Called(Count.Once());
+        loggerImposter.Log(Arg<string>.Any(), Arg<string>.Any()).Called(Count.Once());
+    }
+
+    [Benchmark(Description = "Mockolate")]
+    public void Mockolate_FullWorkflow()
+    {
+        // Create
+        var repo = IUserRepository.CreateMock();
+        var logger = ILogger.CreateMock();
+
+        // Setup
+        repo.Mock.Setup.GetById(1).Returns(new User { Id = 1, Name = "Alice", Email = "alice@test.com" });
+        repo.Mock.Setup.Exists(1).Returns(true);
+        logger.Mock.Setup.IsEnabled(Mockolate.It.IsAny<string>()).Returns(true);
+
+        // Invoke
+        var user = repo.GetById(1);
+        var exists = repo.Exists(1);
+        logger.Log("INFO", $"User {user!.Name} exists: {exists}");
+        repo.Save(new User { Id = 2, Name = "Bob" });
+
+        // Verify
+        repo.Mock.Verify.GetById(1).Once();
+        repo.Mock.Verify.Exists(1).Once();
+        repo.Mock.Verify.Save(Mockolate.It.IsAny<User>()).Once();
+        logger.Mock.Verify.Log(Mockolate.It.IsAny<string>(), Mockolate.It.IsAny<string>()).Once();
+    }
+
     [Benchmark(Description = "Moq")]
     public void Moq_FullWorkflow()
     {
@@ -52,7 +107,7 @@ public class CombinedWorkflowBenchmarks
         // Setup
         repoMock.Setup(x => x.GetById(1)).Returns(new User { Id = 1, Name = "Alice", Email = "alice@test.com" });
         repoMock.Setup(x => x.Exists(1)).Returns(true);
-        loggerMock.Setup(x => x.IsEnabled(It.IsAny<string>())).Returns(true);
+        loggerMock.Setup(x => x.IsEnabled(Moq.It.IsAny<string>())).Returns(true);
 
         // Invoke
         var repo = repoMock.Object;
@@ -66,8 +121,8 @@ public class CombinedWorkflowBenchmarks
         // Verify
         repoMock.Verify(x => x.GetById(1), Moq.Times.Once());
         repoMock.Verify(x => x.Exists(1), Moq.Times.Once());
-        repoMock.Verify(x => x.Save(It.IsAny<User>()), Moq.Times.Once());
-        loggerMock.Verify(x => x.Log(It.IsAny<string>(), It.IsAny<string>()), Moq.Times.Once());
+        repoMock.Verify(x => x.Save(Moq.It.IsAny<User>()), Moq.Times.Once());
+        loggerMock.Verify(x => x.Log(Moq.It.IsAny<string>(), Moq.It.IsAny<string>()), Moq.Times.Once());
     }
 
     [Benchmark(Description = "NSubstitute")]
