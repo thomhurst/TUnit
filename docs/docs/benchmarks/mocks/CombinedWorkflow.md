@@ -7,7 +7,7 @@ sidebar_position: 3
 # CombinedWorkflow Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+This benchmark was automatically generated on **2026-03-29** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -18,10 +18,10 @@ Full workflow: create → setup → invoke → verify:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 6.513 μs | 0.1292 μs | 0.2329 μs | 15.85 KB |
-| Moq | 394.164 μs | 4.7436 μs | 4.2051 μs | 36.45 KB |
-| NSubstitute | 17.171 μs | 0.0753 μs | 0.0667 μs | 26.72 KB |
-| FakeItEasy | 18.689 μs | 0.1373 μs | 0.1284 μs | 25.63 KB |
+| **TUnit.Mocks** | 4.857 μs | 0.0757 μs | 0.0632 μs | 9.13 KB |
+| Moq | 395.343 μs | 2.6644 μs | 2.3619 μs | 36.35 KB |
+| NSubstitute | 16.945 μs | 0.0779 μs | 0.0650 μs | 26.72 KB |
+| FakeItEasy | 17.849 μs | 0.1446 μs | 0.1353 μs | 25.67 KB |
 
 ## 📈 Visual Comparison
 
@@ -49,8 +49,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 473
-  bar [6.513, 394.164, 17.171, 18.689]
+  y-axis "Time (μs)" 0 --> 475
+  bar [4.857, 395.343, 16.945, 17.849]
 ```
 
 ## 🎯 Key Insights
@@ -63,4 +63,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T22:34:52.303Z*
+*Last generated: 2026-03-29T03:29:47.876Z*

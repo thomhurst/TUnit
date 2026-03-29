@@ -7,7 +7,7 @@ sidebar_position: 2
 # Callback Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-03-28** from the latest CI run.
+This benchmark was automatically generated on **2026-03-29** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -18,14 +18,14 @@ Callback registration and execution:
 
 | Method | Mean | Error | StdDev | Allocated |
 |--------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 2.828 μs | 0.0513 μs | 0.0455 μs | 7.28 KB |
-| Moq | 136.434 μs | 0.6351 μs | 0.4959 μs | 13.24 KB |
-| NSubstitute | 4.337 μs | 0.0635 μs | 0.0563 μs | 7.93 KB |
-| FakeItEasy | 4.793 μs | 0.0662 μs | 0.0619 μs | 7.44 KB |
-| **'TUnit.Mocks (with args)'** | 2.708 μs | 0.0299 μs | 0.0265 μs | 7.4 KB |
-| 'Moq (with args)' | 142.187 μs | 0.7043 μs | 0.5881 μs | 13.73 KB |
-| 'NSubstitute (with args)' | 4.886 μs | 0.0262 μs | 0.0245 μs | 8.53 KB |
-| 'FakeItEasy (with args)' | 5.857 μs | 0.1023 μs | 0.0957 μs | 9.4 KB |
+| **TUnit.Mocks** | 1.991 μs | 0.0274 μs | 0.0256 μs | 3.94 KB |
+| Moq | 188.239 μs | 1.4776 μs | 1.3821 μs | 13.14 KB |
+| NSubstitute | 4.688 μs | 0.0363 μs | 0.0322 μs | 7.93 KB |
+| FakeItEasy | 5.490 μs | 0.0253 μs | 0.0237 μs | 7.44 KB |
+| **'TUnit.Mocks (with args)'** | 2.449 μs | 0.0339 μs | 0.0317 μs | 4.04 KB |
+| 'Moq (with args)' | 189.687 μs | 1.6805 μs | 1.5719 μs | 13.73 KB |
+| 'NSubstitute (with args)' | 5.275 μs | 0.0296 μs | 0.0247 μs | 8.53 KB |
+| 'FakeItEasy (with args)' | 6.544 μs | 0.0647 μs | 0.0573 μs | 9.4 KB |
 
 ## 📈 Visual Comparison
 
@@ -53,8 +53,8 @@ Callback registration and execution:
 xychart-beta
   title "Callback Performance Comparison"
   x-axis ["TUnit.Mocks", "Moq", "NSubstitute", "FakeItEasy", "'TUnit.Mocks (with args)'", "'Moq (with args)'", "'NSubstitute (with args)'", "'FakeItEasy (with args)'"]
-  y-axis "Time (μs)" 0 --> 171
-  bar [2.828, 136.434, 4.337, 4.793, 2.708, 142.187, 4.886, 5.857]
+  y-axis "Time (μs)" 0 --> 228
+  bar [1.991, 188.239, 4.688, 5.49, 2.449, 189.687, 5.275, 6.544]
 ```
 
 ## 🎯 Key Insights
@@ -67,4 +67,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-28T22:34:52.302Z*
+*Last generated: 2026-03-29T03:29:47.876Z*
