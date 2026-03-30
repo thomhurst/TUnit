@@ -163,14 +163,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public ExternalLib_ExternalClient_PublicMethod_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public ExternalLib_ExternalClient_PublicMethod_M0_MockCall Returns(global::System.Func<object?[], string> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public ExternalLib_ExternalClient_PublicMethod_M0_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
-        /// <inheritdoc />
-        public ExternalLib_ExternalClient_PublicMethod_M0_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        /// <inheritdoc />
-        public ExternalLib_ExternalClient_PublicMethod_M0_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
-        /// <inheritdoc />
         public ExternalLib_ExternalClient_PublicMethod_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
         public ExternalLib_ExternalClient_PublicMethod_M0_MockCall Then() { EnsureSetup().Then(); return this; }

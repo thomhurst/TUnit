@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace TUnit.Mocks.Setup;
 
 /// <summary>
@@ -25,20 +23,6 @@ public interface IMethodSetup<TReturn>
 
     /// <summary>Execute a callback when the method is called.</summary>
     ISetupChain<TReturn> Callback(Action callback);
-
-    /// <summary>Configure a computed return value based on method arguments.</summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory);
-
-    /// <summary>Configure a computed exception based on method arguments to throw.</summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    ISetupChain<TReturn> Throws(Func<object?[], Exception> exceptionFactory);
-
-    /// <summary>Auto-raise the named event when this method is called.</summary>
-    ISetupChain<TReturn> Raises(string eventName, object? args = null);
-
-    /// <summary>Assign a value to an out or ref parameter when this setup matches.</summary>
-    ISetupChain<TReturn> SetsOutParameter(int paramIndex, object? value);
 
     /// <summary>Transition to the named state after this setup's behavior executes.</summary>
     ISetupChain<TReturn> TransitionsTo(string stateName);

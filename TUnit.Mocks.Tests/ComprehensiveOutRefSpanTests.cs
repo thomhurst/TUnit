@@ -1262,13 +1262,12 @@ public class ReadOnlySpanByteOutComprehensiveTests
     }
 
     [Test]
-    public async Task Out_Span_Untyped_SetsOutParameter_Still_Works()
+    public async Task Out_Span_Typed_SetsOutData_With_Array()
     {
-        // Backward compat: use index-based API with a byte array
         var mock = Mock.Of<ISpanParser>();
         mock.TryParse("key")
             .Returns(true)
-            .SetsOutParameter(1, new byte[] { 0xDE, 0xAD });
+            .SetsOutData(new ReadOnlySpan<byte>([0xDE, 0xAD]));
 
         var success = mock.Object.TryParse("key", out var data);
         var len = data.Length;
@@ -1357,8 +1356,8 @@ public class ReadOnlySpanByteOutComprehensiveTests
     {
         var mock = Mock.Of<ISpanParser>();
         mock.TryParse(Any())
-            .Throws((Func<object?[], Exception>)(args =>
-                new ArgumentException($"Bad input: {args[0]}")));
+            .Throws((string input) =>
+                new ArgumentException($"Bad input: {input}"));
 
         var ex = Assert.Throws<ArgumentException>(() =>
             mock.Object.TryParse("bad", out _));

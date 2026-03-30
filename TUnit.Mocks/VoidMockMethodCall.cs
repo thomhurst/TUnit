@@ -79,32 +79,6 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
         return this;
     }
 
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public IVoidSetupChain Callback(Action<object?[]> callback)
-    {
-        EnsureSetup().Callback(callback);
-        return this;
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory)
-    {
-        EnsureSetup().Throws(exceptionFactory);
-        return this;
-    }
-
-    public IVoidSetupChain Raises(string eventName, object? args = null)
-    {
-        EnsureSetup().Raises(eventName, args);
-        return this;
-    }
-
-    public IVoidSetupChain SetsOutParameter(int paramIndex, object? value)
-    {
-        EnsureSetup().SetsOutParameter(paramIndex, value);
-        return this;
-    }
-
     public IVoidSetupChain TransitionsTo(string stateName)
     {
         EnsureSetup().TransitionsTo(stateName);

@@ -258,12 +258,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IFoo_Bar_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IFoo_Bar_M0_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
-        /// <inheritdoc />
-        public IFoo_Bar_M0_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        /// <inheritdoc />
-        public IFoo_Bar_M0_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
-        /// <inheritdoc />
         public IFoo_Bar_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
         public IFoo_Bar_M0_MockCall Then() { EnsureSetup().Then(); return this; }
@@ -336,14 +330,6 @@ namespace TUnit.Mocks.Generated
         public IFoo_GetValue_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
         /// <inheritdoc />
         public IFoo_GetValue_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Returns(global::System.Func<object?[], string?> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
-        /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        /// <inheritdoc />
-        public IFoo_GetValue_M1_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
         /// <inheritdoc />
         public IFoo_GetValue_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
@@ -422,12 +408,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IFoo_Process_M2_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IFoo_Process_M2_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
-        /// <inheritdoc />
-        public IFoo_Process_M2_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        /// <inheritdoc />
-        public IFoo_Process_M2_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
-        /// <inheritdoc />
         public IFoo_Process_M2_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
         public IFoo_Process_M2_MockCall Then() { EnsureSetup().Then(); return this; }
@@ -500,14 +480,6 @@ namespace TUnit.Mocks.Generated
         public IFoo_GetAsync_M3_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
         /// <inheritdoc />
         public IFoo_GetAsync_M3_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IFoo_GetAsync_M3_MockCall Returns(global::System.Func<object?[], string?> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IFoo_GetAsync_M3_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
-        /// <inheritdoc />
-        public IFoo_GetAsync_M3_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }
-        /// <inheritdoc />
-        public IFoo_GetAsync_M3_MockCall SetsOutParameter(int paramIndex, object? value) { EnsureSetup().SetsOutParameter(paramIndex, value); return this; }
         /// <inheritdoc />
         public IFoo_GetAsync_M3_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />

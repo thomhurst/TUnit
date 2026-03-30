@@ -55,12 +55,14 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Raises(string eventName, object? args = null)
     {
         _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain SetsOutParameter(int paramIndex, object? value)
     {
         _setup.SetOutRefValue(paramIndex, value);

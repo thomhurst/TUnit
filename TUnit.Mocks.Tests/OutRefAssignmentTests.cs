@@ -102,13 +102,13 @@ public class OutRefAssignmentTests
     }
 
     [Test]
-    public async Task Untyped_SetsOutParameter_Still_Works()
+    public async Task Typed_SetsOutValue_Works()
     {
-        // Arrange — backward compatibility with untyped API
+        // Arrange
         var mock = Mock.Of<IDictionary>();
         mock.TryGet("key")
             .Returns(true)
-            .SetsOutParameter(1, "untyped-value");
+            .SetsOutValue("untyped-value");
 
         IDictionary dict = mock.Object;
 

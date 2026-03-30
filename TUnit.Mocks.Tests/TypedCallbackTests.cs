@@ -52,7 +52,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Returns((Func<object?[], int>)(args => (int)args[0]! + (int)args[1]!));
+            .Returns((int a, int b) => a + b);
 
         ICalculator calc = mock.Object;
 
@@ -68,7 +68,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<IGreeter>();
         mock.Greet(Any())
-            .Returns((Func<object?[], string>)(args => $"Hello, {args[0]}!"));
+            .Returns((string name) => $"Hello, {name}!");
 
         IGreeter greeter = mock.Object;
 
@@ -83,8 +83,8 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Throws((Func<object?[], Exception>)(args =>
-                new ArgumentException($"Bad args: {args[0]}, {args[1]}")));
+            .Throws((int a, int b) =>
+                new ArgumentException($"Bad args: {a}, {b}"));
 
         ICalculator calc = mock.Object;
 
@@ -99,8 +99,8 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Log(Any())
-            .Throws((Func<object?[], Exception>)(args =>
-                new InvalidOperationException($"Cannot log: {args[0]}")));
+            .Throws((string msg) =>
+                new InvalidOperationException($"Cannot log: {msg}"));
 
         ICalculator calc = mock.Object;
 
@@ -138,7 +138,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Returns((Func<object?[], int>)(args => (int)args[0]! * (int)args[1]!));
+            .Returns((int a, int b) => a * b);
 
         ICalculator calc = mock.Object;
 
