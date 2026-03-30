@@ -13,8 +13,8 @@ public sealed class MethodSetup
     private readonly IArgumentMatcher[] _matchers;
     private readonly Lock _behaviorLock = new();
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
-    private IBehavior? _singleBehavior;
-    private List<IBehavior>? _behaviors;
+    private volatile IBehavior? _singleBehavior;
+    private volatile List<IBehavior>? _behaviors;
     private List<EventRaiseInfo>? _eventRaises;
     private EventRaiseInfo[]? _eventRaisesSnapshot;
     private Dictionary<int, object?>? _outRefAssignments;
@@ -66,20 +66,22 @@ public sealed class MethodSetup
         {
             if (_singleBehavior is null && _behaviors is null)
             {
-                // First behavior: store directly, no list needed
-                Volatile.Write(ref _singleBehavior, behavior);
+                _singleBehavior = behavior;
                 return;
             }
 
-            // Promote to list on second behavior — write list before clearing single
-            // so concurrent lock-free readers always find at least one path
+            // Promote to list on second behavior. Write _behaviors before clearing
+            // _singleBehavior: both fields are volatile, so the volatile write to
+            // _singleBehavior acts as a release fence, guaranteeing that a lock-free
+            // reader in GetNextBehavior that sees _singleBehavior == null will also
+            // see the updated _behaviors reference.
             if (_behaviors is null)
             {
                 _behaviors = [_singleBehavior!];
             }
 
             _behaviors.Add(behavior);
-            Volatile.Write(ref _singleBehavior, null);
+            _singleBehavior = null;
         }
     }
 
@@ -187,13 +189,12 @@ public sealed class MethodSetup
     public IBehavior? GetNextBehavior()
     {
         // Fast path: single behavior (most common case — no lock needed)
-        var single = Volatile.Read(ref _singleBehavior);
-        if (single is not null)
+        if (_singleBehavior is { } single)
         {
             return single;
         }
 
-        if (Volatile.Read(ref _behaviors) is null)
+        if (_behaviors is null)
         {
             return null;
         }

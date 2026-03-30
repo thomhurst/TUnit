@@ -48,7 +48,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
         var allCallsForMember = _engine.GetCallsFor(_memberId);
 
-        var matchingCount = CountMatches(allCallsForMember);
+        var matchingCount = CountMatchingCalls(allCallsForMember, markVerified: false);
 
         if (!times.Matches(matchingCount))
         {
@@ -62,7 +62,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         }
 
         // Mark matched calls as verified only after assertion passes
-        MarkMatchingCallsVerified(allCallsForMember);
+        CountMatchingCalls(allCallsForMember, markVerified: true);
     }
 
     /// <inheritdoc />
@@ -77,33 +77,21 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    private int CountMatches(IReadOnlyList<CallRecord> calls)
+    private int CountMatchingCalls(IReadOnlyList<CallRecord> calls, bool markVerified)
     {
-        if (_matchers.Length == 0)
-        {
-            return calls.Count;
-        }
-
         var count = 0;
-        for (int i = 0; i < calls.Count; i++)
-        {
-            if (MatchesArguments(calls[i].Arguments))
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private void MarkMatchingCallsVerified(IReadOnlyList<CallRecord> calls)
-    {
         for (int i = 0; i < calls.Count; i++)
         {
             if (_matchers.Length == 0 || MatchesArguments(calls[i].Arguments))
             {
-                calls[i].IsVerified = true;
+                count++;
+                if (markVerified)
+                {
+                    calls[i].IsVerified = true;
+                }
             }
         }
+        return count;
     }
 
     private bool MatchesArguments(object?[] arguments)

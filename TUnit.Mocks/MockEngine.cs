@@ -135,12 +135,12 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
                 _hasStatefulSetups = true;
             }
 
-            // Rebuild lock-free snapshot for the read path
-            var snapshot = new Dictionary<int, MethodSetup[]>(dict.Count);
-            foreach (var kvp in dict)
-            {
-                snapshot[kvp.Key] = kvp.Value.ToArray();
-            }
+            // Rebuild lock-free snapshot: shallow-copy existing, only re-array the affected member
+            var prev = _setupsSnapshot;
+            var snapshot = prev is null
+                ? new Dictionary<int, MethodSetup[]>()
+                : new Dictionary<int, MethodSetup[]>(prev);
+            snapshot[setup.MemberId] = list.ToArray();
             _setupsSnapshot = snapshot;
         }
     }
@@ -524,7 +524,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             PendingRequiredState = null;
         }
 
-        _callHistory = new ConcurrentQueue<CallRecord>();
+        _callHistory = new ConcurrentQueue<CallRecord>(); // volatile field — assignment is a volatile write
         Volatile.Write(ref _autoTrackValues, null);
         Volatile.Write(ref _eventSubscriptions, null);
         Volatile.Write(ref _onSubscribeCallbacks, null);
