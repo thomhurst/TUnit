@@ -211,17 +211,28 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
-            {
-                RaiseEventsForSetup(matchedSetup);
-            }
-            if (result is TReturn typed) return typed;
-            if (result is null) return default(TReturn)!;
             if (result is RawReturn raw)
             {
                 RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
+            }
+            if (result is TReturn typed) return typed;
+            if (result is null) return default(TReturn)!;
+            if (result is RawReturn)
+            {
                 return defaultValue;
             }
             throw new InvalidOperationException(
@@ -368,17 +379,28 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            if (behaviorResult is RawReturn raw)
             {
-                RaiseEventsForSetup(matchedSetup);
+                RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
-            else if (behaviorResult is RawReturn raw)
+            else if (behaviorResult is RawReturn)
             {
-                RawReturnContext.Set(raw);
                 result = defaultValue;
             }
             else throw new InvalidOperationException(
