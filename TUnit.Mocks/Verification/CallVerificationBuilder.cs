@@ -48,9 +48,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
         var allCallsForMember = _engine.GetCallsFor(_memberId);
 
-        // Filter by matchers
-        var matchingCalls = FilterByMatchers(allCallsForMember);
-        var matchingCount = matchingCalls.Count;
+        var matchingCount = CountMatchingCalls(allCallsForMember, markVerified: false);
 
         if (!times.Matches(matchingCount))
         {
@@ -59,11 +57,8 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
-        // Mark matched calls as verified for VerifyNoOtherCalls
-        foreach (var call in matchingCalls)
-        {
-            call.IsVerified = true;
-        }
+        // Mark matched calls as verified only after assertion passes
+        CountMatchingCalls(allCallsForMember, markVerified: true);
     }
 
     /// <inheritdoc />
@@ -78,22 +73,21 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    private List<CallRecord> FilterByMatchers(IReadOnlyList<CallRecord> calls)
+    private int CountMatchingCalls(IReadOnlyList<CallRecord> calls, bool markVerified)
     {
-        if (_matchers.Length == 0)
+        var count = 0;
+        for (int i = 0; i < calls.Count; i++)
         {
-            return calls.ToList();
-        }
-
-        var result = new List<CallRecord>();
-        foreach (var call in calls)
-        {
-            if (MatchesArguments(call.Arguments))
+            if (_matchers.Length == 0 || MatchesArguments(calls[i].Arguments))
             {
-                result.Add(call);
+                count++;
+                if (markVerified)
+                {
+                    calls[i].IsVerified = true;
+                }
             }
         }
-        return result;
+        return count;
     }
 
     private bool MatchesArguments(object?[] arguments)
