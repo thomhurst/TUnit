@@ -24,7 +24,7 @@ internal static class MockCallSequence
 public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
     // Single lock for both setup and call mutations — reduces allocation by one Lock object.
-    // Contention is negligible since setup and call recording don't overlap in typical usage.
+    // Contention is acceptable since setup and call recording rarely overlap in typical usage.
     private Lock? _lock;
     private Lock Lock => _lock ?? EnsureLock();
 
@@ -493,10 +493,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        if (_callHistory is null) return [];
         lock (Lock)
         {
-            return _callHistory.ToArray();
+            return _callHistory is null ? [] : _callHistory.ToArray();
         }
     }
 
@@ -506,9 +505,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        if (_callHistory is null) return [];
         lock (Lock)
         {
+            if (_callHistory is null) return [];
             var result = new List<CallRecord>();
             foreach (var record in _callHistory)
             {
@@ -572,9 +571,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        if (_callHistory is not null)
+        lock (Lock)
         {
-            lock (Lock)
+            if (_callHistory is not null)
             {
                 foreach (var call in _callHistory)
                 {

@@ -21,7 +21,6 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Invocations_Track_Per_Member_Counts_Correctly()
     {
-        // Arrange — ICalculator has 3 members: Add (0), GetName (1), Log (2)
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
