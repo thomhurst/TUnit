@@ -2111,6 +2111,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var propertyType = property.Type.GloballyQualified();
 
+            // Determine if we need an intermediate cast for implicit conversion support.
+            // When the data source type differs from the property type (e.g., ClassDataSource<MyDbFixture> on a MyDbContext property),
+            // we need a two-step cast: (PropertyType)(DataSourceType)value
+            var dataSourceType = GetDataSourceTypeForProperty(property);
+            string castExpression;
+            if (dataSourceType != null && dataSourceType != propertyType)
+            {
+                castExpression = $"({propertyType})({dataSourceType})value";
+            }
+            else
+            {
+                castExpression = $"({propertyType})value";
+            }
+
             writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
             writer.AppendLine("{");
             writer.Indent();
@@ -2138,7 +2152,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     writer.AppendLine("if (backingField != null)");
                     writer.AppendLine("{");
                     writer.Indent();
-                    writer.AppendLine("backingField.SetValue(instance, value);");
+                    writer.AppendLine($"backingField.SetValue(instance, {castExpression});");
                     writer.Unindent();
                     writer.AppendLine("}");
                     writer.AppendLine("else");
@@ -2156,11 +2170,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Cast to the property's containing type if needed
                     if (containingTypeName != className)
                     {
-                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = {castExpression},");
                     }
                     else
                     {
-                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                        writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = {castExpression},");
                     }
                     writer.AppendLine("#else");
                     writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
@@ -2169,8 +2183,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                // For regular properties, use direct assignment (tuple conversion happens at runtime)
-                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+                // For regular properties, use direct assignment
+                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = {castExpression},");
             }
 
             // ValueFactory will be provided by the TestDataCombination at runtime
@@ -2189,6 +2203,42 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.Append("}");
         return writer.ToString();
+    }
+
+    /// <summary>
+    /// Gets the data source type for a property by examining its typed data source attributes.
+    /// Returns the fully qualified data source type if the property has a typed data source
+    /// attribute (e.g., ClassDataSource&lt;T&gt;) where T differs from the property type.
+    /// </summary>
+    private static string? GetDataSourceTypeForProperty(IPropertySymbol property)
+    {
+        foreach (var attr in property.GetAttributes())
+        {
+            if (attr.AttributeClass == null || !DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
+            {
+                continue;
+            }
+
+            // Walk the attribute class hierarchy to find ITypedDataSourceAttribute<T>
+            foreach (var iface in attr.AttributeClass.AllInterfaces)
+            {
+                if (iface.IsGenericType && iface.TypeArguments.Length > 0)
+                {
+                    var def = iface.OriginalDefinition;
+                    if (def.MetadataName == "ITypedDataSourceAttribute`1" &&
+                        def.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+                    {
+                        var typeArg = iface.TypeArguments[0];
+                        if (typeArg.TypeKind != TypeKind.TypeParameter)
+                        {
+                            return typeArg.GloballyQualified();
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)

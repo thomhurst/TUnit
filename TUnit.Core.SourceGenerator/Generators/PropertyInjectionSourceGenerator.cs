@@ -216,10 +216,25 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             typeConstraints = GetTypeParameterConstraints(originalDefinition.TypeParameters);
         }
 
+        // Extract the data source type (T from ClassDataSource<T>) for implicit conversion support.
+        // Walk the attribute class hierarchy to find the first generic type argument, which is the data source type.
+        var dataSourceType = GetDataSourceType(attribute.AttributeClass);
+        var propertyTypeName = GetNonNullableTypeName(propertyType);
+        string? dataSourceTypeFullyQualified = null;
+        if (dataSourceType != null)
+        {
+            var dataSourceTypeName = dataSourceType.GloballyQualified();
+            // Only store if different from property type (needs intermediate cast)
+            if (dataSourceTypeName != propertyTypeName)
+            {
+                dataSourceTypeFullyQualified = dataSourceTypeName;
+            }
+        }
+
         return new PropertyDataSourceModel
         {
             PropertyName = property.Name,
-            PropertyTypeFullyQualified = GetNonNullableTypeName(propertyType),
+            PropertyTypeFullyQualified = propertyTypeName,
             PropertyTypeForTypeof = GetNonNullableTypeString(propertyType),
             ContainingTypeFullyQualified = containingType.ToDisplayString(),
             ContainingTypeClrName = GetClrTypeName(containingType),
@@ -233,6 +248,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             PropertyTypeAsTypeParameter = propertyTypeAsTypeParameter,
             IsValueType = propertyType.IsValueType,
             IsNullableValueType = isNullableValueType,
+            DataSourceTypeFullyQualified = dataSourceTypeFullyQualified,
             AttributeTypeName = attribute.AttributeClass!.ToDisplayString(),
             ConstructorArgs = new EquatableArray<string>(ctorArgs),
             NamedArgs = new EquatableArray<NamedArgModel>(namedArgs)
@@ -697,7 +713,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine("#else");
                 sb.AppendLine($"                var backingField = typeof({prop.ContainingTypeFullyQualified}).GetField(\"<{prop.PropertyName}>k__BackingField\",");
                 sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-                sb.AppendLine("                backingField.SetValue(typedInstance, value);");
+                sb.AppendLine($"                backingField.SetValue(typedInstance, {castExpression});");
                 sb.AppendLine("#endif");
             }
             else
@@ -715,7 +731,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine("#else");
                 sb.AppendLine($"                var backingField = typeof({prop.ContainingTypeFullyQualified}).GetField(\"<{prop.PropertyName}>k__BackingField\",");
                 sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-                sb.AppendLine("                backingField.SetValue(typedInstance, value);");
+                sb.AppendLine($"                backingField.SetValue(typedInstance, {castExpression});");
                 sb.AppendLine("#endif");
             }
         }
@@ -953,11 +969,58 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetPropertyCastExpression(PropertyDataSourceModel prop)
     {
+        // When the data source type differs from the property type (e.g., ClassDataSource<MyDbFixture> on a MyDbContext property),
+        // we need a two-step cast: first cast from object to the data source type, then let C# apply
+        // user-defined implicit/explicit conversion operators to convert to the property type.
+        // A direct (PropertyType)value cast from object bypasses user-defined operators.
+        if (prop.DataSourceTypeFullyQualified != null)
+        {
+            if (prop.IsValueType && !prop.IsNullableValueType)
+            {
+                return $"({prop.PropertyTypeFullyQualified})({prop.DataSourceTypeFullyQualified})value!";
+            }
+            return $"({prop.PropertyTypeFullyQualified})({prop.DataSourceTypeFullyQualified})value";
+        }
+
         if (prop.IsValueType && !prop.IsNullableValueType)
         {
             return $"({prop.PropertyTypeFullyQualified})value!";
         }
         return $"({prop.PropertyTypeFullyQualified})value";
+    }
+
+    /// <summary>
+    /// Extracts the data source type (T) from a typed data source attribute (e.g., ClassDataSourceAttribute&lt;T&gt;).
+    /// Only returns a type when the attribute implements ITypedDataSourceAttribute&lt;T&gt;, which ensures
+    /// the generic argument T represents the actual produced data type (not a containing type as in MethodDataSourceAttribute&lt;T&gt;).
+    /// </summary>
+    private static ITypeSymbol? GetDataSourceType(INamedTypeSymbol? attributeClass)
+    {
+        if (attributeClass == null)
+        {
+            return null;
+        }
+
+        // Look for ITypedDataSourceAttribute<T> in the implemented interfaces
+        foreach (var iface in attributeClass.AllInterfaces)
+        {
+            if (iface.IsGenericType && iface.TypeArguments.Length > 0)
+            {
+                var def = iface.OriginalDefinition;
+                if (def.MetadataName == "ITypedDataSourceAttribute`1" &&
+                    def.ContainingNamespace?.ToDisplayString() == "TUnit.Core")
+                {
+                    var typeArg = iface.TypeArguments[0];
+                    // Skip if the type argument is a type parameter (open generic)
+                    if (typeArg.TypeKind != TypeKind.TypeParameter)
+                    {
+                        return typeArg;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     private static string FormatTypedConstant(TypedConstant constant)
