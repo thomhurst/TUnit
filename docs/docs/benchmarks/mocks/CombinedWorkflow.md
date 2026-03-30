@@ -18,12 +18,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 2.193 μs | 0.0317 μs | 0.0296 μs | 8.02 KB |
-| Imposter | 2.715 μs | 0.0526 μs | 0.0606 μs | 15.71 KB |
-| Mockolate | 2.502 μs | 0.0249 μs | 0.0232 μs | 7.11 KB |
-| Moq | 399.733 μs | 2.6543 μs | 2.4828 μs | 36.43 KB |
-| NSubstitute | 17.239 μs | 0.3429 μs | 0.3367 μs | 26.72 KB |
-| FakeItEasy | 18.053 μs | 0.1269 μs | 0.1060 μs | 25.64 KB |
+| **TUnit.Mocks** | 2.472 μs | 0.0282 μs | 0.0264 μs | 8.77 KB |
+| Imposter | 2.598 μs | 0.0489 μs | 0.0503 μs | 15.71 KB |
+| Mockolate | 2.504 μs | 0.0497 μs | 0.0488 μs | 6.92 KB |
+| Moq | 414.451 μs | 2.0295 μs | 1.8984 μs | 36.16 KB |
+| NSubstitute | 17.237 μs | 0.1351 μs | 0.1264 μs | 26.72 KB |
+| FakeItEasy | 17.193 μs | 0.2083 μs | 0.1949 μs | 25.52 KB |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 480
-  bar [2.193, 2.715, 2.502, 399.733, 17.239, 18.053]
+  y-axis "Time (μs)" 0 --> 498
+  bar [2.472, 2.598, 2.504, 414.451, 17.237, 17.193]
 ```
 
 ## 🎯 Key Insights
@@ -63,4 +63,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-30T03:24:56.545Z*
+*Last generated: 2026-03-30T21:56:59.028Z*
