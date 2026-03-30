@@ -25,6 +25,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private readonly Lock _setupLock = new();
     private Dictionary<int, List<MethodSetup>>? _setupsByMember;
     private volatile Dictionary<int, MethodSetup[]>? _setupsSnapshot;
+    private volatile bool _hasStatefulSetups;
     private volatile ConcurrentQueue<CallRecord> _callHistory = new();
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
@@ -128,6 +129,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
 
             list.Add(setup);
+
+            if (setup.RequiredState is not null || setup.TransitionTarget is not null)
+            {
+                _hasStatefulSetups = true;
+            }
 
             // Rebuild lock-free snapshot for the read path
             var snapshot = new Dictionary<int, MethodSetup[]>(dict.Count);
@@ -513,6 +519,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             _setupsByMember = null;
             _setupsSnapshot = null;
+            _hasStatefulSetups = false;
             _currentState = null;
             PendingRequiredState = null;
         }
@@ -621,6 +628,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
     {
+        // When state machine features are in use, serialize the full match-and-transition
+        // to prevent concurrent invocations from consuming the same state transition
+        if (_hasStatefulSetups)
+        {
+            return FindMatchingSetupLocked(memberId, args);
+        }
+
         var snapshot = _setupsSnapshot;
         if (snapshot is null || !snapshot.TryGetValue(memberId, out var setups))
         {
@@ -632,25 +646,45 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             var setup = setups[i];
 
-            // State guard: skip setups that require a different state
-            if (setup.RequiredState is not null && setup.RequiredState != Volatile.Read(ref _currentState))
-            {
-                continue;
-            }
-
             if (setup.Matches(args))
             {
                 setup.IncrementInvokeCount();
                 setup.ApplyCaptures(args);
-                // Apply state transition under lock to prevent data races on _currentState
-                if (setup.TransitionTarget is not null)
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetupLocked(int memberId, object?[] args)
+    {
+        lock (_setupLock)
+        {
+            if (_setupsByMember is not { } setupDict || !setupDict.TryGetValue(memberId, out var setups))
+            {
+                return (false, null, null);
+            }
+
+            for (int i = setups.Count - 1; i >= 0; i--)
+            {
+                var setup = setups[i];
+
+                if (setup.RequiredState is not null && setup.RequiredState != _currentState)
                 {
-                    lock (_setupLock)
+                    continue;
+                }
+
+                if (setup.Matches(args))
+                {
+                    setup.IncrementInvokeCount();
+                    setup.ApplyCaptures(args);
+                    if (setup.TransitionTarget is not null)
                     {
                         _currentState = setup.TransitionTarget;
                     }
+                    return (true, setup.GetNextBehavior(), setup);
                 }
-                return (true, setup.GetNextBehavior(), setup);
             }
         }
 
@@ -659,11 +693,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
     private static string FormatCall(string memberName, object?[] args)
     {
-        var descriptions = new string[args.Length];
-        for (int i = 0; i < args.Length; i++)
-        {
-            descriptions[i] = args[i]?.ToString() ?? "null";
-        }
-        return $"{memberName}({string.Join(", ", descriptions)})";
+        var formattedArgs = string.Join(", ", args.Select(a => a?.ToString() ?? "null"));
+        return $"{memberName}({formattedArgs})";
     }
 }

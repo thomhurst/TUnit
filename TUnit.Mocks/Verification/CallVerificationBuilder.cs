@@ -48,8 +48,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
         var allCallsForMember = _engine.GetCallsFor(_memberId);
 
-        // Single pass: count matches and mark as verified
-        var matchingCount = CountAndMarkVerified(allCallsForMember);
+        var matchingCount = CountMatches(allCallsForMember);
 
         if (!times.Matches(matchingCount))
         {
@@ -61,6 +60,9 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             }
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
+
+        // Mark matched calls as verified only after assertion passes
+        MarkMatchingCallsVerified(allCallsForMember);
     }
 
     /// <inheritdoc />
@@ -75,14 +77,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    private int CountAndMarkVerified(IReadOnlyList<CallRecord> calls)
+    private int CountMatches(IReadOnlyList<CallRecord> calls)
     {
         if (_matchers.Length == 0)
         {
-            for (int i = 0; i < calls.Count; i++)
-            {
-                calls[i].IsVerified = true;
-            }
             return calls.Count;
         }
 
@@ -91,11 +89,21 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         {
             if (MatchesArguments(calls[i].Arguments))
             {
-                calls[i].IsVerified = true;
                 count++;
             }
         }
         return count;
+    }
+
+    private void MarkMatchingCallsVerified(IReadOnlyList<CallRecord> calls)
+    {
+        for (int i = 0; i < calls.Count; i++)
+        {
+            if (_matchers.Length == 0 || MatchesArguments(calls[i].Arguments))
+            {
+                calls[i].IsVerified = true;
+            }
+        }
     }
 
     private bool MatchesArguments(object?[] arguments)
@@ -117,11 +125,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
     private string FormatExpectedCall()
     {
-        var descriptions = new string[_matchers.Length];
-        for (int i = 0; i < _matchers.Length; i++)
-        {
-            descriptions[i] = _matchers[i].Describe();
-        }
-        return $"{_memberName}({string.Join(", ", descriptions)})";
+        var argDescriptions = string.Join(", ", _matchers.Select(m => m.Describe()));
+        return $"{_memberName}({argDescriptions})";
     }
 }

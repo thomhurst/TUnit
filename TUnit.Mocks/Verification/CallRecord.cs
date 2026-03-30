@@ -39,11 +39,7 @@ public sealed record CallRecord(
 
     public string FormatCall()
     {
-        var descriptions = new string[Arguments.Length];
-        for (int i = 0; i < Arguments.Length; i++)
-        {
-            descriptions[i] = Arguments[i]?.ToString() ?? "null";
-        }
-        return $"{MemberName}({string.Join(", ", descriptions)})";
+        var args = string.Join(", ", Arguments.Select(a => a?.ToString() ?? "null"));
+        return $"{MemberName}({args})";
     }
 }
