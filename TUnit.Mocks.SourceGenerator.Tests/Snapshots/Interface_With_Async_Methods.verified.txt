@@ -397,6 +397,8 @@ namespace TUnit.Mocks.Generated
         public IAsyncService_ComputeAsync_M2_MockCall Then() { EnsureSetup().Then(); return this; }
 
         /// <summary>Return a pre-built ValueTask directly (e.g., from a TaskCompletionSource).</summary>
+        /// <remarks>The same ValueTask instance is returned on every call. Since ValueTask may only be awaited once,
+        /// use the factory overload if the mock will be called multiple times, or ensure the ValueTask is backed by a Task.</remarks>
         public IAsyncService_ComputeAsync_M2_MockCall ReturnsAsync(global::System.Threading.Tasks.ValueTask<int> task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built ValueTask from a factory, invoked on each call.</summary>
         public IAsyncService_ComputeAsync_M2_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.ValueTask<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
@@ -487,6 +489,8 @@ namespace TUnit.Mocks.Generated
         public IAsyncService_InitializeAsync_M3_MockCall Then() { EnsureSetup().Then(); return this; }
 
         /// <summary>Return a pre-built ValueTask directly (e.g., from a TaskCompletionSource).</summary>
+        /// <remarks>The same ValueTask instance is returned on every call. Since ValueTask may only be awaited once,
+        /// use the factory overload if the mock will be called multiple times, or ensure the ValueTask is backed by a Task.</remarks>
         public IAsyncService_InitializeAsync_M3_MockCall ReturnsAsync(global::System.Threading.Tasks.ValueTask task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built ValueTask from a factory, invoked on each call.</summary>
         public IAsyncService_InitializeAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.ValueTask> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }

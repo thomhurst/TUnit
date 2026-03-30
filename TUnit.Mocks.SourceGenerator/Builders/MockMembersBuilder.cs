@@ -885,7 +885,16 @@ internal static class MockMembersBuilder
     {
         var taskLabel = isValueTask ? "ValueTask" : "Task";
         writer.AppendLine();
-        writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} directly (e.g., from a TaskCompletionSource).</summary>");
+        if (isValueTask)
+        {
+            writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} directly (e.g., from a TaskCompletionSource).</summary>");
+            writer.AppendLine($"/// <remarks>The same {taskLabel} instance is returned on every call. Since {taskLabel} may only be awaited once,");
+            writer.AppendLine($"/// use the factory overload if the mock will be called multiple times, or ensure the {taskLabel} is backed by a Task.</remarks>");
+        }
+        else
+        {
+            writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} directly (e.g., from a TaskCompletionSource).</summary>");
+        }
         writer.AppendLine($"public {wrapperName} ReturnsAsync({taskType} task) {{ EnsureSetup().ReturnsRaw(task); return this; }}");
         writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} from a factory, invoked on each call.</summary>");
         writer.AppendLine($"public {wrapperName} ReturnsAsync(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
