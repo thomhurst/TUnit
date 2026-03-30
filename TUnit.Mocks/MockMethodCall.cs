@@ -118,6 +118,20 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> ReturnsRaw(object? rawValue)
+    {
+        EnsureSetup().ReturnsRaw(rawValue);
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> ReturnsRaw(Func<object?> factory)
+    {
+        EnsureSetup().ReturnsRaw(factory);
+        return this;
+    }
+
     // ISetupChain<TReturn> implementation
 
     public IMethodSetup<TReturn> Then()

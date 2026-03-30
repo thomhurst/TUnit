@@ -7,6 +7,9 @@ namespace TUnit.Mocks.Setup;
 /// </summary>
 public interface IVoidMethodSetup
 {
+    /// <summary>Configure the method to return normally (no-op). Useful for sequential behavior chains.</summary>
+    IVoidSetupChain Returns();
+
     /// <summary>Configure an exception to throw.</summary>
     IVoidSetupChain Throws<TException>() where TException : Exception, new();
 

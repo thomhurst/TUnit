@@ -154,6 +154,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public void HandleCall(int memberId, string memberName, object?[] args)
     {
+        RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
 
         // Auto-track property setters: store value keyed by property name
@@ -166,13 +167,24 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
         if (behavior is not null)
         {
-            behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            var behaviorResult = behavior.Execute(args);
+            if (behaviorResult is RawReturn raw)
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             return;
         }
@@ -185,7 +197,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             if (matchedSetup is not null)
             {
-
                 RaiseEventsForSetup(matchedSetup);
             }
             return;
@@ -207,6 +218,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue)
     {
+        RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
@@ -214,15 +226,30 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         if (behavior is not null)
         {
             var result = behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            if (result is RawReturn raw)
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             if (result is TReturn typed) return typed;
             if (result is null) return default(TReturn)!;
+            if (result is RawReturn)
+            {
+                return defaultValue;
+            }
             throw new InvalidOperationException(
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {result.GetType().Name}.");
         }
@@ -299,19 +326,31 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCall(int memberId, string memberName, object?[] args)
     {
+        RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
         if (behavior is not null)
         {
-            behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            var behaviorResult = behavior.Execute(args);
+            if (behaviorResult is RawReturn raw)
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             return true;
         }
@@ -321,7 +360,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
         if (setupFound && matchedSetup is not null)
         {
-
             RaiseEventsForSetup(matchedSetup);
         }
 
@@ -348,6 +386,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, out TReturn result)
     {
+        RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
@@ -355,15 +394,30 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         if (behavior is not null)
         {
             var behaviorResult = behavior.Execute(args);
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            if (behaviorResult is RawReturn raw)
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                RawReturnContext.Set(raw);
+            }
+            try
+            {
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
+            else if (behaviorResult is RawReturn)
+            {
+                result = defaultValue;
+            }
             else throw new InvalidOperationException(
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {behaviorResult.GetType().Name}.");
             return true;

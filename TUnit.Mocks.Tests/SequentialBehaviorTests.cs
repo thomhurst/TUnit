@@ -105,6 +105,37 @@ public class SequentialBehaviorTests
     }
 
     [Test]
+    public async Task Void_Returns_Then_Throws_Then_Returns()
+    {
+        // Arrange
+        var mock = Mock.Of<ICalculator>();
+        mock.Log(Any())
+            .Returns()
+            .Then()
+            .Throws<InvalidOperationException>()
+            .Then()
+            .Returns()
+            .Then()
+            .Throws<ArgumentException>();
+
+        ICalculator calc = mock.Object;
+
+        // First call succeeds (Returns)
+        calc.Log("first");
+
+        // Second call throws InvalidOperationException
+        var ex1 = Assert.Throws<InvalidOperationException>(() => calc.Log("second"));
+        await Assert.That(ex1).IsNotNull();
+
+        // Third call succeeds (Returns)
+        calc.Log("third");
+
+        // Fourth call throws ArgumentException
+        var ex2 = Assert.Throws<ArgumentException>(() => calc.Log("fourth"));
+        await Assert.That(ex2).IsNotNull();
+    }
+
+    [Test]
     public async Task Chained_Returns_With_Then()
     {
         // Arrange

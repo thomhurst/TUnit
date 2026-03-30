@@ -17,6 +17,12 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         _setup = setup;
     }
 
+    public IVoidSetupChain Returns()
+    {
+        _setup.AddBehavior(VoidReturnBehavior.Instance);
+        return this;
+    }
+
     public IVoidSetupChain Throws<TException>() where TException : Exception, new()
     {
         _setup.AddBehavior(new ComputedThrowBehavior(_ => new TException()));
@@ -62,6 +68,20 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
     public IVoidSetupChain TransitionsTo(string stateName)
     {
         _setup.TransitionTarget = stateName;
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IVoidSetupChain ReturnsRaw(object? rawValue)
+    {
+        _setup.AddBehavior(new RawReturnBehavior(rawValue));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IVoidSetupChain ReturnsRaw(Func<object?> factory)
+    {
+        _setup.AddBehavior(new ComputedRawReturnBehavior(factory));
         return this;
     }
 
