@@ -46,19 +46,43 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        var allCallsForMember = _engine.GetCallsFor(_memberId);
+        // Fast path: when no argument matchers, use the per-member call counter directly
+        if (_matchers.Length == 0)
+        {
+            var totalCount = _engine.GetCallCountFor(_memberId);
+            if (!times.Matches(totalCount))
+            {
+                var allCallsForMember = _engine.GetCallsFor(_memberId);
+                var expectedCall = FormatExpectedCall();
+                var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
+                throw new MockVerificationException(expectedCall, times, totalCount, actualCallDescriptions, message);
+            }
 
-        var matchingCount = CountMatchingCalls(allCallsForMember, markVerified: false);
+            // Mark all calls for this member as verified
+            if (totalCount > 0)
+            {
+                var allCallsForMember = _engine.GetCallsFor(_memberId);
+                for (int i = 0; i < allCallsForMember.Count; i++)
+                {
+                    allCallsForMember[i].IsVerified = true;
+                }
+            }
+            return;
+        }
+
+        // Slow path: need to match arguments — single-pass count then mark
+        var calls = _engine.GetCallsFor(_memberId);
+        var matchingCount = CountMatchingCalls(calls, markVerified: false);
 
         if (!times.Matches(matchingCount))
         {
             var expectedCall = FormatExpectedCall();
-            var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
+            var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
         // Mark matched calls as verified only after assertion passes
-        CountMatchingCalls(allCallsForMember, markVerified: true);
+        CountMatchingCalls(calls, markVerified: true);
     }
 
     /// <inheritdoc />
