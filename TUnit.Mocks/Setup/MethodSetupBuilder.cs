@@ -57,30 +57,35 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Callback(Action<object?[]> callback)
     {
         _setup.AddBehavior(new CallbackWithArgsBehavior(callback));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory)
     {
         _setup.AddBehavior(new ComputedReturnWithArgsBehavior<TReturn>(factory));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Throws(Func<object?[], Exception> exceptionFactory)
     {
         _setup.AddBehavior(new ComputedThrowBehavior(exceptionFactory));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Raises(string eventName, object? args = null)
     {
         _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> SetsOutParameter(int paramIndex, object? value)
     {
         _setup.SetOutRefValue(paramIndex, value);

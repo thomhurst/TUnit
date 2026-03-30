@@ -195,20 +195,6 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action<object?[]> callback) {{ EnsureSetup().Callback(callback); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Returns(global::System.Func<object?[], {returnType}> factory) {{ EnsureSetup().Returns(factory); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            if (hasOutRef)
-            {
-                writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-            }
-            writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
@@ -330,18 +316,6 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action<object?[]> callback) {{ EnsureSetup().Callback(callback); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Raises(string eventName, object? args = null) {{ EnsureSetup().Raises(eventName, args); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            if (hasOutRef)
-            {
-                writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-            }
-            writer.AppendLine($"public {wrapperName} SetsOutParameter(int paramIndex, object? value) {{ EnsureSetup().SetsOutParameter(paramIndex, value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");

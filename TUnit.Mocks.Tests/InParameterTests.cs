@@ -166,10 +166,10 @@ public class InParameterTests
         int capturedA = 0, capturedB = 0;
         var mock = Mock.Of<ICalculatorWithIn>();
         mock.Add(Any(), Any())
-            .Callback((object?[] args) =>
+            .Callback((int a, int b) =>
             {
-                capturedA = (int)args[0]!;
-                capturedB = (int)args[1]!;
+                capturedA = a;
+                capturedB = b;
             })
             .Returns(0);
 
@@ -199,7 +199,7 @@ public class InParameterTests
     {
         var messages = new List<string>();
         var mock = Mock.Of<ICalculatorWithIn>();
-        mock.Log(Any()).Callback((object?[] args) => messages.Add((string)args[0]!));
+        mock.Log(Any()).Callback((string msg) => messages.Add(msg));
 
         mock.Object.Log("first");
         mock.Object.Log("second");

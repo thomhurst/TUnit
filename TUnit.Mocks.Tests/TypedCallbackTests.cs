@@ -12,10 +12,10 @@ public class TypedCallbackTests
     public async Task Callback_With_Args_Receives_Arguments()
     {
         // Arrange
-        object?[]? capturedArgs = null;
+        (int a, int b)? capturedArgs = null;
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Callback((Action<object?[]>)(args => capturedArgs = args));
+            .Callback((int a, int b) => capturedArgs = (a, b));
 
         ICalculator calc = mock.Object;
 
@@ -24,19 +24,18 @@ public class TypedCallbackTests
 
         // Assert
         await Assert.That(capturedArgs).IsNotNull();
-        await Assert.That(capturedArgs!.Length).IsEqualTo(2);
-        await Assert.That(capturedArgs[0]).IsEqualTo(3);
-        await Assert.That(capturedArgs[1]).IsEqualTo(7);
+        await Assert.That(capturedArgs!.Value.a).IsEqualTo(3);
+        await Assert.That(capturedArgs!.Value.b).IsEqualTo(7);
     }
 
     [Test]
     public async Task Callback_With_Args_On_Void_Method()
     {
         // Arrange
-        object?[]? capturedArgs = null;
+        string? capturedMsg = null;
         var mock = Mock.Of<ICalculator>();
         mock.Log(Any())
-            .Callback((Action<object?[]>)(args => capturedArgs = args));
+            .Callback((string msg) => capturedMsg = msg);
 
         ICalculator calc = mock.Object;
 
@@ -44,9 +43,7 @@ public class TypedCallbackTests
         calc.Log("hello");
 
         // Assert
-        await Assert.That(capturedArgs).IsNotNull();
-        await Assert.That(capturedArgs!.Length).IsEqualTo(1);
-        await Assert.That(capturedArgs[0]).IsEqualTo("hello");
+        await Assert.That(capturedMsg).IsEqualTo("hello");
     }
 
     [Test]
@@ -55,7 +52,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Returns((Func<object?[], int>)(args => (int)args[0]! + (int)args[1]!));
+            .Returns((int a, int b) => a + b);
 
         ICalculator calc = mock.Object;
 
@@ -71,7 +68,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<IGreeter>();
         mock.Greet(Any())
-            .Returns((Func<object?[], string>)(args => $"Hello, {args[0]}!"));
+            .Returns((string name) => $"Hello, {name}!");
 
         IGreeter greeter = mock.Object;
 
@@ -86,8 +83,8 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Throws((Func<object?[], Exception>)(args =>
-                new ArgumentException($"Bad args: {args[0]}, {args[1]}")));
+            .Throws((int a, int b) =>
+                new ArgumentException($"Bad args: {a}, {b}"));
 
         ICalculator calc = mock.Object;
 
@@ -102,8 +99,8 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Log(Any())
-            .Throws((Func<object?[], Exception>)(args =>
-                new InvalidOperationException($"Cannot log: {args[0]}")));
+            .Throws((string msg) =>
+                new InvalidOperationException($"Cannot log: {msg}"));
 
         ICalculator calc = mock.Object;
 
@@ -116,10 +113,10 @@ public class TypedCallbackTests
     public async Task Callback_With_Args_Then_Returns()
     {
         // Arrange
-        object?[]? capturedArgs = null;
+        (int a, int b)? capturedArgs = null;
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Callback((Action<object?[]>)(args => capturedArgs = args))
+            .Callback((int a, int b) => capturedArgs = (a, b))
             .Then()
             .Returns(42);
 
@@ -128,7 +125,7 @@ public class TypedCallbackTests
         // Act - first call triggers callback
         var result1 = calc.Add(5, 10);
         await Assert.That(capturedArgs).IsNotNull();
-        await Assert.That(capturedArgs![0]).IsEqualTo(5);
+        await Assert.That(capturedArgs!.Value.a).IsEqualTo(5);
 
         // Second call returns fixed value
         var result2 = calc.Add(1, 1);
@@ -141,7 +138,7 @@ public class TypedCallbackTests
         // Arrange
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any())
-            .Returns((Func<object?[], int>)(args => (int)args[0]! * (int)args[1]!));
+            .Returns((int a, int b) => a * b);
 
         ICalculator calc = mock.Object;
 

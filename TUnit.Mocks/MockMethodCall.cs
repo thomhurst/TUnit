@@ -79,39 +79,6 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
         return this;
     }
 
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public ISetupChain<TReturn> Callback(Action<object?[]> callback)
-    {
-        EnsureSetup().Callback(callback);
-        return this;
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory)
-    {
-        EnsureSetup().Returns(factory);
-        return this;
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public ISetupChain<TReturn> Throws(Func<object?[], Exception> exceptionFactory)
-    {
-        EnsureSetup().Throws(exceptionFactory);
-        return this;
-    }
-
-    public ISetupChain<TReturn> Raises(string eventName, object? args = null)
-    {
-        EnsureSetup().Raises(eventName, args);
-        return this;
-    }
-
-    public ISetupChain<TReturn> SetsOutParameter(int paramIndex, object? value)
-    {
-        EnsureSetup().SetsOutParameter(paramIndex, value);
-        return this;
-    }
-
     public ISetupChain<TReturn> TransitionsTo(string stateName)
     {
         EnsureSetup().TransitionsTo(stateName);

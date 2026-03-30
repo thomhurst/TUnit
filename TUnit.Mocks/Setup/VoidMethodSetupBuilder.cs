@@ -41,24 +41,28 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Callback(Action<object?[]> callback)
     {
         _setup.AddBehavior(new CallbackWithArgsBehavior(callback));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory)
     {
         _setup.AddBehavior(new ComputedThrowBehavior(exceptionFactory));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Raises(string eventName, object? args = null)
     {
         _setup.AddEventRaise(new EventRaiseInfo(eventName, args));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain SetsOutParameter(int paramIndex, object? value)
     {
         _setup.SetOutRefValue(paramIndex, value);
