@@ -26123,15 +26123,15 @@ public interface IConnection
 }
 
 var mock = Mock.Of<IConnection>();
-Mock.SetState(mock, "disconnected");
+mock.SetState("disconnected");
 
-Mock.InState(mock, "disconnected", m =>
+mock.InState("disconnected", m =>
 {
     m.GetStatus().Returns("OFFLINE");
     m.Connect().TransitionsTo("connected");
 });
 
-Mock.InState(mock, "connected", m =>
+mock.InState("connected", m =>
 {
     m.GetStatus().Returns("ONLINE");
     m.Disconnect().TransitionsTo("disconnected");
@@ -26151,9 +26151,9 @@ status = mock.Object.GetStatus();     // "OFFLINE"
 
 | Method | Description |
 |---|---|
-| `Mock.SetState(mock, "name")` | Set the current state |
-| `Mock.SetState(mock, null)` | Clear state (all setups match) |
-| `Mock.InState(mock, "name", configure)` | Register setups scoped to a state |
+| `mock.SetState("name")` | Set the current state |
+| `mock.SetState(null)` | Clear state (all setups match) |
+| `mock.InState("name", configure)` | Register setups scoped to a state |
 | `.TransitionsTo("name")` | Transition state after method call (on setup chain) |
 
 ## Recursive / Auto-Mocking
@@ -26236,7 +26236,7 @@ mock.Delete(Any());
 svc.GetUser(1);
 // Delete was never called
 
-var diag = Mock.GetDiagnostics(mock);
+var diag = mock.GetDiagnostics();
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
 diag.UnusedSetups;      // [Delete(Any())]
@@ -26264,7 +26264,7 @@ public class TestDefaults : IDefaultValueProvider
 }
 
 var mock = Mock.Of<IService>();
-Mock.SetDefaultValueProvider(mock, new TestDefaults());
+mock.DefaultValueProvider = new TestDefaults();
 
 var name = mock.Object.GetName();  // "test-default" (no setup needed)
 var count = mock.Object.GetCount(); // -1
@@ -26280,10 +26280,10 @@ Clear all setups, call history, state, and auto-tracked property values:
 mock.GetUser(Any()).Returns(new User("Alice"));
 svc.GetUser(1);
 
-Mock.Reset(mock);
+mock.Reset();
 
 svc.GetUser(1); // returns default (setup cleared)
-Mock.GetInvocations(mock).Count; // 0 (history cleared)
+mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
@@ -27283,7 +27283,7 @@ Call `SetupAllProperties()` to make properties behave like real auto-properties 
 
 ```csharp
 var mock = Mock.Of<IEntity>();
-Mock.SetupAllProperties(mock);
+mock.SetupAllProperties();
 
 mock.Object.Name = "Alice";
 var name = mock.Object.Name; // "Alice"
@@ -27534,7 +27534,7 @@ mock.Delete(Any());
 svc.GetUser(1);
 svc.Delete(2);
 
-Mock.VerifyAll(mock); // passes — both setups were invoked
+mock.VerifyAll(); // passes — both setups were invoked
 ```
 
 If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
@@ -27550,7 +27550,7 @@ svc.Delete(2);
 mock.GetUser(1).WasCalled(Times.Once);
 mock.Delete(2).WasCalled(Times.Once);
 
-Mock.VerifyNoOtherCalls(mock); // passes — all calls accounted for
+mock.VerifyNoOtherCalls(); // passes — all calls accounted for
 ```
 
 If there are unverified calls, `VerifyNoOtherCalls` throws listing them.
@@ -27576,7 +27576,7 @@ This integrates with TUnit's assertion engine — failures appear as assertion e
 Access the raw call history for custom inspection:
 
 ```csharp
-var calls = Mock.GetInvocations(mock);
+var calls = mock.Invocations;
 
 await Assert.That(calls).HasCount().EqualTo(3);
 await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");
