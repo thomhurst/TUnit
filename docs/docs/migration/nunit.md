@@ -210,7 +210,7 @@ dotnet run -- --list-tests
 
 `[Ignore]` becomes `[Skip]`
 
-`[Explicit]` becomes `[Explicit]`
+`[Explicit]` remains `[Explicit]`
 
 ### Setup and Teardown
 
