@@ -1154,7 +1154,11 @@ internal static class MockImplBuilder
     {
         if (!method.IsAsync) return;
 
-        writer.AppendLine($"if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync)) return ({method.ReturnType})__rawAsync!;");
+        writer.AppendLine($"if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))");
+        writer.AppendLine("{");
+        writer.AppendLine($"    if (__rawAsync is {method.ReturnType} __typedAsync) return __typedAsync;");
+        writer.AppendLine($"    throw new global::System.InvalidOperationException($\"ReturnsAsync: expected {method.ReturnType} but got {{__rawAsync?.GetType().Name ?? \"null\"}}\");");
+        writer.AppendLine("}");
     }
 
     /// <summary>

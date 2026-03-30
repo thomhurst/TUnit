@@ -24,15 +24,20 @@ public sealed class RawReturn
 /// (e.g., from a <see cref="System.Threading.Tasks.TaskCompletionSource{TResult}"/>).
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
+/// <remarks>
+/// IMPORTANT: RawReturnContext must be consumed synchronously in the same execution
+/// context as HandleCall*/TryHandleCall*. No await may appear between the engine
+/// dispatch call and TryConsume in the generated code.
+/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class RawReturnContext
 {
     [ThreadStatic]
     private static RawReturn? _pending;
 
-    /// <summary>Stores a raw return value for the generated code to consume.</summary>
+    /// <summary>Stores a <see cref="RawReturn"/> for the generated code to consume. Accepts the marker directly to avoid re-wrapping.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void Set(object? value) => _pending = new RawReturn(value);
+    public static void Set(RawReturn raw) => _pending = raw;
 
     /// <summary>Consumes and returns the raw return value, if one was set. Clears the slot.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
