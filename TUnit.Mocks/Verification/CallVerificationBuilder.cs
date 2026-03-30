@@ -46,19 +46,42 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        var allCallsForMember = _engine.GetCallsFor(_memberId);
+        // Fast path: when no argument matchers, use the per-member call counter directly.
+        // Note: the count is read lock-free, then MarkCallsVerified acquires the lock.
+        // Calls recorded between these two steps will be marked verified but weren't counted.
+        // This is safe because verification should only run after all calls have completed.
+        if (_matchers.Length == 0)
+        {
+            var totalCount = _engine.GetCallCountFor(_memberId);
+            if (!times.Matches(totalCount))
+            {
+                var callsForError = _engine.GetCallsFor(_memberId);
+                var expectedCall = FormatExpectedCall();
+                var actualCallDescriptions = callsForError.Select(c => c.FormatCall()).ToList();
+                throw new MockVerificationException(expectedCall, times, totalCount, actualCallDescriptions, message);
+            }
 
-        var matchingCount = CountMatchingCalls(allCallsForMember, markVerified: false);
+            // Mark all calls for this member as verified (single fetch)
+            if (totalCount > 0)
+            {
+                _engine.MarkCallsVerified(_memberId);
+            }
+            return;
+        }
+
+        // Slow path: need to match arguments — single-pass count then mark
+        var calls = _engine.GetCallsFor(_memberId);
+        var matchingCount = CountMatchingCalls(calls, markVerified: false);
 
         if (!times.Matches(matchingCount))
         {
             var expectedCall = FormatExpectedCall();
-            var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
+            var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
         // Mark matched calls as verified only after assertion passes
-        CountMatchingCalls(allCallsForMember, markVerified: true);
+        CountMatchingCalls(calls, markVerified: true);
     }
 
     /// <inheritdoc />

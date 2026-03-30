@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Setup.Behaviors;
 
@@ -11,7 +12,15 @@ namespace TUnit.Mocks.Setup;
 public sealed class MethodSetup
 {
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Lock _behaviorLock = new();
+    private Lock? _behaviorLock;
+    private Lock BehaviorLock => _behaviorLock ?? EnsureBehaviorLock();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private Lock EnsureBehaviorLock()
+    {
+        Interlocked.CompareExchange(ref _behaviorLock, new Lock(), null);
+        return _behaviorLock!;
+    }
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
     private volatile IBehavior? _singleBehavior;
     private volatile List<IBehavior>? _behaviors;
@@ -62,7 +71,7 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
-        lock (_behaviorLock)
+        lock (BehaviorLock)
         {
             if (_singleBehavior is null && _behaviors is null)
             {
@@ -100,7 +109,7 @@ public sealed class MethodSetup
 
     public void AddEventRaise(EventRaiseInfo raiseInfo)
     {
-        lock (_behaviorLock)
+        lock (BehaviorLock)
         {
             var list = _eventRaises ??= new();
             list.Add(raiseInfo);
@@ -121,7 +130,7 @@ public sealed class MethodSetup
             return snapshot;
         }
 
-        lock (_behaviorLock)
+        lock (BehaviorLock)
         {
             return _eventRaisesSnapshot ??= _eventRaises!.ToArray();
         }
@@ -150,7 +159,7 @@ public sealed class MethodSetup
     /// <param name="value">The value to assign.</param>
     public void SetOutRefValue(int paramIndex, object? value)
     {
-        lock (_behaviorLock)
+        lock (BehaviorLock)
         {
             _outRefAssignments ??= new Dictionary<int, object?>();
             _outRefAssignments[paramIndex] = value;
@@ -165,7 +174,7 @@ public sealed class MethodSetup
     {
         get
         {
-            lock (_behaviorLock)
+            lock (BehaviorLock)
             {
                 return _outRefAssignments;
             }
@@ -199,7 +208,7 @@ public sealed class MethodSetup
             return null;
         }
 
-        lock (_behaviorLock)
+        lock (BehaviorLock)
         {
             if (_behaviors is not { Count: > 0 } behaviors)
             {

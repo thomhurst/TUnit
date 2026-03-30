@@ -4,6 +4,7 @@ using TUnit.Mocks.Setup;
 using TUnit.Mocks.Setup.Behaviors;
 using TUnit.Mocks.Verification;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.ComponentModel;
 
@@ -22,11 +23,21 @@ internal static class MockCallSequence
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
-    private readonly Lock _setupLock = new();
-    private Dictionary<int, List<MethodSetup>>? _setupsByMember;
-    private volatile Dictionary<int, MethodSetup[]>? _setupsSnapshot;
+    // Single lock for both setup and call mutations — reduces allocation by one Lock object.
+    // Contention is acceptable since setup and call recording rarely overlap in typical usage.
+    private Lock? _lock;
+    private Lock Lock => _lock ?? EnsureLock();
+
+    // Flat array indexed by memberId for O(1) setup lookup (member IDs are dense sequential ints 0..N)
+    private volatile MethodSetup[]?[]? _setupsByMemberId;
+    private List<MethodSetup>?[]? _setupListsByMemberId; // mutable lists used during AddSetup, guarded by Lock
     private volatile bool _hasStatefulSetups;
-    private volatile ConcurrentQueue<CallRecord> _callHistory = new();
+
+    // Call history: main list + per-member index for fast lookup + per-member counters for fast verification
+    // All lazily initialized on first RecordCall to save ~64B when mock is created but never invoked.
+    private List<CallRecord>? _callHistory;
+    private List<CallRecord>?[]? _callsByMemberId;
+    private int[]? _callCountByMemberId;
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
@@ -81,6 +92,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         Behavior = behavior;
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private Lock EnsureLock()
+    {
+        Interlocked.CompareExchange(ref _lock, new Lock(), null);
+        return _lock!;
+    }
+
     private ConcurrentDictionary<string, object?> AutoTrackValues
         => LazyInitializer.EnsureInitialized(ref _autoTrackValues)!;
 
@@ -100,13 +118,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// Transitions the engine to the specified state. Null clears the state.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void TransitionTo(string? stateName) { lock (_setupLock) { _currentState = stateName; } }
+    public void TransitionTo(string? stateName) { lock (Lock) { _currentState = stateName; } }
 
     /// <summary>
     /// Gets the current state name. Null means no state.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public string? CurrentState { get { lock (_setupLock) { return _currentState; } } }
+    public string? CurrentState { get { lock (Lock) { return _currentState; } } }
 
     /// <summary>
     /// Registers a new setup. Thread-safe via lock.
@@ -114,20 +132,18 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public void AddSetup(MethodSetup setup)
     {
-        lock (_setupLock)
+        lock (Lock)
         {
             if (PendingRequiredState is not null)
             {
                 setup.RequiredState = PendingRequiredState;
             }
 
-            var dict = _setupsByMember ??= new();
+            var memberId = setup.MemberId;
+            EnsureSetupArrayCapacity(memberId);
 
-            if (!dict.TryGetValue(setup.MemberId, out var list))
-            {
-                dict[setup.MemberId] = list = new();
-            }
-
+            var lists = _setupListsByMemberId!;
+            var list = lists[memberId] ??= new();
             list.Add(setup);
 
             if (setup.RequiredState is not null || setup.TransitionTarget is not null)
@@ -135,13 +151,30 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
                 _hasStatefulSetups = true;
             }
 
-            // Rebuild lock-free snapshot: shallow-copy existing, only re-array the affected member
-            var prev = _setupsSnapshot;
-            var snapshot = prev is null
-                ? new Dictionary<int, MethodSetup[]>()
-                : new Dictionary<int, MethodSetup[]>(prev);
-            snapshot[setup.MemberId] = list.ToArray();
-            _setupsSnapshot = snapshot;
+            // Update the lock-free snapshot array for this member only
+            var snapshot = _setupsByMemberId!;
+            snapshot[memberId] = list.ToArray();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void EnsureSetupArrayCapacity(int memberId)
+    {
+        var required = memberId + 1;
+        if (_setupsByMemberId is null || _setupsByMemberId.Length < required)
+        {
+            var newSize = _setupsByMemberId is null
+                ? Math.Max(required, 8)
+                : Math.Max(required, _setupsByMemberId.Length * 2);
+            var newSnapshot = new MethodSetup[]?[newSize];
+            var newLists = new List<MethodSetup>?[newSize];
+            if (_setupsByMemberId is not null)
+            {
+                Array.Copy(_setupsByMemberId, newSnapshot, _setupsByMemberId.Length);
+                Array.Copy(_setupListsByMemberId!, newLists, _setupListsByMemberId!.Length);
+            }
+            _setupsByMemberId = newSnapshot;
+            _setupListsByMemberId = newLists;
         }
     }
 
@@ -174,12 +207,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
             try
             {
-                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-                OutRefContext.Set(matchedSetup?.OutRefAssignments);
-                if (matchedSetup is not null)
-                {
-                    RaiseEventsForSetup(matchedSetup);
-                }
+                ApplyMatchedSetup(matchedSetup);
             }
             catch
             {
@@ -189,16 +217,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             return;
         }
 
-        // Set out/ref assignments for generated code to consume
-        OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        ApplyMatchedSetup(matchedSetup);
 
         // A matching setup with no explicit behavior means "allow this call" (e.g., void setup with no callback)
         if (setupFound)
         {
-            if (matchedSetup is not null)
-            {
-                RaiseEventsForSetup(matchedSetup);
-            }
             return;
         }
 
@@ -232,12 +255,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
             try
             {
-                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-                OutRefContext.Set(matchedSetup?.OutRefAssignments);
-                if (matchedSetup is not null)
-                {
-                    RaiseEventsForSetup(matchedSetup);
-                }
+                ApplyMatchedSetup(matchedSetup);
             }
             catch
             {
@@ -254,17 +272,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {result.GetType().Name}.");
         }
 
-        // Set out/ref assignments for generated code to consume
-        OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        ApplyMatchedSetup(matchedSetup);
 
         // A matching setup with no explicit behavior returns the default value
         if (setupFound)
         {
-            if (matchedSetup is not null)
-            {
-
-                RaiseEventsForSetup(matchedSetup);
-            }
             return defaultValue;
         }
 
@@ -340,12 +352,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
             try
             {
-                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-                OutRefContext.Set(matchedSetup?.OutRefAssignments);
-                if (matchedSetup is not null)
-                {
-                    RaiseEventsForSetup(matchedSetup);
-                }
+                ApplyMatchedSetup(matchedSetup);
             }
             catch
             {
@@ -355,13 +362,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             return true;
         }
 
-        // Set out/ref assignments for generated code to consume
-        OutRefContext.Set(matchedSetup?.OutRefAssignments);
-
-        if (setupFound && matchedSetup is not null)
-        {
-            RaiseEventsForSetup(matchedSetup);
-        }
+        ApplyMatchedSetup(matchedSetup);
 
         if (!setupFound)
         {
@@ -400,12 +401,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
             try
             {
-                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-                OutRefContext.Set(matchedSetup?.OutRefAssignments);
-                if (matchedSetup is not null)
-                {
-                    RaiseEventsForSetup(matchedSetup);
-                }
+                ApplyMatchedSetup(matchedSetup);
             }
             catch
             {
@@ -423,16 +419,10 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             return true;
         }
 
-        // Set out/ref assignments for generated code to consume
-        OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        ApplyMatchedSetup(matchedSetup);
 
         if (setupFound)
         {
-            if (matchedSetup is not null)
-            {
-
-                RaiseEventsForSetup(matchedSetup);
-            }
             result = defaultValue;
             return true;
         }
@@ -455,15 +445,47 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
-        var result = new List<CallRecord>();
-        foreach (var record in _callHistory)
+        lock (Lock)
         {
-            if (record.MemberId == memberId)
+            if (_callsByMemberId is not null && (uint)memberId < (uint)_callsByMemberId.Length
+                && _callsByMemberId[memberId] is { } list)
             {
-                result.Add(record);
+                return list.ToArray();
             }
         }
-        return result;
+        return [];
+    }
+
+    /// <summary>
+    /// Marks all calls for a specific member as verified without allocating a copy.
+    /// </summary>
+    internal void MarkCallsVerified(int memberId)
+    {
+        lock (Lock)
+        {
+            if (_callsByMemberId is not null && (uint)memberId < (uint)_callsByMemberId.Length
+                && _callsByMemberId[memberId] is { } list)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].IsVerified = true;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the count of calls for a specific member without allocating.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int GetCallCountFor(int memberId)
+    {
+        var counts = Volatile.Read(ref _callCountByMemberId);
+        if (counts is not null && (uint)memberId < (uint)counts.Length)
+        {
+            return Volatile.Read(ref counts[memberId]);
+        }
+        return 0;
     }
 
     /// <summary>
@@ -471,7 +493,10 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        return _callHistory.ToArray();
+        lock (Lock)
+        {
+            return _callHistory is null ? [] : _callHistory.ToArray();
+        }
     }
 
     /// <summary>
@@ -480,15 +505,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        var result = new List<CallRecord>();
-        foreach (var record in _callHistory)
+        lock (Lock)
         {
-            if (!record.IsVerified)
+            if (_callHistory is null) return [];
+            var result = new List<CallRecord>();
+            foreach (var record in _callHistory)
             {
-                result.Add(record);
+                if (!record.IsVerified)
+                {
+                    result.Add(record);
+                }
             }
+            return result;
         }
-        return result;
     }
 
     /// <summary>
@@ -497,16 +526,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<MethodSetup> GetSetups()
     {
-        var snapshot = _setupsSnapshot;
+        var snapshot = _setupsByMemberId;
         if (snapshot is null)
         {
             return [];
         }
 
         var all = new List<MethodSetup>();
-        foreach (var arr in snapshot.Values)
+        foreach (var arr in snapshot)
         {
-            all.AddRange(arr);
+            if (arr is not null)
+            {
+                all.AddRange(arr);
+            }
         }
         return all;
     }
@@ -539,11 +571,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        foreach (var call in _callHistory)
+        lock (Lock)
         {
-            if (call.IsUnmatched)
+            if (_callHistory is not null)
             {
-                unmatchedCalls.Add(call);
+                foreach (var call in _callHistory)
+                {
+                    if (call.IsUnmatched)
+                    {
+                        unmatchedCalls.Add(call);
+                    }
+                }
             }
         }
 
@@ -569,16 +607,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public void Reset()
     {
-        lock (_setupLock)
+        lock (Lock)
         {
-            _setupsByMember = null;
-            _setupsSnapshot = null;
+            _setupsByMemberId = null;
+            _setupListsByMemberId = null;
             _hasStatefulSetups = false;
             _currentState = null;
             PendingRequiredState = null;
+            _callHistory = null;
+            _callsByMemberId = null;
+            _callCountByMemberId = null;
         }
-
-        _callHistory = new ConcurrentQueue<CallRecord>(); // volatile field — assignment is a volatile write
         Volatile.Write(ref _autoTrackValues, null);
         Volatile.Write(ref _eventSubscriptions, null);
         Volatile.Write(ref _onSubscribeCallbacks, null);
@@ -665,8 +704,53 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         var seq = MockCallSequence.Next();
         var record = new CallRecord(memberId, memberName, args, seq);
-        _callHistory.Enqueue(record);
+        lock (Lock)
+        {
+            var history = _callHistory ??= new();
+            history.Add(record);
+            EnsureCallArrayCapacity(memberId);
+            var memberCalls = _callsByMemberId![memberId] ??= new();
+            memberCalls.Add(record);
+            _callCountByMemberId![memberId]++;
+        }
         return record;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void EnsureCallArrayCapacity(int memberId)
+    {
+        var required = memberId + 1;
+        if (_callsByMemberId is null || _callsByMemberId.Length < required)
+        {
+            var newSize = _callsByMemberId is null
+                ? Math.Max(required, 8)
+                : Math.Max(required, _callsByMemberId.Length * 2);
+            var newByMember = new List<CallRecord>?[newSize];
+            var newCounts = new int[newSize];
+            if (_callsByMemberId is not null)
+            {
+                Array.Copy(_callsByMemberId, newByMember, _callsByMemberId.Length);
+                Array.Copy(_callCountByMemberId!, newCounts, _callCountByMemberId!.Length);
+            }
+            _callsByMemberId = newByMember;
+            _callCountByMemberId = newCounts;
+        }
+    }
+
+    /// <summary>
+    /// Applies out/ref assignments and raises events for a matched setup.
+    /// Consolidates the pattern that appeared in all four Handle methods.
+    /// </summary>
+    private void ApplyMatchedSetup(MethodSetup? matchedSetup)
+    {
+        // Always set (or clear) OutRefContext — even when matchedSetup is null.
+        // A reentrant mock call inside Execute() may have written to it, and the
+        // outer call must overwrite that to avoid stale thread-local state.
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        if (matchedSetup is not null)
+        {
+            RaiseEventsForSetup(matchedSetup);
+        }
     }
 
     private void RaiseEventsForSetup(MethodSetup setup)
@@ -689,8 +773,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             return FindMatchingSetupLocked(memberId, args);
         }
 
-        var snapshot = _setupsSnapshot;
-        if (snapshot is null || !snapshot.TryGetValue(memberId, out var setups))
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length)
+        {
+            return (false, null, null);
+        }
+
+        var setups = snapshot[memberId];
+        if (setups is null)
         {
             return (false, null, null);
         }
@@ -713,9 +803,15 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetupLocked(int memberId, object?[] args)
     {
-        lock (_setupLock)
+        lock (Lock)
         {
-            if (_setupsByMember is not { } setupDict || !setupDict.TryGetValue(memberId, out var setups))
+            if (_setupListsByMemberId is not { } lists || (uint)memberId >= (uint)lists.Length)
+            {
+                return (false, null, null);
+            }
+
+            var setups = lists[memberId];
+            if (setups is null)
             {
                 return (false, null, null);
             }
