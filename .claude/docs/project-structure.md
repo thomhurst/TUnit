@@ -50,6 +50,24 @@
 | `TUnit.PublicAPI` | Snapshot tests for public API |
 | `TUnit.Templates.Tests` | Template instantiation tests |
 
+## Mocking Framework
+
+| Project | Purpose |
+|---------|---------|
+| `TUnit.Mocks` | Source-generated mocking framework (core runtime: `MockEngine<T>`, `Mock<T>`, setup/verification) |
+| `TUnit.Mocks.SourceGenerator` | Roslyn source generator that emits mock implementations and extension methods |
+| `TUnit.Mocks.SourceGenerator.Roslyn414/44/47` | Roslyn version variants (link source from base generator) |
+| `TUnit.Mocks.Analyzers` | Analyzers for mock usage correctness |
+| `TUnit.Mocks.Assertions` | TUnit assertion integration for mocks |
+| `TUnit.Mocks.Http` | HTTP mocking (`MockHttpHandler`, `MockHttpClient`) |
+| `TUnit.Mocks.Logging` | `ILogger` mocking (`MockLogger`, `MockLogger<T>`) |
+| `TUnit.Mocks.Tests` | Runtime mock tests (672 tests) |
+| `TUnit.Mocks.SourceGenerator.Tests` | Snapshot tests for generated code |
+| `TUnit.Mocks.Analyzers.Tests` | Analyzer tests |
+| `TUnit.Mocks.Http.Tests` | HTTP mock tests |
+| `TUnit.Mocks.Logging.Tests` | Logging mock tests |
+| `TUnit.Mocks.Benchmarks` | BenchmarkDotNet performance comparisons vs Moq/NSubstitute/FakeItEasy |
+
 ## Performance & Benchmarking
 
 | Project | Purpose |

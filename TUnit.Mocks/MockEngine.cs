@@ -22,9 +22,9 @@ internal static class MockCallSequence
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
-    private readonly Dictionary<int, List<MethodSetup>> _setupsByMember = new();
     private readonly Lock _setupLock = new();
-    private readonly ConcurrentQueue<CallRecord> _callHistory = new();
+    private Dictionary<int, List<MethodSetup>>? _setupsByMember;
+    private ConcurrentQueue<CallRecord>? _callHistory;
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
@@ -119,9 +119,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
                 setup.RequiredState = PendingRequiredState;
             }
 
-            if (!_setupsByMember.TryGetValue(setup.MemberId, out var list))
+            var dict = _setupsByMember ??= new();
+
+            if (!dict.TryGetValue(setup.MemberId, out var list))
             {
-                _setupsByMember[setup.MemberId] = list = new();
+                dict[setup.MemberId] = list = new();
             }
 
             list.Add(setup);
@@ -384,8 +386,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
+        if (Volatile.Read(ref _callHistory) is not { } history)
+        {
+            return [];
+        }
+
         var result = new List<CallRecord>();
-        foreach (var record in _callHistory)
+        foreach (var record in history)
         {
             if (record.MemberId == memberId)
             {
@@ -400,7 +407,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        return _callHistory.ToArray();
+        return Volatile.Read(ref _callHistory)?.ToArray() ?? [];
     }
 
     /// <summary>
@@ -409,8 +416,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
+        if (Volatile.Read(ref _callHistory) is not { } history)
+        {
+            return [];
+        }
+
         var result = new List<CallRecord>();
-        foreach (var record in _callHistory)
+        foreach (var record in history)
         {
             if (!record.IsVerified)
             {
@@ -428,8 +440,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (_setupLock)
         {
+            if (_setupsByMember is not { } setups)
+            {
+                return [];
+            }
+
             var all = new List<MethodSetup>();
-            foreach (var list in _setupsByMember.Values)
+            foreach (var list in setups.Values)
             {
                 all.AddRange(list);
             }
@@ -465,11 +482,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        foreach (var call in _callHistory)
+        if (Volatile.Read(ref _callHistory) is { } history)
         {
-            if (call.IsUnmatched)
+            foreach (var call in history)
             {
-                unmatchedCalls.Add(call);
+                if (call.IsUnmatched)
+                {
+                    unmatchedCalls.Add(call);
+                }
             }
         }
 
@@ -497,14 +517,12 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (_setupLock)
         {
-            _setupsByMember.Clear();
+            _setupsByMember = null;
             _currentState = null;
             PendingRequiredState = null;
         }
 
-        // Drain the queue
-        while (_callHistory.TryDequeue(out _)) { }
-
+        Volatile.Write(ref _callHistory, null);
         Volatile.Write(ref _autoTrackValues, null);
         Volatile.Write(ref _eventSubscriptions, null);
         Volatile.Write(ref _onSubscribeCallbacks, null);
@@ -591,7 +609,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         var seq = MockCallSequence.Next();
         var record = new CallRecord(memberId, memberName, args, seq);
-        _callHistory.Enqueue(record);
+        LazyInitializer.EnsureInitialized(ref _callHistory)!.Enqueue(record);
         return record;
     }
 
@@ -610,7 +628,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (_setupLock)
         {
-            if (!_setupsByMember.TryGetValue(memberId, out var setups))
+            if (_setupsByMember is not { } setupDict || !setupDict.TryGetValue(memberId, out var setups))
             {
                 return (false, null, null);
             }

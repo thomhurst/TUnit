@@ -27,7 +27,10 @@ public class Mock<T> : IMock, IMockEngineAccess<T> where T : class
     {
         _engine = engine;
         Object = mockObject;
-        Mock.Register(mockObject, this);
+        if (mockObject is IMockObject mockObj)
+        {
+            mockObj.MockWrapper = this;
+        }
     }
 
     /// <inheritdoc />

@@ -45,10 +45,12 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"internal sealed class {safeName}_MockImpl : {baseTypes}, global::TUnit.Mocks.IRaisable"))
+        using (writer.Block($"internal sealed class {safeName}_MockImpl : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
 
             // Constructor
             using (writer.Block($"internal {safeName}_MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine)"))
@@ -95,11 +97,13 @@ internal static class MockImplBuilder
     {
         var mockableType = GetMockableTypeName(model);
 
-        using (writer.Block($"internal sealed class {safeName}_WrapMockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable"))
+        using (writer.Block($"internal sealed class {safeName}_WrapMockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine($"private readonly {model.FullyQualifiedName} _wrappedInstance;");
             writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
 
             // Generate constructors that pass through to base + accept wrapped instance
             GenerateWrapConstructors(writer, model, safeName);
@@ -421,10 +425,12 @@ internal static class MockImplBuilder
     {
         var mockableType = GetMockableTypeName(model);
 
-        using (writer.Block($"internal sealed class {safeName}_MockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable"))
+        using (writer.Block($"internal sealed class {safeName}_MockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
+
+            EmitIMockObjectProperty(writer);
 
             // Generate constructors that pass through to base
             GeneratePartialConstructors(writer, model, safeName);
@@ -1268,6 +1274,13 @@ internal static class MockImplBuilder
     /// Emits the static engine assignment with a guard that detects multiple mocks of the same
     /// static-abstract interface type within a single test context.
     /// </summary>
+    private static void EmitIMockObjectProperty(CodeWriter writer)
+    {
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        writer.AppendLine("global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }");
+        writer.AppendLine();
+    }
+
     internal static void EmitStaticEngineAssignment(CodeWriter writer, string safeName)
     {
         writer.AppendLine($"if ({safeName}_StaticEngine.Engine is not null)");

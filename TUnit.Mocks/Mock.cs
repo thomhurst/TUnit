@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
@@ -10,10 +9,6 @@ namespace TUnit.Mocks;
 /// </summary>
 public static class Mock
 {
-    // Maps mock implementation objects back to their Mock<T> wrappers.
-    // ConditionalWeakTable so mocks can be GC'd normally.
-    private static readonly ConditionalWeakTable<object, IMock> _objectToMock = new();
-
     // The source generator registers factories via this method at module initialization time.
     // ConcurrentDictionary is used because module initializers from multiple assemblies
     // can run concurrently when test assemblies are loaded in parallel.
@@ -32,21 +27,6 @@ public static class Mock
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
 
     /// <summary>
-    /// Registers the mapping from a mock implementation object to its <see cref="Mock{T}"/> wrapper.
-    /// Called from the <see cref="Mock{T}"/> constructor. Not intended for direct use.
-    /// </summary>
-    internal static void Register(object mockObject, IMock mockWrapper)
-    {
-#if NET7_0_OR_GREATER
-        _objectToMock.AddOrUpdate(mockObject, mockWrapper);
-#else
-        // ConditionalWeakTable.AddOrUpdate not available before .NET 7.
-        // Each mock object is unique (created by new), so Add will not throw.
-        _objectToMock.Add(mockObject, mockWrapper);
-#endif
-    }
-
-    /// <summary>
     /// Retrieves the <see cref="Mock{T}"/> wrapper for a mock implementation object.
     /// Use this to access the mock wrapper from auto-mocked return values or any mocked object.
     /// </summary>
@@ -60,13 +40,15 @@ public static class Mock
     /// </example>
     public static Mock<T> Get<T>(T mockedObject) where T : class
     {
-        if (_objectToMock.TryGetValue(mockedObject, out var mock))
+        if (mockedObject is IMockObject { MockWrapper: { } wrapper })
         {
-            if (mock is Mock<T> typed)
+            if (wrapper is Mock<T> typed)
+            {
                 return typed;
+            }
 
             throw new InvalidOperationException(
-                $"The object is a mock of '{mock.GetType().GenericTypeArguments[0].Name}', not '{typeof(T).Name}'.");
+                $"The object is a mock of '{wrapper.GetType().GenericTypeArguments[0].Name}', not '{typeof(T).Name}'.");
         }
 
         throw new InvalidOperationException(
@@ -81,7 +63,7 @@ public static class Mock
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void RegisterFactory<T>(Func<MockBehavior, Mock<T>> factory) where T : class
     {
-        _factories[typeof(T)] = behavior => factory(behavior);
+        _factories[typeof(T)] = factory;
     }
 
     /// <summary>
@@ -91,7 +73,7 @@ public static class Mock
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void RegisterPartialFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
     {
-        _partialFactories[typeof(T)] = (behavior, args) => factory(behavior, args);
+        _partialFactories[typeof(T)] = factory;
     }
 
     /// <summary>
@@ -111,7 +93,7 @@ public static class Mock
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void RegisterDelegateFactory<T>(Func<MockBehavior, Mock<T>> factory) where T : class
     {
-        _delegateFactories[typeof(T)] = behavior => factory(behavior);
+        _delegateFactories[typeof(T)] = factory;
     }
 
     /// <summary>

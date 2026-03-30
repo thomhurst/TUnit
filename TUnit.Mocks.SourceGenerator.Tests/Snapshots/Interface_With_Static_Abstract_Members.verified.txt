@@ -79,9 +79,12 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IServiceFactory_MockImpl : global::TUnit.Mocks.Generated.IServiceFactory_Mockable, global::TUnit.Mocks.IRaisable
+    internal sealed class IServiceFactory_MockImpl : global::TUnit.Mocks.Generated.IServiceFactory_Mockable, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> _engine;
+
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
         internal IServiceFactory_MockImpl(global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> engine)
         {
