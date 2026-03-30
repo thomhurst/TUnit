@@ -19,10 +19,6 @@ public interface IVoidMethodSetup
     /// <summary>Execute a callback when the method is called.</summary>
     IVoidSetupChain Callback(Action callback);
 
-    /// <summary>Execute a callback with the method arguments when the method is called.</summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    IVoidSetupChain Callback(Action<object?[]> callback);
-
     /// <summary>Configure a computed exception based on method arguments to throw.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     IVoidSetupChain Throws(Func<object?[], Exception> exceptionFactory);

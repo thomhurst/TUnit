@@ -137,8 +137,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IMyService_GetValue_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IMyService_GetValue_M0_MockCall Callback(global::System.Action<object?[]> callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
         public IMyService_GetValue_M0_MockCall Returns(global::System.Func<object?[], string> factory) { EnsureSetup().Returns(factory); return this; }
         /// <inheritdoc />
         public IMyService_GetValue_M0_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }

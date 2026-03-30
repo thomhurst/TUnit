@@ -195,8 +195,6 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action<object?[]> callback) {{ EnsureSetup().Callback(callback); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Returns(global::System.Func<object?[], {returnType}> factory) {{ EnsureSetup().Returns(factory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
@@ -330,8 +328,6 @@ internal static class MockMembersBuilder
             writer.AppendLine($"public {wrapperName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
-            writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action<object?[]> callback) {{ EnsureSetup().Callback(callback); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) {{ EnsureSetup().Throws(exceptionFactory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");

@@ -26,10 +26,6 @@ public interface IMethodSetup<TReturn>
     /// <summary>Execute a callback when the method is called.</summary>
     ISetupChain<TReturn> Callback(Action callback);
 
-    /// <summary>Execute a callback with the method arguments when the method is called.</summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    ISetupChain<TReturn> Callback(Action<object?[]> callback);
-
     /// <summary>Configure a computed return value based on method arguments.</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory);

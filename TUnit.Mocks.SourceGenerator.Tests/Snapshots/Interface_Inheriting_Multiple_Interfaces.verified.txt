@@ -139,8 +139,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IReadWriter_Write_M2_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IReadWriter_Write_M2_MockCall Callback(global::System.Action<object?[]> callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
         public IReadWriter_Write_M2_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
         /// <inheritdoc />
         public IReadWriter_Write_M2_MockCall Raises(string eventName, object? args = null) { EnsureSetup().Raises(eventName, args); return this; }

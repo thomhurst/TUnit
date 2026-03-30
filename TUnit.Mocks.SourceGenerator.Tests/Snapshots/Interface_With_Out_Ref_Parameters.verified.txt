@@ -144,8 +144,6 @@ namespace TUnit.Mocks.Generated
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action<object?[]> callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall Returns(global::System.Func<object?[], bool> factory) { EnsureSetup().Returns(factory); return this; }
         /// <inheritdoc />
         public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
@@ -234,8 +232,6 @@ namespace TUnit.Mocks.Generated
         public IDictionary_Swap_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
         /// <inheritdoc />
         public IDictionary_Swap_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Callback(global::System.Action<object?[]> callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
         public IDictionary_Swap_M1_MockCall Throws(global::System.Func<object?[], global::System.Exception> exceptionFactory) { EnsureSetup().Throws(exceptionFactory); return this; }
         /// <inheritdoc />

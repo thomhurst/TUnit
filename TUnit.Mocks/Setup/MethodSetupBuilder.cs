@@ -57,12 +57,14 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Callback(Action<object?[]> callback)
     {
         _setup.AddBehavior(new CallbackWithArgsBehavior(callback));
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory)
     {
         _setup.AddBehavior(new ComputedReturnWithArgsBehavior<TReturn>(factory));

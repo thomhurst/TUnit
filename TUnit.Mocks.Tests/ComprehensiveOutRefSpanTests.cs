@@ -401,7 +401,7 @@ public class MultipleOutParamsTests
         string? capturedInput = null;
         var mock = Mock.Of<IMultiOutput>();
         mock.Extract(Any())
-            .Callback((Action<object?[]>)(args => capturedInput = (string?)args[0]))
+            .Callback((string input) => capturedInput = input)
             .Returns(true)
             .SetsOutCount(1)
             .SetsOutData(new ReadOnlySpan<byte>([0xDE]));
@@ -1343,7 +1343,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
         string? capturedInput = null;
         var mock = Mock.Of<ISpanParser>();
         mock.TryParse(Any())
-            .Callback((Action<object?[]>)(args => capturedInput = (string?)args[0]))
+            .Callback((string input) => capturedInput = input)
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([1]));
 
