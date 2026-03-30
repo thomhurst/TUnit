@@ -610,4 +610,22 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task GenerateMock_Attribute_With_Concrete_Class()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            [assembly: GenerateMock(typeof(MyService))]
+
+            public class MyService
+            {
+                public virtual string GetValue() => "real";
+                public virtual void DoWork() { }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
