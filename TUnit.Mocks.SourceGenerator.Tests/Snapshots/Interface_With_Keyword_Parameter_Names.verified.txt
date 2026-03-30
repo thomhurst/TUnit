@@ -8,7 +8,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterFactory<global::ITest>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::ITest>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::ITest> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
@@ -74,34 +74,34 @@ namespace TUnit.Mocks.Generated
         public static ITest_Test_M0_MockCall Test(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.Arg<string> @event)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { @event.Matcher };
-            return new ITest_Test_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Test", matchers);
+            return new ITest_Test_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Test", matchers);
         }
 
         public static ITest_Test_M0_MockCall Test(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<string, bool> @event)
         {
             global::TUnit.Mocks.Arguments.Arg<string> __fa_event = @event;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_event.Matcher };
-            return new ITest_Test_M0_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Test", matchers);
+            return new ITest_Test_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Test", matchers);
         }
 
         public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.Arg<int> @class, global::TUnit.Mocks.Arguments.Arg<string> @return)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { @class.Matcher, @return.Matcher };
-            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Get", matchers);
+            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
         public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool> @class, global::TUnit.Mocks.Arguments.Arg<string> @return)
         {
             global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_class.Matcher, @return.Matcher };
-            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Get", matchers);
+            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
         public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.Arg<int> @class, global::System.Func<string, bool> @return)
         {
             global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { @class.Matcher, __fa_return.Matcher };
-            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Get", matchers);
+            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
 
         public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::System.Func<int, bool> @class, global::System.Func<string, bool> @return)
@@ -109,7 +109,7 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Arguments.Arg<int> __fa_class = @class;
             global::TUnit.Mocks.Arguments.Arg<string> __fa_return = @return;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_class.Matcher, __fa_return.Matcher };
-            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Get", matchers);
+            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
     }
 

@@ -87,7 +87,7 @@ public class EventSubscriptionSetupTests
         var callbackFired = false;
 
         mock.Events.DataReady.OnSubscribe(() => callbackFired = true);
-        Mock.Reset(mock);
+        mock.Reset();
 
         mock.Object.DataReady += (sender, args) => { };
 

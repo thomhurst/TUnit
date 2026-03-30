@@ -114,7 +114,7 @@ public class MultipleInterfaceTests
         ((IMultiDisposable)mock.Object).Dispose();
 
         // Assert — all calls recorded in invocations
-        await Assert.That(Mock.GetInvocations(mock)).Count().IsEqualTo(2);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -180,7 +180,7 @@ public class MultipleInterfaceTests
         ((IMultiCloneable)mock.Object).Clone();
 
         // Assert — all 4 calls tracked
-        await Assert.That(Mock.GetInvocations(mock)).Count().IsEqualTo(4);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(4);
     }
 
     [Test]
@@ -190,6 +190,6 @@ public class MultipleInterfaceTests
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>(MockBehavior.Strict);
 
         // Assert — strict behavior inherited
-        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
     }
 }

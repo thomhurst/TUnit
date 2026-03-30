@@ -74,15 +74,15 @@ public interface IConnection
 }
 
 var mock = Mock.Of<IConnection>();
-Mock.SetState(mock, "disconnected");
+mock.SetState("disconnected");
 
-Mock.InState(mock, "disconnected", m =>
+mock.InState("disconnected", m =>
 {
     m.GetStatus().Returns("OFFLINE");
     m.Connect().TransitionsTo("connected");
 });
 
-Mock.InState(mock, "connected", m =>
+mock.InState("connected", m =>
 {
     m.GetStatus().Returns("ONLINE");
     m.Disconnect().TransitionsTo("disconnected");
@@ -102,9 +102,9 @@ status = mock.Object.GetStatus();     // "OFFLINE"
 
 | Method | Description |
 |---|---|
-| `Mock.SetState(mock, "name")` | Set the current state |
-| `Mock.SetState(mock, null)` | Clear state (all setups match) |
-| `Mock.InState(mock, "name", configure)` | Register setups scoped to a state |
+| `mock.SetState("name")` | Set the current state |
+| `mock.SetState(null)` | Clear state (all setups match) |
+| `mock.InState("name", configure)` | Register setups scoped to a state |
 | `.TransitionsTo("name")` | Transition state after method call (on setup chain) |
 
 ## Recursive / Auto-Mocking
@@ -187,7 +187,7 @@ mock.Delete(Any());
 svc.GetUser(1);
 // Delete was never called
 
-var diag = Mock.GetDiagnostics(mock);
+var diag = mock.GetDiagnostics();
 diag.TotalSetups;       // 2
 diag.ExercisedSetups;   // 1
 diag.UnusedSetups;      // [Delete(Any())]
@@ -215,7 +215,7 @@ public class TestDefaults : IDefaultValueProvider
 }
 
 var mock = Mock.Of<IService>();
-Mock.SetDefaultValueProvider(mock, new TestDefaults());
+mock.DefaultValueProvider = new TestDefaults();
 
 var name = mock.Object.GetName();  // "test-default" (no setup needed)
 var count = mock.Object.GetCount(); // -1
@@ -231,10 +231,10 @@ Clear all setups, call history, state, and auto-tracked property values:
 mock.GetUser(Any()).Returns(new User("Alice"));
 svc.GetUser(1);
 
-Mock.Reset(mock);
+mock.Reset();
 
 svc.GetUser(1); // returns default (setup cleared)
-Mock.GetInvocations(mock).Count; // 0 (history cleared)
+mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.

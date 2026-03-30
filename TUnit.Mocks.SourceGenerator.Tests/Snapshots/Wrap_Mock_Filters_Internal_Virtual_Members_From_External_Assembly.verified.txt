@@ -8,13 +8,13 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.MockMethodCall<string> PublicMethod(this global::TUnit.Mocks.Mock<global::ExternalLib.ExternalService> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "PublicMethod", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "PublicMethod", matchers);
         }
 
         extension(global::TUnit.Mocks.Mock<global::ExternalLib.ExternalService> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<string> PublicProperty
-                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 1, 2, "PublicProperty", true, true);
+                => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, 2, "PublicProperty", true, true);
         }
     }
 }
@@ -32,7 +32,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterWrapFactory<global::ExternalLib.ExternalService>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterWrapFactory<global::ExternalLib.ExternalService>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::ExternalLib.ExternalService> Create(global::TUnit.Mocks.MockBehavior behavior, global::ExternalLib.ExternalService instance)

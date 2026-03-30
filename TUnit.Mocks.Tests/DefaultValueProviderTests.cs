@@ -28,7 +28,7 @@ public class DefaultValueProviderTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        Mock.SetDefaultValueProvider(mock, new CustomProvider());
+        mock.DefaultValueProvider = new CustomProvider();
 
         IGreeter greeter = mock.Object;
 
@@ -44,7 +44,7 @@ public class DefaultValueProviderTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        Mock.SetDefaultValueProvider(mock, new CustomProvider());
+        mock.DefaultValueProvider = new CustomProvider();
 
         ICalculator calc = mock.Object;
 
@@ -60,7 +60,7 @@ public class DefaultValueProviderTests
     {
         // Arrange
         var mock = Mock.Of<ICalculator>();
-        Mock.SetDefaultValueProvider(mock, new CustomProvider());
+        mock.DefaultValueProvider = new CustomProvider();
         mock.Add(1, 2).Returns(100);
 
         ICalculator calc = mock.Object;
@@ -92,7 +92,7 @@ public class DefaultValueProviderTests
     {
         // Arrange
         var mock = Mock.Of<IGreeter>();
-        Mock.SetDefaultValueProvider(mock, DefaultValueProvider.Instance);
+        mock.DefaultValueProvider = DefaultValueProvider.Instance;
 
         IGreeter greeter = mock.Object;
 

@@ -32,7 +32,7 @@ internal static class MockEventsBuilder
                 // Extension property on Mock<T> — non-nullable, only present when type has events
                 using (writer.Block($"extension(global::TUnit.Mocks.Mock<{mockableType}> mock)"))
                 {
-                    writer.AppendLine($"public {safeName}_MockEvents Events => new(global::TUnit.Mocks.Mock.GetEngine(mock));");
+                    writer.AppendLine($"public {safeName}_MockEvents Events => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock));");
                 }
 
                 writer.AppendLine();

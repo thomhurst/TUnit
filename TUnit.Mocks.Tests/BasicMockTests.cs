@@ -160,7 +160,7 @@ public class BasicMockTests
         await Assert.That(calc.Add(1, 1)).IsEqualTo(42);
 
         // Act
-        Mock.Reset(mock);
+        mock.Reset();
 
         // Assert — after reset, returns default
         await Assert.That(calc.Add(1, 1)).IsEqualTo(0);

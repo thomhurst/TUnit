@@ -104,7 +104,7 @@ mock.Delete(Any());
 svc.GetUser(1);
 svc.Delete(2);
 
-Mock.VerifyAll(mock); // passes — both setups were invoked
+mock.VerifyAll(); // passes — both setups were invoked
 ```
 
 If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
@@ -120,7 +120,7 @@ svc.Delete(2);
 mock.GetUser(1).WasCalled(Times.Once);
 mock.Delete(2).WasCalled(Times.Once);
 
-Mock.VerifyNoOtherCalls(mock); // passes — all calls accounted for
+mock.VerifyNoOtherCalls(); // passes — all calls accounted for
 ```
 
 If there are unverified calls, `VerifyNoOtherCalls` throws listing them.
@@ -146,7 +146,7 @@ This integrates with TUnit's assertion engine — failures appear as assertion e
 Access the raw call history for custom inspection:
 
 ```csharp
-var calls = Mock.GetInvocations(mock);
+var calls = mock.Invocations;
 
 await Assert.That(calls).HasCount().EqualTo(3);
 await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");

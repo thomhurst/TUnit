@@ -640,19 +640,19 @@ internal static class MockMembersBuilder
             if (useTypedWrapper)
             {
                 var wrapperName = GetWrapperName(safeName, method);
-                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsVoid || method.IsRefStructReturn)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
         }
     }
@@ -779,19 +779,19 @@ internal static class MockMembersBuilder
             if (useTypedWrapper)
             {
                 var wrapperName = GetWrapperName(safeName, method);
-                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsVoid || method.IsRefStructReturn)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else
             {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.Mock.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
         }
     }
@@ -815,7 +815,7 @@ internal static class MockMembersBuilder
                 var safePropName = GetSafeMemberName(prop.Name);
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
-                writer.AppendLine($"    => new(global::TUnit.Mocks.Mock.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+                writer.AppendLine($"    => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
             }
         }
     }
@@ -855,7 +855,7 @@ internal static class MockMembersBuilder
 
             using (writer.Block($"public static void Raise{evt.Name}({raiseParams})"))
             {
-                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.Mock.GetEngine(mock).Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
+                writer.AppendLine($"((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
             }
         }
     }
