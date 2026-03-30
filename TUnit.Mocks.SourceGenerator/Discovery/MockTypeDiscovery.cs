@@ -11,12 +11,12 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 internal static class MockTypeDiscovery
 {
     /// <summary>
-    /// Syntax predicate: quick check if a node might be a Mock.Of&lt;T&gt;(), Mock.OfPartial&lt;T&gt;(),
-    /// or MockRepository.Of&lt;T&gt;() call. Zero allocations - string comparison only.
+    /// Syntax predicate: quick check if a node might be a Mock.Of&lt;T&gt;(),
+    /// MockRepository.Of&lt;T&gt;(), etc. Zero allocations - string comparison only.
     /// </summary>
     public static bool IsMockOfInvocation(SyntaxNode node, CancellationToken ct)
     {
-        // Match: X.Of<T>() or X.Of<T>(behavior) or X.OfPartial<T>(...)
+        // Match: X.Of<T>() or X.Of<T>(behavior, args) etc.
         // where X can be "Mock" (static) or a MockRepository variable (instance).
         // Also match X.Wrap(instance) where T is inferred (IdentifierNameSyntax).
         if (node is not InvocationExpressionSyntax invocation)
@@ -29,7 +29,7 @@ internal static class MockTypeDiscovery
         if (memberAccess.Name is GenericNameSyntax genericName)
         {
             var methodName = genericName.Identifier.ValueText;
-            return methodName is "Of" or "OfPartial" or "OfDelegate" or "Wrap";
+            return methodName is "Of" or "OfDelegate" or "Wrap";
         }
 
         // Simple name syntax: Mock.Wrap(instance) with type inference
@@ -63,14 +63,12 @@ internal static class MockTypeDiscovery
         if (method is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
-        // Verify this is TUnit.Mocks.Mock.Of<T>() / OfPartial<T>()
-        // or TUnit.Mocks.MockRepository.Of<T>() / OfPartial<T>()
+        // Verify this is TUnit.Mocks.Mock.Of<T>() or TUnit.Mocks.MockRepository.Of<T>()
         var containingTypeName = method.ContainingType?.Name;
         if ((containingTypeName != "Mock" && containingTypeName != "MockRepository") ||
             method.ContainingNamespace?.ToDisplayString() != "TUnit.Mocks")
             return ImmutableArray<MockTypeModel>.Empty;
 
-        var isPartialMock = method.Name == "OfPartial";
         var isDelegateMock = method.Name == "OfDelegate";
         var isWrapMock = method.Name == "Wrap";
 
@@ -124,6 +122,9 @@ internal static class MockTypeDiscovery
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Single-type mock: build one model + transitive interface return types
+        // Partial mock behavior is determined by type kind — classes get partial mocks automatically.
+        var isPartialMock = namedType.TypeKind == TypeKind.Class;
+
         if (method.TypeArguments.Length == 1)
         {
             var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
@@ -397,7 +398,7 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            var model = BuildSingleTypeModel(namedType, isPartialMock: false, compilationAssembly);
+            var model = BuildSingleTypeModel(namedType, isPartialMock: namedType.TypeKind == TypeKind.Class, compilationAssembly);
             if (model is null)
                 continue;
 

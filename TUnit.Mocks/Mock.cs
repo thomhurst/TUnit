@@ -12,16 +12,14 @@ public static class Mock
     // The source generator registers factories via this method at module initialization time.
     // ConcurrentDictionary is used because module initializers from multiple assemblies
     // can run concurrently when test assemblies are loaded in parallel.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object>> _factories = new();
-
-    // Separate registry for partial mock factories that accept constructor args.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _partialFactories = new();
+    // All factories (interface, class, abstract) use a unified signature with constructor args.
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _factories = new();
 
     // Registry for multi-interface mock factories, keyed by compound type string.
-    private static readonly ConcurrentDictionary<string, Func<MockBehavior, object>> _multiFactories = new();
+    private static readonly ConcurrentDictionary<string, Func<MockBehavior, object[], object>> _multiFactories = new();
 
     // Separate registry for delegate mock factories.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object>> _delegateFactories = new();
+    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _delegateFactories = new();
 
     // Separate registry for wrap mock factories that accept a real instance.
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
@@ -61,19 +59,9 @@ public static class Mock
     /// Not intended for direct use.
     /// </summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterFactory<T>(Func<MockBehavior, Mock<T>> factory) where T : class
+    public static void RegisterFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
     {
         _factories[typeof(T)] = factory;
-    }
-
-    /// <summary>
-    /// Registers a factory for creating partial mocks of type T. Called by generated code.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterPartialFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
-    {
-        _partialFactories[typeof(T)] = factory;
     }
 
     /// <summary>
@@ -81,7 +69,7 @@ public static class Mock
     /// Not intended for direct use.
     /// </summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterMultiFactory(string key, Func<MockBehavior, object> factory)
+    public static void RegisterMultiFactory(string key, Func<MockBehavior, object[], object> factory)
     {
         _multiFactories[key] = factory;
     }
@@ -91,7 +79,7 @@ public static class Mock
     /// Not intended for direct use.
     /// </summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterDelegateFactory<T>(Func<MockBehavior, Mock<T>> factory) where T : class
+    public static void RegisterDelegateFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
     {
         _delegateFactories[typeof(T)] = factory;
     }
@@ -119,32 +107,23 @@ public static class Mock
 
     /// <summary>Creates a mock of T with specified behavior.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior) where T : class
+        => Of<T>(behavior, Array.Empty<object>());
+
+    /// <summary>Creates a mock of T in loose mode, optionally passing constructor arguments for concrete classes.</summary>
+    public static Mock<T> Of<T>(params object[] constructorArgs) where T : class
+        => Of<T>(MockBehavior.Loose, constructorArgs);
+
+    /// <summary>Creates a mock of T with specified behavior, optionally passing constructor arguments for concrete classes.</summary>
+    public static Mock<T> Of<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
     {
         if (_factories.TryGetValue(typeof(T), out var factory))
-        {
-            return (Mock<T>)factory(behavior);
-        }
-
-        throw new InvalidOperationException(
-            $"No mock factory registered for type '{typeof(T).FullName}'. " +
-            $"Ensure the TUnit.Mocks source generator is referenced in your project.");
-    }
-
-    /// <summary>Creates a partial mock of T in loose mode, optionally passing constructor arguments.</summary>
-    public static Mock<T> OfPartial<T>(params object[] constructorArgs) where T : class
-        => OfPartial<T>(MockBehavior.Loose, constructorArgs);
-
-    /// <summary>Creates a partial mock of T with specified behavior, optionally passing constructor arguments.</summary>
-    public static Mock<T> OfPartial<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
-    {
-        if (_partialFactories.TryGetValue(typeof(T), out var factory))
         {
             return (Mock<T>)factory(behavior, constructorArgs);
         }
 
         throw new InvalidOperationException(
-            $"No partial mock factory registered for type '{typeof(T).FullName}'. " +
-            $"Ensure the TUnit.Mocks source generator is referenced and the type is not sealed.");
+            $"No mock factory registered for type '{typeof(T).FullName}'. " +
+            $"Ensure the TUnit.Mocks source generator is referenced in your project.");
     }
 
     /// <summary>Creates a delegate mock of T in loose mode.</summary>
@@ -163,7 +142,7 @@ public static class Mock
     {
         if (_delegateFactories.TryGetValue(typeof(T), out var factory))
         {
-            return (Mock<T>)factory(behavior);
+            return (Mock<T>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -199,7 +178,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -219,7 +198,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -239,7 +218,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -257,7 +236,7 @@ public static class Mock
     {
         if (_factories.TryGetValue(type, out var factory))
         {
-            var mock = (IMock)factory(behavior);
+            var mock = (IMock)factory(behavior, Array.Empty<object>());
             mockWrapper = mock;
             return true;
         }

@@ -13,8 +13,8 @@ public class SealedClassMockAnalyzerTests
             {
                 public static object Of<T>() => default!;
                 public static object Of<T>(int behavior) => default!;
-                public static object OfPartial<T>(params object[] args) => default!;
-                public static object OfPartial<T>(int behavior, params object[] args) => default!;
+                public static object Of<T>(int behavior, params object[] args) => default!;
+                public static object Of<T>(params object[] args) => default!;
             }
         }
         """;
@@ -141,7 +141,7 @@ public class SealedClassMockAnalyzerTests
     }
 
     [Test]
-    public async Task Sealed_Class_Via_OfPartial_Reports_TM001()
+    public async Task Sealed_Class_With_Constructor_Args_Reports_TM001()
     {
         await Verifier.VerifyAnalyzerAsync(
             MockStub + """
@@ -152,7 +152,7 @@ public class SealedClassMockAnalyzerTests
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.Mock.OfPartial<MyService>()|};
+                    {|#0:TUnit.Mocks.Mock.Of<MyService>(0, "arg")|};
                 }
             }
             """,

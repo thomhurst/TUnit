@@ -11,8 +11,9 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Mock.RegisterFactory<global::IAsyncService>(Create);
         }
 
-        private static global::TUnit.Mocks.Mock<global::IAsyncService> Create(global::TUnit.Mocks.MockBehavior behavior)
+        private static global::TUnit.Mocks.Mock<global::IAsyncService> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IAsyncService' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IAsyncService>(behavior);
             var impl = new IAsyncService_MockImpl(engine);
             engine.Raisable = impl;

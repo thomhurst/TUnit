@@ -19,7 +19,7 @@ internal static class MockFactoryBuilder
             {
                 BuildWrapFactory(writer, model, safeName);
             }
-            else if (model.IsPartialMock && !model.IsInterface)
+            else if (model.IsPartialMock)
             {
                 BuildPartialFactory(writer, model, safeName);
             }
@@ -60,8 +60,9 @@ internal static class MockFactoryBuilder
             }
             writer.AppendLine();
 
-            using (writer.Block($"private static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior)"))
+            using (writer.Block($"private static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
             {
+                writer.AppendLine($"if (constructorArgs.Length > 0) throw new global::System.ArgumentException($\"Interface mock '{mockableType}' does not support constructor arguments, but {{constructorArgs.Length}} were provided.\");");
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
                 writer.AppendLine("engine.Raisable = impl;");
@@ -101,7 +102,7 @@ internal static class MockFactoryBuilder
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (writer.Block("internal static void Register()"))
             {
-                writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterPartialFactory<{model.FullyQualifiedName}>(Create);");
+                writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterFactory<{model.FullyQualifiedName}>(Create);");
             }
             writer.AppendLine();
 

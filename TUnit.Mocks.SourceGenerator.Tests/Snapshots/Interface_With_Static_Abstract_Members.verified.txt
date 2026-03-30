@@ -60,8 +60,9 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Mock.RegisterFactory<global::TUnit.Mocks.Generated.IServiceFactory_Mockable>(Create);
         }
 
-        private static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> Create(global::TUnit.Mocks.MockBehavior behavior)
+        private static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::TUnit.Mocks.Generated.IServiceFactory_Mockable' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IServiceFactory_Mockable>(behavior);
             var impl = new IServiceFactory_MockImpl(engine);
             engine.Raisable = impl;

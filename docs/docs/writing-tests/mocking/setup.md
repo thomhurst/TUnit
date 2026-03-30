@@ -167,7 +167,7 @@ public abstract class Calculator
     public abstract int Multiply(int a, int b);
 }
 
-var mock = Mock.OfPartial<Calculator>();
+var mock = Mock.Of<Calculator>();
 mock.Multiply(Any(), Any()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
@@ -177,8 +177,31 @@ mock.Object.Multiply(2, 3); // 99 (mocked)
 Pass constructor arguments for non-default constructors:
 
 ```csharp
-var mock = Mock.OfPartial<MyService>("connectionString", 42);
+var mock = Mock.Of<MyService>("connectionString", 42);
 ```
+
+## Interfaces with Static Abstract Members
+
+Interfaces that have static abstract members (directly or inherited) cannot be used as type arguments in `Mock.Of<T>()` — the compiler raises **CS8920** before the source generator runs.
+
+Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source generator produces a bridge interface (suffixed `_Mockable`) that provides default implementations for the static abstract members:
+
+```csharp
+using TUnit.Mocks;
+
+[assembly: GenerateMock(typeof(IMyParseable))]
+
+public interface IMyParseable : IParsable<IMyParseable>
+{
+    string Format();
+}
+
+// In your test — use the generated bridge type:
+var mock = Mock.Of<TUnit_Mocks_Tests_IMyParseable_Mockable>();
+mock.Format().Returns("formatted");
+```
+
+The bridge type implements all the non-static members of the original interface, so you can set up and verify calls as normal.
 
 ## Delegate Mocking
 

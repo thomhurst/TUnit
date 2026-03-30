@@ -13,8 +13,8 @@ public class StructMockAnalyzerTests
             {
                 public static object Of<T>() => default!;
                 public static object Of<T>(int behavior) => default!;
-                public static object OfPartial<T>(params object[] args) => default!;
-                public static object OfPartial<T>(int behavior, params object[] args) => default!;
+                public static object Of<T>(int behavior, params object[] args) => default!;
+                public static object Of<T>(params object[] args) => default!;
             }
         }
         """;
@@ -144,7 +144,7 @@ public class StructMockAnalyzerTests
     }
 
     [Test]
-    public async Task Struct_Via_OfPartial_Reports_TM002()
+    public async Task Struct_With_Constructor_Args_Reports_TM002()
     {
         await Verifier.VerifyAnalyzerAsync(
             MockStub + """
@@ -155,7 +155,7 @@ public class StructMockAnalyzerTests
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.Mock.OfPartial<MyStruct>()|};
+                    {|#0:TUnit.Mocks.Mock.Of<MyStruct>(0, "arg")|};
                 }
             }
             """,

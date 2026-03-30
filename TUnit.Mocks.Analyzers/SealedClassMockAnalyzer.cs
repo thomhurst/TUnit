@@ -60,7 +60,7 @@ public class SealedClassMockAnalyzer : DiagnosticAnalyzer
 
     private static bool IsMockOfMethod(IMethodSymbol method)
     {
-        return method.Name is "Of" or "OfPartial"
+        return method.Name is "Of"
                && method.ContainingType is { Name: "Mock" or "MockRepository", ContainingNamespace: { Name: "Mocks", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } } }
                && method.IsGenericMethod;
     }

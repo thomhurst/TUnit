@@ -69,11 +69,11 @@ public class GreeterTests
 
 | Factory Method | Use Case |
 |---|---|
-| `Mock.Of<T>()` | Mock an interface or abstract class |
-| `Mock.OfPartial<T>(args)` | Mock a concrete class (calls base for unconfigured methods) |
+| `Mock.Of<T>()` | Mock an interface, abstract class, or concrete class |
 | `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
 | `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
 | `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |
+| `[GenerateMock(typeof(T))]` | Generate a mock for interfaces with static abstract members ([details](setup#interfaces-with-static-abstract-members)) |
 | `Mock.HttpHandler()` | Create a `MockHttpHandler` *(requires `TUnit.Mocks.Http`)* |
 | `Mock.HttpClient(baseAddress?)` | Create a `MockHttpClient` — an `HttpClient` with a `.Handler` property *(requires `TUnit.Mocks.Http`)* |
 | `Mock.Logger()` | Create a `MockLogger` *(requires `TUnit.Mocks.Logging`)* |

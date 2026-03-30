@@ -465,7 +465,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<BaseService>();
+                    var mock = Mock.Of<BaseService>();
                 }
             }
             """;
@@ -505,7 +505,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<ExternalClient>();
+                    var mock = Mock.Of<ExternalClient>();
                 }
             }
             """;
@@ -543,7 +543,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<ServiceClient>();
+                    var mock = Mock.Of<ServiceClient>();
                 }
             }
             """;
@@ -605,6 +605,24 @@ public class MockGeneratorTests : SnapshotTestBase
                 {
                     var mock = Mock.Wrap(new Repository());
                 }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task GenerateMock_Attribute_With_Concrete_Class()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            [assembly: GenerateMock(typeof(MyService))]
+
+            public class MyService
+            {
+                public virtual string GetValue() => "real";
+                public virtual void DoWork() { }
             }
             """;
 
