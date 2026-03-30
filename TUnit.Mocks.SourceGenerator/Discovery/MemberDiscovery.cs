@@ -16,7 +16,7 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 internal static class MemberDiscovery
 {
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
-        DiscoverMembers(ITypeSymbol typeSymbol)
+        DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
@@ -36,7 +36,7 @@ internal static class MemberDiscovery
         // If it's a class, also include its own members
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
-            ProcessClassMembers(typeSymbol, methods, properties, events,
+            ProcessClassMembers(typeSymbol, compilationAssembly, methods, properties, events,
                 seenMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
@@ -218,6 +218,7 @@ internal static class MemberDiscovery
 
     private static void ProcessClassMembers(
         ITypeSymbol typeSymbol,
+        IAssemblySymbol? compilationAssembly,
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
@@ -230,6 +231,13 @@ internal static class MemberDiscovery
         var current = typeSymbol;
         while (current != null && current.SpecialType != SpecialType.System_Object)
         {
+            // Pre-compute per-level: are internal members of this type accessible?
+            // Avoids repeated SymbolEqualityComparer + GivesAccessTo checks per member.
+            var isExternalType = compilationAssembly is not null
+                && !SymbolEqualityComparer.Default.Equals(current.ContainingAssembly, compilationAssembly);
+            var hasInternalAccess = isExternalType
+                && current.ContainingAssembly.GivesAccessTo(compilationAssembly!);
+
             foreach (var member in current.GetMembers())
             {
                 if (member.IsStatic) continue;
@@ -238,6 +246,10 @@ internal static class MemberDiscovery
                 if (member.DeclaredAccessibility == Accessibility.Private) continue;
                 if (member is IMethodSymbol { IsSealed: true }) continue;
                 if (member is IPropertySymbol { IsSealed: true }) continue;
+
+                // Skip members inaccessible from the compilation assembly
+                // (e.g., internal virtual methods from external assemblies like Azure SDK)
+                if (isExternalType && !IsMemberAccessibleFromExternal(member, compilationAssembly!, hasInternalAccess)) continue;
 
                 switch (member)
                 {
@@ -280,6 +292,101 @@ internal static class MemberDiscovery
 
             current = current.BaseType;
         }
+    }
+
+    /// <summary>
+    /// Checks accessibility for a member known to be from an external assembly.
+    /// Used in the hot loop where assembly identity is pre-computed per hierarchy level.
+    /// </summary>
+    private static bool IsMemberAccessibleFromExternal(ISymbol member, IAssemblySymbol compilationAssembly, bool hasInternalAccess)
+    {
+        var accessibility = member.DeclaredAccessibility;
+        if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
+        {
+            if (!hasInternalAccess)
+                return false;
+        }
+
+        return AreMemberSignatureTypesAccessible(member, compilationAssembly);
+    }
+
+    /// <summary>
+    /// Full accessibility check for members where the containing assembly isn't pre-computed
+    /// (used by DiscoverConstructors).
+    /// </summary>
+    private static bool IsMemberAccessible(ISymbol member, IAssemblySymbol? compilationAssembly)
+    {
+        if (compilationAssembly is null) return true;
+
+        var memberAssembly = member.ContainingAssembly;
+        if (SymbolEqualityComparer.Default.Equals(memberAssembly, compilationAssembly))
+            return true;
+
+        var accessibility = member.DeclaredAccessibility;
+        if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
+        {
+            if (!memberAssembly.GivesAccessTo(compilationAssembly))
+                return false;
+        }
+
+        return AreMemberSignatureTypesAccessible(member, compilationAssembly);
+    }
+
+    private static bool AreMemberSignatureTypesAccessible(ISymbol member, IAssemblySymbol compilationAssembly)
+    {
+        switch (member)
+        {
+            case IMethodSymbol method:
+                if (!IsTypeAccessible(method.ReturnType, compilationAssembly)) return false;
+                foreach (var param in method.Parameters)
+                {
+                    if (!IsTypeAccessible(param.Type, compilationAssembly)) return false;
+                }
+                return true;
+
+            case IPropertySymbol property:
+                return IsTypeAccessible(property.Type, compilationAssembly);
+
+            case IEventSymbol evt:
+                return IsTypeAccessible(evt.Type, compilationAssembly);
+
+            default:
+                return true;
+        }
+    }
+
+    private static bool IsTypeAccessible(ITypeSymbol type, IAssemblySymbol compilationAssembly)
+    {
+        // Type parameters are always accessible
+        if (type is ITypeParameterSymbol) return true;
+
+        // Arrays: check element type
+        if (type is IArrayTypeSymbol arrayType)
+            return IsTypeAccessible(arrayType.ElementType, compilationAssembly);
+
+        // Check the type itself before recursing into type arguments (short-circuits early)
+        var typeAssembly = type.ContainingAssembly;
+        if (typeAssembly is not null
+            && !SymbolEqualityComparer.Default.Equals(typeAssembly, compilationAssembly))
+        {
+            var accessibility = type.DeclaredAccessibility;
+            if (accessibility == Accessibility.Private) return false;
+            if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
+            {
+                if (!typeAssembly.GivesAccessTo(compilationAssembly)) return false;
+            }
+        }
+
+        // For generic types, also check type arguments
+        if (type is INamedTypeSymbol namedType)
+        {
+            foreach (var typeArg in namedType.TypeArguments)
+            {
+                if (!IsTypeAccessible(typeArg, compilationAssembly)) return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -404,13 +511,14 @@ internal static class MemberDiscovery
     /// <summary>
     /// Discovers all accessible constructors of a class type for partial mock generation.
     /// </summary>
-    public static EquatableArray<MockConstructorModel> DiscoverConstructors(INamedTypeSymbol typeSymbol)
+    public static EquatableArray<MockConstructorModel> DiscoverConstructors(INamedTypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
     {
         var constructors = new List<MockConstructorModel>();
 
         foreach (var ctor in typeSymbol.InstanceConstructors)
         {
             if (ctor.DeclaredAccessibility == Accessibility.Private) continue;
+            if (!IsMemberAccessible(ctor, compilationAssembly)) continue;
 
             constructors.Add(new MockConstructorModel
             {

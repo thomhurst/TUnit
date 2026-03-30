@@ -443,4 +443,134 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Partial_Mock_With_Generic_Constrained_Virtual_Methods()
+    {
+        var source = """
+            using TUnit.Mocks;
+            using System.Collections.Generic;
+
+            public abstract class BaseService
+            {
+                public virtual T GetById<T>(int id) where T : class => default!;
+                public virtual void Save<T>(T entity) where T : class, new() { }
+                public virtual TResult Transform<TInput, TResult>(TInput input)
+                    where TInput : notnull where TResult : struct
+                    => default;
+                public abstract IEnumerable<T> GetAll<T>() where T : class;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.OfPartial<BaseService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Partial_Mock_Filters_Internal_Virtual_Members_From_External_Assembly()
+    {
+        // Simulate an external assembly with internal and public virtual members
+        var externalSource = """
+            namespace ExternalLib
+            {
+                public class ExternalClient
+                {
+                    public virtual string PublicMethod(string input) => input;
+                    internal virtual string InternalMethod() => "internal";
+                    protected internal virtual string ProtectedInternalMethod() => "protected internal";
+                    public virtual string PublicProperty { get; set; } = "";
+                    internal virtual string InternalProperty { get; set; } = "";
+
+                    public ExternalClient() { }
+                    internal ExternalClient(int secret) { }
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.OfPartial<ExternalClient>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
+    public Task Partial_Mock_Filters_Members_With_Internal_Signature_Types()
+    {
+        // External assembly has internal virtual methods whose signatures use internal types
+        var externalSource = """
+            namespace ExternalLib
+            {
+                internal class InternalConfig { }
+
+                public class ServiceClient
+                {
+                    public virtual string GetValue(string key) => key;
+                    internal virtual void Configure(InternalConfig config) { }
+                    internal virtual InternalConfig GetConfig() => new InternalConfig();
+
+                    public ServiceClient() { }
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.OfPartial<ServiceClient>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
+    public Task Wrap_Mock_With_Generic_Constrained_Virtual_Methods()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public class Repository
+            {
+                public virtual T Get<T>(int id) where T : class => default!;
+                public virtual void Store<T>(T item) where T : class, new() { }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Wrap(new Repository());
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }

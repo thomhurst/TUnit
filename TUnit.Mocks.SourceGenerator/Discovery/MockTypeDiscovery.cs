@@ -85,6 +85,9 @@ internal static class MockTypeDiscovery
         if (namedType.TypeKind == TypeKind.Error)
             return ImmutableArray<MockTypeModel>.Empty;
 
+        // Get the compilation assembly for accessibility checks on external types
+        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
+
         // Delegate mocking
         if (isDelegateMock)
         {
@@ -105,7 +108,7 @@ internal static class MockTypeDiscovery
                 return ImmutableArray<MockTypeModel>.Empty;
 
             // Wrap uses the same model as partial mock but with IsWrapMock flag
-            var wrapModel = BuildSingleTypeModel(namedType, isPartialMock: true);
+            var wrapModel = BuildSingleTypeModel(namedType, isPartialMock: true, compilationAssembly);
             if (wrapModel is null)
                 return ImmutableArray<MockTypeModel>.Empty;
 
@@ -123,7 +126,7 @@ internal static class MockTypeDiscovery
         // Single-type mock: build one model + transitive interface return types
         if (method.TypeArguments.Length == 1)
         {
-            var model = BuildSingleTypeModel(namedType, isPartialMock);
+            var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
             if (model is null)
                 return ImmutableArray<MockTypeModel>.Empty;
 
@@ -152,7 +155,7 @@ internal static class MockTypeDiscovery
         }
 
         // Build single-type model for primary type (generates setup/verify/raise)
-        var singleTypeModel = BuildSingleTypeModel(namedType, isPartialMock);
+        var singleTypeModel = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
         if (singleTypeModel is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
@@ -332,13 +335,13 @@ internal static class MockTypeDiscovery
         };
     }
 
-    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock)
+    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly = null)
     {
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly);
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
-            ? MemberDiscovery.DiscoverConstructors(namedType)
+            ? MemberDiscovery.DiscoverConstructors(namedType, compilationAssembly)
             : EquatableArray<MockConstructorModel>.Empty;
 
         return new MockTypeModel
@@ -373,6 +376,7 @@ internal static class MockTypeDiscovery
     {
         // The target symbol for an assembly attribute is the assembly itself
         // The attribute constructor argument is typeof(T)
+        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
         foreach (var attr in context.Attributes)
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
@@ -393,7 +397,7 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            var model = BuildSingleTypeModel(namedType, isPartialMock: false);
+            var model = BuildSingleTypeModel(namedType, isPartialMock: false, compilationAssembly);
             if (model is null)
                 continue;
 
