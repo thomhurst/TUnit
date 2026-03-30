@@ -32,7 +32,7 @@ public class ProtectedMemberTests
     public async Task Protected_Virtual_Method_Calls_Base_When_Not_Configured()
     {
         // Arrange
-        var mock = Mock.OfPartial<ProtectedServiceBase>();
+        var mock = Mock.Of<ProtectedServiceBase>();
         mock.GetName().Returns("Test");
         mock.FormatResult(Any()).Returns("formatted");
 
@@ -48,7 +48,7 @@ public class ProtectedMemberTests
     public async Task Protected_Virtual_Method_Can_Be_Configured()
     {
         // Arrange
-        var mock = Mock.OfPartial<ProtectedServiceBase>();
+        var mock = Mock.Of<ProtectedServiceBase>();
         mock.GetName().Returns("Test");
         mock.ComputeValue(Any()).Returns(42);
         mock.FormatResult(Any()).Returns("configured");
@@ -65,7 +65,7 @@ public class ProtectedMemberTests
     public async Task Protected_Abstract_Method_Can_Be_Configured()
     {
         // Arrange
-        var mock = Mock.OfPartial<ProtectedServiceBase>();
+        var mock = Mock.Of<ProtectedServiceBase>();
         mock.GetName().Returns("Test");
         mock.FormatResult(Any()).Returns("custom format");
 
@@ -80,7 +80,7 @@ public class ProtectedMemberTests
     public async Task Protected_Method_Calls_Are_Recorded_In_Invocations()
     {
         // Arrange
-        var mock = Mock.OfPartial<ProtectedServiceBase>();
+        var mock = Mock.Of<ProtectedServiceBase>();
         mock.GetName().Returns("Test");
         mock.FormatResult(Any()).Returns("result");
 
@@ -95,7 +95,7 @@ public class ProtectedMemberTests
     public async Task Protected_Method_Can_Be_Verified()
     {
         // Arrange
-        var mock = Mock.OfPartial<ProtectedServiceBase>();
+        var mock = Mock.Of<ProtectedServiceBase>();
         mock.GetName().Returns("Test");
         mock.FormatResult(Any()).Returns("result");
 

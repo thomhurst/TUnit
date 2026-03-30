@@ -69,8 +69,7 @@ public class GreeterTests
 
 | Factory Method | Use Case |
 |---|---|
-| `Mock.Of<T>()` | Mock an interface or abstract class |
-| `Mock.OfPartial<T>(args)` | Mock a concrete class (calls base for unconfigured methods) |
+| `Mock.Of<T>()` | Mock an interface, abstract class, or concrete class |
 | `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
 | `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
 | `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |

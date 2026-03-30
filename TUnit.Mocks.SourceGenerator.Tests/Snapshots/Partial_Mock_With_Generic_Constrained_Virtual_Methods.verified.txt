@@ -8,7 +8,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterPartialFactory<global::BaseService>(Create);
+            global::TUnit.Mocks.Mock.RegisterFactory<global::BaseService>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::BaseService> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)

@@ -20,7 +20,7 @@ internal static class MockImplBuilder
             {
                 BuildWrapMockImpl(writer, model, safeName);
             }
-            else if (model.IsPartialMock && !model.IsInterface)
+            else if (model.IsPartialMock)
             {
                 BuildPartialMockImpl(writer, model, safeName);
             }

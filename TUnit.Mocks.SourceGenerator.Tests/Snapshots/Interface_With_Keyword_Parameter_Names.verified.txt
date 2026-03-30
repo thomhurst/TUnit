@@ -11,7 +11,7 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Mock.RegisterFactory<global::ITest>(Create);
         }
 
-        private static global::TUnit.Mocks.Mock<global::ITest> Create(global::TUnit.Mocks.MockBehavior behavior)
+        private static global::TUnit.Mocks.Mock<global::ITest> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::ITest>(behavior);
             var impl = new ITest_MockImpl(engine);

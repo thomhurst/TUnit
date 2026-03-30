@@ -465,7 +465,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<BaseService>();
+                    var mock = Mock.Of<BaseService>();
                 }
             }
             """;
@@ -505,7 +505,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<ExternalClient>();
+                    var mock = Mock.Of<ExternalClient>();
                 }
             }
             """;
@@ -543,7 +543,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 void M()
                 {
-                    var mock = Mock.OfPartial<ServiceClient>();
+                    var mock = Mock.Of<ServiceClient>();
                 }
             }
             """;

@@ -27,7 +27,7 @@ internal static class MockDelegateFactoryBuilder
                 }
                 writer.AppendLine();
 
-                using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior)"))
+                using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
                 {
                     writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
 

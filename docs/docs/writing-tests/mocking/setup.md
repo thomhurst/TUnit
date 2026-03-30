@@ -167,7 +167,7 @@ public abstract class Calculator
     public abstract int Multiply(int a, int b);
 }
 
-var mock = Mock.OfPartial<Calculator>();
+var mock = Mock.Of<Calculator>();
 mock.Multiply(Any(), Any()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
@@ -177,7 +177,7 @@ mock.Object.Multiply(2, 3); // 99 (mocked)
 Pass constructor arguments for non-default constructors:
 
 ```csharp
-var mock = Mock.OfPartial<MyService>("connectionString", 42);
+var mock = Mock.Of<MyService>("connectionString", 42);
 ```
 
 ## Delegate Mocking

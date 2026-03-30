@@ -169,7 +169,7 @@ repo.Reset();                // clear all mocks
 |---|---|
 | `repo.Of<T>()` | Create and track a loose mock |
 | `repo.Of<T>(behavior)` | Create and track a mock with specific behavior |
-| `repo.OfPartial<T>(args)` | Create and track a partial mock |
+| `repo.Of<T>(args)` | Create and track a mock with constructor args |
 | `repo.Track(existingMock)` | Add an existing mock to the repository |
 | `repo.Mocks` | All tracked mocks |
 | `repo.VerifyAll()` | Verify all setups on all mocks |

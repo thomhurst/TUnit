@@ -24,20 +24,16 @@ public class MockRepository
 
     /// <summary>Creates and tracks a mock of T with the specified behavior.</summary>
     public Mock<T> Of<T>(MockBehavior behavior) where T : class
-    {
-        var mock = Mock.Of<T>(behavior);
-        Track(mock);
-        return mock;
-    }
+        => Of<T>(behavior, []);
 
-    /// <summary>Creates and tracks a partial mock of T using the repository's default behavior.</summary>
-    public Mock<T> OfPartial<T>(params object[] constructorArgs) where T : class
-        => OfPartial<T>(_defaultBehavior, constructorArgs);
+    /// <summary>Creates and tracks a mock of T using the repository's default behavior, optionally passing constructor arguments for concrete classes.</summary>
+    public Mock<T> Of<T>(params object[] constructorArgs) where T : class
+        => Of<T>(_defaultBehavior, constructorArgs);
 
-    /// <summary>Creates and tracks a partial mock of T with the specified behavior.</summary>
-    public Mock<T> OfPartial<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
+    /// <summary>Creates and tracks a mock of T with the specified behavior, optionally passing constructor arguments for concrete classes.</summary>
+    public Mock<T> Of<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
     {
-        var mock = Mock.OfPartial<T>(behavior, constructorArgs);
+        var mock = Mock.Of<T>(behavior, constructorArgs);
         Track(mock);
         return mock;
     }
