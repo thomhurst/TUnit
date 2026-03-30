@@ -28,6 +28,7 @@
         </PackageReference>
         <PackageReference Include="Polyfill" />
         <PackageReference Include="FSharp.Core" />
+        <PackageReference Include="System.Memory" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     </ItemGroup>
 
     <ItemGroup>
