@@ -157,12 +157,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             {
                 RawReturnContext.Set(raw);
             }
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            try
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             return;
         }
@@ -175,7 +182,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             if (matchedSetup is not null)
             {
-
                 RaiseEventsForSetup(matchedSetup);
             }
             return;
@@ -209,12 +215,15 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-
                 RaiseEventsForSetup(matchedSetup);
             }
             if (result is TReturn typed) return typed;
             if (result is null) return default(TReturn)!;
-            if (result is RawReturn raw) { RawReturnContext.Set(raw); return defaultValue; }
+            if (result is RawReturn raw)
+            {
+                RawReturnContext.Set(raw);
+                return defaultValue;
+            }
             throw new InvalidOperationException(
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {result.GetType().Name}.");
         }
@@ -303,12 +312,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             {
                 RawReturnContext.Set(raw);
             }
-            // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
-            OutRefContext.Set(matchedSetup?.OutRefAssignments);
-            if (matchedSetup is not null)
+            try
             {
-
-                RaiseEventsForSetup(matchedSetup);
+                // Set out/ref assignments after Execute to avoid reentrancy overwrite from callbacks
+                OutRefContext.Set(matchedSetup?.OutRefAssignments);
+                if (matchedSetup is not null)
+                {
+                    RaiseEventsForSetup(matchedSetup);
+                }
+            }
+            catch
+            {
+                RawReturnContext.Clear();
+                throw;
             }
             return true;
         }
@@ -318,7 +334,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
         if (setupFound && matchedSetup is not null)
         {
-
             RaiseEventsForSetup(matchedSetup);
         }
 
@@ -357,12 +372,15 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             OutRefContext.Set(matchedSetup?.OutRefAssignments);
             if (matchedSetup is not null)
             {
-
                 RaiseEventsForSetup(matchedSetup);
             }
             if (behaviorResult is TReturn typed) result = typed;
             else if (behaviorResult is null) result = default(TReturn)!;
-            else if (behaviorResult is RawReturn raw) { RawReturnContext.Set(raw); result = defaultValue; }
+            else if (behaviorResult is RawReturn raw)
+            {
+                RawReturnContext.Set(raw);
+                result = defaultValue;
+            }
             else throw new InvalidOperationException(
                 $"Setup for method returning {typeof(TReturn).Name} returned incompatible type {behaviorResult.GetType().Name}.");
             return true;
