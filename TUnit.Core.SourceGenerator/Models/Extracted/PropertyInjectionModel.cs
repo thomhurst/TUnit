@@ -130,13 +130,6 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
     public required bool IsNullableValueType { get; init; }
 
     /// <summary>
-    /// Fully qualified data source type (the T in ClassDataSource&lt;T&gt;, when T differs from PropertyType).
-    /// Used to generate intermediate cast for implicit/explicit conversion operators.
-    /// Null when the data source type is the same as the property type or not applicable.
-    /// </summary>
-    public required string? DataSourceTypeFullyQualified { get; init; }
-
-    /// <summary>
     /// Fully qualified attribute type name
     /// </summary>
     public required string AttributeTypeName { get; init; }
@@ -170,7 +163,6 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             && PropertyTypeAsTypeParameter == other.PropertyTypeAsTypeParameter
             && IsValueType == other.IsValueType
             && IsNullableValueType == other.IsNullableValueType
-            && DataSourceTypeFullyQualified == other.DataSourceTypeFullyQualified
             && AttributeTypeName == other.AttributeTypeName
             && ConstructorArgs.Equals(other.ConstructorArgs)
             && NamedArgs.Equals(other.NamedArgs);
@@ -195,7 +187,6 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             hash = (hash * 397) ^ (PropertyTypeAsTypeParameter?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ IsValueType.GetHashCode();
             hash = (hash * 397) ^ IsNullableValueType.GetHashCode();
-            hash = (hash * 397) ^ (DataSourceTypeFullyQualified?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ AttributeTypeName.GetHashCode();
             hash = (hash * 397) ^ ConstructorArgs.GetHashCode();
             hash = (hash * 397) ^ NamedArgs.GetHashCode();
