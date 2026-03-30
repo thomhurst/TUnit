@@ -193,10 +193,10 @@ internal static class MockImplBuilder
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = GetParameterList(method);
         var typeParams = GetTypeParameterList(method);
-        var constraints = GetConstraintClauses(method);
 
+        // C# prohibits restating generic constraints on override methods (CS0460)
         var accessModifier = method.IsProtected ? "protected" : "public";
-        using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList}){constraints}"))
+        using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList})"))
         {
             if (method.IsAbstractMember)
             {
@@ -533,11 +533,10 @@ internal static class MockImplBuilder
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = GetParameterList(method);
         var typeParams = GetTypeParameterList(method);
-        var constraints = GetConstraintClauses(method);
 
-        // For partial mocks, all methods get "override" since we only discover virtual/abstract/override members
+        // C# prohibits restating generic constraints on override methods (CS0460)
         var accessModifier = method.IsProtected ? "protected" : "public";
-        using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList}){constraints}"))
+        using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList})"))
         {
             if (method.IsAbstractMember)
             {
@@ -1104,6 +1103,8 @@ internal static class MockImplBuilder
         return "<" + string.Join(", ", typeParameters.Select(tp => tp.Name)) + ">";
     }
 
+    // Only for non-override declarations (interface impls, extension methods).
+    // C# prohibits restating constraints on override methods (CS0460).
     internal static string GetConstraintClauses(MockMemberModel method) =>
         FormatConstraintClauses(method.TypeParameters);
 

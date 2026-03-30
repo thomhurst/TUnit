@@ -35,16 +35,23 @@ public abstract class SnapshotTestBase
     /// Runs the MockGenerator against the given source and returns the generated files
     /// as an array of strings, ordered by hint name for stable snapshot comparison.
     /// </summary>
-    protected static string[] RunGenerator(string source, CSharpParseOptions? parseOptions = null)
+    protected static string[] RunGenerator(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
     {
         parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
+
+        IEnumerable<MetadataReference> refs = additionalReferences is null
+            ? _references.Value
+            : _references.Value.Concat(additionalReferences);
 
         var compilation = CSharpCompilation.Create(
             "TestAssembly",
             [syntaxTree],
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-        ).WithReferences(_references.Value);
+        ).WithReferences(refs);
 
         var generator = new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
@@ -66,26 +73,63 @@ public abstract class SnapshotTestBase
     }
 
     /// <summary>
-    /// Runs the generator and returns a normalized, scrubbed string for snapshot verification.
+    /// Compiles the given source into an in-memory assembly and returns it as a MetadataReference.
+    /// Useful for simulating external assemblies in tests.
     /// </summary>
-    protected static string RunGeneratorAndFormat(string source)
+    protected static MetadataReference CreateExternalAssemblyReference(string source, string assemblyName = "ExternalLib")
     {
-        var files = RunGenerator(source);
+        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
+
+        var compilation = CSharpCompilation.Create(
+            assemblyName,
+            [syntaxTree],
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        ).WithReferences(_references.Value);
+
+        using var ms = new MemoryStream();
+        var emitResult = compilation.Emit(ms);
+        if (!emitResult.Success)
+        {
+            var errors = string.Join(Environment.NewLine, emitResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
+            throw new InvalidOperationException($"Failed to compile external assembly '{assemblyName}':{Environment.NewLine}{errors}");
+        }
+
+        ms.Seek(0, SeekOrigin.Begin);
+        // CreateFromStream copies bytes immediately; ms is safely disposed after this call
+        return MetadataReference.CreateFromStream(ms);
+    }
+
+    private static string RunGeneratorAndFormat(string source, IEnumerable<MetadataReference>? additionalReferences = null)
+    {
+        var files = RunGenerator(source, additionalReferences);
         var combined = string.Join("\n\n// ===== FILE SEPARATOR =====\n\n",
             files.Select(NormalizeNewlines));
         return combined;
     }
 
-    /// <summary>
-    /// Snapshot-verifies the generated output. Compares against a .verified.txt file
-    /// in the test project directory. If no verified file exists, creates a .received.txt.
-    /// </summary>
-    protected static async Task VerifyGeneratorOutput(
+    protected static Task VerifyGeneratorOutput(
+        string source,
+        IEnumerable<MetadataReference> additionalReferences,
+        [CallerMemberName] string testName = "",
+        [CallerFilePath] string filePath = "")
+    {
+        return VerifySnapshot(RunGeneratorAndFormat(source, additionalReferences), testName, filePath);
+    }
+
+    protected static Task VerifyGeneratorOutput(
         string source,
         [CallerMemberName] string testName = "",
         [CallerFilePath] string filePath = "")
     {
-        var generatedOutput = RunGeneratorAndFormat(source);
+        return VerifySnapshot(RunGeneratorAndFormat(source), testName, filePath);
+    }
+
+    private static async Task VerifySnapshot(
+        string generatedOutput,
+        string testName,
+        string filePath)
+    {
         generatedOutput = NormalizeNewlines(generatedOutput);
 
         var testDir = Path.GetDirectoryName(filePath)!;
