@@ -132,7 +132,7 @@ internal static class MockTypeDiscovery
 
             // Discover transitive interface return types for auto-mocking support
             var visited = new HashSet<string>();
-            var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3);
+            var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly);
 
             if (transitiveModels.Count == 0)
                 return ImmutableArray.Create(model);
@@ -198,7 +198,7 @@ internal static class MockTypeDiscovery
     /// generated for auto-mocking support. Recurses up to maxDepth levels.
     /// </summary>
     private static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
-        INamedTypeSymbol type, HashSet<string> visited, int maxDepth)
+        INamedTypeSymbol type, HashSet<string> visited, int maxDepth, IAssemblySymbol? compilationAssembly)
     {
         var results = new List<MockTypeModel>();
         if (maxDepth <= 0) return results;
@@ -249,12 +249,12 @@ internal static class MockTypeDiscovery
             if (visited.Contains(returnFqn)) continue;
             visited.Add(returnFqn);
 
-            var model = BuildSingleTypeModel(namedReturn, isPartialMock: false);
+            var model = BuildSingleTypeModel(namedReturn, isPartialMock: false, compilationAssembly);
             if (model is null) continue;
 
             results.Add(model);
             // Recurse into the transitive type's members
-            results.AddRange(DiscoverTransitiveInterfaceTypes(namedReturn, visited, maxDepth - 1));
+            results.AddRange(DiscoverTransitiveInterfaceTypes(namedReturn, visited, maxDepth - 1, compilationAssembly));
         }
 
         return results;
@@ -335,7 +335,7 @@ internal static class MockTypeDiscovery
         };
     }
 
-    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly = null)
+    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly)
     {
         var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly);
 

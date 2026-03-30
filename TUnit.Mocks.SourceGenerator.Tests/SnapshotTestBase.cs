@@ -87,7 +87,7 @@ public abstract class SnapshotTestBase
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         ).WithReferences(_references.Value);
 
-        using var ms = new System.IO.MemoryStream();
+        using var ms = new MemoryStream();
         var emitResult = compilation.Emit(ms);
         if (!emitResult.Success)
         {
@@ -95,7 +95,7 @@ public abstract class SnapshotTestBase
             throw new InvalidOperationException($"Failed to compile external assembly '{assemblyName}':{Environment.NewLine}{errors}");
         }
 
-        ms.Seek(0, System.IO.SeekOrigin.Begin);
+        ms.Seek(0, SeekOrigin.Begin);
         return MetadataReference.CreateFromStream(ms);
     }
 

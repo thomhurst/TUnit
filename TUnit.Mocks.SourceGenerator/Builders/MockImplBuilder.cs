@@ -1103,6 +1103,8 @@ internal static class MockImplBuilder
         return "<" + string.Join(", ", typeParameters.Select(tp => tp.Name)) + ">";
     }
 
+    // Only for non-override declarations (interface impls, extension methods).
+    // C# prohibits restating constraints on override methods (CS0460).
     internal static string GetConstraintClauses(MockMemberModel method) =>
         FormatConstraintClauses(method.TypeParameters);
 

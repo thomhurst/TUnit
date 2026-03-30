@@ -360,6 +360,9 @@ internal static class MemberDiscovery
         // Type parameters are always accessible
         if (type is ITypeParameterSymbol) return true;
 
+        // Pointer types can't appear in mock override signatures
+        if (type is IPointerTypeSymbol or IFunctionPointerTypeSymbol) return false;
+
         // Arrays: check element type
         if (type is IArrayTypeSymbol arrayType)
             return IsTypeAccessible(arrayType.ElementType, compilationAssembly);

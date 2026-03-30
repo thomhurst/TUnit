@@ -551,6 +551,42 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Wrap_Mock_Filters_Internal_Virtual_Members_From_External_Assembly()
+    {
+        var externalSource = """
+            namespace ExternalLib
+            {
+                public class ExternalService
+                {
+                    public virtual string PublicMethod() => "public";
+                    internal virtual string InternalMethod() => "internal";
+                    public virtual string PublicProperty { get; set; } = "";
+                    internal virtual string InternalProperty { get; set; } = "";
+
+                    public ExternalService() { }
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Wrap(new ExternalService());
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
     public Task Wrap_Mock_With_Generic_Constrained_Virtual_Methods()
     {
         var source = """
