@@ -457,8 +457,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// <summary>
     /// Marks all calls for a specific member as verified without allocating a copy.
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void MarkCallsVerified(int memberId)
+    internal void MarkCallsVerified(int memberId)
     {
         lock (Lock)
         {
