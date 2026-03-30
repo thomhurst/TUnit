@@ -163,7 +163,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var required = memberId + 1;
         if (_setupsByMemberId is null || _setupsByMemberId.Length < required)
         {
-            var newSize = Math.Max(required, 8);
+            var newSize = _setupsByMemberId is null
+                ? Math.Max(required, 8)
+                : Math.Max(required, _setupsByMemberId.Length * 2);
             var newSnapshot = new MethodSetup[]?[newSize];
             var newLists = new List<MethodSetup>?[newSize];
             if (_setupsByMemberId is not null)
@@ -721,7 +723,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var required = memberId + 1;
         if (_callsByMemberId is null || _callsByMemberId.Length < required)
         {
-            var newSize = Math.Max(required, 8);
+            var newSize = _callsByMemberId is null
+                ? Math.Max(required, 8)
+                : Math.Max(required, _callsByMemberId.Length * 2);
             var newByMember = new List<CallRecord>?[newSize];
             var newCounts = new int[newSize];
             if (_callsByMemberId is not null)
@@ -740,12 +744,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     private void ApplyMatchedSetup(MethodSetup? matchedSetup)
     {
-        if (matchedSetup is null) return;
-        if (matchedSetup.OutRefAssignments is { } outRef)
+        // Always set (or clear) OutRefContext — even when matchedSetup is null.
+        // A reentrant mock call inside Execute() may have written to it, and the
+        // outer call must overwrite that to avoid stale thread-local state.
+        OutRefContext.Set(matchedSetup?.OutRefAssignments);
+        if (matchedSetup is not null)
         {
-            OutRefContext.Set(outRef);
+            RaiseEventsForSetup(matchedSetup);
         }
-        RaiseEventsForSetup(matchedSetup);
     }
 
     private void RaiseEventsForSetup(MethodSetup setup)

@@ -153,19 +153,35 @@ public class PerformanceOptimizationTests
     // ========================================================================
 
     [Test]
-    public async Task Verification_Without_Matchers_Uses_Fast_Path()
+    public async Task Verification_Zero_Param_Method_Uses_Fast_Path()
     {
-        // Arrange — WasCalled with no specific args should use per-member counter
+        // GetName() has zero parameters, so _matchers.Length == 0 → fast path (per-member counter)
+        var mock = Mock.Of<ICalculator>();
+        mock.GetName().Returns("test");
+        ICalculator calc = mock.Object;
+
+        calc.GetName();
+        calc.GetName();
+        calc.GetName();
+
+        mock.GetName().WasCalled(Times.Exactly(3));
+        mock.GetName().WasCalled(Times.AtLeast(2));
+        mock.GetName().WasCalled(Times.AtMost(5));
+        await Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public async Task Verification_With_Any_Matchers_Uses_Matcher_Path()
+    {
+        // Any() creates argument matchers, so _matchers.Length > 0 → matcher path
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
-        // Act
         calc.Add(1, 2);
         calc.Add(3, 4);
         calc.Add(5, 6);
 
-        // Assert — no-matcher verification (fast path)
         mock.Add(Any(), Any()).WasCalled(Times.Exactly(3));
         mock.Add(Any(), Any()).WasCalled(Times.AtLeast(2));
         mock.Add(Any(), Any()).WasCalled(Times.AtMost(5));
@@ -177,17 +193,15 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Verification_With_Exact_Args_Uses_Matcher_Path()
     {
-        // Arrange — WasCalled with specific args must filter
         var mock = Mock.Of<ICalculator>();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
-        // Act
         calc.Add(1, 2);
         calc.Add(1, 2);
         calc.Add(3, 4);
 
-        // Assert — exact arg matching should only count matching calls
+        // Exact arg matching only counts matching calls
         mock.Add(1, 2).WasCalled(Times.Exactly(2));
         mock.Add(3, 4).WasCalled(Times.Once);
         mock.Add(5, 6).WasNeverCalled();
@@ -195,15 +209,22 @@ public class PerformanceOptimizationTests
     }
 
     [Test]
-    public async Task Verification_WasNeverCalled_Fast_Path()
+    public async Task Verification_WasNeverCalled_Zero_Param_Method()
     {
-        // Arrange
         var mock = Mock.Of<ICalculator>();
-        ICalculator calc = mock.Object;
 
-        // WasNeverCalled should work via fast path (per-member counter = 0)
-        mock.Add(Any(), Any()).WasNeverCalled();
+        // Zero-param method → fast path with per-member counter = 0
         mock.GetName().WasNeverCalled();
+        await Assert.That(true).IsTrue();
+    }
+
+    [Test]
+    public async Task Verification_WasNeverCalled_With_Matchers()
+    {
+        var mock = Mock.Of<ICalculator>();
+
+        // Any() creates matchers → matcher path, but still zero calls
+        mock.Add(Any(), Any()).WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
         await Assert.That(true).IsTrue();
     }

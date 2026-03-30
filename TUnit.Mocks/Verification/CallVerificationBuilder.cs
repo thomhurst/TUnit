@@ -46,7 +46,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        // Fast path: when no argument matchers, use the per-member call counter directly
+        // Fast path: when no argument matchers, use the per-member call counter directly.
+        // Note: the count is read lock-free, then MarkCallsVerified acquires the lock.
+        // Calls recorded between these two steps will be marked verified but weren't counted.
+        // This is safe because verification should only run after all calls have completed.
         if (_matchers.Length == 0)
         {
             var totalCount = _engine.GetCallCountFor(_memberId);
