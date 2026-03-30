@@ -25,6 +25,7 @@
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
         </PackageReference>
         <PackageReference Include="Polyfill" />
+        <PackageReference Include="System.Memory" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     </ItemGroup>
 
     <ItemGroup>
