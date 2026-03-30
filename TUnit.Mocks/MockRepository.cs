@@ -24,7 +24,7 @@ public class MockRepository
 
     /// <summary>Creates and tracks a mock of T with the specified behavior.</summary>
     public Mock<T> Of<T>(MockBehavior behavior) where T : class
-        => Of<T>(behavior, []);
+        => Of<T>(behavior, Array.Empty<object>());
 
     /// <summary>Creates and tracks a mock of T using the repository's default behavior, optionally passing constructor arguments for concrete classes.</summary>
     public Mock<T> Of<T>(params object[] constructorArgs) where T : class

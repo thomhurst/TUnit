@@ -107,7 +107,7 @@ public static class Mock
 
     /// <summary>Creates a mock of T with specified behavior.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior) where T : class
-        => Of<T>(behavior, []);
+        => Of<T>(behavior, Array.Empty<object>());
 
     /// <summary>Creates a mock of T in loose mode, optionally passing constructor arguments for concrete classes.</summary>
     public static Mock<T> Of<T>(params object[] constructorArgs) where T : class
@@ -142,7 +142,7 @@ public static class Mock
     {
         if (_delegateFactories.TryGetValue(typeof(T), out var factory))
         {
-            return (Mock<T>)factory(behavior, []);
+            return (Mock<T>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -178,7 +178,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, []);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -198,7 +198,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, []);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -218,7 +218,7 @@ public static class Mock
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
         if (_multiFactories.TryGetValue(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, []);
+            return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
 
         throw new InvalidOperationException(
@@ -236,7 +236,7 @@ public static class Mock
     {
         if (_factories.TryGetValue(type, out var factory))
         {
-            var mock = (IMock)factory(behavior, []);
+            var mock = (IMock)factory(behavior, Array.Empty<object>());
             mockWrapper = mock;
             return true;
         }
