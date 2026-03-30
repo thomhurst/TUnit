@@ -245,4 +245,42 @@ public class RuntimeMethodDataSourceImplicitConversionTests
     }
 }
 
+/// <summary>
+/// Explicitly exercises the cached property path used for retry-created instances.
+/// The first attempt fails after the converted property has been applied, and the retry
+/// must reapply the cached raw value through the cached-property preparation path to a new instance.
+/// </summary>
+[EngineTest(ExpectedResult.Pass)]
+[NotInParallel(nameof(RuntimeCachedRetryImplicitConversionTests))]
+public class RuntimeCachedRetryImplicitConversionTests
+{
+    private static int _attemptCount;
+
+    [ImplicitSourceDataSource]
+    public required RuntimeTarget Target { get; init; }
+
+    [Before(TestSession)]
+    public static void ResetAttempts()
+    {
+        _attemptCount = 0;
+    }
+
+    [Test]
+    [Retry(1)]
+    public async Task Cached_Runtime_Conversion_Works_For_Retry_Created_Instance()
+    {
+        _attemptCount++;
+
+        await Assert.That(Target).IsNotNull();
+        await Assert.That(Target.Value).IsEqualTo("custom-implicit");
+
+        if (_attemptCount == 1)
+        {
+            throw new Exception("Force a retry so cached property values are applied to a new instance");
+        }
+
+        await Assert.That(_attemptCount).IsEqualTo(2);
+    }
+}
+
 #endregion

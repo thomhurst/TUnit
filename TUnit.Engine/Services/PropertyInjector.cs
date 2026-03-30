@@ -7,6 +7,7 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.PropertyInjection.Initialization;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -289,7 +290,7 @@ internal sealed class PropertyInjector
         // Convert the value if the runtime type doesn't match the property type.
         // This handles implicit/explicit conversion operators when the source generator
         // doesn't know the data source type (e.g., custom data sources).
-        resolvedValue = ConvertPropertyValueIfNeeded(resolvedValue, metadata.PropertyType);
+        resolvedValue = PropertyValueConversionHelper.ConvertIfNeeded(resolvedValue, metadata.PropertyType);
 
         // Set the property value
         metadata.SetProperty(instance, resolvedValue);
@@ -344,7 +345,7 @@ internal sealed class PropertyInjector
         // Convert the value if the runtime type doesn't match the property type.
         // This handles implicit/explicit conversion operators when the source generator
         // doesn't know the data source type (e.g., custom data sources).
-        resolvedValue = ConvertPropertyValueIfNeeded(resolvedValue, property.PropertyType);
+        resolvedValue = PropertyValueConversionHelper.ConvertIfNeeded(resolvedValue, property.PropertyType);
 
         propertySetter(instance, resolvedValue);
     }
@@ -635,31 +636,6 @@ internal sealed class PropertyInjector
             context.TestContext?.Metadata.TestDetails.ClassInstance,
             context.Events,
             context.ObjectBag);
-    }
-
-    /// <summary>
-    /// Converts a resolved property value to the target property type if needed.
-    /// This handles implicit/explicit conversion operators at runtime, which is necessary when:
-    /// - The source generator doesn't know the data source type (e.g., custom data sources)
-    /// - The data source yields a type that differs from the property type but has a conversion operator
-    /// </summary>
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "CastHelper handles AOT scenarios with proper fallbacks")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "PropertyType is preserved through source generation or reflection discovery")]
-    private static object? ConvertPropertyValueIfNeeded(object? value, Type targetType)
-    {
-        if (value == null)
-        {
-            return null;
-        }
-
-        var valueType = value.GetType();
-        if (valueType.IsAssignableTo(targetType))
-        {
-            return value;
-        }
-
-        // Use CastHelper which supports implicit/explicit operators, IConvertible, etc.
-        return CastHelper.Cast(targetType, value);
     }
 
     /// <summary>
