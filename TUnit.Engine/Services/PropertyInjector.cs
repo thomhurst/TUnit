@@ -241,6 +241,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through source generation")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ContainingType is annotated with DynamicallyAccessedMembers in PropertyInjectionMetadata")]
     private async Task InjectSourceGeneratedPropertyAsync(
         object instance,
@@ -285,6 +286,11 @@ internal sealed class PropertyInjector
             }
         }
 
+        // Convert the value if the runtime type doesn't match the property type.
+        // This handles implicit/explicit conversion operators when the source generator
+        // doesn't know the data source type (e.g., custom data sources).
+        resolvedValue = ConvertPropertyValueIfNeeded(resolvedValue, metadata.PropertyType);
+
         // Set the property value
         metadata.SetProperty(instance, resolvedValue);
 
@@ -311,6 +317,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through reflection discovery")]
     private async Task InjectReflectionPropertyAsync(
         object instance,
         PropertyInfo property,
@@ -333,6 +340,11 @@ internal sealed class PropertyInjector
         {
             return;
         }
+
+        // Convert the value if the runtime type doesn't match the property type.
+        // This handles implicit/explicit conversion operators when the source generator
+        // doesn't know the data source type (e.g., custom data sources).
+        resolvedValue = ConvertPropertyValueIfNeeded(resolvedValue, property.PropertyType);
 
         propertySetter(instance, resolvedValue);
     }
@@ -623,6 +635,31 @@ internal sealed class PropertyInjector
             context.TestContext?.Metadata.TestDetails.ClassInstance,
             context.Events,
             context.ObjectBag);
+    }
+
+    /// <summary>
+    /// Converts a resolved property value to the target property type if needed.
+    /// This handles implicit/explicit conversion operators at runtime, which is necessary when:
+    /// - The source generator doesn't know the data source type (e.g., custom data sources)
+    /// - The data source yields a type that differs from the property type but has a conversion operator
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "CastHelper handles AOT scenarios with proper fallbacks")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "PropertyType is preserved through source generation or reflection discovery")]
+    private static object? ConvertPropertyValueIfNeeded(object? value, Type targetType)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        var valueType = value.GetType();
+        if (valueType.IsAssignableTo(targetType))
+        {
+            return value;
+        }
+
+        // Use CastHelper which supports implicit/explicit operators, IConvertible, etc.
+        return CastHelper.Cast(targetType, value);
     }
 
     /// <summary>
