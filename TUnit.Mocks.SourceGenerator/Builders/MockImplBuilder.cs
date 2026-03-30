@@ -585,6 +585,7 @@ internal static class MockImplBuilder
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
+            EmitRawReturnCheck(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -614,6 +615,7 @@ internal static class MockImplBuilder
                 writer.IncreaseIndent();
             }
             EmitOutRefReadback(writer, method);
+            EmitRawReturnCheck(writer, method);
             if (method.IsValueTask)
             {
                 writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -699,6 +701,7 @@ internal static class MockImplBuilder
             {
                 writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
                 EmitOutRefReadback(writer, method);
+                EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -736,6 +739,7 @@ internal static class MockImplBuilder
                     writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault});");
                 }
                 EmitOutRefReadback(writer, method);
+                EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -1140,6 +1144,17 @@ internal static class MockImplBuilder
         {
             EmitOutRefParamAssignments(writer, method);
         }
+    }
+
+    /// <summary>
+    /// For async methods: emits code to check <see cref="TUnit.Mocks.Setup.RawReturnContext"/>
+    /// and return the raw Task/ValueTask directly if one was set by a <c>ReturnsAsync</c> setup.
+    /// </summary>
+    private static void EmitRawReturnCheck(CodeWriter writer, MockMemberModel method)
+    {
+        if (!method.IsAsync) return;
+
+        writer.AppendLine($"if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync)) return ({method.ReturnType})__rawAsync!;");
     }
 
     /// <summary>

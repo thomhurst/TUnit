@@ -88,6 +88,9 @@ internal static class MockMembersBuilder
     {
         if (method.IsGenericMethod) return false;
 
+        // Async methods need a typed wrapper for the generated ReturnsAsync() method
+        if (method.IsAsync) return true;
+
         // Exclude out params and ref struct params (can't be boxed or used as type args)
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0)
@@ -124,7 +127,8 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType);
+            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
+                isAsync: method.IsAsync, isValueTask: method.IsValueTask);
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
@@ -134,13 +138,15 @@ internal static class MockMembersBuilder
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams);
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams,
+                isAsync: method.IsAsync, isValueTask: method.IsValueTask, fullReturnType: method.ReturnType);
         }
     }
 
     private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
-        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams)
+        EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
+        bool isAsync = false, bool isValueTask = false, string? fullReturnType = null)
     {
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
@@ -207,6 +213,11 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
 
+            if (isAsync && fullReturnType is not null)
+            {
+                EmitReturnsAsyncOverloads(writer, wrapperName, fullReturnType, isValueTask);
+            }
+
             // Typed parameter overloads (only for methods with typed params)
             if (nonOutParams.Count >= 1)
             {
@@ -272,7 +283,8 @@ internal static class MockMembersBuilder
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
-        string? spanReturnElementType = null, string? spanReturnType = null)
+        string? spanReturnElementType = null, string? spanReturnType = null,
+        bool isAsync = false, bool isValueTask = false)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
@@ -311,6 +323,8 @@ internal static class MockMembersBuilder
 
             // Public self-returning setup methods
             writer.AppendLine($"/// <inheritdoc />");
+            writer.AppendLine($"public {wrapperName} Returns() {{ EnsureSetup().Returns(); return this; }}");
+            writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Throws<TException>() where TException : global::System.Exception, new() {{ EnsureSetup().Throws<TException>(); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
@@ -339,6 +353,14 @@ internal static class MockMembersBuilder
                 writer.AppendLine();
                 writer.AppendLine($"/// <summary>Configure the return value for this span-returning method.</summary>");
                 writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
+            }
+
+            if (isAsync)
+            {
+                var taskType = isValueTask
+                    ? "global::System.Threading.Tasks.ValueTask"
+                    : "global::System.Threading.Tasks.Task";
+                EmitReturnsAsyncOverloads(writer, wrapperName, taskType, isValueTask);
             }
 
             // Typed parameter overloads (only for methods with typed params)
@@ -857,6 +879,16 @@ internal static class MockMembersBuilder
             }
         }
         return string.Join(", ", parts);
+    }
+
+    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask)
+    {
+        var taskLabel = isValueTask ? "ValueTask" : "Task";
+        writer.AppendLine();
+        writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} directly (e.g., from a TaskCompletionSource).</summary>");
+        writer.AppendLine($"public {wrapperName} ReturnsAsync({taskType} task) {{ EnsureSetup().ReturnsRaw(task); return this; }}");
+        writer.AppendLine($"/// <summary>Return a pre-built {taskLabel} from a factory, invoked on each call.</summary>");
+        writer.AppendLine($"public {wrapperName} ReturnsAsync(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
     }
 
     private static void EmitEnsureSetup(CodeWriter writer, string builderType)

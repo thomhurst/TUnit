@@ -191,4 +191,144 @@ public class AsyncTests
         mock.GetValueAsync().WasCalled(Times.Exactly(2));
         await Assert.That(true).IsTrue();
     }
+
+    [Test]
+    public async Task ReturnsAsync_Task_With_TaskCompletionSource()
+    {
+        // Arrange
+        var tcs = new TaskCompletionSource<int>();
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetValueAsync().ReturnsAsync(tcs.Task);
+
+        IAsyncService service = mock.Object;
+
+        // Act — the task is not yet completed
+        var task = service.GetValueAsync();
+        await Assert.That(task.IsCompleted).IsFalse();
+
+        // Complete the TCS
+        tcs.SetResult(42);
+        var result = await task;
+
+        // Assert
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_ValueTask_With_TaskCompletionSource()
+    {
+        // Arrange
+        var tcs = new TaskCompletionSource<int>();
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetValueValueTaskAsync().ReturnsAsync(new ValueTask<int>(tcs.Task));
+
+        IAsyncService service = mock.Object;
+
+        // Act — the ValueTask wraps the TCS
+        var vtask = service.GetValueValueTaskAsync();
+        await Assert.That(vtask.IsCompleted).IsFalse();
+
+        // Complete the TCS
+        tcs.SetResult(99);
+        var result = await vtask;
+
+        // Assert
+        await Assert.That(result).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Void_Task_With_TaskCompletionSource()
+    {
+        // Arrange
+        var tcs = new TaskCompletionSource();
+        var mock = Mock.Of<IAsyncService>();
+        mock.DoWorkAsync().ReturnsAsync(tcs.Task);
+
+        IAsyncService service = mock.Object;
+
+        // Act — the task is not yet completed
+        var task = service.DoWorkAsync();
+        await Assert.That(task.IsCompleted).IsFalse();
+
+        // Complete the TCS
+        tcs.SetResult();
+        await task;
+
+        // Assert — task completed successfully
+        await Assert.That(task.IsCompletedSuccessfully).IsTrue();
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Factory_Returns_Different_Tasks()
+    {
+        // Arrange
+        var tcs1 = new TaskCompletionSource<int>();
+        var tcs2 = new TaskCompletionSource<int>();
+        var callCount = 0;
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetValueAsync().ReturnsAsync(() => (++callCount == 1) ? tcs1.Task : tcs2.Task);
+
+        IAsyncService service = mock.Object;
+
+        // Act — first call gets tcs1
+        var task1 = service.GetValueAsync();
+        tcs1.SetResult(10);
+        var result1 = await task1;
+
+        // Second call gets tcs2
+        var task2 = service.GetValueAsync();
+        tcs2.SetResult(20);
+        var result2 = await task2;
+
+        // Assert
+        await Assert.That(result1).IsEqualTo(10);
+        await Assert.That(result2).IsEqualTo(20);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Then_Returns_Sequence()
+    {
+        // Arrange — mix ReturnsAsync and Returns in a sequence
+        var tcs = new TaskCompletionSource<int>();
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetValueAsync()
+            .Returns(1)
+            .Then()
+            .ReturnsAsync(tcs.Task)
+            .Then()
+            .Returns(3);
+
+        IAsyncService service = mock.Object;
+
+        // First call returns immediately
+        var result1 = await service.GetValueAsync();
+        await Assert.That(result1).IsEqualTo(1);
+
+        // Second call returns the TCS task (not yet completed)
+        var task2 = service.GetValueAsync();
+        await Assert.That(task2.IsCompleted).IsFalse();
+        tcs.SetResult(2);
+        var result2 = await task2;
+        await Assert.That(result2).IsEqualTo(2);
+
+        // Third call returns immediately
+        var result3 = await service.GetValueAsync();
+        await Assert.That(result3).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Already_Completed_Task()
+    {
+        // Arrange — pass an already-completed task
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetValueAsync().ReturnsAsync(Task.FromResult(123));
+
+        IAsyncService service = mock.Object;
+
+        // Act
+        var result = await service.GetValueAsync();
+
+        // Assert
+        await Assert.That(result).IsEqualTo(123);
+    }
 }

@@ -55,6 +55,12 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
 
     // IVoidMethodSetup implementation
 
+    public IVoidSetupChain Returns()
+    {
+        EnsureSetup().Returns();
+        return this;
+    }
+
     public IVoidSetupChain Throws<TException>() where TException : Exception, new()
     {
         EnsureSetup().Throws<TException>();
@@ -102,6 +108,20 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     public IVoidSetupChain TransitionsTo(string stateName)
     {
         EnsureSetup().TransitionsTo(stateName);
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IVoidSetupChain ReturnsRaw(object? rawValue)
+    {
+        EnsureSetup().ReturnsRaw(rawValue);
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IVoidSetupChain ReturnsRaw(Func<object?> factory)
+    {
+        EnsureSetup().ReturnsRaw(factory);
         return this;
     }
 
