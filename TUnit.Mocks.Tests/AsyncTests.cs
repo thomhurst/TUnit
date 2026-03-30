@@ -255,7 +255,7 @@ public class AsyncTests
         await task;
 
         // Assert — task completed successfully
-        await Assert.That(task.IsCompletedSuccessfully).IsTrue();
+        await Assert.That(task.Status).IsEqualTo(TaskStatus.RanToCompletion);
     }
 
     [Test]
