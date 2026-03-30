@@ -13,7 +13,7 @@ namespace TUnit.Mocks.Generated
 
         private static global::TUnit.Mocks.Mock<global::IFoo> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException("Interface mock 'global::IFoo' does not support constructor arguments, but " + constructorArgs.Length + " were provided.");
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IFoo' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IFoo>(behavior);
             var impl = new IFoo_MockImpl(engine);
             engine.Raisable = impl;

@@ -21,7 +21,7 @@ public static class Mock
     // Separate registry for delegate mock factories.
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _delegateFactories = new();
 
-    // Separate registry for wrap mock factories that accept a real instance and constructor args.
+    // Separate registry for wrap mock factories that accept a real instance.
     private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
 
     /// <summary>

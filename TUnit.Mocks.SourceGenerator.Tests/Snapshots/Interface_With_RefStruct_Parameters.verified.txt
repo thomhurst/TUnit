@@ -13,7 +13,7 @@ namespace TUnit.Mocks.Generated
 
         private static global::TUnit.Mocks.Mock<global::IBufferProcessor> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException("Interface mock 'global::IBufferProcessor' does not support constructor arguments, but " + constructorArgs.Length + " were provided.");
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IBufferProcessor' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IBufferProcessor>(behavior);
             var impl = new IBufferProcessor_MockImpl(engine);
             engine.Raisable = impl;
