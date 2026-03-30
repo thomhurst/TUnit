@@ -2209,6 +2209,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// Gets the data source type for a property by examining its typed data source attributes.
     /// Returns the fully qualified data source type if the property has a typed data source
     /// attribute (e.g., ClassDataSource&lt;T&gt;) where T differs from the property type.
+    /// Returns null when no typed data source attribute is found, or when the type argument
+    /// is an unresolved type parameter (open generic).
     /// </summary>
     private static string? GetDataSourceTypeForProperty(IPropertySymbol property)
     {

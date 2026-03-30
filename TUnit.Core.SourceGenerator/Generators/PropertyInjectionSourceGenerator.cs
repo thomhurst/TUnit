@@ -993,6 +993,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     /// Extracts the data source type (T) from a typed data source attribute (e.g., ClassDataSourceAttribute&lt;T&gt;).
     /// Only returns a type when the attribute implements ITypedDataSourceAttribute&lt;T&gt;, which ensures
     /// the generic argument T represents the actual produced data type (not a containing type as in MethodDataSourceAttribute&lt;T&gt;).
+    /// Returns null when the attribute is null, doesn't implement ITypedDataSourceAttribute&lt;T&gt;,
+    /// or the type argument is an unresolved type parameter (open generic).
     /// </summary>
     private static ITypeSymbol? GetDataSourceType(INamedTypeSymbol? attributeClass)
     {
