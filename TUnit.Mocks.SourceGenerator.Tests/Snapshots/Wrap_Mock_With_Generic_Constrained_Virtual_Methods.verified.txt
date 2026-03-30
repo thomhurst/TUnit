@@ -8,27 +8,27 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.MockMethodCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::TUnit.Mocks.Arguments.Arg<int> id) where T : class
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
-            return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Get", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers);
         }
 
         public static global::TUnit.Mocks.MockMethodCall<T> Get<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<int, bool> id) where T : class
         {
             global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
-            return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "Get", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers);
         }
 
         public static global::TUnit.Mocks.VoidMockMethodCall Store<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::TUnit.Mocks.Arguments.Arg<T> item) where T : class, new()
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { item.Matcher };
-            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Store", matchers);
+            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Store", matchers);
         }
 
         public static global::TUnit.Mocks.VoidMockMethodCall Store<T>(this global::TUnit.Mocks.Mock<global::Repository> mock, global::System.Func<T, bool> item) where T : class, new()
         {
             global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_item.Matcher };
-            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "Store", matchers);
+            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Store", matchers);
         }
     }
 }
@@ -46,7 +46,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterWrapFactory<global::Repository>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterWrapFactory<global::Repository>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::Repository> Create(global::TUnit.Mocks.MockBehavior behavior, global::Repository instance)

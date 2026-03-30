@@ -299,7 +299,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             var cacheKey = memberName + "|" + typeof(TReturn).FullName;
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
-                Mock.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
+                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
                 return m;
             });
             if (autoMock is not null)

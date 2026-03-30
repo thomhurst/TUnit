@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
@@ -9,21 +7,6 @@ namespace TUnit.Mocks;
 /// </summary>
 public static class Mock
 {
-    // The source generator registers factories via this method at module initialization time.
-    // ConcurrentDictionary is used because module initializers from multiple assemblies
-    // can run concurrently when test assemblies are loaded in parallel.
-    // All factories (interface, class, abstract) use a unified signature with constructor args.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _factories = new();
-
-    // Registry for multi-interface mock factories, keyed by compound type string.
-    private static readonly ConcurrentDictionary<string, Func<MockBehavior, object[], object>> _multiFactories = new();
-
-    // Separate registry for delegate mock factories.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object[], object>> _delegateFactories = new();
-
-    // Separate registry for wrap mock factories that accept a real instance.
-    private static readonly ConcurrentDictionary<Type, Func<MockBehavior, object, object>> _wrapFactories = new();
-
     /// <summary>
     /// Retrieves the <see cref="Mock{T}"/> wrapper for a mock implementation object.
     /// Use this to access the mock wrapper from auto-mocked return values or any mocked object.
@@ -54,46 +37,6 @@ public static class Mock
             $"Mock.Get can only be used with objects created by Mock.Of, auto-mocking, or other Mock factory methods.");
     }
 
-    /// <summary>
-    /// Registers a factory for creating mocks of type T. Called by generated code.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
-    {
-        _factories[typeof(T)] = factory;
-    }
-
-    /// <summary>
-    /// Registers a factory for creating multi-interface mocks. Called by generated code.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterMultiFactory(string key, Func<MockBehavior, object[], object> factory)
-    {
-        _multiFactories[key] = factory;
-    }
-
-    /// <summary>
-    /// Registers a factory for creating delegate mocks of type T. Called by generated code.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterDelegateFactory<T>(Func<MockBehavior, object[], Mock<T>> factory) where T : class
-    {
-        _delegateFactories[typeof(T)] = factory;
-    }
-
-    /// <summary>
-    /// Registers a factory for creating wrap mocks of type T. Called by generated code.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static void RegisterWrapFactory<T>(Func<MockBehavior, T, Mock<T>> factory) where T : class
-    {
-        _wrapFactories[typeof(T)] = (behavior, instance) => factory(behavior, (T)instance);
-    }
-
     /// <summary>Creates a mock of T in loose mode.</summary>
     public static Mock<T> Of<T>() where T : class => Of<T>(MockBehavior.Loose);
 
@@ -101,7 +44,7 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
     {
         var mock = Of<T>(behavior);
-        GetEngine(mock).DefaultValueProvider = defaultValueProvider;
+        mock.DefaultValueProvider = defaultValueProvider;
         return mock;
     }
 
@@ -116,7 +59,7 @@ public static class Mock
     /// <summary>Creates a mock of T with specified behavior, optionally passing constructor arguments for concrete classes.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
     {
-        if (_factories.TryGetValue(typeof(T), out var factory))
+        if (MockRegistry.TryGetFactory(typeof(T), out var factory))
         {
             return (Mock<T>)factory(behavior, constructorArgs);
         }
@@ -140,7 +83,7 @@ public static class Mock
     /// </remarks>
     public static Mock<T> OfDelegate<T>(MockBehavior behavior) where T : class
     {
-        if (_delegateFactories.TryGetValue(typeof(T), out var factory))
+        if (MockRegistry.TryGetDelegateFactory(typeof(T), out var factory))
         {
             return (Mock<T>)factory(behavior, Array.Empty<object>());
         }
@@ -156,7 +99,7 @@ public static class Mock
     /// <summary>Creates a wrap mock around an existing instance of T with specified behavior.</summary>
     public static Mock<T> Wrap<T>(MockBehavior behavior, T instance) where T : class
     {
-        if (_wrapFactories.TryGetValue(typeof(T), out var factory))
+        if (MockRegistry.TryGetWrapFactory(typeof(T), out var factory))
         {
             return (Mock<T>)factory(behavior, instance);
         }
@@ -176,7 +119,7 @@ public static class Mock
         where T1 : class where T2 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2));
-        if (_multiFactories.TryGetValue(key, out var factory))
+        if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
             return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
@@ -196,7 +139,7 @@ public static class Mock
         where T1 : class where T2 : class where T3 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3));
-        if (_multiFactories.TryGetValue(key, out var factory))
+        if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
             return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
@@ -216,7 +159,7 @@ public static class Mock
         where T1 : class where T2 : class where T3 : class where T4 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
-        if (_multiFactories.TryGetValue(key, out var factory))
+        if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
             return (Mock<T1>)factory(behavior, Array.Empty<object>());
         }
@@ -224,25 +167,6 @@ public static class Mock
         throw new InvalidOperationException(
             $"No multi-interface mock factory registered for types '{typeof(T1).FullName}', '{typeof(T2).FullName}', '{typeof(T3).FullName}', and '{typeof(T4).FullName}'. " +
             $"Ensure the TUnit.Mocks source generator is referenced in your project.");
-    }
-
-    /// <summary>
-    /// Tries to create an auto-mock for the given type. Returns the mock wrapper (IMock) and
-    /// the implementation object. Only works for types with registered factories.
-    /// Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static bool TryCreateAutoMock(Type type, MockBehavior behavior, out IMock mockWrapper)
-    {
-        if (_factories.TryGetValue(type, out var factory))
-        {
-            var mock = (IMock)factory(behavior, Array.Empty<object>());
-            mockWrapper = mock;
-            return true;
-        }
-
-        mockWrapper = null!;
-        return false;
     }
 
     private static string GetMultiKey(params Type[] types)
@@ -260,94 +184,5 @@ public static class Mock
     public static void VerifyInOrder(Action verificationActions)
     {
         OrderedVerification.Verify(verificationActions);
-    }
-
-    // ──────────────────────────────────────────────────────────
-    //  Static helpers – expose control surface without cluttering Mock<T>
-    // ──────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Gets the mock engine for generated code. Not intended for direct use.
-    /// </summary>
-    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public static MockEngine<T> GetEngine<T>(Mock<T> mock) where T : class
-        => ((IMockEngineAccess<T>)mock).Engine;
-
-    /// <summary>All calls made to this mock, in order.</summary>
-    public static IReadOnlyList<CallRecord> GetInvocations<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).GetAllCalls();
-
-    /// <summary>Returns the mock behavior (Loose or Strict).</summary>
-    public static MockBehavior GetBehavior<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).Behavior;
-
-    /// <summary>
-    /// Gets the custom default value provider for unconfigured methods in loose mode.
-    /// When set, this provider is consulted before auto-mocking and built-in defaults.
-    /// </summary>
-    public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).DefaultValueProvider;
-
-    /// <summary>
-    /// Sets the custom default value provider for unconfigured methods in loose mode.
-    /// When set, this provider is consulted before auto-mocking and built-in defaults.
-    /// </summary>
-    public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
-        => GetEngine(mock).DefaultValueProvider = provider;
-
-    /// <summary>
-    /// Enables auto-tracking for all properties. Property setters store values and getters return them,
-    /// acting like real auto-properties. Explicit setups take precedence over auto-tracked values.
-    /// </summary>
-    public static void SetupAllProperties<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).AutoTrackProperties = true;
-
-    /// <summary>Clears all setups and call history.</summary>
-    public static void Reset<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).Reset();
-
-    /// <summary>
-    /// Verifies all registered setups were invoked at least once.
-    /// Throws <see cref="Exceptions.MockVerificationException"/> listing uninvoked setups.
-    /// </summary>
-    public static void VerifyAll<T>(Mock<T> mock) where T : class
-        => ((IMock)mock).VerifyAll();
-
-    /// <summary>
-    /// Fails if any recorded call was not matched by a prior verification statement.
-    /// Throws <see cref="Exceptions.MockVerificationException"/> listing unverified calls.
-    /// </summary>
-    public static void VerifyNoOtherCalls<T>(Mock<T> mock) where T : class
-        => ((IMock)mock).VerifyNoOtherCalls();
-
-    /// <summary>
-    /// Returns a diagnostic report of this mock's setup coverage and call matching.
-    /// </summary>
-    public static MockDiagnostics GetDiagnostics<T>(Mock<T> mock) where T : class
-        => GetEngine(mock).GetDiagnostics();
-
-    /// <summary>
-    /// Sets the current state for state machine mocking. Null clears the state.
-    /// </summary>
-    public static void SetState<T>(Mock<T> mock, string? stateName) where T : class
-        => GetEngine(mock).TransitionTo(stateName);
-
-    /// <summary>
-    /// Configures setups scoped to a specific state. All setups registered inside
-    /// the <paramref name="configure"/> action will only match when the engine is in the specified state.
-    /// </summary>
-    public static void InState<T>(Mock<T> mock, string stateName, Action<Mock<T>> configure) where T : class
-    {
-        var engine = GetEngine(mock);
-        var previous = engine.PendingRequiredState;
-        engine.PendingRequiredState = stateName;
-        try
-        {
-            configure(mock);
-        }
-        finally
-        {
-            engine.PendingRequiredState = previous;
-        }
     }
 }

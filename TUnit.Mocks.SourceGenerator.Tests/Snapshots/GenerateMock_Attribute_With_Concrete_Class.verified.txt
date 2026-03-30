@@ -8,7 +8,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterFactory<global::MyService>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::MyService>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::MyService> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
@@ -81,13 +81,13 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.MockMethodCall<string> GetValue(this global::TUnit.Mocks.Mock<global::MyService> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetValue", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetValue", matchers);
         }
 
         public static global::TUnit.Mocks.VoidMockMethodCall DoWork(this global::TUnit.Mocks.Mock<global::MyService> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "DoWork", matchers);
+            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "DoWork", matchers);
         }
     }
 }

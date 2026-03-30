@@ -340,7 +340,7 @@ public class OrderedVerificationTests
         });
 
         // This should pass because the calls above were verified in VerifyInOrder
-        Mock.VerifyNoOtherCalls(mock);
+        mock.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -365,7 +365,7 @@ public class OrderedVerificationTests
         // Log("hello") was not verified, so this should fail
         var exception = Assert.Throws<MockVerificationException>(() =>
         {
-            Mock.VerifyNoOtherCalls(mock);
+            mock.VerifyNoOtherCalls();
         });
 
         await Assert.That(exception.Message).Contains("Log(hello)");

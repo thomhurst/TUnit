@@ -8,7 +8,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterFactory<global::IRepository>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::IRepository>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::IRepository> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
@@ -80,13 +80,13 @@ namespace TUnit.Mocks.Generated
         extension(global::TUnit.Mocks.Mock<global::IRepository> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<string> Name
-                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 0, 1, "Name", true, true);
+                => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, 1, "Name", true, true);
 
             public global::TUnit.Mocks.PropertyMockCall<int> Count
-                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 2, 0, "Count", true, false);
+                => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, 0, "Count", true, false);
 
             public global::TUnit.Mocks.PropertyMockCall<bool> IsOpen
-                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 0, 4, "IsOpen", false, true);
+                => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, 4, "IsOpen", false, true);
         }
     }
 }

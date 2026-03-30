@@ -57,7 +57,7 @@ namespace TUnit.Mocks.Generated
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.Mock.RegisterFactory<global::TUnit.Mocks.Generated.IServiceFactory_Mockable>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::TUnit.Mocks.Generated.IServiceFactory_Mockable>(Create);
         }
 
         private static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
@@ -125,19 +125,19 @@ namespace TUnit.Mocks.Generated
         public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.Mock.GetEngine(mock), 0, "GetName", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetName", matchers);
         }
 
         public static global::TUnit.Mocks.MockMethodCall<global::ClientConfig> CreateDefaultConfig(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<global::ClientConfig>(global::TUnit.Mocks.Mock.GetEngine(mock), 1, "CreateDefaultConfig", matchers);
+            return new global::TUnit.Mocks.MockMethodCall<global::ClientConfig>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "CreateDefaultConfig", matchers);
         }
 
         extension(global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IServiceFactory_Mockable> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<string> ServiceId
-                => new(global::TUnit.Mocks.Mock.GetEngine(mock), 2, 3, "ServiceId", true, true);
+                => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, 3, "ServiceId", true, true);
         }
     }
 }

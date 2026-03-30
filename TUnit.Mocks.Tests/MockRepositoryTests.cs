@@ -137,8 +137,8 @@ public class MockRepositoryTests
 
         // Assert — setups and history are cleared
         await Assert.That(serviceMock.Object.GetData(1)).IsEmpty(); // no setup, returns smart default
-        await Assert.That(Mock.GetInvocations(serviceMock)).Count().IsEqualTo(1); // only the new call
-        await Assert.That(Mock.GetInvocations(loggerMock)).Count().IsEqualTo(0); // history cleared
+        await Assert.That(serviceMock.Invocations).Count().IsEqualTo(1); // only the new call
+        await Assert.That(loggerMock.Invocations).Count().IsEqualTo(0); // history cleared
     }
 
     [Test]
@@ -149,7 +149,7 @@ public class MockRepositoryTests
         var mock = repo.Of<IRepoService>();
 
         // Assert — mock inherits strict behavior
-        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
     }
 
     [Test]
@@ -160,7 +160,7 @@ public class MockRepositoryTests
         var looseMock = repo.Of<IRepoService>(MockBehavior.Loose);
 
         // Assert — specific behavior overrides repository default
-        await Assert.That(Mock.GetBehavior(looseMock)).IsEqualTo(MockBehavior.Loose);
+        await Assert.That(looseMock.Behavior).IsEqualTo(MockBehavior.Loose);
     }
 
     [Test]
@@ -274,7 +274,7 @@ public class MockRepositoryTests
         var mock = repo.Of<ConcreteService>();
 
         // Assert — partial mock inherits strict behavior from repository
-        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Strict);
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
     }
 
     [Test]
@@ -285,6 +285,6 @@ public class MockRepositoryTests
         var mock = repo.Of<ConcreteService>(MockBehavior.Loose);
 
         // Assert — behavior overridden
-        await Assert.That(Mock.GetBehavior(mock)).IsEqualTo(MockBehavior.Loose);
+        await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Loose);
     }
 }

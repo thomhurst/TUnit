@@ -51,11 +51,11 @@ internal static class MockFactoryBuilder
                         .Concat(model.AdditionalInterfaceNames)
                         .Select(t => $"typeof({t}).FullName");
                     var keyExpr = "string.Join(\"|\", new[] { " + string.Join(", ", allTypes) + " })";
-                    writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterMultiFactory({keyExpr}, Create);");
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterMultiFactory({keyExpr}, Create);");
                 }
                 else
                 {
-                    writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterFactory<{mockableType}>(Create);");
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterFactory<{mockableType}>(Create);");
                 }
             }
             writer.AppendLine();
@@ -79,7 +79,7 @@ internal static class MockFactoryBuilder
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (writer.Block("internal static void Register()"))
             {
-                writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterWrapFactory<{model.FullyQualifiedName}>(Create);");
+                writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterWrapFactory<{model.FullyQualifiedName}>(Create);");
             }
             writer.AppendLine();
 
@@ -102,7 +102,7 @@ internal static class MockFactoryBuilder
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (writer.Block("internal static void Register()"))
             {
-                writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterFactory<{model.FullyQualifiedName}>(Create);");
+                writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterFactory<{model.FullyQualifiedName}>(Create);");
             }
             writer.AppendLine();
 

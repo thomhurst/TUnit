@@ -83,7 +83,7 @@ public class EventSubscriptionVerifyTests
         mock.Object.OnStringAction += _ => { };
 
         // Act
-        Mock.Reset(mock);
+        mock.Reset();
 
         // Assert
         await Assert.That(mock.Events.OnStringAction.WasSubscribed).IsFalse();

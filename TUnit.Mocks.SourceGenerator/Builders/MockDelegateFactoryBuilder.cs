@@ -23,7 +23,7 @@ internal static class MockDelegateFactoryBuilder
                 writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 using (writer.Block("internal static void Register()"))
                 {
-                    writer.AppendLine($"global::TUnit.Mocks.Mock.RegisterDelegateFactory<{model.FullyQualifiedName}>(Create);");
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterDelegateFactory<{model.FullyQualifiedName}>(Create);");
                 }
                 writer.AppendLine();
 
