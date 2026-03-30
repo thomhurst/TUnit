@@ -11,14 +11,14 @@ namespace TUnit.Mocks.Setup;
 public sealed class MethodSetup
 {
     private readonly IArgumentMatcher[] _matchers;
-    private Lock? _behaviorLock;
+    private readonly Lock _behaviorLock = new();
+    /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
+    private IBehavior? _singleBehavior;
     private List<IBehavior>? _behaviors;
     private List<EventRaiseInfo>? _eventRaises;
     private EventRaiseInfo[]? _eventRaisesSnapshot;
     private Dictionary<int, object?>? _outRefAssignments;
     private int _callIndex;
-
-    private Lock EnsureBehaviorLock() => LazyInitializer.EnsureInitialized(ref _behaviorLock)!;
 
     public int MemberId { get; }
 
@@ -62,10 +62,24 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
-        lock (EnsureBehaviorLock())
+        lock (_behaviorLock)
         {
-            var list = _behaviors ??= new();
-            list.Add(behavior);
+            if (_singleBehavior is null && _behaviors is null)
+            {
+                // First behavior: store directly, no list needed
+                Volatile.Write(ref _singleBehavior, behavior);
+                return;
+            }
+
+            // Promote to list on second behavior — write list before clearing single
+            // so concurrent lock-free readers always find at least one path
+            if (_behaviors is null)
+            {
+                _behaviors = [_singleBehavior!];
+            }
+
+            _behaviors.Add(behavior);
+            Volatile.Write(ref _singleBehavior, null);
         }
     }
 
@@ -84,7 +98,7 @@ public sealed class MethodSetup
 
     public void AddEventRaise(EventRaiseInfo raiseInfo)
     {
-        lock (EnsureBehaviorLock())
+        lock (_behaviorLock)
         {
             var list = _eventRaises ??= new();
             list.Add(raiseInfo);
@@ -105,7 +119,7 @@ public sealed class MethodSetup
             return snapshot;
         }
 
-        lock (EnsureBehaviorLock())
+        lock (_behaviorLock)
         {
             return _eventRaisesSnapshot ??= _eventRaises!.ToArray();
         }
@@ -134,7 +148,7 @@ public sealed class MethodSetup
     /// <param name="value">The value to assign.</param>
     public void SetOutRefValue(int paramIndex, object? value)
     {
-        lock (EnsureBehaviorLock())
+        lock (_behaviorLock)
         {
             _outRefAssignments ??= new Dictionary<int, object?>();
             _outRefAssignments[paramIndex] = value;
@@ -149,13 +163,7 @@ public sealed class MethodSetup
     {
         get
         {
-            var lck = Volatile.Read(ref _behaviorLock);
-            if (lck is null)
-            {
-                return null;
-            }
-
-            lock (lck)
+            lock (_behaviorLock)
             {
                 return _outRefAssignments;
             }
@@ -178,12 +186,19 @@ public sealed class MethodSetup
 
     public IBehavior? GetNextBehavior()
     {
+        // Fast path: single behavior (most common case — no lock needed)
+        var single = Volatile.Read(ref _singleBehavior);
+        if (single is not null)
+        {
+            return single;
+        }
+
         if (Volatile.Read(ref _behaviors) is null)
         {
             return null;
         }
 
-        lock (EnsureBehaviorLock())
+        lock (_behaviorLock)
         {
             if (_behaviors is not { Count: > 0 } behaviors)
             {

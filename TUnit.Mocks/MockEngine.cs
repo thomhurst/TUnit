@@ -24,7 +24,8 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 {
     private readonly Lock _setupLock = new();
     private Dictionary<int, List<MethodSetup>>? _setupsByMember;
-    private ConcurrentQueue<CallRecord>? _callHistory;
+    private volatile Dictionary<int, MethodSetup[]>? _setupsSnapshot;
+    private volatile ConcurrentQueue<CallRecord> _callHistory = new();
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
@@ -127,6 +128,14 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             }
 
             list.Add(setup);
+
+            // Rebuild lock-free snapshot for the read path
+            var snapshot = new Dictionary<int, MethodSetup[]>(dict.Count);
+            foreach (var kvp in dict)
+            {
+                snapshot[kvp.Key] = kvp.Value.ToArray();
+            }
+            _setupsSnapshot = snapshot;
         }
     }
 
@@ -386,13 +395,8 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
-        if (Volatile.Read(ref _callHistory) is not { } history)
-        {
-            return [];
-        }
-
         var result = new List<CallRecord>();
-        foreach (var record in history)
+        foreach (var record in _callHistory)
         {
             if (record.MemberId == memberId)
             {
@@ -407,7 +411,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        return Volatile.Read(ref _callHistory)?.ToArray() ?? [];
+        return _callHistory.ToArray();
     }
 
     /// <summary>
@@ -416,13 +420,8 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        if (Volatile.Read(ref _callHistory) is not { } history)
-        {
-            return [];
-        }
-
         var result = new List<CallRecord>();
-        foreach (var record in history)
+        foreach (var record in _callHistory)
         {
             if (!record.IsVerified)
             {
@@ -438,20 +437,18 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<MethodSetup> GetSetups()
     {
-        lock (_setupLock)
+        var snapshot = _setupsSnapshot;
+        if (snapshot is null)
         {
-            if (_setupsByMember is not { } setups)
-            {
-                return [];
-            }
-
-            var all = new List<MethodSetup>();
-            foreach (var list in setups.Values)
-            {
-                all.AddRange(list);
-            }
-            return all;
+            return [];
         }
+
+        var all = new List<MethodSetup>();
+        foreach (var arr in snapshot.Values)
+        {
+            all.AddRange(arr);
+        }
+        return all;
     }
 
     /// <summary>
@@ -482,14 +479,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        if (Volatile.Read(ref _callHistory) is { } history)
+        foreach (var call in _callHistory)
         {
-            foreach (var call in history)
+            if (call.IsUnmatched)
             {
-                if (call.IsUnmatched)
-                {
-                    unmatchedCalls.Add(call);
-                }
+                unmatchedCalls.Add(call);
             }
         }
 
@@ -518,11 +512,12 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         lock (_setupLock)
         {
             _setupsByMember = null;
+            _setupsSnapshot = null;
             _currentState = null;
             PendingRequiredState = null;
         }
 
-        Volatile.Write(ref _callHistory, null);
+        _callHistory = new ConcurrentQueue<CallRecord>();
         Volatile.Write(ref _autoTrackValues, null);
         Volatile.Write(ref _eventSubscriptions, null);
         Volatile.Write(ref _onSubscribeCallbacks, null);
@@ -609,7 +604,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         var seq = MockCallSequence.Next();
         var record = new CallRecord(memberId, memberName, args, seq);
-        LazyInitializer.EnsureInitialized(ref _callHistory)!.Enqueue(record);
+        _callHistory.Enqueue(record);
         return record;
     }
 
@@ -626,35 +621,36 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
     {
-        lock (_setupLock)
+        var snapshot = _setupsSnapshot;
+        if (snapshot is null || !snapshot.TryGetValue(memberId, out var setups))
         {
-            if (_setupsByMember is not { } setupDict || !setupDict.TryGetValue(memberId, out var setups))
+            return (false, null, null);
+        }
+
+        // Iterate last-added-first to implement "last wins" semantics
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+
+            // State guard: skip setups that require a different state
+            if (setup.RequiredState is not null && setup.RequiredState != Volatile.Read(ref _currentState))
             {
-                return (false, null, null);
+                continue;
             }
 
-            // Iterate last-added-first to implement "last wins" semantics
-            for (int i = setups.Count - 1; i >= 0; i--)
+            if (setup.Matches(args))
             {
-                var setup = setups[i];
-
-                // State guard: skip setups that require a different state
-                if (setup.RequiredState is not null && setup.RequiredState != _currentState)
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(args);
+                // Apply state transition under lock to prevent data races on _currentState
+                if (setup.TransitionTarget is not null)
                 {
-                    continue;
-                }
-
-                if (setup.Matches(args))
-                {
-                    setup.IncrementInvokeCount();
-                    setup.ApplyCaptures(args);
-                    // Apply state transition inside the lock to prevent data races on _currentState
-                    if (setup.TransitionTarget is not null)
+                    lock (_setupLock)
                     {
                         _currentState = setup.TransitionTarget;
                     }
-                    return (true, setup.GetNextBehavior(), setup);
                 }
+                return (true, setup.GetNextBehavior(), setup);
             }
         }
 
@@ -663,7 +659,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
 
     private static string FormatCall(string memberName, object?[] args)
     {
-        var formattedArgs = string.Join(", ", args.Select(a => a?.ToString() ?? "null"));
-        return $"{memberName}({formattedArgs})";
+        var descriptions = new string[args.Length];
+        for (int i = 0; i < args.Length; i++)
+        {
+            descriptions[i] = args[i]?.ToString() ?? "null";
+        }
+        return $"{memberName}({string.Join(", ", descriptions)})";
     }
 }
