@@ -53,11 +53,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         if (!times.Matches(matchingCount))
         {
             var expectedCall = FormatExpectedCall();
-            var actualCallDescriptions = new List<string>(allCallsForMember.Count);
-            foreach (var c in allCallsForMember)
-            {
-                actualCallDescriptions.Add(c.FormatCall());
-            }
+            var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
