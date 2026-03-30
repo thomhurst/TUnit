@@ -18,12 +18,12 @@ Calling methods on mock objects:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 404.2 ns | 252.92 ns | 13.86 ns | 192 B |
-| Imposter | 375.8 ns | 206.15 ns | 11.30 ns | 168 B |
-| Mockolate | 872.2 ns | 163.84 ns | 8.98 ns | 688 B |
-| Moq | 933.6 ns | 204.14 ns | 11.19 ns | 376 B |
-| NSubstitute | 803.9 ns | 256.95 ns | 14.08 ns | 304 B |
-| FakeItEasy | 2,058.4 ns | 501.26 ns | 27.48 ns | 944 B |
+| **TUnit.Mocks** | 378.3 ns | 148.70 ns | 8.15 ns | 192 B |
+| Imposter | 293.6 ns | 22.11 ns | 1.21 ns | 168 B |
+| Mockolate | 627.4 ns | 68.88 ns | 3.78 ns | 640 B |
+| Moq | 803.1 ns | 22.67 ns | 1.24 ns | 376 B |
+| NSubstitute | 765.5 ns | 54.01 ns | 2.96 ns | 360 B |
+| FakeItEasy | 1,684.3 ns | 59.92 ns | 3.28 ns | 944 B |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Calling methods on mock objects:
 xychart-beta
   title "Invocation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2471
-  bar [404.2, 375.8, 872.2, 933.6, 803.9, 2058.4]
+  y-axis "Time (ns)" 0 --> 2022
+  bar [378.3, 293.6, 627.4, 803.1, 765.5, 1684.3]
 ```
 
 ---
@@ -59,12 +59,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 237.3 ns | 8.03 ns | 0.44 ns | 128 B |
-| Imposter | 365.5 ns | 165.27 ns | 9.06 ns | 168 B |
-| Mockolate | 760.2 ns | 293.25 ns | 16.07 ns | 568 B |
-| Moq | 604.7 ns | 175.80 ns | 9.64 ns | 296 B |
-| NSubstitute | 700.3 ns | 240.08 ns | 13.16 ns | 272 B |
-| FakeItEasy | 1,754.0 ns | 440.00 ns | 24.12 ns | 776 B |
+| **TUnit.Mocks** | 203.8 ns | 25.92 ns | 1.42 ns | 128 B |
+| Imposter | 291.8 ns | 90.39 ns | 4.95 ns | 168 B |
+| Mockolate | 526.6 ns | 66.93 ns | 3.67 ns | 520 B |
+| Moq | 523.3 ns | 223.75 ns | 12.26 ns | 296 B |
+| NSubstitute | 628.4 ns | 202.93 ns | 11.12 ns | 272 B |
+| FakeItEasy | 1,522.7 ns | 26.06 ns | 1.43 ns | 776 B |
 
 ```mermaid
 %%{init: {
@@ -90,8 +90,8 @@ xychart-beta
 xychart-beta
   title "Invocation (String) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2105
-  bar [237.3, 365.5, 760.2, 604.7, 700.3, 1754]
+  y-axis "Time (ns)" 0 --> 1828
+  bar [203.8, 291.8, 526.6, 523.3, 628.4, 1522.7]
 ```
 
 ---
@@ -100,12 +100,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 41,934.0 ns | 11,359.75 ns | 622.67 ns | 20096 B |
-| Imposter | 35,631.0 ns | 7,181.18 ns | 393.62 ns | 16800 B |
-| Mockolate | 85,371.9 ns | 22,839.30 ns | 1,251.90 ns | 68800 B |
-| Moq | 88,551.5 ns | 40,570.95 ns | 2,223.83 ns | 37600 B |
-| NSubstitute | 79,302.4 ns | 42,113.43 ns | 2,308.38 ns | 30848 B |
-| FakeItEasy | 206,727.2 ns | 7,237.42 ns | 396.71 ns | 94400 B |
+| **TUnit.Mocks** | 36,443.1 ns | 8,227.20 ns | 450.96 ns | 20096 B |
+| Imposter | 28,771.9 ns | 10,101.08 ns | 553.67 ns | 16800 B |
+| Mockolate | 64,463.7 ns | 25,051.83 ns | 1,373.18 ns | 64000 B |
+| Moq | 78,017.1 ns | 19,146.92 ns | 1,049.51 ns | 37600 B |
+| NSubstitute | 80,578.8 ns | 63,529.21 ns | 3,482.25 ns | 36448 B |
+| FakeItEasy | 173,574.7 ns | 47,306.89 ns | 2,593.05 ns | 94400 B |
 
 ```mermaid
 %%{init: {
@@ -131,8 +131,8 @@ xychart-beta
 xychart-beta
   title "Invocation (100 calls) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 248073
-  bar [41934, 35631, 85371.9, 88551.5, 79302.4, 206727.2]
+  y-axis "Time (ns)" 0 --> 208290
+  bar [36443.1, 28771.9, 64463.7, 78017.1, 80578.8, 173574.7]
 ```
 
 ## 🎯 Key Insights
@@ -145,4 +145,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-03-30T03:24:56.545Z*
+*Last generated: 2026-03-30T21:56:59.028Z*
