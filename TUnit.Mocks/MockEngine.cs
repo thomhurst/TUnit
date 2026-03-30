@@ -455,6 +455,25 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     /// <summary>
+    /// Marks all calls for a specific member as verified without allocating a copy.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void MarkCallsVerified(int memberId)
+    {
+        lock (Lock)
+        {
+            if (_callsByMemberId is not null && (uint)memberId < (uint)_callsByMemberId.Length
+                && _callsByMemberId[memberId] is { } list)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].IsVerified = true;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the count of calls for a specific member without allocating.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]

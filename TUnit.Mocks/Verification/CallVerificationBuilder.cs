@@ -52,20 +52,16 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             var totalCount = _engine.GetCallCountFor(_memberId);
             if (!times.Matches(totalCount))
             {
-                var allCallsForMember = _engine.GetCallsFor(_memberId);
+                var callsForError = _engine.GetCallsFor(_memberId);
                 var expectedCall = FormatExpectedCall();
-                var actualCallDescriptions = allCallsForMember.Select(c => c.FormatCall()).ToList();
+                var actualCallDescriptions = callsForError.Select(c => c.FormatCall()).ToList();
                 throw new MockVerificationException(expectedCall, times, totalCount, actualCallDescriptions, message);
             }
 
-            // Mark all calls for this member as verified
+            // Mark all calls for this member as verified (single fetch)
             if (totalCount > 0)
             {
-                var allCallsForMember = _engine.GetCallsFor(_memberId);
-                for (int i = 0; i < allCallsForMember.Count; i++)
-                {
-                    allCallsForMember[i].IsVerified = true;
-                }
+                _engine.MarkCallsVerified(_memberId);
             }
             return;
         }

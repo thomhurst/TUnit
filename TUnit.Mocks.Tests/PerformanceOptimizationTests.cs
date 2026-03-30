@@ -201,9 +201,7 @@ public class PerformanceOptimizationTests
         var mock = Mock.Of<ICalculator>();
         ICalculator calc = mock.Object;
 
-        // Act — don't call any methods
-
-        // Assert — WasNeverCalled should work via fast path (per-member counter = 0)
+        // WasNeverCalled should work via fast path (per-member counter = 0)
         mock.Add(Any(), Any()).WasNeverCalled();
         mock.GetName().WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
