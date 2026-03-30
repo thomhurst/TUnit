@@ -96,6 +96,7 @@ public abstract class SnapshotTestBase
         }
 
         ms.Seek(0, SeekOrigin.Begin);
+        // CreateFromStream copies bytes immediately; ms is safely disposed after this call
         return MetadataReference.CreateFromStream(ms);
     }
 

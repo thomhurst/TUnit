@@ -122,7 +122,7 @@ internal static class MemberDiscovery
     /// Used for multi-interface mocks like Mock.Of&lt;T1, T2&gt;().
     /// </summary>
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
-        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols)
+        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols, IAssemblySymbol? compilationAssembly = null)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
@@ -236,7 +236,8 @@ internal static class MemberDiscovery
             var isExternalType = compilationAssembly is not null
                 && !SymbolEqualityComparer.Default.Equals(current.ContainingAssembly, compilationAssembly);
             var hasInternalAccess = isExternalType
-                && current.ContainingAssembly.GivesAccessTo(compilationAssembly!);
+                && compilationAssembly is not null
+                && current.ContainingAssembly.GivesAccessTo(compilationAssembly);
 
             foreach (var member in current.GetMembers())
             {
@@ -301,6 +302,9 @@ internal static class MemberDiscovery
     private static bool IsMemberAccessibleFromExternal(ISymbol member, IAssemblySymbol compilationAssembly, bool hasInternalAccess)
     {
         var accessibility = member.DeclaredAccessibility;
+        // ProtectedOrInternal (protected internal) is intentionally NOT blocked here:
+        // the generated mock subclasses the target, so the protected part grants access.
+        // ProtectedAndInternal (private protected) requires BOTH inheritance AND internal access.
         if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
         {
             if (!hasInternalAccess)
@@ -360,7 +364,7 @@ internal static class MemberDiscovery
         // Type parameters are always accessible
         if (type is ITypeParameterSymbol) return true;
 
-        // Pointer types can't appear in mock override signatures
+        // Pointer types can't appear in mock override signatures (even same-assembly)
         if (type is IPointerTypeSymbol or IFunctionPointerTypeSymbol) return false;
 
         // Arrays: check element type

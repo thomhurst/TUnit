@@ -476,7 +476,7 @@ public class MockGeneratorTests : SnapshotTestBase
     [Test]
     public Task Partial_Mock_Filters_Internal_Virtual_Members_From_External_Assembly()
     {
-        // Simulate an external assembly with internal and public virtual members
+        // Simulate an external assembly with internal, private protected, and public virtual members
         var externalSource = """
             namespace ExternalLib
             {
@@ -485,6 +485,7 @@ public class MockGeneratorTests : SnapshotTestBase
                     public virtual string PublicMethod(string input) => input;
                     internal virtual string InternalMethod() => "internal";
                     protected internal virtual string ProtectedInternalMethod() => "protected internal";
+                    private protected virtual string PrivateProtectedMethod() => "private protected";
                     public virtual string PublicProperty { get; set; } = "";
                     internal virtual string InternalProperty { get; set; } = "";
 

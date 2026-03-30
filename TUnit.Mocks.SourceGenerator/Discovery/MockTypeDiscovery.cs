@@ -161,7 +161,7 @@ internal static class MockTypeDiscovery
 
         // Build multi-type model (generates impl + factory only)
         var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes, compilationAssembly);
 
         var additionalInterfaceNames = ImmutableArray.CreateBuilder<string>(additionalTypes.Count);
         foreach (var t in additionalTypes)
