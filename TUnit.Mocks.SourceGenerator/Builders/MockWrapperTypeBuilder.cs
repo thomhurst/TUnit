@@ -27,12 +27,10 @@ internal static class MockWrapperTypeBuilder
 
             using (writer.Block($"public sealed class {safeName}_Mock : global::TUnit.Mocks.Mock<{mockableType}>, {interfaceList}"))
             {
-                // Constructor
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
                 writer.AppendLine($"public {safeName}_Mock({mockableType} mockObject, global::TUnit.Mocks.MockEngine<{mockableType}> engine)");
                 writer.AppendLine("    : base(mockObject, engine) { }");
 
-                // Methods (non-static-abstract only)
                 foreach (var method in model.Methods)
                 {
                     if (method.IsStaticAbstract) continue;
@@ -40,7 +38,6 @@ internal static class MockWrapperTypeBuilder
                     GenerateMethodForwarding(writer, method, model);
                 }
 
-                // Properties (non-static-abstract, non-indexer, non-ref-struct-return only)
                 foreach (var prop in model.Properties)
                 {
                     if (prop.IsStaticAbstract) continue;
@@ -50,7 +47,6 @@ internal static class MockWrapperTypeBuilder
                     GeneratePropertyForwarding(writer, prop, model);
                 }
 
-                // Events (non-static-abstract only)
                 foreach (var evt in model.Events)
                 {
                     if (evt.IsStaticAbstract) continue;

@@ -6,7 +6,6 @@ internal static class MockStaticExtensionBuilder
 {
     public static string Build(MockTypeModel model)
     {
-        // Multi-interface mocks have a different creation path
         // Static abstract types use bridge interfaces and can't have a simple wrapper
         if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
         {
