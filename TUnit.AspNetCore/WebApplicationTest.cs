@@ -9,6 +9,12 @@ namespace TUnit.AspNetCore;
 
 public abstract class WebApplicationTest
 {
+    // Shared across all generic instantiations of WebApplicationTest<TFactory, TEntryPoint>.
+    // WebApplicationFactory.Server is synchronous; Task.Run prevents blocking async threads,
+    // and this semaphore caps concurrent DI container builds to avoid thread pool starvation.
+    internal static readonly SemaphoreSlim ServerInitSemaphore =
+        new(Environment.ProcessorCount * 2, Environment.ProcessorCount * 2);
+
     /// <summary>
     /// Gets a unique identifier for this test instance.
     /// Delegates to <see cref="TestContext.Isolation"/> to ensure consistency
@@ -118,8 +124,15 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
-        // Eagerly start the test server to catch configuration errors early
-        _ = _factory.Server;
+        await ServerInitSemaphore.WaitAsync();
+        try
+        {
+            await Task.Run(() => _ = _factory.Server);
+        }
+        finally
+        {
+            ServerInitSemaphore.Release();
+        }
     }
 
     [After(HookType.Test)]
