@@ -9,6 +9,15 @@ namespace TUnit.AspNetCore;
 
 public abstract class WebApplicationTest
 {
+    // Shared across all generic instantiations of WebApplicationTest<TFactory, TEntryPoint>.
+    // WebApplicationFactory.Server is synchronous; Task.Run prevents blocking async threads,
+    // and this semaphore caps concurrent DI container builds to avoid thread pool starvation.
+    // Capped at 8: startup is reflection/I/O-bound, not CPU-bound, so ProcessorCount alone
+    // would allow too many concurrent builds on high-core-count machines.
+    private static readonly int _maxConcurrentServerInits = Math.Min(Environment.ProcessorCount * 2, 8);
+    private protected static readonly SemaphoreSlim ServerInitSemaphore =
+        new(_maxConcurrentServerInits, _maxConcurrentServerInits);
+
     /// <summary>
     /// Gets a unique identifier for this test instance.
     /// Delegates to <see cref="TestContext.Isolation"/> to ensure consistency
@@ -118,8 +127,17 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
-        // Eagerly start the test server to catch configuration errors early
-        _ = _factory.Server;
+        // Semaphore guards only the Server property access (the synchronous host build),
+        // not the factory creation above which is fast synchronous configuration.
+        await ServerInitSemaphore.WaitAsync(testContext.Execution.CancellationToken);
+        try
+        {
+            await Task.Run(() => _ = _factory.Server, testContext.Execution.CancellationToken);
+        }
+        finally
+        {
+            ServerInitSemaphore.Release();
+        }
     }
 
     [After(HookType.Test)]
