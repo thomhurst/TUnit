@@ -653,4 +653,28 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Generic_Interface_Extension_Discovery()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IRepository<T>
+            {
+                T GetById(int id);
+                void Save(T entity);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = IRepository<string>.Mock();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
