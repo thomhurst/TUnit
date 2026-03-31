@@ -96,9 +96,6 @@ public class ComplexBaseService
     public virtual string Description { get; set; } = "base-desc";
     public virtual event EventHandler? StatusChanged;
     public virtual event EventHandler<string>? MessageReceived;
-
-    public virtual void OnStatusChanged() => StatusChanged?.Invoke(this, EventArgs.Empty);
-    public virtual void OnMessageReceived(string msg) => MessageReceived?.Invoke(this, msg);
 }
 
 public class ComplexDerivedService : ComplexBaseService
@@ -122,8 +119,6 @@ public class ComplexDerivedService : ComplexBaseService
     // 'new' hides event
     public new event EventHandler? StatusChanged;
     // MessageReceived remains virtual from base
-
-    public new void OnStatusChanged() => StatusChanged?.Invoke(this, EventArgs.Empty);
 }
 
 public abstract class ServiceWithConstructor
@@ -656,5 +651,18 @@ public class PartialMockTests
         mock.Execute(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
         mock.GetStatus().WasCalled(Times.Once);
         mock.Format(Any<int>()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Event_Can_Be_Raised()
+    {
+        // StatusChanged is hidden by 'new'; MessageReceived remains virtual from base
+        var mock = Mock.Of<ComplexDerivedService>();
+        string? received = null;
+
+        mock.Object.MessageReceived += (_, msg) => received = msg;
+        mock.RaiseMessageReceived("hello");
+
+        await Assert.That(received).IsEqualTo("hello");
     }
 }
