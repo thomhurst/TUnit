@@ -37,9 +37,9 @@ public class SetupBenchmarks
     public object Mockolate_Setup()
     {
         var sut = ICalculatorService.CreateMock();
-        sut.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
-        sut.Mock.Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
-        sut.Mock.Setup.Divide(Mockolate.It.IsAny<double>(), Mockolate.It.IsAny<double>()).Returns(1.5);
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Setup.Divide(Mockolate.It.IsAny<double>(), Mockolate.It.IsAny<double>()).Returns(1.5);
         return sut;
     }
 
@@ -101,11 +101,11 @@ public class SetupBenchmarks
     public object Mockolate_MultipleSetups()
     {
         var sut = IUserRepository.CreateMock();
-        sut.Mock.Setup.GetById(1).Returns(new User { Id = 1, Name = "Alice" });
-        sut.Mock.Setup.GetById(2).Returns(new User { Id = 2, Name = "Bob" });
-        sut.Mock.Setup.GetById(3).Returns(new User { Id = 3, Name = "Charlie" });
-        sut.Mock.Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
-        sut.Mock.Setup.GetAll().Returns(new List<User>());
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.GetById(1).Returns(new User { Id = 1, Name = "Alice" });
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.GetById(2).Returns(new User { Id = 2, Name = "Bob" });
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.GetById(3).Returns(new User { Id = 3, Name = "Charlie" });
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.GetAll().Returns(new List<User>());
         return sut;
     }
 

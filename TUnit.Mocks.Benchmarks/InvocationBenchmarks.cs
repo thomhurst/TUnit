@@ -40,8 +40,8 @@ public class InvocationBenchmarks
 
         // Mockolate
         _mockolateObject = ICalculatorService.CreateMock();
-        _mockolateObject.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
-        _mockolateObject.Mock.Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
+        ((Mockolate.Mock.IMockForICalculatorService)_mockolateObject).Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        ((Mockolate.Mock.IMockForICalculatorService)_mockolateObject).Setup.Format(Mockolate.It.IsAny<int>()).Returns("formatted");
 
         // Moq
         _moqMock = new Moq.Mock<ICalculatorService>();

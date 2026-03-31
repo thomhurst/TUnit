@@ -22,7 +22,6 @@ internal static class MockStaticExtensionBuilder
             {
                 using (writer.Block($"extension({model.FullyQualifiedName})"))
                 {
-                    writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]");
                     using (writer.Block($"public static global::TUnit.Mocks.Generated.{safeName}_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
                     {
                         writer.AppendLine($"return (global::TUnit.Mocks.Generated.{safeName}_Mock)global::TUnit.Mocks.Generated.{safeName}_MockFactory.Create(behavior, []);");

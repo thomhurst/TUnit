@@ -4,8 +4,8 @@ namespace TUnit.Mocks;
 
 /// <summary>
 /// Generic fallback extension providing <c>T.Mock()</c> for any class or interface type.
-/// Source-generated per-type extensions have higher <see cref="OverloadResolutionPriorityAttribute"/>
-/// and take precedence when available, returning a specialized wrapper type.
+/// Source-generated per-type extensions take precedence via C# 14 type specificity rules
+/// and return a specialized wrapper type.
 /// </summary>
 public static class MockExtension
 {

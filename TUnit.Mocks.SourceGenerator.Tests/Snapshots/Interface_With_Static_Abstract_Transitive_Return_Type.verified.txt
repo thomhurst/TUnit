@@ -210,7 +210,6 @@ namespace TUnit.Mocks
     {
         extension(global::IMyService)
         {
-            [global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
             public static global::TUnit.Mocks.Generated.IMyService_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
                 return (global::TUnit.Mocks.Generated.IMyService_Mock)global::TUnit.Mocks.Generated.IMyService_MockFactory.Create(behavior, []);
