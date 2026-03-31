@@ -2132,6 +2132,9 @@ namespace .Helpers
             "ile time. The runtime TryParsableConvert fallback is only used in non-AOT scenar" +
             "ios.")]
         public static T? Cast<[.(..PublicParameterlessConstructor)]  T>(object? value) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        public static object? CastIfNeeded([.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..Interfaces)]  type, object? value) { }
     }
     public static class ClassConstructorHelper
     {
