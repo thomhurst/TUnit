@@ -173,6 +173,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// This is used to apply cached property values to new instances created during retries.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through source generation or reflection discovery — annotation can't flow through PropertyInfo/PropertyInjectionMetadata")]
     private void SetCachedPropertiesOnInstance(object instance, TestContext testContext)
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
@@ -192,7 +193,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
-                    // Set the cached value on the new instance
+                    // Convert if needed — cached values may be unconverted when pre-resolved during registration
+                    cachedValue = CastHelper.CastIfNeeded(metadata.PropertyType, cachedValue);
                     metadata.SetProperty(instance, cachedValue);
                 }
             }
@@ -205,7 +207,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
-                    // Set the cached value on the new instance
+                    // Convert if needed — cached values may be unconverted when pre-resolved during registration
+                    cachedValue = CastHelper.CastIfNeeded(property.PropertyType, cachedValue);
                     var setter = PropertySetterFactory.CreateSetter(property);
                     setter(instance, cachedValue);
                 }

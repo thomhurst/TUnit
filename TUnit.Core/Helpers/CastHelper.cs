@@ -30,6 +30,28 @@ public static class CastHelper
     }
 
     /// <summary>
+    /// Returns the value as-is if it's null or already assignable to the target type;
+    /// otherwise delegates to <see cref="Cast"/> to apply conversion operators.
+    /// Unlike <see cref="Cast"/>, null input always returns null (no default-value creation for value types).
+    /// In Native AOT mode, throws <see cref="InvalidCastException"/> when reflection-based
+    /// operator discovery is unavailable.
+    /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
+    public static object? CastIfNeeded(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor
+            | DynamicallyAccessedMemberTypes.Interfaces
+            | DynamicallyAccessedMemberTypes.PublicMethods)] Type type,
+        object? value)
+    {
+        if (value is null || value.GetType().IsAssignableTo(type))
+        {
+            return value;
+        }
+
+        return Cast(type, value);
+    }
+
+    /// <summary>
     /// Attempts to cast or convert a value to the specified type.
     /// Conversion priority:
     /// 1. Fast path: null handling, direct cast, nullable unwrapping
