@@ -5,7 +5,6 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -195,7 +194,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
                     // Convert if needed — cached values may be unconverted when pre-resolved during registration
-                    cachedValue = PropertyValueConversionHelper.ConvertIfNeeded(cachedValue, metadata.PropertyType);
+                    cachedValue = CastHelper.CastIfNeeded(metadata.PropertyType, cachedValue);
                     metadata.SetProperty(instance, cachedValue);
                 }
             }
@@ -209,7 +208,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
                     // Convert if needed — cached values may be unconverted when pre-resolved during registration
-                    cachedValue = PropertyValueConversionHelper.ConvertIfNeeded(cachedValue, property.PropertyType);
+                    cachedValue = CastHelper.CastIfNeeded(property.PropertyType, cachedValue);
                     var setter = PropertySetterFactory.CreateSetter(property);
                     setter(instance, cachedValue);
                 }

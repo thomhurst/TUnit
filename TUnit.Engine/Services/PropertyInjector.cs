@@ -7,7 +7,6 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.PropertyInjection.Initialization;
-using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -290,7 +289,7 @@ internal sealed class PropertyInjector
         // Convert the value if the runtime type doesn't match the property type.
         // This handles implicit/explicit conversion operators when the source generator
         // doesn't know the data source type (e.g., custom data sources).
-        resolvedValue = PropertyValueConversionHelper.ConvertIfNeeded(resolvedValue, metadata.PropertyType);
+        resolvedValue = CastHelper.CastIfNeeded(metadata.PropertyType, resolvedValue);
 
         // Set the property value
         metadata.SetProperty(instance, resolvedValue);
@@ -347,7 +346,7 @@ internal sealed class PropertyInjector
         // Convert the value if the runtime type doesn't match the property type.
         // This handles implicit/explicit conversion operators when the source generator
         // doesn't know the data source type (e.g., custom data sources).
-        resolvedValue = PropertyValueConversionHelper.ConvertIfNeeded(resolvedValue, property.PropertyType);
+        resolvedValue = CastHelper.CastIfNeeded(property.PropertyType, resolvedValue);
 
         propertySetter(instance, resolvedValue);
     }
