@@ -15,6 +15,14 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </summary>
 internal static class MemberDiscovery
 {
+    /// <summary>
+    /// Sentinel index stored in <c>seenProperties</c> when a non-virtual property
+    /// hides a base virtual via <c>new</c>. Prevents the base virtual from being
+    /// collected and ensures <see cref="MergePropertyAccessors"/> is not called
+    /// with an invalid index.
+    /// </summary>
+    private const int HiddenByNew = -1;
+
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
     {
@@ -72,7 +80,10 @@ internal static class MemberDiscovery
                         var key = $"P:{property.Name}";
                         if (seenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                            if (existingIndex != HiddenByNew)
+                            {
+                                MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                            }
                         }
                         else
                         {
@@ -88,7 +99,10 @@ internal static class MemberDiscovery
                         var key = $"I:[{paramTypes}]";
                         if (seenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                            if (existingIndex != HiddenByNew)
+                            {
+                                MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                            }
                         }
                         else
                         {
@@ -171,7 +185,10 @@ internal static class MemberDiscovery
                             var key = $"P:{property.Name}";
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
-                                MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                if (existingIndex != HiddenByNew)
+                                {
+                                    MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                }
                             }
                             else
                             {
@@ -187,7 +204,10 @@ internal static class MemberDiscovery
                             var key = $"I:[{paramTypes}]";
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
-                                MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                                if (existingIndex != HiddenByNew)
+                                {
+                                    MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                                }
                             }
                             else
                             {
@@ -252,40 +272,62 @@ internal static class MemberDiscovery
                 // (e.g., internal virtual methods from external assemblies like Azure SDK)
                 if (isExternalType && !IsMemberAccessibleFromExternal(member, compilationAssembly!, hasInternalAccess)) continue;
 
+                // Non-virtual members are recorded in the seen-sets (but not collected) so that
+                // base virtuals hidden by 'new' in a derived class are not emitted as overrides.
                 switch (member)
                 {
-                    case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary
-                        && (method.IsAbstract || method.IsVirtual || method.IsOverride):
+                    case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                     {
                         var key = GetMethodKey(method);
-                        if (!seenMethods.Add(key)) continue;
-
-                        methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
-                        break;
-                    }
-
-                    case IPropertySymbol property when !property.IsIndexer
-                        && (property.IsAbstract || property.IsVirtual || property.IsOverride):
-                    {
-                        var key = $"P:{property.Name}";
-                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        if (method.IsAbstract || method.IsVirtual || method.IsOverride)
                         {
-                            MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                            if (!seenMethods.Add(key)) continue;
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
                         }
                         else
                         {
-                            seenProperties[key] = properties.Count;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                            seenMethods.Add(key);
                         }
                         break;
                     }
 
-                    case IEventSymbol evt when evt.IsAbstract || evt.IsVirtual || evt.IsOverride:
+                    case IPropertySymbol property when !property.IsIndexer:
+                    {
+                        var key = $"P:{property.Name}";
+                        if (property.IsAbstract || property.IsVirtual || property.IsOverride)
+                        {
+                            if (seenProperties.TryGetValue(key, out var existingIndex))
+                            {
+                                if (existingIndex != HiddenByNew)
+                                {
+                                    MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                }
+                            }
+                            else
+                            {
+                                seenProperties[key] = properties.Count;
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                            }
+                        }
+                        else if (!seenProperties.ContainsKey(key))
+                        {
+                            seenProperties[key] = HiddenByNew;
+                        }
+                        break;
+                    }
+
+                    case IEventSymbol evt:
                     {
                         var key = $"E:{evt.Name}";
-                        if (!seenEvents.Add(key)) continue;
-
-                        events.Add(CreateEventModel(evt, null));
+                        if (evt.IsAbstract || evt.IsVirtual || evt.IsOverride)
+                        {
+                            if (!seenEvents.Add(key)) continue;
+                            events.Add(CreateEventModel(evt, null));
+                        }
+                        else
+                        {
+                            seenEvents.Add(key);
+                        }
                         break;
                     }
                 }

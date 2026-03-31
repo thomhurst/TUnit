@@ -21,6 +21,111 @@ public class ConcreteService
     public virtual int Add(int a, int b) => a + b;
 }
 
+/// <summary>Simulates Azure SDK patterns like BlobBaseClient/BlobClient.</summary>
+public class BaseClientWithVirtuals
+{
+    public virtual string WithSnapshot(string snapshot) => $"base-{snapshot}";
+    public virtual string WithVersion(string version) => $"base-{version}";
+    public virtual int Calculate(int x) => x * 2;
+    public virtual string Name { get; set; } = "base";
+    public virtual int Priority { get; set; }
+}
+
+public class DerivedClientWithNewMethods : BaseClientWithVirtuals
+{
+    public new string WithSnapshot(string snapshot) => $"derived-{snapshot}";
+    public new string WithVersion(string version) => $"derived-{version}";
+}
+
+public class DerivedClientWithNewProperties : BaseClientWithVirtuals
+{
+    public new string Name { get; set; } = "derived";
+}
+
+public class MixedNewAndOverrideClient : BaseClientWithVirtuals
+{
+    public new string WithSnapshot(string snapshot) => $"new-{snapshot}";
+    public override string WithVersion(string version) => $"override-{version}";
+    public new string Name { get; set; } = "mixed";
+    public override int Priority { get; set; }
+}
+
+public class MiddleClient : BaseClientWithVirtuals
+{
+    public override string WithSnapshot(string snapshot) => $"middle-{snapshot}";
+}
+
+public class GrandchildClient : MiddleClient
+{
+    public new string WithSnapshot(string snapshot) => $"grandchild-{snapshot}";
+}
+
+public class NewVirtualClient : BaseClientWithVirtuals
+{
+    public new virtual string WithSnapshot(string snapshot) => $"newvirtual-{snapshot}";
+}
+
+public class NewVirtualDerivedClient : NewVirtualClient
+{
+    public override string WithSnapshot(string snapshot) => $"nvderived-{snapshot}";
+}
+
+// Separate hierarchy for wrap-mode tests (Mock.Of and Mock.Wrap on the same type collide on hintName).
+public class WrapBaseClient
+{
+    public virtual string Process(string input) => $"base-{input}";
+    public virtual int Compute(int x) => x + 1;
+}
+
+public class WrapDerivedClientWithNew : WrapBaseClient
+{
+    public new string Process(string input) => $"derived-{input}";
+}
+
+public class ComplexBaseService
+{
+    public virtual string Execute(string command) => $"base-exec-{command}";
+    public virtual string Execute(string command, int timeout) => $"base-exec-{command}-{timeout}";
+    public virtual string Execute(string command, int timeout, bool retry) => $"base-exec-{command}-{timeout}-{retry}";
+    public virtual int GetStatus() => 0;
+    public virtual string Format(string value) => $"base-fmt-{value}";
+    public virtual string Format(int value) => $"base-fmt-{value}";
+    public virtual string Format(string value, string locale) => $"base-fmt-{value}-{locale}";
+    public virtual string Name { get; set; } = "base";
+    public virtual int Priority { get; set; }
+    public virtual string Description { get; set; } = "base-desc";
+    public virtual event EventHandler? StatusChanged;
+    public virtual event EventHandler<string>? MessageReceived;
+
+    public virtual void OnStatusChanged() => StatusChanged?.Invoke(this, EventArgs.Empty);
+    public virtual void OnMessageReceived(string msg) => MessageReceived?.Invoke(this, msg);
+}
+
+public class ComplexDerivedService : ComplexBaseService
+{
+    // 'new' hides some Execute overloads, others remain virtual from base
+    public new string Execute(string command) => $"derived-exec-{command}";
+    public new string Execute(string command, int timeout) => $"derived-exec-{command}-{timeout}";
+    // Execute(string,int,bool) is NOT hidden — remains virtual from base
+
+    // 'override' for GetStatus
+    public override int GetStatus() => 1;
+
+    // 'new' hides one Format overload, leaves others
+    public new string Format(string value) => $"derived-fmt-{value}";
+    // Format(int) and Format(string,string) remain virtual from base
+
+    // 'new' hides property
+    public new string Name { get; set; } = "derived";
+    // Priority and Description remain virtual from base
+
+    // 'new' hides event
+    public new event EventHandler? StatusChanged;
+    // MessageReceived remains virtual from base
+
+    public new void OnStatusChanged() => StatusChanged?.Invoke(this, EventArgs.Empty);
+}
+
 public abstract class ServiceWithConstructor
 {
     protected readonly string _prefix;
@@ -236,5 +341,320 @@ public class PartialMockTests
 
         // Assert
         await Assert.That(result).IsEqualTo(5);
+    }
+
+    // ========================================================================
+    // Tests for 'new' method hiding (GitHub issue #5326)
+    // ========================================================================
+
+    [Test]
+    public async Task New_Method_Hiding__Non_Hidden_Virtual_Can_Be_Configured()
+    {
+        // DerivedClientWithNewMethods hides WithSnapshot/WithVersion but not Calculate
+        var mock = Mock.Of<DerivedClientWithNewMethods>();
+        mock.Calculate(Any()).Returns(42);
+
+        var result = mock.Object.Calculate(5);
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task New_Method_Hiding__Non_Hidden_Virtual_Falls_Back_To_Base()
+    {
+        var mock = Mock.Of<DerivedClientWithNewMethods>();
+
+        // Calculate is virtual in base and not hidden — unconfigured should call base (x * 2)
+        var result = mock.Object.Calculate(7);
+
+        await Assert.That(result).IsEqualTo(14);
+    }
+
+    [Test]
+    public async Task New_Method_Hiding__Strict_Mode_Works()
+    {
+        var mock = Mock.Of<DerivedClientWithNewMethods>(MockBehavior.Strict);
+        mock.Calculate(Any()).Returns(99);
+
+        var result = mock.Object.Calculate(10);
+
+        await Assert.That(result).IsEqualTo(99);
+    }
+
+    [Test]
+    public void New_Method_Hiding__Verify_Calls_On_Non_Hidden_Virtual()
+    {
+        var mock = Mock.Of<DerivedClientWithNewMethods>();
+
+        mock.Object.Calculate(1);
+        mock.Object.Calculate(2);
+
+        mock.Calculate(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task New_Property_Hiding__Non_Hidden_Virtual_Property_Can_Be_Configured()
+    {
+        // DerivedClientWithNewProperties hides Name but not Priority
+        var mock = Mock.Of<DerivedClientWithNewProperties>();
+        mock.Priority.Returns(42);
+
+        var result = mock.Object.Priority;
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Mixed_New_And_Override__Override_Method_Can_Be_Configured()
+    {
+        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        mock.WithVersion(Any()).Returns("mocked-version");
+
+        var result = mock.Object.WithVersion("v1");
+
+        await Assert.That(result).IsEqualTo("mocked-version");
+    }
+
+    [Test]
+    public async Task Mixed_New_And_Override__Override_Method_Falls_Back_To_Override()
+    {
+        var mock = Mock.Of<MixedNewAndOverrideClient>();
+
+        // WithVersion is overridden (not hidden) — unconfigured should call the override
+        var result = mock.Object.WithVersion("v1");
+
+        await Assert.That(result).IsEqualTo("override-v1");
+    }
+
+    [Test]
+    public async Task Mixed_New_And_Override__Non_Hidden_Virtual_Still_Works()
+    {
+        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        mock.Calculate(Any()).Returns(100);
+
+        var result = mock.Object.Calculate(3);
+
+        await Assert.That(result).IsEqualTo(100);
+    }
+
+    [Test]
+    public async Task Mixed_New_And_Override__Override_Property_Can_Be_Configured()
+    {
+        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        mock.Priority.Returns(7);
+
+        var result = mock.Object.Priority;
+
+        await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Three_Level_Hierarchy__Grandchild_Hides_Middle_Override()
+    {
+        // GrandchildClient hides MiddleClient.WithSnapshot (which overrides base)
+        // Only Calculate should be mockable
+        var mock = Mock.Of<GrandchildClient>();
+        mock.Calculate(Any()).Returns(55);
+
+        var result = mock.Object.Calculate(1);
+
+        await Assert.That(result).IsEqualTo(55);
+    }
+
+    [Test]
+    public async Task Three_Level_Hierarchy__Non_Hidden_Virtuals_Fall_Back_To_Base()
+    {
+        var mock = Mock.Of<GrandchildClient>();
+
+        // WithVersion is not hidden at any level — unconfigured should call base
+        var result = mock.Object.WithVersion("v2");
+
+        await Assert.That(result).IsEqualTo("base-v2");
+    }
+
+    [Test]
+    public async Task New_Virtual__Re_Introduced_Virtual_Can_Be_Configured()
+    {
+        // NewVirtualClient uses 'new virtual' — starts a new virtual chain
+        var mock = Mock.Of<NewVirtualClient>();
+        mock.WithSnapshot(Any()).Returns("mocked-snap");
+
+        var result = mock.Object.WithSnapshot("s1");
+
+        await Assert.That(result).IsEqualTo("mocked-snap");
+    }
+
+    [Test]
+    public async Task New_Virtual__Unconfigured_Falls_Back_To_New_Virtual_Base()
+    {
+        var mock = Mock.Of<NewVirtualClient>();
+
+        var result = mock.Object.WithSnapshot("s1");
+
+        await Assert.That(result).IsEqualTo("newvirtual-s1");
+    }
+
+    [Test]
+    public async Task New_Virtual_Derived__Can_Configure_Override_Of_New_Virtual()
+    {
+        var mock = Mock.Of<NewVirtualDerivedClient>();
+        mock.WithSnapshot(Any()).Returns("fully-mocked");
+
+        var result = mock.Object.WithSnapshot("s1");
+
+        await Assert.That(result).IsEqualTo("fully-mocked");
+    }
+
+    [Test]
+    public async Task New_Virtual_Derived__Unconfigured_Falls_Back_To_Derived_Override()
+    {
+        var mock = Mock.Of<NewVirtualDerivedClient>();
+
+        var result = mock.Object.WithSnapshot("s1");
+
+        await Assert.That(result).IsEqualTo("nvderived-s1");
+    }
+
+    [Test]
+    public async Task Wrap_Mode__Class_With_New_Methods_Works()
+    {
+        var real = new WrapDerivedClientWithNew();
+        var mock = Mock.Wrap(real);
+
+        // Configure the non-hidden virtual
+        mock.Compute(Any()).Returns(77);
+
+        var result = mock.Object.Compute(5);
+
+        await Assert.That(result).IsEqualTo(77);
+    }
+
+    [Test]
+    public async Task Wrap_Mode__Class_With_New_Methods_Unconfigured_Delegates_To_Real()
+    {
+        var real = new WrapDerivedClientWithNew();
+        var mock = Mock.Wrap(real);
+
+        // Compute is virtual and unconfigured — should delegate to real instance (x + 1)
+        var result = mock.Object.Compute(6);
+
+        await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public void Wrap_Mode__Verify_Calls_On_Class_With_New_Methods()
+    {
+        var real = new WrapDerivedClientWithNew();
+        var mock = Mock.Wrap(real);
+
+        mock.Object.Compute(10);
+        mock.Object.Compute(20);
+
+        mock.Compute(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    // ========================================================================
+    // Complex mixture test: many member types + overloads + new/override
+    // ========================================================================
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Overload_Can_Be_Configured()
+    {
+        // Execute(string,int,bool) is NOT hidden — should be mockable
+        var mock = Mock.Of<ComplexDerivedService>();
+        mock.Execute(Any(), Any(), Any()).Returns("mocked-3-arg");
+
+        var result = mock.Object.Execute("cmd", 30, true);
+
+        await Assert.That(result).IsEqualTo("mocked-3-arg");
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Overload_Falls_Back_To_Base()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        // Execute(string,int,bool) not configured — should call base
+        var result = mock.Object.Execute("cmd", 30, true);
+
+        await Assert.That(result).IsEqualTo("base-exec-cmd-30-True");
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Override_Method_Can_Be_Configured()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+        mock.GetStatus().Returns(42);
+
+        var result = mock.Object.GetStatus();
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Override_Method_Falls_Back_To_Derived_Implementation()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        // GetStatus is overridden — unconfigured should call the override (returns 1)
+        var result = mock.Object.GetStatus();
+
+        await Assert.That(result).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Format_Overloads_Can_Be_Configured()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        // Format(int) is NOT hidden
+        mock.Format(Any<int>()).Returns("mocked-int-fmt");
+        var result1 = mock.Object.Format(42);
+        await Assert.That(result1).IsEqualTo("mocked-int-fmt");
+
+        // Format(string,string) is NOT hidden
+        mock.Format(Any(), Any()).Returns("mocked-locale-fmt");
+        var result2 = mock.Object.Format("hello", "en-US");
+        await Assert.That(result2).IsEqualTo("mocked-locale-fmt");
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Format_Overloads_Fall_Back_To_Base()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        var result1 = mock.Object.Format(42);
+        await Assert.That(result1).IsEqualTo("base-fmt-42");
+
+        var result2 = mock.Object.Format("val", "fr-FR");
+        await Assert.That(result2).IsEqualTo("base-fmt-val-fr-FR");
+    }
+
+    [Test]
+    public async Task Complex_Mixture__Non_Hidden_Properties_Can_Be_Configured()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        // Priority and Description are not hidden — should be mockable
+        mock.Priority.Returns(10);
+        mock.Description.Returns("mocked-desc");
+
+        await Assert.That(mock.Object.Priority).IsEqualTo(10);
+        await Assert.That(mock.Object.Description).IsEqualTo("mocked-desc");
+    }
+
+    [Test]
+    public void Complex_Mixture__Verify_Calls_On_Non_Hidden_Members()
+    {
+        var mock = Mock.Of<ComplexDerivedService>();
+
+        mock.Object.Execute("a", 1, true);
+        mock.Object.Execute("b", 2, false);
+        mock.Object.GetStatus();
+        mock.Object.Format(99);
+
+        mock.Execute(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
+        mock.GetStatus().WasCalled(Times.Once);
+        mock.Format(Any<int>()).WasCalled(Times.Once);
     }
 }
