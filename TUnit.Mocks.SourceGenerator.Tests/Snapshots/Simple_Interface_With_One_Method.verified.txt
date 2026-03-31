@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IGreeter_Mock : global::TUnit.Mocks.Mock<global::IGreeter>, global::IGreeter
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IGreeter_Mock(global::IGreeter mockObject, global::TUnit.Mocks.MockEngine<global::IGreeter> engine)
+        internal IGreeter_Mock(global::IGreeter mockObject, global::TUnit.Mocks.MockEngine<global::IGreeter> engine)
             : base(mockObject, engine) { }
 
         string global::IGreeter.Greet(string name) => Object.Greet(name);

@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IAsyncService_Mock : global::TUnit.Mocks.Mock<global::IAsyncService>, global::IAsyncService
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IAsyncService_Mock(global::IAsyncService mockObject, global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
+        internal IAsyncService_Mock(global::IAsyncService mockObject, global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
             : base(mockObject, engine) { }
 
         global::System.Threading.Tasks.Task<string> global::IAsyncService.GetValueAsync(string key) => Object.GetValueAsync(key);

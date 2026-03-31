@@ -48,7 +48,12 @@ public class MockGenerator : IIncrementalGenerator
             .Collect()
             .Combine(attributeTypes.Collect())
             .Combine(extensionTypes.Collect())
-            .SelectMany((pair, _) => pair.Left.Left.AddRange(pair.Left.Right).AddRange(pair.Right).Distinct());
+            .SelectMany((pair, _) =>
+            {
+                var (mockOfAndAttribute, extensionInvocations) = pair;
+                var (mockOfTypes, attributeTypes) = mockOfAndAttribute;
+                return mockOfTypes.AddRange(attributeTypes).AddRange(extensionInvocations).Distinct();
+            });
 
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
@@ -107,19 +112,20 @@ public class MockGenerator : IIncrementalGenerator
         var factorySource = MockFactoryBuilder.Build(model);
         spc.AddSource($"{fileName}_MockFactory.g.cs", factorySource);
 
-        // Generate wrapper type and static extension for interface mocks
+        // Generate wrapper type and static extension for interface mocks.
+        // The static extension references the wrapper type, so both are emitted together.
         if (model.IsInterface)
         {
             var wrapperSource = MockWrapperTypeBuilder.Build(model);
             if (!string.IsNullOrEmpty(wrapperSource))
             {
                 spc.AddSource($"{fileName}_Mock.g.cs", wrapperSource);
-            }
 
-            var extensionSource = MockStaticExtensionBuilder.Build(model);
-            if (!string.IsNullOrEmpty(extensionSource))
-            {
-                spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
+                var extensionSource = MockStaticExtensionBuilder.Build(model);
+                if (!string.IsNullOrEmpty(extensionSource))
+                {
+                    spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
+                }
             }
         }
     }

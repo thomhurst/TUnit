@@ -5,13 +5,26 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 
 internal static class MockWrapperTypeBuilder
 {
+    /// <summary>
+    /// Whether a typed wrapper (IFoo_Mock : Mock&lt;IFoo&gt;, IFoo) can be generated for this model.
+    /// False for multi-interface mocks, static-abstract types, and interfaces with indexers
+    /// or ref-struct-returning properties that can't be forwarded.
+    /// </summary>
+    public static bool CanGenerateWrapper(MockTypeModel model)
+    {
+        if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
+            return false;
+
+        if (model.Properties.Any(p => !p.IsStaticAbstract && (p.IsIndexer || p.IsRefStructReturn)))
+            return false;
+
+        return true;
+    }
+
     public static string Build(MockTypeModel model)
     {
-        // Multi-interface mocks and static abstract types can't have a simple wrapper
-        if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
-        {
+        if (!CanGenerateWrapper(model))
             return string.Empty;
-        }
 
         var writer = new CodeWriter();
         var safeName = MockImplBuilder.GetCompositeSafeName(model);
@@ -23,12 +36,10 @@ internal static class MockWrapperTypeBuilder
 
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
-            var interfaceList = string.Join(", ", new[] { model.FullyQualifiedName }.Concat(model.AdditionalInterfaceNames));
-
-            using (writer.Block($"public sealed class {safeName}_Mock : global::TUnit.Mocks.Mock<{mockableType}>, {interfaceList}"))
+            using (writer.Block($"public sealed class {safeName}_Mock : global::TUnit.Mocks.Mock<{mockableType}>, {model.FullyQualifiedName}"))
             {
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-                writer.AppendLine($"public {safeName}_Mock({mockableType} mockObject, global::TUnit.Mocks.MockEngine<{mockableType}> engine)");
+                writer.AppendLine($"internal {safeName}_Mock({mockableType} mockObject, global::TUnit.Mocks.MockEngine<{mockableType}> engine)");
                 writer.AppendLine("    : base(mockObject, engine) { }");
 
                 foreach (var method in model.Methods)
@@ -41,8 +52,6 @@ internal static class MockWrapperTypeBuilder
                 foreach (var prop in model.Properties)
                 {
                     if (prop.IsStaticAbstract) continue;
-                    if (prop.IsIndexer) continue;
-                    if (prop.IsRefStructReturn) continue;
                     writer.AppendLine();
                     GeneratePropertyForwarding(writer, prop, model);
                 }

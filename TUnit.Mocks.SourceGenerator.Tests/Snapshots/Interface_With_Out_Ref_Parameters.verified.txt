@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IDictionary_Mock : global::TUnit.Mocks.Mock<global::IDictionary>, global::IDictionary
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IDictionary_Mock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
+        internal IDictionary_Mock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
             : base(mockObject, engine) { }
 
         bool global::IDictionary.TryGetValue(string key, out string value) => Object.TryGetValue(key, out value);

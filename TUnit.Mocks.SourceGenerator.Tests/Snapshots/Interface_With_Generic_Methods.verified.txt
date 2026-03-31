@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IRepository_Mock : global::TUnit.Mocks.Mock<global::IRepository>, global::IRepository
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IRepository_Mock(global::IRepository mockObject, global::TUnit.Mocks.MockEngine<global::IRepository> engine)
+        internal IRepository_Mock(global::IRepository mockObject, global::TUnit.Mocks.MockEngine<global::IRepository> engine)
             : base(mockObject, engine) { }
 
         T global::IRepository.GetById<T>(int id) where T : class => Object.GetById<T>(id);

@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IMyService_Mock : global::TUnit.Mocks.Mock<global::IMyService>, global::IMyService
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IMyService_Mock(global::IMyService mockObject, global::TUnit.Mocks.MockEngine<global::IMyService> engine)
+        internal IMyService_Mock(global::IMyService mockObject, global::TUnit.Mocks.MockEngine<global::IMyService> engine)
             : base(mockObject, engine) { }
 
         string global::IMyService.GetValue(string key) => Object.GetValue(key);

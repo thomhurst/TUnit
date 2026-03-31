@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IService_Mock : global::TUnit.Mocks.Mock<global::IService>, global::IService
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IService_Mock(global::IService mockObject, global::TUnit.Mocks.MockEngine<global::IService> engine)
+        internal IService_Mock(global::IService mockObject, global::TUnit.Mocks.MockEngine<global::IService> engine)
             : base(mockObject, engine) { }
 
         global::System.Threading.Tasks.Task<string> global::IService.GetAsync(int id) => Object.GetAsync(id);

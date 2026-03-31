@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class ICalculator_Mock : global::TUnit.Mocks.Mock<global::ICalculator>, global::ICalculator
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public ICalculator_Mock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
+        internal ICalculator_Mock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
             : base(mockObject, engine) { }
 
         int global::ICalculator.Add(int a, int b) => Object.Add(a, b);

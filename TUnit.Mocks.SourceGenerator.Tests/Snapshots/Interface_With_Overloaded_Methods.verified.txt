@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IFormatter_Mock : global::TUnit.Mocks.Mock<global::IFormatter>, global::IFormatter
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IFormatter_Mock(global::IFormatter mockObject, global::TUnit.Mocks.MockEngine<global::IFormatter> engine)
+        internal IFormatter_Mock(global::IFormatter mockObject, global::TUnit.Mocks.MockEngine<global::IFormatter> engine)
             : base(mockObject, engine) { }
 
         string global::IFormatter.Format(string value) => Object.Format(value);

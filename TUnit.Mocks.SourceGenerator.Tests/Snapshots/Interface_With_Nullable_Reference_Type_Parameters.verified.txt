@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class IFoo_Mock : global::TUnit.Mocks.Mock<global::IFoo>, global::IFoo
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public IFoo_Mock(global::IFoo mockObject, global::TUnit.Mocks.MockEngine<global::IFoo> engine)
+        internal IFoo_Mock(global::IFoo mockObject, global::TUnit.Mocks.MockEngine<global::IFoo> engine)
             : base(mockObject, engine) { }
 
         void global::IFoo.Bar(object? baz)

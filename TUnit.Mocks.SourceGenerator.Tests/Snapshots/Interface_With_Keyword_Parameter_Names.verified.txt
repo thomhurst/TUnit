@@ -6,7 +6,7 @@ namespace TUnit.Mocks.Generated
     public sealed class ITest_Mock : global::TUnit.Mocks.Mock<global::ITest>, global::ITest
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public ITest_Mock(global::ITest mockObject, global::TUnit.Mocks.MockEngine<global::ITest> engine)
+        internal ITest_Mock(global::ITest mockObject, global::TUnit.Mocks.MockEngine<global::ITest> engine)
             : base(mockObject, engine) { }
 
         void global::ITest.Test(string @event)
