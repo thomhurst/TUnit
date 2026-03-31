@@ -52,7 +52,11 @@ public class MockGenerator : IIncrementalGenerator
             {
                 var (mockOfAndAttribute, extensionInvocations) = pair;
                 var (mockOfTypes, attributeTypes) = mockOfAndAttribute;
-                return mockOfTypes.AddRange(attributeTypes).AddRange(extensionInvocations).Distinct();
+                var set = new HashSet<MockTypeModel>();
+                foreach (var m in mockOfTypes) set.Add(m);
+                foreach (var m in attributeTypes) set.Add(m);
+                foreach (var m in extensionInvocations) set.Add(m);
+                return set;
             });
 
         // Step 3: Generate source for each unique type

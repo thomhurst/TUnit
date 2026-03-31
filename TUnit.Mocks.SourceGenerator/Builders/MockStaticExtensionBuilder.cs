@@ -6,11 +6,8 @@ internal static class MockStaticExtensionBuilder
 {
     public static string Build(MockTypeModel model)
     {
-        // Static abstract types use bridge interfaces and can't have a simple wrapper
-        if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
-        {
+        if (!MockWrapperTypeBuilder.CanGenerateWrapper(model))
             return string.Empty;
-        }
 
         var writer = new CodeWriter();
         var safeName = MockImplBuilder.GetCompositeSafeName(model);
