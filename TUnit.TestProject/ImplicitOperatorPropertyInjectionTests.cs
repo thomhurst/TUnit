@@ -3,6 +3,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class ImplicitOperatorPropertyInjectionTests
 {
     [ClassDataSource<ImplicitDbFixture>]

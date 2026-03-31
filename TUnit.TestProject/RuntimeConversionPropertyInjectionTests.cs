@@ -139,6 +139,7 @@ public class SameTypeDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 /// so conversion must happen at runtime via CastHelper.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeImplicitConversionFromCustomDataSourceTests
 {
     [ImplicitSourceDataSource]
@@ -157,6 +158,7 @@ public class RuntimeImplicitConversionFromCustomDataSourceTests
 /// that yields a type with an explicit operator.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeExplicitConversionFromCustomDataSourceTests
 {
     [ExplicitSourceDataSource]
@@ -175,6 +177,7 @@ public class RuntimeExplicitConversionFromCustomDataSourceTests
 /// conversion operator (as opposed to the source type).
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeImplicitOnTargetTypeConversionTests
 {
     [TargetDefinesImplicitDataSource]
@@ -193,6 +196,7 @@ public class RuntimeImplicitOnTargetTypeConversionTests
 /// an implicit operator. This exercises the boxing/unboxing + conversion path.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeStructImplicitConversionTests
 {
     [StructImplicitDataSource]
@@ -211,6 +215,7 @@ public class RuntimeStructImplicitConversionTests
 /// No conversion is needed — verifies no regression when types already match.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeSameTypeNoConversionTests
 {
     [SameTypeDataSource]
@@ -230,6 +235,7 @@ public class RuntimeSameTypeNoConversionTests
 /// but the property expects RuntimeTarget.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 public class RuntimeMethodDataSourceImplicitConversionTests
 {
     [MethodDataSource(nameof(GetSource))]
@@ -251,6 +257,7 @@ public class RuntimeMethodDataSourceImplicitConversionTests
 /// must reapply the cached raw value through the cached-property preparation path to a new instance.
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
+[DynamicCodeOnly]
 [NotInParallel(nameof(RuntimeCachedRetryImplicitConversionTests))]
 public class RuntimeCachedRetryImplicitConversionTests
 {
