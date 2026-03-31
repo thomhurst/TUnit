@@ -132,7 +132,7 @@ var strict = IGreeter.Mock(MockBehavior.Strict);
 ```
 
 :::note
-`IMyInterface.Mock()` is available for simple interface mocks. For multi-interface mocks, interfaces with static abstract members, delegates, partial mocks, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
+`IMyInterface.Mock()` requires C# 14 / .NET 10 or later (it uses C# 14 static extension members). For older language versions, or for multi-interface mocks, interfaces with static abstract members, delegates, partial mocks, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
 :::
 
 ### Implicit Conversion

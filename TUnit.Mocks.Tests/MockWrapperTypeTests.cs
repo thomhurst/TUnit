@@ -34,11 +34,11 @@ public class MockWrapperTypeTests
     [Test]
     public async Task Wrapper_Can_Be_Passed_As_Interface_Parameter()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Arg.Any<string>()).Returns("Hi!");
 
-        // Pass mock directly to a method expecting the interface
-        var result = AcceptGreeter((IGreeter)mock);
+        // IGreeter.Mock() returns a typed wrapper — no cast needed
+        var result = AcceptGreeter(mock);
 
         await Assert.That(result).IsEqualTo("Hi!");
     }

@@ -100,6 +100,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
+            hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             return hash;
         }

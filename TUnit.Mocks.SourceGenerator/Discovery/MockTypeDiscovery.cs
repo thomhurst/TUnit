@@ -390,7 +390,8 @@ internal static class MockTypeDiscovery
             return false;
 
         // Static extension calls use a type name on the left — never a variable or member access.
-        return lhs is IdentifierNameSyntax or QualifiedNameSyntax or AliasQualifiedNameSyntax;
+        // GenericNameSyntax handles IFoo<T>.Mock().
+        return lhs is IdentifierNameSyntax or GenericNameSyntax or QualifiedNameSyntax or AliasQualifiedNameSyntax;
     }
 
     /// <summary>

@@ -7,8 +7,8 @@ internal static class MockWrapperTypeBuilder
 {
     public static string Build(MockTypeModel model)
     {
-        // Types with static abstract members use bridge interfaces and can't have a simple wrapper
-        if (model.HasStaticAbstractMembers)
+        // Multi-interface mocks and static abstract types can't have a simple wrapper
+        if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
         {
             return string.Empty;
         }

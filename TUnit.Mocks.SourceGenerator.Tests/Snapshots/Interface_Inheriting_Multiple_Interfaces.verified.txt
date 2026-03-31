@@ -39,7 +39,7 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.MockRegistry.RegisterFactory<global::IReadWriter>(Create);
         }
 
-        private static global::TUnit.Mocks.Mock<global::IReadWriter> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+        internal static global::TUnit.Mocks.Mock<global::IReadWriter> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IReadWriter' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IReadWriter>(behavior);
@@ -216,10 +216,7 @@ namespace TUnit.Mocks
             [global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]
             public static global::TUnit.Mocks.Generated.IReadWriter_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                var engine = new global::TUnit.Mocks.MockEngine<global::IReadWriter>(behavior);
-                var impl = new global::TUnit.Mocks.Generated.IReadWriter_MockImpl(engine);
-                engine.Raisable = impl;
-                return new global::TUnit.Mocks.Generated.IReadWriter_Mock(impl, engine);
+                return (global::TUnit.Mocks.Generated.IReadWriter_Mock)global::TUnit.Mocks.Generated.IReadWriter_MockFactory.Create(behavior, []);
             }
         }
     }
