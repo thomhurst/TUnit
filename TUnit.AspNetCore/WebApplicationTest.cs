@@ -15,7 +15,7 @@ public abstract class WebApplicationTest
     // Capped at 8: startup is reflection/I/O-bound, not CPU-bound, so ProcessorCount alone
     // would allow too many concurrent builds on high-core-count machines.
     private static readonly int _maxConcurrentServerInits = Math.Min(Environment.ProcessorCount * 2, 8);
-    protected static readonly SemaphoreSlim ServerInitSemaphore =
+    private protected static readonly SemaphoreSlim ServerInitSemaphore =
         new(_maxConcurrentServerInits, _maxConcurrentServerInits);
 
     /// <summary>
