@@ -22454,7 +22454,7 @@ TUnit requires `Microsoft.Testing.Platform` support to be enabled in your IDE.
 
 **Rider:** Settings > Build, Execution, Deployment > Unit Testing > Testing Platform > enable "Testing Platform support", then restart.
 
-**VS Code:** Install C# Dev Kit, then set `"dotnet.testWindow.useTestingPlatformProtocol": true` in settings, then reload.
+**VS Code:** Install C# Dev Kit, then reload.
 
 If tests still don't appear after enabling, try a clean rebuild. In Visual Studio, deleting the `.vs` folder can help.
 
