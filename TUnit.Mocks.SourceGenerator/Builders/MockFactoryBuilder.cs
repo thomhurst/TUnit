@@ -60,13 +60,20 @@ internal static class MockFactoryBuilder
             }
             writer.AppendLine();
 
-            using (writer.Block($"private static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
+            using (writer.Block($"internal static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
             {
                 writer.AppendLine($"if (constructorArgs.Length > 0) throw new global::System.ArgumentException($\"Interface mock '{mockableType}' does not support constructor arguments, but {{constructorArgs.Length}} were provided.\");");
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+                if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
+                {
+                    writer.AppendLine($"var mock = new {safeName}_Mock(impl, engine);");
+                }
+                else
+                {
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+                }
                 writer.AppendLine("return mock;");
             }
         }

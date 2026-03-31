@@ -127,21 +127,7 @@ internal static class MockTypeDiscovery
 
         if (method.TypeArguments.Length == 1)
         {
-            var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
-            if (model is null)
-                return ImmutableArray<MockTypeModel>.Empty;
-
-            // Discover transitive interface return types for auto-mocking support
-            var visited = new HashSet<string>();
-            var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly);
-
-            if (transitiveModels.Count == 0)
-                return ImmutableArray.Create(model);
-
-            var builder = ImmutableArray.CreateBuilder<MockTypeModel>(1 + transitiveModels.Count);
-            builder.Add(model);
-            builder.AddRange(transitiveModels);
-            return builder.MoveToImmutable();
+            return BuildModelWithTransitiveDependencies(namedType, isPartialMock, compilationAssembly);
         }
 
         // Multi-type mock: validate additional type args are all interfaces
@@ -336,6 +322,25 @@ internal static class MockTypeDiscovery
         };
     }
 
+    private static ImmutableArray<MockTypeModel> BuildModelWithTransitiveDependencies(
+        INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly)
+    {
+        var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
+        if (model is null)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var visited = new HashSet<string>();
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly);
+
+        if (transitiveModels.Count == 0)
+            return ImmutableArray.Create(model);
+
+        var builder = ImmutableArray.CreateBuilder<MockTypeModel>(1 + transitiveModels.Count);
+        builder.Add(model);
+        builder.AddRange(transitiveModels);
+        return builder.MoveToImmutable();
+    }
+
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly)
     {
         var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly);
@@ -364,6 +369,54 @@ internal static class MockTypeDiscovery
             Constructors = constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
         };
+    }
+
+    // ─── IFoo.Mock() static extension discovery ────────────────────
+
+    /// <summary>
+    /// Syntax predicate: matches IFoo.Mock() — a static extension invocation where the
+    /// left-hand side is a type name (not a variable/field access).
+    /// </summary>
+    public static bool IsMockExtensionInvocation(SyntaxNode node, CancellationToken ct)
+    {
+        if (node is not InvocationExpressionSyntax
+            {
+                Expression: MemberAccessExpressionSyntax
+                {
+                    Name: IdentifierNameSyntax { Identifier.ValueText: "Mock" },
+                    Expression: var lhs
+                }
+            })
+            return false;
+
+        // Static extension calls use a type name on the left — never a variable or member access.
+        // GenericNameSyntax handles IFoo<T>.Mock().
+        return lhs is IdentifierNameSyntax or GenericNameSyntax or QualifiedNameSyntax or AliasQualifiedNameSyntax;
+    }
+
+    /// <summary>
+    /// Semantic transform: resolve the left-hand side of X.Mock() to a type symbol.
+    /// If it's an interface, build a MockTypeModel for it.
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformMockExtensionInvocation(
+        GeneratorSyntaxContext context, CancellationToken ct)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
+
+        // Resolve the LHS to a type symbol first (cheap lookup).
+        var leftSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression, ct);
+        if (leftSymbol.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip if .Mock() already resolves to a generated specialization (2nd incremental pass).
+        var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
+        if (invocationSymbol.Symbol is IMethodSymbol resolved
+            && resolved.ReturnType.ContainingNamespace?.ToDisplayString() == "TUnit.Mocks.Generated")
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
+        return BuildModelWithTransitiveDependencies(namedType, isPartialMock: false, compilationAssembly);
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────

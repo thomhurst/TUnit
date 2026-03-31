@@ -46,7 +46,7 @@ public class CallbackBenchmarks
     {
         var count = 0;
         var svc = INotificationService.CreateMock();
-        svc.Mock.Setup.Send(Mockolate.It.IsAny<string>(), Mockolate.It.IsAny<string>())
+        ((Mockolate.Mock.IMockForINotificationService)svc).Setup.Send(Mockolate.It.IsAny<string>(), Mockolate.It.IsAny<string>())
             .Do(() => count++);
 
         svc.Send("user@test.com", "Hello");
@@ -129,7 +129,7 @@ public class CallbackBenchmarks
     {
         var lastMessage = "";
         var logger = ILogger.CreateMock();
-        logger.Mock.Setup.Log(Mockolate.It.IsAny<string>(), Mockolate.It.IsAny<string>())
+        ((Mockolate.Mock.IMockForILogger)logger).Setup.Log(Mockolate.It.IsAny<string>(), Mockolate.It.IsAny<string>())
             .Do((_, msg) => lastMessage = msg);
 
         logger.Log("INFO", "Test message 1");

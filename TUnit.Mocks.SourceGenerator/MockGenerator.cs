@@ -36,11 +36,28 @@ public class MockGenerator : IIncrementalGenerator
                 transform: MockTypeDiscovery.TransformGenerateMockAttribute)
             .SelectMany((models, _) => models);
 
-        // Step 2: Merge both sources and deduplicate
+        // Step 1c: Find all IFoo.Mock() static extension invocations
+        var extensionTypes = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: MockTypeDiscovery.IsMockExtensionInvocation,
+                transform: MockTypeDiscovery.TransformMockExtensionInvocation)
+            .SelectMany((models, _) => models);
+
+        // Step 2: Merge all sources and deduplicate
         var distinctTypes = mockTypes
             .Collect()
             .Combine(attributeTypes.Collect())
-            .SelectMany((pair, _) => pair.Left.AddRange(pair.Right).Distinct());
+            .Combine(extensionTypes.Collect())
+            .SelectMany((pair, _) =>
+            {
+                var (mockOfAndAttribute, extensionInvocations) = pair;
+                var (mockOfTypes, attributeTypes) = mockOfAndAttribute;
+                var set = new HashSet<MockTypeModel>();
+                foreach (var m in mockOfTypes) set.Add(m);
+                foreach (var m in attributeTypes) set.Add(m);
+                foreach (var m in extensionInvocations) set.Add(m);
+                return set;
+            });
 
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
@@ -98,6 +115,23 @@ public class MockGenerator : IIncrementalGenerator
         // Generate factory
         var factorySource = MockFactoryBuilder.Build(model);
         spc.AddSource($"{fileName}_MockFactory.g.cs", factorySource);
+
+        // Generate wrapper type and static extension for interface mocks.
+        // The static extension references the wrapper type, so both are emitted together.
+        if (model.IsInterface)
+        {
+            var wrapperSource = MockWrapperTypeBuilder.Build(model);
+            if (!string.IsNullOrEmpty(wrapperSource))
+            {
+                spc.AddSource($"{fileName}_Mock.g.cs", wrapperSource);
+
+                var extensionSource = MockStaticExtensionBuilder.Build(model);
+                if (!string.IsNullOrEmpty(extensionSource))
+                {
+                    spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
+                }
+            }
+        }
     }
 
     private static void GenerateDelegateMock(SourceProductionContext spc, MockTypeModel model)

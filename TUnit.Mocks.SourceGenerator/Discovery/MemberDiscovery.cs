@@ -63,7 +63,7 @@ internal static class MemberDiscovery
                         var key = GetMethodKey(method);
                         if (!seenMethods.Add(key)) continue;
 
-                        methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName));
+                        methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
                         break;
                     }
 
@@ -80,7 +80,7 @@ internal static class MemberDiscovery
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName));
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
                         }
                         break;
                     }
@@ -99,7 +99,7 @@ internal static class MemberDiscovery
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName));
+                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
                         }
                         break;
                     }
@@ -109,7 +109,7 @@ internal static class MemberDiscovery
                         var key = $"E:{evt.Name}";
                         if (!seenEvents.Add(key)) continue;
 
-                        events.Add(CreateEventModel(evt, explicitInterfaceName));
+                        events.Add(CreateEventModel(evt, explicitInterfaceName, interfaceFqn));
                         break;
                     }
                 }
@@ -168,7 +168,7 @@ internal static class MemberDiscovery
                         {
                             var key = GetMethodKey(method);
                             if (!seenMethods.Add(key)) continue;
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             break;
                         }
 
@@ -185,7 +185,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             }
                             break;
                         }
@@ -204,7 +204,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             }
                             break;
                         }
@@ -213,7 +213,7 @@ internal static class MemberDiscovery
                         {
                             var key = $"E:{evt.Name}";
                             if (!seenEvents.Add(key)) continue;
-                            events.Add(CreateEventModel(evt, null));
+                            events.Add(CreateEventModel(evt, null, declaringInterfaceName: interfaceFqn));
                             break;
                         }
                     }
@@ -464,7 +464,7 @@ internal static class MemberDiscovery
         return CreateMethodModel(invokeMethod, ref memberIdCounter, null);
     }
 
-    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName)
+    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
     {
         var returnType = method.ReturnType;
         var isAsync = returnType.IsAsyncReturnType();
@@ -510,6 +510,7 @@ internal static class MemberDiscovery
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,
+            DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = returnType.NullableAnnotation.ToString(),
             SmartDefault = isVoid ? "" : returnType.GetSmartDefault(returnType.IsNullableAnnotated()),
             UnwrappedSmartDefault = ComputeUnwrappedSmartDefault(returnType, isVoid, isAsync),
@@ -545,7 +546,7 @@ internal static class MemberDiscovery
         };
     }
 
-    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName)
+    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
     {
         var getterId = memberIdCounter++;
         var setterId = property.SetMethod is not null ? memberIdCounter++ : 0;
@@ -563,6 +564,7 @@ internal static class MemberDiscovery
             HasSetter = property.SetMethod is not null,
             SetterMemberId = setterId,
             ExplicitInterfaceName = explicitInterfaceName,
+            DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = property.Type.NullableAnnotation.ToString(),
             SmartDefault = property.Type.GetSmartDefault(property.Type.IsNullableAnnotated()),
             IsAbstractMember = property.IsAbstract,
@@ -608,7 +610,7 @@ internal static class MemberDiscovery
         return new EquatableArray<MockConstructorModel>(constructors.ToImmutableArray());
     }
 
-    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName)
+    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
     {
         var getterId = memberIdCounter++;
         var setterId = indexer.SetMethod is not null ? memberIdCounter++ : 0;
@@ -636,12 +638,13 @@ internal static class MemberDiscovery
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,
+            DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated())
         };
     }
 
-    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName)
+    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)
     {
         var eventHandlerType = evt.Type.GetFullyQualifiedName();
 
@@ -700,6 +703,7 @@ internal static class MemberDiscovery
             InvokeArgs = invokeArgs,
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,
+            DeclaringInterfaceName = declaringInterfaceName,
             RaiseParameterList = raiseParameterList
         };
     }

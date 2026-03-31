@@ -42,11 +42,11 @@ public class VerificationBenchmarks
     public void Mockolate_Verify()
     {
         var sut = ICalculatorService.CreateMock();
-        sut.Mock.Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Setup.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Returns(42);
         sut.Add(1, 2);
         sut.Add(3, 4);
 
-        sut.Mock.Verify.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Exactly(2);
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Verify.Add(Mockolate.It.IsAny<int>(), Mockolate.It.IsAny<int>()).Exactly(2);
     }
 
     [Benchmark(Description = "Moq")]
@@ -102,7 +102,7 @@ public class VerificationBenchmarks
     public void Mockolate_VerifyNever()
     {
         var sut = ICalculatorService.CreateMock();
-        sut.Mock.Verify.Format(Mockolate.It.IsAny<int>()).Never();
+        ((Mockolate.Mock.IMockForICalculatorService)sut).Verify.Format(Mockolate.It.IsAny<int>()).Never();
     }
 
     [Benchmark(Description = "Moq (Never)")]
@@ -166,17 +166,17 @@ public class VerificationBenchmarks
     public void Mockolate_VerifyMultiple()
     {
         var sut = IUserRepository.CreateMock();
-        sut.Mock.Setup.GetById(Mockolate.It.IsAny<int>()).Returns(new User { Id = 1, Name = "Test" });
-        sut.Mock.Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.GetById(Mockolate.It.IsAny<int>()).Returns(new User { Id = 1, Name = "Test" });
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Setup.Exists(Mockolate.It.IsAny<int>()).Returns(true);
 
         sut.GetById(1);
         sut.GetById(2);
         sut.Exists(1);
         sut.Save(new User { Id = 3, Name = "New" });
 
-        sut.Mock.Verify.GetById(Mockolate.It.IsAny<int>()).Exactly(2);
-        sut.Mock.Verify.Exists(Mockolate.It.IsAny<int>()).Once();
-        sut.Mock.Verify.Save(Mockolate.It.IsAny<User>()).Once();
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Verify.GetById(Mockolate.It.IsAny<int>()).Exactly(2);
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Verify.Exists(Mockolate.It.IsAny<int>()).Once();
+        ((Mockolate.Mock.IMockForIUserRepository)sut).Verify.Save(Mockolate.It.IsAny<User>()).Once();
     }
 
     [Benchmark(Description = "Moq (Multiple)")]

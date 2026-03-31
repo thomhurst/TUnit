@@ -1238,7 +1238,7 @@ internal static class MockImplBuilder
     /// <summary>
     /// Gets the argument pass-through list for calling base.Method(), preserving ref/out/in directions.
     /// </summary>
-    private static string GetArgPassList(MockMemberModel method)
+    internal static string GetArgPassList(MockMemberModel method)
     {
         return string.Join(", ", method.Parameters.Select(p =>
         {

@@ -19,6 +19,11 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public string EventArgsType { get; init; } = "";
 
     public string? ExplicitInterfaceName { get; init; }
+    /// <summary>
+    /// The fully qualified name of the interface that declares this event.
+    /// Used by the wrapper type builder for correct explicit interface forwarding.
+    /// </summary>
+    public string? DeclaringInterfaceName { get; init; }
     public bool IsStaticAbstract { get; init; }
 
     /// <summary>
@@ -35,6 +40,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
+            && DeclaringInterfaceName == other.DeclaringInterfaceName
             && IsStaticAbstract == other.IsStaticAbstract
             && RaiseParameterList == other.RaiseParameterList;
     }
@@ -47,6 +53,8 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + EventHandlerType.GetHashCode();
             hash = hash * 31 + RaiseParameterList.GetHashCode();
+            hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             return hash;
         }
     }
