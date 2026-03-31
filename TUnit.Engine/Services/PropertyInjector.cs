@@ -242,7 +242,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Source-gen properties are AOT-safe")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through source generation")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through source generation — annotation can't flow through PropertyInjectionMetadata interface")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "ContainingType is annotated with DynamicallyAccessedMembers in PropertyInjectionMetadata")]
     private async Task InjectSourceGeneratedPropertyAsync(
         object instance,
@@ -295,11 +295,13 @@ internal sealed class PropertyInjector
         // Set the property value
         metadata.SetProperty(instance, resolvedValue);
 
-        // Store for potential reuse with composite key
+        // Store the converted value for potential reuse (e.g., retries).
+        // Use indexer to overwrite any pre-resolved unconverted value so that
+        // SetCachedPropertiesOnInstance can use the value directly without re-converting.
         if (testContext != null)
         {
             ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
-                .TryAdd(cacheKey, resolvedValue);
+                [cacheKey] = resolvedValue;
         }
     }
 
@@ -318,7 +320,7 @@ internal sealed class PropertyInjector
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through reflection discovery")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through reflection discovery — annotation can't flow through PropertyInfo.PropertyType")]
     private async Task InjectReflectionPropertyAsync(
         object instance,
         PropertyInfo property,

@@ -174,6 +174,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// This is used to apply cached property values to new instances created during retries.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "PropertyType is preserved through source generation or reflection discovery — annotation can't flow through PropertyInfo/PropertyInjectionMetadata")]
     private void SetCachedPropertiesOnInstance(object instance, TestContext testContext)
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
@@ -193,12 +194,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
-                    // Convert the value if the runtime type doesn't match the property type.
-                    // This handles implicit/explicit conversion operators at runtime when the
-                    // source generator doesn't know the data source type (e.g., custom data sources).
+                    // Convert if needed — cached values may be unconverted when pre-resolved during registration
                     cachedValue = PropertyValueConversionHelper.ConvertIfNeeded(cachedValue, metadata.PropertyType);
-
-                    // Set the cached value on the new instance
                     metadata.SetProperty(instance, cachedValue);
                 }
             }
@@ -211,10 +208,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
                 if (cachedProperties.TryGetValue(cacheKey, out var cachedValue) && cachedValue != null)
                 {
-                    // Convert the value if needed (same as above)
+                    // Convert if needed — cached values may be unconverted when pre-resolved during registration
                     cachedValue = PropertyValueConversionHelper.ConvertIfNeeded(cachedValue, property.PropertyType);
-
-                    // Set the cached value on the new instance
                     var setter = PropertySetterFactory.CreateSetter(property);
                     setter(instance, cachedValue);
                 }
