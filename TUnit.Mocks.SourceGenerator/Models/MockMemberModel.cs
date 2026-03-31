@@ -24,6 +24,11 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public EquatableArray<MockParameterModel> Parameters { get; init; } = EquatableArray<MockParameterModel>.Empty;
     public EquatableArray<MockTypeParameterModel> TypeParameters { get; init; } = EquatableArray<MockTypeParameterModel>.Empty;
     public string? ExplicitInterfaceName { get; init; }
+    /// <summary>
+    /// The fully qualified name of the interface that declares this member.
+    /// Used by the wrapper type builder for correct explicit interface forwarding.
+    /// </summary>
+    public string? DeclaringInterfaceName { get; init; }
     public string NullableAnnotation { get; init; } = "None";
     public string SmartDefault { get; init; } = "default!";
     public string UnwrappedSmartDefault { get; init; } = "default!";
@@ -71,6 +76,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && Parameters.Equals(other.Parameters)
             && TypeParameters.Equals(other.TypeParameters)
             && ExplicitInterfaceName == other.ExplicitInterfaceName
+            && DeclaringInterfaceName == other.DeclaringInterfaceName
             && NullableAnnotation == other.NullableAnnotation
             && SmartDefault == other.SmartDefault
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault

@@ -98,6 +98,22 @@ public class MockGenerator : IIncrementalGenerator
         // Generate factory
         var factorySource = MockFactoryBuilder.Build(model);
         spc.AddSource($"{fileName}_MockFactory.g.cs", factorySource);
+
+        // Generate wrapper type and static extension for interface mocks
+        if (model.IsInterface)
+        {
+            var wrapperSource = MockWrapperTypeBuilder.Build(model);
+            if (!string.IsNullOrEmpty(wrapperSource))
+            {
+                spc.AddSource($"{fileName}_Mock.g.cs", wrapperSource);
+            }
+
+            var extensionSource = MockStaticExtensionBuilder.Build(model);
+            if (!string.IsNullOrEmpty(extensionSource))
+            {
+                spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
+            }
+        }
     }
 
     private static void GenerateDelegateMock(SourceProductionContext spc, MockTypeModel model)

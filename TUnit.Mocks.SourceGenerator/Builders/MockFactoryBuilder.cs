@@ -66,7 +66,14 @@ internal static class MockFactoryBuilder
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
                 writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
                 writer.AppendLine("engine.Raisable = impl;");
-                writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+                if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
+                {
+                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+                }
+                else
+                {
+                    writer.AppendLine($"var mock = new {safeName}_Mock(impl, engine);");
+                }
                 writer.AppendLine("return mock;");
             }
         }
