@@ -15,14 +15,6 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </summary>
 internal static class MemberDiscovery
 {
-    /// <summary>
-    /// Sentinel index stored in <c>seenProperties</c> when a non-virtual property
-    /// hides a base virtual via <c>new</c>. Prevents the base virtual from being
-    /// collected and ensures <see cref="MergePropertyAccessors"/> is not called
-    /// with an invalid index.
-    /// </summary>
-    private const int HiddenByNew = -1;
-
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
     {
@@ -31,7 +23,7 @@ internal static class MemberDiscovery
         var events = new List<MockEventModel>();
 
         var seenMethods = new HashSet<string>();
-        var seenProperties = new Dictionary<string, int>();
+        var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
 
         int memberIdCounter = 0;
@@ -80,9 +72,9 @@ internal static class MemberDiscovery
                         var key = $"P:{property.Name}";
                         if (seenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            if (existingIndex != HiddenByNew)
+                            if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
                             }
                         }
                         else
@@ -99,9 +91,9 @@ internal static class MemberDiscovery
                         var key = $"I:[{paramTypes}]";
                         if (seenProperties.TryGetValue(key, out var existingIndex))
                         {
-                            if (existingIndex != HiddenByNew)
+                            if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                                MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
                             }
                         }
                         else
@@ -143,7 +135,7 @@ internal static class MemberDiscovery
         var events = new List<MockEventModel>();
 
         var seenMethods = new HashSet<string>();
-        var seenProperties = new Dictionary<string, int>();
+        var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
 
         int memberIdCounter = 0;
@@ -185,9 +177,9 @@ internal static class MemberDiscovery
                             var key = $"P:{property.Name}";
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
-                                if (existingIndex != HiddenByNew)
+                                if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
                                 }
                             }
                             else
@@ -204,9 +196,9 @@ internal static class MemberDiscovery
                             var key = $"I:[{paramTypes}]";
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
-                                if (existingIndex != HiddenByNew)
+                                if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex, indexer, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
                                 }
                             }
                             else
@@ -243,7 +235,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> properties,
         List<MockEventModel> events,
         HashSet<string> seenMethods,
-        Dictionary<string, int> seenProperties,
+        Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
     {
@@ -298,9 +290,9 @@ internal static class MemberDiscovery
                         {
                             if (seenProperties.TryGetValue(key, out var existingIndex))
                             {
-                                if (existingIndex != HiddenByNew)
+                                if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex, property, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
                                 }
                             }
                             else
@@ -311,7 +303,33 @@ internal static class MemberDiscovery
                         }
                         else if (!seenProperties.ContainsKey(key))
                         {
-                            seenProperties[key] = HiddenByNew;
+                            seenProperties[key] = null;
+                        }
+                        break;
+                    }
+
+                    case IPropertySymbol indexer when indexer.IsIndexer:
+                    {
+                        var paramTypes = string.Join(',', indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
+                        var key = $"I:[{paramTypes}]";
+                        if (indexer.IsAbstract || indexer.IsVirtual || indexer.IsOverride)
+                        {
+                            if (seenProperties.TryGetValue(key, out var existingIndex))
+                            {
+                                if (existingIndex.HasValue)
+                                {
+                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
+                                }
+                            }
+                            else
+                            {
+                                seenProperties[key] = properties.Count;
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                            }
+                        }
+                        else if (!seenProperties.ContainsKey(key))
+                        {
+                            seenProperties[key] = null;
                         }
                         break;
                     }
@@ -794,7 +812,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> properties,
         List<MockEventModel> events,
         HashSet<string> seenMethods,
-        Dictionary<string, int> seenProperties,
+        Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
     {
