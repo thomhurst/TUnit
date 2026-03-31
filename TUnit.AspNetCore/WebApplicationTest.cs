@@ -124,7 +124,7 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
-        await ServerInitSemaphore.WaitAsync();
+        await ServerInitSemaphore.WaitAsync(testContext.Execution.CancellationToken);
         try
         {
             await Task.Run(() => _ = _factory.Server);
