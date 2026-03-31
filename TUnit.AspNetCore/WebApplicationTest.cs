@@ -127,10 +127,12 @@ public abstract class WebApplicationTest<TFactory, TEntryPoint> : WebApplication
                 (_, config) => ConfigureTestConfiguration(config),
                 ConfigureWebHostBuilder));
 
+        // Semaphore guards only the Server property access (the synchronous host build),
+        // not the factory creation above which is fast synchronous configuration.
         await ServerInitSemaphore.WaitAsync(testContext.Execution.CancellationToken);
         try
         {
-            await Task.Run(() => _ = _factory.Server);
+            await Task.Run(() => _ = _factory.Server, testContext.Execution.CancellationToken);
         }
         finally
         {
