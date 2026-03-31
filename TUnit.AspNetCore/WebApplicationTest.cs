@@ -12,8 +12,11 @@ public abstract class WebApplicationTest
     // Shared across all generic instantiations of WebApplicationTest<TFactory, TEntryPoint>.
     // WebApplicationFactory.Server is synchronous; Task.Run prevents blocking async threads,
     // and this semaphore caps concurrent DI container builds to avoid thread pool starvation.
-    internal static readonly SemaphoreSlim ServerInitSemaphore =
-        new(Environment.ProcessorCount * 2, Environment.ProcessorCount * 2);
+    // Capped at 8: startup is reflection/I/O-bound, not CPU-bound, so ProcessorCount alone
+    // would allow too many concurrent builds on high-core-count machines.
+    private static readonly int _maxConcurrentServerInits = Math.Min(Environment.ProcessorCount * 2, 8);
+    protected static readonly SemaphoreSlim ServerInitSemaphore =
+        new(_maxConcurrentServerInits, _maxConcurrentServerInits);
 
     /// <summary>
     /// Gets a unique identifier for this test instance.
