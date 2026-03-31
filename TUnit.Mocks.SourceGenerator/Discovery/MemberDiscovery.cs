@@ -162,7 +162,7 @@ internal static class MemberDiscovery
                         {
                             var key = GetMethodKey(method);
                             if (!seenMethods.Add(key)) continue;
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             break;
                         }
 
@@ -176,7 +176,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             }
                             break;
                         }
@@ -192,7 +192,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
                             }
                             break;
                         }
@@ -201,7 +201,7 @@ internal static class MemberDiscovery
                         {
                             var key = $"E:{evt.Name}";
                             if (!seenEvents.Add(key)) continue;
-                            events.Add(CreateEventModel(evt, null));
+                            events.Add(CreateEventModel(evt, null, declaringInterfaceName: interfaceFqn));
                             break;
                         }
                     }

@@ -46,14 +46,14 @@ public class GreeterTests
     [Test]
     public async Task Greet_Returns_Configured_Value()
     {
-        // Arrange — create a mock
-        var mock = Mock.Of<IGreeter>();
+        // Arrange — create a mock using the static extension syntax
+        var mock = IGreeter.Mock();
 
         // Configure — set up a return value
         mock.Greet(Any()).Returns("Hello!");
 
-        // Act — use the mock object
-        IGreeter greeter = mock.Object;
+        // Act — mock IS the interface, no .Object needed
+        IGreeter greeter = mock;
         var result = greeter.Greet("Alice");
 
         // Assert — verify the result and the call
@@ -63,6 +63,12 @@ public class GreeterTests
 }
 ```
 
+You can also use the `Mock.Of<T>()` factory — both produce the same result for interfaces:
+
+```csharp
+var mock = Mock.Of<IGreeter>();
+```
+
 ## Key Concepts
 
 ### Creating Mocks
@@ -70,6 +76,7 @@ public class GreeterTests
 | Factory Method | Use Case |
 |---|---|
 | `Mock.Of<T>()` | Mock an interface, abstract class, or concrete class |
+| `IMyInterface.Mock()` | Create a mock that directly implements the interface ([details](#typed-mock-wrapper)) |
 | `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
 | `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
 | `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |
@@ -88,20 +95,49 @@ var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured
 
 ### The Mock Wrapper
 
-`Mock.Of<T>()` returns a `Mock<T>` wrapper. Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
+`IService.Mock()` and `Mock.Of<T>()` return a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
 
 ```csharp
-var mock = Mock.Of<IService>();
+var mock = IService.Mock();
 
-mock.GetUser(Any()).Returns(user);       // setup — .Returns() makes it a stub
+mock.GetUser(Any()).Returns(user);           // setup — .Returns() makes it a stub
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
 mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
-mock.Object                                  // the T instance to pass to your code under test
+mock.Object                                  // the T instance (also available via direct cast)
 ```
+
+### Typed Mock Wrapper
+
+The `IMyInterface.Mock()` syntax (a C# 14 static extension member) returns a specialized wrapper type that extends `Mock<T>` **and** implements the interface directly. This means the mock can be used anywhere the interface is expected — no `.Object` or cast needed:
+
+```csharp
+var mock = IGreeter.Mock();
+
+// mock IS an IGreeter — assign directly, pass to methods, use in collections
+IGreeter greeter = mock;
+List<IGreeter> greeters = [mock];
+AcceptGreeter(mock);
+
+// Setup and verification work the same way
+mock.Greet(Any()).Returns("Hello!");
+mock.Greet("Alice").WasCalled();
+```
+
+Both `Mock.Of<T>()` and `IMyInterface.Mock()` produce the same wrapper type for interfaces, so you can use them interchangeably. The `IMyInterface.Mock()` form is more concise and makes the intent clearer.
+
+An optional `MockBehavior` parameter is supported:
+
+```csharp
+var strict = IGreeter.Mock(MockBehavior.Strict);
+```
+
+:::note
+`IMyInterface.Mock()` is available for simple interface mocks. For multi-interface mocks, interfaces with static abstract members, delegates, partial mocks, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
+:::
 
 ### Implicit Conversion
 
-You can pass `Mock<T>` directly where `T` is expected — no `.Object` needed:
+`Mock<T>` also supports implicit conversion to `T` — so `Mock.Of<T>()` works without `.Object` too:
 
 ```csharp
 var mock = Mock.Of<IGreeter>();

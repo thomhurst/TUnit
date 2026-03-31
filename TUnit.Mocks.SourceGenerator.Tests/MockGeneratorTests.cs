@@ -628,4 +628,29 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Static_Extension_Discovery_Without_Mock_Of()
+    {
+        // IFoo.Mock() should trigger generation even without Mock.Of<IFoo>()
+        var source = """
+            using TUnit.Mocks;
+
+            public interface INotifier
+            {
+                void Notify(string message);
+                string GetStatus();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = INotifier.Mock();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }

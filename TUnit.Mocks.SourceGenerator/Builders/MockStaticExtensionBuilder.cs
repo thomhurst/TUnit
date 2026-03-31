@@ -21,18 +21,19 @@ internal static class MockStaticExtensionBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block("namespace TUnit.Mocks.Generated"))
+        using (writer.Block("namespace TUnit.Mocks"))
         {
             using (writer.Block($"public static class {safeName}_MockStaticExtension"))
             {
                 using (writer.Block($"extension({model.FullyQualifiedName})"))
                 {
-                    using (writer.Block($"public static {safeName}_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
+                    writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]");
+                using (writer.Block($"public static global::TUnit.Mocks.Generated.{safeName}_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
                     {
                         writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
-                        writer.AppendLine($"var impl = new {safeName}_MockImpl(engine);");
+                        writer.AppendLine($"var impl = new global::TUnit.Mocks.Generated.{safeName}_MockImpl(engine);");
                         writer.AppendLine("engine.Raisable = impl;");
-                        writer.AppendLine($"return new {safeName}_Mock(impl, engine);");
+                        writer.AppendLine($"return new global::TUnit.Mocks.Generated.{safeName}_Mock(impl, engine);");
                     }
                 }
             }

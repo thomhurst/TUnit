@@ -23,11 +23,7 @@ internal static class MockWrapperTypeBuilder
 
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
-            // Build interface list: primary + additional
-            var interfaces = new[] { model.FullyQualifiedName }
-                .Concat(model.AdditionalInterfaceNames)
-                .ToList();
-            var interfaceList = string.Join(", ", interfaces);
+            var interfaceList = string.Join(", ", new[] { model.FullyQualifiedName }.Concat(model.AdditionalInterfaceNames));
 
             using (writer.Block($"public sealed class {safeName}_Mock : global::TUnit.Mocks.Mock<{mockableType}>, {interfaceList}"))
             {
@@ -73,7 +69,7 @@ internal static class MockWrapperTypeBuilder
         var paramList = MockImplBuilder.GetParameterList(method);
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
         var constraints = MockImplBuilder.GetConstraintClauses(method);
-        var argPassList = GetArgPassList(method);
+        var argPassList = MockImplBuilder.GetArgPassList(method);
         var returnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
 
         if (method.IsVoid && !method.IsAsync)
@@ -94,17 +90,10 @@ internal static class MockWrapperTypeBuilder
         var interfaceName = prop.ExplicitInterfaceName ?? prop.DeclaringInterfaceName ?? model.FullyQualifiedName;
         var returnType = prop.ReturnType;
 
-        var accessors = new System.Collections.Generic.List<string>();
-        if (prop.HasGetter)
-        {
-            accessors.Add($"get => Object.{prop.Name};");
-        }
-        if (prop.HasSetter)
-        {
-            accessors.Add($"set => Object.{prop.Name} = value;");
-        }
+        var getter = prop.HasGetter ? $"get => Object.{prop.Name}; " : "";
+        var setter = prop.HasSetter ? $"set => Object.{prop.Name} = value; " : "";
 
-        writer.AppendLine($"{returnType} {interfaceName}.{prop.Name} {{ {string.Join(" ", accessors)} }}");
+        writer.AppendLine($"{returnType} {interfaceName}.{prop.Name} {{ {getter}{setter}}}");
     }
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
@@ -114,18 +103,4 @@ internal static class MockWrapperTypeBuilder
         writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
     }
 
-    private static string GetArgPassList(MockMemberModel method)
-    {
-        return string.Join(", ", method.Parameters.Select(p =>
-        {
-            var direction = p.Direction switch
-            {
-                ParameterDirection.Out => "out ",
-                ParameterDirection.Ref => "ref ",
-                ParameterDirection.In_Readonly => "in ",
-                _ => ""
-            };
-            return $"{direction}{p.Name}";
-        }));
-    }
 }

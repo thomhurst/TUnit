@@ -36,11 +36,19 @@ public class MockGenerator : IIncrementalGenerator
                 transform: MockTypeDiscovery.TransformGenerateMockAttribute)
             .SelectMany((models, _) => models);
 
-        // Step 2: Merge both sources and deduplicate
+        // Step 1c: Find all IFoo.Mock() static extension invocations
+        var extensionTypes = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: MockTypeDiscovery.IsMockExtensionInvocation,
+                transform: MockTypeDiscovery.TransformMockExtensionInvocation)
+            .SelectMany((models, _) => models);
+
+        // Step 2: Merge all sources and deduplicate
         var distinctTypes = mockTypes
             .Collect()
             .Combine(attributeTypes.Collect())
-            .SelectMany((pair, _) => pair.Left.AddRange(pair.Right).Distinct());
+            .Combine(extensionTypes.Collect())
+            .SelectMany((pair, _) => pair.Left.Left.AddRange(pair.Left.Right).AddRange(pair.Right).Distinct());
 
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>

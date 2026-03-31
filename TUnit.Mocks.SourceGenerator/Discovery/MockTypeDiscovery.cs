@@ -366,6 +366,73 @@ internal static class MockTypeDiscovery
         };
     }
 
+    // ─── IFoo.Mock() static extension discovery ────────────────────
+
+    /// <summary>
+    /// Syntax predicate: quick check if a node might be IFoo.Mock() — a static extension
+    /// invocation on an interface type. Matches any X.Mock(...) member access invocation.
+    /// </summary>
+    public static bool IsMockExtensionInvocation(SyntaxNode node, CancellationToken ct)
+    {
+        return node is InvocationExpressionSyntax
+        {
+            Expression: MemberAccessExpressionSyntax
+            {
+                Name: IdentifierNameSyntax { Identifier.ValueText: "Mock" }
+            }
+        };
+    }
+
+    /// <summary>
+    /// Semantic transform: resolve the left-hand side of X.Mock() to a type symbol.
+    /// If it's an interface, build a MockTypeModel for it.
+    /// </summary>
+    public static ImmutableArray<MockTypeModel> TransformMockExtensionInvocation(
+        GeneratorSyntaxContext context, CancellationToken ct)
+    {
+        var invocation = (InvocationExpressionSyntax)context.Node;
+        var memberAccess = (MemberAccessExpressionSyntax)invocation.Expression;
+
+        // Check if .Mock() already resolves to a generated specialization.
+        // The generic fallback returns Mock<T>; the generated one returns T_Mock.
+        // If the return type is already a subclass of Mock<T> (i.e. in the Generated namespace),
+        // the specialization exists and we can skip generation.
+        var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
+        if (invocationSymbol.Symbol is IMethodSymbol resolved
+            && resolved.ReturnType.ContainingNamespace?.ToDisplayString() == "TUnit.Mocks.Generated")
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Resolve the left-hand side (e.g. IFoo) to a type symbol
+        var leftSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression, ct);
+        if (leftSymbol.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip error types
+        if (namedType.TypeKind == TypeKind.Error)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Skip sealed/value types (shouldn't be interfaces, but guard)
+        if (namedType.IsSealed || namedType.IsValueType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
+        var model = BuildSingleTypeModel(namedType, isPartialMock: false, compilationAssembly);
+        if (model is null)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Discover transitive interface return types for auto-mocking support
+        var visited = new HashSet<string>();
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly);
+
+        if (transitiveModels.Count == 0)
+            return ImmutableArray.Create(model);
+
+        var builder = ImmutableArray.CreateBuilder<MockTypeModel>(1 + transitiveModels.Count);
+        builder.Add(model);
+        builder.AddRange(transitiveModels);
+        return builder.MoveToImmutable();
+    }
+
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
 
     /// <summary>

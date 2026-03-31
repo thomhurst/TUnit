@@ -112,8 +112,29 @@ public class MockWrapperTypeTests
         await Assert.That(name).IsEqualTo("Calculator");
     }
 
+    [Test]
+    public async Task Extension_Only_Discovery_Works_Without_Mock_Of()
+    {
+        // IExtensionOnlyService is never used with Mock.Of<T>() — only IExtensionOnlyService.Mock()
+        var mock = IExtensionOnlyService.Mock();
+        mock.Process(Arg.Any<int>()).Returns("processed");
+
+        IExtensionOnlyService svc = mock;
+        var result = svc.Process(42);
+
+        await Assert.That(result).IsEqualTo("processed");
+    }
+
     private static string AcceptGreeter(IGreeter greeter)
     {
         return greeter.Greet("Test");
     }
+}
+
+/// <summary>
+/// Interface discovered only via IExtensionOnlyService.Mock() — no Mock.Of usage.
+/// </summary>
+public interface IExtensionOnlyService
+{
+    string Process(int value);
 }

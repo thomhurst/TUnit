@@ -182,7 +182,7 @@ var mock = Mock.Of<MyService>("connectionString", 42);
 
 ## Interfaces with Static Abstract Members
 
-Interfaces that have static abstract members (directly or inherited) cannot be used as type arguments in `Mock.Of<T>()` — the compiler raises **CS8920** before the source generator runs.
+Interfaces that have static abstract members (directly or inherited) cannot be used as type arguments in `Mock.Of<T>()` or with `IMyInterface.Mock()` — the compiler raises **CS8920** before the source generator runs.
 
 Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source generator produces a bridge interface (suffixed `_Mockable`) that provides default implementations for the static abstract members:
 
