@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class ITest_Mock : global::TUnit.Mocks.Mock<global::ITest>, global::ITest
+    public sealed class ITestMock : global::TUnit.Mocks.Mock<global::ITest>, global::ITest
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal ITest_Mock(global::ITest mockObject, global::TUnit.Mocks.MockEngine<global::ITest> engine)
+        internal ITestMock(global::ITest mockObject, global::TUnit.Mocks.MockEngine<global::ITest> engine)
             : base(mockObject, engine) { }
 
         void global::ITest.Test(string @event)
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class ITest_MockFactory
+    internal static class ITestMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -38,9 +38,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::ITest' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::ITest>(behavior);
-            var impl = new ITest_MockImpl(engine);
+            var impl = new ITestMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new ITest_Mock(impl, engine);
+            var mock = new ITestMock(impl, engine);
             return mock;
         }
     }
@@ -54,14 +54,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class ITest_MockImpl : global::ITest, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class ITestMockImpl : global::ITest, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::ITest> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal ITest_MockImpl(global::TUnit.Mocks.MockEngine<global::ITest> engine)
+        internal ITestMockImpl(global::TUnit.Mocks.MockEngine<global::ITest> engine)
         {
             _engine = engine;
         }
@@ -299,9 +299,9 @@ namespace TUnit.Mocks
     {
         extension(global::ITest)
         {
-            public static global::TUnit.Mocks.Generated.ITest_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.ITestMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ITest_Mock)global::TUnit.Mocks.Generated.ITest_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.ITestMock)global::TUnit.Mocks.Generated.ITestMockFactory.Create(behavior, []);
             }
         }
     }

@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class ICalculator_Mock : global::TUnit.Mocks.Mock<global::ICalculator>, global::ICalculator
+    public sealed class ICalculatorMock : global::TUnit.Mocks.Mock<global::ICalculator>, global::ICalculator
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal ICalculator_Mock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
+        internal ICalculatorMock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
             : base(mockObject, engine) { }
 
         int global::ICalculator.Add(int a, int b) => Object.Add(a, b);
@@ -28,7 +28,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class ICalculator_MockFactory
+    internal static class ICalculatorMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -40,9 +40,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::ICalculator' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::ICalculator>(behavior);
-            var impl = new ICalculator_MockImpl(engine);
+            var impl = new ICalculatorMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new ICalculator_Mock(impl, engine);
+            var mock = new ICalculatorMock(impl, engine);
             return mock;
         }
     }
@@ -56,14 +56,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class ICalculator_MockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class ICalculatorMockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::ICalculator> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal ICalculator_MockImpl(global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
+        internal ICalculatorMockImpl(global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
         {
             _engine = engine;
         }
@@ -337,9 +337,9 @@ namespace TUnit.Mocks
     {
         extension(global::ICalculator)
         {
-            public static global::TUnit.Mocks.Generated.ICalculator_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.ICalculatorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ICalculator_Mock)global::TUnit.Mocks.Generated.ICalculator_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.ICalculatorMock)global::TUnit.Mocks.Generated.ICalculatorMockFactory.Create(behavior, []);
             }
         }
     }

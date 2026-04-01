@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IRepository_string__Mock : global::TUnit.Mocks.Mock<global::IRepository<string>>, global::IRepository<string>
+    public sealed class IRepository_string_Mock : global::TUnit.Mocks.Mock<global::IRepository<string>>, global::IRepository<string>
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IRepository_string__Mock(global::IRepository<string> mockObject, global::TUnit.Mocks.MockEngine<global::IRepository<string>> engine)
+        internal IRepository_string_Mock(global::IRepository<string> mockObject, global::TUnit.Mocks.MockEngine<global::IRepository<string>> engine)
             : base(mockObject, engine) { }
 
         string global::IRepository<string>.GetById(int id) => Object.GetById(id);
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IRepository_string__MockFactory
+    internal static class IRepository_string_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -38,9 +38,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IRepository<string>' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IRepository<string>>(behavior);
-            var impl = new IRepository_string__MockImpl(engine);
+            var impl = new IRepository_string_MockImpl(engine);
             engine.Raisable = impl;
-            var mock = new IRepository_string__Mock(impl, engine);
+            var mock = new IRepository_string_Mock(impl, engine);
             return mock;
         }
     }
@@ -54,14 +54,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IRepository_string__MockImpl : global::IRepository<string>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IRepository_string_MockImpl : global::IRepository<string>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IRepository<string>> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IRepository_string__MockImpl(global::TUnit.Mocks.MockEngine<global::IRepository<string>> engine)
+        internal IRepository_string_MockImpl(global::TUnit.Mocks.MockEngine<global::IRepository<string>> engine)
         {
             _engine = engine;
         }
@@ -284,9 +284,9 @@ namespace TUnit.Mocks
     {
         extension(global::IRepository<string>)
         {
-            public static global::TUnit.Mocks.Generated.IRepository_string__Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.IRepository_string_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IRepository_string__Mock)global::TUnit.Mocks.Generated.IRepository_string__MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.IRepository_string_Mock)global::TUnit.Mocks.Generated.IRepository_string_MockFactory.Create(behavior, []);
             }
         }
     }

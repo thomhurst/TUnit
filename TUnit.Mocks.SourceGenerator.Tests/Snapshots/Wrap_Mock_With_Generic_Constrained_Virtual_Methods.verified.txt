@@ -41,7 +41,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class Repository_WrapMockFactory
+    internal static class RepositoryWrapMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -53,7 +53,7 @@ namespace TUnit.Mocks.Generated
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::Repository>(behavior);
             engine.IsWrapMock = true;
-            var impl = new Repository_WrapMockImpl(engine, instance);
+            var impl = new RepositoryWrapMockImpl(engine, instance);
             engine.Raisable = impl;
             var mock = new global::TUnit.Mocks.Mock<global::Repository>(impl, engine);
             return mock;
@@ -69,7 +69,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class Repository_WrapMockImpl : global::Repository, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class RepositoryWrapMockImpl : global::Repository, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::Repository> _engine;
         private readonly global::Repository _wrappedInstance;
@@ -77,7 +77,7 @@ namespace TUnit.Mocks.Generated
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal Repository_WrapMockImpl(global::TUnit.Mocks.MockEngine<global::Repository> engine, global::Repository wrappedInstance) : base()
+        internal RepositoryWrapMockImpl(global::TUnit.Mocks.MockEngine<global::Repository> engine, global::Repository wrappedInstance) : base()
         {
             _engine = engine;
             _wrappedInstance = wrappedInstance;

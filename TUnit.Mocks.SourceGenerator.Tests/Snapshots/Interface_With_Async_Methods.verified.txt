@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IAsyncService_Mock : global::TUnit.Mocks.Mock<global::IAsyncService>, global::IAsyncService
+    public sealed class IAsyncServiceMock : global::TUnit.Mocks.Mock<global::IAsyncService>, global::IAsyncService
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IAsyncService_Mock(global::IAsyncService mockObject, global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
+        internal IAsyncServiceMock(global::IAsyncService mockObject, global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
             : base(mockObject, engine) { }
 
         global::System.Threading.Tasks.Task<string> global::IAsyncService.GetValueAsync(string key) => Object.GetValueAsync(key);
@@ -27,7 +27,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IAsyncService_MockFactory
+    internal static class IAsyncServiceMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -39,9 +39,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IAsyncService' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IAsyncService>(behavior);
-            var impl = new IAsyncService_MockImpl(engine);
+            var impl = new IAsyncServiceMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new IAsyncService_Mock(impl, engine);
+            var mock = new IAsyncServiceMock(impl, engine);
             return mock;
         }
     }
@@ -55,14 +55,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IAsyncService_MockImpl : global::IAsyncService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IAsyncServiceMockImpl : global::IAsyncService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IAsyncService> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IAsyncService_MockImpl(global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
+        internal IAsyncServiceMockImpl(global::TUnit.Mocks.MockEngine<global::IAsyncService> engine)
         {
             _engine = engine;
         }
@@ -526,9 +526,9 @@ namespace TUnit.Mocks
     {
         extension(global::IAsyncService)
         {
-            public static global::TUnit.Mocks.Generated.IAsyncService_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.IAsyncServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IAsyncService_Mock)global::TUnit.Mocks.Generated.IAsyncService_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.IAsyncServiceMock)global::TUnit.Mocks.Generated.IAsyncServiceMockFactory.Create(behavior, []);
             }
         }
     }

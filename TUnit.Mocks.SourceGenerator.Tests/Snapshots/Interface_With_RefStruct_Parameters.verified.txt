@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IBufferProcessor_Mock : global::TUnit.Mocks.Mock<global::IBufferProcessor>, global::IBufferProcessor
+    public sealed class IBufferProcessorMock : global::TUnit.Mocks.Mock<global::IBufferProcessor>, global::IBufferProcessor
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IBufferProcessor_Mock(global::IBufferProcessor mockObject, global::TUnit.Mocks.MockEngine<global::IBufferProcessor> engine)
+        internal IBufferProcessorMock(global::IBufferProcessor mockObject, global::TUnit.Mocks.MockEngine<global::IBufferProcessor> engine)
             : base(mockObject, engine) { }
 
         void global::IBufferProcessor.Process(global::System.ReadOnlySpan<byte> data)
@@ -28,7 +28,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IBufferProcessor_MockFactory
+    internal static class IBufferProcessorMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -40,9 +40,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IBufferProcessor' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IBufferProcessor>(behavior);
-            var impl = new IBufferProcessor_MockImpl(engine);
+            var impl = new IBufferProcessorMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new IBufferProcessor_Mock(impl, engine);
+            var mock = new IBufferProcessorMock(impl, engine);
             return mock;
         }
     }
@@ -56,14 +56,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IBufferProcessor_MockImpl : global::IBufferProcessor, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IBufferProcessorMockImpl : global::IBufferProcessor, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IBufferProcessor> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IBufferProcessor_MockImpl(global::TUnit.Mocks.MockEngine<global::IBufferProcessor> engine)
+        internal IBufferProcessorMockImpl(global::TUnit.Mocks.MockEngine<global::IBufferProcessor> engine)
         {
             _engine = engine;
         }
@@ -159,9 +159,9 @@ namespace TUnit.Mocks
     {
         extension(global::IBufferProcessor)
         {
-            public static global::TUnit.Mocks.Generated.IBufferProcessor_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.IBufferProcessorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IBufferProcessor_Mock)global::TUnit.Mocks.Generated.IBufferProcessor_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.IBufferProcessorMock)global::TUnit.Mocks.Generated.IBufferProcessorMockFactory.Create(behavior, []);
             }
         }
     }

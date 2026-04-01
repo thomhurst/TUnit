@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IMyService_Mock : global::TUnit.Mocks.Mock<global::IMyService>, global::IMyService
+    public sealed class IMyServiceMock : global::TUnit.Mocks.Mock<global::IMyService>, global::IMyService
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IMyService_Mock(global::IMyService mockObject, global::TUnit.Mocks.MockEngine<global::IMyService> engine)
+        internal IMyServiceMock(global::IMyService mockObject, global::TUnit.Mocks.MockEngine<global::IMyService> engine)
             : base(mockObject, engine) { }
 
         string global::IMyService.GetValue(string key) => Object.GetValue(key);
@@ -23,7 +23,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IMyService_MockFactory
+    internal static class IMyServiceMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -35,9 +35,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IMyService' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IMyService>(behavior);
-            var impl = new IMyService_MockImpl(engine);
+            var impl = new IMyServiceMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new IMyService_Mock(impl, engine);
+            var mock = new IMyServiceMock(impl, engine);
             return mock;
         }
     }
@@ -51,14 +51,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IMyService_MockImpl : global::IMyService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IMyServiceMockImpl : global::IMyService, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IMyService> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IMyService_MockImpl(global::TUnit.Mocks.MockEngine<global::IMyService> engine)
+        internal IMyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::IMyService> engine)
         {
             _engine = engine;
         }
@@ -210,9 +210,9 @@ namespace TUnit.Mocks
     {
         extension(global::IMyService)
         {
-            public static global::TUnit.Mocks.Generated.IMyService_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.IMyServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IMyService_Mock)global::TUnit.Mocks.Generated.IMyService_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.IMyServiceMock)global::TUnit.Mocks.Generated.IMyServiceMockFactory.Create(behavior, []);
             }
         }
     }

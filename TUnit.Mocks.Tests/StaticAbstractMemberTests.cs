@@ -2,10 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Mocks;
 using TUnit.Mocks.Generated;
+using TUnit.Mocks.Generated.TUnit.Mocks.Tests;
 
 // Discovery: typeof() does not trigger CS8920, so this is safe for interfaces
 // with static abstract members. The generator produces a bridge interface
-// (TUnit_Mocks_Tests_IAmazonService_Mockable) that resolves the static abstracts.
+// (IAmazonServiceMockable) that resolves the static abstracts.
 [assembly: TUnit.Mocks.GenerateMock(typeof(TUnit.Mocks.Tests.IAmazonService))]
 
 namespace TUnit.Mocks.Tests;
@@ -65,12 +66,12 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Returns_Configured_Value()
     {
         // Arrange — use the bridge type which resolves static abstract members
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         var expectedConfig = new ClientConfig { Region = "eu-west-1" };
         mock.CreateDefaultConfig().Returns(expectedConfig);
 
         // Act — call through constrained generic using the bridge type
-        var result = CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var result = CallStaticAbstract<IAmazonServiceMockable>();
 
         // Assert
         await Assert.That(result).IsSameReferenceAs(expectedConfig);
@@ -80,10 +81,10 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Returns_Default_When_No_Setup()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
 
         // Act — no setup, should return default
-        var result = CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var result = CallStaticAbstract<IAmazonServiceMockable>();
 
         // Assert
         await Assert.That(result).IsNull();
@@ -93,11 +94,11 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Throws_Configured_Exception()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.CreateDefaultConfig().Throws(new InvalidOperationException("not available"));
 
         // Act & Assert
-        await Assert.That(() => CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>())
+        await Assert.That(() => CallStaticAbstract<IAmazonServiceMockable>())
             .ThrowsExactly<InvalidOperationException>()
             .WithMessage("not available");
     }
@@ -106,12 +107,12 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Verification()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.CreateDefaultConfig().Returns(new ClientConfig());
 
         // Act
-        CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>();
-        CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        CallStaticAbstract<IAmazonServiceMockable>();
+        CallStaticAbstract<IAmazonServiceMockable>();
 
         // Assert
         mock.CreateDefaultConfig().WasCalled(Times.Exactly(2));
@@ -121,11 +122,11 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Property_Getter_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.ServiceId.Getter.Returns("s3");
 
         // Act
-        var result = GetStaticAbstractProperty<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var result = GetStaticAbstractProperty<IAmazonServiceMockable>();
 
         // Assert
         await Assert.That(result).IsEqualTo("s3");
@@ -135,10 +136,10 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Property_Setter_Can_Be_Verified()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
 
         // Act
-        SetStaticAbstractProperty<TUnit_Mocks_Tests_IAmazonService_Mockable>("dynamodb");
+        SetStaticAbstractProperty<IAmazonServiceMockable>("dynamodb");
 
         // Assert
         mock.ServiceId.Setter.WasCalled();
@@ -148,13 +149,13 @@ public class StaticAbstractMemberTests
     public async Task Instance_And_Static_Members_Coexist()
     {
         // Arrange
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.GetEndpoint().Returns("https://s3.amazonaws.com");
         mock.CreateDefaultConfig().Returns(new ClientConfig { Region = "ap-southeast-1" });
 
         // Act
         var endpoint = mock.Object.GetEndpoint();
-        var config = CallStaticAbstract<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var config = CallStaticAbstract<IAmazonServiceMockable>();
 
         // Assert
         await Assert.That(endpoint).IsEqualTo("https://s3.amazonaws.com");
@@ -166,11 +167,11 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultClientConfig_Returns_Configured_Value()
     {
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         var expected = new ClientConfig { Region = "sa-east-1" };
         mock.CreateDefaultClientConfig().Returns(expected);
 
-        var result = CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var result = CallCreateDefaultClientConfig<IAmazonServiceMockable>();
 
         await Assert.That(result).IsSameReferenceAs(expected);
     }
@@ -178,11 +179,11 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultClientConfig_Verification()
     {
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.CreateDefaultClientConfig().Returns(new ClientConfig());
 
-        CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
-        CallCreateDefaultClientConfig<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        CallCreateDefaultClientConfig<IAmazonServiceMockable>();
+        CallCreateDefaultClientConfig<IAmazonServiceMockable>();
 
         mock.CreateDefaultClientConfig().WasCalled(Times.Exactly(2));
     }
@@ -194,9 +195,9 @@ public class StaticAbstractMemberTests
     {
         // No setup — the generator uses HandleCallWithReturn<object?> + cast,
         // so the default null value is cast to IAmazonService and returned.
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
 
-        var result = CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+        var result = CallCreateDefaultServiceClient<IAmazonServiceMockable>(
             new AWSCredentials(), new ClientConfig());
 
         // Cast to object? — using IAmazonService directly as a type argument triggers CS8920.
@@ -208,13 +209,13 @@ public class StaticAbstractMemberTests
     {
         // Arrange — .Returns() works via MockMethodCall<object?> (not VoidMockMethodCall)
         // because the return type (IAmazonService) has static abstract members (CS8920).
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         var expectedService = mock.Object;
         mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
             .Returns(expectedService);
 
         // Act
-        var result = CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+        var result = CallCreateDefaultServiceClient<IAmazonServiceMockable>(
             new AWSCredentials(), new ClientConfig());
 
         // Assert — the configured value is returned through the object? → IAmazonService cast
@@ -224,11 +225,11 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultServiceClient_Verification()
     {
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         var creds = new AWSCredentials { AccessKey = "AKID", AuthSignature = "test-sig" };
         var config = new ClientConfig { Region = "us-west-2" };
 
-        CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(creds, config);
+        CallCreateDefaultServiceClient<IAmazonServiceMockable>(creds, config);
 
         // MockMethodCall<object?> supports verification even though the return type
         // (IAmazonService) cannot be used as a generic type argument (CS8920).
@@ -238,11 +239,11 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultServiceClient_Throws_Configured_Exception()
     {
-        var mock = Mock.Of<TUnit_Mocks_Tests_IAmazonService_Mockable>();
+        var mock = Mock.Of<IAmazonServiceMockable>();
         mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
             .Throws(new InvalidOperationException("service unavailable"));
 
-        await Assert.That(() => CallCreateDefaultServiceClient<TUnit_Mocks_Tests_IAmazonService_Mockable>(
+        await Assert.That(() => CallCreateDefaultServiceClient<IAmazonServiceMockable>(
                 new AWSCredentials(), new ClientConfig()))
             .ThrowsExactly<InvalidOperationException>()
             .WithMessage("service unavailable");
