@@ -391,6 +391,30 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return;
         }
 
+        // Runtime safety net: skip resources whose snapshot is marked IsHidden.
+        // This catches hidden internal resources (e.g. ProjectRebuilderResource registered with
+        // IsHidden = true) even if they slip past the model-level IResourceWithParent filter.
+        List<string>? hiddenNames = null;
+        for (var i = resourceNames.Count - 1; i >= 0; i--)
+        {
+            if (notificationService.TryGetCurrentState(resourceNames[i], out var ev) && ev.Snapshot.IsHidden)
+            {
+                hiddenNames ??= [];
+                hiddenNames.Add(resourceNames[i]);
+                resourceNames.RemoveAt(i);
+            }
+        }
+
+        if (hiddenNames is { Count: > 0 })
+        {
+            LogProgress($"Skipping {hiddenNames.Count} hidden resource(s) at runtime: [{string.Join(", ", hiddenNames)}]");
+        }
+
+        if (resourceNames.Count == 0)
+        {
+            return;
+        }
+
         // Track which resources have become ready (for timeout reporting)
         var readyResources = new ConcurrentBag<string>();
 
@@ -525,9 +549,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     // Opt-in: only wait for IComputeResource (containers, projects, executables).
     // Non-compute resources (parameters, connection strings) never report healthy and would hang.
+    //
     // Also skip resources that implement IResourceWithParent — these are internally-managed child
-    // resources such as ProjectRebuilderResource (introduced in Aspire 13.2.0) that are orchestrated
-    // by Aspire itself and are not user-visible resources that need to be awaited.
+    // resources orchestrated by Aspire itself (e.g. ProjectRebuilderResource, introduced in Aspire
+    // 13.2.0 for hot-reload). ProjectRebuilderResource is the only IComputeResource that also
+    // implements IResourceWithParent; it is internal, registered with IsHidden = true and
+    // ExplicitStartupAnnotation (meaning it never auto-starts or emits healthy/running state).
+    //
+    // Alternatives considered (see https://github.com/thomhurst/TUnit/pull/5335):
+    //   • IResourceWithoutLifetime — no types implement it in Aspire 13.2.x, so it's unusable.
+    //   • ExplicitStartupAnnotation — public, but could over-exclude user resources that are
+    //     manually started then expected to become healthy.
+    //   • WaitBehavior.StopOnResourceUnavailable — doesn't help; the rebuilder stays in
+    //     NotStarted (not a terminal state), so WaitForResourceHealthyAsync still hangs.
+    //   • ResourceNotificationService.WaitForDependenciesAsync — different use case (waits for
+    //     annotated deps of a specific resource, not "all resources").
+    //   • TryGetCurrentState + IsHidden — used as a runtime safety net in
+    //     WaitForResourcesWithFailFastAsync (see below).
     protected virtual List<string> GetWaitableResourceNames(DistributedApplicationModel model)
     {
         var waitable = new List<string>();
