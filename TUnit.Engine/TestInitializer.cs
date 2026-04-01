@@ -1,8 +1,5 @@
 using TUnit.Core;
 using TUnit.Engine.Services;
-#if NET
-using System.Diagnostics;
-#endif
 
 namespace TUnit.Engine;
 
@@ -35,27 +32,10 @@ internal class TestInitializer
 
     public async ValueTask InitializeTestObjectsAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Data source initialization runs before the test case span starts, so any spans it
-        // creates (container startup, auth calls, connection pools, etc.) do not appear nested
-        // inside the individual test's trace timeline. We briefly set Activity.Current to the
-        // session span so those spans are parented there instead.
-#if NET
-        var sessionActivity = test.Context.ClassContext.AssemblyContext.TestSessionContext.Activity;
-        var previousActivity = Activity.Current;
-        if (sessionActivity is not null)
-        {
-            Activity.Current = sessionActivity;
-        }
-        try
-        {
-            await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
-        }
-        finally
-        {
-            Activity.Current = previousActivity;
-        }
-#else
+        // Data source initialization now runs inside the test case span, so any spans it
+        // creates (container startup, auth calls, connection pools, etc.) will appear nested
+        // inside the test's trace timeline via the "data source initialization" child activity
+        // created by TestExecutor.
         await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
-#endif
     }
 }

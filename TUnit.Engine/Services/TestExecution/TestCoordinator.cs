@@ -6,6 +6,9 @@ using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+#if NET
+using System.Diagnostics;
+#endif
 
 namespace TUnit.Engine.Services.TestExecution;
 
@@ -301,6 +304,19 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
+#if NET
+            Activity? disposalActivity = null;
+            if (TUnitActivitySource.Source.HasListeners())
+            {
+                disposalActivity = TUnitActivitySource.StartActivity(
+                    "test instance disposal",
+                    ActivityKind.Internal,
+                    test.Context.ClassContext.Activity?.Context ?? default,
+                    [new("tunit.test.id", test.Context.Id)]);
+            }
+            try
+            {
+#endif
             // Dispose test instance and fire OnDispose after each attempt
             // This ensures each retry gets a fresh instance
             var onDispose = test.Context.InternalEvents.OnDispose;
@@ -327,6 +343,13 @@ internal sealed class TestCoordinator : ITestCoordinator
             {
                 await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
             }
+#if NET
+            }
+            finally
+            {
+                TUnitActivitySource.StopActivity(disposalActivity);
+            }
+#endif
         }
     }
 }

@@ -116,10 +116,6 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
-            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
-            // This ensures resources like Docker containers are not started until needed
-            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
 #if NET
             if (TUnitActivitySource.Source.HasListeners())
             {
@@ -138,6 +134,38 @@ internal class TestExecutor
                         new("tunit.test.categories", testDetails.Categories.ToArray())
                     ]);
             }
+#endif
+
+            // Set test start time before initialization so the HTML report duration
+            // includes data source initialization time
+            executableTest.Context.TestStart = DateTimeOffset.UtcNow;
+
+            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
+            // This ensures resources like Docker containers are not started until needed
+#if NET
+            Activity? initActivity = null;
+            if (TUnitActivitySource.Source.HasListeners())
+            {
+                initActivity = TUnitActivitySource.StartActivity(
+                    "data source initialization",
+                    ActivityKind.Internal,
+                    executableTest.Context.Activity?.Context ?? default);
+            }
+            try
+            {
+                await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                TUnitActivitySource.RecordException(initActivity, ex);
+                throw;
+            }
+            finally
+            {
+                TUnitActivitySource.StopActivity(initActivity);
+            }
+#else
+            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
 #endif
 
             executableTest.Context.RestoreExecutionContext();
@@ -319,9 +347,6 @@ internal class TestExecutor
         {
             return;
         }
-
-        // Set the test start time when we actually begin executing the test
-        executableTest.Context.TestStart = DateTimeOffset.UtcNow;
 
         // Set the cancellation token on the context so source-generated tests can access it
         executableTest.Context.CancellationToken = cancellationToken;
