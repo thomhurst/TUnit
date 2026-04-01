@@ -318,15 +318,25 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
 #if NET
         Activity? disposalActivity = null;
+        var previousActivity = Activity.Current;
         if (TUnitActivitySource.Source.HasListeners())
         {
-            var typeName = test.Context.Metadata.TestDetails.ClassType.Name;
+            var typeName = test.Context.Metadata.TestDetails.ClassType.FullName ?? test.Context.Metadata.TestDetails.ClassType.Name;
             disposalActivity = TUnitActivitySource.StartActivity(
                 $"dispose {typeName}",
                 ActivityKind.Internal,
                 test.Context.ClassContext.Activity?.Context ?? default,
-                [new("tunit.test.id", test.Context.Id)]);
+                [
+                    new("tunit.test.id", test.Context.Id),
+                    new("tunit.test.class", test.Context.Metadata.TestDetails.ClassType.FullName)
+                ]);
         }
+
+        if (disposalActivity is not null)
+        {
+            Activity.Current = disposalActivity;
+        }
+
         try
         {
 #endif
@@ -351,22 +361,15 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
         }
 
-        try
-        {
-            await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
-        }
-        catch (Exception disposeEx)
-        {
-#if NET
-            TUnitActivitySource.RecordException(disposalActivity, disposeEx);
-#endif
-            await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-        }
+        // Note: DisposeTestInstance swallows all exceptions internally (bare catch {}),
+        // so no error recording is needed here — exceptions never propagate.
+        await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
 #if NET
         }
         finally
         {
             TUnitActivitySource.StopActivity(disposalActivity);
+            Activity.Current = previousActivity;
         }
 #endif
     }
