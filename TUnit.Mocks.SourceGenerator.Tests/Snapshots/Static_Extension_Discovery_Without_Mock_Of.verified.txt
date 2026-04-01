@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class INotifier_Mock : global::TUnit.Mocks.Mock<global::INotifier>, global::INotifier
+    public sealed class INotifierMock : global::TUnit.Mocks.Mock<global::INotifier>, global::INotifier
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal INotifier_Mock(global::INotifier mockObject, global::TUnit.Mocks.MockEngine<global::INotifier> engine)
+        internal INotifierMock(global::INotifier mockObject, global::TUnit.Mocks.MockEngine<global::INotifier> engine)
             : base(mockObject, engine) { }
 
         void global::INotifier.Notify(string message)
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class INotifier_MockFactory
+    internal static class INotifierMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -38,9 +38,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::INotifier' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::INotifier>(behavior);
-            var impl = new INotifier_MockImpl(engine);
+            var impl = new INotifierMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new INotifier_Mock(impl, engine);
+            var mock = new INotifierMock(impl, engine);
             return mock;
         }
     }
@@ -54,14 +54,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class INotifier_MockImpl : global::INotifier, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class INotifierMockImpl : global::INotifier, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::INotifier> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal INotifier_MockImpl(global::TUnit.Mocks.MockEngine<global::INotifier> engine)
+        internal INotifierMockImpl(global::TUnit.Mocks.MockEngine<global::INotifier> engine)
         {
             _engine = engine;
         }
@@ -197,9 +197,9 @@ namespace TUnit.Mocks
     {
         extension(global::INotifier)
         {
-            public static global::TUnit.Mocks.Generated.INotifier_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.INotifierMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.INotifier_Mock)global::TUnit.Mocks.Generated.INotifier_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.INotifierMock)global::TUnit.Mocks.Generated.INotifierMockFactory.Create(behavior, []);
             }
         }
     }

@@ -7,7 +7,8 @@ internal static class MockDelegateFactoryBuilder
     public static string Build(MockTypeModel model)
     {
         var writer = new CodeWriter();
-        var safeName = MockImplBuilder.GetCompositeSafeName(model);
+        var safeName = MockImplBuilder.GetCompositeShortSafeName(model);
+        var mockNamespace = MockImplBuilder.GetMockNamespace(model);
 
         // The delegate has exactly one method: Invoke
         var invokeMethod = model.Methods[0];
@@ -16,9 +17,9 @@ internal static class MockDelegateFactoryBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block("namespace TUnit.Mocks.Generated"))
+        using (writer.Block($"namespace {mockNamespace}"))
         {
-            using (writer.Block($"internal static class {safeName}_MockDelegateFactory"))
+            using (writer.Block($"internal static class {safeName}MockDelegateFactory"))
             {
                 writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 using (writer.Block("internal static void Register()"))

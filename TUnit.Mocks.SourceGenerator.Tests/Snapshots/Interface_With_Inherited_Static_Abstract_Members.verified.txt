@@ -4,11 +4,11 @@
 namespace TUnit.Mocks.Generated
 {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public interface IMyService_Mockable : global::IMyService
+    public interface IMyServiceMockable : global::IMyService
     {
         static global::ClientConfig global::IServiceBase.CreateDefaultConfig()
         {
-            var __engine = IMyService_StaticEngine.Engine;
+            var __engine = IMyServiceStaticEngine.Engine;
             if (__engine is null) return default!;
             var __result = __engine.HandleCallWithReturn<global::ClientConfig>(1, "CreateDefaultConfig", global::System.Array.Empty<object?>(), default!);
             return __result;
@@ -16,7 +16,7 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    internal static class IMyService_StaticEngine
+    internal static class IMyServiceStaticEngine
     {
         private static readonly global::System.Threading.AsyncLocal<global::TUnit.Mocks.IMockEngineAccess?> _engine = new();
 
@@ -36,21 +36,21 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IMyService_MockFactory
+    internal static class IMyServiceMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::TUnit.Mocks.Generated.IMyService_Mockable>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::TUnit.Mocks.Generated.IMyServiceMockable>(Create);
         }
 
-        internal static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyService_Mockable> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+        internal static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::TUnit.Mocks.Generated.IMyService_Mockable' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyService_Mockable>(behavior);
-            var impl = new IMyService_MockImpl(engine);
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::TUnit.Mocks.Generated.IMyServiceMockable' does not support constructor arguments, but {constructorArgs.Length} were provided.");
+            var engine = new global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyServiceMockable>(behavior);
+            var impl = new IMyServiceMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyService_Mockable>(impl, engine);
+            var mock = new global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable>(impl, engine);
             return mock;
         }
     }
@@ -64,23 +64,23 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IMyService_MockImpl : global::TUnit.Mocks.Generated.IMyService_Mockable, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IMyServiceMockImpl : global::TUnit.Mocks.Generated.IMyServiceMockable, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyService_Mockable> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyServiceMockable> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IMyService_MockImpl(global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyService_Mockable> engine)
+        internal IMyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyServiceMockable> engine)
         {
             _engine = engine;
-            if (IMyService_StaticEngine.Engine is not null)
+            if (IMyServiceStaticEngine.Engine is not null)
             {
                 throw new global::System.InvalidOperationException(
                     "Multiple mocks of an interface with static abstract members cannot be created in the same test context. " +
                     "Static member calls are routed via a shared AsyncLocal engine, so only one mock instance per type is supported per test.");
             }
-            IMyService_StaticEngine.Engine = engine;
+            IMyServiceStaticEngine.Engine = engine;
         }
 
         public string GetName()
@@ -106,13 +106,13 @@ namespace TUnit.Mocks.Generated
 {
     public static class IMyService_MockMemberExtensions
     {
-        public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyService_Mockable> mock)
+        public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetName", matchers);
         }
 
-        public static global::TUnit.Mocks.MockMethodCall<global::ClientConfig> CreateDefaultConfig(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyService_Mockable> mock)
+        public static global::TUnit.Mocks.MockMethodCall<global::ClientConfig> CreateDefaultConfig(this global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable> mock)
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.MockMethodCall<global::ClientConfig>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "CreateDefaultConfig", matchers);

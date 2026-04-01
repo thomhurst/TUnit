@@ -3,10 +3,10 @@
 
 namespace TUnit.Mocks.Generated
 {
-    public sealed class IDictionary_Mock : global::TUnit.Mocks.Mock<global::IDictionary>, global::IDictionary
+    public sealed class IDictionaryMock : global::TUnit.Mocks.Mock<global::IDictionary>, global::IDictionary
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IDictionary_Mock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
+        internal IDictionaryMock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
             : base(mockObject, engine) { }
 
         bool global::IDictionary.TryGetValue(string key, out string value) => Object.TryGetValue(key, out value);
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal static class IDictionary_MockFactory
+    internal static class IDictionaryMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -38,9 +38,9 @@ namespace TUnit.Mocks.Generated
         {
             if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IDictionary' does not support constructor arguments, but {constructorArgs.Length} were provided.");
             var engine = new global::TUnit.Mocks.MockEngine<global::IDictionary>(behavior);
-            var impl = new IDictionary_MockImpl(engine);
+            var impl = new IDictionaryMockImpl(engine);
             engine.Raisable = impl;
-            var mock = new IDictionary_Mock(impl, engine);
+            var mock = new IDictionaryMock(impl, engine);
             return mock;
         }
     }
@@ -54,14 +54,14 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks.Generated
 {
-    internal sealed class IDictionary_MockImpl : global::IDictionary, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    internal sealed class IDictionaryMockImpl : global::IDictionary, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
         private readonly global::TUnit.Mocks.MockEngine<global::IDictionary> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IDictionary_MockImpl(global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
+        internal IDictionaryMockImpl(global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
         {
             _engine = engine;
         }
@@ -298,9 +298,9 @@ namespace TUnit.Mocks
     {
         extension(global::IDictionary)
         {
-            public static global::TUnit.Mocks.Generated.IDictionary_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IDictionary_Mock)global::TUnit.Mocks.Generated.IDictionary_MockFactory.Create(behavior, []);
+                return (global::TUnit.Mocks.Generated.IDictionaryMock)global::TUnit.Mocks.Generated.IDictionaryMockFactory.Create(behavior, []);
             }
         }
     }
