@@ -395,15 +395,17 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         // This catches hidden internal resources (e.g. ProjectRebuilderResource registered with
         // IsHidden = true) even if they slip past the model-level IResourceWithParent filter.
         List<string>? hiddenNames = null;
-        for (var i = resourceNames.Count - 1; i >= 0; i--)
+        resourceNames.RemoveAll(name =>
         {
-            if (notificationService.TryGetCurrentState(resourceNames[i], out var ev) && ev.Snapshot.IsHidden)
+            if (notificationService.TryGetCurrentState(name, out var ev) && ev.Snapshot.IsHidden)
             {
                 hiddenNames ??= [];
-                hiddenNames.Add(resourceNames[i]);
-                resourceNames.RemoveAt(i);
+                hiddenNames.Add(name);
+                return true;
             }
-        }
+
+            return false;
+        });
 
         if (hiddenNames is { Count: > 0 })
         {
