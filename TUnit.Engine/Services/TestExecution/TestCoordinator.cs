@@ -320,8 +320,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         Activity? disposalActivity = null;
         if (TUnitActivitySource.Source.HasListeners())
         {
+            var typeName = test.Context.Metadata.TestDetails.ClassType.Name;
             disposalActivity = TUnitActivitySource.StartActivity(
-                "test instance disposal",
+                $"dispose {typeName}",
                 ActivityKind.Internal,
                 test.Context.ClassContext.Activity?.Context ?? default,
                 [new("tunit.test.id", test.Context.Id)]);
