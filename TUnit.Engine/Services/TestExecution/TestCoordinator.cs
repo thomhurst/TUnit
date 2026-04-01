@@ -308,6 +308,9 @@ internal sealed class TestCoordinator : ITestCoordinator
             Activity? disposalActivity = null;
             if (TUnitActivitySource.Source.HasListeners())
             {
+                // Parented under the class activity because the test case activity has already
+                // been stopped by this point (disposal runs after TestExecutor.ExecuteAsync completes).
+                // The initialization activity is a child of the test case span since it runs within it.
                 disposalActivity = TUnitActivitySource.StartActivity(
                     "test instance disposal",
                     ActivityKind.Internal,

@@ -137,7 +137,9 @@ internal class TestExecutor
 #endif
 
             // Set test start time before initialization so the HTML report duration
-            // includes data source initialization time
+            // includes data source initialization time. This means "test start" reflects
+            // the beginning of the full test lifecycle (init + hooks + body), not just
+            // the test body execution.
             executableTest.Context.TestStart = DateTimeOffset.UtcNow;
 
             // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
@@ -147,7 +149,7 @@ internal class TestExecutor
             if (TUnitActivitySource.Source.HasListeners())
             {
                 initActivity = TUnitActivitySource.StartActivity(
-                    "data source initialization",
+                    "test object initialization",
                     ActivityKind.Internal,
                     executableTest.Context.Activity?.Context ?? default);
             }
