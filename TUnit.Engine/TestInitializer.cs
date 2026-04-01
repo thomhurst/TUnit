@@ -34,7 +34,7 @@ internal class TestInitializer
     {
         // Data source initialization now runs inside the test case span, so any spans it
         // creates (container startup, auth calls, connection pools, etc.) will appear nested
-        // inside the test's trace timeline via the "data source initialization" child activity
+        // inside the test's trace timeline via the "test object initialization" child activity
         // created by TestExecutor.
         await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
     }
