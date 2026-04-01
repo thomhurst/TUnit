@@ -92,52 +92,35 @@ public class WaitForHealthyReproductionTests
     /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
     ///
     /// Aspire 13.2.0 introduced ProjectRebuilderResource: an IComputeResource that also implements
-    /// IResourceWithParent. Without the fix, GetWaitableResourceNames included it in the wait list,
-    /// so WaitForResourcesWithFailFastAsync called WaitForResourceHealthyAsync on it. That call never
-    /// completes (the rebuilder never emits a healthy state), producing:
-    ///   TimeoutException: Resources not ready: ['my-container-rebuilder']
-    ///
-    /// This test exercises the actual wait loop using the real GetWaitableResourceNames output:
-    /// • WITHOUT the fix: the rebuilder is in the wait list → the wait times out →
-    ///   TimeoutException: Resources not ready: ['my-container-rebuilder']
-    /// • WITH the fix:    the rebuilder is excluded → the wait completes immediately → no exception
+    /// IResourceWithParent. Without the fix, ShouldWaitForResource returns true for it, causing
+    /// WaitForResourceHealthyAsync to hang (it never emits healthy/running state).
     /// </summary>
     [Test]
-    public async Task GetWaitableResourceNames_ExcludesIResourceWithParent_PreventingTimeout()
+    public async Task ShouldWaitForResource_IncludesComputeResource()
     {
-        var regularResource = new FakeContainerResource("my-container");
-        var rebuilderResource = new FakeRebuilderResource("my-container-rebuilder", regularResource);
-
-        var model = new DistributedApplicationModel([regularResource, rebuilderResource]);
-        var resourceLookup = model.Resources.ToDictionary(r => r.Name);
         var fixture = new InspectableFixture();
+        var regular = new FakeContainerResource("my-container");
 
-        var waitableNames = fixture.GetWaitableNames(model);
+        await Assert.That(fixture.TestShouldWaitForResource(regular)).IsTrue();
+    }
 
-        // Reproduce the inner wait loop from WaitForResourcesWithFailFastAsync:
-        //   await notificationService.WaitForResourceHealthyAsync(name, cancellationToken);
-        // IResourceWithParent resources (like ProjectRebuilderResource) never signal healthy;
-        // regular IComputeResource resources (containers) signal healthy immediately here.
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
-        try
-        {
-            await Task.WhenAll(waitableNames.Select(name =>
-            {
-                var resource = resourceLookup[name];
-                return resource is IResourceWithParent
-                    ? Task.Delay(Timeout.Infinite, timeoutCts.Token) // rebuilder: never healthy
-                    : Task.CompletedTask;                             // container: healthy immediately
-            }));
-        }
-        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
-        {
-            // Mirror the TimeoutException thrown by WaitForResourcesWithFailFastAsync on timeout
-            var pending = waitableNames
-                .Where(n => resourceLookup[n] is IResourceWithParent)
-                .ToList();
-            throw new TimeoutException(
-                $"Resources not ready: [{string.Join(", ", pending.Select(n => $"'{n}'"))}]");
-        }
+    [Test]
+    public async Task ShouldWaitForResource_ExcludesIResourceWithParent()
+    {
+        var fixture = new InspectableFixture();
+        var regular = new FakeContainerResource("my-container");
+        var rebuilder = new FakeRebuilderResource("my-container-rebuilder", regular);
+
+        await Assert.That(fixture.TestShouldWaitForResource(rebuilder)).IsFalse();
+    }
+
+    [Test]
+    public async Task ShouldWaitForResource_ExcludesNonComputeResource()
+    {
+        var fixture = new InspectableFixture();
+        var paramResource = new FakeNonComputeResource("my-param");
+
+        await Assert.That(fixture.TestShouldWaitForResource(paramResource)).IsFalse();
     }
 
     private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
@@ -146,16 +129,23 @@ public class WaitForHealthyReproductionTests
     }
 
     /// <summary>
-    /// Exposes <see cref="AspireFixture{TAppHost}.GetWaitableResourceNames"/> for unit testing.
+    /// Exposes <see cref="AspireFixture{TAppHost}.ShouldWaitForResource"/> for unit testing.
     /// </summary>
     private sealed class InspectableFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
     {
-        public List<string> GetWaitableNames(DistributedApplicationModel model)
-            => GetWaitableResourceNames(model);
+        public bool TestShouldWaitForResource(IResource resource)
+            => ShouldWaitForResource(resource);
     }
 
     /// <summary>A plain IComputeResource with no parent.</summary>
     private sealed class FakeContainerResource(string name) : IComputeResource
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+    }
+
+    /// <summary>A non-compute resource (e.g. ParameterResource, ConnectionStringResource).</summary>
+    private sealed class FakeNonComputeResource(string name) : IResource
     {
         public string Name => name;
         public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();

@@ -393,26 +393,29 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         // Runtime safety net: skip resources whose snapshot is marked IsHidden.
         // This catches hidden internal resources (e.g. ProjectRebuilderResource registered with
-        // IsHidden = true) even if they slip past the model-level IResourceWithParent filter.
+        // IsHidden = true) even if they slip past the model-level ShouldWaitForResource filter.
+        var visibleNames = new List<string>(resourceNames.Count);
         List<string>? hiddenNames = null;
-        resourceNames.RemoveAll(name =>
+
+        foreach (var name in resourceNames)
         {
             if (notificationService.TryGetCurrentState(name, out var ev) && ev.Snapshot.IsHidden)
             {
                 hiddenNames ??= [];
                 hiddenNames.Add(name);
-                return true;
             }
-
-            return false;
-        });
+            else
+            {
+                visibleNames.Add(name);
+            }
+        }
 
         if (hiddenNames is { Count: > 0 })
         {
             LogProgress($"Skipping {hiddenNames.Count} hidden resource(s) at runtime: [{string.Join(", ", hiddenNames)}]");
         }
 
-        if (resourceNames.Count == 0)
+        if (visibleNames.Count == 0)
         {
             return;
         }
@@ -424,10 +427,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         using var failureCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         var targetState = waitForHealthy ? "healthy" : "running";
-        LogProgress($"Waiting for {resourceNames.Count} resource(s) to become {targetState}: [{string.Join(", ", resourceNames)}]");
+        LogProgress($"Waiting for {visibleNames.Count} resource(s) to become {targetState}: [{string.Join(", ", visibleNames)}]");
 
         // Success path: wait for all resources to reach the desired state
-        var readyTask = Task.WhenAll(resourceNames.Select(async name =>
+        var readyTask = Task.WhenAll(visibleNames.Select(async name =>
         {
             if (waitForHealthy)
             {
@@ -439,11 +442,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             }
 
             readyResources.Add(name);
-            LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{resourceNames.Count})");
+            LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{visibleNames.Count})");
         }));
 
         // Fail-fast path: complete as soon as ANY resource enters FailedToStart
-        var failureTasks = resourceNames.Select(async name =>
+        var failureTasks = visibleNames.Select(async name =>
         {
             await notificationService.WaitForResourceAsync(name, KnownResourceStates.FailedToStart, failureCts.Token);
             return name;
@@ -478,7 +481,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             failureCts.Cancel();
 
             var readySet = new HashSet<string>(readyResources);
-            var pending = resourceNames.Where(n => !readySet.Contains(n)).ToList();
+            var pending = visibleNames.Where(n => !readySet.Contains(n)).ToList();
 
             var sb = new StringBuilder();
             sb.Append("Resources not ready: [");
@@ -549,46 +552,59 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         return string.Join(Environment.NewLine, lines);
     }
 
-    // Opt-in: only wait for IComputeResource (containers, projects, executables).
-    // Non-compute resources (parameters, connection strings) never report healthy and would hang.
-    //
-    // Also skip resources that implement IResourceWithParent — these are internally-managed child
-    // resources orchestrated by Aspire itself (e.g. ProjectRebuilderResource, introduced in Aspire
-    // 13.2.0 for hot-reload). ProjectRebuilderResource is the only IComputeResource that also
-    // implements IResourceWithParent; it is internal, registered with IsHidden = true and
-    // ExplicitStartupAnnotation (meaning it never auto-starts or emits healthy/running state).
-    //
-    // Alternatives considered (see https://github.com/thomhurst/TUnit/pull/5335):
-    //   • IResourceWithoutLifetime — no types implement it in Aspire 13.2.x, so it's unusable.
-    //   • ExplicitStartupAnnotation — public, but could over-exclude user resources that are
-    //     manually started then expected to become healthy.
-    //   • WaitBehavior.StopOnResourceUnavailable — doesn't help; the rebuilder stays in
-    //     NotStarted (not a terminal state), so WaitForResourceHealthyAsync still hangs.
-    //   • ResourceNotificationService.WaitForDependenciesAsync — different use case (waits for
-    //     annotated deps of a specific resource, not "all resources").
-    //   • TryGetCurrentState + IsHidden — used as a runtime safety net in
-    //     WaitForResourcesWithFailFastAsync (see below).
-    protected virtual List<string> GetWaitableResourceNames(DistributedApplicationModel model)
+    /// <summary>
+    /// Returns whether <paramref name="resource"/> should be included in the wait list.
+    /// Override to add custom inclusion/exclusion logic.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Default: waits for <see cref="IComputeResource"/> (containers, projects, executables) unless
+    /// the resource also implements <see cref="IResourceWithParent"/>. Child resources are assumed to
+    /// be internally managed by Aspire and should not be independently awaited.
+    /// </para>
+    /// <para>
+    /// For example, Aspire 13.2.0+ adds <c>ProjectRebuilderResource</c> (an <see cref="IComputeResource"/>
+    /// that implements <see cref="IResourceWithParent"/>) for hot-reload support. It never emits a
+    /// healthy/running state and would cause a guaranteed timeout if waited on.
+    /// </para>
+    /// <para>
+    /// Non-compute resources (parameters, connection strings) are always excluded because they never
+    /// report healthy and would hang indefinitely.
+    /// </para>
+    /// <example>
+    /// Override to exclude a slow resource from the wait list:
+    /// <code>
+    /// protected override bool ShouldWaitForResource(IResource resource)
+    ///     => base.ShouldWaitForResource(resource) &amp;&amp; resource.Name != "slow-service";
+    /// </code>
+    /// </example>
+    /// </remarks>
+    /// <param name="resource">The resource to evaluate.</param>
+    /// <returns><see langword="true"/> if the resource should be waited for; otherwise <see langword="false"/>.</returns>
+    protected virtual bool ShouldWaitForResource(IResource resource)
+        => resource is IComputeResource && resource is not IResourceWithParent;
+
+    private List<string> GetWaitableResourceNames(DistributedApplicationModel model)
     {
         var waitable = new List<string>();
         List<string>? skipped = null;
 
         foreach (var r in model.Resources)
         {
-            if (r is not IComputeResource || r is IResourceWithParent)
+            if (ShouldWaitForResource(r))
             {
-                skipped ??= [];
-                skipped.Add(r.Name);
+                waitable.Add(r.Name);
             }
             else
             {
-                waitable.Add(r.Name);
+                skipped ??= [];
+                skipped.Add(r.Name);
             }
         }
 
         if (skipped is { Count: > 0 })
         {
-            LogProgress($"Skipping {skipped.Count} non-waitable resource(s) (non-compute or child resources): [{string.Join(", ", skipped)}]");
+            LogProgress($"Skipping {skipped.Count} non-waitable resource(s): [{string.Join(", ", skipped)}]");
         }
 
         return waitable;
