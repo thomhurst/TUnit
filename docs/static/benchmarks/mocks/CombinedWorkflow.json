@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-31T03:22:46.140Z",
+  "timestamp": "2026-04-01T03:22:34.139Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
@@ -10,57 +10,57 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "1.927 μs",
-      "Error": "0.0234 μs",
-      "StdDev": "0.0219 μs",
+      "Mean": "1.938 μs",
+      "Error": "0.0119 μs",
+      "StdDev": "0.0112 μs",
       "Gen0": "0.3815",
       "Gen1": "0.0038",
       "Allocated": "6.26 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "2.695 μs",
-      "Error": "0.0516 μs",
-      "StdDev": "0.0507 μs",
+      "Mean": "2.529 μs",
+      "Error": "0.0316 μs",
+      "StdDev": "0.0296 μs",
       "Gen0": "0.9613",
       "Gen1": "0.0458",
       "Allocated": "15.71 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "2.404 μs",
-      "Error": "0.0300 μs",
-      "StdDev": "0.0281 μs",
+      "Mean": "2.338 μs",
+      "Error": "0.0170 μs",
+      "StdDev": "0.0150 μs",
       "Gen0": "0.4234",
       "Gen1": "0.0038",
-      "Allocated": "6.95 KB"
+      "Allocated": "6.92 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "405.221 μs",
-      "Error": "2.3487 μs",
-      "StdDev": "2.1970 μs",
+      "Mean": "397.211 μs",
+      "Error": "2.1032 μs",
+      "StdDev": "1.7563 μs",
       "Gen0": "1.9531",
       "Gen1": "0.9766",
       "Allocated": "36.35 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "17.325 μs",
-      "Error": "0.1934 μs",
-      "StdDev": "0.1809 μs",
+      "Mean": "17.121 μs",
+      "Error": "0.0770 μs",
+      "StdDev": "0.0683 μs",
       "Gen0": "1.6174",
       "Gen1": "0.0305",
-      "Allocated": "26.72 KB"
+      "Allocated": "26.85 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "17.442 μs",
-      "Error": "0.2778 μs",
-      "StdDev": "0.2463 μs",
+      "Mean": "18.018 μs",
+      "Error": "0.1240 μs",
+      "StdDev": "0.1099 μs",
       "Gen0": "1.4648",
       "Gen1": "0.1221",
-      "Allocated": "25.52 KB"
+      "Allocated": "25.6 KB"
     }
   ]
 }
