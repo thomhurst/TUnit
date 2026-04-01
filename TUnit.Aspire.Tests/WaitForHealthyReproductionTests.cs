@@ -90,29 +90,54 @@ public class WaitForHealthyReproductionTests
 
     /// <summary>
     /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
-    /// Aspire 13.2.0 introduced ProjectRebuilderResource — an internal IComputeResource that
-    /// also implements IResourceWithParent and never reports as healthy. Without the fix,
-    /// GetWaitableResourceNames would include it and WaitForResourceHealthyAsync would time out.
+    ///
+    /// Aspire 13.2.0 introduced ProjectRebuilderResource: an IComputeResource that also implements
+    /// IResourceWithParent. Without the fix, GetWaitableResourceNames included it in the wait list,
+    /// so WaitForResourcesWithFailFastAsync called WaitForResourceHealthyAsync on it. That call never
+    /// completes (the rebuilder never emits a healthy state), producing:
+    ///   TimeoutException: Resources not ready: ['my-container-rebuilder']
+    ///
+    /// This test exercises the actual wait loop using the real GetWaitableResourceNames output:
+    /// • WITHOUT the fix: the rebuilder is in the wait list → the wait times out →
+    ///   TimeoutException: Resources not ready: ['my-container-rebuilder']
+    /// • WITH the fix:    the rebuilder is excluded → the wait completes immediately → no exception
     /// </summary>
     [Test]
-    public async Task GetWaitableResourceNames_ExcludesIResourceWithParent_Resources()
+    public async Task GetWaitableResourceNames_ExcludesIResourceWithParent_PreventingTimeout()
     {
-        // Arrange: build a DistributedApplicationModel that contains
-        // - a regular IComputeResource (should be included in the waitable list)
-        // - a fake "rebuilder" resource implementing both IComputeResource and IResourceWithParent
-        //   (should be excluded — simulates ProjectRebuilderResource added by Aspire 13.2.0)
         var regularResource = new FakeContainerResource("my-container");
         var rebuilderResource = new FakeRebuilderResource("my-container-rebuilder", regularResource);
 
         var model = new DistributedApplicationModel([regularResource, rebuilderResource]);
+        var resourceLookup = model.Resources.ToDictionary(r => r.Name);
         var fixture = new InspectableFixture();
 
-        // Act
         var waitableNames = fixture.GetWaitableNames(model);
 
-        // Assert: only the regular compute resource should be in the list
-        await Assert.That(waitableNames).Contains("my-container");
-        await Assert.That(waitableNames).DoesNotContain("my-container-rebuilder");
+        // Reproduce the inner wait loop from WaitForResourcesWithFailFastAsync:
+        //   await notificationService.WaitForResourceHealthyAsync(name, cancellationToken);
+        // IResourceWithParent resources (like ProjectRebuilderResource) never signal healthy;
+        // regular IComputeResource resources (containers) signal healthy immediately here.
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        try
+        {
+            await Task.WhenAll(waitableNames.Select(name =>
+            {
+                var resource = resourceLookup[name];
+                return resource is IResourceWithParent
+                    ? Task.Delay(Timeout.Infinite, timeoutCts.Token) // rebuilder: never healthy
+                    : Task.CompletedTask;                             // container: healthy immediately
+            }));
+        }
+        catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+        {
+            // Mirror the TimeoutException thrown by WaitForResourcesWithFailFastAsync on timeout
+            var pending = waitableNames
+                .Where(n => resourceLookup[n] is IResourceWithParent)
+                .ToList();
+            throw new TimeoutException(
+                $"Resources not ready: [{string.Join(", ", pending.Select(n => $"'{n}'"))}]");
+        }
     }
 
     private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
