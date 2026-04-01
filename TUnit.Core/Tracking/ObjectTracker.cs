@@ -113,11 +113,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, SortedList<int, HashSet<object>> trackedObjects)
     {
-        // SortedList keeps keys in ascending order; iterate by index in reverse for descending depth.
-        var keys = trackedObjects.Keys;
+        // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
+        // This ensures disposal happens in reverse order of initialization (which goes deepest first).
+        // Dependents (shallow) are disposed before their dependencies (deep).
         var values = trackedObjects.Values;
 
-        for (var i = keys.Count - 1; i >= 0; i--)
+        for (var i = 0; i < values.Count; i++)
         {
             var bucket = values[i];
             List<Task>? disposalTasks = null;
