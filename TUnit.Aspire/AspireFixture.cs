@@ -525,14 +525,17 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     // Opt-in: only wait for IComputeResource (containers, projects, executables).
     // Non-compute resources (parameters, connection strings) never report healthy and would hang.
-    private List<string> GetWaitableResourceNames(DistributedApplicationModel model)
+    // Also skip resources that implement IResourceWithParent — these are internally-managed child
+    // resources such as ProjectRebuilderResource (introduced in Aspire 13.2.0) that are orchestrated
+    // by Aspire itself and are not user-visible resources that need to be awaited.
+    protected virtual List<string> GetWaitableResourceNames(DistributedApplicationModel model)
     {
         var waitable = new List<string>();
         List<string>? skipped = null;
 
         foreach (var r in model.Resources)
         {
-            if (r is not IComputeResource)
+            if (r is not IComputeResource || r is IResourceWithParent)
             {
                 skipped ??= [];
                 skipped.Add(r.Name);
@@ -545,7 +548,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         if (skipped is { Count: > 0 })
         {
-            LogProgress($"Skipping {skipped.Count} non-compute resource(s): [{string.Join(", ", skipped)}]");
+            LogProgress($"Skipping {skipped.Count} non-waitable resource(s) (non-compute or child resources): [{string.Join(", ", skipped)}]");
         }
 
         return waitable;

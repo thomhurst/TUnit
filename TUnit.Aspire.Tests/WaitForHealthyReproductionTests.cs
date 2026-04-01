@@ -88,8 +88,63 @@ public class WaitForHealthyReproductionTests
         }
     }
 
+    /// <summary>
+    /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
+    /// Aspire 13.2.0 introduced ProjectRebuilderResource — an internal IComputeResource that
+    /// also implements IResourceWithParent and never reports as healthy. Without the fix,
+    /// GetWaitableResourceNames would include it and WaitForResourceHealthyAsync would time out.
+    /// </summary>
+    [Test]
+    public async Task GetWaitableResourceNames_ExcludesIResourceWithParent_Resources()
+    {
+        // Arrange: build a DistributedApplicationModel that contains
+        // - a regular IComputeResource (should be included in the waitable list)
+        // - a fake "rebuilder" resource implementing both IComputeResource and IResourceWithParent
+        //   (should be excluded — simulates ProjectRebuilderResource added by Aspire 13.2.0)
+        var regularResource = new FakeContainerResource("my-container");
+        var rebuilderResource = new FakeRebuilderResource("my-container-rebuilder", regularResource);
+
+        var model = new DistributedApplicationModel([regularResource, rebuilderResource]);
+        var fixture = new InspectableFixture();
+
+        // Act
+        var waitableNames = fixture.GetWaitableNames(model);
+
+        // Assert: only the regular compute resource should be in the list
+        await Assert.That(waitableNames).Contains("my-container");
+        await Assert.That(waitableNames).DoesNotContain("my-container-rebuilder");
+    }
+
     private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
     {
         protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+    }
+
+    /// <summary>
+    /// Exposes <see cref="AspireFixture{TAppHost}.GetWaitableResourceNames"/> for unit testing.
+    /// </summary>
+    private sealed class InspectableFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
+    {
+        public List<string> GetWaitableNames(DistributedApplicationModel model)
+            => GetWaitableResourceNames(model);
+    }
+
+    /// <summary>A plain IComputeResource with no parent.</summary>
+    private sealed class FakeContainerResource(string name) : IComputeResource
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+    }
+
+    /// <summary>
+    /// Simulates ProjectRebuilderResource from Aspire 13.2.0:
+    /// an IComputeResource that also implements IResourceWithParent.
+    /// </summary>
+    private sealed class FakeRebuilderResource(string name, IResource parent)
+        : IComputeResource, IResourceWithParent
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+        public IResource Parent => parent;
     }
 }
