@@ -1287,31 +1287,12 @@ internal static class MockImplBuilder
     /// </summary>
     public static string GetShortSafeName(MockTypeModel model)
     {
-        var name = model.FullyQualifiedName;
+        var name = StripGlobalPrefix(model.FullyQualifiedName);
 
-        // Strip global:: prefix
-        if (name.StartsWith("global::"))
-            name = name.Substring("global::".Length);
-
-        // Strip namespace prefix
         if (!IsGlobalNamespace(model.Namespace) && name.StartsWith(model.Namespace + "."))
             name = name.Substring(model.Namespace.Length + 1);
 
-        // Sanitize generic type args and nested type dots
-        var result = name
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace("[", "_")
-            .Replace("]", "_")
-            .Replace(" ", "");
-
-        // Collapse runs of underscores from adjacent brackets (e.g. >> → __)
-        while (result.Contains("__"))
-            result = result.Replace("__", "_");
-
-        return result;
+        return SanitizeIdentifier(name);
     }
 
     /// <summary>
@@ -1323,10 +1304,7 @@ internal static class MockImplBuilder
         var name = GetShortSafeName(model);
         if (model.AdditionalInterfaceNames.Length > 0)
         {
-            foreach (var addlFqn in model.AdditionalInterfaceNames)
-            {
-                name += "_" + StripNamespaceFromFqn(addlFqn);
-            }
+            name += "_" + string.Join("_", model.AdditionalInterfaceNames.Select(StripNamespaceFromFqn));
         }
         return name;
     }
@@ -1337,11 +1315,9 @@ internal static class MockImplBuilder
     /// </summary>
     private static string StripNamespaceFromFqn(string fqn)
     {
-        var name = fqn;
-        if (name.StartsWith("global::"))
-            name = name.Substring("global::".Length);
+        var name = StripGlobalPrefix(fqn);
 
-        // Find last dot not inside angle brackets (to handle generic type arguments)
+        // Find last dot not inside angle brackets to handle generic type arguments
         var lastDotIndex = -1;
         var depth = 0;
         for (int i = 0; i < name.Length; i++)
@@ -1354,7 +1330,14 @@ internal static class MockImplBuilder
         if (lastDotIndex >= 0)
             name = name.Substring(lastDotIndex + 1);
 
-        // Sanitize
+        return SanitizeIdentifier(name);
+    }
+
+    private static string StripGlobalPrefix(string name)
+        => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
+
+    private static string SanitizeIdentifier(string name)
+    {
         var result = name
             .Replace(".", "_")
             .Replace("<", "_")
