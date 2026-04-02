@@ -88,13 +88,6 @@ public class WaitForHealthyReproductionTests
         }
     }
 
-    /// <summary>
-    /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
-    ///
-    /// Aspire 13.2.0 introduced ProjectRebuilderResource: an IComputeResource that also implements
-    /// IResourceWithParent. Without the fix, ShouldWaitForResource returns true for it, causing
-    /// WaitForResourceHealthyAsync to hang (it never emits healthy/running state).
-    /// </summary>
     [Test]
     public async Task ShouldWaitForResource_IncludesComputeResource()
     {
@@ -104,6 +97,13 @@ public class WaitForHealthyReproductionTests
         await Assert.That(fixture.TestShouldWaitForResource(regular)).IsTrue();
     }
 
+    /// <summary>
+    /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
+    ///
+    /// Aspire 13.2.0 introduced ProjectRebuilderResource: an IComputeResource that also implements
+    /// IResourceWithParent. Without the fix, ShouldWaitForResource returns true for it, causing
+    /// WaitForResourceHealthyAsync to hang (it never emits healthy/running state).
+    /// </summary>
     [Test]
     public async Task ShouldWaitForResource_ExcludesIResourceWithParent()
     {
