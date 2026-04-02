@@ -5,6 +5,9 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
+#if NET
+using System.Diagnostics;
+#endif
 
 namespace TUnit.Engine.Services;
 
@@ -220,6 +223,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Initializes all tracked objects depth-first (deepest objects first).
     /// This is called during test execution (after BeforeClass hooks) to initialize IAsyncInitializer objects.
     /// Objects at the same level are initialized in parallel.
+    /// Each object gets its own OpenTelemetry span parented under the appropriate scope activity
+    /// based on its <see cref="SharedType"/> (registered in <see cref="TraceScopeRegistry"/>).
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
@@ -235,7 +240,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>(objectsAtLevel.Count);
             foreach (var obj in objectsAtLevel)
             {
-                tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
+                tasks.Add(InitializeObjectWithSpanAsync(obj, testContext, cancellationToken));
             }
 
             if (tasks.Count > 0)
@@ -244,23 +249,122 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             }
         }
 
-        // Finally initialize the test class and its nested objects
+        // Finally initialize the test class and its nested objects.
+        // The test class instance is always per-test scope.
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
         await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
+
+#if NET
+        if (classInstance is IAsyncInitializer)
+        {
+            await InitializeWithSpanAsync(classInstance, testContext, SharedType.None, cancellationToken);
+        }
+        else
+        {
+            await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
+        }
+#else
         await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
+#endif
     }
 
     /// <summary>
-    /// Initializes an object and its nested objects.
+    /// Initializes an object and its nested objects, wrapped in a scope-aware OpenTelemetry span.
     /// </summary>
-    private async Task InitializeObjectWithNestedAsync(object obj, CancellationToken cancellationToken)
+    private async Task InitializeObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
     {
         // First initialize nested objects depth-first
         await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
 
-        // Then initialize the object itself
+#if NET
+        if (obj is IAsyncInitializer)
+        {
+            var sharedType = TraceScopeRegistry.GetSharedType(obj);
+            await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
+        }
+        else
+        {
+            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+        }
+#else
         await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+#endif
     }
+
+#if NET
+    /// <summary>
+    /// Initializes an object within an OpenTelemetry span parented under the appropriate scope activity.
+    /// </summary>
+    private static async Task InitializeWithSpanAsync(
+        object obj,
+        TestContext testContext,
+        SharedType? sharedType,
+        CancellationToken cancellationToken)
+    {
+        Activity? initActivity = null;
+        var previousActivity = Activity.Current;
+
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var parentContext = GetParentActivityContext(testContext, sharedType);
+            var typeName = obj.GetType().FullName ?? obj.GetType().Name;
+            var scopeTag = sharedType switch
+            {
+                SharedType.PerTestSession => "session",
+                SharedType.PerAssembly => "assembly",
+                SharedType.PerClass => "class",
+                SharedType.Keyed => "keyed",
+                _ => "test"
+            };
+
+            initActivity = TUnitActivitySource.StartActivity(
+                $"initialize {typeName}",
+                ActivityKind.Internal,
+                parentContext,
+                [
+                    new("tunit.test.id", testContext.Id),
+                    new("tunit.test.class", testContext.Metadata.TestDetails.ClassType.FullName),
+                    new("tunit.trace.scope", scopeTag)
+                ]);
+
+            if (initActivity is not null)
+            {
+                Activity.Current = initActivity;
+            }
+        }
+
+        try
+        {
+            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            TUnitActivitySource.RecordException(initActivity, ex);
+            throw;
+        }
+        finally
+        {
+            TUnitActivitySource.StopActivity(initActivity);
+            Activity.Current = previousActivity;
+        }
+    }
+
+    /// <summary>
+    /// Returns the parent activity context for an initialization span based on the object's shared type.
+    /// </summary>
+    private static ActivityContext GetParentActivityContext(TestContext testContext, SharedType? sharedType)
+    {
+        return sharedType switch
+        {
+            SharedType.PerTestSession => testContext.ClassContext.AssemblyContext.TestSessionContext.Activity?.Context ?? default,
+            SharedType.PerAssembly => testContext.ClassContext.AssemblyContext.Activity?.Context ?? default,
+            SharedType.PerClass => testContext.ClassContext.Activity?.Context ?? default,
+            SharedType.Keyed => testContext.ClassContext.AssemblyContext.TestSessionContext.Activity?.Context ?? default,
+            // Per-test objects and the test class instance go under the test case activity
+            _ => testContext.Activity?.Context ?? testContext.ClassContext.Activity?.Context ?? default
+        };
+    }
+#endif
 
     /// <summary>
     /// Initializes nested objects during execution phase - all IAsyncInitializer objects.

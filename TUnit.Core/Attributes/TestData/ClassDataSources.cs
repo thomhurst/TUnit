@@ -42,7 +42,7 @@ internal class ClassDataSources
 
     public T Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>(SharedType sharedType, Type testClassType, string key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return sharedType switch
+        var instance = sharedType switch
         {
             SharedType.None => Create<T>(),
             SharedType.PerTestSession => (T) TestDataContainer.GetGlobalInstance(typeof(T), _ => Create(typeof(T)))!,
@@ -51,11 +51,17 @@ internal class ClassDataSources
             SharedType.PerAssembly => (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), _ => Create(typeof(T)))!,
             _ => throw new ArgumentOutOfRangeException()
         };
+
+#if NET
+        TraceScopeRegistry.Register(instance!, sharedType);
+#endif
+
+        return instance;
     }
 
     public object? Get(SharedType sharedType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type type, Type testClassType, string? key, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return sharedType switch
+        var instance = sharedType switch
         {
             SharedType.None => Create(type),
             SharedType.PerTestSession => TestDataContainer.GetGlobalInstance(type, _ => Create(type)),
@@ -64,6 +70,15 @@ internal class ClassDataSources
             SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, _ => Create(type)),
             _ => throw new ArgumentOutOfRangeException()
         };
+
+#if NET
+        if (instance is not null)
+        {
+            TraceScopeRegistry.Register(instance, sharedType);
+        }
+#endif
+
+        return instance;
     }
 
     private static object CreateWithKey([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, string key)

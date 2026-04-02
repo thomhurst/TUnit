@@ -1,8 +1,5 @@
 using TUnit.Core;
 using TUnit.Engine.Services;
-#if NET
-using System.Diagnostics;
-#endif
 
 namespace TUnit.Engine;
 
@@ -35,47 +32,10 @@ internal class TestInitializer
 
     public async ValueTask InitializeTestObjectsAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Object initialization runs before the test case span starts, so any spans it
-        // creates (container startup, auth calls, connection pools, etc.) do not appear nested
-        // inside the individual test's trace timeline. We briefly set Activity.Current to the
-        // session span so those spans are parented there instead.
-#if NET
-        var sessionActivity = test.Context.ClassContext.AssemblyContext.TestSessionContext.Activity;
-        var previousActivity = Activity.Current;
-        if (sessionActivity is not null)
-        {
-            Activity.Current = sessionActivity;
-        }
-
-        var typeName = test.Context.Metadata.TestDetails.ClassType.FullName ?? test.Context.Metadata.TestDetails.ClassType.Name;
-        Activity? initActivity = null;
-        if (TUnitActivitySource.Source.HasListeners())
-        {
-            initActivity = TUnitActivitySource.StartActivity(
-                $"initialize {typeName}",
-                ActivityKind.Internal,
-                sessionActivity?.Context ?? default,
-                [
-                    new("tunit.test.id", test.Context.Id),
-                    new("tunit.test.class", test.Context.Metadata.TestDetails.ClassType.FullName)
-                ]);
-        }
-        try
-        {
-            await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            TUnitActivitySource.RecordException(initActivity, ex);
-            throw;
-        }
-        finally
-        {
-            TUnitActivitySource.StopActivity(initActivity);
-            Activity.Current = previousActivity;
-        }
-#else
+        // ObjectLifecycleService creates per-object initialization spans with scope-aware
+        // parent activity selection. Shared objects (PerSession/PerAssembly/PerClass) are
+        // parented under session/assembly/class activities; per-test objects and the test
+        // class itself are parented under the test case activity.
         await _objectLifecycleService.InitializeTestObjectsAsync(test.Context, cancellationToken);
-#endif
     }
 }

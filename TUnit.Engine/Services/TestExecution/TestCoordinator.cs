@@ -328,7 +328,8 @@ internal sealed class TestCoordinator : ITestCoordinator
                 test.Context.ClassContext.Activity?.Context ?? default,
                 [
                     new("tunit.test.id", test.Context.Id),
-                    new("tunit.test.class", test.Context.Metadata.TestDetails.ClassType.FullName)
+                    new("tunit.test.class", test.Context.Metadata.TestDetails.ClassType.FullName),
+                    new("tunit.trace.scope", "test")
                 ]);
         }
 
