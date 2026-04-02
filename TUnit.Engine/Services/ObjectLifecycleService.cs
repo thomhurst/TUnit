@@ -308,14 +308,6 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         {
             var parentContext = GetParentActivityContext(testContext, sharedType);
             var typeName = obj.GetType().FullName ?? obj.GetType().Name;
-            var scopeTag = sharedType switch
-            {
-                SharedType.PerTestSession => "session",
-                SharedType.PerAssembly => "assembly",
-                SharedType.PerClass => "class",
-                SharedType.Keyed => "keyed",
-                _ => "test"
-            };
 
             initActivity = TUnitActivitySource.StartActivity(
                 $"initialize {typeName}",
@@ -324,7 +316,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
                 [
                     new("tunit.test.id", testContext.Id),
                     new("tunit.test.class", testContext.Metadata.TestDetails.ClassType.FullName),
-                    new("tunit.trace.scope", scopeTag)
+                    new("tunit.trace.scope", TUnitActivitySource.GetScopeTag(sharedType))
                 ]);
 
             if (initActivity is not null)
@@ -351,6 +343,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
     /// <summary>
     /// Returns the parent activity context for an initialization span based on the object's shared type.
+    /// Keyed objects use session-level scope because they can be shared across classes and assemblies
+    /// via matching keys, making session the broadest safe parent.
     /// </summary>
     private static ActivityContext GetParentActivityContext(TestContext testContext, SharedType? sharedType)
     {

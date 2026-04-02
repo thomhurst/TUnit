@@ -17,6 +17,7 @@ namespace TUnit.Core;
 /// </remarks>
 internal static class TraceScopeRegistry
 {
+    // Fully qualify to disambiguate from System.Collections.Generic.ReferenceEqualityComparer
     private static readonly ConcurrentDictionary<object, SharedType> Scopes =
         new(Helpers.ReferenceEqualityComparer.Instance);
 

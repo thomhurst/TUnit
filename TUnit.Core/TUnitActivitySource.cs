@@ -51,6 +51,20 @@ internal static class TUnitActivitySource
         activity.Stop();
         activity.Dispose();
     }
+
+    /// <summary>
+    /// Maps a <see cref="SharedType"/> to its trace scope tag value.
+    /// Keyed objects use session-level scope because they can be shared across
+    /// classes and assemblies via matching keys, so session is the broadest safe parent.
+    /// </summary>
+    internal static string GetScopeTag(SharedType? sharedType) => sharedType switch
+    {
+        SharedType.PerTestSession => "session",
+        SharedType.PerAssembly => "assembly",
+        SharedType.PerClass => "class",
+        SharedType.Keyed => "keyed",
+        _ => "test"
+    };
 }
 
 #endif

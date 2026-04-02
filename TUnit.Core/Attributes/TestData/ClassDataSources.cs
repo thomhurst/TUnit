@@ -53,7 +53,10 @@ internal class ClassDataSources
         };
 
 #if NET
-        TraceScopeRegistry.Register(instance!, sharedType);
+        if (instance is not null)
+        {
+            TraceScopeRegistry.Register(instance, sharedType);
+        }
 #endif
 
         return instance;
