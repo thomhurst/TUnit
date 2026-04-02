@@ -1476,9 +1476,13 @@ function renderSuiteTrace(className) {
     return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div></div></div>';
 }
 
-// Global timeline: session + assembly + suite spans
+// Global timeline: session + assembly + suite + initialize/dispose spans
+function isGlobalTimelineSpan(s) {
+    var t = s.spanType;
+    return t === 'test session' || t === 'test assembly' || t === 'test suite' || (t && (t.startsWith('initialize ') || t.startsWith('dispose ')));
+}
 function renderGlobalTimeline() {
-    const topSpans = spans.filter(s => s.spanType === 'test session' || s.spanType === 'test assembly' || s.spanType === 'test suite');
+    const topSpans = spans.filter(isGlobalTimelineSpan);
     if (!topSpans.length) return '';
     return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(topSpans, 'global') + '</div></div></div></div>';
 }
