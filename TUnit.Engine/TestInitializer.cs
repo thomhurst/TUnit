@@ -47,7 +47,7 @@ internal class TestInitializer
             Activity.Current = sessionActivity;
         }
 
-        var typeName = test.Context.Metadata.TestDetails.ClassType.FullName ?? test.Context.Metadata.TestDetails.ClassType.Name;
+        var typeName = test.Context.Metadata.TestDetails.ClassType.Name;
         Activity? initActivity = null;
         if (TUnitActivitySource.Source.HasListeners())
         {
