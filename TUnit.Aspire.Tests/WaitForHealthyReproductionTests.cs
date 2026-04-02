@@ -88,8 +88,78 @@ public class WaitForHealthyReproductionTests
         }
     }
 
+    [Test]
+    public async Task ShouldWaitForResource_IncludesComputeResource()
+    {
+        var fixture = new InspectableFixture();
+        var regular = new FakeContainerResource("my-container");
+
+        await Assert.That(fixture.TestShouldWaitForResource(regular)).IsTrue();
+    }
+
+    /// <summary>
+    /// Regression test for https://github.com/thomhurst/TUnit/issues/5260 (Aspire 13.2.0+).
+    ///
+    /// Aspire 13.2.0 introduced ProjectRebuilderResource: an IComputeResource that also implements
+    /// IResourceWithParent. Without the fix, ShouldWaitForResource returns true for it, causing
+    /// WaitForResourceHealthyAsync to hang (it never emits healthy/running state).
+    /// </summary>
+    [Test]
+    public async Task ShouldWaitForResource_ExcludesIResourceWithParent()
+    {
+        var fixture = new InspectableFixture();
+        var regular = new FakeContainerResource("my-container");
+        var rebuilder = new FakeRebuilderResource("my-container-rebuilder", regular);
+
+        await Assert.That(fixture.TestShouldWaitForResource(rebuilder)).IsFalse();
+    }
+
+    [Test]
+    public async Task ShouldWaitForResource_ExcludesNonComputeResource()
+    {
+        var fixture = new InspectableFixture();
+        var paramResource = new FakeNonComputeResource("my-param");
+
+        await Assert.That(fixture.TestShouldWaitForResource(paramResource)).IsFalse();
+    }
+
     private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
     {
         protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+    }
+
+    /// <summary>
+    /// Exposes <see cref="AspireFixture{TAppHost}.ShouldWaitForResource"/> for unit testing.
+    /// </summary>
+    private sealed class InspectableFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
+    {
+        public bool TestShouldWaitForResource(IResource resource)
+            => ShouldWaitForResource(resource);
+    }
+
+    /// <summary>A plain IComputeResource with no parent.</summary>
+    private sealed class FakeContainerResource(string name) : IComputeResource
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+    }
+
+    /// <summary>A non-compute resource (e.g. ParameterResource, ConnectionStringResource).</summary>
+    private sealed class FakeNonComputeResource(string name) : IResource
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+    }
+
+    /// <summary>
+    /// Simulates ProjectRebuilderResource from Aspire 13.2.0:
+    /// an IComputeResource that also implements IResourceWithParent.
+    /// </summary>
+    private sealed class FakeRebuilderResource(string name, IResource parent)
+        : IComputeResource, IResourceWithParent
+    {
+        public string Name => name;
+        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
+        public IResource Parent => parent;
     }
 }
