@@ -45,4 +45,49 @@ public class StringToParsableArgumentsTests
         await Assert.That(time).IsEqualTo(new TimeOnly(14, 30, 0));
     }
 #endif
+
+    [Test]
+    [Arguments("2022-05-31")]
+    [Arguments(null)]
+    public async Task Nullable_DateTime_From_String(DateTime? testDate)
+    {
+        if (testDate is not null)
+        {
+            await Assert.That(testDate.Value).IsEqualTo(new DateTime(2022, 5, 31));
+        }
+        else
+        {
+            await Assert.That(testDate).IsNull();
+        }
+    }
+
+    [Test]
+    [Arguments("01:30:00")]
+    [Arguments(null)]
+    public async Task Nullable_TimeSpan_From_String(TimeSpan? timeSpan)
+    {
+        if (timeSpan is not null)
+        {
+            await Assert.That(timeSpan.Value).IsEqualTo(new TimeSpan(1, 30, 0));
+        }
+        else
+        {
+            await Assert.That(timeSpan).IsNull();
+        }
+    }
+
+    [Test]
+    [Arguments("d3b07384-d113-4ec0-8b2a-1e1f0e1e4e57")]
+    [Arguments(null)]
+    public async Task Nullable_Guid_From_String(Guid? guid)
+    {
+        if (guid is not null)
+        {
+            await Assert.That(guid.Value).IsEqualTo(new Guid("d3b07384-d113-4ec0-8b2a-1e1f0e1e4e57"));
+        }
+        else
+        {
+            await Assert.That(guid).IsNull();
+        }
+    }
 }
