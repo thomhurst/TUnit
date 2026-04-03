@@ -321,15 +321,16 @@ internal sealed class TestCoordinator : ITestCoordinator
         var previousActivity = Activity.Current;
         if (TUnitActivitySource.Source.HasListeners())
         {
-            var typeName = test.Context.Metadata.TestDetails.ClassType.FullName ?? test.Context.Metadata.TestDetails.ClassType.Name;
+            var classType = test.Context.Metadata.TestDetails.ClassType;
+            var typeName = classType.FullName ?? classType.Name;
             disposalActivity = TUnitActivitySource.StartActivity(
                 $"dispose {typeName}",
                 ActivityKind.Internal,
                 test.Context.ClassContext.Activity?.Context ?? default,
                 [
                     new("tunit.test.id", test.Context.Id),
-                    new("tunit.test.class", test.Context.Metadata.TestDetails.ClassType.FullName),
-                    new("tunit.trace.scope", "test")
+                    new("tunit.test.class", classType.FullName),
+                    new("tunit.trace.scope", TUnitActivitySource.GetScopeTag(SharedType.None))
                 ]);
         }
 

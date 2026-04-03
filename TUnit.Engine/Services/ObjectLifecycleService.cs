@@ -307,7 +307,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         if (TUnitActivitySource.Source.HasListeners())
         {
             var parentContext = GetParentActivityContext(testContext, sharedType);
-            var typeName = obj.GetType().FullName ?? obj.GetType().Name;
+            var objType = obj.GetType();
+            var typeName = objType.FullName ?? objType.Name;
 
             initActivity = TUnitActivitySource.StartActivity(
                 $"initialize {typeName}",

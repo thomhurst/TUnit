@@ -22,14 +22,6 @@ internal static class TraceScopeRegistry
         new(Helpers.ReferenceEqualityComparer.Instance);
 
     /// <summary>
-    /// Records the <see cref="SharedType"/> for an object created by a class data source.
-    /// </summary>
-    internal static void Register(object obj, SharedType sharedType)
-    {
-        Scopes.TryAdd(obj, sharedType);
-    }
-
-    /// <summary>
     /// Registers trace scopes for data objects produced by a data source attribute.
     /// If the attribute implements <see cref="ITraceScopeProvider"/>, each object is
     /// paired with the corresponding <see cref="SharedType"/> from the provider.
