@@ -10,9 +10,9 @@ namespace TUnit.Core;
 /// under the correct activity (session, assembly, class, or test).
 /// </summary>
 /// <remarks>
-/// Objects are registered in <see cref="ClassDataSources"/> based on their
-/// <see cref="SharedType"/>. The engine reads the scope during initialization
-/// to determine the parent activity for each object's trace span.
+/// Objects are registered by the engine (TestBuilder, PropertyInjector) when data source
+/// attributes implement <see cref="ITraceScopeProvider"/>. The engine reads the scope
+/// during initialization to determine the parent activity for each object's trace span.
 /// Uses reference equality to distinguish distinct instances that may compare equal.
 /// </remarks>
 internal static class TraceScopeRegistry
@@ -27,6 +27,34 @@ internal static class TraceScopeRegistry
     internal static void Register(object obj, SharedType sharedType)
     {
         Scopes.TryAdd(obj, sharedType);
+    }
+
+    /// <summary>
+    /// Registers trace scopes for data objects produced by a data source attribute.
+    /// If the attribute implements <see cref="ITraceScopeProvider"/>, each object is
+    /// paired with the corresponding <see cref="SharedType"/> from the provider.
+    /// </summary>
+    internal static void RegisterFromDataSource(IDataSourceAttribute dataSource, object?[]? objects)
+    {
+        if (objects is null || objects.Length == 0)
+        {
+            return;
+        }
+
+        if (dataSource is not ITraceScopeProvider traceScopeProvider)
+        {
+            return;
+        }
+
+        using var enumerator = traceScopeProvider.GetSharedTypes().GetEnumerator();
+        for (var i = 0; i < objects.Length; i++)
+        {
+            var sharedType = enumerator.MoveNext() ? enumerator.Current : SharedType.None;
+            if (objects[i] is not null)
+            {
+                Scopes.TryAdd(objects[i]!, sharedType);
+            }
+        }
     }
 
     /// <summary>

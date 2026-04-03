@@ -52,13 +52,6 @@ internal class ClassDataSources
             _ => throw new ArgumentOutOfRangeException()
         };
 
-#if NET
-        if (instance is not null)
-        {
-            TraceScopeRegistry.Register(instance, sharedType);
-        }
-#endif
-
         return instance;
     }
 
@@ -73,13 +66,6 @@ internal class ClassDataSources
             SharedType.PerAssembly => TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, type, _ => Create(type)),
             _ => throw new ArgumentOutOfRangeException()
         };
-
-#if NET
-        if (instance is not null)
-        {
-            TraceScopeRegistry.Register(instance, sharedType);
-        }
-#endif
 
         return instance;
     }

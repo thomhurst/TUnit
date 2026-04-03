@@ -210,6 +210,10 @@ internal sealed class TestBuilder : ITestBuilder
                     var classDataResult = await classDataFactory() ?? [];
                     var classData = DataUnwrapper.Unwrap(classDataResult);
 
+#if NET
+                    TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
+#endif
+
                     // Initialize objects before method data sources are evaluated.
                     // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
                     await InitializeClassDataAsync(classData);
@@ -292,6 +296,11 @@ internal sealed class TestBuilder : ITestBuilder
                                 var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                 classData = classDataUnwrapped;
                                 var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+#if NET
+                                TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
+                                TraceScopeRegistry.RegisterFromDataSource(methodDataSource, methodData);
+#endif
 
                                 // Extract and merge metadata from data source attributes and TestDataRow wrappers
                                 var classAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(classDataSource);

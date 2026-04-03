@@ -537,6 +537,9 @@ internal sealed class PropertyInjector
 
             if (value != null)
             {
+#if NET
+                TraceScopeRegistry.RegisterFromDataSource(dataSource, args);
+#endif
                 // EnsureInitializedAsync handles property injection and initialization.
                 // ObjectInitializer is phase-aware: during Discovery phase, only IAsyncDiscoveryInitializer
                 // objects are initialized; regular IAsyncInitializer objects are deferred to Execution phase.

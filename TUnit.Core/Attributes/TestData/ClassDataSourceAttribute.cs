@@ -31,7 +31,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
-public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute
+public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute, ITraceScopeProvider
 {
     private Type[] _types;
 
@@ -180,7 +180,7 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>
-    : DataSourceGeneratorAttribute<T>
+    : DataSourceGeneratorAttribute<T>, ITraceScopeProvider
 {
     public SharedType Shared { get; set; } = SharedType.None;
     public string Key { get; set; } = string.Empty;
