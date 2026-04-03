@@ -11,6 +11,12 @@ internal static class ParsableTypeExtensions
             return false;
         }
 
+        // Unwrap nullable value types (e.g., DateTime? -> DateTime)
+        if (type is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } nullableType)
+        {
+            type = nullableType.TypeArguments[0];
+        }
+
         if (type.AllInterfaces.Any(i =>
                 i is { IsGenericType: true, MetadataName: "IParsable`1" }
                 && i.ContainingNamespace?.ToDisplayString() == "System"

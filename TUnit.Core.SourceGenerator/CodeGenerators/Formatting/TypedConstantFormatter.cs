@@ -226,7 +226,14 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
             if (value is string strForParsing && targetType.SpecialType != SpecialType.System_String && targetType.IsParsableFromString())
             {
-                var fullyQualifiedName = targetType.GloballyQualified();
+                // For nullable value types, use the underlying type for Parse
+                var parseType = targetType;
+                if (targetType is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } nullableType)
+                {
+                    parseType = nullableType.TypeArguments[0];
+                }
+
+                var fullyQualifiedName = parseType.GloballyQualified();
                 var escapedValue = SymbolDisplay.FormatLiteral(strForParsing, quote: true);
                 return $"{fullyQualifiedName}.Parse({escapedValue}, global::System.Globalization.CultureInfo.InvariantCulture)";
             }
