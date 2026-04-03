@@ -345,7 +345,9 @@ internal sealed class ActivityCollector : IDisposable
         // All child spans will have already stopped by this point (children stop before parents).
         if (isTUnit && activity.GetTagItem("tunit.test.node_uid") is not null)
         {
-            _testCaseSpanIds.TryRemove(activity.SpanId.ToString(), out _);
+            var spanId = activity.SpanId.ToString();
+            _testCaseSpanIds.TryRemove(spanId, out _);
+            _externalSpanCountsByTest.TryRemove(spanId, out _);
             _externalSpanCountsByTrace.TryRemove(traceId, out _);
         }
     }
