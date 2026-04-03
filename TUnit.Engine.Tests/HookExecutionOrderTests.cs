@@ -18,6 +18,7 @@ public sealed class GlobalHookExecutionOrderSetup
     }
 }
 
+[NotInParallel]
 public class HookExecutionOrderTests
 {
     internal static readonly List<string> _executionOrder = [];
