@@ -11,6 +11,9 @@ internal sealed class ActivityCollector : IDisposable
     // TUnit's own spans are always captured regardless of caps.
     // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
     private const int MaxExternalSpansPerTest = 100;
+    // Fallback cap applied per trace when the test case association cannot be determined
+    // (e.g. broken Activity.Parent chains from async connection pooling).
+    private const int MaxExternalSpansPerTrace = 100;
 
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
     // Track external span count per test case (keyed by test case span ID)
@@ -174,9 +177,10 @@ internal sealed class ActivityCollector : IDisposable
             current = current.Parent;
         }
 
-        // Fallback: check if ParentSpanId is a known test case span.
-        // This handles broken Activity.Parent chains (e.g. Npgsql async pooling)
-        // where the W3C ParentSpanId is still correct.
+        // Fallback: check if the direct ParentSpanId is a known test case span.
+        // Note: only one level — deeper broken chains fall through to the per-trace cap.
+        // This handles Npgsql async pooling where the direct parent reference is broken
+        // but W3C ParentSpanId is still correct.
         if (activity.ParentSpanId != default)
         {
             var parentSpanId = activity.ParentSpanId.ToString();
@@ -253,7 +257,7 @@ internal sealed class ActivityCollector : IDisposable
                 // Fallback cap by trace ID to prevent unbounded growth for spans
                 // with broken parent chains (e.g., Npgsql async connection pooling).
                 var count = _externalSpanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-                if (count > MaxExternalSpansPerTest)
+                if (count > MaxExternalSpansPerTrace)
                 {
                     return;
                 }
@@ -336,6 +340,14 @@ internal sealed class ActivityCollector : IDisposable
         };
 
         queue.Enqueue(spanData);
+
+        // Cleanup: remove test case span from tracking sets once it stops.
+        // All child spans will have already stopped by this point (children stop before parents).
+        if (isTUnit && activity.GetTagItem("tunit.test.node_uid") is not null)
+        {
+            _testCaseSpanIds.TryRemove(activity.SpanId.ToString(), out _);
+            _externalSpanCountsByTrace.TryRemove(traceId, out _);
+        }
     }
 
     public void Dispose()
