@@ -8,7 +8,12 @@ public sealed class GlobalHookExecutionOrderSetup
     [BeforeEvery(Test)]
     public static void GlobalSetup(TestContext context)
     {
-        HookExecutionOrderTests._executionOrder.Clear(); // Clear before each test
+        if (context.Metadata.TestDetails.ClassType != typeof(HookExecutionOrderTests))
+        {
+            return;
+        }
+
+        HookExecutionOrderTests._executionOrder.Clear();
         HookExecutionOrderTests._executionOrder.Add("BeforeEvery");
     }
 }
