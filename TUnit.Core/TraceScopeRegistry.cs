@@ -26,7 +26,7 @@ internal static class TraceScopeRegistry
     /// </summary>
     internal static void Register(object obj, SharedType sharedType)
     {
-        Scopes[obj] = sharedType;
+        Scopes.TryAdd(obj, sharedType);
     }
 
     /// <summary>
@@ -36,14 +36,6 @@ internal static class TraceScopeRegistry
     internal static SharedType? GetSharedType(object obj)
     {
         return Scopes.TryGetValue(obj, out var scope) ? scope : null;
-    }
-
-    /// <summary>
-    /// Removes an object from the registry. Called during cleanup.
-    /// </summary>
-    internal static void Unregister(object obj)
-    {
-        Scopes.TryRemove(obj, out _);
     }
 
     /// <summary>
