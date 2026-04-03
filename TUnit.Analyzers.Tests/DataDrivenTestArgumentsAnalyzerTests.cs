@@ -309,4 +309,26 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Nullable_Parsable_Type_Is_Not_Flagged_When_String_Argument()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments("2026/04/03 15:45")]
+                    [Arguments(null)]
+                    public void MyTest(DateTime? value)
+                    {
+                    }
+                }
+                """
+            );
+    }
 }
