@@ -23,7 +23,7 @@ public class RunPlaywrightTestsModule : TestBaseModule
             },
             new CommandExecutionOptions
             {
-                WorkingDirectory = project.Folder!.Path,
+                WorkingDirectory = project.Directory!.FullName,
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
