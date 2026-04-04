@@ -87,7 +87,7 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
             : "No attempts were made";
 
         return AssertionResult.Failed(
-            $"assertion did not pass within {_timeout.TotalMilliseconds:F0}ms after {attemptCount} attempts. {lastErrorMessage}", lastException);
+            $"assertion did not pass within {_timeout.TotalMilliseconds:F0}ms after {attemptCount} attempts. {lastErrorMessage}", lastException?.InnerException ?? lastException);
     }
 
     /// <summary>
