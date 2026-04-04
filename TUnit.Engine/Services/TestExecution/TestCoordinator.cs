@@ -363,13 +363,25 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
         }
 
-        // Note: DisposeTestInstance swallows all exceptions internally (bare catch {}),
-        // so no error recording is needed here — exceptions never propagate.
-        await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+        try
+        {
+            await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+        }
+        catch (Exception disposeEx)
+        {
+#if NET
+            TUnitActivitySource.RecordException(disposalActivity, disposeEx);
+#endif
+            await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
+        }
 #if NET
         }
         finally
         {
+            // Activity.Current is thread-static; this restore only affects the current thread.
+            // Async continuations that ran on other threads during disposal will have already
+            // captured Activity.Current at their point of execution — this is an inherent
+            // limitation of System.Diagnostics.Activity's threading model.
             TUnitActivitySource.StopActivity(disposalActivity);
             Activity.Current = previousActivity;
         }

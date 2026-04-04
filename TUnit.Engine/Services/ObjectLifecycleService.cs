@@ -337,6 +337,10 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
         finally
         {
+            // Activity.Current is thread-static; this restore only affects the current thread.
+            // Async continuations that ran on other threads during initialization will have
+            // already captured Activity.Current at their point of execution — this is an
+            // inherent limitation of System.Diagnostics.Activity's threading model.
             TUnitActivitySource.StopActivity(initActivity);
             Activity.Current = previousActivity;
         }

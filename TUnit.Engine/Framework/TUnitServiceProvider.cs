@@ -338,9 +338,5 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         await TUnitLoggerFactory.DisposeAllAsync().ConfigureAwait(false);
 
         TestExtensions.ClearCaches();
-
-#if NET
-        TraceScopeRegistry.Clear();
-#endif
     }
 }

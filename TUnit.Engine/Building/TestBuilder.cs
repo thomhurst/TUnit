@@ -211,6 +211,8 @@ internal sealed class TestBuilder : ITestBuilder
                     var classData = DataUnwrapper.Unwrap(classDataResult);
 
 #if NET
+                    // Register scope for class data objects from the simple path.
+                    // Also registered in the repeat loop below for re-fetched instances.
                     TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
 #endif
 
@@ -298,6 +300,9 @@ internal sealed class TestBuilder : ITestBuilder
                                 var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
 #if NET
+                                // Re-register: classDataFactory() was called again above and may return
+                                // a different instance for non-shared objects. First-registration-wins
+                                // semantics make this a no-op for the same instance.
                                 TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
                                 TraceScopeRegistry.RegisterFromDataSource(methodDataSource, methodData);
 #endif

@@ -244,7 +244,7 @@ namespace
         public required string TestSessionId { get; init; }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute : .UntypedDataSourceGeneratorAttribute
+    public sealed class ClassDataSourceAttribute : .UntypedDataSourceGeneratorAttribute, .ITraceScopeProvider
     {
         public ClassDataSourceAttribute() { }
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
@@ -274,7 +274,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T> : .DataSourceGeneratorAttribute<T>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T> : .DataSourceGeneratorAttribute<T>, .ITraceScopeProvider
     {
         public ClassDataSourceAttribute() { }
         public  ClassType { get; }
@@ -285,7 +285,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2> : .DataSourceGeneratorAttribute<T1, T2>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2> : .DataSourceGeneratorAttribute<T1, T2>, .ITraceScopeProvider
         where T1 : new()
         where T2 : new()
     {
@@ -297,7 +297,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3> : .DataSourceGeneratorAttribute<T1, T2, T3>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3> : .DataSourceGeneratorAttribute<T1, T2, T3>, .ITraceScopeProvider
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -310,7 +310,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T4> : .DataSourceGeneratorAttribute<T1, T2, T3, T4>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T4> : .DataSourceGeneratorAttribute<T1, T2, T3, T4>, .ITraceScopeProvider
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -324,7 +324,7 @@ namespace
         public .<.SharedType> GetSharedTypes() { }
     }
     [(.Class | .Method, AllowMultiple=true)]
-    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T5> : .DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
+    public sealed class ClassDataSourceAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties | ..NonPublicProperties)]  T5> : .DataSourceGeneratorAttribute<T1, T2, T3, T4, T5>, .ITraceScopeProvider
         where T1 : new()
         where T2 : new()
         where T3 : new()
@@ -909,6 +909,10 @@ namespace
         int Count { get; }
         .TestEntryFilterData GetFilterData(int index);
         .<.TestMetadata> Materialize(int index, string testSessionId);
+    }
+    public interface ITraceScopeProvider
+    {
+        .<.SharedType> GetSharedTypes();
     }
     public interface ITypedDataSourceAttribute<T> : .IDataSourceAttribute
     {
