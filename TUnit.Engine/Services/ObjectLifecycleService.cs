@@ -35,6 +35,14 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks =
         new(Core.Helpers.ReferenceEqualityComparer.Instance);
 
+#if NET
+    // Gates span creation so only the first caller for a given object creates a trace span.
+    // Subsequent callers (concurrent tests sharing the same object) skip span creation
+    // and just await ObjectInitializer's deduplicated Lazy<Task>.
+    private readonly ConcurrentDictionary<object, byte> _spannedObjects =
+        new(Core.Helpers.ReferenceEqualityComparer.Instance);
+#endif
+
     public ObjectLifecycleService(
         Lazy<PropertyInjector> propertyInjector,
         ObjectGraphDiscoveryService objectGraphDiscoveryService,
@@ -265,7 +273,11 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
 
 #if NET
-        if (obj is IAsyncInitializer)
+        // Only the first caller for a given object creates a trace span.
+        // TryAdd is atomic — exactly one concurrent caller wins the gate.
+        // Subsequent callers skip span creation and go straight to ObjectInitializer,
+        // which deduplicates via Lazy<Task>.
+        if (obj is IAsyncInitializer && _spannedObjects.TryAdd(obj, 0))
         {
             var sharedType = TraceScopeRegistry.GetSharedType(obj);
             await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
