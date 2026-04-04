@@ -19,7 +19,7 @@ public static partial class JsonStringAssertionExtensions
         }
         catch (JsonException ex)
         {
-            return AssertionResult.Failed($"is not valid JSON: {ex.Message}");
+            return AssertionResult.Failed($"is not valid JSON: {ex.Message}", ex);
         }
     }
 
@@ -51,7 +51,7 @@ public static partial class JsonStringAssertionExtensions
         }
         catch (JsonException ex)
         {
-            return AssertionResult.Failed($"is not valid JSON: {ex.Message}");
+            return AssertionResult.Failed($"is not valid JSON: {ex.Message}", ex);
         }
     }
 
@@ -69,7 +69,7 @@ public static partial class JsonStringAssertionExtensions
         }
         catch (JsonException ex)
         {
-            return AssertionResult.Failed($"is not valid JSON: {ex.Message}");
+            return AssertionResult.Failed($"is not valid JSON: {ex.Message}", ex);
         }
     }
 }

@@ -34,7 +34,7 @@ public class WasCalledAssertion : Assertion<ICallVerification>
         }
         catch (MockVerificationException ex)
         {
-            return Task.FromResult(AssertionResult.Failed(ex.Message));
+            return Task.FromResult(AssertionResult.Failed(ex.Message, ex));
         }
     }
 

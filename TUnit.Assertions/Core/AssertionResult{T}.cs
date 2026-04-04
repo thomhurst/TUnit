@@ -11,12 +11,14 @@ public readonly struct AssertionResult<T>
     public bool IsPassed { get; }
     public string Message { get; }
     public T? Value { get; }
+    public Exception? Exception { get; }
 
-    private AssertionResult(bool isPassed, string message, T? value)
+    private AssertionResult(bool isPassed, string message, T? value, Exception? exception = null)
     {
         IsPassed = isPassed;
         Message = message ?? string.Empty;
         Value = value;
+        Exception = exception;
     }
 
     /// <summary>
@@ -39,6 +41,6 @@ public readonly struct AssertionResult<T>
                 "Cannot convert a passed AssertionResult to AssertionResult<T> without a value. Use AssertionResult<T>.Passed(value) instead.");
         }
 
-        return Failed(result.Message);
+        return new AssertionResult<T>(false, result.Message, default, result.Exception);
     }
 }

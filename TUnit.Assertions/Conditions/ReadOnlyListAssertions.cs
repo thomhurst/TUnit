@@ -465,7 +465,7 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"item at index {_index} did not satisfy assertion: {ex.Message}");
+                return AssertionResult.Failed($"item at index {_index} did not satisfy assertion: {ex.Message}", ex);
             }
         }
 
@@ -637,7 +637,7 @@ public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyList
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"last item did not satisfy assertion: {ex.Message}");
+                return AssertionResult.Failed($"last item did not satisfy assertion: {ex.Message}", ex);
             }
         }
 

@@ -46,7 +46,7 @@ public class WithInnerExceptionsAssertion : Assertion<AggregateException>
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"inner exceptions did not satisfy assertion: {ex.Message}");
+                return AssertionResult.Failed($"inner exceptions did not satisfy assertion: {ex.Message}", ex);
             }
         }
 

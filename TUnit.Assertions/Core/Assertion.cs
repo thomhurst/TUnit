@@ -242,7 +242,9 @@ public abstract class Assertion<TValue> : IAssertion
             at {Context.ExpressionBuilder}
             """;
 
-        return new AssertionException(message);
+        return result.Exception != null
+            ? new AssertionException(message, result.Exception)
+            : new AssertionException(message);
     }
 
     /// <summary>

@@ -688,7 +688,7 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.Collect
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"item at index {index} failed assertion: {ex.Message}");
+                return AssertionResult.Failed($"item at index {index} failed assertion: {ex.Message}", ex);
             }
             index++;
         }
@@ -755,7 +755,7 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"item at index {index} (mapped by {_mapperDescription}) failed assertion: {ex.Message}");
+                return AssertionResult.Failed($"item at index {index} (mapped by {_mapperDescription}) failed assertion: {ex.Message}", ex);
             }
             index++;
         }

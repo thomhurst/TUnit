@@ -9,11 +9,13 @@ public readonly struct AssertionResult
 
     public bool IsPassed { get; }
     public string Message { get; }
+    public Exception? Exception { get; }
 
-    private AssertionResult(bool isPassed, string message)
+    private AssertionResult(bool isPassed, string message, Exception? exception = null)
     {
         IsPassed = isPassed;
         Message = message ?? string.Empty;
+        Exception = exception;
     }
 
     /// <summary>
@@ -25,6 +27,11 @@ public readonly struct AssertionResult
     /// Creates a failing assertion result with a message describing what was found.
     /// </summary>
     public static AssertionResult Failed(string message) => new(false, message);
+
+    /// <summary>
+    /// Creates a failing assertion result with a message and an associated exception.
+    /// </summary>
+    public static AssertionResult Failed(string message, Exception? exception) => new(false, message, exception);
 
     /// <summary>
     /// Helper method to conditionally create a failed result.
