@@ -2109,7 +2109,6 @@ namespace .Conditions
         public .<> WithInnerException() { }
         public .<TException, TInnerException> WithInnerException<TInnerException>()
             where TInnerException :  { }
-        public .<TException> WithInnerExceptions(<.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2130,7 +2129,6 @@ namespace .Conditions
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
         public .<TException, TInnerException> WithInnerException<TInnerException>()
             where TInnerException :  { }
-        public .<TException> WithInnerExceptions(<.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2274,10 +2272,9 @@ namespace .Conditions
     [.<>("TrackResurrection", CustomName="DoesNotTrackResurrection", ExpectationMessage="track resurrection", NegateLogic=true)]
     [.<>("TrackResurrection", ExpectationMessage="track resurrection")]
     public static class WeakReferenceAssertionExtensions { }
-    public class WithInnerExceptionsAssertion<TException> : .<TException>
-        where TException : 
+    public class WithInnerExceptionsAssertion : .<>
     {
-        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
 }
@@ -2733,6 +2730,8 @@ namespace .Extensions
         public static .<TException, TInnerException> WithInnerException<TException, TInnerException>(this .<TException> source)
             where TException : 
             where TInnerException :  { }
+        public static . WithInnerExceptions(this .<> source, <.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
+        public static . WithInnerExceptions(this .<> source, <.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
         public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
             where TException :  { }
         public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)

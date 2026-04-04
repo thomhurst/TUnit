@@ -8,20 +8,19 @@ namespace TUnit.Assertions.Conditions;
 /// The delegate receives a CollectionAssertion&lt;Exception&gt; for the InnerExceptions, enabling
 /// full collection assertion chaining (Count, All().Satisfy, Contains, etc.).
 /// </summary>
-public class WithInnerExceptionsAssertion<TException> : Assertion<TException>
-    where TException : Exception
+public class WithInnerExceptionsAssertion : Assertion<AggregateException>
 {
     private readonly Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> _innerExceptionsAssertion;
 
     internal WithInnerExceptionsAssertion(
-        AssertionContext<TException> context,
+        AssertionContext<AggregateException> context,
         Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> innerExceptionsAssertion)
         : base(context)
     {
         _innerExceptionsAssertion = innerExceptionsAssertion;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<AggregateException> metadata)
     {
         var evaluationException = metadata.Exception;
         if (evaluationException != null)
@@ -29,18 +28,14 @@ public class WithInnerExceptionsAssertion<TException> : Assertion<TException>
             return AssertionResult.Failed($"threw {evaluationException.GetType().FullName}");
         }
 
-        var exception = metadata.Value;
+        var aggregateException = metadata.Value;
 
-        if (exception is not AggregateException aggregateException)
+        if (aggregateException == null)
         {
-            return AssertionResult.Failed(
-                exception == null
-                    ? "exception was null"
-                    : $"exception was {exception.GetType().Name}, not AggregateException");
+            return AssertionResult.Failed("exception was null");
         }
 
-        var innerExceptions = aggregateException.InnerExceptions;
-        var collectionSource = new CollectionAssertion<Exception>(innerExceptions, "InnerExceptions");
+        var collectionSource = new CollectionAssertion<Exception>(aggregateException.InnerExceptions, "InnerExceptions");
         var resultingAssertion = _innerExceptionsAssertion(collectionSource);
 
         if (resultingAssertion != null)

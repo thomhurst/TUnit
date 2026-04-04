@@ -76,17 +76,5 @@ public partial class Throws
                 .ThrowsExactly<AggregateException>()
                 .WithInnerExceptions(exceptions => exceptions.Count().IsEqualTo(2));
         }
-
-        [Test]
-        public async Task WithInnerExceptions_Fails_When_Not_AggregateException()
-        {
-            Action action = () => throw new InvalidOperationException("not aggregate");
-
-            var sut = async () => await Assert.That(action)
-                .Throws<InvalidOperationException>()
-                .WithInnerExceptions(exceptions => exceptions.Count().IsEqualTo(1));
-
-            await Assert.That(sut).ThrowsException();
-        }
     }
 }
