@@ -28207,7 +28207,7 @@ public class MyTests
 If your test case IDs are predefined (not loaded at runtime), use `IAsyncInitializer` instead — it avoids running expensive initialization during every discovery pass.
 :::
 
-For more troubleshooting, see [Test Discovery Issues](../troubleshooting.md#test-discovery-issues).
+For more troubleshooting, see [Tests Not Discovered](../troubleshooting.md#tests-not-discovered).
 
 ## Basic Property Injection Examples
 
