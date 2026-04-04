@@ -1,11 +1,13 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal static class HtmlReportGenerator
+internal static partial class HtmlReportGenerator
 {
     internal static string GenerateHtml(ReportData data)
     {
@@ -30,7 +32,7 @@ internal static class HtmlReportGenerator
         sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
         sb.AppendLine("</title>");
         sb.AppendLine("<style>");
-        sb.AppendLine(GetCss());
+        sb.AppendLine(MinifiedCss);
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
     }
@@ -346,9 +348,22 @@ internal static class HtmlReportGenerator
 
     private static void AppendJsonData(StringBuilder sb, ReportData data)
     {
-        sb.Append("<script id=\"test-data\" type=\"application/json\">");
-        var json = JsonSerializer.Serialize(data, HtmlReportJsonContext.Default.ReportData);
-        sb.Append(json.Replace("</", "<\\/"));
+        using var ms = new MemoryStream();
+#if NET
+        using (var compressor = new GZipStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+#else
+        using (var compressor = new GZipStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+#endif
+        {
+            JsonSerializer.Serialize(compressor, data, HtmlReportJsonContext.Default.ReportData);
+        }
+
+        var rawBuffer = ms.GetBuffer();
+        var length = checked((int)ms.Length);
+        var base64 = Convert.ToBase64String(rawBuffer, 0, length);
+
+        sb.Append("<script id=\"test-data\" type=\"text/plain\" data-compressed=\"gzip\">");
+        sb.Append(base64);
         sb.AppendLine("</script>");
     }
 
@@ -379,6 +394,40 @@ internal static class HtmlReportGenerator
 
         return (ms / 60000).ToString("F1", CultureInfo.InvariantCulture) + "m";
     }
+
+    private static string MinifyCss(string css)
+    {
+        css = CssCommentsRegex().Replace(css, string.Empty);
+        css = CssWhitespaceRegex().Replace(css, " ");
+        css = CssSeparatorsRegex().Replace(css, "$1");
+        css = css.Replace(";}", "}");
+        return css.Trim();
+    }
+
+    private const string CssCommentsPattern = @"/\*[\s\S]*?\*/";
+    private const string CssWhitespacePattern = @"\s+";
+    private const string CssSeparatorsPattern = @"\s*([{}:;,>~+])\s*";
+
+#if NET
+    [System.Text.RegularExpressions.GeneratedRegex(CssCommentsPattern)]
+    private static partial Regex CssCommentsRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(CssWhitespacePattern)]
+    private static partial Regex CssWhitespaceRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(CssSeparatorsPattern)]
+    private static partial Regex CssSeparatorsRegex();
+#else
+    private static readonly Regex CssCommentsRegexInstance = new(CssCommentsPattern, RegexOptions.Compiled);
+    private static readonly Regex CssWhitespaceRegexInstance = new(CssWhitespacePattern, RegexOptions.Compiled);
+    private static readonly Regex CssSeparatorsRegexInstance = new(CssSeparatorsPattern, RegexOptions.Compiled);
+
+    private static Regex CssCommentsRegex() => CssCommentsRegexInstance;
+    private static Regex CssWhitespaceRegex() => CssWhitespaceRegexInstance;
+    private static Regex CssSeparatorsRegex() => CssSeparatorsRegexInstance;
+#endif
+
+    private static readonly string MinifiedCss = MinifyCss(GetCss());
 
     private static string GetCss()
     {
@@ -1128,11 +1177,24 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
     private static string GetJavaScript()
     {
         return """
-(function(){
+(async function(){
 'use strict';
 const raw = document.getElementById('test-data');
 if (!raw) return;
-const data = JSON.parse(raw.textContent);
+let data;
+const compression = raw.getAttribute('data-compressed');
+if (compression && typeof DecompressionStream !== 'undefined') {
+    const binary = atob(raw.textContent.trim());
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const readable = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(compression));
+    data = JSON.parse(await new Response(readable).text());
+} else if (compression) {
+    document.getElementById('testGroups').innerHTML = '<div class="empty">This browser does not support DecompressionStream. Please open this report in a modern browser (Chrome 80+, Edge 80+, Firefox 113+, Safari 16.4+).</div>';
+    return;
+} else {
+    data = JSON.parse(raw.textContent);
+}
 const groups = data.groups || [];
 const testById = Object.create(null);
 groups.forEach(function(g){g.tests.forEach(function(t){testById[t.id]=t;});});
@@ -1923,7 +1985,7 @@ if(data.summary.passed===data.summary.total&&data.summary.total>0){
     }
     hist.innerHTML=h;
 })();
-})();
+})().catch(e => console.error('TUnit report init failed:', e));
 """;
     }
 }
