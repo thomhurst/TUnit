@@ -31,7 +31,7 @@ public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionA
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)

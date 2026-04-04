@@ -37,7 +37,7 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception));
         }
 
         if (value == null)
@@ -141,7 +141,7 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception));
         }
 
         if (value == null)

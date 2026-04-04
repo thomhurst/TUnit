@@ -36,7 +36,7 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         // Map the value
@@ -47,7 +47,7 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"selector threw {ex.GetType().Name}: {ex.Message}");
+            return AssertionResult.Failed($"selector threw {ex.GetType().Name}: {ex.Message}", ex);
         }
 
         // Create an assertion for the mapped value
@@ -65,7 +65,7 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"mapped value did not satisfy assertions: {ex.Message}");
+            return AssertionResult.Failed($"mapped value did not satisfy assertions: {ex.Message}", ex);
         }
     }
 
@@ -103,7 +103,7 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         // Map the value asynchronously
@@ -114,7 +114,7 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"selector threw {ex.GetType().Name}: {ex.Message}");
+            return AssertionResult.Failed($"selector threw {ex.GetType().Name}: {ex.Message}", ex);
         }
 
         // Create an assertion for the mapped value
@@ -132,7 +132,7 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"mapped value did not satisfy assertions: {ex.Message}");
+            return AssertionResult.Failed($"mapped value did not satisfy assertions: {ex.Message}", ex);
         }
     }
 

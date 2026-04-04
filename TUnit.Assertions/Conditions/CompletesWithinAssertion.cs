@@ -54,7 +54,7 @@ public class CompletesWithinActionAssertion : Assertion<object?>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}");
+            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex);
         }
     }
 
@@ -112,7 +112,7 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}");
+            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex);
         }
     }
 

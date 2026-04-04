@@ -30,7 +30,7 @@ public class SetIsSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -70,7 +70,7 @@ public class SetIsSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TIte
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -110,7 +110,7 @@ public class SetIsProperSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -150,7 +150,7 @@ public class SetIsProperSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -190,7 +190,7 @@ public class SetOverlapsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -230,7 +230,7 @@ public class SetDoesNotOverlapAssertion<TSet, TItem> : SetAssertionBase<TSet, TI
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -270,7 +270,7 @@ public class SetEqualsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)

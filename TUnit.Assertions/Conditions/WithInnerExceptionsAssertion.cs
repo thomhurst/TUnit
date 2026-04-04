@@ -25,7 +25,7 @@ public class WithInnerExceptionsAssertion : Assertion<AggregateException>
         var evaluationException = metadata.Exception;
         if (evaluationException != null)
         {
-            return AssertionResult.Failed($"threw {evaluationException.GetType().FullName}");
+            return AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException);
         }
 
         var aggregateException = metadata.Value;
@@ -46,7 +46,7 @@ public class WithInnerExceptionsAssertion : Assertion<AggregateException>
             }
             catch (Exception ex)
             {
-                return AssertionResult.Failed($"inner exceptions did not satisfy assertion: {ex.Message}");
+                return AssertionResult.Failed($"inner exceptions did not satisfy assertion: {ex.Message}", ex);
             }
         }
 

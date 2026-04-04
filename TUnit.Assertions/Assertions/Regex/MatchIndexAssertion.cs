@@ -46,9 +46,9 @@ public class MatchIndexAssertion : Assertion<RegexMatch>
         {
             if (exception is ArgumentOutOfRangeException || exception is InvalidOperationException)
             {
-                return Task.FromResult(AssertionResult.Failed(exception.Message));
+                return Task.FromResult(AssertionResult.Failed(exception.Message, exception));
             }
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // If we have a match, the assertion passed

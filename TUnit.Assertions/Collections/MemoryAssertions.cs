@@ -29,7 +29,7 @@ public class MemoryIsEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemor
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -65,7 +65,7 @@ public class MemoryIsNotEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMe
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -107,7 +107,7 @@ public class MemoryContainsAssertion<TMemory, TItem> : MemoryAssertionBase<TMemo
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -149,7 +149,7 @@ public class MemoryDoesNotContainAssertion<TMemory, TItem> : MemoryAssertionBase
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -204,7 +204,7 @@ public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryAssertionBase
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -250,7 +250,7 @@ public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -292,7 +292,7 @@ public class MemoryAllAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, T
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -331,7 +331,7 @@ public class MemoryAnyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, T
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -370,7 +370,7 @@ public class MemoryIsInOrderAssertion<TMemory, TItem> : MemoryAssertionBase<TMem
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -409,7 +409,7 @@ public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : MemoryAssertio
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -448,7 +448,7 @@ public class MemoryHasDistinctItemsAssertion<TMemory, TItem> : MemoryAssertionBa
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -609,7 +609,7 @@ public class MemoryCountEqualsAssertion<TMemory, TItem> : MemoryAssertionBase<TM
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)

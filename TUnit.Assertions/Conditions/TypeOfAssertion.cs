@@ -69,7 +69,7 @@ public class IsNotTypeOfAssertion<TValue, TExpected> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -309,7 +309,7 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)

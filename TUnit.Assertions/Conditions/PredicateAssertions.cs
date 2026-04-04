@@ -30,7 +30,7 @@ public class SatisfiesAssertion<TValue> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (_predicate(value))
@@ -80,7 +80,7 @@ public class IsEquatableOrEqualToAssertion<TValue> : ComparerBasedAssertion<TVal
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var comparer = GetComparer();

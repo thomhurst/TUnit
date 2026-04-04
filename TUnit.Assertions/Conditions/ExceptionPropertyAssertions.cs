@@ -30,7 +30,7 @@ public class ExceptionMessageContainsAssertion<TException> : Assertion<TExceptio
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -81,7 +81,7 @@ public class ExceptionMessageEqualsAssertion<TException> : Assertion<TException>
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -127,7 +127,7 @@ public class ExceptionMessageNotContainsAssertion<TException> : Assertion<TExcep
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -172,7 +172,7 @@ public class ExceptionMessageMatchesPatternAssertion<TException> : Assertion<TEx
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -234,7 +234,7 @@ public class ExceptionMessageMatchesAssertion<TException> : Assertion<TException
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -288,7 +288,7 @@ public class ExceptionStackTraceContainsAssertion<TException> : Assertion<TExcep
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -335,7 +335,7 @@ public class ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException>
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)
@@ -387,7 +387,7 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
 
         if (evaluationException != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {evaluationException.GetType().FullName}", evaluationException));
         }
 
         if (exception == null)

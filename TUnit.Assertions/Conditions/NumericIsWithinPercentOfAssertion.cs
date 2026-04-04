@@ -40,7 +40,7 @@ public class DoubleIsWithinPercentOfAssertion : Assertion<double>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // Handle NaN comparisons
@@ -121,7 +121,7 @@ public class FloatIsWithinPercentOfAssertion : Assertion<float>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // Handle NaN comparisons
@@ -198,7 +198,7 @@ public class IntIsWithinPercentOfAssertion : Assertion<int>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs((double)value - _expected);
@@ -251,7 +251,7 @@ public class LongIsWithinPercentOfAssertion : Assertion<long>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs((double)value - _expected);
@@ -304,7 +304,7 @@ public class DecimalIsWithinPercentOfAssertion : Assertion<decimal>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs(value - _expected);

@@ -29,7 +29,7 @@ public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -74,7 +74,7 @@ public class NullableEquatableAssertion<TActual, TExpected> : Assertion<TActual?
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (!value.HasValue)

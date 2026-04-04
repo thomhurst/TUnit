@@ -164,7 +164,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         if (value == null)
@@ -279,7 +279,7 @@ public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : C
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         if (value == null)

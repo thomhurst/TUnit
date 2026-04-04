@@ -41,7 +41,7 @@ public class GroupAssertion : Assertion<RegexMatchCollection>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (collection == null || collection.Count == 0)
@@ -58,7 +58,8 @@ public class GroupAssertion : Assertion<RegexMatchCollection>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed(ex.Message);
+            var groupDesc = _groupName != null ? $"group '{_groupName}'" : $"group {_groupIndex}";
+            return AssertionResult.Failed($"failed to get {groupDesc}: {ex.Message}", ex);
         }
 
         var groupAssertion = new ValueAssertion<string>(groupValue, _groupName ?? $"group {_groupIndex}");
@@ -116,7 +117,7 @@ public class MatchGroupAssertion : Assertion<RegexMatch>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (match == null)
@@ -133,7 +134,8 @@ public class MatchGroupAssertion : Assertion<RegexMatch>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed(ex.Message);
+            var groupDesc = _groupName != null ? $"group '{_groupName}'" : $"group {_groupIndex}";
+            return AssertionResult.Failed($"failed to get {groupDesc}: {ex.Message}", ex);
         }
 
         var groupAssertion = new ValueAssertion<string>(groupValue, _groupName ?? $"group {_groupIndex}");

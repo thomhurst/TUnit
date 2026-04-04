@@ -39,7 +39,7 @@ public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -87,7 +87,7 @@ public class MutableDictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TVal
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -125,7 +125,7 @@ public class MutableDictionaryContainsValueAssertion<TDictionary, TKey, TValue> 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -167,7 +167,7 @@ public class MutableDictionaryDoesNotContainValueAssertion<TDictionary, TKey, TV
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -211,7 +211,7 @@ public class MutableDictionaryContainsKeyWithValueAssertion<TDictionary, TKey, T
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -255,7 +255,7 @@ public class MutableDictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Muta
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -296,7 +296,7 @@ public class MutableDictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Mu
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -337,7 +337,7 @@ public class MutableDictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Mutab
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -378,7 +378,7 @@ public class MutableDictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Mut
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)

@@ -17,7 +17,7 @@ public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumer
     {
         if (metadata.Exception != null)
         {
-            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception);
         }
 
         if (metadata.Value == null)

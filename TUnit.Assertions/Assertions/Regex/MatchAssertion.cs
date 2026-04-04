@@ -28,7 +28,7 @@ public class MatchAssertion : Assertion<RegexMatchCollection>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (collection == null)
@@ -49,7 +49,7 @@ public class MatchAssertion : Assertion<RegexMatchCollection>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"Failed to get match at index {_index}: {ex.Message}");
+            return AssertionResult.Failed($"Failed to get match at index {_index}: {ex.Message}", ex);
         }
 
         var matchAssertion = new ValueAssertion<RegexMatch>(match, $"match at index {_index}");

@@ -11,12 +11,14 @@ public readonly struct AssertionResult<T>
     public bool IsPassed { get; }
     public string Message { get; }
     public T? Value { get; }
+    public Exception? Exception { get; }
 
-    private AssertionResult(bool isPassed, string message, T? value)
+    private AssertionResult(bool isPassed, string message, T? value, Exception? exception = null)
     {
         IsPassed = isPassed;
         Message = message ?? string.Empty;
         Value = value;
+        Exception = exception;
     }
 
     /// <summary>
@@ -26,6 +28,8 @@ public readonly struct AssertionResult<T>
     public static AssertionResult<T> Passed(T value) => new(true, string.Empty, value);
 
     internal static AssertionResult<T> Failed(string message) => new(false, message, default);
+
+    internal static AssertionResult<T> Failed(string message, Exception? exception) => new(false, message, default, exception);
 
     /// <summary>
     /// Allows implicit conversion from a non-generic <see cref="AssertionResult"/> (failure only).
@@ -39,6 +43,6 @@ public readonly struct AssertionResult<T>
                 "Cannot convert a passed AssertionResult to AssertionResult<T> without a value. Use AssertionResult<T>.Passed(value) instead.");
         }
 
-        return Failed(result.Message);
+        return new AssertionResult<T>(false, result.Message, default, result.Exception);
     }
 }

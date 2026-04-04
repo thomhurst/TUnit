@@ -423,7 +423,7 @@ public class TimeSpanEqualsAssertion : Assertion<TimeSpan>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (_tolerance.HasValue)

@@ -70,7 +70,7 @@ public abstract class ToleranceBasedEqualsAssertion<TValue, TTolerance> : Assert
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var actual = value!;

@@ -86,8 +86,10 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
             ? $"Last error: {ExtractAssertionMessage(lastException)}"
             : "No attempts were made";
 
+        // Inner exception is the last AssertionException (not an originating cause) — kept whole
+        // because it carries the formatted assertion message useful for debugging.
         return AssertionResult.Failed(
-            $"assertion did not pass within {_timeout.TotalMilliseconds:F0}ms after {attemptCount} attempts. {lastErrorMessage}");
+            $"assertion did not pass within {_timeout.TotalMilliseconds:F0}ms after {attemptCount} attempts. {lastErrorMessage}", lastException);
     }
 
     /// <summary>

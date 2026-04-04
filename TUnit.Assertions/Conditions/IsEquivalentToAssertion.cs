@@ -60,7 +60,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var comparer = GetComparer();

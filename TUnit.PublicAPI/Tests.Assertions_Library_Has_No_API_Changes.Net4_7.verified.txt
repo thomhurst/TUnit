@@ -2156,14 +2156,17 @@ namespace .Core
     }
     public readonly struct AssertionResult
     {
+        public ? Exception { get; }
         public bool IsPassed { get; }
         public string Message { get; }
         public static . Passed { get; }
         public static . FailIf(bool condition, string message) { }
         public static . Failed(string message) { }
+        public static . Failed(string message, ? exception) { }
     }
     public readonly struct AssertionResult<T>
     {
+        public ? Exception { get; }
         public bool IsPassed { get; }
         public string Message { get; }
         public T Value { get; }
