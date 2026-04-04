@@ -356,8 +356,8 @@ internal static class HtmlReportGenerator
             JsonSerializer.Serialize(gz, data, HtmlReportJsonContext.Default.ReportData);
         }
 
-        ms.TryGetBuffer(out var buffer);
-        var base64 = Convert.ToBase64String(buffer.Array!, buffer.Offset, buffer.Count);
+        var rawBuffer = ms.GetBuffer();
+        var base64 = Convert.ToBase64String(rawBuffer, 0, (int)ms.Length);
 
         sb.Append("<script id=\"test-data\" type=\"text/plain\" data-compressed=\"gzip\">");
         sb.Append(base64);
@@ -1162,6 +1162,9 @@ if (raw.getAttribute('data-compressed') === 'gzip' && typeof DecompressionStream
     writer.write(bytes);
     writer.close();
     data = JSON.parse(await new Response(ds.readable).text());
+} else if (raw.getAttribute('data-compressed') === 'gzip') {
+    console.error('TUnit: This browser does not support DecompressionStream. Report data cannot be decoded.');
+    return;
 } else {
     data = JSON.parse(raw.textContent);
 }
