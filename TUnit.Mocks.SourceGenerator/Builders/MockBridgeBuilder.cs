@@ -90,7 +90,7 @@ internal static class MockBridgeBuilder
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = MockImplBuilder.GetParameterList(method);
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
-        var constraints = MockImplBuilder.GetConstraintClauses(method);
+        var constraints = MockImplBuilder.GetConstraintClauses(method, forExplicitImplementation: true);
 
         using (writer.Block($"static {signatureReturnType} {method.ExplicitInterfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
         {

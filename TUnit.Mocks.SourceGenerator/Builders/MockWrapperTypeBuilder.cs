@@ -74,7 +74,7 @@ internal static class MockWrapperTypeBuilder
         var interfaceName = method.ExplicitInterfaceName ?? method.DeclaringInterfaceName ?? model.FullyQualifiedName;
         var paramList = MockImplBuilder.GetParameterList(method);
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
-        var constraints = MockImplBuilder.GetConstraintClauses(method);
+        var constraints = MockImplBuilder.GetConstraintClauses(method, forExplicitImplementation: true);
         var argPassList = MockImplBuilder.GetArgPassList(method);
         var returnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
 
