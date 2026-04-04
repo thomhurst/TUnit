@@ -85,6 +85,18 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+            ~/AppData/Local/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/package.json', '**/Directory.Packages.props') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Docker Setup Docker
         if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v5.0.0
