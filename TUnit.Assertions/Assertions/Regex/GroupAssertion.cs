@@ -58,7 +58,8 @@ public class GroupAssertion : Assertion<RegexMatchCollection>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed(ex.Message, ex);
+            var groupDesc = _groupName != null ? $"group '{_groupName}'" : $"group {_groupIndex}";
+            return AssertionResult.Failed($"failed to get {groupDesc}: {ex.Message}", ex);
         }
 
         var groupAssertion = new ValueAssertion<string>(groupValue, _groupName ?? $"group {_groupIndex}");
@@ -133,7 +134,8 @@ public class MatchGroupAssertion : Assertion<RegexMatch>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed(ex.Message, ex);
+            var groupDesc = _groupName != null ? $"group '{_groupName}'" : $"group {_groupIndex}";
+            return AssertionResult.Failed($"failed to get {groupDesc}: {ex.Message}", ex);
         }
 
         var groupAssertion = new ValueAssertion<string>(groupValue, _groupName ?? $"group {_groupIndex}");
