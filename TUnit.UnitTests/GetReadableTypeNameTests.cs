@@ -1,3 +1,4 @@
+#if NET
 using TUnit.Core;
 
 namespace TUnit.UnitTests;
@@ -41,3 +42,4 @@ public class OuterClass
         public class DeeplyNested;
     }
 }
+#endif
