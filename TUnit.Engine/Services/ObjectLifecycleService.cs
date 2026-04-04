@@ -7,6 +7,8 @@ using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
 #if NET
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 #endif
 
 namespace TUnit.Engine.Services;
@@ -39,8 +41,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     // Gates span creation so only the first caller for a given object creates a trace span.
     // Subsequent callers (concurrent tests sharing the same object) skip span creation
     // and just await ObjectInitializer's deduplicated Lazy<Task>.
-    private readonly ConcurrentDictionary<object, byte> _spannedObjects =
-        new(Core.Helpers.ReferenceEqualityComparer.Instance);
+    // Uses ConditionalWeakTable so per-test objects can be GC'd after their test completes.
+    private readonly ConditionalWeakTable<object, StrongBox<int>> _spannedObjects = new();
 #endif
 
     public ObjectLifecycleService(
@@ -274,10 +276,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
 #if NET
         // Only the first caller for a given object creates a trace span.
-        // TryAdd is atomic — exactly one concurrent caller wins the gate.
-        // Subsequent callers skip span creation and go straight to ObjectInitializer,
-        // which deduplicates via Lazy<Task>.
-        if (obj is IAsyncInitializer && TUnitActivitySource.Source.HasListeners() && _spannedObjects.TryAdd(obj, 0))
+        // GetValue is atomic — exactly one concurrent caller's factory runs.
+        // Interlocked.Exchange ensures exactly one caller wins the gate even if
+        // multiple threads pass the TryGetValue fast-path simultaneously.
+        var isFirstCaller = false;
+        if (obj is IAsyncInitializer && TUnitActivitySource.Source.HasListeners()
+            && !_spannedObjects.TryGetValue(obj, out _))
+        {
+            var box = _spannedObjects.GetValue(obj, _ => new StrongBox<int>(1));
+            isFirstCaller = Interlocked.Exchange(ref box.Value, 0) == 1;
+        }
+
+        if (isFirstCaller)
         {
             var sharedType = TraceScopeRegistry.GetSharedType(obj);
             await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
