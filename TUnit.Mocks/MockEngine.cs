@@ -32,12 +32,13 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private volatile MethodSetup[]?[]? _setupsByMemberId;
     private List<MethodSetup>?[]? _setupListsByMemberId; // mutable lists used during AddSetup, guarded by Lock
     private volatile bool _hasStatefulSetups;
+    private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
-    // Call history: main list + per-member index for fast lookup + per-member counters for fast verification
-    // All lazily initialized on first RecordCall to save ~64B when mock is created but never invoked.
-    private List<CallRecord>? _callHistory;
+    // Per-member call recording + counters for fast verification.
+    // No global history list — GetAllCalls() reconstructs from per-member lists on demand.
+    // Call arrays are pre-allocated during setup to avoid capacity checks on the invocation hot path.
     private List<CallRecord>?[]? _callsByMemberId;
-    private int[]? _callCountByMemberId;
+    private volatile int[]? _callCountByMemberId;
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
@@ -151,9 +152,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
                 _hasStatefulSetups = true;
             }
 
-            // Update the lock-free snapshot array for this member only
-            var snapshot = _setupsByMemberId!;
-            snapshot[memberId] = list.ToArray();
+            // Mark stale — snapshot will be rebuilt lazily on next FindMatchingSetup call.
+            // This avoids repeated ToArray allocations during the setup phase.
+            _hasStaleSetups = true;
         }
     }
 
@@ -176,6 +177,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             _setupsByMemberId = newSnapshot;
             _setupListsByMemberId = newLists;
         }
+
+        // Pre-allocate call tracking arrays so invocations don't need to check capacity
+        EnsureCallArrayCapacity(memberId);
     }
 
     /// <inheritdoc />
@@ -281,7 +285,10 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // No setup matched — mark as unmatched for diagnostics
-        callRecord.IsUnmatched = true;
+        if (callRecord is not null)
+        {
+            callRecord.IsUnmatched = true;
+        }
 
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
@@ -428,7 +435,10 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // No setup matched
-        callRecord.IsUnmatched = true;
+        if (callRecord is not null)
+        {
+            callRecord.IsUnmatched = true;
+        }
 
         if (IsWrapMock && Behavior == MockBehavior.Strict)
         {
@@ -480,10 +490,10 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public int GetCallCountFor(int memberId)
     {
-        var counts = Volatile.Read(ref _callCountByMemberId);
+        var counts = _callCountByMemberId; // volatile read
         if (counts is not null && (uint)memberId < (uint)counts.Length)
         {
-            return Volatile.Read(ref counts[memberId]);
+            return Interlocked.CompareExchange(ref counts[memberId], 0, 0); // atomic read
         }
         return 0;
     }
@@ -495,7 +505,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (Lock)
         {
-            return _callHistory is null ? [] : _callHistory.ToArray();
+            if (_callsByMemberId is null) return [];
+            var all = new List<CallRecord>();
+            foreach (var list in _callsByMemberId)
+            {
+                if (list is not null)
+                {
+                    all.AddRange(list);
+                }
+            }
+            all.Sort((a, b) => a.SequenceNumber.CompareTo(b.SequenceNumber));
+            return all;
         }
     }
 
@@ -507,13 +527,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (Lock)
         {
-            if (_callHistory is null) return [];
+            if (_callsByMemberId is null) return [];
             var result = new List<CallRecord>();
-            foreach (var record in _callHistory)
+            foreach (var list in _callsByMemberId)
             {
-                if (!record.IsVerified)
+                if (list is null) continue;
+                foreach (var record in list)
                 {
-                    result.Add(record);
+                    if (!record.IsVerified)
+                    {
+                        result.Add(record);
+                    }
                 }
             }
             return result;
@@ -526,6 +550,11 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<MethodSetup> GetSetups()
     {
+        if (_hasStaleSetups)
+        {
+            RebuildStaleSnapshots();
+        }
+
         var snapshot = _setupsByMemberId;
         if (snapshot is null)
         {
@@ -573,13 +602,17 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var unmatchedCalls = new List<CallRecord>();
         lock (Lock)
         {
-            if (_callHistory is not null)
+            if (_callsByMemberId is not null)
             {
-                foreach (var call in _callHistory)
+                foreach (var list in _callsByMemberId)
                 {
-                    if (call.IsUnmatched)
+                    if (list is null) continue;
+                    foreach (var call in list)
                     {
-                        unmatchedCalls.Add(call);
+                        if (call.IsUnmatched)
+                        {
+                            unmatchedCalls.Add(call);
+                        }
                     }
                 }
             }
@@ -612,9 +645,9 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
             _setupsByMemberId = null;
             _setupListsByMemberId = null;
             _hasStatefulSetups = false;
+            _hasStaleSetups = false;
             _currentState = null;
             PendingRequiredState = null;
-            _callHistory = null;
             _callsByMemberId = null;
             _callCountByMemberId = null;
         }
@@ -706,8 +739,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var record = new CallRecord(memberId, memberName, args, seq);
         lock (Lock)
         {
-            var history = _callHistory ??= new();
-            history.Add(record);
             EnsureCallArrayCapacity(memberId);
             var memberCalls = _callsByMemberId![memberId] ??= new();
             memberCalls.Add(record);
@@ -764,8 +795,40 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
     }
 
+    /// <summary>
+    /// Rebuilds snapshot arrays from the mutable lists for all members.
+    /// Called once on transition from setup phase to invocation phase.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void RebuildStaleSnapshots()
+    {
+        lock (Lock)
+        {
+            if (!_hasStaleSetups) return;
+            var lists = _setupListsByMemberId;
+            var snapshots = _setupsByMemberId;
+            if (lists is not null && snapshots is not null)
+            {
+                for (int i = 0; i < lists.Length; i++)
+                {
+                    if (lists[i] is { } list)
+                    {
+                        snapshots[i] = list.ToArray();
+                    }
+                }
+            }
+            _hasStaleSetups = false;
+        }
+    }
+
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
     {
+        // Rebuild snapshots if setup phase just ended (batches all ToArray work into one pass)
+        if (_hasStaleSetups)
+        {
+            RebuildStaleSnapshots();
+        }
+
         // When state machine features are in use, serialize the full match-and-transition
         // to prevent concurrent invocations from consuming the same state transition
         if (_hasStatefulSetups)
@@ -805,6 +868,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (Lock)
         {
+            _hasStaleSetups = false; // we're reading from lists directly under lock, so snapshots don't matter here
             if (_setupListsByMemberId is not { } lists || (uint)memberId >= (uint)lists.Length)
             {
                 return (false, null, null);
