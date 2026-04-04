@@ -100,8 +100,9 @@
     <Project Path="TUnit.TestProject.VB.NET/TUnit.TestProject.VB.NET.vbproj" />
   </Folder>
 
-  <!-- Templates package (content projects excluded - not needed for CI) -->
+  <!-- Templates package -->
   <Folder Name="/Templates/">
     <Project Path="TUnit.Templates/TUnit.Templates.csproj" />
+    <Project Path="TUnit.Templates/content/TUnit.Playwright/TestProject.csproj" />
   </Folder>
 </Solution>

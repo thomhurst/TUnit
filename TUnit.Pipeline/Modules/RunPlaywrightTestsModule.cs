@@ -18,6 +18,7 @@ public class RunPlaywrightTestsModule : TestBaseModule
             new DotNetRunOptions
             {
                 Project = project.Name,
+                NoBuild = true,
                 Configuration = "Release",
             },
             new CommandExecutionOptions
