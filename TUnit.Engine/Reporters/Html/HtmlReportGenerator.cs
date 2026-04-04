@@ -1183,11 +1183,8 @@ if (compression && typeof DecompressionStream !== 'undefined') {
     const binary = atob(raw.textContent.trim());
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const ds = new DecompressionStream(compression);
-    const writer = ds.writable.getWriter();
-    await writer.write(bytes);
-    await writer.close();
-    data = JSON.parse(await new Response(ds.readable).text());
+    const readable = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(compression));
+    data = JSON.parse(await new Response(readable).text());
 } else if (compression) {
     console.error('TUnit: This browser does not support DecompressionStream. Report data cannot be decoded.');
     return;
