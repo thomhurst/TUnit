@@ -9,8 +9,6 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal static partial class HtmlReportGenerator
 {
-    private static readonly string MinifiedCss = MinifyCss(GetCss());
-
     internal static string GenerateHtml(ReportData data)
     {
         var sb = new StringBuilder(96 * 1024);
@@ -423,6 +421,8 @@ internal static partial class HtmlReportGenerator
     private static Regex CssWhitespaceRegex() => CssWhitespaceRegexInstance;
     private static Regex CssSeparatorsRegex() => CssSeparatorsRegexInstance;
 #endif
+
+    private static readonly string MinifiedCss = MinifyCss(GetCss());
 
     private static string GetCss()
     {
@@ -1184,7 +1184,7 @@ if (compression && typeof DecompressionStream !== 'undefined') {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const ds = new DecompressionStream(compression);
     const writer = ds.writable.getWriter();
-    writer.write(bytes);
+    await writer.write(bytes);
     writer.close();
     data = JSON.parse(await new Response(ds.readable).text());
 } else if (compression) {
