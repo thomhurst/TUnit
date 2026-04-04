@@ -277,7 +277,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         // TryAdd is atomic — exactly one concurrent caller wins the gate.
         // Subsequent callers skip span creation and go straight to ObjectInitializer,
         // which deduplicates via Lazy<Task>.
-        if (obj is IAsyncInitializer && _spannedObjects.TryAdd(obj, 0))
+        if (obj is IAsyncInitializer && TUnitActivitySource.Source.HasListeners() && _spannedObjects.TryAdd(obj, 0))
         {
             var sharedType = TraceScopeRegistry.GetSharedType(obj);
             await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
@@ -539,5 +539,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     public void ClearCache()
     {
         _initializationTasks.Clear();
+#if NET
+        _spannedObjects.Clear();
+#endif
     }
 }

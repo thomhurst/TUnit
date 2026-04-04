@@ -339,7 +339,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             // Use the session span duration as the header duration when available,
             // since it captures the full wall-clock time including initialization.
             // The test-timing-based duration only covers test execution.
-            var sessionSpan = spans?.FirstOrDefault(s => s.SpanType == "test session");
+            var sessionSpan = spans?.FirstOrDefault(s => s.SpanType == TUnitActivitySource.SpanTestSession);
             if (sessionSpan != null)
             {
                 totalDurationMs = sessionSpan.DurationMs;

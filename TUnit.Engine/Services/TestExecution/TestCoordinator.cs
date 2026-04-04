@@ -343,6 +343,9 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }
                 catch (Exception disposeEx)
                 {
+#if NET
+                    TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
                     await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
                 }
             }
@@ -354,6 +357,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         catch (Exception disposeEx)
         {
+#if NET
+            TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
             await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
         }
     }

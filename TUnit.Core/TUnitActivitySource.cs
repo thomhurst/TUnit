@@ -11,6 +11,12 @@ internal static class TUnitActivitySource
 
     internal static readonly ActivitySource Source = new("TUnit", Version);
 
+    // Span names used across the engine and HTML report.
+    internal const string SpanTestSession = "test session";
+    internal const string SpanTestAssembly = "test assembly";
+    internal const string SpanTestSuite = "test suite";
+    internal const string SpanTestCase = "test case";
+
     // Tag keys used across init/dispose spans and the HTML report.
     internal const string TagTestId = "tunit.test.id";
     internal const string TagTestClass = "tunit.test.class";

@@ -126,7 +126,7 @@ internal class TestExecutor
                 var classActivity = executableTest.Context.ClassContext.Activity;
                 var testDetails = executableTest.Context.Metadata.TestDetails;
                 executableTest.Context.Activity = TUnitActivitySource.StartActivity(
-                    "test case",
+                    TUnitActivitySource.SpanTestCase,
                     ActivityKind.Internal,
                     classActivity?.Context ?? default,
                     [
