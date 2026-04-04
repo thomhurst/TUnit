@@ -63,6 +63,26 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         string testSessionId,
         FilterHints filterHints)
     {
+        // Phase 0: Resolve lazy sources in parallel for type-matched classes.
+        // This turns sequential per-class JIT into parallel JIT, significantly
+        // reducing discovery time for large test suites.
+        if (Sources.TestEntries.Count > 1)
+        {
+            var sourcesToResolve = new List<ITestEntrySource>(Sources.TestEntries.Count);
+            foreach (var kvp in Sources.TestEntries)
+            {
+                if (!filterHints.HasHints || filterHints.CouldTypeMatch(kvp.Key))
+                {
+                    sourcesToResolve.Add(kvp.Value);
+                }
+            }
+
+            if (sourcesToResolve.Count > 1)
+            {
+                Parallel.ForEach(sourcesToResolve, static source => _ = source.Count);
+            }
+        }
+
         // Phase 1: Filter using pure data (no JIT of test-specific methods)
         var totalEntries = Sources.TestEntries.Sum(static kvp => kvp.Value.Count);
         var matching = new List<(ITestEntrySource Source, int Index)>(totalEntries);

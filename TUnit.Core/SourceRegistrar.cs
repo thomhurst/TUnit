@@ -125,4 +125,46 @@ public class SourceRegistrar
             // Another thread added between TryGetValue and TryAdd — retry to merge
         }
     }
+
+    /// <summary>
+    /// Registers a lazy factory for test entries. The factory is not invoked until the engine
+    /// needs to access the entries (during discovery/filtering), avoiding per-class JIT
+    /// compilation during module initialization.
+    /// Returns a dummy value for use as a static field initializer.
+    /// Multiple calls for the same T are additive — factories accumulate.
+    /// </summary>
+    public static int RegisterLazy<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntry<T>[]> factory) where T : class
+    {
+        var key = typeof(T);
+
+        while (true)
+        {
+            if (Sources.TestEntries.TryGetValue(key, out var existing))
+            {
+                if (existing is LazyTestEntrySource<T> existingLazy)
+                {
+                    existingLazy.AddFactory(factory);
+                    return 0;
+                }
+
+                if (existing is TestEntrySource<T> existingSource)
+                {
+                    // Rare: someone called RegisterEntries before RegisterLazy for the same T.
+                    // Eagerly resolve and merge.
+                    existingSource.AddEntries(factory());
+                    return 0;
+                }
+
+                throw new InvalidOperationException(
+                    $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected LazyTestEntrySource<{typeof(T).Name}> or TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
+            }
+
+            if (Sources.TestEntries.TryAdd(key, new LazyTestEntrySource<T>(factory)))
+            {
+                return 0;
+            }
+
+            // Another thread added between TryGetValue and TryAdd — retry to merge
+        }
+    }
 }

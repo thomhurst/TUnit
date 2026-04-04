@@ -518,5 +518,5 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_STAThreadTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_STAThreadTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_STAThreadTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.STAThreadTests>(static () => TUnit_TestProject_STAThreadTests__TestSource.Entries);
 }
