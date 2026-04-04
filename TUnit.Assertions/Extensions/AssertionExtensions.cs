@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.Chaining;
 using TUnit.Assertions.Conditions;
-using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 

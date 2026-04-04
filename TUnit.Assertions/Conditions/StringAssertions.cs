@@ -526,6 +526,7 @@ public class StringLengthWithInlineAssertionAssertion : Assertion<string>
 {
     private readonly Func<IAssertionSource<int>, Assertion<int>?> _lengthAssertion;
     private int _actualLength;
+    private Assertion<int>? _innerAssertion;
 
     internal StringLengthWithInlineAssertionAssertion(
         AssertionContext<string> context,
@@ -547,17 +548,24 @@ public class StringLengthWithInlineAssertionAssertion : Assertion<string>
 
         if (value == null)
         {
-            return AssertionResult.Failed("value was null");
+            return AssertionResult.Failed("string was null");
         }
 
         _actualLength = value.Length;
 
-        return await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
+        var (result, innerAssertion) = await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
             _actualLength, "length", _lengthAssertion);
+        _innerAssertion = innerAssertion;
+        return result;
     }
 
     protected override string GetExpectation()
     {
+        if (_innerAssertion != null)
+        {
+            return $"length {_innerAssertion.InternalGetExpectation()}";
+        }
+
         return "to satisfy length assertion";
     }
 }

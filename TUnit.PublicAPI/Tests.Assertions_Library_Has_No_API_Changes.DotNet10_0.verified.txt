@@ -2363,28 +2363,6 @@ namespace .
         public static . IsValidJsonObject(this string value) { }
     }
 }
-namespace .
-{
-    public class CountWrapper<TCollection, TItem> : ., .<TCollection>
-        where TCollection : .<TItem>
-    {
-        public CountWrapper(.<TCollection> context) { }
-        public .<int> Between(int minimum, int maximum, [.("minimum")] string? minExpression = null, [.("maximum")] string? maxExpression = null) { }
-        public .<TCollection, TItem> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
-        public ._IsGreaterThan_TValue_Assertion<int> GreaterThan(int expected, [.("expected")] string? expression = null) { }
-        public ._IsGreaterThanOrEqualTo_TValue_Assertion<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public ._IsLessThan_TValue_Assertion<int> LessThan(int expected, [.("expected")] string? expression = null) { }
-        public ._IsLessThanOrEqualTo_TValue_Assertion<int> LessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public .<int> NotEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public ._IsGreaterThan_TValue_Assertion<int> Positive() { }
-        public .<TCollection, TItem> Zero() { }
-    }
-    public class LengthWrapper : ., .<string>
-    {
-        public LengthWrapper(.<string> context) { }
-        public . EqualTo(int expectedLength, [.("expectedLength")] string? expression = null) { }
-    }
-}
 namespace .Core
 {
     public class AndContinuation<TValue> : .<TValue> { }

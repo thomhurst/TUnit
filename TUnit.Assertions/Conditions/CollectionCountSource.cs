@@ -262,6 +262,7 @@ public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : C
 {
     private readonly Func<IAssertionSource<int>, Assertion<int>?> _countAssertion;
     private int _actualCount;
+    private Assertion<int>? _innerAssertion;
 
     internal CollectionCountWithInlineAssertionAssertion(
         AssertionContext<TCollection> context,
@@ -293,12 +294,19 @@ public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : C
             _ => System.Linq.Enumerable.Count(value)
         };
 
-        return await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
+        var (result, innerAssertion) = await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
             _actualCount, "count", _countAssertion);
+        _innerAssertion = innerAssertion;
+        return result;
     }
 
     protected override string GetExpectation()
     {
+        if (_innerAssertion != null)
+        {
+            return $"count {_innerAssertion.InternalGetExpectation()}";
+        }
+
         return "to satisfy count assertion";
     }
 }
