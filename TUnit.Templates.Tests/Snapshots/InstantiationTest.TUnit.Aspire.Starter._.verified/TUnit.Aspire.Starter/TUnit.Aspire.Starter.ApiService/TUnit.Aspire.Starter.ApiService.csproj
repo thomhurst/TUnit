@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Testcontainers.PostgreSql" Version="1.0.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="0.0.0-scrubbed" />
   </ItemGroup>
 
 </Project>

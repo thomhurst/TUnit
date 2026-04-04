@@ -10,13 +10,13 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
 
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="1.0.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.0.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="0.0.0-scrubbed" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="0.0.0-scrubbed" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="0.0.0-scrubbed" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="0.0.0-scrubbed" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="0.0.0-scrubbed" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="0.0.0-scrubbed" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="0.0.0-scrubbed" />
   </ItemGroup>
 
 </Project>
