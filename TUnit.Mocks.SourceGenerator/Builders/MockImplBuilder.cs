@@ -1122,7 +1122,7 @@ internal static class MockImplBuilder
             {
                 clauses.Add($"where {tp.Name} : {tp.Constraints}");
             }
-            else if (forExplicitImplementation && tp.NeedsDefaultConstraint)
+            else if (forExplicitImplementation && tp.HasAnnotatedNullableUsage)
             {
                 clauses.Add($"where {tp.Name} : default");
             }
