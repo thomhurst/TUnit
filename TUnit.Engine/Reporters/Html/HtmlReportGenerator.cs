@@ -1,12 +1,16 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace TUnit.Engine.Reporters.Html;
 
 internal static class HtmlReportGenerator
 {
+    private static readonly string MinifiedCss = MinifyCss(GetCss());
+
     internal static string GenerateHtml(ReportData data)
     {
         var sb = new StringBuilder(96 * 1024);
@@ -30,7 +34,7 @@ internal static class HtmlReportGenerator
         sb.Append(WebUtility.HtmlEncode(data.AssemblyName));
         sb.AppendLine("</title>");
         sb.AppendLine("<style>");
-        sb.AppendLine(GetCss());
+        sb.AppendLine(MinifiedCss);
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
     }
@@ -346,9 +350,17 @@ internal static class HtmlReportGenerator
 
     private static void AppendJsonData(StringBuilder sb, ReportData data)
     {
-        sb.Append("<script id=\"test-data\" type=\"application/json\">");
-        var json = JsonSerializer.Serialize(data, HtmlReportJsonContext.Default.ReportData);
-        sb.Append(json.Replace("</", "<\\/"));
+        using var ms = new MemoryStream();
+        using (var gz = new GZipStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            JsonSerializer.Serialize(gz, data, HtmlReportJsonContext.Default.ReportData);
+        }
+
+        ms.TryGetBuffer(out var buffer);
+        var base64 = Convert.ToBase64String(buffer.Array!, buffer.Offset, buffer.Count);
+
+        sb.Append("<script id=\"test-data\" type=\"text/plain\" data-compressed=\"gzip\">");
+        sb.Append(base64);
         sb.AppendLine("</script>");
     }
 
@@ -378,6 +390,15 @@ internal static class HtmlReportGenerator
         }
 
         return (ms / 60000).ToString("F1", CultureInfo.InvariantCulture) + "m";
+    }
+
+    private static string MinifyCss(string css)
+    {
+        css = Regex.Replace(css, @"/\*[\s\S]*?\*/", string.Empty);
+        css = Regex.Replace(css, @"\s+", " ");
+        css = Regex.Replace(css, @"\s*([{}:;,>~+!])\s*", "$1");
+        css = css.Replace(";}", "}");
+        return css.Trim();
     }
 
     private static string GetCss()
@@ -1128,11 +1149,22 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
     private static string GetJavaScript()
     {
         return """
-(function(){
+(async function(){
 'use strict';
 const raw = document.getElementById('test-data');
 if (!raw) return;
-const data = JSON.parse(raw.textContent);
+let data;
+if (raw.getAttribute('data-compressed') === 'gzip' && typeof DecompressionStream !== 'undefined') {
+    const binary = atob(raw.textContent.trim());
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    const ds = new DecompressionStream('gzip');
+    const writer = ds.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    data = JSON.parse(await new Response(ds.readable).text());
+} else {
+    data = JSON.parse(raw.textContent);
+}
 const groups = data.groups || [];
 const testById = Object.create(null);
 groups.forEach(function(g){g.tests.forEach(function(t){testById[t.id]=t;});});
@@ -1923,7 +1955,7 @@ if(data.summary.passed===data.summary.total&&data.summary.total>0){
     }
     hist.innerHTML=h;
 })();
-})();
+})().catch(e => console.error('TUnit report init failed:', e));
 """;
     }
 }
