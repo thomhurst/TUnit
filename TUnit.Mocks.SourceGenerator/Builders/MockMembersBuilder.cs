@@ -211,26 +211,14 @@ internal static class MockMembersBuilder
                 if (hasRefStructParams)
                 {
                     writer.AppendLine("#if NET9_0_OR_GREATER");
-                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName, allNonOutParams);
-                    writer.AppendLine();
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType, allNonOutParams);
                     writer.AppendLine("#else");
-                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName);
-                    writer.AppendLine();
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType);
                     writer.AppendLine("#endif");
                 }
                 else
                 {
-                    GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName);
-                    writer.AppendLine();
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
-                    writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType);
                 }
             }
 
@@ -404,6 +392,37 @@ internal static class MockMembersBuilder
         using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
         {
             writer.AppendLine($"EnsureSetup().Returns(args => factory({castArgs}));");
+            writer.AppendLine("return this;");
+        }
+    }
+
+    private static void EmitTypedOverloads(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string returnType, string wrapperName, bool isAsync, string? fullReturnType,
+        List<MockParameterModel>? allNonOutParams = null)
+    {
+        GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName, allNonOutParams);
+        if (isAsync && fullReturnType is not null)
+        {
+            writer.AppendLine();
+            GenerateTypedReturnsAsyncOverload(writer, nonOutParams, fullReturnType, wrapperName, allNonOutParams);
+        }
+        writer.AppendLine();
+        GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+        writer.AppendLine();
+        GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+    }
+
+    private static void GenerateTypedReturnsAsyncOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
+        string taskType, string wrapperName, List<MockParameterModel>? allNonOutParams = null)
+    {
+        var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+        var funcType = $"global::System.Func<{typeList}, {taskType}>";
+        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
+
+        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters.</summary>");
+        using (writer.Block($"public {wrapperName} ReturnsAsync({funcType} factory)"))
+        {
+            writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
             writer.AppendLine("return this;");
         }
     }

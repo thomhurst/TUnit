@@ -112,5 +112,12 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> ReturnsRaw(Func<object?[], object?> factory)
+    {
+        _setup.AddBehavior(new ComputedRawReturnWithArgsBehavior(factory));
+        return this;
+    }
+
     public IMethodSetup<TReturn> Then() => this;
 }

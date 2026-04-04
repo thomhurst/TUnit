@@ -17,3 +17,12 @@ internal sealed class ComputedRawReturnBehavior : IBehavior
 
     public object? Execute(object?[] arguments) => new RawReturn(_factory());
 }
+
+internal sealed class ComputedRawReturnWithArgsBehavior : IBehavior
+{
+    private readonly Func<object?[], object?> _factory;
+
+    public ComputedRawReturnWithArgsBehavior(Func<object?[], object?> factory) => _factory = factory;
+
+    public object? Execute(object?[] arguments) => new RawReturn(_factory(arguments));
+}
