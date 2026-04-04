@@ -533,11 +533,19 @@ internal static class MockMembersBuilder
     {
         if (allNonOutParams is null)
         {
-            return string.Join(", ", nonOutParams.Select((p, i) => $"({p.FullyQualifiedType})args[{i}]!"));
+            return string.Join(", ", nonOutParams.Select((p, i) => CastArg(p, i)));
         }
 
         var indexMap = allNonOutParams.Select((p, i) => (p, i)).ToDictionary(x => x.p, x => x.i);
-        return string.Join(", ", nonOutParams.Select(p => $"({p.FullyQualifiedType})args[{indexMap[p]}]!"));
+        return string.Join(", ", nonOutParams.Select(p => CastArg(p, indexMap[p])));
+    }
+
+    private static string CastArg(MockParameterModel p, int index)
+    {
+        // For nullable types, skip the null-forgiving operator since the value can legitimately be null.
+        // For non-nullable types, ! suppresses the object? -> T conversion warning.
+        var bang = p.FullyQualifiedType.EndsWith("?") ? "" : "!";
+        return $"({p.FullyQualifiedType})args[{index}]{bang}";
     }
 
     private static void GenerateMemberMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
