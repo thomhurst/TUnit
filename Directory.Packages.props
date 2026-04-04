@@ -56,7 +56,7 @@
     <PackageVersion Include="Microsoft.Testing.Platform" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
     <PackageVersion Include="Imposter" Version="0.1.9"/>
-    <PackageVersion Include="Mockolate" Version="2.2.0" />
+    <PackageVersion Include="Mockolate" Version="2.3.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.1.90" />
