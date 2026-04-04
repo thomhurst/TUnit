@@ -102,7 +102,7 @@ public class NotInParallelClassGroupingTests_Verify
         }
 
         // We should have 8 test executions (3 from ClassA, 2 from ClassB, 3 from ClassC)
-        await Assert.That(order).HasCount(8);
+        await Assert.That(order).Count().IsEqualTo(8);
 
         // Verify that all tests from one class complete before another class starts
         var classSequence = new List<string>();
@@ -128,9 +128,9 @@ public class NotInParallelClassGroupingTests_Verify
         var classCTests = order.Where(o => o.StartsWith("ClassC.")).ToList();
 
         // Check that we have the right number of tests from each class
-        await Assert.That(classATests).HasCount(3);
-        await Assert.That(classBTests).HasCount(2);
-        await Assert.That(classCTests).HasCount(3);
+        await Assert.That(classATests).Count().IsEqualTo(3);
+        await Assert.That(classBTests).Count().IsEqualTo(2);
+        await Assert.That(classCTests).Count().IsEqualTo(3);
 
         // Relaxed ordering check: Just verify all expected tests ran
         // In highly concurrent environments, even within-class ordering might vary

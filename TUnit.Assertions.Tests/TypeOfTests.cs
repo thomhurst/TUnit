@@ -241,7 +241,7 @@ public class TypeOfTests
         byte[]? nullableBytes = new byte[] { 1, 2, 3, 4, 5 };
 
         // Should be able to use collection assertion methods
-        await Assert.That(nullableBytes).HasCount(5);
+        await Assert.That(nullableBytes).Count().IsEqualTo(5);
         await Assert.That(nullableBytes).Contains(3);
         await Assert.That(nullableBytes).IsInOrder();
 
@@ -252,7 +252,7 @@ public class TypeOfTests
     {
         List<int>? nullableList = new List<int> { 10, 20, 30 };
 
-        await Assert.That(nullableList).HasCount(3);
+        await Assert.That(nullableList).Count().IsEqualTo(3);
         await Assert.That(nullableList).Contains(20);
         await Assert.That(nullableList).IsInOrder();
     }
@@ -262,7 +262,7 @@ public class TypeOfTests
     {
         IEnumerable<string>? nullableEnumerable = new[] { "apple", "banana", "cherry" };
 
-        await Assert.That(nullableEnumerable).HasCount(3);
+        await Assert.That(nullableEnumerable).Count().IsEqualTo(3);
         await Assert.That(nullableEnumerable).Contains("banana");
         await Assert.That(nullableEnumerable).IsInOrder();
     }

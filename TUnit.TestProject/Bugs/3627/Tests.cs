@@ -24,7 +24,7 @@ public class StateBagWithDependsOnTests
     {
         var dependentTests = TestContext.Current!.Dependencies.GetTests(nameof(FirstTest_SetupData));
 
-        await Assert.That(dependentTests).HasCount().EqualTo(1);
+        await Assert.That(dependentTests).Count().IsEqualTo(1);
 
         var firstTestContext = dependentTests[0];
 

@@ -1117,7 +1117,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                         var items = new[] { 1, 2, 3 };
                         // TODO: TUnit migration - Assert.Collection element inspectors were dropped and need manual conversion: [0]: x => Assert.Equal(1, x); [1]: x => Assert.Equal(2, x); [2]: x => Assert.Equal(3, x)
-                        await Assert.That(items).HasCount(3);
+                        await Assert.That(items).Count().IsEqualTo(3);
                     }
                 }
                 """,

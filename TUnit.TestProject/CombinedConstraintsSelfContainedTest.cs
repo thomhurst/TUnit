@@ -116,7 +116,7 @@ public class CombinedConstraintVerifier
         var log = CombinedConstraintTracker.ExecutionLog.OrderBy(x => x.Start).ToList();
 
         // We should have 6 test executions
-        await Assert.That(log).HasCount().EqualTo(6);
+        await Assert.That(log).Count().IsEqualTo(6);
 
         // 1. Tests with same key should not overlap
         // Allow a small tolerance (50ms) for framework overhead and CI scheduling variability

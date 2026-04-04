@@ -35,7 +35,7 @@ public class DictionaryCollectionTests
             ["key3"] = 3
         };
 
-        await Assert.That(dictionary).HasCount(3);
+        await Assert.That(dictionary).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -130,7 +130,7 @@ public class DictionaryCollectionTests
         // Collection methods work on dictionaries
         await Assert.That(dictionary)
             .IsNotEmpty()
-            .And.HasCount(2)
+            .And.Count().IsEqualTo(2)
             .And.Contains(new KeyValuePair<string, int>("key2", 2));
     }
 
@@ -159,7 +159,7 @@ public class DictionaryCollectionTests
         // Collection methods work on IReadOnlyDictionary
         await Assert.That(dictionary)
             .IsNotEmpty()
-            .And.HasCount(2);
+            .And.Count().IsEqualTo(2);
 
         // Dictionary-specific methods also work
         await Assert.That(dictionary)
@@ -612,7 +612,7 @@ public class DictionaryCollectionTests
         // IDictionary should also have access to collection methods
         await Assert.That(dictionary)
             .IsNotEmpty()
-            .And.HasCount(2);
+            .And.Count().IsEqualTo(2);
     }
 
     [Test]

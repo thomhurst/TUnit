@@ -161,7 +161,7 @@ public class EventReceiverStageTests
     public async Task EarlyTestStartReceiver_RunsBeforeBeforeTestHook()
     {
         // Expected order: EarlyTestStart → BeforeTest → Test
-        await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(2);
+        await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(2);
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("EarlyTestStart");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("BeforeTest");
     }
@@ -171,7 +171,7 @@ public class EventReceiverStageTests
     public async Task LateTestStartReceiver_RunsAfterBeforeTestHook()
     {
         // Expected order: BeforeTest → LateTestStart → Test
-        await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(2);
+        await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(2);
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("BeforeTest");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("LateTestStart");
     }
@@ -182,7 +182,7 @@ public class EventReceiverStageTests
     {
         // Expected order: BeforeTest → DefaultTestStart → Test
         // Default should behave as Late stage
-        await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(2);
+        await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(2);
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("BeforeTest");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("DefaultTestStart");
     }
@@ -203,7 +203,7 @@ public class EventReceiverStageTests
         {
             // Expected order: BeforeTest → EarlyTestEnd → AfterTest
             await Task.Delay(10); // Small delay to ensure all receivers have executed
-            await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(3);
+            await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(3);
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("BeforeTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("EarlyTestEnd");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("AfterTest");
@@ -225,7 +225,7 @@ public class EventReceiverStageTests
         {
             // Expected order: BeforeTest → AfterTest → LateTestEnd
             await Task.Delay(10); // Small delay to ensure all receivers have executed
-            await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(3);
+            await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(3);
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("BeforeTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("AfterTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("LateTestEnd");
@@ -248,7 +248,7 @@ public class EventReceiverStageTests
         {
             // Expected order: BeforeTest → AfterTest → DefaultTestEnd
             await Task.Delay(10); // Small delay to ensure all receivers have executed
-            await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(3);
+            await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(3);
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("BeforeTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("AfterTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("DefaultTestEnd");
@@ -262,7 +262,7 @@ public class EventReceiverStageTests
     {
         // Expected order: EarlyTestStart_Order1 → EarlyTestStart_Order2 → BeforeTest → Test
         // Order property should still be respected within the same stage
-        await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(3);
+        await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(3);
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("EarlyTestStart_Order1");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("EarlyTestStart_Order2");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("BeforeTest");
@@ -276,7 +276,7 @@ public class EventReceiverStageTests
     public async Task MixedStageReceivers_ExecuteInCorrectOrder()
     {
         // Expected order: EarlyTestStart → BeforeTest → LateTestStart → Test → EarlyTestEnd → AfterTest → LateTestEnd
-        await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(3);
+        await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(3);
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("EarlyTestStart");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("BeforeTest");
         await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("LateTestStart");
@@ -289,7 +289,7 @@ public class EventReceiverStageTests
         {
             // Expected final order: EarlyTestStart → BeforeTest → LateTestStart → EarlyTestEnd → AfterTest → LateTestEnd
             await Task.Delay(10); // Small delay to ensure all receivers have executed
-            await Assert.That(EventReceiverStageTracker.ExecutionOrder).HasCount().EqualTo(6);
+            await Assert.That(EventReceiverStageTracker.ExecutionOrder).Count().IsEqualTo(6);
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[0]).IsEqualTo("EarlyTestStart");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[1]).IsEqualTo("BeforeTest");
             await Assert.That(EventReceiverStageTracker.ExecutionOrder[2]).IsEqualTo("LateTestStart");

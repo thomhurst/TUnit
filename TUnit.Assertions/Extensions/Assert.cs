@@ -263,9 +263,9 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for a synchronous function that returns a collection.
-    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, HasCount, etc.) on lambda-wrapped collections.
+    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, Count, etc.) on lambda-wrapped collections.
     /// Example: await Assert.That(() => GetItems()).IsEmpty();
-    /// Example: await Assert.That(() => GetItems()).HasCount(5);
+    /// Example: await Assert.That(() => GetItems()).Count().IsEqualTo(5);
     /// </summary>
     [OverloadResolutionPriority(1)]
     public static FuncCollectionAssertion<TItem> That<TItem>(
@@ -288,9 +288,9 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for an asynchronous function that returns a collection.
-    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, HasCount, etc.) on async lambda-wrapped collections.
+    /// This overload enables collection-specific assertions (IsEmpty, IsNotEmpty, Count, etc.) on async lambda-wrapped collections.
     /// Example: await Assert.That(async () => await GetItemsAsync()).IsEmpty();
-    /// Example: await Assert.That(async () => await GetItemsAsync()).HasCount(5);
+    /// Example: await Assert.That(async () => await GetItemsAsync()).Count().IsEqualTo(5);
     /// </summary>
     [OverloadResolutionPriority(1)]
     public static AsyncFuncCollectionAssertion<TItem> That<TItem>(

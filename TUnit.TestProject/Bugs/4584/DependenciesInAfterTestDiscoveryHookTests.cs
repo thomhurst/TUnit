@@ -141,7 +141,7 @@ public class FocusedTestWithClassDependency4584
 
         // Verify the dependency was available in the hook
         var capturedDeps = DependenciesInAfterTestDiscoveryHookTests.CapturedDependenciesInHook[testId];
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
         await Assert.That(capturedDeps[0].ClassType).IsEqualTo(typeof(DependencyTarget4584));
 
         // Verify the dependency ran before us
@@ -167,7 +167,7 @@ public class FocusedTestWithMethodDependency4584
 
         // Verify the dependency was available in the hook
         var capturedDeps = DependenciesInAfterTestDiscoveryHookTests.CapturedDependenciesInHook[testId];
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
     }
 }
 
@@ -229,7 +229,7 @@ public class FocusedTestWithTransitiveDependencies4584
 
         // Verify BOTH direct and transitive dependencies were available in the hook
         var capturedDeps = DependenciesInAfterTestDiscoveryHookTests.CapturedDependenciesInHook[testId];
-        await Assert.That(capturedDeps).HasCount().EqualTo(2);
+        await Assert.That(capturedDeps).Count().IsEqualTo(2);
 
         var depTypes = capturedDeps.Select(d => d.ClassType).ToList();
         await Assert.That(depTypes).Contains(typeof(IntermediateDependency4584));
@@ -354,7 +354,7 @@ public class FocusedWithMiddleDependency4584
         var capturedDeps = DependenciesInAfterTestDiscoveryHookTests.CapturedDependenciesInHook[testId];
 
         // Should see both middle and root
-        await Assert.That(capturedDeps).HasCount().EqualTo(2);
+        await Assert.That(capturedDeps).Count().IsEqualTo(2);
 
         var depTypes = capturedDeps.Select(d => d.ClassType).ToList();
         await Assert.That(depTypes).Contains(typeof(MiddleDependency4584));
@@ -378,7 +378,7 @@ public class FocusedWithRootDependency4584
         var capturedDeps = DependenciesInAfterTestDiscoveryHookTests.CapturedDependenciesInHook[testId];
 
         // Should see only root
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
         await Assert.That(capturedDeps[0].ClassType).IsEqualTo(typeof(RootDependency4584));
     }
 }

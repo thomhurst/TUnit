@@ -13,7 +13,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "BoolMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsPositive_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -30,7 +30,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AssertionResultMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEven_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -47,7 +47,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AsyncBoolAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsPositiveAsync_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -63,7 +63,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AsyncAssertionResultAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEvenAsync_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -79,7 +79,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "GenericMethodWithNonInferableTypeParameter.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsErrorOfType"));
             await Assert.That(mainFile).IsNotNull();
@@ -99,7 +99,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithComparableConstraint.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -122,7 +122,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithMultipleConstraints.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -141,7 +141,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithReferenceTypeConstraint.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -160,7 +160,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithValueTypeConstraint.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -179,7 +179,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithNotNullConstraint.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -210,7 +210,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "MethodWithDefaultValues.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -229,7 +229,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
         new RunTestOptions { PreprocessorSymbols = ["NET6_0_OR_GREATER"] },
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).IsNotNull();
@@ -261,7 +261,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AssertionResultOfTMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).Contains("IEnumerableString_ContainsMatch_String_Assertion");
@@ -282,7 +282,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AsyncAssertionResultOfTAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.First();
             await Assert.That(mainFile).Contains("IEnumerableString_ContainsMatchAsync_String_Assertion");
@@ -303,7 +303,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "ArrayTargetAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("ContainsMessage"));
             await Assert.That(mainFile).IsNotNull();

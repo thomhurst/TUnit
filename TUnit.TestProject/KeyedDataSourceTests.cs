@@ -51,7 +51,7 @@ public class KeyedDataSourceTests
     [DependsOn(nameof(Key_IsAvailableDuringInitializeAsync))]
     public async Task SameKey_ReturnsSameInstance()
     {
-        await Assert.That(AlphaInstances).HasCount().EqualTo(2);
+        await Assert.That(AlphaInstances).Count().IsEqualTo(2);
         await Assert.That(AlphaInstances[0]).IsSameReferenceAs(AlphaInstances[1]);
     }
 }

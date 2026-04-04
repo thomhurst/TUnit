@@ -35,7 +35,7 @@ public class PerformanceOptimizationTests
         calc.Log("msg2");
 
         // Assert — total invocations correct
-        await Assert.That(mock.Invocations).HasCount().EqualTo(6);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(6);
 
         // Verify per-member counts via WasCalled
         mock.Add(Any(), Any()).WasCalled(Times.Exactly(3));
@@ -63,7 +63,7 @@ public class PerformanceOptimizationTests
 
         // Assert — only one call after reset
         mock.Add(Any(), Any()).WasCalled(Times.Once);
-        await Assert.That(mock.Invocations).HasCount().EqualTo(1);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class PerformanceOptimizationTests
         // Assert — verify correct counts per member
         mock.Add(Any(), Any()).WasCalled(Times.Exactly(2));
         mock.GetName().WasCalled(Times.Exactly(3));
-        await Assert.That(mock.Invocations).HasCount().EqualTo(5);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(5);
     }
 
     // ========================================================================
@@ -144,7 +144,7 @@ public class PerformanceOptimizationTests
         await Assert.That(await repo.ExistsAsync(1)).IsTrue();
         await Assert.That(await repo.ExistsAsync(2)).IsFalse();
         var all = await repo.GetAllAsync();
-        await Assert.That(all).HasCount().EqualTo(1);
+        await Assert.That(all).Count().IsEqualTo(1);
     }
 
     // ========================================================================
@@ -262,7 +262,7 @@ public class PerformanceOptimizationTests
         await Task.WhenAll(addTasks.Concat(nameTasks));
 
         // Assert — all 100 calls recorded
-        await Assert.That(mock.Invocations).HasCount().EqualTo(100);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(100);
         mock.Add(Any(), Any()).WasCalled(Times.Exactly(50));
         mock.GetName().WasCalled(Times.Exactly(50));
     }
@@ -408,7 +408,7 @@ public class PerformanceOptimizationTests
         mock.Add(Any(), Any()).WasNeverCalled();
         mock.GetName().WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
-        await Assert.That(mock.Invocations).HasCount().EqualTo(0);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(0);
     }
 
     [Test]
@@ -450,7 +450,7 @@ public class PerformanceOptimizationTests
 
         // Final state: clean
         mock.Add(Any(), Any()).WasNeverCalled();
-        await Assert.That(mock.Invocations).HasCount().EqualTo(0);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(0);
     }
 
     // ========================================================================
@@ -467,7 +467,7 @@ public class PerformanceOptimizationTests
         mock.Add(Any(), Any()).WasNeverCalled();
         mock.GetName().WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
-        await Assert.That(mock.Invocations).HasCount().EqualTo(0);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(0);
     }
 
     [Test]
@@ -483,7 +483,7 @@ public class PerformanceOptimizationTests
         calc.GetName();
 
         // Assert — all calls recorded even without setups
-        await Assert.That(mock.Invocations).HasCount().EqualTo(3);
+        await Assert.That(mock.Invocations).Count().IsEqualTo(3);
         mock.Add(Any(), Any()).WasCalled(Times.Once);
         mock.Log(Any()).WasCalled(Times.Once);
         mock.GetName().WasCalled(Times.Once);

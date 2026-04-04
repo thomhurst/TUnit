@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions.Wrappers;
 
 /// <summary>
 /// Wrapper for string length assertions that provides .EqualTo() method.
-/// Example: await Assert.That(str).HasLength().EqualTo(5);
+/// Example: await Assert.That(str).Length().IsEqualTo(5);
 /// </summary>
 public class LengthWrapper : IAssertionSource<string>
 {
@@ -21,63 +21,63 @@ public class LengthWrapper : IAssertionSource<string>
     AssertionContext<string> IAssertionSource<string>.Context => _context;
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsTypeOf on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsTypeOf on the assertion source before calling Length().
     /// </summary>
     TypeOfAssertion<string, TExpected> IAssertionSource<string>.IsTypeOf<TExpected>()
     {
         throw new NotSupportedException(
-            "IsTypeOf is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsTypeOf<string>().HasLength().EqualTo(5)");
+            "IsTypeOf is not supported after Length(). " +
+            "Use: Assert.That(value).IsTypeOf<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsAssignableTo on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsAssignableTo on the assertion source before calling Length().
     /// </summary>
     IsAssignableToAssertion<TTarget, string> IAssertionSource<string>.IsAssignableTo<TTarget>()
     {
         throw new NotSupportedException(
-            "IsAssignableTo is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsAssignableTo<string>().HasLength().EqualTo(5)");
+            "IsAssignableTo is not supported after Length(). " +
+            "Use: Assert.That(value).IsAssignableTo<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsNotAssignableTo on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsNotAssignableTo on the assertion source before calling Length().
     /// </summary>
     IsNotAssignableToAssertion<TTarget, string> IAssertionSource<string>.IsNotAssignableTo<TTarget>()
     {
         throw new NotSupportedException(
-            "IsNotAssignableTo is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsNotAssignableTo<string>().HasLength().EqualTo(5)");
+            "IsNotAssignableTo is not supported after Length(). " +
+            "Use: Assert.That(value).IsNotAssignableTo<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsAssignableFrom on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsAssignableFrom on the assertion source before calling Length().
     /// </summary>
     IsAssignableFromAssertion<TTarget, string> IAssertionSource<string>.IsAssignableFrom<TTarget>()
     {
         throw new NotSupportedException(
-            "IsAssignableFrom is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsAssignableFrom<string>().HasLength().EqualTo(5)");
+            "IsAssignableFrom is not supported after Length(). " +
+            "Use: Assert.That(value).IsAssignableFrom<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsNotAssignableFrom on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsNotAssignableFrom on the assertion source before calling Length().
     /// </summary>
     IsNotAssignableFromAssertion<TTarget, string> IAssertionSource<string>.IsNotAssignableFrom<TTarget>()
     {
         throw new NotSupportedException(
-            "IsNotAssignableFrom is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsNotAssignableFrom<string>().HasLength().EqualTo(5)");
+            "IsNotAssignableFrom is not supported after Length(). " +
+            "Use: Assert.That(value).IsNotAssignableFrom<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>
-    /// Not supported on LengthWrapper - use IsNotTypeOf on the assertion source before calling HasLength().
+    /// Not supported on LengthWrapper - use IsNotTypeOf on the assertion source before calling Length().
     /// </summary>
     IsNotTypeOfAssertion<string, TExpected> IAssertionSource<string>.IsNotTypeOf<TExpected>()
     {
         throw new NotSupportedException(
-            "IsNotTypeOf is not supported after HasLength(). " +
-            "Use: Assert.That(value).IsNotTypeOf<string>().HasLength().EqualTo(5)");
+            "IsNotTypeOf is not supported after Length(). " +
+            "Use: Assert.That(value).IsNotTypeOf<string>().Length().IsEqualTo(5)");
     }
 
     /// <summary>

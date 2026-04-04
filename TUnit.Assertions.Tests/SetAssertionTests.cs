@@ -225,7 +225,7 @@ public class SetAssertionTests
         await Assert.That(set)
             .IsSubsetOf(other)
             .And.IsNotEmpty()
-            .And.HasCount(3);
+            .And.Count().IsEqualTo(3);
     }
 
     [Test]
@@ -249,7 +249,7 @@ public class SetAssertionTests
         // Set should have access to collection methods
         await Assert.That(set)
             .IsNotEmpty()
-            .And.HasCount(3)
+            .And.Count().IsEqualTo(3)
             .And.Contains(2);
     }
 

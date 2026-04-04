@@ -122,16 +122,16 @@ public class TestContextIsolationTests
         var allContexts = CapturedContexts.Values.Where(c => c != null).ToList();
 
         // Verify we captured contexts
-        await Assert.That(allContexts).HasCount().GreaterThanOrEqualTo(15); // 3 tests * 5 repeats
+        await Assert.That(allContexts).Count().IsGreaterThanOrEqualTo(15); // 3 tests * 5 repeats
 
         // Verify all contexts are unique instances
         var uniqueContexts = allContexts.Distinct().ToList();
-        await Assert.That(uniqueContexts).HasCount().EqualTo(allContexts.Count);
+        await Assert.That(uniqueContexts).Count().IsEqualTo(allContexts.Count);
 
         // Verify each test had its own TestLocalId
         var allTestIds = CapturedContexts.Keys.ToList();
         var uniqueTestIds = allTestIds.Distinct().ToList();
-        await Assert.That(uniqueTestIds).HasCount().EqualTo(allTestIds.Count);
+        await Assert.That(uniqueTestIds).Count().IsEqualTo(allTestIds.Count);
     }
 }
 

@@ -15,7 +15,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Tags, tags => tags.HasCount(3));
+            .Member(x => x.Tags, tags => tags.Count().IsEqualTo(3));
     }
 
     [Test]
@@ -27,10 +27,10 @@ public class MemberCollectionAssertionTests
         };
 
         var exception = await Assert.ThrowsAsync<TUnitAssertionException>(async () =>
-            await Assert.That(obj).Member(x => x.Tags, tags => tags.HasCount(5)));
+            await Assert.That(obj).Member(x => x.Tags, tags => tags.Count().IsEqualTo(5)));
 
-        await Assert.That(exception.Message).Contains("to have count 5");
-        await Assert.That(exception.Message).Contains("but received 2");
+        await Assert.That(exception.Message).Contains("to have count equal to 5");
+        await Assert.That(exception.Message).Contains("received 2");
     }
 
     [Test]
@@ -107,7 +107,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Tags, tags => tags.HasCount(2).And.Contains("tag1").And.Contains("tag2"));
+            .Member(x => x.Tags, tags => tags.Count().IsEqualTo(2).And.Contains("tag1").And.Contains("tag2"));
     }
 
     [Test]
@@ -120,7 +120,7 @@ public class MemberCollectionAssertionTests
 
         await Assert.That(obj)
             .IsNotNull()
-            .And.Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("tag1"));
+            .And.Member(x => x.Tags, tags => tags.Count().IsEqualTo(1).And.Contains("tag1"));
     }
 
     [Test]
@@ -132,7 +132,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Items, items => items.HasCount(3));
+            .Member(x => x.Items, items => items.Count().IsEqualTo(3));
     }
 
     [Test]
@@ -206,7 +206,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Attributes, attrs => attrs.HasCount(2));
+            .Member(x => x.Attributes, attrs => attrs.Count().IsEqualTo(2));
     }
 
     [Test]
@@ -269,9 +269,9 @@ public class MemberCollectionAssertionTests
 
         await Assert.That(obj)
             .IsNotNull()
-            .And.Member(x => x.Tags, tags => tags.HasCount(2).And.Contains("important"))
-            .And.Member(x => x.Items, items => items.HasCount(3).And.All(x => x > 0))
-            .And.Member(x => x.Attributes, attrs => attrs.HasCount(1));
+            .And.Member(x => x.Tags, tags => tags.Count().IsEqualTo(2).And.Contains("important"))
+            .And.Member(x => x.Items, items => items.Count().IsEqualTo(3).And.All(x => x > 0))
+            .And.Member(x => x.Attributes, attrs => attrs.Count().IsEqualTo(1));
     }
 
     [Test]
@@ -319,7 +319,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Sequence, seq => seq.HasCount(5));
+            .Member(x => x.Sequence, seq => seq.Count().IsEqualTo(5));
     }
 
     [Test]
@@ -333,7 +333,7 @@ public class MemberCollectionAssertionTests
 
         await Assert.That(obj)
             .IsNotNull()
-            .And.Member(x => x.Tags, tags => tags.HasCount(2).And.Contains("pile"));
+            .And.Member(x => x.Tags, tags => tags.Count().IsEqualTo(2).And.Contains("pile"));
     }
 
     [Test]
@@ -359,7 +359,7 @@ public class MemberCollectionAssertionTests
         };
 
         await Assert.That(obj)
-            .Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.HasCount(1));
+            .Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.Count().IsEqualTo(1));
     }
 
     private class TestClass

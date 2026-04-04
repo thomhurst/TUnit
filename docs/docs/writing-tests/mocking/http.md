@@ -218,12 +218,12 @@ client.Handler.VerifyNoUnmatchedRequests();
 ### Inspect Captured Requests
 
 ```csharp
-await Assert.That(client.Handler.Requests).HasCount().EqualTo(2);
+await Assert.That(client.Handler.Requests).Count().IsEqualTo(2);
 await Assert.That(client.Handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
 await Assert.That(client.Handler.Requests[0].RequestUri!.PathAndQuery).IsEqualTo("/api/users");
 
 // Check for unmatched requests
-await Assert.That(client.Handler.UnmatchedRequests).HasCount().EqualTo(0);
+await Assert.That(client.Handler.UnmatchedRequests).Count().IsEqualTo(0);
 ```
 
 Each `CapturedRequest` provides:

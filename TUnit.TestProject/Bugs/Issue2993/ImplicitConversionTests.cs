@@ -28,7 +28,7 @@ internal class ImplicitConversionTests
         var items = new[] { item1, item2 };
 
         await Assert.That(items).IsNotEmpty();
-        await Assert.That(items).HasCount(2);
+        await Assert.That(items).Count().IsEqualTo(2);
     }
 
     // Test with non-nullable value type

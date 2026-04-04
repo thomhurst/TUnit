@@ -541,7 +541,7 @@ public class RealWorldScenarioTests
         await service.PlaceOrderAsync(7, "Gadget");
 
         // Assert — verify the captured email body content
-        await Assert.That(bodyArg.Values).HasCount().EqualTo(1);
+        await Assert.That(bodyArg.Values).Count().IsEqualTo(1);
         await Assert.That(bodyArg.Latest).IsEqualTo("Your order for Gadget has been placed.");
     }
 

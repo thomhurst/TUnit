@@ -31,7 +31,7 @@ public class MockVerificationExceptionTests
         await Assert.That(ex.ExpectedCall).Contains("Add");
         await Assert.That(ex.ExpectedTimes).IsEqualTo(Times.Exactly(5));
         await Assert.That(ex.ActualCount).IsEqualTo(1);
-        await Assert.That(ex.ActualCalls).HasCount().EqualTo(1);
+        await Assert.That(ex.ActualCalls).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -66,7 +66,7 @@ public class MockVerificationExceptionTests
         });
 
         // Assert — all 3 actual calls to Add are listed
-        await Assert.That(ex.ActualCalls).HasCount().EqualTo(3);
+        await Assert.That(ex.ActualCalls).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -78,7 +78,7 @@ public class MockVerificationExceptionTests
         await Assert.That(ex.ExpectedCall).IsEmpty();
         await Assert.That(ex.ExpectedTimes).IsEqualTo(Times.Never);
         await Assert.That(ex.ActualCount).IsEqualTo(0);
-        await Assert.That(ex.ActualCalls).HasCount().EqualTo(0);
+        await Assert.That(ex.ActualCalls).Count().IsEqualTo(0);
     }
 }
 
@@ -267,7 +267,7 @@ public class InvocationOrderingTests
         mock.Object.Add(3, 4);
 
         var invocations = mock.Invocations;
-        await Assert.That(invocations).HasCount().EqualTo(4);
+        await Assert.That(invocations).Count().IsEqualTo(4);
         await Assert.That(invocations[0].MemberName).IsEqualTo("Add");
         await Assert.That(invocations[1].MemberName).IsEqualTo("Log");
         await Assert.That(invocations[2].MemberName).IsEqualTo("GetName");

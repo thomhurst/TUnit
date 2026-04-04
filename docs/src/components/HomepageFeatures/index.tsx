@@ -41,7 +41,7 @@ public async Task TestAsync()
     var result = await GetDataAsync();
     await Assert.That(result)
         .IsNotNull()
-        .And.HasCount(5);
+        .And.Count().IsEqualTo(5);
 }`
   },
   {

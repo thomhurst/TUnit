@@ -37,12 +37,12 @@ using TUnit.Core.Enums;
 /// {
 ///     public async ValueTask OnTestStart(TestContext context)
 ///     {
-///         context.ObjectBag["StartTime"] = DateTime.UtcNow;
+///         context.StateBag["StartTime"] = DateTime.UtcNow;
 ///     }
 ///
 ///     public async ValueTask OnTestEnd(TestContext context)
 ///     {
-///         var start = (DateTime)context.ObjectBag["StartTime"];
+///         var start = (DateTime)context.StateBag["StartTime"];
 ///         var duration = DateTime.UtcNow - start;
 ///         await context.OutputWriter.WriteLineAsync($"Test took {duration.TotalMilliseconds}ms");
 ///     }

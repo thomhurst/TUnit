@@ -31,7 +31,7 @@ public class Issue4446Tests
     public async Task ICollection_Should_Support_Count()
     {
         ICollection<int> collection = new List<int> { 1, 2, 3 };
-        await Assert.That(collection).HasCount().EqualTo(3);
+        await Assert.That(collection).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -73,7 +73,7 @@ public class Issue4446Tests
     public async Task IReadOnlyCollection_Should_Support_Count()
     {
         IReadOnlyCollection<int> collection = new List<int> { 1, 2, 3 };
-        await Assert.That(collection).HasCount().EqualTo(3);
+        await Assert.That(collection).Count().IsEqualTo(3);
     }
 
     [Test]

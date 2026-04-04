@@ -20,7 +20,7 @@ public class DiagnosticsTests
 
         await Assert.That(diag.TotalSetups).IsEqualTo(2);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(1);
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(1);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(1);
         await Assert.That(diag.UnusedSetups[0].MemberName).IsEqualTo("Add");
     }
 
@@ -38,7 +38,7 @@ public class DiagnosticsTests
 
         var diag = mock.GetDiagnostics();
 
-        await Assert.That(diag.UnmatchedCalls).HasCount().EqualTo(1);
+        await Assert.That(diag.UnmatchedCalls).Count().IsEqualTo(1);
         await Assert.That(diag.UnmatchedCalls[0].MemberName).IsEqualTo("Add");
     }
 
@@ -56,7 +56,7 @@ public class DiagnosticsTests
 
         await Assert.That(diag.TotalSetups).IsEqualTo(1);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(1);
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(0);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(0);
     }
 
     [Test]
@@ -71,7 +71,7 @@ public class DiagnosticsTests
 
         await Assert.That(diag.TotalSetups).IsEqualTo(2);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(2);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -82,9 +82,9 @@ public class DiagnosticsTests
 
         var diag = mock.GetDiagnostics();
 
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(1);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(1);
         var setup = diag.UnusedSetups[0];
-        await Assert.That(setup.MatcherDescriptions).HasCount().EqualTo(2);
+        await Assert.That(setup.MatcherDescriptions).Count().IsEqualTo(2);
         await Assert.That(setup.MatcherDescriptions[0]).Contains("Any");
         await Assert.That(setup.MatcherDescriptions[1]).Contains("predicate");
     }
@@ -104,8 +104,8 @@ public class DiagnosticsTests
 
         await Assert.That(diag.TotalSetups).IsEqualTo(0);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(0);
-        await Assert.That(diag.UnmatchedCalls).HasCount().EqualTo(0);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(0);
+        await Assert.That(diag.UnmatchedCalls).Count().IsEqualTo(0);
     }
 
     [Test]
@@ -117,7 +117,7 @@ public class DiagnosticsTests
 
         await Assert.That(diag.TotalSetups).IsEqualTo(0);
         await Assert.That(diag.ExercisedSetups).IsEqualTo(0);
-        await Assert.That(diag.UnusedSetups).HasCount().EqualTo(0);
-        await Assert.That(diag.UnmatchedCalls).HasCount().EqualTo(0);
+        await Assert.That(diag.UnusedSetups).Count().IsEqualTo(0);
+        await Assert.That(diag.UnmatchedCalls).Count().IsEqualTo(0);
     }
 }

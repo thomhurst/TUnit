@@ -361,7 +361,7 @@ public class InterfaceInheritanceTests
         await Assert.That(fetched.IsDeleted).IsFalse();
 
         await Assert.That(actives).IsNotNull();
-        await Assert.That(actives).HasCount().EqualTo(1);
+        await Assert.That(actives).Count().IsEqualTo(1);
         await Assert.That(actives[0].Id).IsEqualTo(1);
     }
 }
@@ -650,7 +650,7 @@ public class ConcurrentAccessTests
         var results = await Task.WhenAll(tasks);
 
         // Assert — all tasks completed without exception, results are valid ints
-        await Assert.That(results).HasCount().EqualTo(10);
+        await Assert.That(results).Count().IsEqualTo(10);
         foreach (var result in results)
         {
             // Result is some valid int (either the thread-specific setup or the Any setup)
@@ -707,10 +707,10 @@ public class EnumParameterTests
         var highResult = await mgr.GetByPriorityAsync(Priority.High);
 
         // Assert
-        await Assert.That(lowResult).HasCount().EqualTo(1);
+        await Assert.That(lowResult).Count().IsEqualTo(1);
         await Assert.That(lowResult[0].Title).IsEqualTo("Low task");
 
-        await Assert.That(highResult).HasCount().EqualTo(2);
+        await Assert.That(highResult).Count().IsEqualTo(2);
         await Assert.That(highResult[0].Title).IsEqualTo("High task");
     }
 

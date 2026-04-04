@@ -217,7 +217,7 @@ svc.Greet("Charlie");
 var all = nameArg.Values;   // ["Alice", "Bob", "Charlie"]
 var last = nameArg.Latest;  // "Charlie"
 
-await Assert.That(nameArg.Values).HasCount().EqualTo(3);
+await Assert.That(nameArg.Values).Count().IsEqualTo(3);
 ```
 
 :::tip

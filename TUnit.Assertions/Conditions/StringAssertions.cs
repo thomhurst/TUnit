@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using TUnit.Assertions.Assertions.Regex;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Conditions;
 
@@ -515,6 +516,65 @@ public class StringLengthAssertion : Assertion<string>
     }
 
     protected override string GetExpectation() => $"to have length {_expectedLength}";
+}
+
+/// <summary>
+/// Asserts on the length of a string using an inline assertion lambda, preserving string context for chaining.
+/// Example: await Assert.That(str).Length(l => l.IsEqualTo(5)).And.StartsWith("h");
+/// </summary>
+public class StringLengthWithInlineAssertionAssertion : Assertion<string>
+{
+    private readonly Func<IAssertionSource<int>, Assertion<int>?> _lengthAssertion;
+    private int _actualLength;
+
+    internal StringLengthWithInlineAssertionAssertion(
+        AssertionContext<string> context,
+        Func<IAssertionSource<int>, Assertion<int>?> lengthAssertion)
+        : base(context)
+    {
+        _lengthAssertion = lengthAssertion;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+        }
+
+        if (value == null)
+        {
+            return AssertionResult.Failed("value was null");
+        }
+
+        _actualLength = value.Length;
+
+        var lengthSource = new ValueAssertion<int>(_actualLength, "length");
+        var resultingAssertion = _lengthAssertion(lengthSource);
+
+        if (resultingAssertion != null)
+        {
+            try
+            {
+                await resultingAssertion.AssertAsync();
+                return AssertionResult.Passed;
+            }
+            catch
+            {
+                return AssertionResult.Failed($"length was {_actualLength}");
+            }
+        }
+
+        return AssertionResult.Passed;
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy length assertion";
+    }
 }
 
 /// <summary>

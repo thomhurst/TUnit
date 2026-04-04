@@ -36,7 +36,7 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is populated
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies.DependsOn).HasCount().EqualTo(1);
+        await Assert.That(context.Dependencies.DependsOn).Count().IsEqualTo(1);
         await Assert.That(context.Dependencies.DependsOn.ElementAt(0).TestName).IsEqualTo("DependentTest");
     }
 
@@ -49,7 +49,7 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is empty for independent tests
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies.DependsOn).HasCount().EqualTo(0);
+        await Assert.That(context.Dependencies.DependsOn).Count().IsEqualTo(0);
     }
 
     [Test]
@@ -63,7 +63,7 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is populated with cross-class dependency
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies.DependsOn).HasCount().EqualTo(1);
+        await Assert.That(context.Dependencies.DependsOn).Count().IsEqualTo(1);
         await Assert.That(context.Dependencies.DependsOn.ElementAt(0).TestName).IsEqualTo("CrossClassDependency");
         await Assert.That(context.Dependencies.DependsOn.ElementAt(0).ClassType.Name).IsEqualTo("DependencyFilteringTests2");
     }

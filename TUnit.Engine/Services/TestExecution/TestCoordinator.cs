@@ -91,9 +91,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.Execution.Result = null;
             test.Context.TestStart = null;
             test.Context.Execution.TestEnd = null;
-#pragma warning disable CS0618 // Obsolete Timing API
             test.Context.Timings.Clear();
-#pragma warning restore CS0618
 
             TestContext.Current = test.Context;
 

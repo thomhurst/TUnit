@@ -176,7 +176,7 @@ public class ReadOnlyListAssertionTests
     public async Task Test_IReadOnlyList_HasCount_Works()
     {
         IReadOnlyList<int> list = new List<int> { 1, 2, 3, 4, 5 };
-        await Assert.That(list).HasCount().EqualTo(5);
+        await Assert.That(list).Count().IsEqualTo(5);
     }
 
     // Chaining tests
@@ -222,6 +222,6 @@ public class ReadOnlyListAssertionTests
     public async Task Test_LastItem_Satisfies_Passes()
     {
         IReadOnlyList<string> list = new List<string> { "a", "bb", "ccc" };
-        await Assert.That(list).LastItem().Satisfies(item => item.HasLength(3));
+        await Assert.That(list).LastItem().Satisfies(item => item.Length(l => l.IsEqualTo(3)));
     }
 }

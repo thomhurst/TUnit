@@ -57,7 +57,7 @@ logger.LogInformation("User {UserId} logged in", 42);
 logger.LogWarning("Disk space low");
 
 // All entries
-await Assert.That(logger.Entries).HasCount().EqualTo(2);
+await Assert.That(logger.Entries).Count().IsEqualTo(2);
 await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(LogLevel.Information);
 await Assert.That(logger.Entries[0].Message).Contains("42");
 

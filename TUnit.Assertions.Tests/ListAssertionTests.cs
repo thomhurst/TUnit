@@ -191,7 +191,7 @@ public class ListAssertionTests
     {
         IList<int> list = new List<int> { 1, 2, 3, 4, 5 };
 
-        await Assert.That(list).HasCount(5);
+        await Assert.That(list).Count().IsEqualTo(5);
         await Assert.That(list).All(x => x > 0);
         await Assert.That(list).Any(x => x == 3);
     }

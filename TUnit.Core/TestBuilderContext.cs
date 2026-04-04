@@ -25,9 +25,6 @@ public record TestBuilderContext
     /// </summary>
     public string DefinitionId => _definitionId ??= Guid.NewGuid().ToString();
 
-     [Obsolete("Use StateBag property instead.")]
-     public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
-
     private ConcurrentDictionary<string, object?>? _stateBag;
     private TestContextEvents? _events;
 

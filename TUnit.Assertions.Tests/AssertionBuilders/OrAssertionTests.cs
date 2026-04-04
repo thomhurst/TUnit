@@ -349,7 +349,7 @@ public sealed class OrAssertionTests
                 return _ < 10; // Passes
             });
 
-        await Assert.That(evaluationOrder).HasCount(2);
+        await Assert.That(evaluationOrder).Count().IsEqualTo(2);
         await Assert.That(evaluationOrder[0]).IsEqualTo(1);
         await Assert.That(evaluationOrder[1]).IsEqualTo(2);
     }
@@ -374,7 +374,7 @@ public sealed class OrAssertionTests
                 return _ < 10;
             });
 
-        await Assert.That(evaluationOrder).HasCount(1);
+        await Assert.That(evaluationOrder).Count().IsEqualTo(1);
         await Assert.That(evaluationOrder[0]).IsEqualTo(1);
     }
 
@@ -386,7 +386,7 @@ public sealed class OrAssertionTests
         await Assert.That(collection)
             .Contains(5)
             .Or
-            .HasCount(3);
+            .Count().IsEqualTo(3);
     }
 
     [Test]
@@ -397,7 +397,7 @@ public sealed class OrAssertionTests
         await Assert.That(text)
             .Contains("Goodbye")
             .Or
-            .HasLength(11);
+            .Length().IsEqualTo(11);
     }
 
     // [Test]

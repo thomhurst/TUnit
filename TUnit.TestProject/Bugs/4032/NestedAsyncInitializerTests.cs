@@ -383,7 +383,7 @@ public class DeepNestedAsyncInitializerOrderTests
         var order = DeepNestingInitializationTracker.GetOrder();
 
         // Deep should be initialized first, then Middle, then Top
-        await Assert.That(order).HasCount().EqualTo(3)
+        await Assert.That(order).Count().IsEqualTo(3)
             .Because("there should be exactly 3 initializations");
 
         await Assert.That(order[0]).IsEqualTo("Deep")

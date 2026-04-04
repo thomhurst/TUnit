@@ -154,7 +154,7 @@ public class ErrorMessageTests
         });
 
         await Assert.That(exception.ActualCount).IsEqualTo(2);
-        await Assert.That(exception.ActualCalls).HasCount().GreaterThanOrEqualTo(0);
+        await Assert.That(exception.ActualCalls).Count().IsGreaterThanOrEqualTo(0);
     }
 
     // --- MockStrictBehaviorException message quality ---

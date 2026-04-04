@@ -45,8 +45,8 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
 
         using var _ = Assert.Multiple();
 
-        await Assert.That(dataClasses).HasCount().EqualTo(6);
-        await Assert.That(dataClasses.Where(x => x.Disposed)).HasCount().EqualTo(6);
+        await Assert.That(dataClasses).Count().IsEqualTo(6);
+        await Assert.That(dataClasses.Where(x => x.Disposed)).Count().IsEqualTo(6);
 
         foreach (var test in tests.Where(x => x.Execution.Result != null))
         {

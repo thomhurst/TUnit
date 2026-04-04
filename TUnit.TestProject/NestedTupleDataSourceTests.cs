@@ -63,7 +63,7 @@ public class NestedTupleDataSourceTests
     [MethodDataSource(nameof(ArrayNestedTupleData))]
     public async Task ArrayNestedTuple_SeparateParams(int[] value1, (string, double) value2)
     {
-        await Assert.That(value1).HasCount(3);
+        await Assert.That(value1).Count().IsEqualTo(3);
         await Assert.That(value2.Item1).IsEqualTo("array");
         await Assert.That(value2.Item2).IsEqualTo(3.14);
     }

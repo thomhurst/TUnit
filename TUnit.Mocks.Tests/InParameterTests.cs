@@ -204,7 +204,7 @@ public class InParameterTests
         mock.Object.Log("first");
         mock.Object.Log("second");
 
-        await Assert.That(messages).HasCount().EqualTo(2);
+        await Assert.That(messages).Count().IsEqualTo(2);
         await Assert.That(messages[0]).IsEqualTo("first");
         await Assert.That(messages[1]).IsEqualTo("second");
     }

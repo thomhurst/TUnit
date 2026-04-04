@@ -31,7 +31,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsTypeOf is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsTypeOf<List<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsTypeOf<List<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsAssignableTo is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsAssignableTo<IList<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsAssignableTo<IList<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsNotAssignableTo is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsNotAssignableTo<IList<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsNotAssignableTo<IList<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsAssignableFrom is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsAssignableFrom<IList<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsAssignableFrom<IList<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsNotAssignableFrom is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsNotAssignableFrom<IList<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsNotAssignableFrom<IList<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     {
         throw new NotSupportedException(
             "IsNotTypeOf is not supported after HasCount(). " +
-            "Use: Assert.That(value).IsNotTypeOf<List<int>>().HasCount().EqualTo(5)");
+            "Use: Assert.That(value).IsNotTypeOf<List<int>>().Count().IsEqualTo(5)");
     }
 
     /// <summary>

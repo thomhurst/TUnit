@@ -281,7 +281,7 @@ public sealed class AndAssertionTests
                 return _ < 10;
             });
 
-        await Assert.That(evaluationOrder).HasCount(2);
+        await Assert.That(evaluationOrder).Count().IsEqualTo(2);
         await Assert.That(evaluationOrder[0]).IsEqualTo(1);
         await Assert.That(evaluationOrder[1]).IsEqualTo(2);
     }
@@ -294,7 +294,7 @@ public sealed class AndAssertionTests
         await Assert.That(collection)
             .Contains(3)
             .And
-            .HasCount(5);
+            .Count().IsEqualTo(5);
     }
 
     [Test]
@@ -305,6 +305,6 @@ public sealed class AndAssertionTests
         await Assert.That(text)
             .Contains("Hello")
             .And
-            .HasLength(11);
+            .Length().IsEqualTo(11);
     }
 }
