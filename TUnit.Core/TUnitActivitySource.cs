@@ -22,6 +22,35 @@ internal static class TUnitActivitySource
     internal const string TagTestClass = "tunit.test.class";
     internal const string TagTraceScope = "tunit.trace.scope";
 
+    /// <summary>
+    /// Returns a human-readable type name suitable for span labels.
+    /// Strips the namespace but preserves nesting (Outer.Inner) and cleans up
+    /// generic arity suffixes (MySource`1 → MySource&lt;T&gt;).
+    /// </summary>
+    internal static string GetReadableTypeName(Type type)
+    {
+        var name = type.FullName ?? type.Name;
+
+        // Strip namespace: take everything after the last '.' that isn't part of nesting
+        var nsEnd = name.LastIndexOf('.');
+        if (nsEnd >= 0 && type.Namespace is { Length: > 0 })
+        {
+            name = name[type.Namespace.Length..].TrimStart('.');
+        }
+
+        // Replace '+' nesting separator with '.'
+        name = name.Replace('+', '.');
+
+        // Clean up generic arity suffixes: MySource`1 → MySource
+        var backtick = name.IndexOf('`');
+        if (backtick >= 0)
+        {
+            name = name[..backtick];
+        }
+
+        return name;
+    }
+
     internal static Activity? StartActivity(
         string name,
         ActivityKind kind = ActivityKind.Internal,

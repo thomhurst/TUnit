@@ -220,6 +220,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         if (shouldDispose)
         {
+            // TODO: Add disposal span for shared objects here to match the init spans
+            // created in ObjectLifecycleService.InitializeWithSpanAsync. Currently only
+            // per-test disposal gets a span (via TestCoordinator.DisposeTestInstanceWithSpanAsync).
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
         }
     }

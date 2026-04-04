@@ -313,14 +313,26 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     {
         var parentContext = GetParentActivityContext(testContext, sharedType);
 
-        await TUnitActivitySource.RunWithSpanAsync(
-            $"initialize {obj.GetType().Name}",
-            parentContext,
+        var scopeTag = TUnitActivitySource.GetScopeTag(sharedType);
+        var isShared = sharedType is not null and not SharedType.None;
+
+        KeyValuePair<string, object?>[] tags = isShared
+            ?
+            [
+                new(TUnitActivitySource.TagTestClass, testContext.Metadata.TestDetails.ClassType.FullName),
+                new(TUnitActivitySource.TagTraceScope, scopeTag)
+            ]
+            :
             [
                 new(TUnitActivitySource.TagTestId, testContext.Id),
                 new(TUnitActivitySource.TagTestClass, testContext.Metadata.TestDetails.ClassType.FullName),
-                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(sharedType))
-            ],
+                new(TUnitActivitySource.TagTraceScope, scopeTag)
+            ];
+
+        await TUnitActivitySource.RunWithSpanAsync(
+            $"initialize {TUnitActivitySource.GetReadableTypeName(obj.GetType())}",
+            parentContext,
+            tags,
             () => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
     }
 

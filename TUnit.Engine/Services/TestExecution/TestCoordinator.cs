@@ -316,7 +316,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 #if NET
         var classType = test.Context.Metadata.TestDetails.ClassType;
         await TUnitActivitySource.RunWithSpanAsync(
-            $"dispose {classType.Name}",
+            $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
             test.Context.ClassContext.Activity?.Context ?? default,
             [
                 new(TUnitActivitySource.TagTestId, test.Context.Id),
