@@ -1164,6 +1164,34 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts on the InnerExceptions collection of an AggregateException using an inline assertion delegate.
+    /// Only available when the thrown exception type is AggregateException.
+    /// Example: await Assert.That(action).Throws&lt;AggregateException&gt;().WithInnerExceptions(e => e.Count().IsEqualTo(3));
+    /// </summary>
+    public static WithInnerExceptionsAssertion WithInnerExceptions(
+        this ThrowsAssertion<AggregateException> source,
+        Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> innerExceptionsAssertion,
+        [CallerArgumentExpression(nameof(innerExceptionsAssertion))] string? expression = null)
+    {
+        source.InternalContext.ExpressionBuilder.Append($".WithInnerExceptions({expression})");
+        return new WithInnerExceptionsAssertion(source.InternalContext, innerExceptionsAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on the InnerExceptions collection of an AggregateException using an inline assertion delegate.
+    /// Only available when the thrown exception type is AggregateException.
+    /// Example: await Assert.That(action).ThrowsExactly&lt;AggregateException&gt;().WithInnerExceptions(e => e.Count().IsEqualTo(3));
+    /// </summary>
+    public static WithInnerExceptionsAssertion WithInnerExceptions(
+        this ThrowsExactlyAssertion<AggregateException> source,
+        Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> innerExceptionsAssertion,
+        [CallerArgumentExpression(nameof(innerExceptionsAssertion))] string? expression = null)
+    {
+        source.InternalContext.ExpressionBuilder.Append($".WithInnerExceptions({expression})");
+        return new WithInnerExceptionsAssertion(source.InternalContext, innerExceptionsAssertion);
+    }
+
+    /// <summary>
     /// Asserts that an exception's Message property exactly equals the expected string.
     /// Works with both direct exception assertions and chained exception assertions (via .And).
     /// </summary>

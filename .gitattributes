@@ -3,6 +3,56 @@
 ###############################################################################
 * text=auto
 
-# Verify
-*.verified.txt text eol=lf working-tree-encoding=UTF-8
-*.received.txt text eol=lf working-tree-encoding=UTF-8
+###############################################################################
+# Source code - normalize to LF in repo, native on checkout
+###############################################################################
+*.cs text diff=csharp
+*.csx text diff=csharp
+*.csproj text
+*.sln text
+*.slnx text
+*.props text
+*.targets text
+*.json text
+*.xml text
+*.yml text
+*.yaml text
+*.md text
+*.txt text
+*.config text
+*.editorconfig text
+*.razor text
+*.cshtml text
+
+###############################################################################
+# Shell scripts - always LF
+###############################################################################
+*.sh text eol=lf
+*.bash text eol=lf
+
+###############################################################################
+# Windows scripts - always CRLF
+###############################################################################
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+###############################################################################
+# Verify snapshots - LF for consistent cross-platform diffs
+###############################################################################
+*.verified.txt text eol=lf
+*.received.txt text eol=lf
+
+###############################################################################
+# Binary files - no normalization
+###############################################################################
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.dll binary
+*.exe binary
+*.nupkg binary
+*.snk binary
+*.pfx binary
