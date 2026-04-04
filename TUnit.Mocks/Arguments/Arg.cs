@@ -22,10 +22,10 @@ public static class Arg
     public static Arg<T> Is<T>(Func<T?, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
     /// <summary>Matches only when the argument is null.</summary>
-    public static Arg<T> IsNull<T>() where T : class => new(new NullMatcher<T>());
+    public static Arg<T> IsNull<T>() where T : class? => new(new NullMatcher<T>());
 
     /// <summary>Matches only when the argument is not null.</summary>
-    public static Arg<T> IsNotNull<T>() where T : class => new(new NotNullMatcher<T>());
+    public static Arg<T> IsNotNull<T>() where T : class? => new(new NotNullMatcher<T>());
 
     /// <summary>Matches a string against a regular expression pattern.</summary>
     public static Arg<string> Matches(string pattern) => new(new RegexMatcher(pattern));
