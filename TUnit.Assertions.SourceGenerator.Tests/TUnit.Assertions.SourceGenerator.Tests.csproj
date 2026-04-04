@@ -2,6 +2,11 @@
 
   <Import Project="..\TestProject.props" />
 
+  <PropertyGroup>
+    <!-- Source generator projects (netstandard2.0) bring in older Microsoft.Bcl.AsyncInterfaces -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />

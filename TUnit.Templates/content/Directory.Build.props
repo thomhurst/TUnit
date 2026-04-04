@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+    <PropertyGroup>
+        <!-- TUnit.Assertions.props auto-adds TUnit.Assertions.FSharp for F# projects;
+             template fsproj files also include it explicitly with a pinned version -->
+        <NoWarn>$(NoWarn);NU1504</NoWarn>
+    </PropertyGroup>
+
     <ItemGroup Condition="$(MSBuildProjectName.Contains('TestProject'))">
         <Using Include="TUnit.Core.HookType" Static="True" />
         <Using Include="TUnit.Core" />
