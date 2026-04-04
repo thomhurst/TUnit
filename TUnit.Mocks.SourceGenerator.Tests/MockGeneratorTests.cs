@@ -689,6 +689,7 @@ public class MockGeneratorTests : SnapshotTestBase
             {
                 Task<T?> DoSomethingAsync<T>();
                 T? GetValue<T>();
+                (T?, string) GetPair<T>();
             }
 
             public class TestUsage

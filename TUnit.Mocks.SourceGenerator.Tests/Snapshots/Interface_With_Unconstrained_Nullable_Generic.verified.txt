@@ -12,6 +12,8 @@ namespace TUnit.Mocks.Generated
         global::System.Threading.Tasks.Task<T?> global::IFoo.DoSomethingAsync<T>() where T : default => Object.DoSomethingAsync<T>();
 
         T? global::IFoo.GetValue<T>() where T : default => Object.GetValue<T>();
+
+        (T?, string) global::IFoo.GetPair<T>() where T : default => Object.GetPair<T>();
     }
 }
 
@@ -86,6 +88,11 @@ namespace TUnit.Mocks.Generated
             return _engine.HandleCallWithReturn<T?>(1, "GetValue", global::System.Array.Empty<object?>(), default);
         }
 
+        public (T?, string) GetPair<T>()
+        {
+            return _engine.HandleCallWithReturn<(T?, string)>(2, "GetPair", global::System.Array.Empty<object?>(), default);
+        }
+
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         public void RaiseEvent(string eventName, object? args)
         {
@@ -114,6 +121,12 @@ namespace TUnit.Mocks.Generated
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
+        }
+
+        public static global::TUnit.Mocks.MockMethodCall<(T?, string)> GetPair<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
+        {
+            var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
+            return new global::TUnit.Mocks.MockMethodCall<(T?, string)>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetPair", matchers);
         }
     }
 }
