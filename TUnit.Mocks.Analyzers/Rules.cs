@@ -31,6 +31,15 @@ public static class Rules
         isEnabledByDefault: true
     );
 
+    public static readonly DiagnosticDescriptor TM005_ArgIsNullNonNullableValueType = new(
+        id: "TM005",
+        title: "Arg.IsNull/IsNotNull used with non-nullable value type",
+        messageFormat: "Arg.{0}<{1}>() will never match because '{1}' is a non-nullable value type. Use '{1}?' instead.",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
     public static readonly DiagnosticDescriptor TM004_RequiresCSharp14 = new(
         id: "TM004",
         title: "TUnit.Mocks requires C# 14 or later",
