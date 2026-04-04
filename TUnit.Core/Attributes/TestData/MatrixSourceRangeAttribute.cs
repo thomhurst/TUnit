@@ -2,7 +2,7 @@
 
 namespace TUnit.Core;
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Parameter)]
 public class MatrixRangeAttribute<T>(T min, T max, T step)
     : MatrixAttribute<T>(CreateRange(min, max, step))

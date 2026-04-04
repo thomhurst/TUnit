@@ -15,7 +15,7 @@ namespace TUnit.Assertions.Conditions;
 [AssertionFrom<Task>(nameof(Task.IsFaulted), ExpectationMessage = "be faulted")]
 [AssertionFrom<Task>(nameof(Task.IsFaulted), CustomName = "IsNotFaulted", NegateLogic = true, ExpectationMessage = "be faulted")]
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [AssertionFrom<Task>(nameof(Task.IsCompletedSuccessfully), ExpectationMessage = "be completed successfully")]
 [AssertionFrom<Task>(nameof(Task.IsCompletedSuccessfully), CustomName = "IsNotCompletedSuccessfully", NegateLogic = true, ExpectationMessage = "be completed successfully")]
 #endif

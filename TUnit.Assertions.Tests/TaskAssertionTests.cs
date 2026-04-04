@@ -115,7 +115,7 @@ public class TaskAssertionTests
         await Assert.That(task).IsNotFaulted();
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [Test]
     public async Task Test_Task_IsCompletedSuccessfully()
     {

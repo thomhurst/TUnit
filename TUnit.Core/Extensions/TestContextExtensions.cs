@@ -91,7 +91,7 @@ public static class TestContextExtensions
     /// </summary>
     public static bool IsVariant(this Interfaces.ITestDependencies dependencies) => dependencies.ParentTestId != null;
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     #endif
     public static async Task AddDynamicTest<[DynamicallyAccessedMembers(
@@ -118,7 +118,7 @@ public static class TestContextExtensions
     /// <param name="relationship">The relationship category of this variant to its parent test (defaults to Derived)</param>
     /// <param name="displayName">Optional user-facing display name for the variant (e.g., "Shrink Attempt", "Mutant")</param>
     /// <returns>Information about the created test variant, including its TestId and DisplayName</returns>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection")]
     #endif
     public static async Task<TestVariantInfo> CreateTestVariant(

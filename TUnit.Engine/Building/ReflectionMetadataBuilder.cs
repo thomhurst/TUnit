@@ -9,7 +9,7 @@ internal static class ReflectionMetadataBuilder
     /// <summary>
     /// Creates method metadata from reflection info with proper ReflectionInfo populated
     /// </summary>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
 #endif
     public static MethodMetadata CreateMethodMetadata(
@@ -40,7 +40,7 @@ internal static class ReflectionMetadataBuilder
         return new ConcreteType(type);
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
 #endif
     private static ParameterMetadata CreateParameterMetadata(
@@ -59,7 +59,7 @@ internal static class ReflectionMetadataBuilder
         };
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Class metadata creation uses reflection on constructors")]
 #endif
     private static ClassMetadata CreateClassMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors

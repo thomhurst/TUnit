@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 [AssertionFrom<TimeZoneInfo>(nameof(TimeZoneInfo.SupportsDaylightSavingTime), ExpectationMessage = "support daylight saving time")]
 [AssertionFrom<TimeZoneInfo>(nameof(TimeZoneInfo.SupportsDaylightSavingTime), CustomName = "DoesNotSupportDaylightSavingTime", NegateLogic = true, ExpectationMessage = "support daylight saving time")]
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [AssertionFrom<TimeZoneInfo>(nameof(TimeZoneInfo.HasIanaId), ExpectationMessage = "have an IANA ID")]
 [AssertionFrom<TimeZoneInfo>(nameof(TimeZoneInfo.HasIanaId), CustomName = "DoesNotHaveIanaId", NegateLogic = true, ExpectationMessage = "have an IANA ID")]
 #endif

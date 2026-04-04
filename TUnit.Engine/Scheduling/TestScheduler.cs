@@ -65,7 +65,7 @@ internal sealed class TestScheduler : ITestScheduler
             : new SemaphoreSlim(_maxParallelism, _maxParallelism);
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     public async Task<bool> ScheduleAndExecuteAsync(
@@ -157,7 +157,7 @@ internal sealed class TestScheduler : ITestScheduler
         return true;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteGroupedTestsAsync(
@@ -228,7 +228,7 @@ internal sealed class TestScheduler : ITestScheduler
         await dynamicTestProcessingTask.ConfigureAwait(false);
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ProcessDynamicTestQueueAsync(CancellationToken cancellationToken)
@@ -301,7 +301,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteTestsAsync(
@@ -314,7 +314,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
         else
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             // Use Parallel.ForEachAsync for bounded concurrency (eliminates unbounded Task.Run queue depth)
             // This dramatically reduces ThreadPool contention and GetQueuedCompletionStatus waits
             await Parallel.ForEachAsync(
@@ -339,7 +339,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteSingleTestAsync(
@@ -365,7 +365,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteSequentiallyAsync(
@@ -383,7 +383,7 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         // PERFORMANCE OPTIMIZATION: Partition tests by whether they have parallel limiters
         // Tests without limiters can run with unlimited parallelism (avoiding global semaphore overhead)
         var testsWithLimiters = new List<AbstractExecutableTest>();
@@ -450,7 +450,7 @@ internal sealed class TestScheduler : ITestScheduler
 #endif
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     private async Task ExecuteWithLimitAsync(
         List<AbstractExecutableTest> tests,
         CancellationToken cancellationToken)

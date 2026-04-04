@@ -25,7 +25,7 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <param name="buildingContext">Context for optimizing test building (e.g., pre-filtering during execution)</param>
     /// <returns>Collection of executable tests for all data combinations</returns>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
     Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default);
@@ -36,7 +36,7 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Stream of executable tests for all data combinations</returns>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
     IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
@@ -49,7 +49,7 @@ internal interface ITestBuilder
     /// and ITestDiscoveryEventReceiver events.
     /// </summary>
     /// <param name="test">The test with resolved dependencies</param>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
 #endif
     ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test);

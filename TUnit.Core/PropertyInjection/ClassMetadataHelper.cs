@@ -12,7 +12,7 @@ internal static class ClassMetadataHelper
     /// <summary>
     /// Gets or creates ClassMetadata for the specified type.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Metadata creation requires reflection")]
     #endif
     public static ClassMetadata GetOrCreateClassMetadata(

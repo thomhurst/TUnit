@@ -81,7 +81,7 @@ internal static class TypeHelper
             || type == typeof(Guid)
             || typeof(Type).IsAssignableFrom(type)
             || typeof(MemberInfo).IsAssignableFrom(type)
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             || type == typeof(DateOnly)
             || type == typeof(TimeOnly)
 #endif

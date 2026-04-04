@@ -245,7 +245,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="action"/> is null.</exception>
     public static void OnDisposed(object? o, Action action)
     {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(action);
 #else
         if (action == null)
@@ -267,7 +267,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="asyncAction"/> is null.</exception>
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(asyncAction);
 #else
         if (asyncAction == null)

@@ -140,7 +140,7 @@ internal static class DisplayNameBuilder
     /// <summary>
     /// Resolves the actual value from a data source factory result
     /// </summary>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source value resolution may use reflection")]
 #endif
     public static async Task<object?> ResolveDataSourceValue(object? value)

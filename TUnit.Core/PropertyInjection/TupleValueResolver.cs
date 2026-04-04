@@ -15,7 +15,7 @@ internal static class TupleValueResolver
     /// <param name="propertyType">The expected property type</param>
     /// <param name="args">The arguments from the data source</param>
     /// <returns>The resolved value, potentially a tuple</returns>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple types are created dynamically")]
     #endif
     public static object? ResolveTupleValue(

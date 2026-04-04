@@ -163,7 +163,7 @@ public static class TupleHelper
     /// Expands an array of tuples into individual tuple elements for data source generation
     /// For example: [(1, "a"), (2, "b")] becomes individual items that each unwrap to [1, "a"] and [2, "b"]
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple expansion uses reflection as fallback")]
     #endif
     public static IEnumerable<object?[]> ExpandTupleArray(object? value)

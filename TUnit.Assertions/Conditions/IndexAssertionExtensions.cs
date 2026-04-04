@@ -1,4 +1,4 @@
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;

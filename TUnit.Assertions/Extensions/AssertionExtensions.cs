@@ -1347,7 +1347,7 @@ public static class AssertionExtensions
         return new TValue_IsLessThanOrEqualTo_TValue_Assertion<DateTimeOffset>(source.Context, expected);
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     /// <summary>
     /// Asserts that the DateOnly is after the expected DateOnly.
     /// Alias for IsGreaterThan for better readability with dates.

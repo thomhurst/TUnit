@@ -7,7 +7,7 @@ namespace TUnit.Engine.Discovery;
 /// Uses reflection to scan assemblies and register hooks into Sources at runtime.
 /// This implementation requires reflection and is NOT AOT-compatible.
 /// </summary>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Hook registration uses reflection to scan assemblies and types")]
 #endif
 internal sealed class ReflectionHookRegistrar : IHookRegistrar

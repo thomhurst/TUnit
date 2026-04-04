@@ -164,7 +164,7 @@ internal sealed class EventBatcher<TEvent> : IAsyncDisposable, IDisposable where
         try
         {
             // Properly await the task with timeout
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             await _processingTask.WaitAsync(EngineDefaults.ShutdownTimeout, CancellationToken.None);
 #else
             // For .NET Framework, use Task.WhenAny to implement timeout

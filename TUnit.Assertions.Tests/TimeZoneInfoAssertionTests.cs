@@ -18,7 +18,7 @@ public class TimeZoneInfoAssertionTests
         await Assert.That(utc).DoesNotSupportDaylightSavingTime();
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [Test]
     public async Task Test_TimeZoneInfo_HasIanaId()
     {
