@@ -404,19 +404,23 @@ internal static partial class HtmlReportGenerator
         return css.Trim();
     }
 
+    private const string CssCommentsPattern = @"/\*[\s\S]*?\*/";
+    private const string CssWhitespacePattern = @"\s+";
+    private const string CssSeparatorsPattern = @"\s*([{}:;,>~+])\s*";
+
 #if NET
-    [System.Text.RegularExpressions.GeneratedRegex(@"/\*[\s\S]*?\*/")]
+    [System.Text.RegularExpressions.GeneratedRegex(CssCommentsPattern)]
     private static partial Regex CssCommentsRegex();
 
-    [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]
+    [System.Text.RegularExpressions.GeneratedRegex(CssWhitespacePattern)]
     private static partial Regex CssWhitespaceRegex();
 
-    [System.Text.RegularExpressions.GeneratedRegex(@"\s*([{}:;,>~+])\s*")]
+    [System.Text.RegularExpressions.GeneratedRegex(CssSeparatorsPattern)]
     private static partial Regex CssSeparatorsRegex();
 #else
-    private static readonly Regex CssCommentsRegexInstance = new(@"/\*[\s\S]*?\*/", RegexOptions.Compiled);
-    private static readonly Regex CssWhitespaceRegexInstance = new(@"\s+", RegexOptions.Compiled);
-    private static readonly Regex CssSeparatorsRegexInstance = new(@"\s*([{}:;,>~+])\s*", RegexOptions.Compiled);
+    private static readonly Regex CssCommentsRegexInstance = new(CssCommentsPattern, RegexOptions.Compiled);
+    private static readonly Regex CssWhitespaceRegexInstance = new(CssWhitespacePattern, RegexOptions.Compiled);
+    private static readonly Regex CssSeparatorsRegexInstance = new(CssSeparatorsPattern, RegexOptions.Compiled);
 
     private static Regex CssCommentsRegex() => CssCommentsRegexInstance;
     private static Regex CssWhitespaceRegex() => CssWhitespaceRegexInstance;
@@ -1186,7 +1190,7 @@ if (compression && typeof DecompressionStream !== 'undefined') {
     const readable = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(compression));
     data = JSON.parse(await new Response(readable).text());
 } else if (compression) {
-    console.error('TUnit: This browser does not support DecompressionStream. Report data cannot be decoded.');
+    document.getElementById('testGroups').innerHTML = '<div class="empty">This browser does not support DecompressionStream. Please open this report in a modern browser (Chrome 80+, Edge 80+, Firefox 113+, Safari 16.4+).</div>';
     return;
 } else {
     data = JSON.parse(raw.textContent);
