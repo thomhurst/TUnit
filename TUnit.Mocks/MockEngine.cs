@@ -34,8 +34,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     private volatile bool _hasStatefulSetups;
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
-    // Per-member call recording + counters for fast verification.
-    // No global history list — GetAllCalls() reconstructs from per-member lists on demand.
     // Call arrays are pre-allocated during setup to avoid capacity checks on the invocation hot path.
     private List<CallRecord>?[]? _callsByMemberId;
     private volatile int[]? _callCountByMemberId;
@@ -285,10 +283,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // No setup matched — mark as unmatched for diagnostics
-        if (callRecord is not null)
-        {
-            callRecord.IsUnmatched = true;
-        }
+        callRecord.IsUnmatched = true;
 
         // Auto-track property getters: return stored value if available
         if (AutoTrackProperties && Volatile.Read(ref _autoTrackValues) is { } trackValues && memberName.StartsWith("get_", StringComparison.Ordinal))
@@ -435,10 +430,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         // No setup matched
-        if (callRecord is not null)
-        {
-            callRecord.IsUnmatched = true;
-        }
+        callRecord.IsUnmatched = true;
 
         if (IsWrapMock && Behavior == MockBehavior.Strict)
         {
@@ -493,7 +485,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var counts = _callCountByMemberId; // volatile read
         if (counts is not null && (uint)memberId < (uint)counts.Length)
         {
-            return Interlocked.CompareExchange(ref counts[memberId], 0, 0); // atomic read
+            return Volatile.Read(ref counts[memberId]);
         }
         return 0;
     }
@@ -507,13 +499,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             if (_callsByMemberId is null) return [];
             var all = new List<CallRecord>();
-            foreach (var list in _callsByMemberId)
-            {
-                if (list is not null)
-                {
-                    all.AddRange(list);
-                }
-            }
+            CollectCallRecords(all);
             all.Sort((a, b) => a.SequenceNumber.CompareTo(b.SequenceNumber));
             return all;
         }
@@ -529,17 +515,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         {
             if (_callsByMemberId is null) return [];
             var result = new List<CallRecord>();
-            foreach (var list in _callsByMemberId)
-            {
-                if (list is null) continue;
-                foreach (var record in list)
-                {
-                    if (!record.IsVerified)
-                    {
-                        result.Add(record);
-                    }
-                }
-            }
+            CollectCallRecords(result, static r => !r.IsVerified);
             return result;
         }
     }
@@ -602,20 +578,7 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         var unmatchedCalls = new List<CallRecord>();
         lock (Lock)
         {
-            if (_callsByMemberId is not null)
-            {
-                foreach (var list in _callsByMemberId)
-                {
-                    if (list is null) continue;
-                    foreach (var call in list)
-                    {
-                        if (call.IsUnmatched)
-                        {
-                            unmatchedCalls.Add(call);
-                        }
-                    }
-                }
-            }
+            CollectCallRecords(unmatchedCalls, static r => r.IsUnmatched);
         }
 
         return new Diagnostics.MockDiagnostics(unusedSetups, unmatchedCalls, totalSetups, exercisedSetups);
@@ -732,6 +695,33 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         return false;
     }
 
+
+    /// <summary>
+    /// Collects call records from all per-member lists into <paramref name="target"/>,
+    /// optionally filtered by <paramref name="predicate"/>. Must be called under <see cref="Lock"/>.
+    /// </summary>
+    private void CollectCallRecords(List<CallRecord> target, Predicate<CallRecord>? predicate = null)
+    {
+        if (_callsByMemberId is null) return;
+        foreach (var list in _callsByMemberId)
+        {
+            if (list is null) continue;
+            if (predicate is null)
+            {
+                target.AddRange(list);
+            }
+            else
+            {
+                foreach (var record in list)
+                {
+                    if (predicate(record))
+                    {
+                        target.Add(record);
+                    }
+                }
+            }
+        }
+    }
 
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)
     {
@@ -868,7 +858,6 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     {
         lock (Lock)
         {
-            _hasStaleSetups = false; // we're reading from lists directly under lock, so snapshots don't matter here
             if (_setupListsByMemberId is not { } lists || (uint)memberId >= (uint)lists.Length)
             {
                 return (false, null, null);
