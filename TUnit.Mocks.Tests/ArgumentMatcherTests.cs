@@ -3,6 +3,11 @@ using TUnit.Mocks.Arguments;
 
 namespace TUnit.Mocks.Tests;
 
+public interface INullableValueConsumer
+{
+    string Process(int? value);
+}
+
 /// <summary>
 /// US3 Integration Tests: Argument matchers for mock setup expressions.
 /// </summary>

@@ -18,11 +18,6 @@ public interface IGreeter
     string Greet(string name);
 }
 
-public interface INullableValueConsumer
-{
-    string Process(int? value);
-}
-
 /// <summary>
 /// US1 Integration Tests: Create a mock and configure return values.
 /// </summary>
