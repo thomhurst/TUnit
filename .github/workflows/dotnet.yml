@@ -34,7 +34,7 @@ jobs:
         with:
           tool-cache: false
           android: true
-          dotnet: true
+          dotnet: false
           haskell: true
           large-packages: false
           docker-images: false
@@ -57,10 +57,6 @@ jobs:
       - name: Setup .NET Framework
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v3
-      - name: Setup .NET 6
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 6.0.x
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v5
