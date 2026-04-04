@@ -1186,7 +1186,7 @@ if (compression && typeof DecompressionStream !== 'undefined') {
     const ds = new DecompressionStream(compression);
     const writer = ds.writable.getWriter();
     await writer.write(bytes);
-    writer.close();
+    await writer.close();
     data = JSON.parse(await new Response(ds.readable).text());
 } else if (compression) {
     console.error('TUnit: This browser does not support DecompressionStream. Report data cannot be decoded.');
