@@ -6,7 +6,8 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("NetworkTests"), RunOnLinuxOnly, RunOnWindowsOnly]
+[NotInParallel("NetworkTests")]
+[DependsOn<InstallPlaywrightModule>]
 public class RunPlaywrightTestsModule : TestBaseModule
 {
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)

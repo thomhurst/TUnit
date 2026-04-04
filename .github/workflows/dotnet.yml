@@ -89,27 +89,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v5.0.0
 
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v5
-        continue-on-error: true
-        id: playwright-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-            ~/Library/Caches/ms-playwright
-            ~/AppData/Local/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/package.json', '**/Directory.Packages.props') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - name: Install Playwright (browsers only)
-        run: npx playwright install
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
         run: |
