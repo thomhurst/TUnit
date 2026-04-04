@@ -352,12 +352,12 @@ internal static partial class HtmlReportGenerator
     {
         using var ms = new MemoryStream();
 #if NET
-        using (var gz = new GZipStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+        using (var compressor = new GZipStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
 #else
-        using (var gz = new GZipStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+        using (var compressor = new GZipStream(ms, CompressionLevel.Optimal, leaveOpen: true))
 #endif
         {
-            JsonSerializer.Serialize(gz, data, HtmlReportJsonContext.Default.ReportData);
+            JsonSerializer.Serialize(compressor, data, HtmlReportJsonContext.Default.ReportData);
         }
 
         var rawBuffer = ms.GetBuffer();
@@ -1178,11 +1178,11 @@ const raw = document.getElementById('test-data');
 if (!raw) return;
 let data;
 const compression = raw.getAttribute('data-compressed');
-if (compression === 'gzip' && typeof DecompressionStream !== 'undefined') {
+if (compression && typeof DecompressionStream !== 'undefined') {
     const binary = atob(raw.textContent.trim());
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const ds = new DecompressionStream('gzip');
+    const ds = new DecompressionStream(compression);
     const writer = ds.writable.getWriter();
     writer.write(bytes);
     writer.close();
