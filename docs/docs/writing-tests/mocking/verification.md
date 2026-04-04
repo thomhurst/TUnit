@@ -148,7 +148,7 @@ Access the raw call history for custom inspection:
 ```csharp
 var calls = mock.Invocations;
 
-await Assert.That(calls).HasCount().EqualTo(3);
+await Assert.That(calls).Count().IsEqualTo(3);
 await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");
 ```
 

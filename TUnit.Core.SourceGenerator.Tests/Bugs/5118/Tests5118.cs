@@ -11,6 +11,6 @@ internal class Tests5118 : TestsBase
             "AsyncClassMethodDataSourceTests.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
         });
 }

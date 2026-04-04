@@ -4,15 +4,19 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
+internal record TimingEntry(string StepName, DateTimeOffset Start, DateTimeOffset End)
+{
+    public TimeSpan Duration => End - Start;
+}
+
 /// <summary>
 /// Test output capture and artifact management
 /// Implements <see cref="ITestOutput"/> interface
 /// </summary>
 public partial class TestContext
 {
-#pragma warning disable CS0618 // Obsolete Timing API — internal backing for interface implementation
     // Internal backing fields and properties
-    internal ConcurrentBag<Timing> Timings { get; } = [];
+    internal ConcurrentBag<TimingEntry> Timings { get; } = [];
     private readonly ConcurrentBag<Artifact> _artifactsBag = new();
 
     internal IReadOnlyList<Artifact> Artifacts => _artifactsBag.ToArray();
@@ -20,16 +24,7 @@ public partial class TestContext
     // Explicit interface implementations for ITestOutput
     TextWriter ITestOutput.StandardOutput => OutputWriter;
     TextWriter ITestOutput.ErrorOutput => ErrorOutputWriter;
-    IReadOnlyCollection<Timing> ITestOutput.Timings => Timings;
-#pragma warning restore CS0618
     IReadOnlyCollection<Artifact> ITestOutput.Artifacts => Artifacts;
-
-#pragma warning disable CS0618 // Obsolete Timing API — internal backing for interface implementation
-    void ITestOutput.RecordTiming(Timing timing)
-    {
-        Timings.Add(timing);
-    }
-#pragma warning restore CS0618
 
     void ITestOutput.AttachArtifact(Artifact artifact)
     {

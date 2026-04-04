@@ -347,7 +347,7 @@ public class TypeAssertionAmbiguityTests
             .And
             .IsTypeOf<string>()
             .And
-            .HasLength(4);
+            .Length().IsEqualTo(4);
     }
 
     [Test]
@@ -632,7 +632,7 @@ public class TypeAssertionAmbiguityTests
     {
         List<object> items = ["test", "hello"];
 
-        await Assert.That(items).HasCount(2);
+        await Assert.That(items).Count().IsEqualTo(2);
         await Assert.That(items.First()).IsTypeOf<string>();
     }
 
@@ -642,7 +642,7 @@ public class TypeAssertionAmbiguityTests
         List<IElement> items = [new Element(), new DerivedElement()];
         var derived = items.OfType<DerivedElement>().ToList();
 
-        await Assert.That(derived).HasCount(1);
+        await Assert.That(derived).Count().IsEqualTo(1);
         await Assert.That(derived.First()).IsAssignableTo<Element>();
     }
 }

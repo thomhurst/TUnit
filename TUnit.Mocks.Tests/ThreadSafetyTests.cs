@@ -21,7 +21,7 @@ public class ThreadSafetyTests
         var results = await Task.WhenAll(tasks);
 
         // Assert — all should return 42
-        await Assert.That(results).HasCount().EqualTo(100);
+        await Assert.That(results).Count().IsEqualTo(100);
         foreach (var result in results)
         {
             await Assert.That(result).IsEqualTo(42);
@@ -71,7 +71,7 @@ public class ThreadSafetyTests
         await setupTask;
 
         // Assert — no exceptions were thrown, all results are valid ints
-        await Assert.That(results).HasCount().EqualTo(50);
+        await Assert.That(results).Count().IsEqualTo(50);
     }
 
     [Test]
@@ -145,8 +145,8 @@ public class ThreadSafetyTests
         var greeterResults = await Task.WhenAll(greeterTasks);
 
         // Assert
-        await Assert.That(calcResults).HasCount().EqualTo(50);
-        await Assert.That(greeterResults).HasCount().EqualTo(50);
+        await Assert.That(calcResults).Count().IsEqualTo(50);
+        await Assert.That(greeterResults).Count().IsEqualTo(50);
 
         foreach (var r in calcResults)
         {

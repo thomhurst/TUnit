@@ -244,7 +244,7 @@ public class EdgeCaseTests
     [Arguments(new[] { 1, 2, 3 })]
     public async Task ArrayArguments_Work(int[] values)
     {
-        await Assert.That(values).HasCount(3);
+        await Assert.That(values).Count().IsEqualTo(3);
         await Assert.That(values[0]).IsEqualTo(1);
     }
 }

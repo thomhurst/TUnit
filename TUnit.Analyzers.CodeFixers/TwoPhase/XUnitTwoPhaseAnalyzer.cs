@@ -625,7 +625,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
         var inspectorSummary = string.Join("; ", inspectors);
         var todoComment = $"// TODO: TUnit migration - Assert.Collection element inspectors were dropped and need manual conversion: {inspectorSummary}";
-        return (AssertionConversionKind.Collection, $"await Assert.That({collection}).HasCount({inspectorCount})", true, todoComment);
+        return (AssertionConversionKind.Collection, $"await Assert.That({collection}).Count().IsEqualTo({inspectorCount})", true, todoComment);
     }
 
     private string? TryConvertActionToPredicate(ExpressionSyntax actionExpression)

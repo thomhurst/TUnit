@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.Chaining;
 using TUnit.Assertions.Conditions;
-using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
@@ -314,10 +313,10 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts on a collection member of an object using a lambda selector and assertion lambda.
-    /// The assertion lambda receives collection assertion methods (HasCount, Contains, IsEmpty, etc.).
+    /// The assertion lambda receives collection assertion methods (Count, Contains, IsEmpty, etc.).
     /// Supports type transformations like IsTypeOf within the assertion lambda.
     /// After the member assertion completes, returns to the parent object context for further chaining.
-    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Count().IsEqualTo(1).And.Contains("value"));
     /// </summary>
     [OverloadResolutionPriority(2)]
     public static MemberAssertionResult<TObject> Member<TObject, TItem, TTransformed>(
@@ -367,9 +366,9 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts on a collection member of an object using a lambda selector and assertion lambda.
-    /// The assertion lambda receives collection assertion methods (HasCount, Contains, IsEmpty, etc.).
+    /// The assertion lambda receives collection assertion methods (Count, Contains, IsEmpty, etc.).
     /// After the member assertion completes, returns to the parent object context for further chaining.
-    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Count().IsEqualTo(1).And.Contains("value"));
     /// </summary>
     [OverloadResolutionPriority(1)]
     public static MemberAssertionResult<TObject> Member<TObject, TItem>(
@@ -419,9 +418,9 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts on a collection member of an object using a lambda selector and assertion lambda.
-    /// The assertion lambda receives collection assertion methods (HasCount, Contains, IsEmpty, etc.).
+    /// The assertion lambda receives collection assertion methods (Count, Contains, IsEmpty, etc.).
     /// After the member assertion completes, returns to the parent object context for further chaining.
-    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Count().IsEqualTo(1).And.Contains("value"));
     /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
     [OverloadResolutionPriority(1)]
@@ -698,29 +697,16 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Returns a wrapper for string length assertions.
-    /// Example: await Assert.That(str).HasLength().EqualTo(5);
+    /// Asserts on the length of the string using an inline assertion lambda, preserving string context for chaining.
+    /// Example: await Assert.That(str).Length(l => l.IsEqualTo(5)).And.StartsWith("h");
     /// </summary>
-    [Obsolete("Use Length() instead, which provides all numeric assertion methods. Example: Assert.That(str).Length().IsGreaterThan(5)")]
-    public static LengthWrapper HasLength(
-        this IAssertionSource<string> source)
-    {
-        source.Context.ExpressionBuilder.Append(".HasLength()");
-        return new LengthWrapper(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the string has the expected length.
-    /// Example: await Assert.That(str).HasLength(5);
-    /// </summary>
-    [Obsolete("Use Length().IsEqualTo(expectedLength) instead.")]
-    public static StringLengthAssertion HasLength(
+    public static StringLengthWithInlineAssertionAssertion Length(
         this IAssertionSource<string> source,
-        int expectedLength,
-        [CallerArgumentExpression(nameof(expectedLength))] string? expression = null)
+        Func<IAssertionSource<int>, Assertion<int>?> lengthAssertion,
+        [CallerArgumentExpression(nameof(lengthAssertion))] string? expression = null)
     {
-        source.Context.ExpressionBuilder.Append($".HasLength({expression})");
-        return new StringLengthAssertion(source.Context, expectedLength);
+        source.Context.ExpressionBuilder.Append($".Length({expression})");
+        return new StringLengthWithInlineAssertionAssertion(source.Context, lengthAssertion);
     }
 
     /// <summary>

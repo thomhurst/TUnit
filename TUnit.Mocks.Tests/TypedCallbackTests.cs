@@ -177,7 +177,7 @@ public class TypedCallbackTests
         _ = calc.Add(10, 20);
 
         // Last behavior repeats — both calls run the callback
-        await Assert.That(capturedArgs).HasCount().EqualTo(2);
+        await Assert.That(capturedArgs).Count().IsEqualTo(2);
         await Assert.That(capturedArgs[0]).IsEqualTo((1, 2));
         await Assert.That(capturedArgs[1]).IsEqualTo((10, 20));
     }

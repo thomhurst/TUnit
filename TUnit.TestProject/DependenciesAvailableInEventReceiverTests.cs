@@ -65,7 +65,7 @@ public class DependenciesAvailableInEventReceiverTests
 
         // Verify the dependency was captured at registration time
         var capturedDeps = CaptureDependenciesAttribute.CapturedDependencies[testId];
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
         await Assert.That(capturedDeps[0].TestName).IsEqualTo(nameof(IndependentTest));
     }
 }
@@ -103,7 +103,7 @@ public class CrossClassDependenciesInEventReceiverTests
 
         // Verify the cross-class dependency was captured at registration time
         var capturedDeps = CaptureDependenciesAttribute.CapturedDependencies[testId];
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
         await Assert.That(capturedDeps[0].ClassType).IsEqualTo(typeof(DependencyTargetClass));
         await Assert.That(capturedDeps[0].TestName).IsEqualTo(nameof(DependencyTargetClass.TargetTest));
 
@@ -136,7 +136,7 @@ public class TransitiveDependenciesInEventReceiverTests
         var capturedDeps = CaptureDependenciesAttribute.CapturedDependencies[testId];
 
         // B depends directly on C
-        await Assert.That(capturedDeps).HasCount().EqualTo(1);
+        await Assert.That(capturedDeps).Count().IsEqualTo(1);
         await Assert.That(capturedDeps[0].TestName).IsEqualTo(nameof(TestC_NoDependencies));
     }
 
@@ -148,7 +148,7 @@ public class TransitiveDependenciesInEventReceiverTests
         var capturedDeps = CaptureDependenciesAttribute.CapturedDependencies[testId];
 
         // A depends on B, but should also see C as a transitive dependency
-        await Assert.That(capturedDeps).HasCount().EqualTo(2);
+        await Assert.That(capturedDeps).Count().IsEqualTo(2);
 
         var depNames = capturedDeps.Select(d => d.TestName).ToList();
         await Assert.That(depNames).Contains(nameof(TestB_DependsOnC));

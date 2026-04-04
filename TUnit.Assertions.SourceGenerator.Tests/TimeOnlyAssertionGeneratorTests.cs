@@ -13,6 +13,6 @@ internal class TimeOnlyAssertionGeneratorTests : TestsBase<MethodAssertionGenera
             "TimeOnlyAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount(0);
+            await Assert.That(generatedFiles).Count().IsEqualTo(0);
         });
 }

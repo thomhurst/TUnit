@@ -42,8 +42,8 @@ public class DependsOnTests3
         var test1 = TestContext.Current!.Dependencies.GetTests(nameof(Test1));
         var test2 = TestContext.Current.Dependencies.GetTests(nameof(Test2));
 
-        await Assert.That(test1).HasCount().EqualTo(1);
-        await Assert.That(test2).HasCount().EqualTo(1);
+        await Assert.That(test1).Count().IsEqualTo(1);
+        await Assert.That(test2).Count().IsEqualTo(1);
 
         await Assert.That(test1[0].StateBag.Items).ContainsKey("Test1");
         await Assert.That(test2[0].StateBag.Items).ContainsKey("Test2");

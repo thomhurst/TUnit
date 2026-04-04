@@ -39,7 +39,7 @@ public class SelfTypedCollectionTests
             .Contains(1)
             .And.Contains(2)
             .And.Contains(3)
-            .And.HasCount(5);
+            .And.Count().IsEqualTo(5);
     }
 
     [Test]
@@ -72,7 +72,7 @@ public class SelfTypedCollectionTests
         await Assert.That(list)
             .Contains(1)
             .And.Contains(5)
-            .And.HasCount(5)
+            .And.Count().IsEqualTo(5)
             .And.IsNotEmpty();
     }
 
@@ -91,7 +91,7 @@ public class SelfTypedCollectionTests
             .And
             .Contains("B")
             .And
-            .HasCount(3);
+            .Count().IsEqualTo(3);
     }
 
     [Test]

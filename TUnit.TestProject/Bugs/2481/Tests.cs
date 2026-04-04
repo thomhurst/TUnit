@@ -15,7 +15,7 @@ public class Tests
 
         var array = properties["Group"].ToArray();
 
-        await Assert.That(array).HasCount().EqualTo(3);
+        await Assert.That(array).Count().IsEqualTo(3);
         await Assert.That(array).Contains((string x) => x == "Bugs");
         await Assert.That(array).Contains((string x) => x == "2481");
         await Assert.That(array).Contains((string x) => x == "TUnit");

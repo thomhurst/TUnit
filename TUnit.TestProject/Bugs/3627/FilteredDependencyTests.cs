@@ -29,7 +29,7 @@ public class FilteredDependencyTests
         // When filtering to run only this test, BaseTest should also execute
         var dependencies = TestContext.Current!.Dependencies.GetTests(nameof(BaseTest));
 
-        await Assert.That(dependencies).HasCount().EqualTo(1);
+        await Assert.That(dependencies).Count().IsEqualTo(1);
         await Assert.That(dependencies[0]).IsNotNull();
 
         // Verify the dependency actually executed by checking its StateBag

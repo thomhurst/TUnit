@@ -182,7 +182,7 @@ public class Tests
             return Task.CompletedTask;
         });
 
-        await Assert.That(discoveredResults).HasCount().GreaterThan(4000);
+        await Assert.That(discoveredResults).Count().IsGreaterThan(4000);
 
         Console.WriteLine("[RPC Test] Waiting for discovery to complete...");
         await discoverTestsResponse.WaitCompletionAsync();
@@ -227,14 +227,14 @@ public class Tests
             {
                 // With filter, we expect fewer tests
                 Console.WriteLine($"[RPC Test] With filter, executed test count: {finished.Count}");
-                await Assert.That(finished).HasCount().GreaterThan(0);
-                await Assert.That(finished).HasCount().LessThan(originalDiscovered.Count);
+                await Assert.That(finished).Count().IsGreaterThan(0);
+                await Assert.That(finished).Count().IsLessThan(originalDiscovered.Count);
             }
             else
             {
                 // Without filter, expect all tests
                 Console.WriteLine($"[RPC Test] Asserting discovered test count: {originalDiscovered.Count} (expected >= 3400)");
-                await Assert.That(originalDiscovered).HasCount().GreaterThanOrEqualTo(3400);
+                await Assert.That(originalDiscovered).Count().IsGreaterThanOrEqualTo(3400);
             }
 
             Console.WriteLine("[RPC Test] Sending exit command to test host...");

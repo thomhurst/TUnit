@@ -35,12 +35,12 @@ const assertionsData: Assertion[] = [
   { name: 'EndsWith', category: 'String', description: 'Asserts the string ends with the expected suffix', syntax: 'await Assert.That(actual).EndsWith(suffix)', example: 'await Assert.That("hello world").EndsWith("world")' },
   { name: 'IsEmpty', category: 'String', description: 'Asserts the string is empty', syntax: 'await Assert.That(actual).IsEmpty()', example: 'await Assert.That("").IsEmpty()' },
   { name: 'IsNotEmpty', category: 'String', description: 'Asserts the string is not empty', syntax: 'await Assert.That(actual).IsNotEmpty()', example: 'await Assert.That("text").IsNotEmpty()' },
-  { name: 'HasLength', category: 'String', description: 'Asserts the string has the expected length', syntax: 'await Assert.That(actual).HasLength().EqualTo(length)', example: 'await Assert.That("hello").HasLength().EqualTo(5)' },
+  { name: 'Length', category: 'String', description: 'Asserts the string has the expected length', syntax: 'await Assert.That(actual).Length().IsEqualTo(length)', example: 'await Assert.That("hello").Length().IsEqualTo(5)' },
 
   // Collections
   { name: 'Contains (Collection)', category: 'Collections', description: 'Asserts the collection contains the expected item', syntax: 'await Assert.That(collection).Contains(item)', example: 'await Assert.That(list).Contains(5)' },
   { name: 'DoesNotContain (Collection)', category: 'Collections', description: 'Asserts the collection does not contain the item', syntax: 'await Assert.That(collection).DoesNotContain(item)', example: 'await Assert.That(list).DoesNotContain(10)' },
-  { name: 'HasCount', category: 'Collections', description: 'Asserts the collection has the expected count', syntax: 'await Assert.That(collection).HasCount().EqualTo(count)', example: 'await Assert.That(list).HasCount().EqualTo(3)' },
+  { name: 'Count', category: 'Collections', description: 'Asserts the collection has the expected count', syntax: 'await Assert.That(collection).Count().IsEqualTo(count)', example: 'await Assert.That(list).Count().IsEqualTo(3)' },
   { name: 'IsEmpty (Collection)', category: 'Collections', description: 'Asserts the collection is empty', syntax: 'await Assert.That(collection).IsEmpty()', example: 'await Assert.That(emptyList).IsEmpty()' },
   { name: 'IsNotEmpty (Collection)', category: 'Collections', description: 'Asserts the collection is not empty', syntax: 'await Assert.That(collection).IsNotEmpty()', example: 'await Assert.That(list).IsNotEmpty()' },
   { name: 'IsEquivalentTo', category: 'Collections', description: 'Asserts collections have equivalent items (order-independent)', syntax: 'await Assert.That(collection).IsEquivalentTo(expected)', example: 'await Assert.That(list).IsEquivalentTo([1,2,3])' },

@@ -58,7 +58,7 @@ public sealed class AssertionContext<TValue>
         var newContext = new AssertionContext<TNew>(newEvaluation, ExpressionBuilder);
 
         // Transfer pending links from source context to handle cross-type chaining
-        // e.g., Assert.That(str).HasLength(3).And.Match(@"\d+").And.Captured<int>(1)
+        // e.g., Assert.That(str).Length().IsEqualTo(3).And.Match(@"\d+").And.Captured<int>(1)
         var (pendingAssertion, combinerType) = ConsumePendingLink();
         if (pendingAssertion != null)
         {

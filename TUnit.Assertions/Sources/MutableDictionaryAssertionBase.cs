@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.Adapters;
 using TUnit.Assertions.Collections;
 using TUnit.Assertions.Conditions;
-using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Sources;

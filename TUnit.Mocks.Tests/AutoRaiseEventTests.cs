@@ -65,7 +65,7 @@ public class AutoRaiseEventTests
 
         mock.Object.Process(1);
 
-        await Assert.That(receivedStatuses).HasCount().EqualTo(2);
+        await Assert.That(receivedStatuses).Count().IsEqualTo(2);
         await Assert.That(receivedStatuses[0]).IsEqualTo("first");
         await Assert.That(receivedStatuses[1]).IsEqualTo("second");
     }

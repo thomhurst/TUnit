@@ -83,7 +83,7 @@ public class DelegateMockTests
         mock.Object("first");
         mock.Object("second");
 
-        await Assert.That(nameArg.Values).HasCount().EqualTo(2);
+        await Assert.That(nameArg.Values).Count().IsEqualTo(2);
         await Assert.That(nameArg.Values[0]).IsEqualTo("first");
         await Assert.That(nameArg.Values[1]).IsEqualTo("second");
     }

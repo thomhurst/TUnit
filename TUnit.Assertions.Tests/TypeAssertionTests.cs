@@ -504,26 +504,26 @@ public class TypeAssertionTests
     [Test]
     public async Task IsTypeOf_WithAnd_PreviousAssertion_ShouldFail()
     {
-        // HasLength(4) should fail because "123" has length 3
+        // Length().IsEqualTo(4) should fail because "123" has length 3
         var exception = await Assert.That(async () =>
         {
             var sut = "123";
             await Assert.That(sut)
-                .HasLength(4)
+                .Length().IsEqualTo(4)
                 .And
                 .IsTypeOf<string>()
                 .And
-                .HasLength(3);
-        }).ThrowsException().And.HasMessageContaining("HasLength(4)");
+                .Length().IsEqualTo(3);
+        }).ThrowsException().And.HasMessageContaining("IsEqualTo(4)");
     }
 
     [Test]
     public async Task IsTypeOf_WithAnd_PreviousAssertion_ShouldPass()
     {
-        // Both assertions should pass
+        // Use Length(lambda) to preserve string context for And chaining
         var sut = "123";
         await Assert.That(sut)
-            .HasLength(3)
+            .Length(l => l.IsEqualTo(3))
             .And
             .IsTypeOf<string>()
             .And
@@ -540,7 +540,7 @@ public class TypeAssertionTests
             .And
             .IsTypeOf<string>()
             .And
-            .HasLength(4);
+            .Length().IsEqualTo(4);
     }
 
     [Test]
@@ -569,7 +569,7 @@ public class TypeAssertionTests
             .And
             .IsTypeOf<string>()
             .And
-            .HasLength(5)
+            .Length(l => l.IsEqualTo(5))
             .And
             .StartsWith("h");
     }
@@ -602,8 +602,8 @@ public class TypeAssertionTests
                 .And
                 .IsTypeOf<string>()
                 .And
-                .HasLength(10);
-        }).ThrowsException().And.HasMessageContaining("HasLength");
+                .Length().IsEqualTo(10);
+        }).ThrowsException().And.HasMessageContaining("IsEqualTo");
     }
 
     [Test]
@@ -622,7 +622,7 @@ public class TypeAssertionTests
                     .And
                     .IsTypeOf<string>()
                     .And
-                    .HasLength(10);
+                    .Length().IsEqualTo(10);
             }
         }).ThrowsException();
 
@@ -640,7 +640,7 @@ public class TypeAssertionTests
             .And
             .IsTypeOf<string>()
             .And
-            .HasLength(5)
+            .Length(l => l.IsEqualTo(5))
             .And
             .StartsWith("1")
             .And
@@ -658,7 +658,7 @@ public class TypeAssertionTests
             .IsTypeOf<List<int>>();
 
         // Assert on collection contents separately
-        await Assert.That((List<int>)sut).HasCount(3);
+        await Assert.That((List<int>)sut).Count().IsEqualTo(3);
     }
 
     [Test]

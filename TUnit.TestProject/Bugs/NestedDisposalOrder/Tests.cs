@@ -148,7 +148,7 @@ public class NestedDisposalOrderTests
         Console.WriteLine($"Dispose order: {string.Join(" -> ", disposeOrder)}");
 
         // Init should be deepest first
-        await Assert.That(initOrder).HasCount().EqualTo(3);
+        await Assert.That(initOrder).Count().IsEqualTo(3);
         await Assert.That(initOrder[0]).IsEqualTo(nameof(ContextFactoryFixture2))
             .Because("deepest dependency should be initialized first");
         await Assert.That(initOrder[1]).IsEqualTo(nameof(AppSeedFixture2))
@@ -157,7 +157,7 @@ public class NestedDisposalOrderTests
             .Because("top-level dependency should be initialized last");
 
         // Dispose should be reverse of init (shallowest first)
-        await Assert.That(disposeOrder).HasCount().EqualTo(3);
+        await Assert.That(disposeOrder).Count().IsEqualTo(3);
         await Assert.That(disposeOrder[0]).IsEqualTo(nameof(AppServiceFixture2))
             .Because("top-level (shallowest) should be disposed first");
         await Assert.That(disposeOrder[1]).IsEqualTo(nameof(AppSeedFixture2))

@@ -121,7 +121,7 @@ public class InstanceMethodDataSourceWithAsyncInitializerTests
         // Verify that all tests used the SAME fixture instance (SharedType.PerClass)
         var uniqueInstanceIds = _observedInstanceIds.Distinct().ToList();
         await Assert.That(uniqueInstanceIds)
-            .HasCount().EqualTo(1)
+            .Count().IsEqualTo(1)
             .Because("with SharedType.PerClass, all tests should share the same fixture instance");
 
         // Reset for next run

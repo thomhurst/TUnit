@@ -59,16 +59,16 @@ public class ParseAssertionTests
     [Test]
     public async Task WhenParsedInto_WithAnd_PreviousAssertion_ShouldFail()
     {
-        // HasLength(4) should fail because "123" has length 3
+        // Length().IsEqualTo(4) should fail because "123" has length 3
         var exception = await Assert.That(async () =>
         {
             var sut = "123";
             await Assert.That(sut)
-                .HasLength(4)
+                .Length(l => l.IsEqualTo(4))
                 .And
                 .WhenParsedInto<int>()
                 .IsEqualTo(123);
-        }).ThrowsException().And.HasMessageContaining("HasLength(4)");
+        }).ThrowsException().And.HasMessageContaining("length");
     }
 
     [Test]
@@ -77,7 +77,7 @@ public class ParseAssertionTests
         // Both assertions should pass
         var sut = "123";
         await Assert.That(sut)
-            .HasLength(3)
+            .Length(l => l.IsEqualTo(3))
             .And
             .WhenParsedInto<int>()
             .IsEqualTo(123);
@@ -86,18 +86,18 @@ public class ParseAssertionTests
     [Test]
     public async Task WhenParsedInto_WithAnd_MultiplePreviousAssertions_ShouldFail()
     {
-        // IsNotEmpty should pass, but HasLength(4) should fail
+        // IsNotEmpty should pass, but Length(l => l.IsEqualTo(4)) should fail
         var exception = await Assert.That(async () =>
         {
             var sut = "123";
             await Assert.That(sut)
                 .IsNotEmpty()
                 .And
-                .HasLength(4)
+                .Length(l => l.IsEqualTo(4))
                 .And
                 .WhenParsedInto<int>()
                 .IsGreaterThan(100);
-        }).ThrowsException().And.HasMessageContaining("HasLength(4)");
+        }).ThrowsException().And.HasMessageContaining("length");
     }
 
     [Test]
@@ -106,7 +106,7 @@ public class ParseAssertionTests
         // Previous assertion should be checked before parsing
         var sut = "100";
         await Assert.That(sut)
-            .HasLength(3)
+            .Length(l => l.IsEqualTo(3))
             .And
             .WhenParsedInto<int>()
             .IsGreaterThan(50)
@@ -137,7 +137,7 @@ public class ParseAssertionTests
         {
             var sut = "123";
             await Assert.That(sut)
-                .HasLength(3)
+                .Length(l => l.IsEqualTo(3))
                 .And
                 .WhenParsedInto<int>()
                 .IsEqualTo(456);
@@ -154,15 +154,15 @@ public class ParseAssertionTests
             {
                 var sut = "123";
                 await Assert.That(sut)
-                    .HasLength(4)
+                    .Length(l => l.IsEqualTo(4))
                     .And
                     .WhenParsedInto<int>()
                     .IsEqualTo(456);
             }
         }).ThrowsException();
 
-        // Should have recorded the HasLength failure
-        await Assert.That(exception.Message).Contains("HasLength");
+        // Should have recorded the length assertion failure
+        await Assert.That(exception.Message).Contains("length");
     }
 
     [Test]
@@ -171,7 +171,7 @@ public class ParseAssertionTests
         // Complex chain: string assertions, parse, int assertions
         var sut = "1234";
         await Assert.That(sut)
-            .HasLength(4)
+            .Length(l => l.IsEqualTo(4))
             .And
             .StartsWith("1")
             .And
@@ -193,7 +193,7 @@ public class ParseAssertionTests
         {
             var sut = "1234";
             await Assert.That(sut)
-                .HasLength(4)
+                .Length(l => l.IsEqualTo(4))
                 .And
                 .StartsWith("1")
                 .And

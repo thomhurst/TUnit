@@ -20,10 +20,6 @@ public class TestRegisteredContext
         CustomDisplayName = testContext.CustomDisplayName;
     }
 
-    [Obsolete("Use StateBag property instead.")]
-    public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
-
-    
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
