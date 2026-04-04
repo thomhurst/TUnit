@@ -23,6 +23,12 @@ public class WithInnerExceptionsAssertion<TException> : Assertion<TException>
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
     {
+        var evaluationException = metadata.Exception;
+        if (evaluationException != null)
+        {
+            return AssertionResult.Failed($"threw {evaluationException.GetType().FullName}");
+        }
+
         var exception = metadata.Value;
 
         if (exception is not AggregateException aggregateException)
@@ -42,11 +48,10 @@ public class WithInnerExceptionsAssertion<TException> : Assertion<TException>
             try
             {
                 await resultingAssertion.AssertAsync();
-                return AssertionResult.Passed;
             }
             catch
             {
-                return AssertionResult.Failed("inner exceptions assertion failed");
+                return AssertionResult.Failed("inner exceptions did not satisfy assertion");
             }
         }
 
