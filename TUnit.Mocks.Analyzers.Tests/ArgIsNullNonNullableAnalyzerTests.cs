@@ -126,4 +126,40 @@ public class ArgIsNullNonNullableAnalyzerTests
             """
         );
     }
+
+    [Test]
+    public async Task IsNull_With_Nullable_Reference_Type_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            ArgStub + """
+
+            #nullable enable
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Arguments.Arg.IsNull<string?>();
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task IsNotNull_With_Nullable_Reference_Type_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            ArgStub + """
+
+            #nullable enable
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Arguments.Arg.IsNotNull<string?>();
+                }
+            }
+            """
+        );
+    }
 }
