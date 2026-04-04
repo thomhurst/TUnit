@@ -19,7 +19,7 @@ internal static class MockDelegateFactoryBuilder
 
         using (writer.Block($"namespace {mockNamespace}"))
         {
-            using (writer.Block($"internal static class {safeName}MockDelegateFactory"))
+            using (writer.Block($"file static class {safeName}MockDelegateFactory"))
             {
                 writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
                 using (writer.Block("internal static void Register()"))
