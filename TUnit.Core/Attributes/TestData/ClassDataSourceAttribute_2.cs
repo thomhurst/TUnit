@@ -28,7 +28,7 @@ public sealed class ClassDataSourceAttribute<
         };
     }
 
-    public IEnumerable<SharedType> GetSharedTypes() => [..Shared];
+    public IEnumerable<SharedType> GetSharedTypes() => Shared;
 
-    public IEnumerable<string> GetKeys() => [..Keys];
+    public IEnumerable<string> GetKeys() => Keys;
 }
