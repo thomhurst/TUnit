@@ -17,12 +17,13 @@ public class RunPlaywrightTestsModule : TestBaseModule
         return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
             new DotNetRunOptions
             {
-                Project = project.FullName,
+                Project = project.Name,
                 NoBuild = true,
                 Configuration = "Release",
             },
             new CommandExecutionOptions
             {
+                WorkingDirectory = project.Folder!.Path,
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
