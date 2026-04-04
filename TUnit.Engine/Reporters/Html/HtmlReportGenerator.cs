@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal static class HtmlReportGenerator
+internal static partial class HtmlReportGenerator
 {
     private static readonly string MinifiedCss = MinifyCss(GetCss());
 
@@ -394,12 +394,31 @@ internal static class HtmlReportGenerator
 
     private static string MinifyCss(string css)
     {
-        css = Regex.Replace(css, @"/\*[\s\S]*?\*/", string.Empty);
-        css = Regex.Replace(css, @"\s+", " ");
-        css = Regex.Replace(css, @"\s*([{}:;,>~+!])\s*", "$1");
+        css = CssCommentsRegex().Replace(css, string.Empty);
+        css = CssWhitespaceRegex().Replace(css, " ");
+        css = CssSeparatorsRegex().Replace(css, "$1");
         css = css.Replace(";}", "}");
         return css.Trim();
     }
+
+#if NET
+    [System.Text.RegularExpressions.GeneratedRegex(@"/\*[\s\S]*?\*/")]
+    private static partial Regex CssCommentsRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]
+    private static partial Regex CssWhitespaceRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\s*([{}:;,>~+!])\s*")]
+    private static partial Regex CssSeparatorsRegex();
+#else
+    private static readonly Regex CssCommentsRegexInstance = new(@"/\*[\s\S]*?\*/", RegexOptions.Compiled);
+    private static readonly Regex CssWhitespaceRegexInstance = new(@"\s+", RegexOptions.Compiled);
+    private static readonly Regex CssSeparatorsRegexInstance = new(@"\s*([{}:;,>~+!])\s*", RegexOptions.Compiled);
+
+    private static Regex CssCommentsRegex() => CssCommentsRegexInstance;
+    private static Regex CssWhitespaceRegex() => CssWhitespaceRegexInstance;
+    private static Regex CssSeparatorsRegex() => CssSeparatorsRegexInstance;
+#endif
 
     private static string GetCss()
     {
