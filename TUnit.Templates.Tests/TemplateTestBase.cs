@@ -34,14 +34,15 @@ public abstract partial class TemplateTestBase : IDisposable
                 .AddScrubber(ScrubVersions, "vbproj")
             );
 
+    private const string ScrubbedVersion = "0.0.0-scrubbed";
+
     private static void ScrubVersions(StringBuilder sb)
     {
         var original = sb.ToString();
-        var matches = VersionRegex().Matches(original);
 
-        foreach (var match in matches.Where(m => m.Success))
+        foreach (var match in VersionRegex().Matches(original).Cast<Match>())
         {
-            var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "0.0.0-scrubbed");
+            var line = match.Value.Replace(match.Groups[1].Value, ScrubbedVersion);
             sb.Replace(match.Value, line);
         }
     }
