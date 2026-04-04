@@ -12,6 +12,7 @@ public interface IAsyncService
     Task<string> GetNameAsync(string key);
     Task DoWorkAsync();
     ValueTask<int> GetValueValueTaskAsync();
+    ValueTask<int> ComputeValueTaskAsync(int input);
 }
 
 /// <summary>
@@ -330,5 +331,113 @@ public class AsyncTests
 
         // Assert
         await Assert.That(result).IsEqualTo(123);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Typed_Factory_Receives_Arguments()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetNameAsync(Any()).ReturnsAsync((string key) => Task.FromResult($"value-{key}"));
+
+        IAsyncService service = mock.Object;
+
+        var result = await service.GetNameAsync("abc");
+        await Assert.That(result).IsEqualTo("value-abc");
+
+        var result2 = await service.GetNameAsync("xyz");
+        await Assert.That(result2).IsEqualTo("value-xyz");
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Typed_Factory_ValueTask_Receives_Arguments()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        mock.ComputeValueTaskAsync(Any()).ReturnsAsync((int input) => new ValueTask<int>(input * 10));
+
+        IAsyncService service = mock.Object;
+
+        var result = await service.ComputeValueTaskAsync(5);
+        await Assert.That(result).IsEqualTo(50);
+
+        var result2 = await service.ComputeValueTaskAsync(3);
+        await Assert.That(result2).IsEqualTo(30);
+    }
+
+    [Test]
+    public async Task ReturnsAsync_Typed_Factory_With_Then_Chain()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetNameAsync(Any())
+            .ReturnsAsync((string key) => Task.FromResult($"first-{key}"))
+            .Then()
+            .Returns("fallback");
+
+        IAsyncService service = mock.Object;
+
+        var result1 = await service.GetNameAsync("a");
+        await Assert.That(result1).IsEqualTo("first-a");
+
+        var result2 = await service.GetNameAsync("b");
+        await Assert.That(result2).IsEqualTo("fallback");
+    }
+
+    [Test]
+    public async Task Typed_Callback_On_Async_Task_Method()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        string? capturedKey = null;
+
+        mock.GetNameAsync(Any())
+            .Callback((string key) => capturedKey = key)
+            .Then()
+            .Returns("result");
+
+        IAsyncService service = mock.Object;
+
+        await service.GetNameAsync("myKey");
+        await Assert.That(capturedKey).IsEqualTo("myKey");
+    }
+
+    [Test]
+    public async Task Typed_Callback_On_Async_ValueTask_Method()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        int? capturedInput = null;
+
+        mock.ComputeValueTaskAsync(Any())
+            .Callback((int input) => capturedInput = input)
+            .Then()
+            .Returns(0);
+
+        IAsyncService service = mock.Object;
+
+        await service.ComputeValueTaskAsync(42);
+        await Assert.That(capturedInput).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Typed_Throws_On_Async_Task_Method()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        mock.GetNameAsync(Any())
+            .Throws((string key) => new InvalidOperationException($"No value for: {key}"));
+
+        IAsyncService service = mock.Object;
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetNameAsync("badKey"));
+        await Assert.That(ex.Message).Contains("No value for: badKey");
+    }
+
+    [Test]
+    public async Task Typed_Throws_On_Async_ValueTask_Method()
+    {
+        var mock = Mock.Of<IAsyncService>();
+        mock.ComputeValueTaskAsync(Any())
+            .Throws((int input) => new ArgumentException($"Invalid input: {input}"));
+
+        IAsyncService service = mock.Object;
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await service.ComputeValueTaskAsync(-1));
+        await Assert.That(ex.Message).Contains("Invalid input: -1");
     }
 }
