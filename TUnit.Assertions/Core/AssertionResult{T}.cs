@@ -29,6 +29,8 @@ public readonly struct AssertionResult<T>
 
     internal static AssertionResult<T> Failed(string message) => new(false, message, default);
 
+    internal static AssertionResult<T> Failed(string message, Exception? exception) => new(false, message, default, exception);
+
     /// <summary>
     /// Allows implicit conversion from a non-generic <see cref="AssertionResult"/> (failure only).
     /// Converting a passed <see cref="AssertionResult"/> without a value will throw.

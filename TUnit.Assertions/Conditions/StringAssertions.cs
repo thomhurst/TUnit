@@ -610,7 +610,7 @@ public class StringMatchesAssertion : Assertion<RegexMatchCollection>
             // Check what type of exception it is
             if (exception is InvalidOperationException)
             {
-                return Task.FromResult(AssertionResult.Failed(exception.Message));
+                return Task.FromResult(AssertionResult.Failed(exception.Message, exception));
             }
             // Rethrow native exceptions (ArgumentNullException, RegexParseException, RegexMatchTimeoutException)
             // so they can be tested with .Throws<T>()
