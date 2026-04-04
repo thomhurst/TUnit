@@ -301,47 +301,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         SharedType? sharedType,
         CancellationToken cancellationToken)
     {
-        Activity? initActivity = null;
-        var previousActivity = Activity.Current;
+        var parentContext = GetParentActivityContext(testContext, sharedType);
 
-        if (TUnitActivitySource.Source.HasListeners())
-        {
-            var parentContext = GetParentActivityContext(testContext, sharedType);
-            var objType = obj.GetType();
-            initActivity = TUnitActivitySource.StartActivity(
-                $"initialize {objType.Name}",
-                ActivityKind.Internal,
-                parentContext,
-                [
-                    new("tunit.test.id", testContext.Id),
-                    new("tunit.test.class", testContext.Metadata.TestDetails.ClassType.FullName),
-                    new("tunit.trace.scope", TUnitActivitySource.GetScopeTag(sharedType))
-                ]);
-
-            if (initActivity is not null)
-            {
-                Activity.Current = initActivity;
-            }
-        }
-
-        try
-        {
-            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            TUnitActivitySource.RecordException(initActivity, ex);
-            throw;
-        }
-        finally
-        {
-            // Activity.Current is thread-static; this restore only affects the current thread.
-            // Async continuations that ran on other threads during initialization will have
-            // already captured Activity.Current at their point of execution — this is an
-            // inherent limitation of System.Diagnostics.Activity's threading model.
-            TUnitActivitySource.StopActivity(initActivity);
-            Activity.Current = previousActivity;
-        }
+        await TUnitActivitySource.RunWithSpanAsync(
+            $"initialize {obj.GetType().Name}",
+            parentContext,
+            [
+                new(TUnitActivitySource.TagTestId, testContext.Id),
+                new(TUnitActivitySource.TagTestClass, testContext.Metadata.TestDetails.ClassType.FullName),
+                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(sharedType))
+            ],
+            () => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
     }
 
     /// <summary>

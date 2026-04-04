@@ -6,9 +6,6 @@ using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
-#if NET
-using System.Diagnostics;
-#endif
 
 namespace TUnit.Engine.Services.TestExecution;
 
@@ -317,32 +314,24 @@ internal sealed class TestCoordinator : ITestCoordinator
     private async ValueTask DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
     {
 #if NET
-        Activity? disposalActivity = null;
-        var previousActivity = Activity.Current;
-        if (TUnitActivitySource.Source.HasListeners())
-        {
-            var classType = test.Context.Metadata.TestDetails.ClassType;
-            disposalActivity = TUnitActivitySource.StartActivity(
-                $"dispose {classType.Name}",
-                ActivityKind.Internal,
-                test.Context.ClassContext.Activity?.Context ?? default,
-                [
-                    new("tunit.test.id", test.Context.Id),
-                    new("tunit.test.class", classType.FullName),
-                    new("tunit.trace.scope", TUnitActivitySource.GetScopeTag(SharedType.None))
-                ]);
-        }
-
-        if (disposalActivity is not null)
-        {
-            Activity.Current = disposalActivity;
-        }
-
-        try
-        {
+        var classType = test.Context.Metadata.TestDetails.ClassType;
+        await TUnitActivitySource.RunWithSpanAsync(
+            $"dispose {classType.Name}",
+            test.Context.ClassContext.Activity?.Context ?? default,
+            [
+                new(TUnitActivitySource.TagTestId, test.Context.Id),
+                new(TUnitActivitySource.TagTestClass, classType.FullName),
+                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
+            ],
+            () => DisposeTestInstanceCoreAsync(test));
+#else
+        await DisposeTestInstanceCoreAsync(test);
 #endif
-        // Dispose test instance and fire OnDispose after each attempt
-        // This ensures each retry gets a fresh instance
+    }
+
+    private async Task DisposeTestInstanceCoreAsync(AbstractExecutableTest test)
+    {
+        // Fire OnDispose callbacks — each retry gets a fresh instance
         var onDispose = test.Context.InternalEvents.OnDispose;
         if (onDispose?.InvocationList != null)
         {
@@ -354,9 +343,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }
                 catch (Exception disposeEx)
                 {
-#if NET
-                    TUnitActivitySource.RecordException(disposalActivity, disposeEx);
-#endif
                     await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
                 }
             }
@@ -368,22 +354,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         catch (Exception disposeEx)
         {
-#if NET
-            TUnitActivitySource.RecordException(disposalActivity, disposeEx);
-#endif
             await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
         }
-#if NET
-        }
-        finally
-        {
-            // Activity.Current is thread-static; this restore only affects the current thread.
-            // Async continuations that ran on other threads during disposal will have already
-            // captured Activity.Current at their point of execution — this is an inherent
-            // limitation of System.Diagnostics.Activity's threading model.
-            TUnitActivitySource.StopActivity(disposalActivity);
-            Activity.Current = previousActivity;
-        }
-#endif
     }
 }
