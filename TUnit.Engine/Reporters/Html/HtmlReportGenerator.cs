@@ -1175,7 +1175,8 @@ if (!raw) return;
 let data;
 if (raw.getAttribute('data-compressed') === 'gzip' && typeof DecompressionStream !== 'undefined') {
     const binary = atob(raw.textContent.trim());
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const ds = new DecompressionStream('gzip');
     const writer = ds.writable.getWriter();
     writer.write(bytes);
