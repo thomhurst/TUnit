@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.fsproj'">
         <!-- TUnit.Assertions.props auto-adds TUnit.Assertions.FSharp for F# projects;
              template fsproj files also include it explicitly with a pinned version -->
         <NoWarn>$(NoWarn);NU1504</NoWarn>
