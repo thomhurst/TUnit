@@ -315,18 +315,18 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     }
 
     /// <summary>
-    /// Returns the parent activity context for an initialization span based on the object's shared type.
-    /// Keyed objects use session-level scope because they can be shared across classes and assemblies
-    /// via matching keys, making session the broadest safe parent.
+    /// Returns the parent activity context for an initialization span.
+    /// Session/keyed/assembly-scoped objects are parented under the assembly activity so they
+    /// appear as siblings of suite spans in both OTel backends and the HTML timeline.
+    /// The <c>tunit.trace.scope</c> tag carries the precise lifetime semantics.
     /// </summary>
     private static ActivityContext GetParentActivityContext(TestContext testContext, SharedType? sharedType)
     {
         return sharedType switch
         {
-            SharedType.PerTestSession => testContext.ClassContext.AssemblyContext.TestSessionContext.Activity?.Context ?? default,
-            SharedType.PerAssembly => testContext.ClassContext.AssemblyContext.Activity?.Context ?? default,
+            SharedType.PerTestSession or SharedType.PerAssembly or SharedType.Keyed
+                => testContext.ClassContext.AssemblyContext.Activity?.Context ?? default,
             SharedType.PerClass => testContext.ClassContext.Activity?.Context ?? default,
-            SharedType.Keyed => testContext.ClassContext.AssemblyContext.TestSessionContext.Activity?.Context ?? default,
             // Per-test objects and the test class instance go under the test case activity
             _ => testContext.Activity?.Context ?? testContext.ClassContext.Activity?.Context ?? default
         };
