@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <!-- Source generator projects (netstandard2.0) bring in older Microsoft.Bcl.AsyncInterfaces -->
+        <NoWarn>$(NoWarn);MSB3277</NoWarn>
         <RootNamespace>TUnit.Assertions.SourceGenerator.IncrementalTests</RootNamespace>
     </PropertyGroup>
 

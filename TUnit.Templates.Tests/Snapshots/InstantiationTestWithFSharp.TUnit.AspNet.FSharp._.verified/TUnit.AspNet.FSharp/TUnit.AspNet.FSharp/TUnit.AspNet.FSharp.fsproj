@@ -11,7 +11,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="0.0.0-scrubbed" />
 		<PackageReference Include="TUnit" Version="0.0.0-scrubbed" />
-		<PackageReference Include="TUnit.Assertions.FSharp" Version="0.0.0-scrubbed" />	
+		<PackageReference Include="TUnit.Assertions.FSharp" Version="0.0.0-scrubbed" />
 	</ItemGroup>
 
 	<ItemGroup>
