@@ -31,6 +31,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
+
+    <!-- Build performance: skip recompilation of dependents when only internals change -->
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <!-- Build performance: faster NuGet restore via static graph evaluation -->
+    <RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
+    <!-- Build performance: hardlink instead of copying files to output directories -->
+    <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
+    <CreateHardLinksForPublishFilesToOutputDirectoryIfPossible>true</CreateHardLinksForPublishFilesToOutputDirectoryIfPossible>
+
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
     <BuildTransitivePath>buildTransitive/$(TargetFramework)/</BuildTransitivePath>
