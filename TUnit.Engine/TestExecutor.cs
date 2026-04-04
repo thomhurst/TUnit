@@ -116,17 +116,17 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
-            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
-            // This ensures resources like Docker containers are not started until needed
-            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
 #if NET
+            // Start the test case activity BEFORE initialization so that per-test
+            // object init spans can be parented under the test case. Shared objects
+            // (PerSession/PerAssembly/PerClass) are parented under their respective
+            // scope activities via explicit parentContext in ObjectLifecycleService.
             if (TUnitActivitySource.Source.HasListeners())
             {
                 var classActivity = executableTest.Context.ClassContext.Activity;
                 var testDetails = executableTest.Context.Metadata.TestDetails;
                 executableTest.Context.Activity = TUnitActivitySource.StartActivity(
-                    "test case",
+                    TUnitActivitySource.SpanTestCase,
                     ActivityKind.Internal,
                     classActivity?.Context ?? default,
                     [
@@ -139,6 +139,11 @@ internal class TestExecutor
                     ]);
             }
 #endif
+
+            // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
+            // and after the test case activity starts. Per-test objects are traced
+            // under the test case; shared objects under session/assembly/class.
+            await testInitializer.InitializeTestObjectsAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.RestoreExecutionContext();
 

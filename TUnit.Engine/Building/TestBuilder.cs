@@ -210,6 +210,12 @@ internal sealed class TestBuilder : ITestBuilder
                     var classDataResult = await classDataFactory() ?? [];
                     var classData = DataUnwrapper.Unwrap(classDataResult);
 
+#if NET
+                    // Register scope for class data objects from the simple path.
+                    // Also registered in the repeat loop below for re-fetched instances.
+                    TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
+#endif
+
                     // Initialize objects before method data sources are evaluated.
                     // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
                     await InitializeClassDataAsync(classData);
@@ -292,6 +298,14 @@ internal sealed class TestBuilder : ITestBuilder
                                 var (classDataUnwrapped, classRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
                                 classData = classDataUnwrapped;
                                 var (methodData, methodRowMetadata) = DataUnwrapper.UnwrapWithTypesAndMetadata(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+#if NET
+                                // Re-register: classDataFactory() was called again above and may return
+                                // a different instance for non-shared objects. First-registration-wins
+                                // semantics make this a no-op for the same instance.
+                                TraceScopeRegistry.RegisterFromDataSource(classDataSource, classData);
+                                TraceScopeRegistry.RegisterFromDataSource(methodDataSource, methodData);
+#endif
 
                                 // Extract and merge metadata from data source attributes and TestDataRow wrappers
                                 var classAttrMetadata = DataSourceMetadataExtractor.ExtractFromAttribute(classDataSource);

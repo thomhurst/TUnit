@@ -301,32 +301,66 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            // Dispose test instance and fire OnDispose after each attempt
-            // This ensures each retry gets a fresh instance
-            var onDispose = test.Context.InternalEvents.OnDispose;
-            if (onDispose?.InvocationList != null)
+            await DisposeTestInstanceWithSpanAsync(test).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Disposes the test instance and fires OnDispose callbacks, wrapped in an OpenTelemetry
+    /// activity span for trace timeline visibility.
+    /// Parented under the class activity because the test case activity has already been stopped
+    /// by this point (disposal runs after TestExecutor.ExecuteAsync completes).
+    /// </summary>
+    private async ValueTask DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
+    {
+#if NET
+        var classType = test.Context.Metadata.TestDetails.ClassType;
+        await TUnitActivitySource.RunWithSpanAsync(
+            $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
+            test.Context.ClassContext.Activity?.Context ?? default,
+            [
+                new(TUnitActivitySource.TagTestId, test.Context.Id),
+                new(TUnitActivitySource.TagTestClass, classType.FullName),
+                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
+            ],
+            () => DisposeTestInstanceCoreAsync(test));
+#else
+        await DisposeTestInstanceCoreAsync(test);
+#endif
+    }
+
+    private async Task DisposeTestInstanceCoreAsync(AbstractExecutableTest test)
+    {
+        // Fire OnDispose callbacks — each retry gets a fresh instance
+        var onDispose = test.Context.InternalEvents.OnDispose;
+        if (onDispose?.InvocationList != null)
+        {
+            foreach (var invocation in onDispose.InvocationList)
             {
-                foreach (var invocation in onDispose.InvocationList)
+                try
                 {
-                    try
-                    {
-                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                    }
-                    catch (Exception disposeEx)
-                    {
-                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-                    }
+                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                }
+                catch (Exception disposeEx)
+                {
+#if NET
+                    TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
+                    await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
                 }
             }
+        }
 
-            try
-            {
-                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
-            }
-            catch (Exception disposeEx)
-            {
-                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
-            }
+        try
+        {
+            await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
+        }
+        catch (Exception disposeEx)
+        {
+#if NET
+            TUnitActivitySource.RecordException(System.Diagnostics.Activity.Current, disposeEx);
+#endif
+            await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
         }
     }
 }

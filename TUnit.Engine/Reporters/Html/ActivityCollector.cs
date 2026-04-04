@@ -204,9 +204,9 @@ internal sealed class ActivityCollector : IDisposable
         // Look up the semantic name tag to produce a more descriptive label
         var tagKey = displayName switch
         {
-            "test case" => "test.case.name",
-            "test suite" => "test.suite.name",
-            "test assembly" => "tunit.assembly.name",
+            TUnitActivitySource.SpanTestCase => "test.case.name",
+            TUnitActivitySource.SpanTestSuite => "test.suite.name",
+            TUnitActivitySource.SpanTestAssembly => "tunit.assembly.name",
             _ => null
         };
 

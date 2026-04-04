@@ -5,6 +5,11 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
+#if NET
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
+#endif
 
 namespace TUnit.Engine.Services;
 
@@ -31,6 +36,14 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     // Use ReferenceEqualityComparer to prevent objects with custom Equals from sharing initialization state
     private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks =
         new(Core.Helpers.ReferenceEqualityComparer.Instance);
+
+#if NET
+    // Gates span creation so only the first caller for a given object creates a trace span.
+    // Subsequent callers (concurrent tests sharing the same object) skip span creation
+    // and just await ObjectInitializer's deduplicated Lazy<Task>.
+    // Uses ConditionalWeakTable so per-test objects can be GC'd after their test completes.
+    private readonly ConditionalWeakTable<object, StrongBox<int>> _spannedObjects = new();
+#endif
 
     public ObjectLifecycleService(
         Lazy<PropertyInjector> propertyInjector,
@@ -220,6 +233,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Initializes all tracked objects depth-first (deepest objects first).
     /// This is called during test execution (after BeforeClass hooks) to initialize IAsyncInitializer objects.
     /// Objects at the same level are initialized in parallel.
+    /// Each object gets its own OpenTelemetry span parented under the appropriate scope activity
+    /// based on its <see cref="SharedType"/> (registered in <see cref="TraceScopeRegistry"/>).
     /// </summary>
     private async Task InitializeTrackedObjectsAsync(TestContext testContext, CancellationToken cancellationToken)
     {
@@ -235,7 +250,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>(objectsAtLevel.Count);
             foreach (var obj in objectsAtLevel)
             {
-                tasks.Add(InitializeObjectWithNestedAsync(obj, cancellationToken));
+                tasks.Add(InitializeObjectWithSpanAsync(obj, testContext, cancellationToken));
             }
 
             if (tasks.Count > 0)
@@ -244,23 +259,101 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             }
         }
 
-        // Finally initialize the test class and its nested objects
+        // Finally initialize the test class and its nested objects.
+        // The test class instance is unregistered in TraceScopeRegistry, so
+        // GetSharedType returns null → defaults to per-test scope automatically.
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
-        await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
-        await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
+        await InitializeObjectWithSpanAsync(classInstance, testContext, cancellationToken);
     }
 
     /// <summary>
-    /// Initializes an object and its nested objects.
+    /// Initializes an object and its nested objects, wrapped in a scope-aware OpenTelemetry span.
     /// </summary>
-    private async Task InitializeObjectWithNestedAsync(object obj, CancellationToken cancellationToken)
+    private async Task InitializeObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
     {
         // First initialize nested objects depth-first
         await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
 
-        // Then initialize the object itself
+#if NET
+        // Only the first caller for a given object creates a trace span.
+        // GetValue is atomic — exactly one concurrent caller's factory runs.
+        // Interlocked.Exchange ensures exactly one caller wins the gate even if
+        // multiple threads pass the TryGetValue fast-path simultaneously.
+        var isFirstCaller = false;
+        if (obj is IAsyncInitializer && TUnitActivitySource.Source.HasListeners()
+            && !_spannedObjects.TryGetValue(obj, out _))
+        {
+            var box = _spannedObjects.GetValue(obj, _ => new StrongBox<int>(1));
+            isFirstCaller = Interlocked.Exchange(ref box.Value, 0) == 1;
+        }
+
+        if (isFirstCaller)
+        {
+            var sharedType = TraceScopeRegistry.GetSharedType(obj);
+            await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
+        }
+        else
+        {
+            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+        }
+#else
         await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+#endif
     }
+
+#if NET
+    /// <summary>
+    /// Initializes an object within an OpenTelemetry span parented under the appropriate scope activity.
+    /// </summary>
+    private static async Task InitializeWithSpanAsync(
+        object obj,
+        TestContext testContext,
+        SharedType? sharedType,
+        CancellationToken cancellationToken)
+    {
+        var parentContext = GetParentActivityContext(testContext, sharedType);
+
+        var scopeTag = TUnitActivitySource.GetScopeTag(sharedType);
+        var isShared = sharedType is not null and not SharedType.None;
+
+        KeyValuePair<string, object?>[] tags = isShared
+            ?
+            [
+                new(TUnitActivitySource.TagTestClass, testContext.Metadata.TestDetails.ClassType.FullName),
+                new(TUnitActivitySource.TagTraceScope, scopeTag)
+            ]
+            :
+            [
+                new(TUnitActivitySource.TagTestId, testContext.Id),
+                new(TUnitActivitySource.TagTestClass, testContext.Metadata.TestDetails.ClassType.FullName),
+                new(TUnitActivitySource.TagTraceScope, scopeTag)
+            ];
+
+        await TUnitActivitySource.RunWithSpanAsync(
+            $"initialize {TUnitActivitySource.GetReadableTypeName(obj.GetType())}",
+            parentContext,
+            tags,
+            () => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask());
+    }
+
+    /// <summary>
+    /// Returns the parent activity context for an initialization span.
+    /// Session/keyed/assembly-scoped objects are parented under the assembly activity so they
+    /// appear as siblings of suite spans in both OTel backends and the HTML timeline.
+    /// The <c>tunit.trace.scope</c> tag carries the precise lifetime semantics.
+    /// </summary>
+    private static ActivityContext GetParentActivityContext(TestContext testContext, SharedType? sharedType)
+    {
+        return sharedType switch
+        {
+            SharedType.PerTestSession or SharedType.PerAssembly or SharedType.Keyed
+                => testContext.ClassContext.AssemblyContext.Activity?.Context ?? default,
+            SharedType.PerClass => testContext.ClassContext.Activity?.Context ?? default,
+            // Per-test objects and the test class instance go under the test case activity
+            _ => testContext.Activity?.Context ?? testContext.ClassContext.Activity?.Context ?? default
+        };
+    }
+#endif
 
     /// <summary>
     /// Initializes nested objects during execution phase - all IAsyncInitializer objects.
@@ -468,5 +561,8 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     public void ClearCache()
     {
         _initializationTasks.Clear();
+#if NET
+        _spannedObjects.Clear();
+#endif
     }
 }

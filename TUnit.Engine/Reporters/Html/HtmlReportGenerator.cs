@@ -1538,9 +1538,19 @@ function renderSuiteTrace(className) {
     return '<div class="suite-trace"><div class="tl-toggle">' + tlArrow + 'Class Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(filtered, 'suite-' + className) + '</div></div></div></div>';
 }
 
-// Global timeline: session + assembly + suite spans
+// Global timeline: session + assembly + suite + shared init/dispose spans (not per-test)
+function isGlobalTimelineSpan(s) {
+    var t = s.spanType;
+    if (t === 'test session' || t === 'test assembly' || t === 'test suite') return true;
+    // Include init/dispose spans that are NOT per-test scope (shared prerequisites)
+    if (t && (t.startsWith('initialize ') || t.startsWith('dispose '))) {
+        var scopeTag = (s.tags||[]).find(function(tag){ return tag.key === 'tunit.trace.scope'; });
+        return scopeTag && scopeTag.value !== 'test';
+    }
+    return false;
+}
 function renderGlobalTimeline() {
-    const topSpans = spans.filter(s => s.spanType === 'test session' || s.spanType === 'test assembly' || s.spanType === 'test suite');
+    const topSpans = spans.filter(isGlobalTimelineSpan);
     if (!topSpans.length) return '';
     return '<div class="global-trace"><div class="tl-toggle">' + tlArrow + 'Execution Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">' + renderSpanRows(topSpans, 'global') + '</div></div></div></div>';
 }

@@ -69,7 +69,7 @@ internal sealed class HookExecutor
         if (TUnitActivitySource.Source.HasListeners())
         {
             sessionContext.Activity = TUnitActivitySource.StartActivity(
-                "test session",
+                TUnitActivitySource.SpanTestSession,
                 System.Diagnostics.ActivityKind.Internal,
                 default,
                 [
@@ -153,7 +153,7 @@ internal sealed class HookExecutor
         {
             var sessionActivity = _contextProvider.TestSessionContext.Activity;
             assemblyContext.Activity = TUnitActivitySource.StartActivity(
-                "test assembly",
+                TUnitActivitySource.SpanTestAssembly,
                 System.Diagnostics.ActivityKind.Internal,
                 sessionActivity?.Context ?? default,
                 [
@@ -311,7 +311,7 @@ internal sealed class HookExecutor
         {
             var assemblyActivity = classContext.AssemblyContext.Activity;
             classContext.Activity = TUnitActivitySource.StartActivity(
-                "test suite",
+                TUnitActivitySource.SpanTestSuite,
                 System.Diagnostics.ActivityKind.Internal,
                 assemblyActivity?.Context ?? default,
                 [
