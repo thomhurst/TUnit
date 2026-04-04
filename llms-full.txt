@@ -26506,7 +26506,7 @@ svc.Greet("Charlie");
 var all = nameArg.Values;   // ["Alice", "Bob", "Charlie"]
 var last = nameArg.Latest;  // "Charlie"
 
-await Assert.That(nameArg.Values).HasCount().EqualTo(3);
+await Assert.That(nameArg.Values).Count().IsEqualTo(3);
 ```
 
 :::tip
@@ -26819,12 +26819,12 @@ client.Handler.VerifyNoUnmatchedRequests();
 ### Inspect Captured Requests
 
 ```csharp
-await Assert.That(client.Handler.Requests).HasCount().EqualTo(2);
+await Assert.That(client.Handler.Requests).Count().IsEqualTo(2);
 await Assert.That(client.Handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
 await Assert.That(client.Handler.Requests[0].RequestUri!.PathAndQuery).IsEqualTo("/api/users");
 
 // Check for unmatched requests
-await Assert.That(client.Handler.UnmatchedRequests).HasCount().EqualTo(0);
+await Assert.That(client.Handler.UnmatchedRequests).Count().IsEqualTo(0);
 ```
 
 Each `CapturedRequest` provides:
@@ -27089,7 +27089,7 @@ logger.LogInformation("User {UserId} logged in", 42);
 logger.LogWarning("Disk space low");
 
 // All entries
-await Assert.That(logger.Entries).HasCount().EqualTo(2);
+await Assert.That(logger.Entries).Count().IsEqualTo(2);
 await Assert.That(logger.Entries[0].LogLevel).IsEqualTo(LogLevel.Information);
 await Assert.That(logger.Entries[0].Message).Contains("42");
 
@@ -27614,7 +27614,7 @@ Access the raw call history for custom inspection:
 ```csharp
 var calls = mock.Invocations;
 
-await Assert.That(calls).HasCount().EqualTo(3);
+await Assert.That(calls).Count().IsEqualTo(3);
 await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");
 ```
 
