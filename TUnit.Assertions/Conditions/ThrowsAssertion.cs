@@ -1,4 +1,6 @@
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Conditions;
 
@@ -108,6 +110,20 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
         });
 
         return new ThrowsAssertion<Exception>(new AssertionContext<Exception>(innerExceptionContext, Context.ExpressionBuilder));
+    }
+
+    /// <summary>
+    /// Asserts on the InnerExceptions collection of an AggregateException using an inline assertion delegate.
+    /// The delegate receives a collection assertion source for InnerExceptions, enabling full collection
+    /// assertion chaining (Count, All().Satisfy, Contains, etc.).
+    /// Example: await Assert.That(action).Throws&lt;AggregateException&gt;().WithInnerExceptions(e => e.Count().IsEqualTo(3));
+    /// </summary>
+    public WithInnerExceptionsAssertion<TException> WithInnerExceptions(
+        Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> innerExceptionsAssertion,
+        [CallerArgumentExpression(nameof(innerExceptionsAssertion))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".WithInnerExceptions({expression})");
+        return new WithInnerExceptionsAssertion<TException>(Context, innerExceptionsAssertion);
     }
 
     /// <summary>
@@ -382,6 +398,20 @@ public class ThrowsExactlyAssertion<TException> : BaseThrowsAssertion<TException
     {
         Context.ExpressionBuilder.Append($".WithInnerException<{typeof(TInnerException).Name}>()");
         return new ExceptionInnerExceptionOfTypeAssertion<TException, TInnerException>(Context);
+    }
+
+    /// <summary>
+    /// Asserts on the InnerExceptions collection of an AggregateException using an inline assertion delegate.
+    /// The delegate receives a collection assertion source for InnerExceptions, enabling full collection
+    /// assertion chaining (Count, All().Satisfy, Contains, etc.).
+    /// Example: await Assert.That(action).ThrowsExactly&lt;AggregateException&gt;().WithInnerExceptions(e => e.Count().IsEqualTo(3));
+    /// </summary>
+    public WithInnerExceptionsAssertion<TException> WithInnerExceptions(
+        Func<CollectionAssertion<Exception>, Assertion<IEnumerable<Exception>>?> innerExceptionsAssertion,
+        [CallerArgumentExpression(nameof(innerExceptionsAssertion))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".WithInnerExceptions({expression})");
+        return new WithInnerExceptionsAssertion<TException>(Context, innerExceptionsAssertion);
     }
 
     /// <summary>

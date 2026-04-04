@@ -2109,6 +2109,7 @@ namespace .Conditions
         public .<> WithInnerException() { }
         public .<TException, TInnerException> WithInnerException<TInnerException>()
             where TInnerException :  { }
+        public .<TException> WithInnerExceptions(<.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2129,6 +2130,7 @@ namespace .Conditions
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
         public .<TException, TInnerException> WithInnerException<TInnerException>()
             where TInnerException :  { }
+        public .<TException> WithInnerExceptions(<.<>, .<.<>>?> innerExceptionsAssertion, [.("innerExceptionsAssertion")] string? expression = null) { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
         public .<TException> WithMessageContaining(string expectedSubstring) { }
@@ -2272,6 +2274,12 @@ namespace .Conditions
     [.<>("TrackResurrection", CustomName="DoesNotTrackResurrection", ExpectationMessage="track resurrection", NegateLogic=true)]
     [.<>("TrackResurrection", ExpectationMessage="track resurrection")]
     public static class WeakReferenceAssertionExtensions { }
+    public class WithInnerExceptionsAssertion<TException> : .<TException>
+        where TException : 
+    {
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
 }
 namespace .
 {
