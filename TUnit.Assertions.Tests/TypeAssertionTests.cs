@@ -520,10 +520,10 @@ public class TypeAssertionTests
     [Test]
     public async Task IsTypeOf_WithAnd_PreviousAssertion_ShouldPass()
     {
-        // Both assertions should pass
+        // Use Length(lambda) to preserve string context for And chaining
         var sut = "123";
         await Assert.That(sut)
-            .Length().IsEqualTo(3)
+            .Length(l => l.IsEqualTo(3))
             .And
             .IsTypeOf<string>()
             .And

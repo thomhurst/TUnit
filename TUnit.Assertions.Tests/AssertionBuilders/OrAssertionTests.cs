@@ -397,7 +397,7 @@ public sealed class OrAssertionTests
         await Assert.That(text)
             .Contains("Goodbye")
             .Or
-            .Length().IsEqualTo(11);
+            .Length(l => l.IsEqualTo(11));
     }
 
     // [Test]
