@@ -64,8 +64,8 @@ internal static class TUnitActivitySource
         }
         finally
         {
-            // Activity.Current is thread-static; this restore only affects the current thread.
-            // Async continuations on other threads will have already captured their own value.
+            // Activity.Current is AsyncLocal — restore so the ambient context on this
+            // execution path is not permanently set to the span we just stopped.
             StopActivity(activity);
             Activity.Current = previousActivity;
         }
