@@ -32,11 +32,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
 
-    <!-- Build performance: skip recompilation of dependents when only internals change -->
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <!-- Build performance: faster NuGet restore via static graph evaluation -->
     <RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
-    <!-- Build performance: hardlink instead of copying files to output directories -->
     <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
     <CreateHardLinksForPublishFilesToOutputDirectoryIfPossible>true</CreateHardLinksForPublishFilesToOutputDirectoryIfPossible>
 
@@ -102,6 +99,18 @@
     <PackageReference Include="Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- GitVersion only needed by the 4 core library projects that produce versioned NuGet packages -->
+  <ItemGroup Condition="
+      '$(MSBuildProjectName)' == 'TUnit.Core' or
+      '$(MSBuildProjectName)' == 'TUnit.Engine' or
+      '$(MSBuildProjectName)' == 'TUnit.Mocks' or
+      '$(MSBuildProjectName)' == 'TUnit.Assertions'">
+    <PackageReference Include="GitVersion.MsBuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
