@@ -359,7 +359,8 @@ internal static partial class HtmlReportGenerator
         }
 
         var rawBuffer = ms.GetBuffer();
-        var base64 = Convert.ToBase64String(rawBuffer, 0, (int)ms.Length);
+        var length = checked((int)ms.Length);
+        var base64 = Convert.ToBase64String(rawBuffer, 0, length);
 
         sb.Append("<script id=\"test-data\" type=\"text/plain\" data-compressed=\"gzip\">");
         sb.Append(base64);
