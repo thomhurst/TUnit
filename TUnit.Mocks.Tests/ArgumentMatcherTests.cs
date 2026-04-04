@@ -231,6 +231,41 @@ public class ArgumentMatcherTests
     }
 
     [Test]
+    public async Task Arg_IsNull_Matches_Null_Nullable_Value_Type()
+    {
+        // Arrange
+        var mock = Mock.Of<INullableValueConsumer>();
+        mock.Process(IsNull<int?>()).Returns("got null");
+
+        // Act
+        INullableValueConsumer consumer = mock.Object;
+
+        // Assert — null matches
+        await Assert.That(consumer.Process(null)).IsEqualTo("got null");
+
+        // Assert — non-null does not match, returns default
+        await Assert.That(consumer.Process(42)).IsNotEqualTo("got null");
+    }
+
+    [Test]
+    public async Task Arg_IsNotNull_Matches_NonNull_Nullable_Value_Type()
+    {
+        // Arrange
+        var mock = Mock.Of<INullableValueConsumer>();
+        mock.Process(IsNotNull<int?>()).Returns("got value");
+
+        // Act
+        INullableValueConsumer consumer = mock.Object;
+
+        // Assert — non-null matches
+        await Assert.That(consumer.Process(42)).IsEqualTo("got value");
+        await Assert.That(consumer.Process(0)).IsEqualTo("got value");
+
+        // Assert — null does not match
+        await Assert.That(consumer.Process(null)).IsNotEqualTo("got value");
+    }
+
+    [Test]
     public async Task Predicate_Matcher_With_String()
     {
         // Arrange

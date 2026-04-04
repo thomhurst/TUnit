@@ -21,11 +21,11 @@ public static class Arg
     /// <summary>Matches when the predicate returns true for the actual argument.</summary>
     public static Arg<T> Is<T>(Func<T?, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
-    /// <summary>Matches only when the argument is null.</summary>
-    public static Arg<T> IsNull<T>() where T : class? => new(new NullMatcher<T>());
+    /// <summary>Matches only when the argument is null. Supports reference types and nullable value types.</summary>
+    public static Arg<T> IsNull<T>() => new(new NullMatcher<T>());
 
-    /// <summary>Matches only when the argument is not null.</summary>
-    public static Arg<T> IsNotNull<T>() where T : class? => new(new NotNullMatcher<T>());
+    /// <summary>Matches only when the argument is not null. Supports reference types and nullable value types.</summary>
+    public static Arg<T> IsNotNull<T>() => new(new NotNullMatcher<T>());
 
     /// <summary>Matches a string against a regular expression pattern.</summary>
     public static Arg<string> Matches(string pattern) => new(new RegexMatcher(pattern));
