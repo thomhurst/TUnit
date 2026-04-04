@@ -408,12 +408,12 @@ internal static partial class HtmlReportGenerator
     [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]
     private static partial Regex CssWhitespaceRegex();
 
-    [System.Text.RegularExpressions.GeneratedRegex(@"\s*([{}:;,>~+!])\s*")]
+    [System.Text.RegularExpressions.GeneratedRegex(@"\s*([{}:;,>~+])\s*")]
     private static partial Regex CssSeparatorsRegex();
 #else
     private static readonly Regex CssCommentsRegexInstance = new(@"/\*[\s\S]*?\*/", RegexOptions.Compiled);
     private static readonly Regex CssWhitespaceRegexInstance = new(@"\s+", RegexOptions.Compiled);
-    private static readonly Regex CssSeparatorsRegexInstance = new(@"\s*([{}:;,>~+!])\s*", RegexOptions.Compiled);
+    private static readonly Regex CssSeparatorsRegexInstance = new(@"\s*([{}:;,>~+])\s*", RegexOptions.Compiled);
 
     private static Regex CssCommentsRegex() => CssCommentsRegexInstance;
     private static Regex CssWhitespaceRegex() => CssWhitespaceRegexInstance;
@@ -1173,7 +1173,8 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 const raw = document.getElementById('test-data');
 if (!raw) return;
 let data;
-if (raw.getAttribute('data-compressed') === 'gzip' && typeof DecompressionStream !== 'undefined') {
+const compression = raw.getAttribute('data-compressed');
+if (compression === 'gzip' && typeof DecompressionStream !== 'undefined') {
     const binary = atob(raw.textContent.trim());
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -1182,7 +1183,7 @@ if (raw.getAttribute('data-compressed') === 'gzip' && typeof DecompressionStream
     writer.write(bytes);
     writer.close();
     data = JSON.parse(await new Response(ds.readable).text());
-} else if (raw.getAttribute('data-compressed') === 'gzip') {
+} else if (compression) {
     console.error('TUnit: This browser does not support DecompressionStream. Report data cannot be decoded.');
     return;
 } else {
