@@ -67,7 +67,7 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue> where TValue : struc
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (EqualityComparer<TValue>.Default.Equals(value!, default!))
@@ -100,7 +100,7 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : st
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (!EqualityComparer<TValue>.Default.Equals(value!, default!))
@@ -134,7 +134,7 @@ public class IsDefaultNullableAssertion<TValue> : Assertion<TValue?> where TValu
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (!value.HasValue)
@@ -168,7 +168,7 @@ public class IsNotDefaultNullableAssertion<TValue> : Assertion<TValue?> where TV
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value.HasValue)
@@ -202,7 +202,7 @@ public class IsDefaultReferenceAssertion<TValue> : Assertion<TValue> where TValu
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (EqualityComparer<TValue>.Default.Equals(value!, default!))
@@ -236,7 +236,7 @@ public class IsNotDefaultReferenceAssertion<TValue> : Assertion<TValue> where TV
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (!EqualityComparer<TValue>.Default.Equals(value!, default!))

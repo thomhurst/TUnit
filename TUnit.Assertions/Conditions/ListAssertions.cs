@@ -29,7 +29,7 @@ public class ListHasItemAtAssertion<TList, TItem> : ListAssertionBase<TList, TIt
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -315,7 +315,7 @@ public class ListItemAtEqualsAssertion<TList, TItem> : ListAssertionBase<TList, 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -376,7 +376,7 @@ public class ListItemAtNullAssertion<TList, TItem> : ListAssertionBase<TList, TI
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -436,7 +436,7 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
     {
         if (metadata.Exception != null)
         {
-            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception);
         }
 
         if (metadata.Value == null)
@@ -496,7 +496,7 @@ public class ListLastItemEqualsAssertion<TList, TItem> : ListAssertionBase<TList
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -553,7 +553,7 @@ public class ListLastItemNullAssertion<TList, TItem> : ListAssertionBase<TList, 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -609,7 +609,7 @@ public class ListLastItemSatisfiesAssertion<TList, TItem> : ListAssertionBase<TL
     {
         if (metadata.Exception != null)
         {
-            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception);
         }
 
         if (metadata.Value == null)

@@ -46,7 +46,7 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -102,7 +102,7 @@ public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : S
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -146,7 +146,7 @@ public class DictionaryContainsValueAssertion<TDictionary, TKey, TValue> : Sourc
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -186,7 +186,7 @@ public class DictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> :
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -229,7 +229,7 @@ public class DictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> 
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -266,7 +266,7 @@ public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Sources.Dic
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -303,7 +303,7 @@ public class DictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Sources.D
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -340,7 +340,7 @@ public class DictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Sources.Dict
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -377,7 +377,7 @@ public class DictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Sources.Di
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)

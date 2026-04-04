@@ -5,6 +5,7 @@ namespace TUnit.Assertions.Core;
 /// </summary>
 public readonly struct AssertionResult
 {
+    private static readonly AssertionResult _passed = new(true, string.Empty);
     internal static readonly Task<AssertionResult> _passedTask = Task.FromResult(Passed);
 
     public bool IsPassed { get; }
@@ -21,7 +22,7 @@ public readonly struct AssertionResult
     /// <summary>
     /// Creates a passing assertion result.
     /// </summary>
-    public static AssertionResult Passed => new(true, string.Empty);
+    public static AssertionResult Passed => _passed;
 
     /// <summary>
     /// Creates a failing assertion result with a message describing what was found.

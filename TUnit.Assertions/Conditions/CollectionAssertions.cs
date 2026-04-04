@@ -27,7 +27,7 @@ public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.Collection
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -59,7 +59,7 @@ public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.Collect
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -99,7 +99,7 @@ public class CollectionContainsAssertion<TCollection, TItem> : Sources.Collectio
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -139,7 +139,7 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.Col
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -179,7 +179,7 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : So
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -215,7 +215,7 @@ public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAs
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -251,7 +251,7 @@ public class CollectionHasAtLeastAssertion<TCollection, TItem> : Sources.Collect
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -287,7 +287,7 @@ public class CollectionHasAtMostAssertion<TCollection, TItem> : Sources.Collecti
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -326,7 +326,7 @@ public class CollectionHasCountBetweenAssertion<TCollection, TItem> : Sources.Co
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -409,7 +409,7 @@ public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAsse
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -449,7 +449,7 @@ public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAsse
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -485,7 +485,7 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -551,7 +551,7 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -607,7 +607,7 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -666,7 +666,7 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.Collect
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         if (value == null)
@@ -732,7 +732,7 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}", exception);
         }
 
         if (value == null)
@@ -784,7 +784,7 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -817,7 +817,7 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -860,7 +860,7 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -922,7 +922,7 @@ public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> 
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)

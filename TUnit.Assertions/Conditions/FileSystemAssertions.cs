@@ -22,7 +22,7 @@ public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -64,7 +64,7 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -107,7 +107,7 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)
@@ -148,7 +148,7 @@ public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         if (value == null)

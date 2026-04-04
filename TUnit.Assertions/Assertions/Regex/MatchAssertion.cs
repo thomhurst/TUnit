@@ -28,7 +28,7 @@ public class MatchAssertion : Assertion<RegexMatchCollection>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (collection == null)

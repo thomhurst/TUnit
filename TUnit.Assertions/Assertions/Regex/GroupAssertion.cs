@@ -41,7 +41,7 @@ public class GroupAssertion : Assertion<RegexMatchCollection>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (collection == null || collection.Count == 0)
@@ -117,7 +117,7 @@ public class MatchGroupAssertion : Assertion<RegexMatch>
 
         if (exception != null)
         {
-            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}");
+            return AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception);
         }
 
         if (match == null)

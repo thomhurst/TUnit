@@ -78,7 +78,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // Deep comparison with ignored types

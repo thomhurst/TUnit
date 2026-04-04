@@ -41,7 +41,7 @@ public class DoubleIsCloseToAssertion : Assertion<double>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // Handle NaN comparisons
@@ -114,7 +114,7 @@ public class FloatIsCloseToAssertion : Assertion<float>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // Handle NaN comparisons
@@ -185,7 +185,7 @@ public class IntIsCloseToAssertion : Assertion<int>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs((long)value - _expected);
@@ -231,7 +231,7 @@ public class LongIsCloseToAssertion : Assertion<long>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs((decimal) value - _expected);
@@ -275,7 +275,7 @@ public class DecimalIsCloseToAssertion : Assertion<decimal>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         var diff = Math.Abs(value - _expected);

@@ -31,7 +31,7 @@ public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertio
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -317,7 +317,7 @@ public class ReadOnlyListItemAtEqualsAssertion<TList, TItem> : ReadOnlyListAsser
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -378,7 +378,7 @@ public class ReadOnlyListItemAtNullAssertion<TList, TItem> : ReadOnlyListAsserti
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -438,7 +438,7 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
     {
         if (metadata.Exception != null)
         {
-            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception);
         }
 
         if (metadata.Value == null)
@@ -498,7 +498,7 @@ public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : ReadOnlyListAss
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -555,7 +555,7 @@ public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListAsser
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         if (metadata.Value == null)
@@ -611,7 +611,7 @@ public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyList
     {
         if (metadata.Exception != null)
         {
-            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}");
+            return AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception);
         }
 
         if (metadata.Value == null)

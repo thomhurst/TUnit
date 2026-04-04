@@ -72,7 +72,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception));
         }
 
         // Create a temporary StructuralEquivalencyAssertion to reuse the comparison logic

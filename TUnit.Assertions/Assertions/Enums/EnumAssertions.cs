@@ -22,7 +22,7 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception));
         }
 
 #if NET
@@ -59,7 +59,7 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}", exception));
         }
 
 #if NET

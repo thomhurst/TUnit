@@ -48,7 +48,7 @@ public class MatchIndexAssertion : Assertion<RegexMatch>
             {
                 return Task.FromResult(AssertionResult.Failed(exception.Message));
             }
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
         // If we have a match, the assertion passed
