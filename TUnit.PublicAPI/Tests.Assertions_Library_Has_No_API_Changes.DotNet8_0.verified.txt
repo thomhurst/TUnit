@@ -2031,6 +2031,11 @@ namespace .Conditions
     {
         public StringLengthValueAssertion(.<string> stringContext) { }
     }
+    public class StringLengthWithInlineAssertionAssertion : .<string>
+    {
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class StringMatchesAssertion : .<..RegexMatchCollection>
     {
         public StringMatchesAssertion(.<string> context, . regex) { }
@@ -2599,11 +2604,6 @@ namespace .Extensions
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> Eventually<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
-        [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +
-            "(str).Length().IsGreaterThan(5)")]
-        public static ..LengthWrapper HasLength(this .<string> source) { }
-        [("Use Length().IsEqualTo(expectedLength) instead.")]
-        public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
         public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
             where TException :  { }
         public static .<TException> HasMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
@@ -2658,6 +2658,7 @@ namespace .Extensions
         public static ._IsGreaterThan_TValue_Assertion<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
         public static . Length(this .<string> source) { }
+        public static . Length(this .<string> source, <.<int>, .<int>?> lengthAssertion, [.("lengthAssertion")] string? expression = null) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TItem, TTransformed> overload with strongly-typed assertions.")]
@@ -6061,11 +6062,6 @@ namespace .Sources
         protected override string GetExpectation() { }
         public .<TCollection, TItem> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public .<TCollection, TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
-        [("Use Count() instead, which provides all numeric assertion methods. Example: Asser" +
-            "(list).Count().IsGreaterThan(5)")]
-        public ..CountWrapper<TCollection, TItem> HasCount() { }
-        [("Use Count().IsEqualTo(expectedCount) instead.")]
-        public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TCollection, TItem> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
         public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
