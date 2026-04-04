@@ -41,7 +41,7 @@ public abstract partial class TemplateTestBase : IDisposable
 
         foreach (var match in matches.Where(m => m.Success))
         {
-            var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "99.99.99");
+            var line = match.Groups[0].Value.Replace(match.Groups[1].Value, "0.0.0-scrubbed");
             sb.Replace(match.Value, line);
         }
     }

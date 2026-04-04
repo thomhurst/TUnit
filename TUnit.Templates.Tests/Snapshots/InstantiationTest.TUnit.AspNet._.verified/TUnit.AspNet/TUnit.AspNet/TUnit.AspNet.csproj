@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="99.99.99" />
-    <PackageReference Include="TUnit" Version="99.99.99" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="0.0.0-scrubbed" />
+    <PackageReference Include="TUnit" Version="0.0.0-scrubbed" />
   </ItemGroup>
 
   <ItemGroup>
