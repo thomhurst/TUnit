@@ -250,22 +250,10 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
 
         // Finally initialize the test class and its nested objects.
-        // The test class instance is always per-test scope.
+        // The test class instance is unregistered in TraceScopeRegistry, so
+        // GetSharedType returns null → defaults to per-test scope automatically.
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
-        await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
-
-#if NET
-        if (classInstance is IAsyncInitializer)
-        {
-            await InitializeWithSpanAsync(classInstance, testContext, SharedType.None, cancellationToken);
-        }
-        else
-        {
-            await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
-        }
-#else
-        await ObjectInitializer.InitializeAsync(classInstance, cancellationToken);
-#endif
+        await InitializeObjectWithSpanAsync(classInstance, testContext, cancellationToken);
     }
 
     /// <summary>
