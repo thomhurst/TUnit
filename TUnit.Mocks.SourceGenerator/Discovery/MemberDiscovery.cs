@@ -506,7 +506,8 @@ internal static class MemberDiscovery
                 method.TypeParameters.Select(tp => new MockTypeParameterModel
                 {
                     Name = tp.Name,
-                    Constraints = tp.GetGenericConstraints()
+                    Constraints = tp.GetGenericConstraints(),
+                    NeedsDefaultConstraint = tp.IsUnconstrainedWithNullableUsage(method)
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,

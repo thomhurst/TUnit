@@ -19,8 +19,19 @@ internal static class MethodSymbolExtensions
         };
     }
 
+    private static bool IsUnconstrained(this ITypeParameterSymbol typeParam) =>
+        !typeParam.HasReferenceTypeConstraint &&
+        !typeParam.HasValueTypeConstraint &&
+        !typeParam.HasUnmanagedTypeConstraint &&
+        !typeParam.HasNotNullConstraint &&
+        typeParam.ConstraintTypes.Length == 0 &&
+        !typeParam.HasConstructorConstraint;
+
     public static string GetGenericConstraints(this ITypeParameterSymbol typeParam)
     {
+        if (typeParam.IsUnconstrained())
+            return "";
+
         var constraints = new List<string>();
 
         if (typeParam.HasReferenceTypeConstraint)
@@ -40,7 +51,53 @@ internal static class MethodSymbolExtensions
         if (typeParam.HasConstructorConstraint)
             constraints.Add("new()");
 
-        return constraints.Count > 0 ? string.Join(", ", constraints) : "";
+        return string.Join(", ", constraints);
+    }
+
+    public static bool IsUnconstrainedWithNullableUsage(this ITypeParameterSymbol typeParam, IMethodSymbol method)
+    {
+        if (!typeParam.IsUnconstrained())
+        {
+            return false;
+        }
+
+        if (HasNullableTypeParameter(method.ReturnType, typeParam))
+            return true;
+
+        foreach (var param in method.Parameters)
+        {
+            if (HasNullableTypeParameter(param.Type, typeParam))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool HasNullableTypeParameter(ITypeSymbol type, ITypeParameterSymbol typeParam)
+    {
+        if (type is ITypeParameterSymbol tp &&
+            SymbolEqualityComparer.Default.Equals(tp.OriginalDefinition, typeParam.OriginalDefinition) &&
+            tp.NullableAnnotation == NullableAnnotation.Annotated)
+        {
+            return true;
+        }
+
+        if (type is INamedTypeSymbol named)
+        {
+            foreach (var arg in named.TypeArguments)
+            {
+                if (HasNullableTypeParameter(arg, typeParam))
+                    return true;
+            }
+        }
+
+        if (type is IArrayTypeSymbol array)
+        {
+            if (HasNullableTypeParameter(array.ElementType, typeParam))
+                return true;
+        }
+
+        return false;
     }
 
     public static string GetParameterList(this IMethodSymbol method)

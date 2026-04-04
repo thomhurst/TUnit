@@ -1110,10 +1110,10 @@ internal static class MockImplBuilder
 
     // Only for non-override declarations (interface impls, extension methods).
     // C# prohibits restating constraints on override methods (CS0460).
-    internal static string GetConstraintClauses(MockMemberModel method) =>
-        FormatConstraintClauses(method.TypeParameters);
+    internal static string GetConstraintClauses(MockMemberModel method, bool forExplicitImplementation = false) =>
+        FormatConstraintClauses(method.TypeParameters, forExplicitImplementation);
 
-    private static string FormatConstraintClauses(EquatableArray<MockTypeParameterModel> typeParameters)
+    private static string FormatConstraintClauses(EquatableArray<MockTypeParameterModel> typeParameters, bool forExplicitImplementation = false)
     {
         var clauses = new List<string>();
         foreach (var tp in typeParameters)
@@ -1121,6 +1121,10 @@ internal static class MockImplBuilder
             if (!string.IsNullOrEmpty(tp.Constraints))
             {
                 clauses.Add($"where {tp.Name} : {tp.Constraints}");
+            }
+            else if (forExplicitImplementation && tp.NeedsDefaultConstraint)
+            {
+                clauses.Add($"where {tp.Name} : default");
             }
         }
         return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";

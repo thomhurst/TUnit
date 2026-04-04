@@ -677,4 +677,29 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Interface_With_Unconstrained_Nullable_Generic()
+    {
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IFoo
+            {
+                Task<T?> DoSomethingAsync<T>();
+                T? GetValue<T>();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IFoo>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
