@@ -7,8 +7,8 @@ namespace TUnit.Pipeline.Modules;
 
 public class InstallPlaywrightModule : Module<CommandResult>
 {
-    protected override Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken) =>
-        context.Shell.Bash.Command(
+    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken) =>
+        await context.Shell.Bash.Command(
             new BashCommandOptions("npx playwright install --with-deps"),
             cancellationToken);
 }
