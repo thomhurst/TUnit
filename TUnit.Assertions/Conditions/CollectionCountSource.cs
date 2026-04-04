@@ -293,26 +293,8 @@ public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : C
             _ => System.Linq.Enumerable.Count(value)
         };
 
-        // Create an assertion source for the count and run the inline assertion
-        var countSource = new ValueAssertion<int>(_actualCount, "count");
-        var resultingAssertion = _countAssertion(countSource);
-
-        if (resultingAssertion != null)
-        {
-            try
-            {
-                await resultingAssertion.AssertAsync();
-                return AssertionResult.Passed;
-            }
-            catch
-            {
-                // Count assertion failed
-                return AssertionResult.Failed($"count was {_actualCount}");
-            }
-        }
-
-        // Null assertion means no constraint, always pass
-        return AssertionResult.Passed;
+        return await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
+            _actualCount, "count", _countAssertion);
     }
 
     protected override string GetExpectation()

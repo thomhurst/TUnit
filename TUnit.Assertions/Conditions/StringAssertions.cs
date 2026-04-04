@@ -552,23 +552,8 @@ public class StringLengthWithInlineAssertionAssertion : Assertion<string>
 
         _actualLength = value.Length;
 
-        var lengthSource = new ValueAssertion<int>(_actualLength, "length");
-        var resultingAssertion = _lengthAssertion(lengthSource);
-
-        if (resultingAssertion != null)
-        {
-            try
-            {
-                await resultingAssertion.AssertAsync();
-                return AssertionResult.Passed;
-            }
-            catch
-            {
-                return AssertionResult.Failed($"length was {_actualLength}");
-            }
-        }
-
-        return AssertionResult.Passed;
+        return await Helpers.InlineAssertionHelper.ExecuteInlineAssertionAsync(
+            _actualLength, "length", _lengthAssertion);
     }
 
     protected override string GetExpectation()
