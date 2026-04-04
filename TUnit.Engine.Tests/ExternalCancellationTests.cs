@@ -18,6 +18,7 @@ namespace TUnit.Engine.Tests;
 /// </remarks>
 [ExcludeOn(OS.Windows)]
 [Retry(3)]
+[NotInParallel]
 public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     private static readonly string TempPath = Path.GetTempPath();
