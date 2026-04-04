@@ -17,7 +17,7 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 internal sealed class AotTestDataCollector : ITestDataCollector
 {
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
@@ -28,7 +28,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return CollectTestsAsync(testSessionId, filter: null);
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
@@ -56,7 +56,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Collects tests from TestEntry sources (the new fast path).
     /// Uses TestEntryFilterData for pure-data filtering, then materializes only matching entries.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Materialization uses source-generated metadata")]
     #endif
     private IEnumerable<TestMetadata> CollectTestsFromTestEntries(
@@ -213,7 +213,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test conversion requires expression compilation")]
     #endif
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
@@ -232,7 +232,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation requires expression extraction and reflection")]
     #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
@@ -317,7 +317,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile")]
     #endif
     private static Func<object, object?[], Task> CreateAotDynamicTestInvoker(DynamicDiscoveryResult result)
@@ -350,7 +350,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Failed metadata creation accesses Type.Name and assembly info")]
     #endif
     private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
@@ -372,7 +372,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dummy metadata creation accesses type and assembly information")]
     #endif
     private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)

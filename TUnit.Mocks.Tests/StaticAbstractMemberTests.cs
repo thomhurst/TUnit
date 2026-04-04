@@ -1,4 +1,4 @@
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Mocks;
 using TUnit.Mocks.Generated;

@@ -212,7 +212,7 @@ internal static class DataGeneratorMetadataCreator
     /// Creates DataGeneratorMetadata for property injection using PropertyInfo (reflection mode).
     /// This method is only called in reflection mode, not in source-generated/AOT scenarios.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
         Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated PropertyMetadata.")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
@@ -267,7 +267,7 @@ internal static class DataGeneratorMetadataCreator
         return parameters;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
         Justification = "This helper is only used in reflection mode. In AOT/source-gen mode, class metadata is generated at compile time.")]
     [UnconditionalSuppressMessage("Trimming", "IL2070:Target method return value does not satisfy 'DynamicallyAccessedMembersAttribute'",

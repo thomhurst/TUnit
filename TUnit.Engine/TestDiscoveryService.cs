@@ -207,7 +207,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
@@ -309,7 +309,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             return;
         }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         await Parallel.ForEachAsync(
             allTests,
             new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },

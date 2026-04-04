@@ -75,7 +75,7 @@ public class MatrixTests
             .IsNotEqualTo(CountToTenEnum.Seven);
     }
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [Test]
         [MatrixDataSource]
         public async Task Range(

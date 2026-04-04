@@ -5,7 +5,7 @@ namespace TUnit.Engine.Scheduling;
 
 internal interface IConstraintKeyScheduler
 {
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     ValueTask ExecuteTestsWithConstraintsAsync(

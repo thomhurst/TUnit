@@ -219,14 +219,14 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("bool exact = true");
         });
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [Test]
     public Task RefStructParameter() => RunTest(
         Path.Combine(Sourcy.Git.RootDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
             "TestData",
             "RefStructParameterAssertion.cs"),
-        new RunTestOptions { PreprocessorSymbols = ["NET6_0_OR_GREATER"] },
+        new RunTestOptions { PreprocessorSymbols = ["NET8_0_OR_GREATER"] },
         async generatedFiles =>
         {
             await Assert.That(generatedFiles).HasCount(1);

@@ -7,7 +7,7 @@ namespace TUnit.Engine.Discovery;
 internal static class AsyncDataSourceHelper
 {
     /// Processes async generator items without evaluating them during discovery
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Typed placeholder creation uses reflection on generic types")]
 #endif
     public static List<object?[]> ProcessAsyncGeneratorItemsForDiscovery(object? item)
@@ -112,7 +112,7 @@ internal static class AsyncDataSourceHelper
         return returnType;
     }
     
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Typed placeholder creation uses reflection on generic types")]
 #endif
     private static AsyncDataSourcePlaceholder CreateTypedPlaceholder(object item, Type? resultType)

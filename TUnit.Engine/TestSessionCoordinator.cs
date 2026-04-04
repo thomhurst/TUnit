@@ -81,7 +81,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     }
 
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Test scheduler uses mode-specific services that handle reflection properly")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Test scheduler uses mode-specific services that handle dynamic code properly")]
     #endif

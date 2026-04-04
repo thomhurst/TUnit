@@ -67,7 +67,7 @@ internal static class PropertyInjectionPlanBuilder
     /// <summary>
     /// Creates an injection plan for reflection mode.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection mode requires runtime property discovery")]
     #endif
     public static PropertyInjectionPlan BuildReflectionPlan(Type type)

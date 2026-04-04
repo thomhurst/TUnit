@@ -8,7 +8,7 @@ namespace TUnit.Core.Services;
 /// <summary>
 /// Implementation of generic type resolution for test methods and classes
 /// </summary>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Generic type resolution requires runtime type generation")]
 #endif
 public class GenericTypeResolver : IGenericTypeResolver

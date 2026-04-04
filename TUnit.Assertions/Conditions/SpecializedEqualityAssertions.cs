@@ -3,7 +3,7 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 /// <summary>
 /// Asserts that a DateOnly value is equal to another, with optional tolerance.
 /// </summary>
@@ -49,7 +49,7 @@ public class DateOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<DateOnly, i
 }
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 /// <summary>
 /// Asserts that a TimeOnly value is equal to another, with optional tolerance.
 /// </summary>

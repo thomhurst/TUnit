@@ -12,7 +12,7 @@ internal interface ITestScheduler
     /// Schedules and executes tests with optimal parallelization
     /// </summary>
     /// <returns>True if successful, false if After(TestSession) hooks failed</returns>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     Task<bool> ScheduleAndExecuteAsync(

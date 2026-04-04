@@ -19,7 +19,7 @@ internal sealed class TestGenericTypeResolver
     /// <param name="metadata">The test metadata containing generic type information</param>
     /// <param name="testData">The runtime test data containing actual arguments</param>
     /// <returns>A result containing resolved generic types for both class and method</returns>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     public static TestGenericTypeResolution Resolve(TestMetadata metadata, TestBuilder.TestData testData)
@@ -54,7 +54,7 @@ internal sealed class TestGenericTypeResolver
         return result;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static Type[] ResolveClassGenericArguments(
@@ -122,7 +122,7 @@ internal sealed class TestGenericTypeResolver
         return resolvedTypes;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static Type[] ResolveMethodGenericArguments(
@@ -417,7 +417,7 @@ internal sealed class TestGenericTypeResolver
         return resolvedTypesFromMapping;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static bool TryInferTypesFromArguments(
@@ -443,7 +443,7 @@ internal sealed class TestGenericTypeResolver
         return true;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static void InferTypeMapping(
@@ -459,7 +459,7 @@ internal sealed class TestGenericTypeResolver
         }
     }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
 #endif
     private static bool TryInferTypeMapping(

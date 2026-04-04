@@ -9,7 +9,7 @@ namespace TUnit.Engine.Services;
 /// Initializes static properties using both source-generated initializers and reflection-based discovery.
 /// This implementation requires reflection and is NOT AOT-compatible.
 /// </summary>
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Uses reflection to discover and initialize static properties")]
 #endif
 internal sealed class ReflectionStaticPropertyInitializer : IStaticPropertyInitializer

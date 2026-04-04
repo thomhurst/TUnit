@@ -108,7 +108,7 @@ public sealed class DiscoveryCircuitBreaker
     {
         try
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             // Try to get actual available memory on newer .NET versions
             var gcMemoryInfo = GC.GetGCMemoryInfo();
             if (gcMemoryInfo.TotalAvailableMemoryBytes > 0)

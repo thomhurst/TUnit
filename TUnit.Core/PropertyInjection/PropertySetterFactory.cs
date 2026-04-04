@@ -22,7 +22,7 @@ internal static class PropertySetterFactory
     /// Gets or creates a setter delegate for the given property.
     /// Uses caching to avoid repeated reflection calls.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
     public static Action<object, object?> GetOrCreateSetter(PropertyInfo property)
@@ -34,7 +34,7 @@ internal static class PropertySetterFactory
     /// Creates a setter delegate for the given property.
     /// Consider using <see cref="GetOrCreateSetter"/> for better performance through caching.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
     public static Action<object, object?> CreateSetter(PropertyInfo property)
@@ -47,7 +47,7 @@ internal static class PropertySetterFactory
     /// Core implementation for creating a setter delegate.
     /// Called by GetOrCreateSetter for caching.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
     private static Action<object, object?> CreateSetterCore(PropertyInfo property)
@@ -105,7 +105,7 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Gets the backing field for a property.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
     #endif
     private static FieldInfo? GetBackingField(PropertyInfo property, Type? instanceType = null)
@@ -184,7 +184,7 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Helper method to get field with proper trimming suppression.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Field access for property backing fields requires reflection")]
     #endif
     private static FieldInfo? GetFieldSafe(
@@ -199,7 +199,7 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Checks if a method is init-only.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Checking for init-only setters requires reflection")]
     #endif
     private static bool IsInitOnlyMethod(MethodInfo setMethod)

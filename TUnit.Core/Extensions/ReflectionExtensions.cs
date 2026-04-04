@@ -109,7 +109,7 @@ public static class ReflectionExtensions
 #endif
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
     #endif
     private static Attribute[] GetAttributesViaCustomAttributeData(ICustomAttributeProvider provider, Type attributeType, bool inherit)
@@ -173,7 +173,7 @@ public static class ReflectionExtensions
         return attributes.ToArray();
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
     #endif
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
@@ -240,7 +240,7 @@ public static class ReflectionExtensions
         return attribute;
     }
 
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
     #endif
     private static object? ExtractArgumentValue(CustomAttributeTypedArgument arg)
@@ -278,7 +278,7 @@ public static class ReflectionExtensions
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Property access used for unwrapping test data")]
     #endif
     private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
@@ -289,7 +289,7 @@ public static class ReflectionExtensions
     /// <summary>
     /// Gets the "Value" property from a runtime type.
     /// </summary>
-    #if NET6_0_OR_GREATER
+    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
     #endif
     private static PropertyInfo? GetValuePropertyForType(Type type)
