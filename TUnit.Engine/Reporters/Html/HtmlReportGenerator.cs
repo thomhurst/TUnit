@@ -351,7 +351,11 @@ internal static partial class HtmlReportGenerator
     private static void AppendJsonData(StringBuilder sb, ReportData data)
     {
         using var ms = new MemoryStream();
+#if NET
+        using (var gz = new GZipStream(ms, CompressionLevel.SmallestSize, leaveOpen: true))
+#else
         using (var gz = new GZipStream(ms, CompressionLevel.Optimal, leaveOpen: true))
+#endif
         {
             JsonSerializer.Serialize(gz, data, HtmlReportJsonContext.Default.ReportData);
         }
