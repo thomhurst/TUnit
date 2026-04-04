@@ -44,9 +44,9 @@ public class WithInnerExceptionsAssertion : Assertion<AggregateException>
             {
                 await resultingAssertion.AssertAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                return AssertionResult.Failed("inner exceptions did not satisfy assertion");
+                return AssertionResult.Failed($"inner exceptions did not satisfy assertion: {ex.Message}");
             }
         }
 
