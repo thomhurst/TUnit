@@ -44,8 +44,9 @@ internal static class TraceScopeRegistry
             var sharedType = enumerator.MoveNext() ? enumerator.Current : SharedType.None;
             if (objects[i] is not null && !Scopes.TryGetValue(objects[i]!, out _))
             {
-                // GetValue is atomic: returns existing entry or creates a new one.
-                // TryGetValue fast-path above avoids allocating the closure on re-registration.
+                // TryGetValue above is a fast-path to avoid allocating the closure below
+                // on re-registration. GetValue is the atomic operation that enforces
+                // first-registration-wins semantics.
                 Scopes.GetValue(objects[i]!, _ => new StrongBox<SharedType>(sharedType));
             }
         }
