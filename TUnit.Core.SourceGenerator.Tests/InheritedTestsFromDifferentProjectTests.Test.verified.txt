@@ -230,7 +230,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.Entries);
 }
 
 
@@ -309,7 +309,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource.Entries_0);
 }
 
 
@@ -389,5 +389,5 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource.Entries_0);
 }

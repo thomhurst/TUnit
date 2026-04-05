@@ -249,5 +249,5 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_PriorityFilteringTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.PriorityFilteringTests>(static () => TUnit_TestProject_PriorityFilteringTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_PriorityFilteringTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.PriorityFilteringTests>(static () => TUnit_TestProject_PriorityFilteringTests__TestSource.Entries);
 }

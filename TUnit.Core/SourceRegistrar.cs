@@ -88,19 +88,14 @@ public class SourceRegistrar
     }
 
     /// <summary>
-    /// Registers test entries for a class using the TestEntry pattern.
+    /// Registers a factory for test entries. The factory is not invoked until the engine
+    /// needs to access the entries (during discovery/filtering), avoiding per-class JIT
+    /// compilation during module initialization.
     /// Returns a dummy value for use as a static field initializer.
-    /// Multiple calls for the same T are additive — entries accumulate.
+    /// Multiple calls for the same T are additive — factories accumulate.
     /// </summary>
-    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(TestEntry<T>[] entries) where T : class
+    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntry<T>[]> factory) where T : class
     {
-        if (entries is null || entries.Length == 0)
-        {
-            throw new InvalidOperationException(
-                $"Source-generated test registration failed: no entries for '{typeof(T).FullName}'. " +
-                "This indicates a source generator bug. Please report this issue.");
-        }
-
         var key = typeof(T);
 
         while (true)
@@ -109,7 +104,7 @@ public class SourceRegistrar
             {
                 if (existing is TestEntrySource<T> existingSource)
                 {
-                    existingSource.AddEntries(entries);
+                    existingSource.AddFactory(factory);
                     return 0;
                 }
 
@@ -117,49 +112,7 @@ public class SourceRegistrar
                     $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
             }
 
-            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(entries)))
-            {
-                return 0;
-            }
-
-            // Another thread added between TryGetValue and TryAdd — retry to merge
-        }
-    }
-
-    /// <summary>
-    /// Registers a lazy factory for test entries. The factory is not invoked until the engine
-    /// needs to access the entries (during discovery/filtering), avoiding per-class JIT
-    /// compilation during module initialization.
-    /// Returns a dummy value for use as a static field initializer.
-    /// Multiple calls for the same T are additive — factories accumulate.
-    /// </summary>
-    public static int RegisterLazy<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntry<T>[]> factory) where T : class
-    {
-        var key = typeof(T);
-
-        while (true)
-        {
-            if (Sources.TestEntries.TryGetValue(key, out var existing))
-            {
-                if (existing is LazyTestEntrySource<T> existingLazy)
-                {
-                    existingLazy.AddFactory(factory);
-                    return 0;
-                }
-
-                if (existing is TestEntrySource<T> existingSource)
-                {
-                    // Rare: someone called RegisterEntries before RegisterLazy for the same T.
-                    // Eagerly resolve and merge.
-                    existingSource.AddEntries(factory());
-                    return 0;
-                }
-
-                throw new InvalidOperationException(
-                    $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected LazyTestEntrySource<{typeof(T).Name}> or TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
-            }
-
-            if (Sources.TestEntries.TryAdd(key, new LazyTestEntrySource<T>(factory)))
+            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(factory)))
             {
                 return 0;
             }

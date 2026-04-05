@@ -134,5 +134,5 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_MultipleClassDataSourceDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(static () => TUnit_TestProject_MultipleClassDataSourceDrivenTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_MultipleClassDataSourceDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests>(static () => TUnit_TestProject_MultipleClassDataSourceDrivenTests__TestSource.Entries);
 }

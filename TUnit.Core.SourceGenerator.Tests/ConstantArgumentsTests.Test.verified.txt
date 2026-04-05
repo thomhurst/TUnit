@@ -368,5 +368,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ConstantArgumentsTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.ConstantArgumentsTests>(static () => TUnit_TestProject_ConstantArgumentsTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ConstantArgumentsTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ConstantArgumentsTests>(static () => TUnit_TestProject_ConstantArgumentsTests__TestSource.Entries);
 }

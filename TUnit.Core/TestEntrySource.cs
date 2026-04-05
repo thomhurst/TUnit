@@ -5,7 +5,8 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Thin non-generic wrapper around TestEntry&lt;T&gt;[] for engine access.
-/// Provides filter data extraction and delegates materialization to TestEntry&lt;T&gt;.ToTestMetadata().
+/// Wraps one or more factories that produce entries, resolving lazily on first access
+/// to avoid per-class JIT compilation during module initialization.
 /// </summary>
 #if !DEBUG
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -15,43 +16,95 @@ public sealed class TestEntrySource<
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods)] T> : ITestEntrySource where T : class
 {
-    private TestEntry<T>[] _entries;
-    private readonly string _className;
+    private List<Func<TestEntry<T>[]>>? _factories;
+    private volatile TestEntry<T>[]? _entries;
+    private string? _className;
+    private readonly object _lock = new();
 
-    public TestEntrySource(TestEntry<T>[] entries)
+    public TestEntrySource(Func<TestEntry<T>[]> factory)
     {
-        _entries = entries;
-        _className = TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
+        _factories = [factory];
     }
 
     /// <summary>
-    /// Appends additional entries. Used when multiple source-gen files register entries for the same T.
+    /// Adds another factory for the same T. Used when multiple source-gen files
+    /// register entries for the same class (e.g. generic instantiations).
     /// Thread-safe via lock since static field initializers may run concurrently.
     /// </summary>
-    internal void AddEntries(TestEntry<T>[] additional)
+    internal void AddFactory(Func<TestEntry<T>[]> factory)
     {
         lock (_lock)
         {
-            var combined = new TestEntry<T>[_entries.Length + additional.Length];
-            Array.Copy(_entries, 0, combined, 0, _entries.Length);
-            Array.Copy(additional, 0, combined, _entries.Length, additional.Length);
-            _entries = combined;
+            if (_entries is not null)
+            {
+                // Already resolved — merge eagerly
+                var additional = factory();
+                var combined = new TestEntry<T>[_entries.Length + additional.Length];
+                Array.Copy(_entries, 0, combined, 0, _entries.Length);
+                Array.Copy(additional, 0, combined, _entries.Length, additional.Length);
+                _entries = combined;
+                return;
+            }
+
+            _factories!.Add(factory);
         }
     }
 
-    private readonly object _lock = new();
+    private TestEntry<T>[] Resolve()
+    {
+        if (_entries is not null)
+        {
+            return _entries;
+        }
 
-    public int Count => _entries.Length;
+        lock (_lock)
+        {
+            if (_entries is not null)
+            {
+                return _entries;
+            }
+
+            var factories = _factories!;
+            TestEntry<T>[] entries;
+
+            if (factories.Count == 1)
+            {
+                entries = factories[0]();
+            }
+            else
+            {
+                var allEntries = new List<TestEntry<T>>();
+                foreach (var factory in factories)
+                {
+                    allEntries.AddRange(factory());
+                }
+                entries = allEntries.ToArray();
+            }
+
+            if (entries.Length == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Source-generated test registration failed: no entries for '{typeof(T).FullName}'. " +
+                    "This indicates a source generator bug. Please report this issue.");
+            }
+
+            _entries = entries;
+            _factories = null; // Release factory references
+            return entries;
+        }
+    }
+
+    public int Count => Resolve().Length;
     public Type ClassType => typeof(T);
-    public string ClassName => _className;
+    public string ClassName => _className ??= TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
 
     public TestEntryFilterData GetFilterData(int index)
     {
-        var entry = _entries[index];
+        var entry = Resolve()[index];
         return new TestEntryFilterData
         {
             MethodName = entry.MethodName,
-            ClassName = _className,
+            ClassName = ClassName,
             Categories = entry.Categories,
             Properties = entry.Properties,
             DependsOn = entry.DependsOn,
@@ -62,6 +115,6 @@ public sealed class TestEntrySource<
 
     public IReadOnlyList<TestMetadata> Materialize(int index, string testSessionId)
     {
-        return [_entries[index].ToTestMetadata(testSessionId)];
+        return [Resolve()[index].ToTestMetadata(testSessionId)];
     }
 }

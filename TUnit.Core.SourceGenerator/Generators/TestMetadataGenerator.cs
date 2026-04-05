@@ -505,13 +505,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Registration calls — use RegisterLazy to defer per-class JIT until discovery
+        // Registration calls — factory wrapper defers per-class JIT until discovery
         registrationIndex = 0;
         foreach (var group in groupedByConcreteClass)
         {
             var concreteClassName = group.Key;
             EmitRegistrationField(writer, $"{uniqueClassName}_{registrationIndex}",
-                $"global::TUnit.Core.SourceRegistrar.RegisterLazy<{concreteClassName}>(static () => {uniqueClassName}.Entries_{registrationIndex})");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>(static () => {uniqueClassName}.Entries_{registrationIndex})");
             registrationIndex++;
         }
     }
@@ -3555,9 +3555,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // Registration — use RegisterLazy to defer per-class JIT until discovery
+            // Registration — factory wrapper defers per-class JIT until discovery
             EmitRegistrationField(writer, classGroup.TestSourceName,
-                $"global::TUnit.Core.SourceRegistrar.RegisterLazy<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Entries)");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Entries)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }

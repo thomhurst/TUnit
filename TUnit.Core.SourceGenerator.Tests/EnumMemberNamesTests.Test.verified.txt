@@ -101,5 +101,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterLazy<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(static () => TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(static () => TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource.Entries);
 }
