@@ -1,0 +1,66 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+
+  <!-- Core framework packages -->
+  <Folder Name="/Core/">
+    <Project Path="TUnit/TUnit.csproj" />
+    <Project Path="TUnit.Core/TUnit.Core.csproj" />
+    <Project Path="TUnit.Engine/TUnit.Engine.csproj" />
+    <Project Path="TUnit.Assertions/TUnit.Assertions.csproj" />
+    <Project Path="TUnit.Assertions.FSharp/TUnit.Assertions.FSharp.fsproj" />
+  </Folder>
+
+  <!-- Extension libraries and integrations -->
+  <Folder Name="/Libraries/">
+    <Project Path="TUnit.Aspire/TUnit.Aspire.csproj" />
+    <Project Path="TUnit.AspNetCore/TUnit.AspNetCore.csproj" />
+    <Project Path="TUnit.FsCheck/TUnit.FsCheck.csproj" />
+    <Project Path="TUnit.Logging.Microsoft/TUnit.Logging.Microsoft.csproj" />
+    <Project Path="TUnit.Mocks/TUnit.Mocks.csproj" />
+    <Project Path="TUnit.Mocks.Assertions/TUnit.Mocks.Assertions.csproj" />
+    <Project Path="TUnit.Mocks.Http/TUnit.Mocks.Http.csproj" />
+    <Project Path="TUnit.Mocks.Logging/TUnit.Mocks.Logging.csproj" />
+    <Project Path="TUnit.Playwright/TUnit.Playwright.csproj" />
+  </Folder>
+
+  <!-- Roslyn analyzers and code fixers (base projects only, no Roslyn version variants) -->
+  <Folder Name="/Analyzers/">
+    <Project Path="TUnit.Analyzers/TUnit.Analyzers.csproj" />
+    <Project Path="TUnit.Analyzers.CodeFixers/TUnit.Analyzers.CodeFixers.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers/TUnit.AspNetCore.Analyzers.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers/TUnit.Assertions.Analyzers.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.CodeFixers/TUnit.Assertions.Analyzers.CodeFixers.csproj" />
+    <Project Path="TUnit.Mocks.Analyzers/TUnit.Mocks.Analyzers.csproj" />
+  </Folder>
+
+  <!-- Source generators (base projects only, no Roslyn version variants) -->
+  <Folder Name="/SourceGenerators/">
+    <Project Path="TUnit.Assertions.SourceGenerator/TUnit.Assertions.SourceGenerator.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator/TUnit.Core.SourceGenerator.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator/TUnit.Mocks.SourceGenerator.csproj" />
+  </Folder>
+
+  <!-- Test projects -->
+  <Folder Name="/Tests/">
+    <Project Path="TUnit.Analyzers.Tests/TUnit.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.Tests/TUnit.AspNetCore.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.CodeFixers.Tests/TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Analyzers.Tests/TUnit.Assertions.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Assertions.SourceGenerator.Tests/TUnit.Assertions.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Tests/TUnit.Assertions.Tests.csproj" />
+    <Project Path="TUnit.Core.SourceGenerator.Tests/TUnit.Core.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Engine.Tests/TUnit.Engine.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Analyzers.Tests/TUnit.Mocks.Analyzers.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Http.Tests/TUnit.Mocks.Http.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Logging.Tests/TUnit.Mocks.Logging.Tests.csproj" />
+    <Project Path="TUnit.Mocks.SourceGenerator.Tests/TUnit.Mocks.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj" />
+    <Project Path="TUnit.PublicAPI/TUnit.PublicAPI.csproj" />
+    <Project Path="TUnit.RpcTests/TUnit.RpcTests.csproj" />
+    <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />
+  </Folder>
+</Solution>

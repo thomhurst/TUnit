@@ -116,10 +116,14 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3
 
+      - name: Restore
+        shell: bash
+        run: dotnet restore TUnit.CI.slnx
+
       - name: Build
         shell: bash
         run: >-
-          dotnet build TUnit.CI.slnx -c Release
+          dotnet build TUnit.CI.slnx -c Release --no-restore -graphBuild:True
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"

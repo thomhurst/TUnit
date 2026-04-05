@@ -5,6 +5,17 @@
 ## Common Commands
 
 ```bash
+# Build (fast inner loop — use dev solution, separate restore, graph scheduling)
+dotnet restore TUnit.Dev.slnx
+dotnet build TUnit.Dev.slnx --no-restore -graphBuild:True
+
+# Build with centralized output layout
+dotnet build TUnit.Dev.slnx --no-restore -graphBuild:True --artifacts-path artifacts
+
+# Build full solution (CI or pre-commit)
+dotnet restore TUnit.slnx
+dotnet build TUnit.slnx --no-restore -graphBuild:True
+
 # Run all tests (excludes TUnit.TestProject)
 dotnet test
 
