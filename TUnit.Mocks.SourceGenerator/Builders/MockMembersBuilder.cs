@@ -436,9 +436,11 @@ internal static class MockMembersBuilder
         writer.AppendLine("/// <summary>Execute a typed callback using the actual method parameters.</summary>");
         using (writer.Block($"public {wrapperName} Callback({actionType} callback)"))
         {
+            // allNonOutParams is null when this is the primary overload (no out/ref struct subset remapping).
+            // In that case the callback's parameter types match the typed Callback<T1,...> overload directly,
+            // so we can register it without a wrapping closure — avoiding the object?[] allocation.
             if (allNonOutParams is null && nonOutParams.Count <= 8)
             {
-                // Direct typed registration — avoids boxing args into object?[] and the wrapping closure
                 writer.AppendLine("EnsureSetup().Callback(callback);");
             }
             else
