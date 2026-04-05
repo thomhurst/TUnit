@@ -48,7 +48,15 @@ public sealed class CallRecord
     /// <summary>
     /// The arguments passed to the call. Lazily materialized from the argument store if one was provided.
     /// </summary>
-    public object?[] Arguments => _arguments ??= _store?.ToArray() ?? [];
+    public object?[] Arguments
+    {
+        get
+        {
+            if (_arguments is not null) return _arguments;
+            var arr = _store?.ToArray() ?? [];
+            return Interlocked.CompareExchange(ref _arguments, arr, null) ?? arr;
+        }
+    }
 
     internal bool IsVerifiedField;
 
