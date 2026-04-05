@@ -3,6 +3,7 @@ using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Setup;
 using TUnit.Mocks.Setup.Behaviors;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Mocks;
 
@@ -13,27 +14,35 @@ public sealed partial class MockEngine<T> where T : class
     //  ITypedBehavior<T...>, then fall back to store.ToArray().
     // ──────────────────────────────────────────────────────────────────────
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1>(IBehavior b, ArgumentStore<T1> store, T1 a1)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1> tb ? tb.Execute(a1) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2>(IBehavior b, ArgumentStore<T1, T2> store, T1 a1, T2 a2)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2> tb ? tb.Execute(a1, a2) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3>(IBehavior b, ArgumentStore<T1, T2, T3> store, T1 a1, T2 a2, T3 a3)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3> tb ? tb.Execute(a1, a2, a3) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3, T4>(IBehavior b, ArgumentStore<T1, T2, T3, T4> store, T1 a1, T2 a2, T3 a3, T4 a4)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4> tb ? tb.Execute(a1, a2, a3, a4) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3, T4, T5>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5> tb ? tb.Execute(a1, a2, a3, a4, a5) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6> tb ? tb.Execute(a1, a2, a3, a4, a5, a6) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6, T7>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6, T7> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6, T7> tb ? tb.Execute(a1, a2, a3, a4, a5, a6, a7) : b.Execute(store.ToArray());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6, T7, T8>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6, T7, T8> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
         => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8> tb ? tb.Execute(a1, a2, a3, a4, a5, a6, a7, a8) : b.Execute(store.ToArray());
     // ──────────────────────────────────────────────────────────────────────

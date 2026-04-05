@@ -6,11 +6,7 @@ internal sealed class CallbackBehavior : IBehavior, IArgumentFreeBehavior
 
     public CallbackBehavior(Action callback) => _callback = callback;
 
-    public object? Execute(object?[] arguments)
-    {
-        _callback();
-        return null;
-    }
+    public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute()
     {

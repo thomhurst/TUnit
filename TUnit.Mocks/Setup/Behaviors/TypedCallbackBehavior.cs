@@ -1,9 +1,5 @@
 namespace TUnit.Mocks.Setup.Behaviors;
 
-// Typed behavior interfaces enable the typed HandleCall<T1,...> methods to invoke callbacks
-// without boxing arguments into object?[]. The typed HandleCall checks for the matching
-// ITypedBehavior<T1,...> interface and calls Execute(arg1,...) directly.
-
 internal interface ITypedBehavior<T1>
 {
     object? Execute(T1 arg1);

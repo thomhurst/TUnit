@@ -6,7 +6,7 @@ internal sealed class ThrowBehavior : IBehavior, IArgumentFreeBehavior
 
     public ThrowBehavior(Exception exception) => _exception = exception;
 
-    public object? Execute(object?[] arguments) => throw _exception;
+    public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute() => throw _exception;
 }

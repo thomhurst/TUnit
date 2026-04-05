@@ -6,7 +6,7 @@ internal sealed class RawReturnBehavior : IBehavior, IArgumentFreeBehavior
 
     public RawReturnBehavior(object? rawValue) => _wrapper = new RawReturn(rawValue);
 
-    public object? Execute(object?[] arguments) => _wrapper;
+    public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute() => _wrapper;
 }
@@ -17,7 +17,7 @@ internal sealed class ComputedRawReturnBehavior : IBehavior, IArgumentFreeBehavi
 
     public ComputedRawReturnBehavior(Func<object?> factory) => _factory = factory;
 
-    public object? Execute(object?[] arguments) => new RawReturn(_factory());
+    public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute() => new RawReturn(_factory());
 }

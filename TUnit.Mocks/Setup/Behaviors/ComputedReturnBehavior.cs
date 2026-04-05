@@ -6,7 +6,7 @@ internal sealed class ComputedReturnBehavior<TReturn> : IBehavior, IArgumentFree
 
     public ComputedReturnBehavior(Func<TReturn> factory) => _factory = factory;
 
-    public object? Execute(object?[] arguments) => _factory();
+    public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute() => _factory();
 }
