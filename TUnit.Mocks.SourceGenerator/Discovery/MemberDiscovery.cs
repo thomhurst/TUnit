@@ -507,6 +507,8 @@ internal static class MemberDiscovery
                 {
                     Name = tp.Name,
                     Constraints = tp.GetGenericConstraints(),
+                    HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
+                    HasValueTypeConstraint = tp.HasValueTypeConstraint,
                     HasAnnotatedNullableUsage = tp.IsUnconstrainedWithNullableUsage(method)
                 }).ToImmutableArray()
             ),

@@ -11,12 +11,12 @@ namespace TUnit.Mocks.Generated
 
         T global::IRepository.GetById<T>(int id) where T : class => Object.GetById<T>(id);
 
-        void global::IRepository.Save<T>(T entity) where T : class, new()
+        void global::IRepository.Save<T>(T entity) where T : class
         {
             Object.Save<T>(entity);
         }
 
-        TResult global::IRepository.Transform<TInput, TResult>(TInput input) where TInput : notnull where TResult : struct => Object.Transform<TInput, TResult>(input);
+        TResult global::IRepository.Transform<TInput, TResult>(TInput input) where TResult : struct => Object.Transform<TInput, TResult>(input);
     }
 }
 

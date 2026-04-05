@@ -193,6 +193,35 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Generic_Method_Constraints_On_Explicit_Impl()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface IConstrained
+            {
+                T GetNotnull<T>(string key) where T : notnull;
+                T GetNew<T>() where T : new();
+                T GetUnmanaged<T>() where T : unmanaged;
+                T GetDisposable<T>() where T : IDisposable;
+                T GetClassNew<T>() where T : class, IDisposable, new();
+                T GetStructDisposable<T>() where T : struct, IDisposable;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConstrained>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Overloaded_Methods()
     {
         var source = """
