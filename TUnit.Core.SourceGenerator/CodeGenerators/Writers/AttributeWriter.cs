@@ -5,9 +5,12 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 
-public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator.Helpers.WellKnownTypes wellKnownTypes)
+public class AttributeWriter(Compilation compilation)
 {
+    private const string TUnitRootNamespace = "TUnit";
+
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
+    private readonly Dictionary<INamedTypeSymbol, bool> _tunitRelatedCache = new(SymbolEqualityComparer.Default);
 
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
         IEnumerable<AttributeData> attributeDatas)
@@ -17,22 +20,13 @@ public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator
         // Filter out attributes that we can write
         foreach (var attributeData in attributeDatas)
         {
-            // Include attributes with syntax reference (from current compilation)
-            // Include attributes without syntax reference (from other assemblies) as long as they have an AttributeClass
-            if (attributeData.ApplicationSyntaxReference is null && attributeData.AttributeClass is null)
+            if (attributeData.AttributeClass is null)
             {
                 continue;
             }
 
-            // Skip compiler-internal and assembly-level attributes
-            if (ShouldSkipCompilerInternalAttribute(attributeData))
-            {
-                continue;
-            }
-
-            // Skip framework-specific attributes when targeting older frameworks
-            // We determine this by checking if we can compile the attribute
-            if (ShouldSkipFrameworkSpecificAttribute(attributeData))
+            // Only include attributes that are, inherit from, or implement a TUnit type
+            if (!IsTUnitRelatedAttribute(attributeData.AttributeClass))
             {
                 continue;
             }
@@ -185,80 +179,35 @@ public class AttributeWriter(Compilation compilation, TUnit.Core.SourceGenerator
     }
 
 
-    private bool ShouldSkipFrameworkSpecificAttribute(AttributeData attributeData)
+    private bool IsTUnitRelatedAttribute(INamedTypeSymbol attributeClass)
     {
-        if (attributeData.AttributeClass == null)
+        if (_tunitRelatedCache.TryGetValue(attributeClass, out var cached))
         {
-            return false;
+            return cached;
         }
 
-        // Generic approach: Check if the attribute type is actually available in the target compilation
-        // This works by seeing if we can resolve the type from the compilation's references
-        var fullyQualifiedName = wellKnownTypes.GetDisplayString(attributeData.AttributeClass);
+        var result = attributeClass.GetSelfAndBaseTypes().Any(IsInTUnitNamespace)
+                     || attributeClass.AllInterfaces.Any(IsInTUnitNamespace);
 
-        // Check if this is a system/runtime attribute that might not exist on all frameworks
-        if (fullyQualifiedName.StartsWith("System.") || fullyQualifiedName.StartsWith("Microsoft."))
+        _tunitRelatedCache[attributeClass] = result;
+        return result;
+    }
+
+    private static bool IsInTUnitNamespace(INamedTypeSymbol type)
+    {
+        var ns = type.ContainingNamespace;
+
+        while (ns is { IsGlobalNamespace: false })
         {
-            // Try to get the type from the compilation
-            // If it doesn't exist in the compilation's references, we should skip it
-            var typeSymbol = wellKnownTypes.TryGet(fullyQualifiedName);
-
-            // If the type doesn't exist in the compilation, skip it
-            if (typeSymbol == null)
+            if (ns.Name == TUnitRootNamespace)
             {
                 return true;
             }
 
-            // Special handling for attributes that exist but may not be usable
-            // For example, nullable attributes exist in the reference assemblies but not at runtime for .NET Framework
-            if (IsNullableAttribute(fullyQualifiedName))
-            {
-                // Check if we're targeting .NET Framework by looking at references
-                var isNetFramework = compilation.References.Any(r =>
-                    r.Display?.Contains("mscorlib") == true &&
-                    !r.Display.Contains("System.Runtime"));
-
-                if (isNetFramework)
-                {
-                    return true; // Skip nullable attributes on .NET Framework
-                }
-            }
+            ns = ns.ContainingNamespace;
         }
 
         return false;
-    }
-
-    private static bool IsNullableAttribute(string fullyQualifiedName)
-    {
-        return fullyQualifiedName.Contains("NullableAttribute") ||
-               fullyQualifiedName.Contains("NullableContextAttribute") ||
-               fullyQualifiedName.Contains("NullablePublicOnlyAttribute");
-    }
-
-    private bool ShouldSkipCompilerInternalAttribute(AttributeData attributeData)
-    {
-        if (attributeData.AttributeClass == null)
-        {
-            return false;
-        }
-
-        var fullyQualifiedName = wellKnownTypes.GetDisplayString(attributeData.AttributeClass);
-
-        // Skip compiler-internal attributes that should never be re-emitted
-        // System.Runtime.CompilerServices contains compiler-generated and structural metadata attributes
-        if (fullyQualifiedName.StartsWith("System.Runtime.CompilerServices."))
-        {
-            return true;
-        }
-
-        // Skip debugger attributes (compiler-generated for debugging support)
-        if (fullyQualifiedName.StartsWith("System.Diagnostics.Debugger"))
-        {
-            return true;
-        }
-
-        // Skip ParamArrayAttribute (compiler-generated for params keyword)
-        return fullyQualifiedName == "System.ParamArrayAttribute";
     }
 
 }

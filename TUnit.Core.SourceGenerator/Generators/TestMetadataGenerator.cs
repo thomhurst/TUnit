@@ -36,7 +36,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var wellKnownTypes = new WellKnownTypes(c);
                 return new CompilationContext(
                     (CSharpCompilation)c,
-                    new AttributeWriter(c, wellKnownTypes),
+                    new AttributeWriter(c),
                     wellKnownTypes
                 );
             });
