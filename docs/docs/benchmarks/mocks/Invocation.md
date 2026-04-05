@@ -18,12 +18,12 @@ Calling methods on mock objects:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 368.7 ns | 234.41 ns | 12.85 ns | 176 B |
-| Imposter | 367.0 ns | 102.23 ns | 5.60 ns | 168 B |
-| Mockolate | 796.7 ns | 374.54 ns | 20.53 ns | 640 B |
-| Moq | 913.9 ns | 344.02 ns | 18.86 ns | 376 B |
-| NSubstitute | 809.3 ns | 236.18 ns | 12.95 ns | 304 B |
-| FakeItEasy | 2,020.7 ns | 645.01 ns | 35.35 ns | 944 B |
+| **TUnit.Mocks** | 316.8 ns | 167.39 ns | 9.18 ns | 208 B |
+| Imposter | 288.1 ns | 62.75 ns | 3.44 ns | 168 B |
+| Mockolate | 633.1 ns | 89.16 ns | 4.89 ns | 640 B |
+| Moq | 798.1 ns | 253.28 ns | 13.88 ns | 376 B |
+| NSubstitute | 758.5 ns | 233.20 ns | 12.78 ns | 360 B |
+| FakeItEasy | 1,708.6 ns | 443.53 ns | 24.31 ns | 944 B |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Calling methods on mock objects:
 xychart-beta
   title "Invocation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2425
-  bar [368.7, 367, 796.7, 913.9, 809.3, 2020.7]
+  y-axis "Time (ns)" 0 --> 2051
+  bar [316.8, 288.1, 633.1, 798.1, 758.5, 1708.6]
 ```
 
 ---
@@ -59,12 +59,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 227.7 ns | 147.17 ns | 8.07 ns | 112 B |
-| Imposter | 364.0 ns | 148.82 ns | 8.16 ns | 168 B |
-| Mockolate | 722.7 ns | 357.53 ns | 19.60 ns | 520 B |
-| Moq | 608.3 ns | 45.72 ns | 2.51 ns | 296 B |
-| NSubstitute | 720.7 ns | 116.44 ns | 6.38 ns | 328 B |
-| FakeItEasy | 1,753.1 ns | 715.60 ns | 39.22 ns | 776 B |
+| **TUnit.Mocks** | 270.7 ns | 124.78 ns | 6.84 ns | 144 B |
+| Imposter | 292.3 ns | 86.39 ns | 4.74 ns | 168 B |
+| Mockolate | 525.3 ns | 174.71 ns | 9.58 ns | 520 B |
+| Moq | 517.8 ns | 335.71 ns | 18.40 ns | 296 B |
+| NSubstitute | 592.5 ns | 212.16 ns | 11.63 ns | 272 B |
+| FakeItEasy | 1,522.2 ns | 536.69 ns | 29.42 ns | 776 B |
 
 ```mermaid
 %%{init: {
@@ -90,8 +90,8 @@ xychart-beta
 xychart-beta
   title "Invocation (String) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2104
-  bar [227.7, 364, 722.7, 608.3, 720.7, 1753.1]
+  y-axis "Time (ns)" 0 --> 1827
+  bar [270.7, 292.3, 525.3, 517.8, 592.5, 1522.2]
 ```
 
 ---
@@ -100,12 +100,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 39,741.9 ns | 12,503.76 ns | 685.37 ns | 18048 B |
-| Imposter | 37,376.4 ns | 54,157.26 ns | 2,968.54 ns | 16800 B |
-| Mockolate | 77,269.3 ns | 43,532.15 ns | 2,386.14 ns | 64000 B |
-| Moq | 88,134.5 ns | 65,537.69 ns | 3,592.34 ns | 37600 B |
-| NSubstitute | 81,687.5 ns | 38,698.53 ns | 2,121.20 ns | 36448 B |
-| FakeItEasy | 207,688.7 ns | 7,905.08 ns | 433.30 ns | 94400 B |
+| **TUnit.Mocks** | 31,365.4 ns | 17,153.66 ns | 940.25 ns | 21248 B |
+| Imposter | 28,902.8 ns | 10,632.48 ns | 582.80 ns | 16800 B |
+| Mockolate | 65,972.9 ns | 18,196.73 ns | 997.42 ns | 64000 B |
+| Moq | 80,423.8 ns | 4,121.47 ns | 225.91 ns | 37600 B |
+| NSubstitute | 73,410.9 ns | 11,495.85 ns | 630.13 ns | 30848 B |
+| FakeItEasy | 181,158.0 ns | 73,020.55 ns | 4,002.50 ns | 94400 B |
 
 ```mermaid
 %%{init: {
@@ -131,8 +131,8 @@ xychart-beta
 xychart-beta
   title "Invocation (100 calls) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 249227
-  bar [39741.9, 37376.4, 77269.3, 88134.5, 81687.5, 207688.7]
+  y-axis "Time (ns)" 0 --> 217390
+  bar [31365.4, 28902.8, 65972.9, 80423.8, 73410.9, 181158]
 ```
 
 ## 🎯 Key Insights
@@ -145,4 +145,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-05T03:32:35.400Z*
+*Last generated: 2026-04-05T11:44:06.333Z*
