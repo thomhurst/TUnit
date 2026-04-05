@@ -165,17 +165,50 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
 #if NET
     public override void Write(ReadOnlySpan<char> buffer) => Write(new string(buffer));
-    public override void Write(StringBuilder? value) => Write(value?.ToString() ?? string.Empty);
+    public override void Write(StringBuilder? value) => Write(CopyStringBuilderSafely(value));
     public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
         => WriteAsync(new string(buffer.Span));
     public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-        => WriteAsync(value?.ToString() ?? string.Empty);
+        => WriteAsync(CopyStringBuilderSafely(value));
     public override void WriteLine(ReadOnlySpan<char> buffer) => WriteLine(new string(buffer));
-    public override void WriteLine(StringBuilder? value) => WriteLine(value?.ToString() ?? string.Empty);
+    public override void WriteLine(StringBuilder? value) => WriteLine(CopyStringBuilderSafely(value));
     public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
         => WriteLineAsync(new string(buffer.Span));
     public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-        => WriteLineAsync(value?.ToString() ?? string.Empty);
+        => WriteLineAsync(CopyStringBuilderSafely(value));
+
+    /// <summary>
+    /// Safely copies the content of a caller-owned StringBuilder into a string.
+    /// Callers (e.g., ASP.NET Core's ConsoleLogger) may pool and reuse their
+    /// StringBuilder after Write returns. If the StringBuilder is mutated
+    /// concurrently during the copy, the ArgumentOutOfRangeException is caught
+    /// and the output for that single log entry is lost rather than crashing
+    /// the test.
+    /// </summary>
+    private static string CopyStringBuilderSafely(StringBuilder? value)
+    {
+        if (value is null)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            int length = value.Length;
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Create(length, value, static (span, sb) => sb.CopyTo(0, span, span.Length));
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // The caller's StringBuilder was mutated concurrently (e.g., returned
+            // to a pool and reused by another thread). Swallow rather than crash.
+            return string.Empty;
+        }
+    }
 #endif
 
     public override IFormatProvider FormatProvider => GetOriginalOut().FormatProvider;
