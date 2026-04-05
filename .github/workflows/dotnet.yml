@@ -85,14 +85,9 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Docker Setup Docker
-        if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v5.0.0
-
       - name: Cache Playwright Browsers
         uses: actions/cache@v5
         continue-on-error: true
-        id: playwright-cache
         with:
           path: |
             ~/.cache/ms-playwright
@@ -102,13 +97,9 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
 
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - name: Install Playwright (browsers only)
-        run: npx playwright install
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
+      - name: Docker Setup Docker
+        if: matrix.os == 'ubuntu-latest'
+        uses: docker/setup-docker-action@v5.0.0
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'

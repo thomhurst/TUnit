@@ -6,7 +6,8 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("NetworkTests"), RunOnLinuxOnly, RunOnWindowsOnly]
+[NotInParallel("NetworkTests")]
+[DependsOn<InstallPlaywrightModule>]
 public class RunPlaywrightTestsModule : TestBaseModule
 {
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
@@ -16,12 +17,13 @@ public class RunPlaywrightTestsModule : TestBaseModule
         return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
             new DotNetRunOptions
             {
-                Project = project.FullName,
+                Project = project.Name,
                 NoBuild = true,
                 Configuration = "Release",
             },
             new CommandExecutionOptions
             {
+                WorkingDirectory = project.Directory!.FullName,
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
