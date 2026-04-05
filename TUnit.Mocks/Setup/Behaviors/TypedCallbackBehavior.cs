@@ -51,6 +51,14 @@ internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
 }
 
+// ── ARITY COUPLING (1–8) ──────────────────────────────────────────────
+// If you add an arity (e.g. T9), you MUST also update:
+//   - ITypedBehavior<T1...T9> above
+//   - ExecuteBehavior<T1...T9> in MockEngine.Typed.cs
+//   - Callback<T1...T9> in MethodSetupBuilder.cs and VoidMethodSetupBuilder.cs
+//   - MaxTypedParams in MockMembersBuilder.cs (source generator)
+// ──────────────────────────────────────────────────────────────────────
+
 internal sealed class TypedCallbackBehavior<T1>(Action<T1> callback) : IBehavior, ITypedBehavior<T1>
 {
     public object? Execute(object?[] arguments)

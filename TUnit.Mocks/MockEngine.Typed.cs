@@ -9,10 +9,13 @@ namespace TUnit.Mocks;
 
 public sealed partial class MockEngine<T> where T : class
 {
-    // ──────────────────────────────────────────────────────────────────────
+    // ── ARITY COUPLING (1–8) ──────────────────────────────────────────────
     //  Behavior execution helpers — check IArgumentFreeBehavior, then
     //  ITypedBehavior<T...>, then fall back to store.ToArray().
-    //  Arity range 1–8; must match MaxTypedParams in MockMembersBuilder.
+    //  If you add an arity (e.g. T9), you MUST also update:
+    //    - ITypedBehavior<T1...T9> and TypedCallbackBehavior in TypedCallbackBehavior.cs
+    //    - Callback<T1...T9> in MethodSetupBuilder.cs and VoidMethodSetupBuilder.cs
+    //    - MaxTypedParams in MockMembersBuilder.cs (source generator)
     // ──────────────────────────────────────────────────────────────────────
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
