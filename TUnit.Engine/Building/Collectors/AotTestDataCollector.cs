@@ -91,13 +91,17 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             var classType = kvp.Key;
             var source = kvp.Value;
-            var typeMatches = !filterHints.HasHints || filterHints.CouldTypeMatch(classType);
+
+            if (filterHints.HasHints && !filterHints.CouldTypeMatch(classType))
+            {
+                continue;
+            }
 
             for (var i = 0; i < source.Count; i++)
             {
                 var filterData = source.GetFilterData(i);
 
-                if (typeMatches && (!filterHints.HasHints || filterHints.CouldMatch(filterData.ClassName, filterData.MethodName)))
+                if (!filterHints.HasHints || filterHints.CouldMatch(filterData.ClassName, filterData.MethodName))
                 {
                     matching.Add((source, i));
                     if (filterData.DependsOn.Length > 0)
