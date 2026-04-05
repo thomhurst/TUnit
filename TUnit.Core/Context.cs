@@ -82,16 +82,13 @@ public abstract class Context : IContext, IDisposable
 
     public virtual string GetStandardOutput()
     {
-        if (_outputBuilder.Length == 0)
-        {
-            return string.Empty;
-        }
-
         _outputLock.EnterReadLock();
 
         try
         {
-            return _outputBuilder.ToString();
+            return _outputBuilder.Length == 0
+                ? string.Empty
+                : _outputBuilder.ToString();
         }
         finally
         {
@@ -101,16 +98,13 @@ public abstract class Context : IContext, IDisposable
 
     public virtual string GetErrorOutput()
     {
-        if (_errorOutputBuilder.Length == 0)
-        {
-            return string.Empty;
-        }
-
         _errorOutputLock.EnterReadLock();
 
         try
         {
-            return _errorOutputBuilder.ToString();
+            return _errorOutputBuilder.Length == 0
+                ? string.Empty
+                : _errorOutputBuilder.ToString();
         }
         finally
         {

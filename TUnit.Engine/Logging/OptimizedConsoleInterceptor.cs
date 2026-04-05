@@ -164,18 +164,15 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     }
 
 #if NET
+    // StringBuilder overrides intentionally omitted — base TextWriter iterates chunks
+    // via GetChunks() and calls Write(ReadOnlySpan<char>) per chunk, avoiding ToString()
+    // which races with concurrent StringBuilder mutation (see #5411).
     public override void Write(ReadOnlySpan<char> buffer) => Write(new string(buffer));
-    public override void Write(StringBuilder? value) => Write(value?.ToString() ?? string.Empty);
     public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
         => WriteAsync(new string(buffer.Span));
-    public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-        => WriteAsync(value?.ToString() ?? string.Empty);
     public override void WriteLine(ReadOnlySpan<char> buffer) => WriteLine(new string(buffer));
-    public override void WriteLine(StringBuilder? value) => WriteLine(value?.ToString() ?? string.Empty);
     public override Task WriteLineAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
         => WriteLineAsync(new string(buffer.Span));
-    public override Task WriteLineAsync(StringBuilder? value, CancellationToken cancellationToken = new())
-        => WriteLineAsync(value?.ToString() ?? string.Empty);
 #endif
 
     public override IFormatProvider FormatProvider => GetOriginalOut().FormatProvider;
