@@ -56,6 +56,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         Properties = properties,
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = "Release",
+                        NoBuild = true,
                     }, new CommandExecutionOptions
                     {
                         LogSettings = new CommandLoggingOptions
