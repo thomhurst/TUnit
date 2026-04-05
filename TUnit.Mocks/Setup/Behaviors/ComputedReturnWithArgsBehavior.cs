@@ -6,6 +6,9 @@ namespace TUnit.Mocks.Setup.Behaviors;
 /// Behavior that computes a return value from the method arguments.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
+/// <remarks>
+/// Future optimization: implement ITypedBehavior&lt;T...&gt; to avoid store.ToArray() when args are needed.
+/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ComputedReturnWithArgsBehavior<TReturn> : IBehavior
 {

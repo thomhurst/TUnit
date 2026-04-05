@@ -48,6 +48,7 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    /// <summary>Typed callback overload emitted by the source generator. Avoids boxing arguments into object?[].</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Callback<T1>(Action<T1> callback)
     {

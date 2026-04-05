@@ -64,6 +64,7 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
+    /// <summary>Typed callback overload emitted by the source generator. Avoids boxing arguments into object?[].</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Callback<T1>(Action<T1> callback)
     {

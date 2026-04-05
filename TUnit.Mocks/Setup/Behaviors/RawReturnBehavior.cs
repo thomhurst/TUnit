@@ -22,6 +22,7 @@ internal sealed class ComputedRawReturnBehavior : IBehavior, IArgumentFreeBehavi
     public object? Execute() => new RawReturn(_factory());
 }
 
+// Future optimization: implement ITypedBehavior<T...> to avoid store.ToArray() when args are needed.
 internal sealed class ComputedRawReturnWithArgsBehavior : IBehavior
 {
     private readonly Func<object?[], object?> _factory;
