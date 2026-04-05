@@ -66,8 +66,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
                 return
                 [
                     new global::TUnit.Core.TestAttribute(),
-                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
-                    new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
+                    new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
                 ];
             }
             default:

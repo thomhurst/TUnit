@@ -223,8 +223,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
                     new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.RunOnAttribute(global::TUnit.Core.Enums.OS.Windows),
-                    new global::TUnit.Core.RepeatAttribute(100),
-                    new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
+                    new global::TUnit.Core.RepeatAttribute(100)
                 ];
             }
             case 1:
@@ -234,8 +233,7 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
                     new global::TUnit.Core.TestAttribute(),
                     new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                     new global::TUnit.Core.RunOnAttribute(global::TUnit.Core.Enums.OS.Windows),
-                    new global::TUnit.Core.RepeatAttribute(100),
-                    new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
+                    new global::TUnit.Core.RepeatAttribute(100)
                 ];
             }
             default:
