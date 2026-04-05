@@ -679,6 +679,174 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Generic_Interface_With_Enum_Type_Argument()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            namespace Sandbox
+            {
+                public enum SomeEnum
+                {
+                    Value1,
+                    Value2
+                }
+
+                public interface IFoo<T>
+                {
+                    T Value { get; }
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = IFoo<SomeEnum>.Mock();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Generic_Interface_With_Class_Type_Argument()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            namespace Sandbox
+            {
+                public class Bar
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public interface IFoo<T>
+                {
+                    T Value { get; }
+                    void Process(T item);
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = IFoo<Bar>.Mock();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Generic_Interface_With_Nested_Namespace_Type_Argument()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            namespace Outer.Inner
+            {
+                public class Config
+                {
+                    public int Timeout { get; set; }
+                }
+            }
+
+            namespace Sandbox
+            {
+                public interface IService<T>
+                {
+                    T GetConfig();
+                    void Apply(T config);
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = IService<Outer.Inner.Config>.Mock();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Generic_Interface_With_Multiple_Non_Builtin_Type_Arguments()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            namespace Sandbox
+            {
+                public class Entity
+                {
+                    public int Id { get; set; }
+                }
+
+                public enum Status
+                {
+                    Active,
+                    Inactive
+                }
+
+                public interface IMapper<TIn, TOut>
+                {
+                    TOut Map(TIn input);
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = IMapper<Entity, Status>.Mock();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Generic_Interface_With_Nested_Generic_Type_Argument()
+    {
+        var source = """
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+
+            namespace Sandbox
+            {
+                public class Item
+                {
+                    public string Name { get; set; } = "";
+                }
+
+                public interface IProvider<T>
+                {
+                    T Get();
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = IProvider<List<Item>>.Mock();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Unconstrained_Nullable_Generic()
     {
         var source = """
