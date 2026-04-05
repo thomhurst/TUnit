@@ -1112,13 +1112,25 @@ internal static class MockImplBuilder
         var clauses = new List<string>();
         foreach (var tp in typeParameters)
         {
-            if (!string.IsNullOrEmpty(tp.Constraints))
+            if (forExplicitImplementation)
+            {
+                // CS0460: Only 'class' and 'struct' constraints are allowed on explicit interface implementations.
+                if (tp.HasReferenceTypeConstraint)
+                {
+                    clauses.Add($"where {tp.Name} : class");
+                }
+                else if (tp.HasValueTypeConstraint)
+                {
+                    clauses.Add($"where {tp.Name} : struct");
+                }
+                else if (tp.HasAnnotatedNullableUsage)
+                {
+                    clauses.Add($"where {tp.Name} : default");
+                }
+            }
+            else if (!string.IsNullOrEmpty(tp.Constraints))
             {
                 clauses.Add($"where {tp.Name} : {tp.Constraints}");
-            }
-            else if (forExplicitImplementation && tp.HasAnnotatedNullableUsage)
-            {
-                clauses.Add($"where {tp.Name} : default");
             }
         }
         return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
