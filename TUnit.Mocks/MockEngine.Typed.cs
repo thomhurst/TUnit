@@ -12,6 +12,7 @@ public sealed partial class MockEngine<T> where T : class
     // ──────────────────────────────────────────────────────────────────────
     //  Behavior execution helpers — check IArgumentFreeBehavior, then
     //  ITypedBehavior<T...>, then fall back to store.ToArray().
+    //  Arity range 1–8; must match MaxTypedParams in MockMembersBuilder.
     // ──────────────────────────────────────────────────────────────────────
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

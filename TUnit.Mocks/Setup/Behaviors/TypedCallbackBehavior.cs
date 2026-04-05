@@ -6,6 +6,11 @@ namespace TUnit.Mocks.Setup.Behaviors;
 /// Currently implemented by TypedCallbackBehavior; extensible for future typed return behaviors
 /// (e.g. a TypedComputedReturnBehavior that takes Func&lt;T1, TReturn&gt;).
 /// </summary>
+/// <remarks>
+/// Intentionally internal: the typed dispatch is tightly coupled to the source generator's
+/// knowledge of parameter arity — only generated code knows the concrete types at compile time.
+/// <see cref="IArgumentFreeBehavior"/> is public because any behavior can opt in without type knowledge.
+/// </remarks>
 internal interface ITypedBehavior<T1>
 {
     object? Execute(T1 arg1);
