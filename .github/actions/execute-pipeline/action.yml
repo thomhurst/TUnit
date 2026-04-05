@@ -30,7 +30,7 @@ runs:
   steps:
     - name: Run Pipeline
       shell: bash
-      run: dotnet run -c Release --categories ${{ inputs.categories }}
+      run: dotnet run -c Release --no-build --categories ${{ inputs.categories }}
       working-directory: "TUnit.Pipeline"
       env:
         ADMIN_TOKEN: ${{ inputs.admin-token }}
