@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-05T00:42:23.774Z",
+  "timestamp": "2026-04-05T12:17:42.435Z",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
     "sdk": ".NET SDK 10.0.201",
@@ -9,249 +9,249 @@
     "AsyncTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "532.1 ms",
-        "Error": "1.29 ms",
-        "StdDev": "1.08 ms",
-        "Median": "532.2 ms"
+        "Version": "1.28.0",
+        "Mean": "505.7 ms",
+        "Error": "7.29 ms",
+        "StdDev": "6.82 ms",
+        "Median": "505.2 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "690.1 ms",
-        "Error": "8.54 ms",
-        "StdDev": "7.99 ms",
-        "Median": "688.5 ms"
+        "Mean": "706.6 ms",
+        "Error": "7.68 ms",
+        "StdDev": "6.41 ms",
+        "Median": "706.2 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "613.5 ms",
-        "Error": "10.39 ms",
-        "StdDev": "9.72 ms",
-        "Median": "609.9 ms"
+        "Mean": "656.9 ms",
+        "Error": "12.76 ms",
+        "StdDev": "16.14 ms",
+        "Median": "655.8 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "738.2 ms",
-        "Error": "9.32 ms",
-        "StdDev": "7.79 ms",
-        "Median": "737.4 ms"
+        "Mean": "768.3 ms",
+        "Error": "6.50 ms",
+        "StdDev": "5.76 ms",
+        "Median": "768.5 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
-        "Mean": "121.6 ms",
-        "Error": "0.29 ms",
-        "StdDev": "0.26 ms",
-        "Median": "121.5 ms"
+        "Version": "1.28.0",
+        "Mean": "122.6 ms",
+        "Error": "0.18 ms",
+        "StdDev": "0.16 ms",
+        "Median": "122.6 ms"
       }
     ],
     "DataDrivenTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "480.68 ms",
-        "Error": "2.609 ms",
-        "StdDev": "2.313 ms",
-        "Median": "480.47 ms"
+        "Version": "1.28.0",
+        "Mean": "469.70 ms",
+        "Error": "6.349 ms",
+        "StdDev": "5.628 ms",
+        "Median": "467.78 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "575.35 ms",
-        "Error": "8.416 ms",
-        "StdDev": "7.873 ms",
-        "Median": "577.64 ms"
+        "Mean": "565.08 ms",
+        "Error": "6.483 ms",
+        "StdDev": "5.414 ms",
+        "Median": "565.43 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "540.63 ms",
-        "Error": "10.674 ms",
-        "StdDev": "10.483 ms",
-        "Median": "539.26 ms"
+        "Mean": "533.97 ms",
+        "Error": "8.472 ms",
+        "StdDev": "7.510 ms",
+        "Median": "534.35 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "609.45 ms",
-        "Error": "5.939 ms",
-        "StdDev": "5.265 ms",
-        "Median": "610.10 ms"
+        "Mean": "607.03 ms",
+        "Error": "7.618 ms",
+        "StdDev": "6.753 ms",
+        "Median": "604.60 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
-        "Mean": "22.40 ms",
-        "Error": "0.444 ms",
-        "StdDev": "0.436 ms",
-        "Median": "22.14 ms"
+        "Version": "1.28.0",
+        "Mean": "23.48 ms",
+        "Error": "0.465 ms",
+        "StdDev": "0.751 ms",
+        "Median": "23.37 ms"
       }
     ],
     "MassiveParallelTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "673.0 ms",
-        "Error": "2.89 ms",
-        "StdDev": "2.56 ms",
-        "Median": "672.4 ms"
+        "Version": "1.28.0",
+        "Mean": "664.9 ms",
+        "Error": "2.85 ms",
+        "StdDev": "2.53 ms",
+        "Median": "665.0 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "1,257.8 ms",
-        "Error": "8.49 ms",
-        "StdDev": "7.94 ms",
-        "Median": "1,256.3 ms"
+        "Mean": "1,250.3 ms",
+        "Error": "8.21 ms",
+        "StdDev": "7.27 ms",
+        "Median": "1,249.9 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "2,990.7 ms",
-        "Error": "3.48 ms",
-        "StdDev": "2.72 ms",
-        "Median": "2,991.4 ms"
+        "Mean": "2,978.5 ms",
+        "Error": "11.11 ms",
+        "StdDev": "10.39 ms",
+        "Median": "2,979.2 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "3,132.9 ms",
-        "Error": "8.63 ms",
-        "StdDev": "8.07 ms",
-        "Median": "3,132.6 ms"
+        "Mean": "3,113.2 ms",
+        "Error": "12.40 ms",
+        "StdDev": "11.60 ms",
+        "Median": "3,111.6 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
+        "Version": "1.28.0",
         "Mean": "228.5 ms",
-        "Error": "0.30 ms",
-        "StdDev": "0.25 ms",
-        "Median": "228.6 ms"
+        "Error": "0.55 ms",
+        "StdDev": "0.51 ms",
+        "Median": "228.5 ms"
       }
     ],
     "MatrixTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "572.3 ms",
-        "Error": "10.26 ms",
-        "StdDev": "9.59 ms",
-        "Median": "574.3 ms"
+        "Version": "1.28.0",
+        "Mean": "631.5 ms",
+        "Error": "12.27 ms",
+        "StdDev": "15.52 ms",
+        "Median": "632.6 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "1,570.6 ms",
-        "Error": "16.79 ms",
-        "StdDev": "15.71 ms",
-        "Median": "1,567.9 ms"
+        "Mean": "1,674.5 ms",
+        "Error": "12.45 ms",
+        "StdDev": "10.40 ms",
+        "Median": "1,681.0 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "1,479.0 ms",
-        "Error": "9.09 ms",
-        "StdDev": "8.51 ms",
-        "Median": "1,478.2 ms"
+        "Mean": "1,555.3 ms",
+        "Error": "12.49 ms",
+        "StdDev": "11.07 ms",
+        "Median": "1,553.1 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "1,615.0 ms",
-        "Error": "13.72 ms",
-        "StdDev": "12.83 ms",
-        "Median": "1,616.3 ms"
+        "Mean": "1,697.4 ms",
+        "Error": "9.62 ms",
+        "StdDev": "9.00 ms",
+        "Median": "1,695.2 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
-        "Mean": "126.5 ms",
-        "Error": "0.92 ms",
-        "StdDev": "0.77 ms",
-        "Median": "126.3 ms"
+        "Version": "1.28.0",
+        "Mean": "127.7 ms",
+        "Error": "0.51 ms",
+        "StdDev": "0.43 ms",
+        "Median": "127.7 ms"
       }
     ],
     "ScaleTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "488.83 ms",
-        "Error": "5.219 ms",
-        "StdDev": "4.882 ms",
-        "Median": "489.65 ms"
+        "Version": "1.28.0",
+        "Mean": "491.08 ms",
+        "Error": "3.345 ms",
+        "StdDev": "2.965 ms",
+        "Median": "490.42 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "590.74 ms",
-        "Error": "6.711 ms",
-        "StdDev": "5.949 ms",
-        "Median": "591.21 ms"
+        "Mean": "615.08 ms",
+        "Error": "6.560 ms",
+        "StdDev": "6.136 ms",
+        "Median": "614.65 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "537.16 ms",
-        "Error": "10.378 ms",
-        "StdDev": "14.884 ms",
-        "Median": "534.96 ms"
+        "Mean": "484.99 ms",
+        "Error": "5.972 ms",
+        "StdDev": "5.586 ms",
+        "Median": "485.09 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "602.86 ms",
-        "Error": "9.303 ms",
-        "StdDev": "8.247 ms",
-        "Median": "602.25 ms"
+        "Mean": "618.10 ms",
+        "Error": "8.305 ms",
+        "StdDev": "6.935 ms",
+        "Median": "617.83 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
-        "Mean": "34.33 ms",
-        "Error": "0.861 ms",
-        "StdDev": "2.537 ms",
-        "Median": "34.22 ms"
+        "Version": "1.28.0",
+        "Mean": "34.31 ms",
+        "Error": "0.790 ms",
+        "StdDev": "2.304 ms",
+        "Median": "33.79 ms"
       }
     ],
     "SetupTeardownTests": [
       {
         "Method": "TUnit",
-        "Version": "1.27.0",
-        "Mean": "578.6 ms",
-        "Error": "3.92 ms",
-        "StdDev": "3.67 ms",
-        "Median": "577.9 ms"
+        "Version": "1.28.0",
+        "Mean": "572.6 ms",
+        "Error": "2.68 ms",
+        "StdDev": "2.38 ms",
+        "Median": "572.7 ms"
       },
       {
         "Method": "NUnit",
         "Version": "4.5.1",
-        "Mean": "1,218.4 ms",
-        "Error": "9.16 ms",
-        "StdDev": "8.56 ms",
-        "Median": "1,219.1 ms"
+        "Mean": "1,183.8 ms",
+        "Error": "10.26 ms",
+        "StdDev": "9.10 ms",
+        "Median": "1,182.1 ms"
       },
       {
         "Method": "MSTest",
         "Version": "4.1.0",
-        "Mean": "1,135.3 ms",
-        "Error": "8.56 ms",
-        "StdDev": "7.59 ms",
-        "Median": "1,135.3 ms"
+        "Mean": "1,103.4 ms",
+        "Error": "5.41 ms",
+        "StdDev": "5.06 ms",
+        "Median": "1,102.0 ms"
       },
       {
         "Method": "xUnit3",
         "Version": "3.2.2",
-        "Mean": "1,270.3 ms",
-        "Error": "11.20 ms",
-        "StdDev": "9.93 ms",
-        "Median": "1,266.5 ms"
+        "Mean": "1,239.0 ms",
+        "Error": "9.77 ms",
+        "StdDev": "8.66 ms",
+        "Median": "1,237.5 ms"
       },
       {
         "Method": "TUnit_AOT",
-        "Version": "1.27.0",
+        "Version": "1.28.0",
         "Mean": "NA",
         "Error": "NA",
         "StdDev": "NA",
@@ -263,35 +263,35 @@
     "BuildTime": [
       {
         "Method": "Build_TUnit",
-        "Version": "1.27.0",
-        "Mean": "2.620 s",
-        "Error": "0.0364 s",
-        "StdDev": "0.0323 s",
-        "Median": "2.627 s"
+        "Version": "1.28.0",
+        "Mean": "1.820 s",
+        "Error": "0.0222 s",
+        "StdDev": "0.0207 s",
+        "Median": "1.826 s"
       },
       {
         "Method": "Build_NUnit",
         "Version": "4.5.1",
-        "Mean": "2.427 s",
-        "Error": "0.0266 s",
-        "StdDev": "0.0248 s",
-        "Median": "2.417 s"
+        "Mean": "1.626 s",
+        "Error": "0.0162 s",
+        "StdDev": "0.0143 s",
+        "Median": "1.622 s"
       },
       {
         "Method": "Build_MSTest",
         "Version": "4.1.0",
-        "Mean": "2.494 s",
-        "Error": "0.0339 s",
-        "StdDev": "0.0300 s",
-        "Median": "2.492 s"
+        "Mean": "1.708 s",
+        "Error": "0.0165 s",
+        "StdDev": "0.0147 s",
+        "Median": "1.710 s"
       },
       {
         "Method": "Build_xUnit3",
         "Version": "3.2.2",
-        "Mean": "2.417 s",
-        "Error": "0.0201 s",
-        "StdDev": "0.0188 s",
-        "Median": "2.413 s"
+        "Mean": "1.671 s",
+        "Error": "0.0218 s",
+        "StdDev": "0.0193 s",
+        "Median": "1.663 s"
       }
     ]
   },
@@ -299,6 +299,6 @@
     "runtimeCategories": 6,
     "buildCategories": 1,
     "totalBenchmarks": 7,
-    "lastUpdated": "2026-04-05T00:42:23.771Z"
+    "lastUpdated": "2026-04-05T12:17:42.432Z"
   }
 }
