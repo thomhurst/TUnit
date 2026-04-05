@@ -196,18 +196,15 @@ public class AttributeWriter(Compilation compilation)
     private static bool IsInTUnitNamespace(INamedTypeSymbol type)
     {
         var ns = type.ContainingNamespace;
+        INamespaceSymbol? outermost = null;
 
         while (ns is { IsGlobalNamespace: false })
         {
-            if (ns.Name == TUnitRootNamespace)
-            {
-                return true;
-            }
-
+            outermost = ns;
             ns = ns.ContainingNamespace;
         }
 
-        return false;
+        return outermost?.Name == TUnitRootNamespace;
     }
 
 }
