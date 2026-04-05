@@ -48,6 +48,9 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
+    // ── ARITY COUPLING (1–8): keep in sync with MethodSetupBuilder,
+    //    TypedCallbackBehavior.cs, MockEngine.Typed.cs, and MaxTypedParams in MockMembersBuilder.cs
+
     /// <summary>Typed callback overload emitted by the source generator. Avoids boxing arguments into object?[].</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IVoidSetupChain Callback<T1>(Action<T1> callback)
