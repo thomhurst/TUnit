@@ -15,7 +15,8 @@ public sealed class CallRecord
     /// <summary>
     /// Creates a call record with pre-boxed arguments (fallback path).
     /// </summary>
-    internal CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber)
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber)
     {
         MemberId = memberId;
         MemberName = memberName;
@@ -26,7 +27,8 @@ public sealed class CallRecord
     /// <summary>
     /// Creates a call record with a typed argument store for deferred boxing.
     /// </summary>
-    internal CallRecord(int memberId, string memberName, IArgumentStore store, long sequenceNumber)
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public CallRecord(int memberId, string memberName, IArgumentStore store, long sequenceNumber)
     {
         MemberId = memberId;
         MemberName = memberName;
