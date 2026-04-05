@@ -213,12 +213,29 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = EmitArgsArrayVariable(writer, method);
+        var useTypedDispatch = CanUseTypedDispatch(method);
+        string? argsArray = null;
+        string? typeArgs = null;
+        string? argsList = null;
+
+        if (useTypedDispatch)
+        {
+            typeArgs = GetTypedArgsGenericParams(method);
+            argsList = GetTypedArgsList(method);
+        }
+        else
+        {
+            argsArray = EmitArgsArrayVariable(writer, method);
+        }
+
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
         {
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -229,7 +246,10 @@ internal static class MockImplBuilder
         }
         else if (method.IsVoid && method.IsAsync)
         {
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -249,14 +269,20 @@ internal static class MockImplBuilder
         {
             if (method.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                if (useTypedDispatch)
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null, out var __rawResult))");
+                else
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
             }
             else
             {
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                if (useTypedDispatch)
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.UnwrappedSmartDefault}, out var __result))");
+                else
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
             }
@@ -275,7 +301,10 @@ internal static class MockImplBuilder
         }
         else if (method.IsRefStructReturn)
         {
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             if (method.SpanReturnElementType is not null)
@@ -293,7 +322,10 @@ internal static class MockImplBuilder
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null, out var __rawResult))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
@@ -305,7 +337,10 @@ internal static class MockImplBuilder
         }
         else
         {
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.SmartDefault}, out var __result))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -552,13 +587,30 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = EmitArgsArrayVariable(writer, method);
+        var useTypedDispatch = CanUseTypedDispatch(method);
+        string? argsArray = null;
+        string? typeArgs = null;
+        string? argsList = null;
+
+        if (useTypedDispatch)
+        {
+            typeArgs = GetTypedArgsGenericParams(method);
+            argsList = GetTypedArgsList(method);
+        }
+        else
+        {
+            argsArray = EmitArgsArrayVariable(writer, method);
+        }
+
         var argPassList = GetArgPassList(method);
 
         if (method.IsVoid && !method.IsAsync)
         {
             // void virtual method
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -570,7 +622,10 @@ internal static class MockImplBuilder
         else if (method.IsVoid && method.IsAsync)
         {
             // async void virtual method (Task/ValueTask)
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -592,14 +647,20 @@ internal static class MockImplBuilder
             // async method with return (Task<T>/ValueTask<T>)
             if (method.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+                if (useTypedDispatch)
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null, out var __rawResult))");
+                else
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__rawResult!;");
             }
             else
             {
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
+                if (useTypedDispatch)
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.UnwrappedSmartDefault}, out var __result))");
+                else
+                    writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault}, out var __result))");
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
             }
@@ -620,7 +681,10 @@ internal static class MockImplBuilder
         else if (method.IsRefStructReturn)
         {
             // synchronous method returning ref struct — use void dispatch, fall back to base
-            writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCall({method.MemberId}, \"{method.Name}\", {argsArray}))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             if (method.SpanReturnElementType is not null)
@@ -638,7 +702,10 @@ internal static class MockImplBuilder
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null, out var __rawResult))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null, out var __rawResult))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
@@ -651,7 +718,10 @@ internal static class MockImplBuilder
         else
         {
             // synchronous method with return value
-            writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
+            if (useTypedDispatch)
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.SmartDefault}, out var __result))");
+            else
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault}, out var __result))");
             writer.AppendLine("{");
             writer.IncreaseIndent();
             EmitOutRefReadback(writer, method);
@@ -673,14 +743,30 @@ internal static class MockImplBuilder
             }
         }
 
-        var argsArray = EmitArgsArrayVariable(writer, method);
+        var useTypedDispatch = CanUseTypedDispatch(method);
+        string? argsArray = null;
+        string? typeArgs = null;
+        string? argsList = null;
+
+        if (useTypedDispatch)
+        {
+            typeArgs = GetTypedArgsGenericParams(method);
+            argsList = GetTypedArgsList(method);
+        }
+        else
+        {
+            argsArray = EmitArgsArrayVariable(writer, method);
+        }
 
         var hasOutRef = HasOutRefParams(method);
 
         if (method.IsVoid && !method.IsAsync)
         {
             // Pure void method
-            writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            if (useTypedDispatch)
+                writer.AppendLine($"_engine.HandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList});");
+            else
+                writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
             EmitOutRefReadback(writer, method);
         }
         else if (method.IsVoid && method.IsAsync)
@@ -688,7 +774,10 @@ internal static class MockImplBuilder
             // Async void method (Task or ValueTask with no generic arg)
             using (writer.Block("try"))
             {
-                writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+                if (useTypedDispatch)
+                    writer.AppendLine($"_engine.HandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList});");
+                else
+                    writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
                 EmitOutRefReadback(writer, method);
                 EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
@@ -719,13 +808,27 @@ internal static class MockImplBuilder
             var unwrappedDefault = method.IsReturnTypeStaticAbstractInterface ? "null" : method.UnwrappedSmartDefault;
             using (writer.Block("try"))
             {
-                if (method.IsReturnTypeStaticAbstractInterface)
+                if (useTypedDispatch)
                 {
-                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault})!;");
+                    if (method.IsReturnTypeStaticAbstractInterface)
+                    {
+                        writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<{unwrappedArg}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {unwrappedDefault})!;");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {unwrappedDefault});");
+                    }
                 }
                 else
                 {
-                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault});");
+                    if (method.IsReturnTypeStaticAbstractInterface)
+                    {
+                        writer.AppendLine($"var __result = ({method.UnwrappedReturnType})_engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault})!;");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{unwrappedArg}>({method.MemberId}, \"{method.Name}\", {argsArray}, {unwrappedDefault});");
+                    }
                 }
                 EmitOutRefReadback(writer, method);
                 EmitRawReturnCheck(writer, method);
@@ -755,7 +858,10 @@ internal static class MockImplBuilder
             // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
             // ref structs can't be generic type arguments. Use void dispatch for call tracking,
             // callbacks, and throws.
-            writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
+            if (useTypedDispatch)
+                writer.AppendLine($"_engine.HandleCall<{typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList});");
+            else
+                writer.AppendLine($"_engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
             if (method.SpanReturnElementType is not null)
             {
                 // Span return: read back out/ref params AND extract return value from OutRefContext index -1
@@ -773,13 +879,19 @@ internal static class MockImplBuilder
             // as a generic type argument. Use object? and cast.
             if (hasOutRef)
             {
-                writer.AppendLine($"var __result = ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                if (useTypedDispatch)
+                    writer.AppendLine($"var __result = ({method.ReturnType})_engine.HandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null)!;");
+                else
+                    writer.AppendLine($"var __result = ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
                 EmitOutRefReadback(writer, method);
                 writer.AppendLine("return __result;");
             }
             else
             {
-                writer.AppendLine($"return ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
+                if (useTypedDispatch)
+                    writer.AppendLine($"return ({method.ReturnType})_engine.HandleCallWithReturn<object?, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, null)!;");
+                else
+                    writer.AppendLine($"return ({method.ReturnType})_engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
             }
         }
         else
@@ -787,13 +899,19 @@ internal static class MockImplBuilder
             // Synchronous method with return value — need to read back out/ref before returning
             if (hasOutRef)
             {
-                writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+                if (useTypedDispatch)
+                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.ReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.SmartDefault});");
+                else
+                    writer.AppendLine($"var __result = _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
                 EmitOutRefReadback(writer, method);
                 writer.AppendLine("return __result;");
             }
             else
             {
-                writer.AppendLine($"return _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
+                if (useTypedDispatch)
+                    writer.AppendLine($"return _engine.HandleCallWithReturn<{method.ReturnType}, {typeArgs}>({method.MemberId}, \"{method.Name}\", {argsList}, {method.SmartDefault});");
+                else
+                    writer.AppendLine($"return _engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
             }
         }
     }
@@ -1117,6 +1235,34 @@ internal static class MockImplBuilder
             }
         }
         return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
+    }
+
+    /// <summary>
+    /// Returns true if the method qualifies for typed dispatch (1-8 non-out params, no ref structs).
+    /// </summary>
+    private static bool CanUseTypedDispatch(MockMemberModel method)
+    {
+        if (method.HasRefStructParams) return false;
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
+        return nonOutParams.Count is >= 1 and <= 8;
+    }
+
+    /// <summary>
+    /// Gets the generic type parameters for typed dispatch (e.g., "int, string" for a method with int and string args).
+    /// </summary>
+    private static string GetTypedArgsGenericParams(MockMemberModel method)
+    {
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out);
+        return string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
+    }
+
+    /// <summary>
+    /// Gets the argument list for typed dispatch (e.g., "a, b" for parameters named a and b).
+    /// </summary>
+    private static string GetTypedArgsList(MockMemberModel method)
+    {
+        var nonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out);
+        return string.Join(", ", nonOutParams.Select(p => p.Name));
     }
 
     /// <summary>
