@@ -69,7 +69,7 @@ internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1889.DerivedTest>(static () => TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource.Entries_0);
 }
 
 
@@ -162,7 +162,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1889.DerivedTest>(static () => TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestSource.Entries_0);
 }
 
 
@@ -257,5 +257,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries(TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1889.DerivedTest>(static () => TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestSource.Entries_0);
 }
