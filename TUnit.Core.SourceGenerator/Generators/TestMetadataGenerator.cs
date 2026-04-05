@@ -505,7 +505,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Registration calls — factory wrapper defers per-class JIT until discovery
         registrationIndex = 0;
         foreach (var group in groupedByConcreteClass)
         {
@@ -3555,7 +3554,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // Registration — factory wrapper defers per-class JIT until discovery
             EmitRegistrationField(writer, classGroup.TestSourceName,
                 $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Entries)");
 

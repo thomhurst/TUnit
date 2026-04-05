@@ -39,10 +39,7 @@ public sealed class TestEntrySource<
             {
                 // Already resolved — merge eagerly
                 var additional = factory();
-                var combined = new TestEntry<T>[_entries.Length + additional.Length];
-                Array.Copy(_entries, 0, combined, 0, _entries.Length);
-                Array.Copy(additional, 0, combined, _entries.Length, additional.Length);
-                _entries = combined;
+                _entries = [.. _entries, .. additional];
                 return;
             }
 
