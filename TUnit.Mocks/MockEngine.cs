@@ -724,29 +724,19 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)
-    {
-        var seq = MockCallSequence.Next();
-        var record = new CallRecord(memberId, memberName, args, seq);
-        lock (Lock)
-        {
-            EnsureCallArrayCapacity(memberId);
-            var memberCalls = _callsByMemberId![memberId] ??= new();
-            memberCalls.Add(record);
-            _callCountByMemberId![memberId]++;
-        }
-        return record;
-    }
+        => StoreCallRecord(new CallRecord(memberId, memberName, args, MockCallSequence.Next()));
 
     private CallRecord RecordCall(int memberId, string memberName, IArgumentStore store)
+        => StoreCallRecord(new CallRecord(memberId, memberName, store, MockCallSequence.Next()));
+
+    private CallRecord StoreCallRecord(CallRecord record)
     {
-        var seq = MockCallSequence.Next();
-        var record = new CallRecord(memberId, memberName, store, seq);
         lock (Lock)
         {
-            EnsureCallArrayCapacity(memberId);
-            var memberCalls = _callsByMemberId![memberId] ??= new();
+            EnsureCallArrayCapacity(record.MemberId);
+            var memberCalls = _callsByMemberId![record.MemberId] ??= new();
             memberCalls.Add(record);
-            _callCountByMemberId![memberId]++;
+            _callCountByMemberId![record.MemberId]++;
         }
         return record;
     }
