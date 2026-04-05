@@ -32,11 +32,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
 
-    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <RestoreUseStaticGraphEvaluation>true</RestoreUseStaticGraphEvaluation>
-    <!-- Hard links cause file lock conflicts when multiple AOT publish processes run in parallel,
-         because all test project outputs point to the same inode for shared assemblies like TUnit.Assertions.dll -->
-
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <NoWarn>NU1507;NU1903;CS9107</NoWarn>
     <BuildTransitivePath>buildTransitive/$(TargetFramework)/</BuildTransitivePath>
