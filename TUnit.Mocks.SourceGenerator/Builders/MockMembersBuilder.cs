@@ -439,7 +439,7 @@ internal static class MockMembersBuilder
             // allNonOutParams is null when this is the primary overload (no out/ref struct subset remapping).
             // In that case the callback's parameter types match the typed Callback<T1,...> overload directly,
             // so we can register it without a wrapping closure — avoiding the object?[] allocation.
-            if (allNonOutParams is null && nonOutParams.Count <= 8)
+            if (allNonOutParams is null && nonOutParams.Count <= MaxTypedParams)
             {
                 writer.AppendLine("EnsureSetup().Callback(callback);");
             }
