@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
+using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.Extensions;
 using ModularPipelines.Git.Extensions;
