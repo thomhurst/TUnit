@@ -432,12 +432,20 @@ internal static class MockMembersBuilder
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var actionType = $"global::System.Action<{typeList}>";
-        var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
 
         writer.AppendLine("/// <summary>Execute a typed callback using the actual method parameters.</summary>");
         using (writer.Block($"public {wrapperName} Callback({actionType} callback)"))
         {
-            writer.AppendLine($"EnsureSetup().Callback(args => callback({castArgs}));");
+            if (allNonOutParams is null && nonOutParams.Count <= 8)
+            {
+                // Direct typed registration — avoids boxing args into object?[] and the wrapping closure
+                writer.AppendLine("EnsureSetup().Callback(callback);");
+            }
+            else
+            {
+                var castArgs = BuildCastArgs(nonOutParams, allNonOutParams);
+                writer.AppendLine($"EnsureSetup().Callback(args => callback({castArgs}));");
+            }
             writer.AppendLine("return this;");
         }
     }

@@ -65,6 +65,62 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1>(Action<T1> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2>(Action<T1, T2> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3, T4>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3, T4, T5>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3, T4, T5, T6>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ISetupChain<TReturn> Callback<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> callback)
+    {
+        _setup.AddBehavior(new TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7, T8>(callback));
+        return this;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ISetupChain<TReturn> Returns(Func<object?[], TReturn> factory)
     {
         _setup.AddBehavior(new ComputedReturnWithArgsBehavior<TReturn>(factory));

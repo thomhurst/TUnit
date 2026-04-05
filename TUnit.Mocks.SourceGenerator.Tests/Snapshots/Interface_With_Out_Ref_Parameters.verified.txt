@@ -172,7 +172,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action<string> callback)
         {
-            EnsureSetup().Callback(args => callback((string)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -245,7 +245,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IDictionary_Swap_M1_MockCall Callback(global::System.Action<int, int> callback)
         {
-            EnsureSetup().Callback(args => callback((int)args[0]!, (int)args[1]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

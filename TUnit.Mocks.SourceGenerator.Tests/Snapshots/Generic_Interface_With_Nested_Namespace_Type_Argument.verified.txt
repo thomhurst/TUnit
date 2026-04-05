@@ -149,7 +149,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public Sandbox_IService_Outer_Inner_Config__Apply_M1_MockCall Callback(global::System.Action<global::Outer.Inner.Config> callback)
         {
-            EnsureSetup().Callback(args => callback((global::Outer.Inner.Config)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

@@ -165,7 +165,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IReadWriter_Write_M2_MockCall Callback(global::System.Action<string> callback)
         {
-            EnsureSetup().Callback(args => callback((string)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

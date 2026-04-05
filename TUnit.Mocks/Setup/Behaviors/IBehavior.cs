@@ -11,3 +11,12 @@ public interface IBehavior
 {
     object? Execute(object?[] arguments);
 }
+
+/// <summary>
+/// Marker interface for behaviors that do not use the method arguments.
+/// Implementing this avoids the allocation of the boxed argument array on the invocation hot path.
+/// </summary>
+internal interface IArgumentFreeBehavior
+{
+    object? Execute();
+}

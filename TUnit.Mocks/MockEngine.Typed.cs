@@ -9,6 +9,34 @@ namespace TUnit.Mocks;
 public sealed partial class MockEngine<T> where T : class
 {
     // ──────────────────────────────────────────────────────────────────────
+    //  Behavior execution helpers — check IArgumentFreeBehavior, then
+    //  ITypedBehavior<T...>, then fall back to store.ToArray().
+    // ──────────────────────────────────────────────────────────────────────
+
+    private static object? ExecuteBehavior<T1>(IBehavior b, ArgumentStore<T1> store, T1 a1)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1> tb ? tb.Execute(a1) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2>(IBehavior b, ArgumentStore<T1, T2> store, T1 a1, T2 a2)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2> tb ? tb.Execute(a1, a2) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3>(IBehavior b, ArgumentStore<T1, T2, T3> store, T1 a1, T2 a2, T3 a3)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3> tb ? tb.Execute(a1, a2, a3) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3, T4>(IBehavior b, ArgumentStore<T1, T2, T3, T4> store, T1 a1, T2 a2, T3 a3, T4 a4)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4> tb ? tb.Execute(a1, a2, a3, a4) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3, T4, T5>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5> tb ? tb.Execute(a1, a2, a3, a4, a5) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6> tb ? tb.Execute(a1, a2, a3, a4, a5, a6) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6, T7>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6, T7> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6, T7> tb ? tb.Execute(a1, a2, a3, a4, a5, a6, a7) : b.Execute(store.ToArray());
+
+    private static object? ExecuteBehavior<T1, T2, T3, T4, T5, T6, T7, T8>(IBehavior b, ArgumentStore<T1, T2, T3, T4, T5, T6, T7, T8> store, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+        => b is IArgumentFreeBehavior af ? af.Execute() : b is ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8> tb ? tb.Execute(a1, a2, a3, a4, a5, a6, a7, a8) : b.Execute(store.ToArray());
+    // ──────────────────────────────────────────────────────────────────────
     //  Arity 1
     // ──────────────────────────────────────────────────────────────────────
 
@@ -28,7 +56,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -56,7 +84,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -120,7 +148,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -147,7 +175,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -186,7 +214,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -214,7 +242,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -278,7 +306,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -305,7 +333,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -344,7 +372,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -372,7 +400,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -436,7 +464,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -463,7 +491,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -502,7 +530,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -530,7 +558,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -594,7 +622,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -621,7 +649,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -660,7 +688,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -688,7 +716,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -752,7 +780,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -779,7 +807,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -818,7 +846,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -846,7 +874,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -910,7 +938,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -937,7 +965,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -976,7 +1004,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1004,7 +1032,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1068,7 +1096,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1095,7 +1123,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1134,7 +1162,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1162,7 +1190,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(store.ToArray());
+            var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1226,7 +1254,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
@@ -1253,7 +1281,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(store.ToArray());
+            var behaviorResult = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             if (behaviorResult is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
             catch { RawReturnContext.Clear(); throw; }
