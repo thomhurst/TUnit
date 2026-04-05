@@ -84,8 +84,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
 
         // Phase 1: Filter using pure data (no JIT of test-specific methods)
-        var totalEntries = Sources.TestEntries.Sum(static kvp => kvp.Value.Count);
-        var matching = new List<(ITestEntrySource Source, int Index)>(totalEntries);
+        var matching = new List<(ITestEntrySource Source, int Index)>();
         var hasDependencies = false;
 
         foreach (var kvp in Sources.TestEntries)

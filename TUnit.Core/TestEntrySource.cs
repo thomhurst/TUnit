@@ -89,7 +89,7 @@ public sealed class TestEntrySource<
             }
 
             _entries = entries;
-            _factories = null; // Release factory references
+            _factories = null;
             return entries;
         }
     }
