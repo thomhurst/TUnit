@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using TUnit.Mocks.Arguments;
 
 namespace TUnit.Mocks.Verification;
 
@@ -6,13 +7,57 @@ namespace TUnit.Mocks.Verification;
 /// Records a single method invocation. Public for generated code and verification access.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed record CallRecord(
-    int MemberId,
-    string MemberName,
-    object?[] Arguments,
-    long SequenceNumber
-)
+public sealed class CallRecord
 {
+    private readonly IArgumentStore? _store;
+    private object?[]? _arguments;
+
+    /// <summary>
+    /// Creates a call record with pre-boxed arguments (fallback path).
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber)
+    {
+        MemberId = memberId;
+        MemberName = memberName;
+        _arguments = arguments;
+        SequenceNumber = sequenceNumber;
+    }
+
+    /// <summary>
+    /// Creates a call record with a typed argument store for deferred boxing.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public CallRecord(int memberId, string memberName, IArgumentStore store, long sequenceNumber)
+    {
+        MemberId = memberId;
+        MemberName = memberName;
+        _store = store;
+        SequenceNumber = sequenceNumber;
+    }
+
+    /// <summary>The unique identifier for the member that was called.</summary>
+    public int MemberId { get; }
+
+    /// <summary>The name of the member that was called.</summary>
+    public string MemberName { get; }
+
+    /// <summary>The global sequence number for cross-mock ordering.</summary>
+    public long SequenceNumber { get; }
+
+    /// <summary>
+    /// The arguments passed to the call. Lazily materialized from the argument store if one was provided.
+    /// </summary>
+    public object?[] Arguments
+    {
+        get
+        {
+            if (_arguments is not null) return _arguments;
+            var arr = _store?.ToArray() ?? [];
+            return Interlocked.CompareExchange(ref _arguments, arr, null) ?? arr;
+        }
+    }
+
     internal bool IsVerifiedField;
 
     /// <summary>

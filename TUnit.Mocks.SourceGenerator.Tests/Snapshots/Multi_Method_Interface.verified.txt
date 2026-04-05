@@ -42,12 +42,12 @@ namespace TUnit.Mocks.Generated
 
         public int Add(int a, int b)
         {
-            return _engine.HandleCallWithReturn<int>(0, "Add", new object?[] { a, b }, default);
+            return _engine.HandleCallWithReturn<int, int, int>(0, "Add", a, b, default);
         }
 
         public int Subtract(int a, int b)
         {
-            return _engine.HandleCallWithReturn<int>(1, "Subtract", new object?[] { a, b }, default);
+            return _engine.HandleCallWithReturn<int, int, int>(1, "Subtract", a, b, default);
         }
 
         public void Reset()

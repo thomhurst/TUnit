@@ -79,7 +79,7 @@ namespace TUnit.Mocks.Generated
         {
             try
             {
-                var __result = _engine.HandleCallWithReturn<string>(3, "GetAsync", new object?[] { id }, "");
+                var __result = _engine.HandleCallWithReturn<string, int>(3, "GetAsync", id, "");
                 if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                 {
                     if (__rawAsync is global::System.Threading.Tasks.Task<string> __typedAsync) return __typedAsync;
@@ -95,7 +95,7 @@ namespace TUnit.Mocks.Generated
 
         public void Process(string data)
         {
-            _engine.HandleCall(4, "Process", new object?[] { data });
+            _engine.HandleCall<string>(4, "Process", data);
         }
 
         public string Name

@@ -19,7 +19,7 @@ namespace TUnit.Mocks.Generated
 
         public override T Get<T>(int id)
         {
-            if (_engine.TryHandleCallWithReturn<T>(0, "Get", new object?[] { id }, default!, out var __result))
+            if (_engine.TryHandleCallWithReturn<T, int>(0, "Get", id, default!, out var __result))
             {
                 return __result;
             }
@@ -28,7 +28,7 @@ namespace TUnit.Mocks.Generated
 
         public override void Store<T>(T item)
         {
-            if (_engine.TryHandleCall(1, "Store", new object?[] { item }))
+            if (_engine.TryHandleCall<T>(1, "Store", item))
             {
                 return;
             }

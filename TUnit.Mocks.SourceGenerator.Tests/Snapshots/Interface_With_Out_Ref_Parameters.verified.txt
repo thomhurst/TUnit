@@ -41,7 +41,7 @@ namespace TUnit.Mocks.Generated
         public bool TryGetValue(string key, out string value)
         {
             value = default!;
-            var __result = _engine.HandleCallWithReturn<bool>(0, "TryGetValue", new object?[] { key }, default);
+            var __result = _engine.HandleCallWithReturn<bool, string>(0, "TryGetValue", key, default);
             var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
             if (__outRef is not null)
             {
@@ -52,7 +52,7 @@ namespace TUnit.Mocks.Generated
 
         public void Swap(ref int a, ref int b)
         {
-            _engine.HandleCall(1, "Swap", new object?[] { a, b });
+            _engine.HandleCall<int, int>(1, "Swap", a, b);
             var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
             if (__outRef is not null)
             {

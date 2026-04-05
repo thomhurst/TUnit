@@ -107,6 +107,155 @@ public sealed class MethodSetup
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool MatchSingle<T>(IArgumentMatcher matcher, T value)
+    {
+        if (matcher is IArgumentMatcher<T> typed)
+            return typed.Matches(value);
+        return matcher.Matches(value);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1>(T1 arg1)
+    {
+        if (_matchers.Length != 1) return false;
+        return MatchSingle(_matchers[0], arg1);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2>(T1 arg1, T2 arg2)
+    {
+        if (_matchers.Length != 2) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3)
+    {
+        if (_matchers.Length != 3) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        if (_matchers.Length != 4) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3) && MatchSingle(_matchers[3], arg4);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    {
+        if (_matchers.Length != 5) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3) && MatchSingle(_matchers[3], arg4) && MatchSingle(_matchers[4], arg5);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    {
+        if (_matchers.Length != 6) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3) && MatchSingle(_matchers[3], arg4) && MatchSingle(_matchers[4], arg5) && MatchSingle(_matchers[5], arg6);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    {
+        if (_matchers.Length != 7) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3) && MatchSingle(_matchers[3], arg4) && MatchSingle(_matchers[4], arg5) && MatchSingle(_matchers[5], arg6) && MatchSingle(_matchers[6], arg7);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool Matches<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    {
+        if (_matchers.Length != 8) return false;
+        return MatchSingle(_matchers[0], arg1) && MatchSingle(_matchers[1], arg2) && MatchSingle(_matchers[2], arg3) && MatchSingle(_matchers[3], arg4) && MatchSingle(_matchers[4], arg5) && MatchSingle(_matchers[5], arg6) && MatchSingle(_matchers[6], arg7) && MatchSingle(_matchers[7], arg8);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void CaptureSingle<T>(IArgumentMatcher matcher, T value)
+    {
+        if (matcher is ICapturingMatcher<T> typed)
+            typed.ApplyCapture(value);
+        else if (matcher is ICapturingMatcher untyped)
+            untyped.ApplyCapture(value);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1>(T1 arg1)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2>(T1 arg1, T2 arg2)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+        if (_matchers.Length >= 4) CaptureSingle(_matchers[3], arg4);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+        if (_matchers.Length >= 4) CaptureSingle(_matchers[3], arg4);
+        if (_matchers.Length >= 5) CaptureSingle(_matchers[4], arg5);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+        if (_matchers.Length >= 4) CaptureSingle(_matchers[3], arg4);
+        if (_matchers.Length >= 5) CaptureSingle(_matchers[4], arg5);
+        if (_matchers.Length >= 6) CaptureSingle(_matchers[5], arg6);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+        if (_matchers.Length >= 4) CaptureSingle(_matchers[3], arg4);
+        if (_matchers.Length >= 5) CaptureSingle(_matchers[4], arg5);
+        if (_matchers.Length >= 6) CaptureSingle(_matchers[5], arg6);
+        if (_matchers.Length >= 7) CaptureSingle(_matchers[6], arg7);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ApplyCaptures<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    {
+        if (_matchers.Length >= 1) CaptureSingle(_matchers[0], arg1);
+        if (_matchers.Length >= 2) CaptureSingle(_matchers[1], arg2);
+        if (_matchers.Length >= 3) CaptureSingle(_matchers[2], arg3);
+        if (_matchers.Length >= 4) CaptureSingle(_matchers[3], arg4);
+        if (_matchers.Length >= 5) CaptureSingle(_matchers[4], arg5);
+        if (_matchers.Length >= 6) CaptureSingle(_matchers[5], arg6);
+        if (_matchers.Length >= 7) CaptureSingle(_matchers[6], arg7);
+        if (_matchers.Length >= 8) CaptureSingle(_matchers[7], arg8);
+    }
+
     public void AddEventRaise(EventRaiseInfo raiseInfo)
     {
         lock (BehaviorLock)

@@ -17,7 +17,7 @@ namespace TUnit.Mocks.Generated
 
         public override T GetById<T>(int id)
         {
-            if (_engine.TryHandleCallWithReturn<T>(0, "GetById", new object?[] { id }, default!, out var __result))
+            if (_engine.TryHandleCallWithReturn<T, int>(0, "GetById", id, default!, out var __result))
             {
                 return __result;
             }
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated
 
         public override void Save<T>(T entity)
         {
-            if (_engine.TryHandleCall(1, "Save", new object?[] { entity }))
+            if (_engine.TryHandleCall<T>(1, "Save", entity))
             {
                 return;
             }
@@ -35,7 +35,7 @@ namespace TUnit.Mocks.Generated
 
         public override TResult Transform<TInput, TResult>(TInput input)
         {
-            if (_engine.TryHandleCallWithReturn<TResult>(2, "Transform", new object?[] { input }, default, out var __result))
+            if (_engine.TryHandleCallWithReturn<TResult, TInput>(2, "Transform", input, default, out var __result))
             {
                 return __result;
             }

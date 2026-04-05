@@ -40,12 +40,12 @@ namespace TUnit.Mocks.Generated
 
         public void Test(string @event)
         {
-            _engine.HandleCall(0, "Test", new object?[] { @event });
+            _engine.HandleCall<string>(0, "Test", @event);
         }
 
         public string Get(int @class, string @return)
         {
-            return _engine.HandleCallWithReturn<string>(1, "Get", new object?[] { @class, @return }, "");
+            return _engine.HandleCallWithReturn<string, int, string>(1, "Get", @class, @return, "");
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

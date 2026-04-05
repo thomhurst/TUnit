@@ -43,7 +43,7 @@ namespace TUnit.Mocks.Generated
         {
             try
             {
-                var __result = _engine.HandleCallWithReturn<string>(0, "GetValueAsync", new object?[] { key }, "");
+                var __result = _engine.HandleCallWithReturn<string, string>(0, "GetValueAsync", key, "");
                 if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                 {
                     if (__rawAsync is global::System.Threading.Tasks.Task<string> __typedAsync) return __typedAsync;
@@ -79,7 +79,7 @@ namespace TUnit.Mocks.Generated
         {
             try
             {
-                var __result = _engine.HandleCallWithReturn<int>(2, "ComputeAsync", new object?[] { input }, default);
+                var __result = _engine.HandleCallWithReturn<int, int>(2, "ComputeAsync", input, default);
                 if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                 {
                     if (__rawAsync is global::System.Threading.Tasks.ValueTask<int> __typedAsync) return __typedAsync;
@@ -97,7 +97,7 @@ namespace TUnit.Mocks.Generated
         {
             try
             {
-                _engine.HandleCall(3, "InitializeAsync", new object?[] { ct });
+                _engine.HandleCall<global::System.Threading.CancellationToken>(3, "InitializeAsync", ct);
                 if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
                 {
                     if (__rawAsync is global::System.Threading.Tasks.ValueTask __typedAsync) return __typedAsync;

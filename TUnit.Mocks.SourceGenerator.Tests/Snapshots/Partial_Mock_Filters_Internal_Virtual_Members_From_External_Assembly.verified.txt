@@ -17,7 +17,7 @@ namespace TUnit.Mocks.Generated.ExternalLib
 
         public override string PublicMethod(string input)
         {
-            if (_engine.TryHandleCallWithReturn<string>(0, "PublicMethod", new object?[] { input }, "", out var __result))
+            if (_engine.TryHandleCallWithReturn<string, string>(0, "PublicMethod", input, "", out var __result))
             {
                 return __result;
             }

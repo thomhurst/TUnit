@@ -17,7 +17,7 @@ namespace TUnit.Mocks.Generated.ExternalLib
 
         public override string GetValue(string key)
         {
-            if (_engine.TryHandleCallWithReturn<string>(0, "GetValue", new object?[] { key }, "", out var __result))
+            if (_engine.TryHandleCallWithReturn<string, string>(0, "GetValue", key, "", out var __result))
             {
                 return __result;
             }

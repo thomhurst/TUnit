@@ -12,11 +12,19 @@ internal interface ICapturingMatcher
 }
 
 /// <summary>
+/// Generic interface for typed capture without boxing.
+/// </summary>
+internal interface ICapturingMatcher<in T>
+{
+    void ApplyCapture(T? value);
+}
+
+/// <summary>
 /// A decorator matcher that delegates to an inner matcher and captures
 /// argument values when the inner matcher returns <see langword="true"/>.
 /// Every <see cref="Arg{T}"/> wraps its matcher in this decorator automatically.
 /// </summary>
-internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatcher
+internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatcher, ICapturingMatcher<T>
 {
     private readonly IArgumentMatcher _inner;
     private ConcurrentQueue<T?>? _captured;
@@ -85,6 +93,19 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
         {
             _captured.Enqueue(default);
         }
+    }
+
+    /// <summary>
+    /// Typed capture path — avoids boxing for value types.
+    /// </summary>
+    void ICapturingMatcher<T>.ApplyCapture(T? value)
+    {
+        if (_captured is null)
+        {
+            Interlocked.CompareExchange(ref _captured, new ConcurrentQueue<T?>(), null);
+        }
+
+        _captured.Enqueue(value);
     }
 
     public string Describe() => _inner.Describe();

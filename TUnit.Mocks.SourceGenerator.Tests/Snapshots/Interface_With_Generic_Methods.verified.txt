@@ -42,17 +42,17 @@ namespace TUnit.Mocks.Generated
 
         public T GetById<T>(int id) where T : class
         {
-            return _engine.HandleCallWithReturn<T>(0, "GetById", new object?[] { id }, default!);
+            return _engine.HandleCallWithReturn<T, int>(0, "GetById", id, default!);
         }
 
         public void Save<T>(T entity) where T : class, new()
         {
-            _engine.HandleCall(1, "Save", new object?[] { entity });
+            _engine.HandleCall<T>(1, "Save", entity);
         }
 
         public TResult Transform<TInput, TResult>(TInput input) where TInput : notnull where TResult : struct
         {
-            return _engine.HandleCallWithReturn<TResult>(2, "Transform", new object?[] { input }, default);
+            return _engine.HandleCallWithReturn<TResult, TInput>(2, "Transform", input, default);
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

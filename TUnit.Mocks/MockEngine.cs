@@ -21,7 +21,7 @@ internal static class MockCallSequence
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed class MockEngine<T> : IMockEngineAccess where T : class
+public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 {
     // Single lock for both setup and call mutations — reduces allocation by one Lock object.
     // Contention is acceptable since setup and call recording rarely overlap in typical usage.
@@ -724,15 +724,19 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
     }
 
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)
+        => StoreCallRecord(new CallRecord(memberId, memberName, args, MockCallSequence.Next()));
+
+    private CallRecord RecordCall(int memberId, string memberName, IArgumentStore store)
+        => StoreCallRecord(new CallRecord(memberId, memberName, store, MockCallSequence.Next()));
+
+    private CallRecord StoreCallRecord(CallRecord record)
     {
-        var seq = MockCallSequence.Next();
-        var record = new CallRecord(memberId, memberName, args, seq);
         lock (Lock)
         {
-            EnsureCallArrayCapacity(memberId);
-            var memberCalls = _callsByMemberId![memberId] ??= new();
+            EnsureCallArrayCapacity(record.MemberId);
+            var memberCalls = _callsByMemberId![record.MemberId] ??= new();
             memberCalls.Add(record);
-            _callCountByMemberId![memberId]++;
+            _callCountByMemberId![record.MemberId]++;
         }
         return record;
     }
@@ -894,9 +898,207 @@ public sealed class MockEngine<T> : IMockEngineAccess where T : class
         return (false, null, null);
     }
 
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1>(int memberId, T1 arg1)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2>(int memberId, T1 arg1, T2 arg2)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3>(int memberId, T1 arg1, T2 arg2, T3 arg3)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3, T4>(int memberId, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3, arg4))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3, arg4);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3, T4, T5>(int memberId, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3, arg4, arg5))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3, arg4, arg5);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3, T4, T5, T6>(int memberId, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3, arg4, arg5, arg6))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3, arg4, arg5, arg6);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3, T4, T5, T6, T7>(int memberId, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6, arg7]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3, arg4, arg5, arg6, arg7))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1, T2, T3, T4, T5, T6, T7, T8>(int memberId, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    {
+        if (_hasStaleSetups) RebuildStaleSnapshots();
+        if (_hasStatefulSetups)
+            return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8]);
+
+        var snapshot = _setupsByMemberId;
+        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
+        var setups = snapshot[memberId];
+        if (setups is null) return (false, null, null);
+
+        for (int i = setups.Length - 1; i >= 0; i--)
+        {
+            var setup = setups[i];
+            if (setup.Matches(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+            {
+                setup.IncrementInvokeCount();
+                setup.ApplyCaptures(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+                return (true, setup.GetNextBehavior(), setup);
+            }
+        }
+        return (false, null, null);
+    }
+
     private static string FormatCall(string memberName, object?[] args)
     {
         var formattedArgs = string.Join(", ", args.Select(a => a?.ToString() ?? "null"));
+        return $"{memberName}({formattedArgs})";
+    }
+
+    private static string FormatCall(string memberName, IArgumentStore store)
+    {
+        var formattedArgs = string.Join(", ", store.ToArray().Select(a => a?.ToString() ?? "null"));
         return $"{memberName}({formattedArgs})";
     }
 }

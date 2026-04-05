@@ -35,7 +35,7 @@ namespace TUnit.Mocks.Generated
 
         public string Greet(string name)
         {
-            return _engine.HandleCallWithReturn<string>(0, "Greet", new object?[] { name }, "");
+            return _engine.HandleCallWithReturn<string, string>(0, "Greet", name, "");
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
