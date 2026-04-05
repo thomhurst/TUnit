@@ -135,7 +135,7 @@ jobs:
       - name: Publish AOT
         shell: bash
         run: >-
-          dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --no-build
+          dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release
           --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
@@ -150,7 +150,7 @@ jobs:
         shell: bash
         run: |
           for fw in net8.0 net9.0 net10.0; do
-            dotnet publish TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj -c Release --no-build \
+            dotnet publish TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj -c Release \
               --use-current-runtime -p:Aot=true -o "MOCKTESTS_AOT_${fw}" --framework "${fw}" &
           done
           wait
