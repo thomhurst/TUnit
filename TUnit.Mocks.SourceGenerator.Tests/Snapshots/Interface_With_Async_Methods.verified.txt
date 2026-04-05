@@ -260,7 +260,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IAsyncService_GetValueAsync_M0_MockCall Callback(global::System.Action<string> callback)
         {
-            EnsureSetup().Callback(args => callback((string)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -415,7 +415,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IAsyncService_ComputeAsync_M2_MockCall Callback(global::System.Action<int> callback)
         {
-            EnsureSetup().Callback(args => callback((int)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -492,7 +492,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IAsyncService_InitializeAsync_M3_MockCall Callback(global::System.Action<global::System.Threading.CancellationToken> callback)
         {
-            EnsureSetup().Callback(args => callback((global::System.Threading.CancellationToken)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

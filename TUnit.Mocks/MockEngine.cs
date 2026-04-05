@@ -202,7 +202,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 
         if (behavior is not null)
         {
-            var behaviorResult = behavior.Execute(args);
+            var behaviorResult = behavior is IArgumentFreeBehavior argFree ? argFree.Execute() : behavior.Execute(args);
             if (behaviorResult is RawReturn raw)
             {
                 RawReturnContext.Set(raw);
@@ -250,7 +250,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 
         if (behavior is not null)
         {
-            var result = behavior.Execute(args);
+            var result = behavior is IArgumentFreeBehavior argFree ? argFree.Execute() : behavior.Execute(args);
             if (result is RawReturn raw)
             {
                 RawReturnContext.Set(raw);

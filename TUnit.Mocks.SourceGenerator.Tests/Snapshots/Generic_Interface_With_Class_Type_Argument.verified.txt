@@ -149,7 +149,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Callback(global::System.Action<global::Sandbox.Bar> callback)
         {
-            EnsureSetup().Callback(args => callback((global::Sandbox.Bar)args[0]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

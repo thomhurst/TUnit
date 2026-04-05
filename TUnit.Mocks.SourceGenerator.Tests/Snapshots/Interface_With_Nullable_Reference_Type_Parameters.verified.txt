@@ -288,7 +288,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IFoo_Bar_M0_MockCall Callback(global::System.Action<object?> callback)
         {
-            EnsureSetup().Callback(args => callback((object?)args[0]));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -368,7 +368,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IFoo_GetValue_M1_MockCall Callback(global::System.Action<string?, int> callback)
         {
-            EnsureSetup().Callback(args => callback((string?)args[0], (int)args[1]!));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -438,7 +438,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IFoo_Process_M2_MockCall Callback(global::System.Action<string, string?, object?> callback)
         {
-            EnsureSetup().Callback(args => callback((string)args[0]!, (string?)args[1], (object?)args[2]));
+            EnsureSetup().Callback(callback);
             return this;
         }
 
@@ -530,7 +530,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IFoo_GetAsync_M3_MockCall Callback(global::System.Action<string?> callback)
         {
-            EnsureSetup().Callback(args => callback((string?)args[0]));
+            EnsureSetup().Callback(callback);
             return this;
         }
 

@@ -6,6 +6,9 @@ namespace TUnit.Mocks.Setup.Behaviors;
 /// Behavior that computes an exception from the method arguments and throws it.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
+/// <remarks>
+/// Future optimization: implement ITypedBehavior&lt;T...&gt; to avoid store.ToArray() when args are needed.
+/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ComputedThrowBehavior : IBehavior
 {
