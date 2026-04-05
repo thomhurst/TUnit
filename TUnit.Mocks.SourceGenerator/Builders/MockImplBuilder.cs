@@ -1291,15 +1291,7 @@ internal static class MockImplBuilder
 
     public static string GetSafeName(string typeName)
     {
-        return typeName
-            .Replace("global::", "")
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace("[", "_")
-            .Replace("]", "_")
-            .Replace(" ", "");
+        return SanitizeIdentifier(typeName);
     }
 
     /// <summary>
@@ -1318,14 +1310,22 @@ internal static class MockImplBuilder
     /// <summary>
     /// Gets a short safe name derived from just the type name (without namespace),
     /// sanitized for generic type arguments. Produces readable names like
-    /// "IGreeter" instead of "MyApp_IGreeter".
+    /// "IGreeter_" instead of "MyApp_IGreeter_" and "IFoo_SomeEnum_" instead of
+    /// "IFoo_Sandbox_SomeEnum_" when the type argument shares the outer namespace.
     /// </summary>
     public static string GetShortSafeName(MockTypeModel model)
     {
         var name = StripGlobalPrefix(model.FullyQualifiedName);
+        var hasNamespace = !IsGlobalNamespace(model.Namespace);
 
-        if (!IsGlobalNamespace(model.Namespace) && name.StartsWith(model.Namespace + "."))
+        if (hasNamespace && name.StartsWith(model.Namespace + "."))
             name = name.Substring(model.Namespace.Length + 1);
+
+        // Strip same-namespace qualifications from generic type arguments so that
+        // IFoo<global::Sandbox.SomeEnum> becomes IFoo<SomeEnum> (not IFoo<Sandbox.SomeEnum>).
+        // Cross-namespace args are kept for disambiguation.
+        if (hasNamespace)
+            name = name.Replace("global::" + model.Namespace + ".", "");
 
         return SanitizeIdentifier(name);
     }
@@ -1373,19 +1373,38 @@ internal static class MockImplBuilder
 
     private static string SanitizeIdentifier(string name)
     {
-        var result = name
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace("[", "_")
-            .Replace("]", "_")
-            .Replace(" ", "");
+        name = name.Replace("global::", "");
 
-        while (result.Contains("__"))
-            result = result.Replace("__", "_");
+        var sb = new System.Text.StringBuilder(name.Length);
+        var lastWasUnderscore = false;
 
-        return result;
+        foreach (var c in name)
+        {
+            if (c == ' ')
+                continue;
+
+            if (char.IsLetterOrDigit(c) || c == '_')
+            {
+                if (c == '_')
+                {
+                    if (lastWasUnderscore)
+                        continue;
+                    lastWasUnderscore = true;
+                }
+                else
+                {
+                    lastWasUnderscore = false;
+                }
+                sb.Append(c);
+            }
+            else if (!lastWasUnderscore)
+            {
+                sb.Append('_');
+                lastWasUnderscore = true;
+            }
+        }
+
+        return sb.ToString();
     }
 
     private static bool IsGlobalNamespace(string ns)
