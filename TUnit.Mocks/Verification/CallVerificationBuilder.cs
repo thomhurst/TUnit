@@ -69,8 +69,8 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        // Single-pass over the internal buffer — no allocation for the happy path.
-        // Optimistically marks matching calls as verified; unmarks on failure (rare).
+        // Iterate the internal buffer directly — no .ToArray() copy on the happy path.
+        // Count first, then mark only on success to avoid corrupting prior verifications.
         var buffer = _engine.GetCallBufferFor(_memberId);
         if (buffer is null || buffer.Count == 0)
         {
@@ -81,17 +81,18 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        var matchingCount = CountAndMarkBuffer(buffer, markVerified: true);
+        var matchingCount = CountMatchingBuffer(buffer);
 
         if (!times.Matches(matchingCount))
         {
-            // Unmark on failure — rare path, so the extra iteration is acceptable
-            CountAndMarkBuffer(buffer, markVerified: false);
             var calls = _engine.GetCallsFor(_memberId);
             var expectedCall = FormatExpectedCall();
             var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
+
+        // Mark only after assertion passes — never leaves a partially-verified state
+        MarkMatchingBuffer(buffer);
     }
 
     /// <inheritdoc />
@@ -106,7 +107,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    private int CountAndMarkBuffer(CallRecordBuffer buffer, bool markVerified)
+    private int CountMatchingBuffer(CallRecordBuffer buffer)
     {
         var (items, bufferCount) = buffer.GetSnapshot();
         var count = 0;
@@ -116,10 +117,22 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             if (_matchers.Length == 0 || MatchesArguments(record.Arguments))
             {
                 count++;
-                record.IsVerified = markVerified;
             }
         }
         return count;
+    }
+
+    private void MarkMatchingBuffer(CallRecordBuffer buffer)
+    {
+        var (items, bufferCount) = buffer.GetSnapshot();
+        for (int i = 0; i < bufferCount; i++)
+        {
+            var record = items[i]!;
+            if (_matchers.Length == 0 || MatchesArguments(record.Arguments))
+            {
+                record.IsVerified = true;
+            }
+        }
     }
 
     private bool MatchesArguments(object?[] arguments)
