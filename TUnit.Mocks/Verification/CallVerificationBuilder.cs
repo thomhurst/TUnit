@@ -106,16 +106,13 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    /// <summary>
-    /// Iterates the buffer directly without allocating a copy array.
-    /// </summary>
     private int CountAndMarkBuffer(CallRecordBuffer buffer, bool markVerified)
     {
+        var (items, bufferCount) = buffer.GetSnapshot();
         var count = 0;
-        var bufferCount = buffer.Count;
         for (int i = 0; i < bufferCount; i++)
         {
-            var record = buffer.Get(i);
+            var record = items[i]!;
             if (_matchers.Length == 0 || MatchesArguments(record.Arguments))
             {
                 count++;

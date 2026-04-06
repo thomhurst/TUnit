@@ -5,16 +5,15 @@ namespace TUnit.Mocks.Verification;
 
 /// <summary>
 /// Thread-safe append-only buffer for call records.
-/// Uses a per-buffer lock (lock(this)) with a small critical section for the append,
-/// which is significantly cheaper than the previous shared MockEngine Lock because:
-///   - No contention with setup operations (separate lock)
-///   - No contention between different members (per-buffer lock)
-///   - No capacity check overhead (pre-allocated during setup)
-/// Readers (verification) can read without locking via volatile count + snapshot.
+/// Uses a per-buffer lock with a small critical section for append, which is cheaper
+/// than the previous shared MockEngine Lock (no contention with setup, no contention
+/// between different members, pre-allocated during setup).
+/// Readers can read without locking via volatile count + snapshot.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal sealed class CallRecordBuffer
 {
+    private readonly object _syncRoot = new();
     private CallRecord?[] _items;
     private int _count;
 
@@ -29,14 +28,9 @@ internal sealed class CallRecordBuffer
         get => Volatile.Read(ref _count);
     }
 
-    /// <summary>
-    /// Appends a call record. Thread-safe via a lightweight per-buffer lock.
-    /// The critical section is minimal: index claim + array write + count publish.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Add(CallRecord record)
     {
-        lock (this)
+        lock (_syncRoot)
         {
             var count = _count;
             var items = _items;
@@ -59,42 +53,40 @@ internal sealed class CallRecordBuffer
         return newItems;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public CallRecord Get(int index) => Volatile.Read(ref _items)[index]!;
-
     /// <summary>
-    /// Returns a snapshot copy of all recorded calls.
+    /// Returns the current items array and count for lock-free iteration.
+    /// The returned array and count form a consistent snapshot: all items at
+    /// indices 0..count-1 are guaranteed to be non-null.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal (CallRecord?[] Items, int Count) GetSnapshot()
+    {
+        var count = Volatile.Read(ref _count);
+        var items = Volatile.Read(ref _items);
+        return (items, count);
+    }
+
     public CallRecord[] ToArray()
     {
-        var count = Count;
+        var (items, count) = GetSnapshot();
         if (count == 0) return [];
-        var items = Volatile.Read(ref _items);
         var result = new CallRecord[count];
         Array.Copy(items, result, count);
         return result;
     }
 
-    /// <summary>
-    /// Iterates all records and applies an action. No allocation.
-    /// </summary>
     public void ForEach(Action<CallRecord> action)
     {
-        var count = Count;
-        var items = Volatile.Read(ref _items);
+        var (items, count) = GetSnapshot();
         for (int i = 0; i < count; i++)
         {
             action(items[i]!);
         }
     }
 
-    /// <summary>
-    /// Collects records into a target list, optionally filtered.
-    /// </summary>
     public void CollectInto(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {
-        var count = Count;
-        var items = Volatile.Read(ref _items);
+        var (items, count) = GetSnapshot();
         for (int i = 0; i < count; i++)
         {
             var record = items[i]!;

@@ -35,7 +35,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
     // Call buffers are pre-allocated during setup to avoid capacity checks on the invocation hot path.
-    // CallRecordBuffer is a lock-free append-only structure for single-writer (test thread) access.
+    // Each buffer uses its own lightweight lock, avoiding contention with the shared MockEngine Lock.
     private CallRecordBuffer?[]? _callsByMemberId;
     private volatile int[]? _callCountByMemberId;
 

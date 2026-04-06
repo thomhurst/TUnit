@@ -76,7 +76,12 @@ public sealed class MethodSetup
         if (Volatile.Read(ref _behaviors) is null
             && Interlocked.CompareExchange(ref _singleBehavior, behavior, null) is null)
         {
-            return;
+            // Double-check: if a concurrent AddBehaviorSlow promoted to list between our
+            // _behaviors read and the CAS, fall through to slow path to reconcile.
+            if (Volatile.Read(ref _behaviors) is null)
+            {
+                return;
+            }
         }
 
         AddBehaviorSlow(behavior);
