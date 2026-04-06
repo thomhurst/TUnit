@@ -708,6 +708,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// <summary>
     /// Collects call records from all per-member buffers into <paramref name="target"/>,
     /// optionally filtered by <paramref name="filter"/>.
+    /// Iterates a snapshot of the buffers array — buffers added by concurrent
+    /// <see cref="EnsureCallArrayCapacity"/> after the snapshot won't appear.
+    /// This is acceptable because verification should only run after all calls have completed.
     /// </summary>
     private void CollectCallRecords(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {

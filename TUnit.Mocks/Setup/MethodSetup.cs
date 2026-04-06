@@ -22,7 +22,12 @@ public sealed class MethodSetup
         return _behaviorLock!;
     }
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
+    /// <remarks>
+    /// Not declared volatile to avoid CS0420 with Interlocked.CompareExchange.
+    /// All accesses use Volatile.Read/Write or Interlocked ops for correct ordering.
+    /// </remarks>
     private IBehavior? _singleBehavior;
+    /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
     private List<IBehavior>? _behaviors;
     private List<EventRaiseInfo>? _eventRaises;
     private EventRaiseInfo[]? _eventRaisesSnapshot;
@@ -73,6 +78,8 @@ public sealed class MethodSetup
     {
         // Lock-free fast path: CAS for the common single-behavior case.
         // Avoids allocating the Lock object entirely when only one behavior is registered.
+        // Safety: Interlocked.CompareExchange is a full memory barrier, so a successful CAS
+        // on _singleBehavior is visible to any subsequent Volatile.Read in AddBehaviorSlow.
         if (Volatile.Read(ref _behaviors) is null
             && Interlocked.CompareExchange(ref _singleBehavior, behavior, null) is null)
         {
