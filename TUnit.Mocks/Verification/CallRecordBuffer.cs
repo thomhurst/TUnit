@@ -58,15 +58,16 @@ internal sealed class CallRecordBuffer
     /// The returned array and count form a consistent snapshot: all items at
     /// indices 0..count-1 are guaranteed to be non-null.
     /// </summary>
-    /// <summary>
-    /// Read items first, then count. A writer always updates items before incrementing
-    /// count (inside the lock), so this order guarantees count &lt;= items.Length.
-    /// </summary>
+    /// <remarks>
+    /// Read count first, then items. A writer always updates items (including Grow)
+    /// before incrementing count (inside the lock), so reading count first guarantees
+    /// the subsequently-read items array has length &gt;= count.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal (CallRecord?[] Items, int Count) GetSnapshot()
     {
-        var items = Volatile.Read(ref _items);
         var count = Volatile.Read(ref _count);
+        var items = Volatile.Read(ref _items);
         return (items, count);
     }
 

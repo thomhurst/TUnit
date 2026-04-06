@@ -113,8 +113,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         var count = 0;
         for (int i = 0; i < bufferCount; i++)
         {
-            var record = items[i]!;
-            if (_matchers.Length == 0 || MatchesArguments(record.Arguments))
+            if (MatchesArguments(items[i]!.Arguments))
             {
                 count++;
             }
@@ -128,7 +127,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         for (int i = 0; i < bufferCount; i++)
         {
             var record = items[i]!;
-            if (_matchers.Length == 0 || MatchesArguments(record.Arguments))
+            if (MatchesArguments(record.Arguments))
             {
                 record.IsVerified = true;
             }
