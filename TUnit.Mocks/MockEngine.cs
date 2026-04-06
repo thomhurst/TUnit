@@ -34,8 +34,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     private volatile bool _hasStatefulSetups;
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
-    // Call arrays are pre-allocated during setup to avoid capacity checks on the invocation hot path.
-    private List<CallRecord>?[]? _callsByMemberId;
+    // Call buffers are pre-allocated during setup to avoid capacity checks on the invocation hot path.
+    // CallRecordBuffer is a lock-free append-only structure for single-writer (test thread) access.
+    private CallRecordBuffer?[]? _callsByMemberId;
     private volatile int[]? _callCountByMemberId;
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
@@ -447,15 +448,28 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
-        lock (Lock)
+        // Lock-free read: CallRecordBuffer.ToArray reads the volatile count then copies.
+        var calls = _callsByMemberId;
+        if (calls is not null && (uint)memberId < (uint)calls.Length
+            && calls[memberId] is { } buffer)
         {
-            if (_callsByMemberId is not null && (uint)memberId < (uint)_callsByMemberId.Length
-                && _callsByMemberId[memberId] is { } list)
-            {
-                return list.ToArray();
-            }
+            return buffer.ToArray();
         }
         return [];
+    }
+
+    /// <summary>
+    /// Gets the internal call buffer for a member without copying.
+    /// Returns null if no calls have been recorded for this member.
+    /// </summary>
+    internal CallRecordBuffer? GetCallBufferFor(int memberId)
+    {
+        var calls = _callsByMemberId;
+        if (calls is not null && (uint)memberId < (uint)calls.Length)
+        {
+            return calls[memberId];
+        }
+        return null;
     }
 
     /// <summary>
@@ -463,16 +477,12 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     internal void MarkCallsVerified(int memberId)
     {
-        lock (Lock)
+        // Lock-free: iterate the buffer directly. IsVerified is a volatile write.
+        var calls = _callsByMemberId;
+        if (calls is not null && (uint)memberId < (uint)calls.Length
+            && calls[memberId] is { } buffer)
         {
-            if (_callsByMemberId is not null && (uint)memberId < (uint)_callsByMemberId.Length
-                && _callsByMemberId[memberId] is { } list)
-            {
-                for (int i = 0; i < list.Count; i++)
-                {
-                    list[i].IsVerified = true;
-                }
-            }
+            buffer.ForEach(static r => r.IsVerified = true);
         }
     }
 
@@ -495,14 +505,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        lock (Lock)
-        {
-            if (_callsByMemberId is null) return [];
-            var all = new List<CallRecord>();
-            CollectCallRecords(all);
-            all.Sort((a, b) => a.SequenceNumber.CompareTo(b.SequenceNumber));
-            return all;
-        }
+        if (_callsByMemberId is null) return [];
+        var all = new List<CallRecord>();
+        CollectCallRecords(all);
+        all.Sort((a, b) => a.SequenceNumber.CompareTo(b.SequenceNumber));
+        return all;
     }
 
     /// <summary>
@@ -511,13 +518,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        lock (Lock)
-        {
-            if (_callsByMemberId is null) return [];
-            var result = new List<CallRecord>();
-            CollectCallRecords(result, static r => !r.IsVerified);
-            return result;
-        }
+        if (_callsByMemberId is null) return [];
+        var result = new List<CallRecord>();
+        CollectCallRecords(result, static r => !r.IsVerified);
+        return result;
     }
 
     /// <summary>
@@ -576,10 +580,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
         }
 
         var unmatchedCalls = new List<CallRecord>();
-        lock (Lock)
-        {
-            CollectCallRecords(unmatchedCalls, static r => r.IsUnmatched);
-        }
+        CollectCallRecords(unmatchedCalls, static r => r.IsUnmatched);
 
         return new Diagnostics.MockDiagnostics(unusedSetups, unmatchedCalls, totalSetups, exercisedSetups);
     }
@@ -697,29 +698,15 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 
 
     /// <summary>
-    /// Collects call records from all per-member lists into <paramref name="target"/>,
-    /// optionally filtered by <paramref name="predicate"/>. Must be called under <see cref="Lock"/>.
+    /// Collects call records from all per-member buffers into <paramref name="target"/>,
+    /// optionally filtered by <paramref name="filter"/>.
     /// </summary>
-    private void CollectCallRecords(List<CallRecord> target, Predicate<CallRecord>? predicate = null)
+    private void CollectCallRecords(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {
         if (_callsByMemberId is null) return;
-        foreach (var list in _callsByMemberId)
+        foreach (var buffer in _callsByMemberId)
         {
-            if (list is null) continue;
-            if (predicate is null)
-            {
-                target.AddRange(list);
-            }
-            else
-            {
-                foreach (var record in list)
-                {
-                    if (predicate(record))
-                    {
-                        target.Add(record);
-                    }
-                }
-            }
+            buffer?.CollectInto(target, filter);
         }
     }
 
@@ -731,12 +718,35 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 
     private CallRecord StoreCallRecord(CallRecord record)
     {
+        var memberId = record.MemberId;
+        var calls = _callsByMemberId;
+        var counts = _callCountByMemberId;
+
+        // Fast path: arrays pre-allocated during setup — lock-free append
+        if (calls is not null && counts is not null && (uint)memberId < (uint)calls.Length)
+        {
+            var buffer = calls[memberId];
+            if (buffer is not null)
+            {
+                buffer.Add(record);
+                Interlocked.Increment(ref counts[memberId]);
+                return record;
+            }
+        }
+
+        // Slow path: first time or capacity exceeded — needs lock for initialization
+        return StoreCallRecordSlow(record);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private CallRecord StoreCallRecordSlow(CallRecord record)
+    {
         lock (Lock)
         {
             EnsureCallArrayCapacity(record.MemberId);
-            var memberCalls = _callsByMemberId![record.MemberId] ??= new();
-            memberCalls.Add(record);
-            _callCountByMemberId![record.MemberId]++;
+            var buffer = _callsByMemberId![record.MemberId] ??= new CallRecordBuffer();
+            buffer.Add(record);
+            Interlocked.Increment(ref _callCountByMemberId![record.MemberId]);
         }
         return record;
     }
@@ -750,7 +760,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
             var newSize = _callsByMemberId is null
                 ? Math.Max(required, 8)
                 : Math.Max(required, _callsByMemberId.Length * 2);
-            var newByMember = new List<CallRecord>?[newSize];
+            var newByMember = new CallRecordBuffer?[newSize];
             var newCounts = new int[newSize];
             if (_callsByMemberId is not null)
             {
@@ -760,6 +770,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
             _callsByMemberId = newByMember;
             _callCountByMemberId = newCounts;
         }
+
+        // Pre-create the buffer so the invocation hot path never needs to allocate or lock
+        _callsByMemberId![memberId] ??= new CallRecordBuffer();
     }
 
     /// <summary>
