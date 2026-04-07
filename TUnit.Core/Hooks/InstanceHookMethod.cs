@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace TUnit.Core.Hooks;
 
@@ -20,6 +22,16 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
     }
 
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
+
+    /// <summary>
+    /// The base method definition for this hook (i.e. <see cref="MethodInfo.GetBaseDefinition"/>),
+    /// used by the engine to deduplicate virtual hook methods that are overridden in a derived
+    /// class. Optional — when null, the engine resolves it via reflection from <see cref="ClassType"/>
+    /// and the metadata name/parameters. Set directly by the reflection discovery path which already
+    /// holds a <see cref="System.Reflection.MethodInfo"/> at registration time.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public MethodInfo? BaseDefinition { get; init; }
 
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
