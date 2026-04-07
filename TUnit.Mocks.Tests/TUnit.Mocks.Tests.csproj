@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" />
+    <PackageReference Include="Azure.Storage.Blobs" />
     <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
     <ProjectReference Include="..\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
 
