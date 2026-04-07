@@ -3061,9 +3061,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// lightweight filter array. This data lives in a separate nested class so discovery
     /// filtering can read it without triggering the heavy entries .cctor.
     /// </summary>
-    private static string PreGenerateFilterDataInitializer(TestMethodMetadata testMethod)
-        => BuildFilterDataInitializer(testMethod, testMethod.MethodSymbol.Name);
-
     private static string BuildFilterDataInitializer(TestMethodMetadata testMethod, string methodName)
     {
         var dependsOn = ExtractDependsOn(testMethod);
@@ -3403,7 +3400,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         MethodMetadataCode = PreGenerateMethodMetadataExpression(m),
                         InvokeSwitchCaseCode = PreGenerateInvokeSwitchCase(m, i),
                         TestEntryDataFieldsCode = PreGenerateTestEntryDataFields(m),
-                        FilterDataInitializerCode = PreGenerateFilterDataInitializer(m),
+                        FilterDataInitializerCode = BuildFilterDataInitializer(m, m.MethodSymbol.Name),
                         TestDataSourcesCode = PreGenerateMethodDataSourcesExpression(m),
                         ClassDataSourcesCode = PreGenerateClassDataSourcesExpression(m),
                         DependenciesCode = PreGenerateDependenciesExpression(m.MethodSymbol),

@@ -18,7 +18,7 @@ public sealed class TestEntrySource<
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods)] T> : ITestEntrySource where T : class
 {
-    private TestEntryFilterData[] _filterData;
+    private volatile TestEntryFilterData[] _filterData;
     private List<Func<TestEntry<T>[]>>? _factories;
     private volatile TestEntry<T>[]? _entries;
     private string? _className;
