@@ -5,8 +5,10 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Thin non-generic wrapper around TestEntry&lt;T&gt;[] for engine access.
-/// Wraps one or more factories that produce entries, resolving lazily on first access
-/// to avoid per-class JIT compilation during module initialization.
+/// Holds the lightweight filter data eagerly (cheap — string/int literals only),
+/// and one or more factories that produce the full <see cref="TestEntry{T}"/> array.
+/// The factories are only invoked once a test is selected for materialization,
+/// so discovery filtering never triggers the per-class delegate/metadata <c>.cctor</c>.
 /// </summary>
 #if !DEBUG
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -16,28 +18,36 @@ public sealed class TestEntrySource<
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods)] T> : ITestEntrySource where T : class
 {
+    private TestEntryFilterData[] _filterData;
     private List<Func<TestEntry<T>[]>>? _factories;
     private volatile TestEntry<T>[]? _entries;
     private string? _className;
     private readonly object _lock = new();
 
-    public TestEntrySource(Func<TestEntry<T>[]> factory)
+    public TestEntrySource(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory)
     {
+        _filterData = filterData;
         _factories = [factory];
     }
 
     /// <summary>
-    /// Adds another factory for the same T. Used when multiple source-gen files
-    /// register entries for the same class (e.g. generic instantiations).
+    /// Adds another (filterData, factory) pair for the same T. Used when multiple source-gen
+    /// files register entries for the same class (e.g. generic instantiations).
     /// Thread-safe via lock since static field initializers may run concurrently.
     /// </summary>
-    internal void AddFactory(Func<TestEntry<T>[]> factory)
+    internal void AddSource(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory)
     {
         lock (_lock)
         {
+            // Concatenate filter data eagerly (cheap).
+            var combined = new TestEntryFilterData[_filterData.Length + filterData.Length];
+            Array.Copy(_filterData, 0, combined, 0, _filterData.Length);
+            Array.Copy(filterData, 0, combined, _filterData.Length, filterData.Length);
+            _filterData = combined;
+
             if (_entries is not null)
             {
-                // Already resolved — merge eagerly
+                // Already resolved — merge eagerly to keep ordering consistent.
                 var additional = factory();
                 _entries = [.. _entries, .. additional];
                 return;
@@ -91,24 +101,11 @@ public sealed class TestEntrySource<
         }
     }
 
-    public int Count => Resolve().Length;
+    public int Count => _filterData.Length;
     public Type ClassType => typeof(T);
     public string ClassName => _className ??= TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
 
-    public TestEntryFilterData GetFilterData(int index)
-    {
-        var entry = Resolve()[index];
-        return new TestEntryFilterData
-        {
-            MethodName = entry.MethodName,
-            ClassName = ClassName,
-            Categories = entry.Categories,
-            Properties = entry.Properties,
-            DependsOn = entry.DependsOn,
-            HasDataSource = entry.HasDataSource,
-            RepeatCount = entry.RepeatCount,
-        };
-    }
+    public TestEntryFilterData GetFilterData(int index) => _filterData[index];
 
     public IReadOnlyList<TestMetadata> Materialize(int index, string testSessionId)
     {

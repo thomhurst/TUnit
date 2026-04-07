@@ -107,6 +107,15 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "One", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 1 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Two", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 2 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Three", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 3 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.RepeatTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.RepeatTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.RepeatTests>
@@ -115,11 +124,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.RepeatTests.One",
             FilePath = @"",
             LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 1,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -133,11 +138,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.RepeatTests.Two",
             FilePath = @"",
             LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 2,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -151,11 +152,7 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.RepeatTests.Three",
             FilePath = @"",
             LineNumber = 23,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 3,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -167,5 +164,5 @@ internal static class TUnit_TestProject_RepeatTests__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_RepeatTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.RepeatTests>(static () => TUnit_TestProject_RepeatTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_RepeatTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.RepeatTests>(TUnit_TestProject_RepeatTests__TestSource.Filter.Data, static () => TUnit_TestProject_RepeatTests__TestSource.Entries);
 }

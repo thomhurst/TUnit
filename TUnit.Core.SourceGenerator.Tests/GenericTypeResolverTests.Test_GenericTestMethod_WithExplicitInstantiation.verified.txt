@@ -82,6 +82,11 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericTestMethod<int>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericTestMethod<string>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>
@@ -90,11 +95,7 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
             FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<int>",
             FilePath = @"",
             LineNumber = 7,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -108,11 +109,7 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
             FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<string>",
             FilePath = @"",
             LineNumber = 7,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -124,5 +121,5 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_TestClass_GenericTestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TestClass>(static () => TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_TestClass_GenericTestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TestClass>(TUnit_TestProject_TestClass_GenericTestMethod_TestSource.FilterData_0, static () => TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Entries_0);
 }

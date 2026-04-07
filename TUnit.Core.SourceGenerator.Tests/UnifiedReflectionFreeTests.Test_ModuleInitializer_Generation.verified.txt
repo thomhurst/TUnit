@@ -59,6 +59,13 @@ internal static class TUnit_TestProject_ModuleInitializerTest__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestWithModuleInit", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ModuleInitializerTest>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ModuleInitializerTest>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ModuleInitializerTest>
@@ -67,11 +74,7 @@ internal static class TUnit_TestProject_ModuleInitializerTest__TestSource
             FullyQualifiedName = "TUnit.TestProject.ModuleInitializerTest.TestWithModuleInit",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -83,5 +86,5 @@ internal static class TUnit_TestProject_ModuleInitializerTest__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ModuleInitializerTest__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ModuleInitializerTest>(static () => TUnit_TestProject_ModuleInitializerTest__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ModuleInitializerTest__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ModuleInitializerTest>(TUnit_TestProject_ModuleInitializerTest__TestSource.Filter.Data, static () => TUnit_TestProject_ModuleInitializerTest__TestSource.Entries);
 }

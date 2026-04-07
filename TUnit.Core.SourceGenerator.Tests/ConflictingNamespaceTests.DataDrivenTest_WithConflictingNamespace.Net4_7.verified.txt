@@ -288,6 +288,22 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "EnumValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NullValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "EmptyString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NonEmptyString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "BooleanString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Type", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntegerArray", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntMaxValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataDrivenTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataDrivenTests>
@@ -296,11 +312,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.DataSource_Method",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -320,11 +332,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.DataSource_Method",
             FilePath = @"",
             LineNumber = 17,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -344,11 +352,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.EnumValue",
             FilePath = @"",
             LineNumber = 26,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -368,11 +372,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.NullValue",
             FilePath = @"",
             LineNumber = 35,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -390,11 +390,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.EmptyString",
             FilePath = @"",
             LineNumber = 42,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -412,11 +408,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.NonEmptyString",
             FilePath = @"",
             LineNumber = 49,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -434,11 +426,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.BooleanString",
             FilePath = @"",
             LineNumber = 56,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_6,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -458,11 +446,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.Type",
             FilePath = @"",
             LineNumber = 65,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_7,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -480,11 +464,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.IntegerArray",
             FilePath = @"",
             LineNumber = 72,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_8,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -502,11 +482,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.IntMaxValue",
             FilePath = @"",
             LineNumber = 79,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_9,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -522,5 +498,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_DataDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DataDrivenTests>(static () => TUnit_TestProject_DataDrivenTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_DataDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DataDrivenTests>(TUnit_TestProject_DataDrivenTests__TestSource.Filter.Data, static () => TUnit_TestProject_DataDrivenTests__TestSource.Entries);
 }

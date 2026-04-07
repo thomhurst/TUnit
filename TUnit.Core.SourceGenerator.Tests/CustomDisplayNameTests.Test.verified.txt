@@ -269,6 +269,21 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test3", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "MethodDataSourceTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestParameterNamePrefixBug", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "PasswordTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "SameClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DifferentClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NestedClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.CustomDisplayNameTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CustomDisplayNameTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CustomDisplayNameTests>
@@ -277,11 +292,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test",
             FilePath = @"",
             LineNumber = 11,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -295,11 +306,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test2",
             FilePath = @"",
             LineNumber = 18,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -313,11 +320,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test3",
             FilePath = @"",
             LineNumber = 25,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -336,11 +339,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest",
             FilePath = @"",
             LineNumber = 37,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -369,11 +368,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.TestParameterNamePrefixBug",
             FilePath = @"",
             LineNumber = 45,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -393,11 +388,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.PasswordTest",
             FilePath = @"",
             LineNumber = 65,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -415,11 +406,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest",
             FilePath = @"",
             LineNumber = 72,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_6,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -433,11 +420,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest",
             FilePath = @"",
             LineNumber = 79,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_7,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -451,11 +434,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest",
             FilePath = @"",
             LineNumber = 86,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_8,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -467,5 +446,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_CustomDisplayNameTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.CustomDisplayNameTests>(static () => TUnit_TestProject_CustomDisplayNameTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_CustomDisplayNameTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.CustomDisplayNameTests>(TUnit_TestProject_CustomDisplayNameTests__TestSource.Filter.Data, static () => TUnit_TestProject_CustomDisplayNameTests__TestSource.Entries);
 }

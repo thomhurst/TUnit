@@ -109,6 +109,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Simple", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "WithMethodLevel", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IgnoreParameters", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassAndMethodArgumentsTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassAndMethodArgumentsTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassAndMethodArgumentsTests>
@@ -117,11 +126,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.Simple",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -140,11 +145,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.WithMethodLevel",
             FilePath = @"",
             LineNumber = 11,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -168,11 +169,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.IgnoreParameters",
             FilePath = @"",
             LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -194,5 +191,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(static () => TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassAndMethodArgumentsTests>(TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource.Filter.Data, static () => TUnit_TestProject_ClassAndMethodArgumentsTests__TestSource.Entries);
 }

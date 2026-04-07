@@ -191,6 +191,18 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Int", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Double", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Float", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Long", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "ULong", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "UInt", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
@@ -199,11 +211,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Int",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -221,11 +229,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Double",
             FilePath = @"",
             LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -243,11 +247,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Float",
             FilePath = @"",
             LineNumber = 22,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -265,11 +265,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Long",
             FilePath = @"",
             LineNumber = 29,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -287,11 +283,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.ULong",
             FilePath = @"",
             LineNumber = 36,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -309,11 +301,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.UInt",
             FilePath = @"",
             LineNumber = 43,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -329,5 +317,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NumberArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NumberArgumentTests>(static () => TUnit_TestProject_NumberArgumentTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_NumberArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NumberArgumentTests>(TUnit_TestProject_NumberArgumentTests__TestSource.Filter.Data, static () => TUnit_TestProject_NumberArgumentTests__TestSource.Entries);
 }

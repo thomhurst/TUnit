@@ -71,6 +71,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "SomeTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>
@@ -79,11 +86,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             FullyQualifiedName = "TUnit.TestProject.Bugs._1432.EnumMemberNamesTests.SomeTest",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -101,5 +104,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(static () => TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests>(TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1432_EnumMemberNamesTests__TestSource.Entries);
 }

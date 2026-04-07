@@ -135,6 +135,18 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_3", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Low_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.PriorityFilteringTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PriorityFilteringTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PriorityFilteringTests>
@@ -143,11 +155,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_1",
             FilePath = @"",
             LineNumber = 12,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -161,11 +169,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_2",
             FilePath = @"",
             LineNumber = 18,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -179,11 +183,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_3",
             FilePath = @"",
             LineNumber = 24,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -197,11 +197,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_1",
             FilePath = @"",
             LineNumber = 30,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -215,11 +211,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_2",
             FilePath = @"",
             LineNumber = 36,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_4,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -233,11 +225,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Low_1",
             FilePath = @"",
             LineNumber = 42,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_5,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -249,5 +237,5 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_PriorityFilteringTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.PriorityFilteringTests>(static () => TUnit_TestProject_PriorityFilteringTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_PriorityFilteringTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.PriorityFilteringTests>(TUnit_TestProject_PriorityFilteringTests__TestSource.Filter.Data, static () => TUnit_TestProject_PriorityFilteringTests__TestSource.Entries);
 }

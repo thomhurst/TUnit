@@ -70,6 +70,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "name", new g
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestName", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NameOfArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NameOfArgumentTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NameOfArgumentTests>
@@ -78,11 +85,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "name", new g
             FullyQualifiedName = "TUnit.TestProject.NameOfArgumentTests.TestName",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -98,5 +101,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "name", new g
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NameOfArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NameOfArgumentTests>(static () => TUnit_TestProject_NameOfArgumentTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_NameOfArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NameOfArgumentTests>(TUnit_TestProject_NameOfArgumentTests__TestSource.Filter.Data, static () => TUnit_TestProject_NameOfArgumentTests__TestSource.Entries);
 }

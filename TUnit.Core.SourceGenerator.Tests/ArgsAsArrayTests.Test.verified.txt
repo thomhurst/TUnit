@@ -209,6 +209,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Params", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "ParamsEnumerable", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Following_Non_Params", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgsAsArrayTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgsAsArrayTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgsAsArrayTests>
@@ -217,11 +226,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Params",
             FilePath = @"",
             LineNumber = 5,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -239,11 +244,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
             FilePath = @"",
             LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -261,11 +262,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
             FilePath = @"",
             LineNumber = 25,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -281,5 +278,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ArgsAsArrayTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ArgsAsArrayTests>(static () => TUnit_TestProject_ArgsAsArrayTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ArgsAsArrayTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ArgsAsArrayTests>(TUnit_TestProject_ArgsAsArrayTests__TestSource.Filter.Data, static () => TUnit_TestProject_ArgsAsArrayTests__TestSource.Entries);
 }

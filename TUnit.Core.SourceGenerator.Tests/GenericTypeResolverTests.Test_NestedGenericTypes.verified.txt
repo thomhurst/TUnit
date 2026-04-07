@@ -45,6 +45,10 @@ internal static class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.Dictionary<string, int>))
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "TestMethod", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>
@@ -53,11 +57,7 @@ internal static class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
             FullyQualifiedName = "TUnit.TestProject.NestedGenericTestClass<List<int>>.TestMethod",
             FilePath = @"",
             LineNumber = 10,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -91,6 +91,10 @@ internal static class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
             new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.Collections.Generic.Dictionary<string, int>))
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_1 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "TestMethod", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>
@@ -99,11 +103,7 @@ internal static class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
             FullyQualifiedName = "TUnit.TestProject.NestedGenericTestClass<Dictionary<string, int>>.TestMethod",
             FilePath = @"",
             LineNumber = 10,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_1,
             InvokeBody = __Invoke_1,
@@ -115,9 +115,9 @@ internal static class TUnit_TestProject_NestedGenericTestClass_T_TestMethod_Test
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>(static () => TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.List<int>>>(TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.FilterData_0, static () => TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>(static () => TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NestedGenericTestClass<global::System.Collections.Generic.Dictionary<string, int>>>(TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.FilterData_1, static () => TUnit_TestProject_NestedGenericTestClass_T_TestMethod_TestSource.Entries_1);
 }

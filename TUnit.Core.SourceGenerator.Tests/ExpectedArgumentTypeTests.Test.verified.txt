@@ -96,6 +96,14 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TypedArguments", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "EnumTypes", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>
@@ -104,11 +112,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
             FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.TypedArguments",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -138,11 +142,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
             FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.EnumTypes",
             FilePath = @"",
             LineNumber = 25,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -165,5 +165,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ExpectedArgumentTypeTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ExpectedArgumentTypeTests>(static () => TUnit_TestProject_ExpectedArgumentTypeTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ExpectedArgumentTypeTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ExpectedArgumentTypeTests>(TUnit_TestProject_ExpectedArgumentTypeTests__TestSource.Filter.Data, static () => TUnit_TestProject_ExpectedArgumentTypeTests__TestSource.Entries);
 }

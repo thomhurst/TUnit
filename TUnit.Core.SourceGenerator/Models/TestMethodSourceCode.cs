@@ -17,6 +17,9 @@ public sealed record TestMethodSourceCode
     /// <summary>TestEntry data fields (MethodName, FilePath, etc.).</summary>
     public required string TestEntryDataFieldsCode { get; init; }
 
+    /// <summary>One element of the Filter.Data array initializer (object initializer for TestEntryFilterData).</summary>
+    public required string FilterDataInitializerCode { get; init; }
+
     public string? TestDataSourcesCode { get; init; }
     public string? ClassDataSourcesCode { get; init; }
     public string? DependenciesCode { get; init; }

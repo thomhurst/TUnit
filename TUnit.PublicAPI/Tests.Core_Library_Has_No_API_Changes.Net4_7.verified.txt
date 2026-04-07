@@ -1235,7 +1235,7 @@ namespace
         public static bool IsEnabled { get; set; }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
-        public static int RegisterEntries<T>(<.TestEntry<T>[]> factory)
+        public static int RegisterEntries<T>(.TestEntryFilterData[] filterData, <.TestEntry<T>[]> factory)
             where T :  class { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
         public static int RegisterHook<T>(.<T> bag, T hook) { }
@@ -1460,7 +1460,6 @@ namespace
     public readonly struct TestEntryFilterData
     {
         public required string[] Categories { get; init; }
-        public required string ClassName { get; init; }
         public required string[] DependsOn { get; init; }
         public required bool HasDataSource { get; init; }
         public required string MethodName { get; init; }
@@ -1470,7 +1469,7 @@ namespace
     public sealed class TestEntrySource<T> : .ITestEntrySource
         where T :  class
     {
-        public TestEntrySource(<.TestEntry<T>[]> factory) { }
+        public TestEntrySource(.TestEntryFilterData[] filterData, <.TestEntry<T>[]> factory) { }
         public string ClassName { get; }
         public  ClassType { get; }
         public int Count { get; }
@@ -1482,22 +1481,18 @@ namespace
     {
         public TestEntry() { }
         public required int AttributeGroupIndex { get; init; }
-        public string[] Categories { get; init; }
         public .IDataSourceAttribute[] ClassDataSources { get; init; }
         public required <int, []> CreateAttributes { get; init; }
         public required <[], object?[], T> CreateInstance { get; init; }
         public .TestDependency[] Dependencies { get; init; }
-        public string[] DependsOn { get; init; }
         public required string FilePath { get; init; }
         public required string FullyQualifiedName { get; init; }
-        public bool HasDataSource { get; init; }
         public .InjectableProperty[] InjectableProperties { get; init; }
         public required <T, int, object?[], .CancellationToken, .> InvokeBody { get; init; }
         public required int LineNumber { get; init; }
         public required int MethodIndex { get; init; }
         public required .MethodMetadata MethodMetadata { get; init; }
         public required string MethodName { get; init; }
-        public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
         public .IDataSourceAttribute[] TestDataSources { get; init; }
     }

@@ -91,6 +91,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 10 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>
@@ -99,11 +106,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.BaseClass.Test",
             FilePath = @"",
             LineNumber = 11,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -121,7 +124,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(static () => TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Entries);
 }
 
 
@@ -191,6 +194,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 10 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>
@@ -199,11 +206,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests.Test",
             FilePath = @"",
             LineNumber = 23,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -221,7 +224,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests>(static () => TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests>(TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.FilterData_0, static () => TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Entries_0);
 }
 
 
@@ -291,6 +294,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 10 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>
@@ -299,11 +306,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests2.Test",
             FilePath = @"",
             LineNumber = 26,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -321,7 +324,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests2>(static () => TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests2>(TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.FilterData_0, static () => TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Entries_0);
 }
 
 
@@ -391,6 +394,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 10 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>
@@ -399,11 +406,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests3.Test",
             FilePath = @"",
             LineNumber = 29,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -421,5 +424,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests3>(static () => TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests3>(TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.FilterData_0, static () => TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Entries_0);
 }

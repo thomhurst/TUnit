@@ -96,6 +96,14 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NullableByteArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NullableByteArgumentTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NullableByteArgumentTests>
@@ -104,11 +112,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
             FullyQualifiedName = "TUnit.TestProject.NullableByteArgumentTests.Test",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -127,11 +131,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
             FullyQualifiedName = "TUnit.TestProject.NullableByteArgumentTests.Test2",
             FilePath = @"",
             LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -148,5 +148,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NullableByteArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NullableByteArgumentTests>(static () => TUnit_TestProject_NullableByteArgumentTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_NullableByteArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NullableByteArgumentTests>(TUnit_TestProject_NullableByteArgumentTests__TestSource.Filter.Data, static () => TUnit_TestProject_NullableByteArgumentTests__TestSource.Entries);
 }

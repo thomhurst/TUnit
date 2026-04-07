@@ -64,6 +64,13 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>
@@ -72,11 +79,7 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
             FullyQualifiedName = "TUnit.TestProject.Bugs._Issue2887.ActualTestClass.Test1",
             FilePath = @"",
             LineNumber = 26,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -88,5 +91,5 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>(static () => TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass>(TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSource.Entries);
 }

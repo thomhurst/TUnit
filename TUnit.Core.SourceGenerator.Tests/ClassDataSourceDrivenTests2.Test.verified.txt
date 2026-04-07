@@ -78,6 +78,14 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Base_Derived1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Base_Derived2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
@@ -86,11 +94,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived1",
             FilePath = @"",
             LineNumber = 12,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -109,11 +113,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived2",
             FilePath = @"",
             LineNumber = 18,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -130,5 +130,5 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(static () => TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource.Filter.Data, static () => TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource.Entries);
 }

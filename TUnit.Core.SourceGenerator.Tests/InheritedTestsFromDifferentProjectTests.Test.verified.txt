@@ -122,6 +122,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericMethodDataSource", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NonGenericMethodDataSource", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "VerifyInheritedCategoriesAreAvailable", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
@@ -130,11 +140,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test",
             FilePath = @"",
             LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -148,11 +154,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource",
             FilePath = @"",
             LineNumber = 14,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_1,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -181,11 +183,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource",
             FilePath = @"",
             LineNumber = 20,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_2,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -214,11 +212,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.VerifyInheritedCategoriesAreAvailable",
             FilePath = @"",
             LineNumber = 26,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_3,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -230,7 +224,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.Filter.Data, static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests__TestSource.Entries);
 }
 
 
@@ -285,6 +279,10 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "BaseTest", Categories = new string[] { "BaseCategory" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
@@ -293,11 +291,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest",
             FilePath = @"",
             LineNumber = 5,
-            Categories = new string[] { "BaseCategory" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -309,7 +303,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource.FilterData_0, static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTest_TestSource.Entries_0);
 }
 
 
@@ -365,6 +359,10 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "BaseTestWithMultipleCategories", Categories = new string[] { "AnotherBaseCategory", "MultipleCategories" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>
@@ -373,11 +371,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTestWithMultipleCategories",
             FilePath = @"",
             LineNumber = 5,
-            Categories = new string[] { "AnotherBaseCategory", "MultipleCategories" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -389,5 +383,5 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests>(TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource.FilterData_0, static () => TUnit_TestProject_InheritedTestsFromDifferentProjectTests_BaseTestWithMultipleCategories_TestSource.Entries_0);
 }

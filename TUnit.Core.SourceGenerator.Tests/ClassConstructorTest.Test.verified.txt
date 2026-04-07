@@ -77,6 +77,13 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
+    internal static class Filter
+    {
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassConstructorTest>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassConstructorTest>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassConstructorTest>
@@ -85,11 +92,7 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
             FullyQualifiedName = "TUnit.TestProject.ClassConstructorTest.Test",
             FilePath = @"",
             LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance,
             InvokeBody = __Invoke,
@@ -101,5 +104,5 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_ClassConstructorTest__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassConstructorTest>(static () => TUnit_TestProject_ClassConstructorTest__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_ClassConstructorTest__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ClassConstructorTest>(TUnit_TestProject_ClassConstructorTest__TestSource.Filter.Data, static () => TUnit_TestProject_ClassConstructorTest__TestSource.Entries);
 }

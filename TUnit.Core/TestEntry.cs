@@ -39,20 +39,8 @@ public sealed class TestEntry<
     /// <summary>Source line number.</summary>
     public required int LineNumber { get; init; }
 
-    /// <summary>Pre-extracted categories for fast filtering.</summary>
-    public string[] Categories { get; init; } = [];
-
-    /// <summary>Pre-extracted "key=value" property pairs for fast filtering.</summary>
-    public string[] Properties { get; init; } = [];
-
-    /// <summary>Dependency strings for fast BFS filtering: "ClassName:MethodName".</summary>
-    public string[] DependsOn { get; init; } = [];
-
     /// <summary>Pre-built TestDependency objects for the engine's dependency resolver.</summary>
     public TestDependency[] Dependencies { get; init; } = [];
-
-    /// <summary>Whether this test has data sources.</summary>
-    public bool HasDataSource { get; init; }
 
     /// <summary>Repeat count from RepeatAttribute, or 0.</summary>
     public int RepeatCount { get; init; }

@@ -43,6 +43,10 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             new global::TUnit.Core.InheritsTestsAttribute()
         };
     }
+    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    {
+        new global::TUnit.Core.TestEntryFilterData { MethodName = "AssertClassName", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+    };
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AbstractTests.ConcreteClass1>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AbstractTests.ConcreteClass1>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AbstractTests.ConcreteClass1>
@@ -51,11 +55,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName",
             FilePath = @"",
             LineNumber = 3,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
             RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
             MethodMetadata = __mm_0,
             CreateInstance = __CreateInstance_0,
             InvokeBody = __Invoke_0,
@@ -67,5 +67,5 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(static () => TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.FilterData_0, static () => TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Entries_0);
 }

@@ -63,27 +63,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         string testSessionId,
         FilterHints filterHints)
     {
-        // Phase 0: Resolve lazy sources in parallel for type-matched classes.
-        // This turns sequential per-class JIT into parallel JIT, significantly
-        // reducing discovery time for large test suites.
-        if (Sources.TestEntries.Count > 1)
-        {
-            var sourcesToResolve = new List<ITestEntrySource>(Sources.TestEntries.Count);
-            foreach (var kvp in Sources.TestEntries)
-            {
-                if (!filterHints.HasHints || filterHints.CouldTypeMatch(kvp.Key))
-                {
-                    sourcesToResolve.Add(kvp.Value);
-                }
-            }
-
-            if (sourcesToResolve.Count > 1)
-            {
-                Parallel.ForEach(sourcesToResolve, static source => _ = source.Count);
-            }
-        }
-
-        // Phase 1: Filter using pure data (no JIT of test-specific methods)
+        // Phase 1: Filter using pure data only (no JIT of test-specific methods).
+        // Filter data is held eagerly on each TestEntrySource, so reading Count/GetFilterData
+        // never triggers the per-class delegate/metadata .cctor — that only happens in Phase 3
+        // for entries actually selected for materialization.
         var matching = new List<(ITestEntrySource Source, int Index)>();
         var hasDependencies = false;
 
@@ -97,11 +80,12 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 continue;
             }
 
+            var className = source.ClassName;
             for (var i = 0; i < source.Count; i++)
             {
                 var filterData = source.GetFilterData(i);
 
-                if (!filterHints.HasHints || filterHints.CouldMatch(filterData.ClassName, filterData.MethodName))
+                if (!filterHints.HasHints || filterHints.CouldMatch(className, filterData.MethodName))
                 {
                     matching.Add((source, i));
                     if (filterData.DependsOn.Length > 0)
@@ -122,16 +106,17 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             foreach (var kvp in Sources.TestEntries)
             {
                 var source = kvp.Value;
+                var className = source.ClassName;
                 for (var i = 0; i < source.Count; i++)
                 {
                     var fd = source.GetFilterData(i);
                     var pair = (source, i);
-                    byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
+                    byClassAndMethod[(className, fd.MethodName)] = pair;
 
-                    if (!byClass.TryGetValue(fd.ClassName, out var list))
+                    if (!byClass.TryGetValue(className, out var list))
                     {
                         list = [];
-                        byClass[fd.ClassName] = list;
+                        byClass[className] = list;
                     }
                     list.Add(pair);
                 }
@@ -144,13 +129,14 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             {
                 var current = queue.Dequeue();
                 var fd = current.Source.GetFilterData(current.Index);
+                var currentClassName = current.Source.ClassName;
 
                 foreach (var dep in fd.DependsOn)
                 {
                     var sep = dep.IndexOf(':');
                     if (sep < 0) continue;
 
-                    var depClass = sep == 0 ? fd.ClassName : dep[..sep];
+                    var depClass = sep == 0 ? currentClassName : dep[..sep];
                     var depMethod = dep[(sep + 1)..];
 
                     if (depMethod.Length > 0)

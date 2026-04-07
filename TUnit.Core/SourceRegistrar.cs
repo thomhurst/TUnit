@@ -88,13 +88,15 @@ public class SourceRegistrar
     }
 
     /// <summary>
-    /// Registers a factory for test entries. The factory is not invoked until the engine
-    /// needs to access the entries (during discovery/filtering), avoiding per-class JIT
-    /// compilation during module initialization.
+    /// Registers a set of test entries for a class. The lightweight <paramref name="filterData"/>
+    /// is held eagerly so discovery filtering can read names/categories/dependencies without JIT,
+    /// while <paramref name="factory"/> is only invoked when an entry is actually selected for
+    /// materialization — keeping the heavy per-class delegate/metadata <c>.cctor</c> off the
+    /// discovery hot path.
     /// Returns a dummy value for use as a static field initializer.
-    /// Multiple calls for the same T are additive — factories accumulate.
+    /// Multiple calls for the same T are additive — filter arrays and factories accumulate.
     /// </summary>
-    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntry<T>[]> factory) where T : class
+    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory) where T : class
     {
         var key = typeof(T);
 
@@ -104,7 +106,7 @@ public class SourceRegistrar
             {
                 if (existing is TestEntrySource<T> existingSource)
                 {
-                    existingSource.AddFactory(factory);
+                    existingSource.AddSource(filterData, factory);
                     return 0;
                 }
 
@@ -112,7 +114,7 @@ public class SourceRegistrar
                     $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
             }
 
-            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(factory)))
+            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(filterData, factory)))
             {
                 return 0;
             }
