@@ -1,5 +1,7 @@
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Core;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
@@ -45,6 +47,7 @@ public class VirtualHookOverrideTests
         }
 
         [Test]
+        [EngineTest(ExpectedResult.Pass)]
         public async Task Override_Should_Run_Once()
         {
             await Assert.That(SetupCalls).IsEqualTo(1);
