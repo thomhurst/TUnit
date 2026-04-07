@@ -488,7 +488,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             for (var i = 0; i < entries.Count; i++)
             {
-                writer.AppendLine($"{BuildGenericFilterDataInitializer(testMethod, entries[i])},");
+                writer.AppendLine($"{BuildFilterDataInitializer(testMethod, entries[i].TestName)},");
             }
             writer.Unindent();
             writer.AppendLine("};");
@@ -1019,34 +1019,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Emits the TestEntry field values for a concrete instantiation.
     /// </summary>
-    /// <summary>
-    /// Builds the <c>new TestEntryFilterData { ... }</c> initializer for one concrete generic instantiation.
-    /// Filter data is method-level (not type-arg-dependent), so all entries in the same generic group
-    /// share the same categories/properties/etc. but each gets its own filter struct.
-    /// </summary>
-    private static string BuildGenericFilterDataInitializer(TestMethodMetadata testMethod, ConcreteInstantiation entry)
-    {
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
-        var hasDataSource = HasDataSources(testMethod);
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        var dependsOn = ExtractDependsOn(testMethod);
-        var dependsOnArray = dependsOn.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
-
-        return $"new global::TUnit.Core.TestEntryFilterData {{ MethodName = \"{EscapeString(entry.TestName)}\", Categories = {categoriesArray}, Properties = {propertiesArray}, DependsOn = {dependsOnArray}, HasDataSource = {(hasDataSource ? "true" : "false")}, RepeatCount = {repeatCount} }}";
-    }
-
     private static void EmitTestEntryFields(CodeWriter writer, TestMethodMetadata testMethod, ConcreteInstantiation entry, int entryIndex, int groupIndex)
     {
         var methodName = entry.TestName;
@@ -3084,9 +3056,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// filtering can read it without triggering the heavy entries .cctor.
     /// </summary>
     private static string PreGenerateFilterDataInitializer(TestMethodMetadata testMethod)
-    {
-        var methodName = testMethod.MethodSymbol.Name;
+        => BuildFilterDataInitializer(testMethod, testMethod.MethodSymbol.Name);
 
+    private static string BuildFilterDataInitializer(TestMethodMetadata testMethod, string methodName)
+    {
         var categories = ExtractCategories(testMethod);
         var categoriesArray = categories.Count == 0
             ? "global::System.Array.Empty<string>()"
@@ -3097,15 +3070,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
 
-        var hasDataSource = HasDataSources(testMethod);
-        var repeatCount = ExtractRepeatCount(testMethod);
-
         var dependsOn = ExtractDependsOn(testMethod);
         var dependsOnArray = dependsOn.Length == 0
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
 
-        return $"new global::TUnit.Core.TestEntryFilterData {{ MethodName = \"{EscapeString(methodName)}\", Categories = {categoriesArray}, Properties = {propertiesArray}, DependsOn = {dependsOnArray}, HasDataSource = {(hasDataSource ? "true" : "false")}, RepeatCount = {repeatCount} }}";
+        var hasDataSource = HasDataSources(testMethod) ? "true" : "false";
+        var repeatCount = ExtractRepeatCount(testMethod);
+
+        return $"new global::TUnit.Core.TestEntryFilterData {{ MethodName = \"{EscapeString(methodName)}\", Categories = {categoriesArray}, Properties = {propertiesArray}, DependsOn = {dependsOnArray}, HasDataSource = {hasDataSource}, RepeatCount = {repeatCount} }}";
     }
 
     /// <summary>
