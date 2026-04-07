@@ -131,7 +131,9 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 perClassMatches[i] = local;
                 if (localHasDeps)
                 {
-                    Interlocked.Exchange(ref hasDependenciesFlag, 1);
+                    // CompareExchange so the write is a no-op once the flag is already set,
+                    // avoiding a redundant LOCK bus round-trip on hot paths.
+                    Interlocked.CompareExchange(ref hasDependenciesFlag, 1, 0);
                 }
             });
 

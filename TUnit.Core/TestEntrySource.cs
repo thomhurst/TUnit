@@ -35,6 +35,9 @@ public sealed class TestEntrySource<
     /// Adds another (filterDataFactory, factory) pair for the same T. Used when multiple source-gen
     /// files register entries for the same class (e.g. generic instantiations).
     /// Thread-safe via lock since static field initializers may run concurrently.
+    /// Note: all calls to <c>AddSource</c> happen from module/type <c>.cctor</c>s, which the CLR
+    /// serialises before any discovery code runs. So there is no window where a reader could observe
+    /// a merged <c>_filterData</c> array but a not-yet-merged <c>_factories</c> list (or vice versa).
     /// </summary>
     internal void AddSource(Func<TestEntryFilterData[]> filterDataFactory, Func<TestEntry<T>[]> factory)
     {

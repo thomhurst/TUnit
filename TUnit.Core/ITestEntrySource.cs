@@ -22,6 +22,11 @@ public interface ITestEntrySource
     /// per-class delegate/metadata <c>.cctor</c>. Callers should snapshot this reference
     /// once and loop over it, rather than calling repeatedly, to avoid any torn reads
     /// if multiple sources are registered concurrently.
+    /// <para>
+    /// The returned array is internal engine state — callers <b>must not</b> mutate it.
+    /// It is exposed as a bare array (not <see cref="IReadOnlyList{T}"/>) purely to avoid
+    /// interface-dispatch overhead on the discovery hot path.
+    /// </para>
     /// </summary>
     TestEntryFilterData[] FilterData { get; }
 
