@@ -51,7 +51,10 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     /// matchable-parameter signature (e.g. <c>BlobClient.GenerateSasUri(perms, expires)</c> vs
     /// <c>GenerateSasUri(perms, expires, out string stringToSign)</c>). When true, callers must
     /// pass <c>out _</c> at the call site for the disambiguated overload.
-    /// Computed across the full method set in <see cref="Builders.MockMembersBuilder"/>.
+    /// Computed transiently inside <see cref="Builders.MockMembersBuilder.Build"/> by examining
+    /// the full method set; never set on models flowing through the incremental pipeline.
+    /// Excluded from <see cref="Equals(MockMemberModel?)"/> / <see cref="GetHashCode"/> because
+    /// it is a derived per-build flag, not part of model identity.
     /// </summary>
     public bool KeepOutParamsInExtensionSignature { get; init; }
 
@@ -96,7 +99,6 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
-            && KeepOutParamsInExtensionSignature == other.KeepOutParamsInExtensionSignature
             && SpanReturnElementType == other.SpanReturnElementType;
     }
 
@@ -111,7 +113,6 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
-            hash = hash * 31 + KeepOutParamsInExtensionSignature.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             return hash;
