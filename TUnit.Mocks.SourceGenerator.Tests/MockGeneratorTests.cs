@@ -106,6 +106,34 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Nullable_Event()
+    {
+        // Regression test for #5424: nullable event handler types must
+        // preserve nullability in generated explicit interface implementation,
+        // otherwise CS8615 (nullability mismatch) is emitted.
+        var source = """
+            #nullable enable
+            using System;
+            using TUnit.Mocks;
+
+            public interface IFoo
+            {
+                event EventHandler<string>? Something;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IFoo>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Multiple_Multi_Parameter_Events()
     {
         // Regression test for #5423: RaiseEvent dispatch generated duplicate

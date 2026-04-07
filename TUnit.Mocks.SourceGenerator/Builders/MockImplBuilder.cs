@@ -946,11 +946,11 @@ internal static class MockImplBuilder
     private static void GenerateEvent(CodeWriter writer, MockEventModel evt)
     {
         // Backing delegate field
-        writer.AppendLine($"private {evt.EventHandlerType}? _backing_{evt.Name};");
+        writer.AppendLine($"private {evt.EventHandlerTypeNonNullable}? _backing_{evt.Name};");
         writer.AppendLine();
 
         // Event add/remove accessors
-        writer.AppendLine($"public event {evt.EventHandlerType}? {evt.Name}");
+        writer.AppendLine($"public event {evt.EventHandlerTypeNonNullable}? {evt.Name}");
         writer.OpenBrace();
         writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
         writer.AppendLine($"remove {{ _backing_{evt.Name} -= value; _engine.RecordEventSubscription(\"{evt.Name}\", false); }}");
@@ -979,11 +979,11 @@ internal static class MockImplBuilder
     private static void GeneratePartialEvent(CodeWriter writer, MockEventModel evt)
     {
         // Backing delegate field
-        writer.AppendLine($"private {evt.EventHandlerType}? _backing_{evt.Name};");
+        writer.AppendLine($"private {evt.EventHandlerTypeNonNullable}? _backing_{evt.Name};");
         writer.AppendLine();
 
         // Event add/remove accessors with override
-        writer.AppendLine($"public override event {evt.EventHandlerType}? {evt.Name}");
+        writer.AppendLine($"public override event {evt.EventHandlerTypeNonNullable}? {evt.Name}");
         writer.OpenBrace();
         writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
         writer.AppendLine($"remove {{ _backing_{evt.Name} -= value; _engine.RecordEventSubscription(\"{evt.Name}\", false); }}");
