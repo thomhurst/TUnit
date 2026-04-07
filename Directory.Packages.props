@@ -59,9 +59,9 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.1.90" />
     <PackageVersion Include="ModularPipelines.Git" Version="3.1.90" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="3.1.90" />
-    <PackageVersion Include="MSTest" Version="4.1.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.1.0" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.1.0" />
+    <PackageVersion Include="MSTest" Version="4.2.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.2.1" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.2.1" />
     <PackageVersion Include="Npgsql" Version="10.0.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
