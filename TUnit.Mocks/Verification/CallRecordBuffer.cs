@@ -13,7 +13,7 @@ namespace TUnit.Mocks.Verification;
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal sealed class CallRecordBuffer
 {
-    private readonly object _syncRoot = new();
+    private readonly Lock _syncRoot = new();
     private CallRecord?[] _items;
     private int _count;
 
