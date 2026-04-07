@@ -50,7 +50,18 @@ public class VirtualHookOverrideTests
         [EngineTest(ExpectedResult.Pass)]
         public async Task Override_Should_Run_Once()
         {
+            // TeardownCalls is verified by AfterTeardownAssertion below — by the time
+            // this test method runs, TeardownAsync has not yet executed (it's an After
+            // hook), so we can't assert it here. The dedicated [After(Test)] hook with
+            // Order = int.MaxValue runs last and performs the assertion.
             await Assert.That(SetupCalls).IsEqualTo(1);
+        }
+
+        // Runs after TeardownAsync to verify the After(Test) override also deduplicates.
+        [After(Test, Order = int.MaxValue)]
+        public async Task AfterTeardownAssertion()
+        {
+            await Assert.That(TeardownCalls).IsEqualTo(1);
         }
     }
 }
