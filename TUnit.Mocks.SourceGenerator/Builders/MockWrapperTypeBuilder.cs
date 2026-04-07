@@ -107,7 +107,7 @@ internal static class MockWrapperTypeBuilder
     {
         var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
-        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
+        writer.AppendLine($"event {evt.EventHandlerTypeWithNullability} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
     }
 
 }

@@ -8,6 +8,14 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public string EventHandlerType { get; init; } = "";
 
     /// <summary>
+    /// The event handler type with nullable annotations preserved from the
+    /// declaring interface. Used when emitting explicit interface event
+    /// implementations so that nullability matches the interface declaration
+    /// (otherwise CS8615 is emitted). See issue #5424.
+    /// </summary>
+    public string EventHandlerTypeWithNullability { get; init; } = "";
+
+    /// <summary>
     /// The argument expression for invoking the backing delegate.
     /// E.g., "this, args" for EventHandler&lt;string&gt;, or "arg1, arg2" for Action&lt;string, int&gt;.
     /// </summary>
@@ -37,6 +45,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
         if (other is null) return false;
         return Name == other.Name
             && EventHandlerType == other.EventHandlerType
+            && EventHandlerTypeWithNullability == other.EventHandlerTypeWithNullability
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
@@ -52,6 +61,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             int hash = 17;
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + EventHandlerType.GetHashCode();
+            hash = hash * 31 + EventHandlerTypeWithNullability.GetHashCode();
             hash = hash * 31 + RaiseParameterList.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);

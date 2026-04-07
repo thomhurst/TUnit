@@ -650,6 +650,7 @@ internal static class MemberDiscovery
     private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)
     {
         var eventHandlerType = evt.Type.GetFullyQualifiedName();
+        var eventHandlerTypeWithNullability = evt.Type.GetFullyQualifiedNameWithNullability();
 
         // Determine if this is an EventHandler pattern (sender + args)
         var isEventHandlerPattern = IsEventHandlerType(evt.Type);
@@ -703,6 +704,7 @@ internal static class MemberDiscovery
         {
             Name = evt.Name,
             EventHandlerType = eventHandlerType,
+            EventHandlerTypeWithNullability = eventHandlerTypeWithNullability,
             InvokeArgs = invokeArgs,
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,
