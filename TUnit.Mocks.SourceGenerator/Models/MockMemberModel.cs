@@ -46,6 +46,16 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsReturnTypeStaticAbstractInterface { get; init; }
 
     /// <summary>
+    /// True when this method's <c>out</c> parameters must be kept in the generated extension
+    /// method signature to avoid CS0111 collisions with a sibling overload that shares the same
+    /// matchable-parameter signature (e.g. <c>BlobClient.GenerateSasUri(perms, expires)</c> vs
+    /// <c>GenerateSasUri(perms, expires, out string stringToSign)</c>). When true, callers must
+    /// pass <c>out _</c> at the call site for the disambiguated overload.
+    /// Computed across the full method set in <see cref="Builders.MockMembersBuilder"/>.
+    /// </summary>
+    public bool KeepOutParamsInExtensionSignature { get; init; }
+
+    /// <summary>
     /// For methods returning ReadOnlySpan&lt;T&gt; or Span&lt;T&gt;, the fully qualified element type.
     /// Null for non-span return types. Used to support configurable span return values via array conversion.
     /// </summary>
@@ -86,6 +96,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
+            && KeepOutParamsInExtensionSignature == other.KeepOutParamsInExtensionSignature
             && SpanReturnElementType == other.SpanReturnElementType;
     }
 
@@ -100,6 +111,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
+            hash = hash * 31 + KeepOutParamsInExtensionSignature.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             return hash;
