@@ -7,12 +7,16 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public string Name { get; init; } = "";
     /// <summary>
     /// The fully qualified event handler type, with nullable annotations
-    /// preserved from the declaring interface. Builders that emit a backing
-    /// delegate field (which is always nullable) should call <c>TrimEnd('?')</c>
-    /// before appending their own <c>?</c> to avoid producing <c>??</c>.
-    /// See issue #5424.
+    /// preserved from the declaring interface. Used when emitting explicit
+    /// interface event implementations so that nullability matches the
+    /// interface declaration (otherwise CS8615 is emitted, see issue #5424).
+    /// For the always-nullable backing delegate field, use
+    /// <see cref="EventHandlerTypeNonNullable"/> and append <c>?</c>.
     /// </summary>
     public string EventHandlerType { get; init; } = "";
+
+    /// <summary>The handler type with any trailing nullable annotation removed.</summary>
+    public string EventHandlerTypeNonNullable => EventHandlerType.TrimEnd('?');
 
     /// <summary>
     /// The argument expression for invoking the backing delegate.
