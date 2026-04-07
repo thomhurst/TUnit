@@ -64,37 +64,85 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         FilterHints filterHints)
     {
         // Phase 1: Filter using pure data only (no JIT of test-specific methods).
-        // Filter data is held eagerly on each TestEntrySource, so reading Count/GetFilterData
-        // never triggers the per-class delegate/metadata .cctor — that only happens in Phase 3
-        // for entries actually selected for materialization.
+        // Parallelized across classes so each class's lazy Filter cctor JIT-compiles on a
+        // worker thread instead of serially on the caller. For broad runs (no filter) this
+        // is the first place the Filter cctors get triggered, so parallelism matters.
+        // When the filter has type hints, most classes short-circuit at CouldTypeMatch without
+        // touching FilterData, so serial iteration is cheapest (no task scheduling overhead).
+        // Only parallelize when every class will be inspected — that's when distributing the
+        // Filter cctor JIT across workers actually wins.
         var matching = new List<(ITestEntrySource Source, int Index)>();
         var hasDependencies = false;
 
-        foreach (var kvp in Sources.TestEntries)
+        if (filterHints.HasHints)
         {
-            var classType = kvp.Key;
-            var source = kvp.Value;
-
-            if (filterHints.HasHints && !filterHints.CouldTypeMatch(classType))
+            foreach (var kvp in Sources.TestEntries)
             {
-                continue;
-            }
+                var classType = kvp.Key;
+                var source = kvp.Value;
 
-            var className = source.ClassName;
-            var filterData = source.FilterData;
-            for (var i = 0; i < filterData.Length; i++)
-            {
-                var fd = filterData[i];
-
-                if (!filterHints.HasHints || filterHints.CouldMatch(className, fd.MethodName))
+                if (!filterHints.CouldTypeMatch(classType))
                 {
-                    matching.Add((source, i));
-                    if (fd.DependsOn.Length > 0)
+                    continue;
+                }
+
+                var className = source.ClassName;
+                var filterData = source.FilterData;
+                for (var i = 0; i < filterData.Length; i++)
+                {
+                    var fd = filterData[i];
+                    if (filterHints.CouldMatch(className, fd.MethodName))
                     {
-                        hasDependencies = true;
+                        matching.Add((source, i));
+                        if (fd.DependsOn.Length > 0)
+                        {
+                            hasDependencies = true;
+                        }
                     }
                 }
             }
+        }
+        else
+        {
+            var sources = Sources.TestEntries.ToArray();
+            var perClassMatches = new List<(ITestEntrySource Source, int Index)>?[sources.Length];
+            var hasDependenciesFlag = 0;
+
+            Parallel.For(0, sources.Length, i =>
+            {
+                var source = sources[i].Value;
+                var filterData = source.FilterData;
+                if (filterData.Length == 0)
+                {
+                    return;
+                }
+
+                var local = new List<(ITestEntrySource, int)>(filterData.Length);
+                var localHasDeps = false;
+                for (var j = 0; j < filterData.Length; j++)
+                {
+                    local.Add((source, j));
+                    if (filterData[j].DependsOn.Length > 0)
+                    {
+                        localHasDeps = true;
+                    }
+                }
+
+                perClassMatches[i] = local;
+                if (localHasDeps)
+                {
+                    Interlocked.Exchange(ref hasDependenciesFlag, 1);
+                }
+            });
+
+            foreach (var local in perClassMatches)
+            {
+                if (local is not null)
+                {
+                    matching.AddRange(local);
+                }
+            }
+            hasDependencies = hasDependenciesFlag != 0;
         }
 
         // Phase 2: Expand dependencies via BFS (only if needed)
