@@ -106,6 +106,37 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Multiple_Multi_Parameter_Events()
+    {
+        // Regression test for #5423: RaiseEvent dispatch generated duplicate
+        // `__argArray` locals in the same switch when more than one event used
+        // a multi-parameter delegate (CS0128 / CS0165).
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public delegate void FirstHandler(object sender, string value);
+            public delegate void SecondHandler(object sender, int value);
+
+            public interface IDualEvents
+            {
+                event FirstHandler First;
+                event SecondHandler Second;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IDualEvents>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_Inheriting_Multiple_Interfaces()
     {
         var source = """

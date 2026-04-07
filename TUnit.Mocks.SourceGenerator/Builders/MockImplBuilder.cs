@@ -1037,14 +1037,15 @@ internal static class MockImplBuilder
                         else if (evt.RaiseParameterList.Length > 1)
                         {
                             // Multi-parameter delegate — cast args to object[] and spread
-                            writer.AppendLine("if (args is object?[] __argArray)");
+                            var argArrayName = $"__argArray_{evt.Name}";
+                            writer.AppendLine($"if (args is object?[] {argArrayName})");
                             writer.AppendLine("{");
                             writer.IncreaseIndent();
 
                             var castArgs = new List<string>();
                             for (int i = 0; i < evt.RaiseParameterList.Length; i++)
                             {
-                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]");
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType}){argArrayName}[{i}]");
                             }
                             writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
                             writer.DecreaseIndent();
