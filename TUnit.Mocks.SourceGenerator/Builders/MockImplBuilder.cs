@@ -1027,6 +1027,10 @@ internal static class MockImplBuilder
                     {
                         writer.AppendLine($"case \"{evt.Name}\":");
                         writer.IncreaseIndent();
+                        // Brace each case so locals (e.g. the `args` pattern variable below) get
+                        // their own scope and don't collide across cases.
+                        writer.AppendLine("{");
+                        writer.IncreaseIndent();
 
                         // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
                         if (evt.RaiseParameterList.Length == 0)
@@ -1037,15 +1041,14 @@ internal static class MockImplBuilder
                         else if (evt.RaiseParameterList.Length > 1)
                         {
                             // Multi-parameter delegate — cast args to object[] and spread
-                            var argArrayName = $"__argArray_{evt.Name}";
-                            writer.AppendLine($"if (args is object?[] {argArrayName})");
+                            writer.AppendLine("if (args is object?[] __argArray)");
                             writer.AppendLine("{");
                             writer.IncreaseIndent();
 
                             var castArgs = new List<string>();
                             for (int i = 0; i < evt.RaiseParameterList.Length; i++)
                             {
-                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType}){argArrayName}[{i}]");
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]");
                             }
                             writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
                             writer.DecreaseIndent();
@@ -1064,6 +1067,8 @@ internal static class MockImplBuilder
                         }
 
                         writer.AppendLine("break;");
+                        writer.DecreaseIndent();
+                        writer.AppendLine("}");
                         writer.DecreaseIndent();
                     }
 

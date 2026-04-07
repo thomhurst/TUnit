@@ -7,6 +7,7 @@ namespace TUnit.Mocks.Tests;
 /// Regression interface for #5423: multiple multi-parameter events on the
 /// same interface previously caused CS0128 in the generated RaiseEvent switch.
 /// </summary>
+// Public because the mock generator emits public extension types that take this interface as a parameter.
 public interface IMultiEventNotifier : INotifyPropertyChanging, INotifyPropertyChanged
 {
 }

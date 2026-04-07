@@ -129,8 +129,10 @@ namespace TUnit.Mocks.Generated
             switch (eventName)
             {
                 case "StatusChanged":
-                    Raise_StatusChanged((string)args!);
-                    break;
+                    {
+                        Raise_StatusChanged((string)args!);
+                        break;
+                    }
                 default:
                     throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
             }
