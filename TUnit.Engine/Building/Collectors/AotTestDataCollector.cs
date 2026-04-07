@@ -162,14 +162,18 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
         }
 
-        // Phase 3: Materialize
-        var toMaterialize = expandedSet ?? (IEnumerable<(ITestEntrySource Source, int Index)>)matching;
-        var results = new List<TestMetadata>();
+        // Phase 3: Materialize in parallel so each class's heavy .cctor (delegate +
+        // MethodMetadata graph construction) JIT-compiles on a worker thread instead
+        // of serially on the caller. This is especially important for unfiltered runs
+        // where every class's Resolve() has to run.
+        var toMaterializeList = expandedSet is not null ? [..expandedSet] : matching;
+        var results = new TestMetadata[toMaterializeList.Count];
 
-        foreach (var (source, index) in toMaterialize)
+        Parallel.For(0, toMaterializeList.Count, i =>
         {
-            results.Add(source.Materialize(index, testSessionId));
-        }
+            var (source, index) = toMaterializeList[i];
+            results[i] = source.Materialize(index, testSessionId);
+        });
 
         return results;
     }

@@ -18,38 +18,82 @@ public sealed class TestEntrySource<
         | DynamicallyAccessedMemberTypes.PublicProperties
         | DynamicallyAccessedMemberTypes.PublicMethods)] T> : ITestEntrySource where T : class
 {
-    private volatile TestEntryFilterData[] _filterData;
+    private volatile TestEntryFilterData[]? _filterData;
+    private List<Func<TestEntryFilterData[]>>? _filterDataFactories;
     private List<Func<TestEntry<T>[]>>? _factories;
     private volatile TestEntry<T>[]? _entries;
     private string? _className;
     private readonly object _lock = new();
 
-    public TestEntrySource(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory)
+    public TestEntrySource(Func<TestEntryFilterData[]> filterDataFactory, Func<TestEntry<T>[]> factory)
     {
-        _filterData = filterData;
+        _filterDataFactories = [filterDataFactory];
         _factories = [factory];
     }
 
     /// <summary>
-    /// Adds another (filterData, factory) pair for the same T. Used when multiple source-gen
+    /// Adds another (filterDataFactory, factory) pair for the same T. Used when multiple source-gen
     /// files register entries for the same class (e.g. generic instantiations).
     /// Thread-safe via lock since static field initializers may run concurrently.
     /// </summary>
-    internal void AddSource(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory)
+    internal void AddSource(Func<TestEntryFilterData[]> filterDataFactory, Func<TestEntry<T>[]> factory)
     {
         lock (_lock)
         {
-            _filterData = [.. _filterData, .. filterData];
+            if (_filterData is not null)
+            {
+                // Filter data already resolved — merge eagerly to keep indexing consistent.
+                _filterData = [.. _filterData, .. filterDataFactory()];
+            }
+            else
+            {
+                _filterDataFactories!.Add(filterDataFactory);
+            }
 
             if (_entries is not null)
             {
-                // Already resolved — merge eagerly to keep ordering consistent.
-                var additional = factory();
-                _entries = [.. _entries, .. additional];
+                // Entries already resolved — merge eagerly to keep ordering consistent.
+                _entries = [.. _entries, .. factory()];
                 return;
             }
 
             _factories!.Add(factory);
+        }
+    }
+
+    private TestEntryFilterData[] ResolveFilterData()
+    {
+        if (_filterData is not null)
+        {
+            return _filterData;
+        }
+
+        lock (_lock)
+        {
+            if (_filterData is not null)
+            {
+                return _filterData;
+            }
+
+            var factories = _filterDataFactories!;
+            TestEntryFilterData[] data;
+            if (factories.Count == 1)
+            {
+                data = factories[0]();
+            }
+            else
+            {
+                var list = new List<TestEntryFilterData>();
+                foreach (var f in factories)
+                {
+                    list.AddRange(f());
+                }
+                data = list.ToArray();
+            }
+
+            _filterData = data;
+            _filterDataFactories = null;
+            return data;
         }
     }
 
@@ -100,7 +144,7 @@ public sealed class TestEntrySource<
     public Type ClassType => typeof(T);
     public string ClassName => _className ??= TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
 
-    public TestEntryFilterData[] FilterData => _filterData;
+    public TestEntryFilterData[] FilterData => _filterData ?? ResolveFilterData();
 
     public TestMetadata Materialize(int index, string testSessionId)
     {

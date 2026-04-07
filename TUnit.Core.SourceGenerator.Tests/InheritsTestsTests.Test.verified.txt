@@ -124,7 +124,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(static () => TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource.Entries);
 }
 
 
@@ -227,7 +227,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests>(TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests>(static () => TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource.Entries_0);
 }
 
 
@@ -330,7 +330,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests2>(TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests2>(static () => TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource.Entries_0);
 }
 
 
@@ -433,5 +433,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests3>(TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1924.None.Tests3>(static () => TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource.Entries_0);
 }

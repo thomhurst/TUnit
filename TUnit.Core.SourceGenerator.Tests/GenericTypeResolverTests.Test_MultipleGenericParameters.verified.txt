@@ -121,9 +121,9 @@ internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MultiGenericTestClass<int, string>>(TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Filter_0.Data, static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MultiGenericTestClass<int, string>>(static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Filter_0.Data, static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MultiGenericTestClass<bool, double>>(TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Filter_1.Data, static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MultiGenericTestClass<bool, double>>(static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Filter_1.Data, static () => TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_TestSource.Entries_1);
 }

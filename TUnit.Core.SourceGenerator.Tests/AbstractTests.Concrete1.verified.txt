@@ -70,5 +70,5 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Filter_0.Data, static () => TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AbstractTests.ConcreteClass1>(static () => TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Filter_0.Data, static () => TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource.Entries_0);
 }

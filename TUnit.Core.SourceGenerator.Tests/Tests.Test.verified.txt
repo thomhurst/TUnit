@@ -196,5 +196,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__1304_Tests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1304.Tests>(TUnit_TestProject_Bugs__1304_Tests__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1304_Tests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_Bugs__1304_Tests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._1304.Tests>(static () => TUnit_TestProject_Bugs__1304_Tests__TestSource.Filter.Data, static () => TUnit_TestProject_Bugs__1304_Tests__TestSource.Entries);
 }

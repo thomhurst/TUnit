@@ -527,7 +527,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var concreteClassName = group.Key;
             EmitRegistrationField(writer, $"{uniqueClassName}_{registrationIndex}",
-                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>({uniqueClassName}.Filter_{registrationIndex}.Data, static () => {uniqueClassName}.Entries_{registrationIndex})");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>(static () => {uniqueClassName}.Filter_{registrationIndex}.Data, static () => {uniqueClassName}.Entries_{registrationIndex})");
             registrationIndex++;
         }
     }
@@ -3566,7 +3566,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("}");
 
             EmitRegistrationField(writer, classGroup.TestSourceName,
-                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>({classGroup.TestSourceName}.Filter.Data, static () => {classGroup.TestSourceName}.Entries)");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Filter.Data, static () => {classGroup.TestSourceName}.Entries)");
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }

@@ -96,7 +96,7 @@ public class SourceRegistrar
     /// Returns a dummy value for use as a static field initializer.
     /// Multiple calls for the same T are additive — filter arrays and factories accumulate.
     /// </summary>
-    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(TestEntryFilterData[] filterData, Func<TestEntry<T>[]> factory) where T : class
+    public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntryFilterData[]> filterDataFactory, Func<TestEntry<T>[]> factory) where T : class
     {
         var key = typeof(T);
 
@@ -106,7 +106,7 @@ public class SourceRegistrar
             {
                 if (existing is TestEntrySource<T> existingSource)
                 {
-                    existingSource.AddSource(filterData, factory);
+                    existingSource.AddSource(filterDataFactory, factory);
                     return 0;
                 }
 
@@ -114,7 +114,7 @@ public class SourceRegistrar
                     $"Type mismatch in TestEntries for '{typeof(T).FullName}': expected TestEntrySource<{typeof(T).Name}>, found {existing.GetType().Name}");
             }
 
-            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(filterData, factory)))
+            if (Sources.TestEntries.TryAdd(key, new TestEntrySource<T>(filterDataFactory, factory)))
             {
                 return 0;
             }

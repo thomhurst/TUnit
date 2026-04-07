@@ -124,5 +124,5 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_TestClass_GenericTestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TestClass>(TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Filter_0.Data, static () => TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_TestClass_GenericTestMethod_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TestClass>(static () => TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Filter_0.Data, static () => TUnit_TestProject_TestClass_GenericTestMethod_TestSource.Entries_0);
 }

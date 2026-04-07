@@ -514,7 +514,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_TimeoutCancellationTokenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TimeoutCancellationTokenTests>(TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.Filter.Data, static () => TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_TimeoutCancellationTokenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TimeoutCancellationTokenTests>(static () => TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.Filter.Data, static () => TUnit_TestProject_TimeoutCancellationTokenTests__TestSource.Entries);
 }
 
 
@@ -642,7 +642,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_TimeoutDoesNotFireTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TimeoutDoesNotFireTests>(TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.Filter.Data, static () => TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_TimeoutDoesNotFireTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.TimeoutDoesNotFireTests>(static () => TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.Filter.Data, static () => TUnit_TestProject_TimeoutDoesNotFireTests__TestSource.Entries);
 }
 
 
@@ -770,5 +770,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_CancellationTokenTriggeredTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.CancellationTokenTriggeredTests>(TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.Filter.Data, static () => TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_CancellationTokenTriggeredTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.CancellationTokenTriggeredTests>(static () => TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.Filter.Data, static () => TUnit_TestProject_CancellationTokenTriggeredTests__TestSource.Entries);
 }

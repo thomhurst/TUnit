@@ -501,5 +501,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource.Filter.Data, static () => TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(static () => TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource.Filter.Data, static () => TUnit_TestProject_AsyncMethodDataSourceDrivenTests__TestSource.Entries);
 }

@@ -121,11 +121,11 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Should_Create_Instance_TestSource.Entries_1);
 }
 
 
@@ -309,11 +309,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithMethodDataSource_T_Should_Have_Number__int_TestSource.Entries_1);
 }
 
 
@@ -484,7 +484,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethod_GenericMethod_Should_Work_TestSource.Entries_0);
 }
 
 
@@ -671,7 +671,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMethodAndDataSource_GenericMeth_0AB5EDCD_TestSource.Entries_0);
 }
 
 
@@ -912,11 +912,11 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod_TClass_BothGeneric_Should_Work_TestSource.Entries_1);
 }
 
 
@@ -1045,11 +1045,11 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T_Should_Have_Label_TestSource.Entries_1);
 }
 
 
@@ -1178,11 +1178,11 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>(TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>(static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>(TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>(static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_Should_Handle_Multiple_Type__8C0B02C5_TestSource.Entries_1);
 }
 
 
@@ -1311,11 +1311,11 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_Create_From_Base_TestSource.Entries_1);
 }
 
 
@@ -1457,11 +1457,11 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSource_T_Should_Have_DataSource_TestSource.Entries_1);
 }
 
 
@@ -1822,9 +1822,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Entries_0);
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Entries_1);
+    static readonly int _r_TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Filter_1.Data, static () => TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWithDataSources_TClass_FullyGene_0A3B401E_TestSource.Entries_1);
 }

@@ -629,5 +629,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_MatrixTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MatrixTests>(TUnit_TestProject_MatrixTests__TestSource.Filter.Data, static () => TUnit_TestProject_MatrixTests__TestSource.Entries);
+    static readonly int _r_TUnit_TestProject_MatrixTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MatrixTests>(static () => TUnit_TestProject_MatrixTests__TestSource.Filter.Data, static () => TUnit_TestProject_MatrixTests__TestSource.Entries);
 }
