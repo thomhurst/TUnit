@@ -134,6 +134,61 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Nullable_Event_Args()
+    {
+        // Regression test for https://github.com/thomhurst/TUnit/issues/5425
+        // Nullability of generic event handler type arguments must be preserved
+        // in the generated mock to avoid CS8604.
+        var source = """
+            #nullable enable
+            using System;
+            using TUnit.Mocks;
+
+            public interface IFoo
+            {
+                event EventHandler<string?> Something;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IFoo>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Nullable_Event_And_Nullable_Args()
+    {
+        // Combined regression for #5424 + #5425: both the delegate itself and
+        // its generic type argument are nullable (`EventHandler<string?>?`).
+        var source = """
+            #nullable enable
+            using System;
+            using TUnit.Mocks;
+
+            public interface IFoo
+            {
+                event EventHandler<string?>? Something;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IFoo>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Multiple_Multi_Parameter_Events()
     {
         // Regression test for #5423: RaiseEvent dispatch generated duplicate
