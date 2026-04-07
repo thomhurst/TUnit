@@ -16,9 +16,11 @@ internal static class MockEventsBuilder
 
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
+            var visibility = model.IsPublic ? "public" : "internal";
+
             // Lightweight struct holding engine reference — no allocation
             writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-            using (writer.Block($"public readonly struct {safeName}_MockEvents"))
+            using (writer.Block($"{visibility} readonly struct {safeName}_MockEvents"))
             {
                 writer.AppendLine($"internal readonly global::TUnit.Mocks.MockEngine<{mockableType}> Engine;");
                 writer.AppendLine();
@@ -27,7 +29,7 @@ internal static class MockEventsBuilder
 
             writer.AppendLine();
 
-            using (writer.Block($"public static class {safeName}_MockEventsExtensions"))
+            using (writer.Block($"{visibility} static class {safeName}_MockEventsExtensions"))
             {
                 // Extension property on Mock<T> — non-nullable, only present when type has events
                 using (writer.Block($"extension(global::TUnit.Mocks.Mock<{mockableType}> mock)"))

@@ -24,6 +24,13 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public EquatableArray<MockConstructorModel> Constructors { get; init; } = EquatableArray<MockConstructorModel>.Empty;
     public bool HasStaticAbstractMembers { get; init; }
 
+    /// <summary>
+    /// True if the mocked type's effective accessibility is public (the type itself and all
+    /// containing types are public). When false, generated wrapper/extension types must be
+    /// declared <c>internal</c> to avoid CS9338/CS0051 inconsistent accessibility errors.
+    /// </summary>
+    public bool IsPublic { get; init; } = true;
+
     public bool Equals(MockTypeModel? other)
     {
         if (other is null) return false;
@@ -35,6 +42,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && IsPartialMock == other.IsPartialMock
             && IsDelegateType == other.IsDelegateType
             && IsWrapMock == other.IsWrapMock
+            && IsPublic == other.IsPublic
             && Methods.Equals(other.Methods)
             && Properties.Equals(other.Properties)
             && Events.Equals(other.Events)
@@ -53,6 +61,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + IsPartialMock.GetHashCode();
             hash = hash * 31 + IsDelegateType.GetHashCode();
             hash = hash * 31 + IsWrapMock.GetHashCode();
+            hash = hash * 31 + IsPublic.GetHashCode();
             hash = hash * 31 + Methods.GetHashCode();
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();

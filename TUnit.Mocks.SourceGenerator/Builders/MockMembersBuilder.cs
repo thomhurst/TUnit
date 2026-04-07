@@ -37,7 +37,8 @@ internal static class MockMembersBuilder
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
             // Extension methods class
-            using (writer.Block($"public static class {safeName}_MockMemberExtensions"))
+            var visibility = model.IsPublic ? "public" : "internal";
+            using (writer.Block($"{visibility} static class {safeName}_MockMemberExtensions"))
             {
                 bool firstMember = true;
 
@@ -83,7 +84,7 @@ internal static class MockMembersBuilder
             {
                 if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
                 writer.AppendLine();
-                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray);
+                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, visibility);
             }
         }
 
@@ -133,7 +134,7 @@ internal static class MockMembersBuilder
         => MockMemberNames.Contains(name) ? name + "_" : name;
 
     private static void GenerateUnifiedSealedClass(CodeWriter writer, MockMemberModel method, string safeName,
-        EquatableArray<MockEventModel> events)
+        EquatableArray<MockEventModel> events, string visibility)
     {
         var setupReturnType = method.IsAsync && !method.IsVoid
             ? method.UnwrappedReturnType
@@ -147,18 +148,18 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
+            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType, visibility,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask);
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
             // Static-abstract interface returns can't be used as generic type args (CS8920)
             // Use object? to preserve .Returns() capability
-            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams);
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams, visibility);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams,
+            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams, visibility,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask, fullReturnType: method.ReturnType);
         }
     }
@@ -166,13 +167,14 @@ internal static class MockMembersBuilder
     private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
+        string visibility,
         bool isAsync = false, bool isValueTask = false, string? fullReturnType = null)
     {
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"public sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
+        using (writer.Block($"{visibility} sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
         {
             // Fields
             writer.AppendLine("private readonly global::TUnit.Mocks.IMockEngineAccess _engine;");
@@ -277,14 +279,15 @@ internal static class MockMembersBuilder
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
-        string? spanReturnElementType = null, string? spanReturnType = null,
+        string? spanReturnElementType, string? spanReturnType,
+        string visibility,
         bool isAsync = false, bool isValueTask = false)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine($"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"public sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
+        using (writer.Block($"{visibility} sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
         {
             // Fields
             writer.AppendLine("private readonly global::TUnit.Mocks.IMockEngineAccess _engine;");

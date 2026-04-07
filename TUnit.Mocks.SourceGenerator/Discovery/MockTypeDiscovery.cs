@@ -174,7 +174,8 @@ internal static class MockTypeDiscovery
             ),
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
             Constructors = singleTypeModel.Constructors,
-            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
+            IsPublic = IsEffectivelyPublic(namedType)
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -319,6 +320,7 @@ internal static class MockTypeDiscovery
             Properties = EquatableArray<MockMemberModel>.Empty,
             Events = EquatableArray<MockEventModel>.Empty,
             AllInterfaces = EquatableArray<string>.Empty,
+            IsPublic = IsEffectivelyPublic(delegateType),
         };
     }
 
@@ -367,8 +369,25 @@ internal static class MockTypeDiscovery
                     .ToImmutableArray()
             ),
             Constructors = constructors,
-            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract)
+            HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
+            IsPublic = IsEffectivelyPublic(namedType)
         };
+    }
+
+    /// <summary>
+    /// Returns true if the type's effective accessibility is public — i.e., the type itself
+    /// and all its containing types are declared public. Generated wrapper/extension classes
+    /// for types that are not effectively public must themselves be internal to avoid
+    /// CS9338 / CS0051 inconsistent accessibility errors. (See issue #5426.)
+    /// </summary>
+    private static bool IsEffectivelyPublic(INamedTypeSymbol type)
+    {
+        for (INamedTypeSymbol? t = type; t is not null; t = t.ContainingType)
+        {
+            if (t.DeclaredAccessibility != Accessibility.Public)
+                return false;
+        }
+        return true;
     }
 
     // ─── IFoo.Mock() static extension discovery ────────────────────

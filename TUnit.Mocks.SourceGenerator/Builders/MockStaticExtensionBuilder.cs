@@ -23,11 +23,12 @@ internal static class MockStaticExtensionBuilder
 
         using (writer.Block("namespace TUnit.Mocks"))
         {
-            using (writer.Block($"public static class {extensionClassName}_MockStaticExtension"))
+            var visibility = model.IsPublic ? "public" : "internal";
+            using (writer.Block($"{visibility} static class {extensionClassName}_MockStaticExtension"))
             {
                 using (writer.Block($"extension({model.FullyQualifiedName})"))
                 {
-                    using (writer.Block($"public static global::{mockNamespace}.{shortName}Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
+                    using (writer.Block($"{visibility} static global::{mockNamespace}.{shortName}Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
                     {
                         writer.AppendLine($"return (global::{mockNamespace}.{shortName}Mock)global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
                     }
