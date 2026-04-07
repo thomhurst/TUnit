@@ -21,7 +21,7 @@ namespace TUnit.Mocks.Generated
             {
                 return __result;
             }
-            return base.GetById(id);
+            return base.GetById<T>(id);
         }
 
         public override void Save<T>(T entity)
@@ -30,7 +30,7 @@ namespace TUnit.Mocks.Generated
             {
                 return;
             }
-            base.Save(entity);
+            base.Save<T>(entity);
         }
 
         public override TResult Transform<TInput, TResult>(TInput input)
@@ -39,7 +39,7 @@ namespace TUnit.Mocks.Generated
             {
                 return __result;
             }
-            return base.Transform(input);
+            return base.Transform<TInput, TResult>(input);
         }
 
         public override global::System.Collections.Generic.IEnumerable<T> GetAll<T>()

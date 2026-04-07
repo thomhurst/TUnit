@@ -41,8 +41,14 @@ internal static class MockMembersBuilder
             {
                 bool firstMember = true;
 
+                // Pre-compute which methods need their `out` parameters kept in the extension
+                // signature to avoid CS0111 collisions. A method needs disambiguation when
+                // some other method on the model shares the same name AND the same
+                // matchable-parameter signature (i.e. parameters excluding out).
+                var methodsWithDisambiguation = ApplyOutDisambiguation(model.Methods);
+
                 // Methods
-                foreach (var method in model.Methods)
+                foreach (var method in methodsWithDisambiguation)
                 {
                     if (!firstMember) writer.AppendLine();
                     firstMember = false;
@@ -82,6 +88,20 @@ internal static class MockMembersBuilder
         }
 
         return writer.ToString();
+    }
+
+    private static void EmitOutParamDefaults(CodeWriter writer, MockMemberModel method)
+    {
+        if (!method.KeepOutParamsInExtensionSignature) return;
+        // Out params are assigned `default!` because the extension method never actually invokes
+        // the mocked method — it only *configures* a setup. The out value is never observed by
+        // caller code: this setup-configuration call returns a MockMethodCall, not the mocked
+        // result. For reference types this suppresses the CS8625 nullable warning on an unused
+        // assignment that exists solely to satisfy the `out` contract.
+        foreach (var op in method.Parameters.Where(p => p.Direction == ParameterDirection.Out))
+        {
+            writer.AppendLine($"{op.Name} = default!;");
+        }
     }
 
     private static bool ShouldGenerateTypedWrapper(MockMemberModel method, bool hasEvents)
@@ -577,6 +597,54 @@ internal static class MockMembersBuilder
         }
     }
 
+    /// <summary>
+    /// Returns the input methods, with <see cref="MockMemberModel.KeepOutParamsInExtensionSignature"/>
+    /// set to <c>true</c> on any method whose generated extension method would otherwise collide with
+    /// another overload. Methods are grouped by (name, type-arity, matchable-parameter signature);
+    /// any group with more than one entry causes its <c>out</c>-bearing members to be flagged.
+    /// The matchable-parameter signature includes parameter direction (ref/in/by-value) so that
+    /// overloads differing only by direction (e.g. <c>Foo(int)</c> vs <c>Foo(ref int)</c>) are not
+    /// treated as collisions.
+    /// </summary>
+    private static IEnumerable<MockMemberModel> ApplyOutDisambiguation(EquatableArray<MockMemberModel> methods)
+    {
+        var flagged = new HashSet<int>();
+        var byKey = new Dictionary<string, List<MockMemberModel>>(System.StringComparer.Ordinal);
+        foreach (var m in methods)
+        {
+            var matchable = string.Join(",", m.Parameters
+                .Where(p => p.Direction != ParameterDirection.Out)
+                .Select(p => $"{p.Direction}:{p.FullyQualifiedType}"));
+            var typeArity = m.TypeParameters.Length;
+            var key = $"{m.Name}`{typeArity}({matchable})";
+            if (!byKey.TryGetValue(key, out var list))
+            {
+                list = new List<MockMemberModel>();
+                byKey[key] = list;
+            }
+            list.Add(m);
+        }
+        foreach (var group in byKey.Values)
+        {
+            if (group.Count < 2) continue;
+            foreach (var m in group)
+            {
+                if (m.Parameters.Any(p => p.Direction == ParameterDirection.Out))
+                {
+                    flagged.Add(m.MemberId);
+                }
+            }
+        }
+
+        if (flagged.Count == 0)
+        {
+            return methods;
+        }
+        return methods.Select(m => flagged.Contains(m.MemberId)
+            ? m with { KeepOutParamsInExtensionSignature = true }
+            : m);
+    }
+
     private static (bool UseTypedWrapper, string ReturnType, string SetupReturnType) GetReturnTypeInfo(
         MockMemberModel method, MockTypeModel model, string safeName)
     {
@@ -633,6 +701,8 @@ internal static class MockMembersBuilder
 
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
+            EmitOutParamDefaults(writer, method);
+
             // Build matchers array
             var matchableParams = includeRefStructArgs
                 ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
@@ -717,7 +787,16 @@ internal static class MockMembersBuilder
         for (int i = 0; i < method.Parameters.Length; i++)
         {
             var p = method.Parameters[i];
-            if (p.Direction == ParameterDirection.Out) continue;
+            if (p.Direction == ParameterDirection.Out)
+            {
+                // Keep out params only when needed to disambiguate colliding overloads.
+                // Callers of the disambiguated overload must write `out _` at the call site.
+                if (method.KeepOutParamsInExtensionSignature)
+                {
+                    paramParts.Add($"out {p.FullyQualifiedType} {p.Name}");
+                }
+                continue;
+            }
 
             if (funcIndices.Contains(i))
             {
@@ -757,6 +836,8 @@ internal static class MockMembersBuilder
 
         using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
+            EmitOutParamDefaults(writer, method);
+
             // Convert Func params to Arg<T> via implicit conversion
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
@@ -876,7 +957,19 @@ internal static class MockMembersBuilder
         var parts = new List<string>();
         foreach (var p in method.Parameters)
         {
-            if (p.Direction == ParameterDirection.Out) continue;
+            if (p.Direction == ParameterDirection.Out)
+            {
+                // Normally out params are omitted from the extension signature so callers
+                // don't have to write `out _`. But when another overload of this method has
+                // the same matchable-parameter signature (e.g. GenerateSasUri(perms, expires)
+                // vs GenerateSasUri(perms, expires, out string)), we MUST keep the out param
+                // in the signature, otherwise CS0111 fires on the generated extensions.
+                if (method.KeepOutParamsInExtensionSignature)
+                {
+                    parts.Add($"out {p.FullyQualifiedType} {p.Name}");
+                }
+                continue;
+            }
             if (p.IsRefStruct)
             {
                 if (includeRefStructArgs)

@@ -569,7 +569,7 @@ internal static class MockImplBuilder
             writer.AppendLine("return;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"base.{method.Name}({argPassList});");
+            writer.AppendLine($"base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
         else if (method.IsVoid && method.IsAsync)
         {
@@ -589,7 +589,7 @@ internal static class MockImplBuilder
             }
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{method.Name}({argPassList});");
+            writer.AppendLine($"return base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
         else if (method.IsAsync)
         {
@@ -619,7 +619,7 @@ internal static class MockImplBuilder
             }
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{method.Name}({argPassList});");
+            writer.AppendLine($"return base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
         else if (method.IsRefStructReturn)
         {
@@ -638,7 +638,7 @@ internal static class MockImplBuilder
             }
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{method.Name}({argPassList});");
+            writer.AppendLine($"return base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
@@ -650,7 +650,7 @@ internal static class MockImplBuilder
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{method.Name}({argPassList});");
+            writer.AppendLine($"return base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
         else
         {
@@ -662,7 +662,7 @@ internal static class MockImplBuilder
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
-            writer.AppendLine($"return base.{method.Name}({argPassList});");
+            writer.AppendLine($"return base.{method.Name}{GetTypeParameterList(method)}({argPassList});");
         }
     }
 
