@@ -69,19 +69,30 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        // Slow path: need to match arguments — single-pass count then mark
-        var calls = _engine.GetCallsFor(_memberId);
-        var matchingCount = CountMatchingCalls(calls, markVerified: false);
+        // Iterate the internal buffer directly — no .ToArray() copy on the happy path.
+        // Count first, then mark only on success to avoid corrupting prior verifications.
+        var buffer = _engine.GetCallBufferFor(_memberId);
+        if (buffer is null || buffer.Count == 0)
+        {
+            if (!times.Matches(0))
+            {
+                throw new MockVerificationException(FormatExpectedCall(), times, 0, [], message);
+            }
+            return;
+        }
+
+        var matchingCount = CountMatchingBuffer(buffer);
 
         if (!times.Matches(matchingCount))
         {
+            var calls = _engine.GetCallsFor(_memberId);
             var expectedCall = FormatExpectedCall();
             var actualCallDescriptions = calls.Select(c => c.FormatCall()).ToList();
             throw new MockVerificationException(expectedCall, times, matchingCount, actualCallDescriptions, message);
         }
 
-        // Mark matched calls as verified only after assertion passes
-        CountMatchingCalls(calls, markVerified: true);
+        // Mark only after assertion passes — never leaves a partially-verified state
+        MarkMatchingBuffer(buffer);
     }
 
     /// <inheritdoc />
@@ -96,21 +107,31 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     /// <inheritdoc />
     public void WasCalled(string? message) => WasCalled(Times.AtLeastOnce, message);
 
-    private int CountMatchingCalls(IReadOnlyList<CallRecord> calls, bool markVerified)
+    private int CountMatchingBuffer(CallRecordBuffer buffer)
     {
+        var (items, bufferCount) = buffer.GetSnapshot();
         var count = 0;
-        for (int i = 0; i < calls.Count; i++)
+        for (int i = 0; i < bufferCount; i++)
         {
-            if (_matchers.Length == 0 || MatchesArguments(calls[i].Arguments))
+            if (MatchesArguments(items[i]!.Arguments))
             {
                 count++;
-                if (markVerified)
-                {
-                    calls[i].IsVerified = true;
-                }
             }
         }
         return count;
+    }
+
+    private void MarkMatchingBuffer(CallRecordBuffer buffer)
+    {
+        var (items, bufferCount) = buffer.GetSnapshot();
+        for (int i = 0; i < bufferCount; i++)
+        {
+            var record = items[i]!;
+            if (MatchesArguments(record.Arguments))
+            {
+                record.IsVerified = true;
+            }
+        }
     }
 
     private bool MatchesArguments(object?[] arguments)
