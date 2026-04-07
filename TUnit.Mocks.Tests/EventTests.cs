@@ -1,6 +1,16 @@
+using System.ComponentModel;
 using TUnit.Mocks;
 
 namespace TUnit.Mocks.Tests;
+
+/// <summary>
+/// Regression interface for #5423: multiple multi-parameter events on the
+/// same interface previously caused CS0128 in the generated RaiseEvent switch.
+/// </summary>
+// Public because the mock generator emits public extension types that take this interface as a parameter.
+public interface IMultiEventNotifier : INotifyPropertyChanging, INotifyPropertyChanged
+{
+}
 
 /// <summary>
 /// Test interface with events for mocking.
@@ -81,5 +91,28 @@ public class EventTests
 
         // Assert — only one notification
         await Assert.That(callCount).IsEqualTo(1);
+    }
+
+    /// <summary>
+    /// Regression test for #5423. An interface inheriting two interfaces, each
+    /// declaring a multi-parameter event, must produce a generated mock that
+    /// compiles and dispatches each event independently through RaiseEvent.
+    /// </summary>
+    [Test]
+    public async Task Mock_With_Multiple_Multi_Parameter_Events_Compiles_And_Raises()
+    {
+        var mock = Mock.Of<IMultiEventNotifier>();
+        var notifier = mock.Object;
+
+        string? changingProperty = null;
+        string? changedProperty = null;
+        notifier.PropertyChanging += (_, e) => changingProperty = e.PropertyName;
+        notifier.PropertyChanged += (_, e) => changedProperty = e.PropertyName;
+
+        mock.RaisePropertyChanging(notifier, new PropertyChangingEventArgs("Foo"));
+        mock.RaisePropertyChanged(notifier, new PropertyChangedEventArgs("Bar"));
+
+        await Assert.That(changingProperty).IsEqualTo("Foo");
+        await Assert.That(changedProperty).IsEqualTo("Bar");
     }
 }

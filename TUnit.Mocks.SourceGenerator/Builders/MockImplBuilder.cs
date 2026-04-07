@@ -1027,6 +1027,10 @@ internal static class MockImplBuilder
                     {
                         writer.AppendLine($"case \"{evt.Name}\":");
                         writer.IncreaseIndent();
+                        // Brace each case so locals (e.g. the `args` pattern variable below) get
+                        // their own scope and don't collide across cases.
+                        writer.AppendLine("{");
+                        writer.IncreaseIndent();
 
                         // Determine how to invoke: if the event handler has parameters matching EventArgs, pass args
                         if (evt.RaiseParameterList.Length == 0)
@@ -1063,6 +1067,8 @@ internal static class MockImplBuilder
                         }
 
                         writer.AppendLine("break;");
+                        writer.DecreaseIndent();
+                        writer.AppendLine("}");
                         writer.DecreaseIndent();
                     }
 
