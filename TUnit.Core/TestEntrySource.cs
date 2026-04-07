@@ -39,11 +39,7 @@ public sealed class TestEntrySource<
     {
         lock (_lock)
         {
-            // Concatenate filter data eagerly (cheap).
-            var combined = new TestEntryFilterData[_filterData.Length + filterData.Length];
-            Array.Copy(_filterData, 0, combined, 0, _filterData.Length);
-            Array.Copy(filterData, 0, combined, _filterData.Length, filterData.Length);
-            _filterData = combined;
+            _filterData = [.. _filterData, .. filterData];
 
             if (_entries is not null)
             {

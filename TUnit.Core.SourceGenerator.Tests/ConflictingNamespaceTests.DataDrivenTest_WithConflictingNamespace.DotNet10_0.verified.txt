@@ -292,16 +292,16 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "EnumValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "NullValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "EmptyString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "NonEmptyString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "BooleanString", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Type", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntegerArray", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntMaxValue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Method", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "EnumValue", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NullValue", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "EmptyString", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NonEmptyString", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "BooleanString", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Type", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntegerArray", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IntMaxValue", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataDrivenTests>[]

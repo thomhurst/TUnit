@@ -122,9 +122,9 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "TryParse_InvalidString_ReturnsFailure", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Parse_InvalidString_ThrowsException", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "TryParse_ValidString_ReturnsAccountId", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TryParse_InvalidString_ReturnsFailure", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Parse_InvalidString_ThrowsException", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TryParse_ValidString_ReturnsAccountId", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>[]

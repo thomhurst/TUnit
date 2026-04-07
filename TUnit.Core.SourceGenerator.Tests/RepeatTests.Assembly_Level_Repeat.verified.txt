@@ -86,8 +86,8 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestWithAssemblyRepeat", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 3 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestWithMethodRepeatOverride", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 1 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestWithAssemblyRepeat", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestWithMethodRepeatOverride", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>[]

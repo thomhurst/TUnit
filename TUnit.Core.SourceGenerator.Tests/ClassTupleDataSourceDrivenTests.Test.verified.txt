@@ -146,7 +146,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_TupleMethod", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_TupleMethod", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassTupleDataSourceDrivenTests>[]

@@ -177,7 +177,7 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PropertySetterTests>[]
@@ -262,10 +262,13 @@ internal static class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
         };
     }
-    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    internal static class Filter_0
     {
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-    };
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", DependsOn = global::System.Array.Empty<string>() },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedPropertySetterTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedPropertySetterTests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.InheritedPropertySetterTests>
@@ -286,5 +289,5 @@ internal static class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedPropertySetterTests>(TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource.FilterData_0, static () => TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.InheritedPropertySetterTests>(TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource.Filter_0.Data, static () => TUnit_TestProject_InheritedPropertySetterTests_Test_TestSource.Entries_0);
 }

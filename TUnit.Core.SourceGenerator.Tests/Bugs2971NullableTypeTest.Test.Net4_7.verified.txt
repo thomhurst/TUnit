@@ -64,7 +64,7 @@ internal static class TUnit_TestProject_Bugs__2971_Tests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "SimpleTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "SimpleTest", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2971.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2971.Tests>[]

@@ -224,13 +224,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Class", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Class_Generic", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_1_ClassDataSource", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_2_ClassDataSources", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_3_ClassDataSources", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_4_ClassDataSources", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_5_ClassDataSources", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Class", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSource_Class_Generic", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_1_ClassDataSource", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_2_ClassDataSources", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_3_ClassDataSources", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_4_ClassDataSources", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "IsInitialized_With_5_ClassDataSources", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests>[]

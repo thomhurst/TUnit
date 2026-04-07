@@ -139,12 +139,12 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_3", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Low_1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_1", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_2", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "High_3", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_1", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Medium_2", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Low_1", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.PriorityFilteringTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.PriorityFilteringTests>[]

@@ -99,8 +99,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new glob
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Normal", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Nullable", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Normal", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Nullable", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.StringArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.StringArgumentTests>[]

@@ -1459,12 +1459,8 @@ namespace
     }
     public readonly struct TestEntryFilterData
     {
-        public required string[] Categories { get; init; }
         public required string[] DependsOn { get; init; }
-        public required bool HasDataSource { get; init; }
         public required string MethodName { get; init; }
-        public required string[] Properties { get; init; }
-        public required int RepeatCount { get; init; }
     }
     public sealed class TestEntrySource<T> : .ITestEntrySource
         where T :  class

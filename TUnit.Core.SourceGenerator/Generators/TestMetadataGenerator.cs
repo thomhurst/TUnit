@@ -482,8 +482,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // Filter data — separate array, lightweight .cctor (literals only).
-            writer.AppendLine($"public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_{groupIndex} = new global::TUnit.Core.TestEntryFilterData[]");
+            // Filter data lives in a nested class so its .cctor (just literals) is independent
+            // of the outer class's .cctor, which initializes __classMetadata and __mm_0.
+            writer.AppendLine($"internal static class Filter_{groupIndex}");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]");
             writer.AppendLine("{");
             writer.Indent();
             for (var i = 0; i < entries.Count; i++)
@@ -492,6 +496,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             writer.Unindent();
             writer.AppendLine("};");
+            writer.Unindent();
+            writer.AppendLine("}");
 
             // TestEntry array
             writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{concreteClassName}>[] Entries_{groupIndex} = new global::TUnit.Core.TestEntry<{concreteClassName}>[]");
@@ -521,7 +527,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var concreteClassName = group.Key;
             EmitRegistrationField(writer, $"{uniqueClassName}_{registrationIndex}",
-                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>({uniqueClassName}.FilterData_{registrationIndex}, static () => {uniqueClassName}.Entries_{registrationIndex})");
+                $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>({uniqueClassName}.Filter_{registrationIndex}.Data, static () => {uniqueClassName}.Entries_{registrationIndex})");
             registrationIndex++;
         }
     }
@@ -3060,25 +3066,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static string BuildFilterDataInitializer(TestMethodMetadata testMethod, string methodName)
     {
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
         var dependsOn = ExtractDependsOn(testMethod);
         var dependsOnArray = dependsOn.Length == 0
             ? "global::System.Array.Empty<string>()"
             : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
 
-        var hasDataSource = HasDataSources(testMethod) ? "true" : "false";
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        return $"new global::TUnit.Core.TestEntryFilterData {{ MethodName = \"{EscapeString(methodName)}\", Categories = {categoriesArray}, Properties = {propertiesArray}, DependsOn = {dependsOnArray}, HasDataSource = {hasDataSource}, RepeatCount = {repeatCount} }}";
+        return $"new global::TUnit.Core.TestEntryFilterData {{ MethodName = \"{EscapeString(methodName)}\", DependsOn = {dependsOnArray} }}";
     }
 
     /// <summary>

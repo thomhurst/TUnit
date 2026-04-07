@@ -273,15 +273,15 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test3", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "MethodDataSourceTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestParameterNamePrefixBug", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "PasswordTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "SameClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DifferentClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "NestedClassConstantTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test3", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "MethodDataSourceTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "TestParameterNamePrefixBug", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "PasswordTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "SameClassConstantTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DifferentClassConstantTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "NestedClassConstantTest", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.CustomDisplayNameTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CustomDisplayNameTests>[]

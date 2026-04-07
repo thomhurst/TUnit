@@ -144,14 +144,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
                 throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
         }
     }
-    public static readonly global::TUnit.Core.TestEntryFilterData[] FilterData_0 = new global::TUnit.Core.TestEntryFilterData[]
+    internal static class Filter_0
     {
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<bool>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<int>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<double>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<string>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-        new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-    };
+        public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
+        {
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<bool>", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<int>", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<double>", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<string>", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>", DependsOn = global::System.Array.Empty<string>() },
+        };
+    }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>[]
     {
         new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
@@ -248,5 +251,5 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._2136.Tests>(TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource.FilterData_0, static () => TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._2136.Tests>(TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource.Filter_0.Data, static () => TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T_string_TestSource.Entries_0);
 }

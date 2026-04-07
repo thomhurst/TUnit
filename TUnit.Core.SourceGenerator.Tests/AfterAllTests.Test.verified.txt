@@ -74,8 +74,8 @@ internal static class TUnit_TestProject_AfterTests_CleanupTests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test1", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test1", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Test2", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AfterTests.CleanupTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AfterTests.CleanupTests>[]

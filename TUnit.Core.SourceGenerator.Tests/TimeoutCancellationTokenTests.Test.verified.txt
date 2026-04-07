@@ -233,12 +233,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DefaultTest", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "BasicTest", Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "InheritedTimeoutAttribute", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataTest", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSourceTest", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "MatrixTest", Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DefaultTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "BasicTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "InheritedTimeoutAttribute", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "DataSourceTest", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "MatrixTest", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[]
@@ -594,7 +594,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "QuickTestDoesNotTimeout", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "QuickTestDoesNotTimeout", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[]
@@ -722,7 +722,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "CancellationTokenIsTriggered", Categories = new string[] { "Timeout Cancellation Token Tests" }, Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "CancellationTokenIsTriggered", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[]

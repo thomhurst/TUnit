@@ -244,21 +244,21 @@ internal static class TUnit_TestProject_STAThreadTests__TestSource
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "With_STA", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "Without_STA", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithSimpleAwait", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskYield", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithConfigureAwaitTrue", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithNestedAsyncCalls", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskFromResult", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithCompletedTask", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskRun", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithMultipleAwaits", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithAsyncEnumerable", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskWhenAll", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithExceptionHandling", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithThrowsNothingAssertion", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithFuncAssertion", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = false, RepeatCount = 100 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "With_STA", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "Without_STA", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithSimpleAwait", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskYield", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithConfigureAwaitTrue", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithNestedAsyncCalls", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskFromResult", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithCompletedTask", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskRun", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithMultipleAwaits", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithAsyncEnumerable", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithTaskWhenAll", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithExceptionHandling", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithThrowsNothingAssertion", DependsOn = global::System.Array.Empty<string>() },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "STA_WithFuncAssertion", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.STAThreadTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.STAThreadTests>[]

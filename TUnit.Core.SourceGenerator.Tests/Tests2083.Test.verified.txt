@@ -75,7 +75,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long), "value", new gl
     {
         public static readonly global::TUnit.Core.TestEntryFilterData[] Data = new global::TUnit.Core.TestEntryFilterData[]
         {
-            new global::TUnit.Core.TestEntryFilterData { MethodName = "MyTest", Categories = global::System.Array.Empty<string>(), Properties = global::System.Array.Empty<string>(), DependsOn = global::System.Array.Empty<string>(), HasDataSource = true, RepeatCount = 0 },
+            new global::TUnit.Core.TestEntryFilterData { MethodName = "MyTest", DependsOn = global::System.Array.Empty<string>() },
         };
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2083.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2083.Tests>[]
