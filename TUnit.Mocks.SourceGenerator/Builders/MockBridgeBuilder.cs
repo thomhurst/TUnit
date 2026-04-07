@@ -136,7 +136,7 @@ internal static class MockBridgeBuilder
 
     private static void GenerateStaticEventDim(CodeWriter writer, MockEventModel evt)
     {
-        writer.AppendLine($"static event {evt.EventHandlerTypeWithNullability} {evt.ExplicitInterfaceName}.{evt.Name}");
+        writer.AppendLine($"static event {evt.EventHandlerType} {evt.ExplicitInterfaceName}.{evt.Name}");
         writer.OpenBrace();
         writer.AppendLine("add { }");
         writer.AppendLine("remove { }");

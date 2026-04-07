@@ -5,15 +5,14 @@ namespace TUnit.Mocks.SourceGenerator.Models;
 internal sealed record MockEventModel : IEquatable<MockEventModel>
 {
     public string Name { get; init; } = "";
-    public string EventHandlerType { get; init; } = "";
-
     /// <summary>
-    /// The event handler type with nullable annotations preserved from the
-    /// declaring interface. Used when emitting explicit interface event
-    /// implementations so that nullability matches the interface declaration
-    /// (otherwise CS8615 is emitted). See issue #5424.
+    /// The fully qualified event handler type, with nullable annotations
+    /// preserved from the declaring interface. Builders that emit a backing
+    /// delegate field (which is always nullable) should call <c>TrimEnd('?')</c>
+    /// before appending their own <c>?</c> to avoid producing <c>??</c>.
+    /// See issue #5424.
     /// </summary>
-    public string EventHandlerTypeWithNullability { get; init; } = "";
+    public string EventHandlerType { get; init; } = "";
 
     /// <summary>
     /// The argument expression for invoking the backing delegate.
@@ -45,7 +44,6 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
         if (other is null) return false;
         return Name == other.Name
             && EventHandlerType == other.EventHandlerType
-            && EventHandlerTypeWithNullability == other.EventHandlerTypeWithNullability
             && InvokeArgs == other.InvokeArgs
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
@@ -61,7 +59,6 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             int hash = 17;
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + EventHandlerType.GetHashCode();
-            hash = hash * 31 + EventHandlerTypeWithNullability.GetHashCode();
             hash = hash * 31 + RaiseParameterList.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
