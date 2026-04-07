@@ -53,6 +53,38 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return _genericTypeDefinitionCache.GetOrAdd(type, static t => t.GetGenericTypeDefinition());
     }
 
+    /// <summary>
+    /// When walking the class hierarchy from derived to base collecting instance hooks, a virtual
+    /// hook method overridden in a derived class is registered twice — once on the base type, once
+    /// on the derived type — but virtual dispatch causes both registrations to invoke the same
+    /// override. This helper records the base method definition for each hook seen so far and
+    /// returns true when a hook's underlying method has already been collected via a more-derived
+    /// override. See issue #5428.
+    /// </summary>
+    private static bool IsOverriddenByMoreDerivedHook(InstanceHookMethod hook, HashSet<MethodInfo> seenBaseDefinitions)
+    {
+        var declaringType = hook.ClassType;
+        var parameters = hook.MethodInfo.Parameters;
+        var paramTypes = parameters.Length == 0
+            ? Type.EmptyTypes
+            : parameters.Select(p => p.Type).ToArray();
+
+        var methodInfo = declaringType.GetMethod(
+            hook.MethodInfo.Name,
+            BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly,
+            binder: null,
+            types: paramTypes,
+            modifiers: null);
+
+        if (methodInfo is null)
+        {
+            return false;
+        }
+
+        var baseDefinition = methodInfo.GetBaseDefinition();
+        return !seenBaseDefinitions.Add(baseDefinition);
+    }
+
     public async ValueTask InitializeAsync()
     {
         await _logger.LogDebugAsync("Building global hook delegates...").ConfigureAwait(false);
@@ -191,6 +223,13 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     {
         var hooksByType = new List<(Type type, List<(int order, int registrationIndex, NamedHookDelegate<TestContext> hook)> hooks)>();
 
+        // Tracks base method definitions (via MethodInfo.GetBaseDefinition()) of hooks we've
+        // already collected from more-derived types. Used to skip virtual hook methods that
+        // are overridden in a derived class — without this, both the base method registration
+        // AND the override registration would run, but virtual dispatch makes them invoke the
+        // same override, causing it to execute twice. See issue #5428.
+        var seenBaseDefinitions = new HashSet<MethodInfo>();
+
         // Collect hooks for each type in the hierarchy
         var currentType = type;
         while (currentType != null)
@@ -201,6 +240,11 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             {
                 foreach (var hook in sourceHooks)
                 {
+                    if (IsOverriddenByMoreDerivedHook(hook, seenBaseDefinitions))
+                    {
+                        continue;
+                    }
+
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -214,6 +258,11 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 {
                     foreach (var hook in openTypeHooks)
                     {
+                        if (IsOverriddenByMoreDerivedHook(hook, seenBaseDefinitions))
+                        {
+                            continue;
+                        }
+
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -258,6 +307,10 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     {
         var hooksByType = new List<(Type type, List<(int order, int registrationIndex, NamedHookDelegate<TestContext> hook)> hooks)>();
 
+        // See note in BuildBeforeTestHooksAsync — same dedup needed for After(Test) hooks
+        // so virtual overrides don't execute twice (issue #5428).
+        var seenBaseDefinitions = new HashSet<MethodInfo>();
+
         // Collect hooks for each type in the hierarchy
         var currentType = type;
         while (currentType != null)
@@ -268,6 +321,11 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             {
                 foreach (var hook in sourceHooks)
                 {
+                    if (IsOverriddenByMoreDerivedHook(hook, seenBaseDefinitions))
+                    {
+                        continue;
+                    }
+
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -281,6 +339,11 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 {
                     foreach (var hook in openTypeHooks)
                     {
+                        if (IsOverriddenByMoreDerivedHook(hook, seenBaseDefinitions))
+                        {
+                            continue;
+                        }
+
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
