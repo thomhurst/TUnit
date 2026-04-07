@@ -882,8 +882,7 @@ namespace
     {
         string ClassName { get; }
          ClassType { get; }
-        int Count { get; }
-        .TestEntryFilterData GetFilterData(int index);
+        .TestEntryFilterData[] FilterData { get; }
         .TestMetadata Materialize(int index, string testSessionId);
     }
     public interface ITypedDataSourceAttribute<T> : .IDataSourceAttribute
@@ -1468,8 +1467,7 @@ namespace
         public TestEntrySource(.TestEntryFilterData[] filterData, <.TestEntry<T>[]> factory) { }
         public string ClassName { get; }
         public  ClassType { get; }
-        public int Count { get; }
-        public .TestEntryFilterData GetFilterData(int index) { }
+        public .TestEntryFilterData[] FilterData { get; }
         public .TestMetadata Materialize(int index, string testSessionId) { }
     }
     public sealed class TestEntry<T>

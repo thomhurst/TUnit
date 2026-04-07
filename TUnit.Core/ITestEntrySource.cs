@@ -11,17 +11,19 @@ namespace TUnit.Core;
 #endif
 public interface ITestEntrySource
 {
-    /// <summary>Number of test entries.</summary>
-    int Count { get; }
-
     /// <summary>The test class type.</summary>
     Type ClassType { get; }
 
     /// <summary>Get the class name for filtering. Same for all entries in this source.</summary>
     string ClassName { get; }
 
-    /// <summary>Get entry data for filtering at the given index. Does not trigger entry materialization.</summary>
-    TestEntryFilterData GetFilterData(int index);
+    /// <summary>
+    /// Lightweight per-entry filter data. Reading this does not trigger the heavy
+    /// per-class delegate/metadata <c>.cctor</c>. Callers should snapshot this reference
+    /// once and loop over it, rather than calling repeatedly, to avoid any torn reads
+    /// if multiple sources are registered concurrently.
+    /// </summary>
+    TestEntryFilterData[] FilterData { get; }
 
     /// <summary>Materialize a TestMetadata for the entry at the given index.</summary>
     TestMetadata Materialize(int index, string testSessionId);

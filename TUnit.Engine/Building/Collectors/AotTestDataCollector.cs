@@ -81,14 +81,15 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             }
 
             var className = source.ClassName;
-            for (var i = 0; i < source.Count; i++)
+            var filterData = source.FilterData;
+            for (var i = 0; i < filterData.Length; i++)
             {
-                var filterData = source.GetFilterData(i);
+                var fd = filterData[i];
 
-                if (!filterHints.HasHints || filterHints.CouldMatch(className, filterData.MethodName))
+                if (!filterHints.HasHints || filterHints.CouldMatch(className, fd.MethodName))
                 {
                     matching.Add((source, i));
-                    if (filterData.DependsOn.Length > 0)
+                    if (fd.DependsOn.Length > 0)
                     {
                         hasDependencies = true;
                     }
@@ -107,9 +108,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             {
                 var source = kvp.Value;
                 var className = source.ClassName;
-                for (var i = 0; i < source.Count; i++)
+                var filterData = source.FilterData;
+                for (var i = 0; i < filterData.Length; i++)
                 {
-                    var fd = source.GetFilterData(i);
+                    var fd = filterData[i];
                     var pair = (source, i);
                     byClassAndMethod[(className, fd.MethodName)] = pair;
 
@@ -128,7 +130,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
-                var fd = current.Source.GetFilterData(current.Index);
+                var fd = current.Source.FilterData[current.Index];
                 var currentClassName = current.Source.ClassName;
 
                 foreach (var dep in fd.DependsOn)

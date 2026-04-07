@@ -97,11 +97,10 @@ public sealed class TestEntrySource<
         }
     }
 
-    public int Count => _filterData.Length;
     public Type ClassType => typeof(T);
     public string ClassName => _className ??= TUnit.Core.Extensions.TestContextExtensions.GetNestedTypeName(typeof(T));
 
-    public TestEntryFilterData GetFilterData(int index) => _filterData[index];
+    public TestEntryFilterData[] FilterData => _filterData;
 
     public TestMetadata Materialize(int index, string testSessionId)
     {
