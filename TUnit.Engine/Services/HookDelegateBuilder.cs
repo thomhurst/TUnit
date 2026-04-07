@@ -63,26 +63,34 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     /// </summary>
     private static bool IsOverriddenByMoreDerivedHook(InstanceHookMethod hook, HashSet<MethodInfo> seenBaseDefinitions)
     {
-        var declaringType = hook.ClassType;
+        // Prefer the pre-resolved BaseDefinition (set by the reflection discovery path).
+        // The source-generated path doesn't currently populate it, so fall back to a one-shot
+        // reflection lookup keyed by name + parameter types. Result is cached in the parent
+        // _beforeTestHooksCache / _afterTestHooksCache, so this only runs on first build per type.
+        var baseDefinition = hook.BaseDefinition ?? ResolveBaseDefinition(hook);
+        if (baseDefinition is null)
+        {
+            return false;
+        }
+
+        return !seenBaseDefinitions.Add(baseDefinition);
+    }
+
+    private static MethodInfo? ResolveBaseDefinition(InstanceHookMethod hook)
+    {
         var parameters = hook.MethodInfo.Parameters;
         var paramTypes = parameters.Length == 0
             ? Type.EmptyTypes
             : parameters.Select(p => p.Type).ToArray();
 
-        var methodInfo = declaringType.GetMethod(
+        var methodInfo = hook.ClassType.GetMethod(
             hook.MethodInfo.Name,
             BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly,
             binder: null,
             types: paramTypes,
             modifiers: null);
 
-        if (methodInfo is null)
-        {
-            return false;
-        }
-
-        var baseDefinition = methodInfo.GetBaseDefinition();
-        return !seenBaseDefinitions.Add(baseDefinition);
+        return methodInfo?.GetBaseDefinition();
     }
 
     public async ValueTask InitializeAsync()

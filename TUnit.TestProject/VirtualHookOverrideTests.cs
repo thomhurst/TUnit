@@ -1,19 +1,31 @@
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.TestProject;
 
 // Regression test for https://github.com/thomhurst/TUnit/issues/5428
-// A virtual [Before(Test)] hook in a base class that is overridden in a derived
-// class (also marked with [Before(Test)]) should only execute the override once,
-// not twice.
+// A virtual [Before(Test)]/[After(Test)] hook in a base class that is overridden
+// in a derived class (also marked with the same hook attribute) should only execute
+// the override once — not twice — because both registrations would otherwise be
+// invoked via virtual dispatch on the same instance.
 public class VirtualHookOverrideTests
 {
     public class BaseTestClass
     {
-        public int SetupCallCount;
+        public int SetupCalls;
+        public int TeardownCalls;
 
         [Before(Test)]
         public virtual Task SetupAsync()
         {
-            SetupCallCount++;
+            SetupCalls++;
+            return Task.CompletedTask;
+        }
+
+        [After(Test)]
+        public virtual Task TeardownAsync()
+        {
+            TeardownCalls++;
             return Task.CompletedTask;
         }
     }
@@ -26,13 +38,16 @@ public class VirtualHookOverrideTests
             await base.SetupAsync();
         }
 
-        [Test]
-        public void Override_Should_Run_Once()
+        [After(Test)]
+        public override async Task TeardownAsync()
         {
-            if (SetupCallCount != 1)
-            {
-                throw new Exception($"Expected SetupAsync to run exactly once, but ran {SetupCallCount} times.");
-            }
+            await base.TeardownAsync();
+        }
+
+        [Test]
+        public async Task Override_Should_Run_Once()
+        {
+            await Assert.That(SetupCalls).IsEqualTo(1);
         }
     }
 }
