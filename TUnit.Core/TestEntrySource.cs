@@ -103,8 +103,8 @@ public sealed class TestEntrySource<
 
     public TestEntryFilterData GetFilterData(int index) => _filterData[index];
 
-    public IReadOnlyList<TestMetadata> Materialize(int index, string testSessionId)
+    public TestMetadata Materialize(int index, string testSessionId)
     {
-        return [Resolve()[index].ToTestMetadata(testSessionId)];
+        return Resolve()[index].ToTestMetadata(testSessionId);
     }
 }

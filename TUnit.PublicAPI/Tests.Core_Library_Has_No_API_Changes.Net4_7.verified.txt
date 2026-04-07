@@ -884,7 +884,7 @@ namespace
          ClassType { get; }
         int Count { get; }
         .TestEntryFilterData GetFilterData(int index);
-        .<.TestMetadata> Materialize(int index, string testSessionId);
+        .TestMetadata Materialize(int index, string testSessionId);
     }
     public interface ITypedDataSourceAttribute<T> : .IDataSourceAttribute
     {
@@ -1470,7 +1470,7 @@ namespace
         public  ClassType { get; }
         public int Count { get; }
         public .TestEntryFilterData GetFilterData(int index) { }
-        public .<.TestMetadata> Materialize(int index, string testSessionId) { }
+        public .TestMetadata Materialize(int index, string testSessionId) { }
     }
     public sealed class TestEntry<T>
         where T :  class

@@ -24,7 +24,7 @@ public interface ITestEntrySource
     TestEntryFilterData GetFilterData(int index);
 
     /// <summary>Materialize a TestMetadata for the entry at the given index.</summary>
-    IReadOnlyList<TestMetadata> Materialize(int index, string testSessionId);
+    TestMetadata Materialize(int index, string testSessionId);
 }
 
 /// <summary>

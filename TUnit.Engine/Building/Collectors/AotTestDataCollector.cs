@@ -166,11 +166,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
         foreach (var (source, index) in toMaterialize)
         {
-            var materialized = source.Materialize(index, testSessionId);
-            for (var i = 0; i < materialized.Count; i++)
-            {
-                results.Add(materialized[i]);
-            }
+            results.Add(source.Materialize(index, testSessionId));
         }
 
         return results;
