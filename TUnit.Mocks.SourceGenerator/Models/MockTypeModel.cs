@@ -31,6 +31,9 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     /// </summary>
     public bool IsPublic { get; init; } = true;
 
+    /// <summary>The C# visibility keyword to emit on generated wrapper/extension types.</summary>
+    public string Visibility => IsPublic ? "public" : "internal";
+
     public bool Equals(MockTypeModel? other)
     {
         if (other is null) return false;

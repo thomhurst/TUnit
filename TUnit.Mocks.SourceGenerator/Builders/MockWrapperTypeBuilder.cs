@@ -37,8 +37,7 @@ internal static class MockWrapperTypeBuilder
 
         using (writer.Block($"namespace {mockNamespace}"))
         {
-            var visibility = model.IsPublic ? "public" : "internal";
-            using (writer.Block($"{visibility} sealed class {safeName}Mock : global::TUnit.Mocks.Mock<{mockableType}>, {model.FullyQualifiedName}"))
+            using (writer.Block($"{model.Visibility} sealed class {safeName}Mock : global::TUnit.Mocks.Mock<{mockableType}>, {model.FullyQualifiedName}"))
             {
                 writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
                 writer.AppendLine($"internal {safeName}Mock({mockableType} mockObject, global::TUnit.Mocks.MockEngine<{mockableType}> engine)");

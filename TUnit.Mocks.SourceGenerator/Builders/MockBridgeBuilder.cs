@@ -36,8 +36,7 @@ internal static class MockBridgeBuilder
     private static void BuildBridgeInterface(CodeWriter writer, MockTypeModel model, string safeName)
     {
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        var visibility = model.IsPublic ? "public" : "internal";
-        using (writer.Block($"{visibility} interface {safeName}Mockable : {model.FullyQualifiedName}"))
+        using (writer.Block($"{model.Visibility} interface {safeName}Mockable : {model.FullyQualifiedName}"))
         {
             bool first = true;
 
