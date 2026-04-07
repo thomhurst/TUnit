@@ -1549,7 +1549,7 @@
 
 "@docusaurus/babel@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/babel/-/babel-3.10.0.tgz#819819f107233dfcf50b59cd51158f23fb04878a"
+  resolved "https://registry.npmjs.org/@docusaurus/babel/-/babel-3.10.0.tgz"
   integrity sha512-mqCJhCZNZUDg0zgDEaPTM4DnRsisa24HdqTy/qn/MQlbwhTb4WVaZg6ZyX6yIVKqTz8fS1hBMgM+98z+BeJJDg==
   dependencies:
     "@babel/core" "^7.25.9"
@@ -1590,7 +1590,7 @@
 
 "@docusaurus/bundler@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/bundler/-/bundler-3.10.0.tgz#878c4c46bfa3434671ea37a43da184238a6aae26"
+  resolved "https://registry.npmjs.org/@docusaurus/bundler/-/bundler-3.10.0.tgz"
   integrity sha512-iONUGZGgp+lAkw/cJZH6irONcF4p8+278IsdRlq8lYhxGjkoNUs0w7F4gVXBYSNChq5KG5/JleTSsdJySShxow==
   dependencies:
     "@babel/core" "^7.25.9"
@@ -1650,7 +1650,7 @@
 
 "@docusaurus/core@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/core/-/core-3.10.0.tgz#642e71a0209d62c3f5ef275ed9d74a881f40df39"
+  resolved "https://registry.npmjs.org/@docusaurus/core/-/core-3.10.0.tgz"
   integrity sha512-mgLdQsO8xppnQZc3LPi+Mf+PkPeyxJeIx11AXAq/14fsaMefInQiMEZUUmrc7J+956G/f7MwE7tn8KZgi3iRcA==
   dependencies:
     "@docusaurus/babel" "3.10.0"
@@ -1746,7 +1746,7 @@
 
 "@docusaurus/cssnano-preset@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/cssnano-preset/-/cssnano-preset-3.10.0.tgz#be1b435c33df09d743473d3fadda67b4568dfae3"
+  resolved "https://registry.npmjs.org/@docusaurus/cssnano-preset/-/cssnano-preset-3.10.0.tgz"
   integrity sha512-qzSshTO1DB3TYW+dPUal5KHM7XPc5YQfzF3Kdb2NDACJUyGbNcFtw3tGkCJlYwhNCRKbZcmwraKUS1i5dcHdGg==
   dependencies:
     cssnano-preset-advanced "^6.1.2"
@@ -1766,7 +1766,7 @@
 
 "@docusaurus/logger@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/logger/-/logger-3.10.0.tgz#2bacbd004dd78e3da926dbe8f6fa9a930856575d"
+  resolved "https://registry.npmjs.org/@docusaurus/logger/-/logger-3.10.0.tgz"
   integrity sha512-9jrZzFuBH1LDRlZ7cznAhCLmAZ3HSDqgwdrSSZdGHq9SPUOQgXXu8mnxe2ZRB9NS1PCpMTIOVUqDtZPIhMafZg==
   dependencies:
     chalk "^4.1.2"
@@ -1782,7 +1782,7 @@
 
 "@docusaurus/mdx-loader@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/mdx-loader/-/mdx-loader-3.10.0.tgz#1d4b050d751389ecf38dee48bcb61e53df8ffb82"
+  resolved "https://registry.npmjs.org/@docusaurus/mdx-loader/-/mdx-loader-3.10.0.tgz"
   integrity sha512-mQQV97080AH4PYNs087l202NMDqRopZA4mg5W76ZZyTFrmWhJ3mHg+8A+drJVENxw5/Q+wHMHLgsx+9z1nEs0A==
   dependencies:
     "@docusaurus/logger" "3.10.0"
@@ -1842,7 +1842,7 @@
 
 "@docusaurus/module-type-aliases@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/module-type-aliases/-/module-type-aliases-3.10.0.tgz#749928f104d563f11f046bf0c9ab6489a470c7c8"
+  resolved "https://registry.npmjs.org/@docusaurus/module-type-aliases/-/module-type-aliases-3.10.0.tgz"
   integrity sha512-/1O0Zg8w3DFrYX/I6Fbss7OJrtZw1QoyjDhegiFNHVi9A9Y0gQ3jUAytVxF6ywpAWpLyLxch8nN8H/V3XfzdJQ==
   dependencies:
     "@docusaurus/types" "3.10.0"
@@ -2065,7 +2065,7 @@
 
 "@docusaurus/theme-common@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/theme-common/-/theme-common-3.10.0.tgz#70b419ccfdf62f092299354a72d1692e81be597d"
+  resolved "https://registry.npmjs.org/@docusaurus/theme-common/-/theme-common-3.10.0.tgz"
   integrity sha512-Dkp1YXKn16ByCJAdIjbDIOpVb4Z66MsVD694/ilX1vAAHaVEMrVsf/NPd9VgreyFx08rJ9GqV1MtzsbTcU73Kg==
   dependencies:
     "@docusaurus/mdx-loader" "3.10.0"
@@ -2101,7 +2101,7 @@
 
 "@docusaurus/theme-mermaid@^3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/theme-mermaid/-/theme-mermaid-3.10.0.tgz#6581ccf16d27e4c02fe8c7cf15488862f27be9c8"
+  resolved "https://registry.npmjs.org/@docusaurus/theme-mermaid/-/theme-mermaid-3.10.0.tgz"
   integrity sha512-Y2xrlwhIJ80oOZIO3PXL6A7J869splfcMI87E3NKpYsy3zJxOyV+BP1QMtGi59ajKgU868HPuyyn6J+6BZGOBg==
   dependencies:
     "@docusaurus/core" "3.10.0"
@@ -2149,7 +2149,7 @@
 
 "@docusaurus/types@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/types/-/types-3.10.0.tgz#a69232bba74b738fcf4671fd5f0f079366dd3d13"
+  resolved "https://registry.npmjs.org/@docusaurus/types/-/types-3.10.0.tgz"
   integrity sha512-F0dOt3FOoO20rRaFK7whGFQZ3ggyrWEdQc/c8/UiRuzhtg4y1w9FspXH5zpCT07uMnJKBPGh+qNazbNlCQqvSw==
   dependencies:
     "@mdx-js/mdx" "^3.0.0"
@@ -2181,7 +2181,7 @@
 
 "@docusaurus/utils-common@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/utils-common/-/utils-common-3.10.0.tgz#2a6dc76b312664fca7234d33607c085318ff1ae3"
+  resolved "https://registry.npmjs.org/@docusaurus/utils-common/-/utils-common-3.10.0.tgz"
   integrity sha512-JyL7sb9QVDgYvudIS81Dv0lsWm7le0vGZSDwsztxWam1SPBqrnkvBy9UYL/amh6pbybkyYTd3CMTkO24oMlCSw==
   dependencies:
     "@docusaurus/types" "3.10.0"
@@ -2197,7 +2197,7 @@
 
 "@docusaurus/utils-validation@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/utils-validation/-/utils-validation-3.10.0.tgz#a2418d7f31980d991fd3a1f39c8aad8820b36812"
+  resolved "https://registry.npmjs.org/@docusaurus/utils-validation/-/utils-validation-3.10.0.tgz"
   integrity sha512-c+6n2+ZPOJtWWc8Bb/EYdpSDfjYEScdCu9fB/SNjOmSCf1IdVnGf2T53o0tsz0gDRtCL90tifTL0JE/oMuP1Mw==
   dependencies:
     "@docusaurus/logger" "3.10.0"
@@ -2225,7 +2225,7 @@
 
 "@docusaurus/utils@3.10.0":
   version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@docusaurus/utils/-/utils-3.10.0.tgz#ea7d7b0d325b60f728decc00bb3908d00ef86faf"
+  resolved "https://registry.npmjs.org/@docusaurus/utils/-/utils-3.10.0.tgz"
   integrity sha512-T3B0WTigsIthe0D4LQa2k+7bJY+c3WS+Wq2JhcznOSpn1lSN64yNtHQXboCj3QnUs1EuAZszQG1SHKu5w5ZrlA==
   dependencies:
     "@docusaurus/logger" "3.10.0"
@@ -3604,7 +3604,7 @@ bail@^2.0.0:
 
 balanced-match@^4.0.2:
   version "4.0.4"
-  resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-4.0.4.tgz#bfb10662feed8196a2c62e7c68e17720c274179a"
+  resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz"
   integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
 
 baseline-browser-mapping@^2.9.0:
@@ -6205,7 +6205,7 @@ is-yarn-global@^0.4.0:
 
 isarray@0.0.1:
   version "0.0.1"
-  resolved "https://registry.yarnpkg.com/isarray/-/isarray-0.0.1.tgz#8a18acfca9a8f4177e09abfc6038939b05d1eedf"
+  resolved "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
   integrity sha512-D2S+3GLxWH+uhrNEcoh/fnmYeP8E8/zHl644d/jdA0g2uyXvy3sb0qxotE+ne0LtccHknQzWwZEzhak7oJ0COQ==
 
 isarray@~1.0.0:
@@ -7302,7 +7302,7 @@ minimalistic-assert@^1.0.0:
   resolved "https://registry.npmjs.org/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimatch@10.2.5, minimatch@3.1.2, minimatch@3.1.5, minimatch@^9.0.3:
+minimatch@10.2.5, minimatch@3.1.5, minimatch@^9.0.3:
   version "10.2.5"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-10.2.5.tgz#bd48687a0be38ed2961399105600f832095861d1"
   integrity sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==
@@ -7675,7 +7675,7 @@ path-parse@^1.0.7:
 
 path-to-regexp@3.3.0:
   version "3.3.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-3.3.0.tgz#f7f31d32e8518c2660862b644414b6d5c63a611b"
+  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-3.3.0.tgz"
   integrity sha512-qyCH421YQPS2WFDxDjftfc1ZR5WKQzVzqsp4n9M2kQhVOo/ByahFoUNJfl58kOcEGfQ//7weFTDhm+ss8Ecxgw==
 
 path-to-regexp@8.4.2:
@@ -7685,14 +7685,14 @@ path-to-regexp@8.4.2:
 
 path-to-regexp@^1.7.0:
   version "1.9.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-1.9.0.tgz#5dc0753acbf8521ca2e0f137b4578b917b10cf24"
+  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-1.9.0.tgz"
   integrity sha512-xIp7/apCFJuUHdDLWe8O1HIkb0kQrOMb/0u6FXQjemHn/ii5LrIzU6bdECnsiTF/GjZkMEKg1xdiZwNqDYlZ6g==
   dependencies:
     isarray "0.0.1"
 
 path-to-regexp@~0.1.12:
   version "0.1.13"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.13.tgz#9b22ec16bc3ab88d05a0c7e369869421401ab17d"
+  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.13.tgz"
   integrity sha512-A/AGNMFN3c8bOlvV9RreMdrv7jsmF9XIfDeCd87+I8RNg6s78BhJxMu69NEMHBSJFxKidViTEdruRwEk/WIKqA==
 
 path-type@^4.0.0:
@@ -8464,16 +8464,9 @@ react-json-view-lite@^2.3.0:
   resolved "https://registry.npmjs.org/react-json-view-lite/-/react-json-view-lite-2.5.0.tgz"
   integrity sha512-tk7o7QG9oYyELWHL8xiMQ8x4WzjCzbWNyig3uexmkLb54r8jO0yH3WCWx8UZS0c49eSA4QUmG5caiRJ8fAn58g==
 
-react-loadable-ssr-addon-v5-slorber@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/react-loadable-ssr-addon-v5-slorber/-/react-loadable-ssr-addon-v5-slorber-1.0.1.tgz"
-  integrity sha512-lq3Lyw1lGku8zUEJPDxsNm1AfYHBrO9Y1+olAYwpUJ2IGFBskM0DMKok97A6LWUpHm+o7IvQBOWu9MLenp9Z+A==
-  dependencies:
-    "@babel/runtime" "^7.10.3"
-
-react-loadable-ssr-addon-v5-slorber@^1.0.3:
+react-loadable-ssr-addon-v5-slorber@^1.0.1, react-loadable-ssr-addon-v5-slorber@^1.0.3:
   version "1.0.3"
-  resolved "https://registry.yarnpkg.com/react-loadable-ssr-addon-v5-slorber/-/react-loadable-ssr-addon-v5-slorber-1.0.3.tgz#bb3791bf481222c63a5bc6b96ee23f68cb5614b9"
+  resolved "https://registry.npmjs.org/react-loadable-ssr-addon-v5-slorber/-/react-loadable-ssr-addon-v5-slorber-1.0.3.tgz"
   integrity sha512-GXfh9VLwB5ERaCsU6RULh7tkemeX15aNh6wuMEBtfdyMa7fFG8TXrhXlx1SoEK2Ty/l6XIkzzYIQmyaWW3JgdQ==
   dependencies:
     "@babel/runtime" "^7.10.3"
@@ -8973,22 +8966,9 @@ serialize-javascript@7.0.5, serialize-javascript@^6.0.0, serialize-javascript@^6
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-7.0.5.tgz#c798cc0552ffbb08981914a42a8756e339d0d5b1"
   integrity sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==
 
-serve-handler@^6.1.6:
-  version "6.1.6"
-  resolved "https://registry.npmjs.org/serve-handler/-/serve-handler-6.1.6.tgz"
-  integrity sha512-x5RL9Y2p5+Sh3D38Fh9i/iQ5ZK+e4xuXRd/pGbM4D13tgo/MGwbttUk8emytcr1YYzBYs+apnUngBDFYfpjPuQ==
-  dependencies:
-    bytes "3.0.0"
-    content-disposition "0.5.2"
-    mime-types "2.1.18"
-    minimatch "3.1.2"
-    path-is-inside "1.0.2"
-    path-to-regexp "3.3.0"
-    range-parser "1.2.0"
-
-serve-handler@^6.1.7:
+serve-handler@^6.1.6, serve-handler@^6.1.7:
   version "6.1.7"
-  resolved "https://registry.yarnpkg.com/serve-handler/-/serve-handler-6.1.7.tgz#e9bb864e87ee71e8dab874cde44d146b77e3fb78"
+  resolved "https://registry.npmjs.org/serve-handler/-/serve-handler-6.1.7.tgz"
   integrity sha512-CinAq1xWb0vR3twAv9evEU8cNWkXCb9kd5ePAHUKJBkOsUpR1wt/CvGdeca7vqumL1U5cSaeVQ6zZMxiJ3yWsg==
   dependencies:
     bytes "3.0.0"
