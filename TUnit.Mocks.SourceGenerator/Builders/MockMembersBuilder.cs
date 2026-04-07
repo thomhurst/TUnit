@@ -37,8 +37,7 @@ internal static class MockMembersBuilder
         using (writer.Block("namespace TUnit.Mocks.Generated"))
         {
             // Extension methods class
-            var visibility = model.IsPublic ? "public" : "internal";
-            using (writer.Block($"{visibility} static class {safeName}_MockMemberExtensions"))
+            using (writer.Block($"{model.Visibility} static class {safeName}_MockMemberExtensions"))
             {
                 bool firstMember = true;
 
@@ -84,7 +83,7 @@ internal static class MockMembersBuilder
             {
                 if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
                 writer.AppendLine();
-                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, visibility);
+                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility);
             }
         }
 
@@ -148,7 +147,7 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType, visibility,
+            GenerateVoidUnifiedClass(writer, wrapperName, visibility, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask);
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
@@ -276,11 +275,10 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName,
+    private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName, string visibility,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
-        string? spanReturnElementType, string? spanReturnType,
-        string visibility,
+        string? spanReturnElementType = null, string? spanReturnType = null,
         bool isAsync = false, bool isValueTask = false)
     {
         var builderType = "global::TUnit.Mocks.Setup.VoidMethodSetupBuilder";
