@@ -713,8 +713,7 @@ internal sealed class ReflectionHookDiscoveryService
             HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-            Body = CreateInstanceHookDelegate(type, method),
-            BaseDefinition = method.GetBaseDefinition()
+            Body = CreateInstanceHookDelegate(type, method)
         };
         bag.Add(hook);
     }
@@ -739,8 +738,7 @@ internal sealed class ReflectionHookDiscoveryService
             HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-            Body = CreateInstanceHookDelegate(type, method),
-            BaseDefinition = method.GetBaseDefinition()
+            Body = CreateInstanceHookDelegate(type, method)
         };
         bag.Add(hook);
     }

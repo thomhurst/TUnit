@@ -534,6 +534,15 @@
     <data name="TUnit0073Title" xml:space="preserve">
         <value>Missing polyfill types required by TUnit</value>
     </data>
+    <data name="TUnit0074Description" xml:space="preserve">
+        <value>When a virtual instance hook method ([Before(Test)] / [After(Test)]) is already declared on a base class, applying the same hook attribute to an override causes the hook to be registered twice. Because virtual dispatch routes both registrations to the same override, the override's body runs twice per test. Remove the attribute from the override — the base class hook will still call through to the override via virtual dispatch.</value>
+    </data>
+    <data name="TUnit0074MessageFormat" xml:space="preserve">
+        <value>[{0}(Test)] is already declared on base method '{1}.{2}'. Remove this attribute from the override — virtual dispatch will still invoke this override when the base hook runs.</value>
+    </data>
+    <data name="TUnit0074Title" xml:space="preserve">
+        <value>Hook attribute is redundant on an override</value>
+    </data>
     <data name="TUnit0301Description" xml:space="preserve">
         <value>Tuple types require reflection for property/field access which is not AOT-compatible. Consider using concrete types or value deconstruction.</value>
     </data>

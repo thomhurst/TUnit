@@ -173,6 +173,9 @@ public static class Rules
             customTags: [WellKnownDiagnosticTags.CompilationEnd],
             helpLinkUri: "https://www.nuget.org/packages/Polyfill");
 
+    public static readonly DiagnosticDescriptor RedundantHookAttributeOnOverride =
+        CreateDescriptor("TUnit0074", UsageCategory, DiagnosticSeverity.Error);
+
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
 

@@ -2321,7 +2321,6 @@ namespace .Hooks
     public class InstanceHookMethod : ., <.>, .<.TestContext>
     {
         public InstanceHookMethod() { }
-        public .MethodInfo? BaseDefinition { get; init; }
         public <object, .TestContext, .CancellationToken, .>? Body { get; init; }
         [.(..PublicMethods)]
         public override  ClassType { get; }
