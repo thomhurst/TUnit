@@ -59,8 +59,9 @@ public class VirtualHookOverrideCodeFixProvider : CodeFixProvider
         SyntaxNode newRoot;
         if (attributeList.Attributes.Count == 1)
         {
-            // KeepNoTrivia so we don't leave a stray blank line where the attribute list was.
-            newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
+            // KeepLeadingTrivia so any comment above the attribute list is preserved by being
+            // re-attached to the next node (the method declaration).
+            newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepLeadingTrivia)!;
         }
         else
         {

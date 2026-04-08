@@ -30,19 +30,16 @@ public class VirtualHookOverrideAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var attributeData in methodSymbol.GetAttributes())
         {
-            if (!attributeData.IsStandardHook(context.Compilation, out _, out var hookLevel, out var hookType))
-            {
-                continue;
-            }
-
             // Only instance (Test-level) hooks participate in virtual dispatch; all other hook
             // levels are enforced static elsewhere.
-            if (hookLevel != HookLevel.Test)
+            if (!attributeData.IsStandardHook(context.Compilation, out _, out var hookLevel, out var hookType)
+                || hookLevel != HookLevel.Test
+                || hookType is null)
             {
                 continue;
             }
 
-            var conflictingBase = FindBaseWithMatchingHook(methodSymbol, hookType!.Value, context.Compilation);
+            var conflictingBase = FindBaseWithMatchingHook(methodSymbol, hookType.Value, context.Compilation);
             if (conflictingBase is null)
             {
                 continue;
