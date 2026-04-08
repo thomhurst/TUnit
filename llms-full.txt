@@ -13453,11 +13453,11 @@ public class TraceSetup
 
 ### Why `[Before(TestDiscovery)]`?
 
-The listener **must** be registered in a `[Before(TestDiscovery)]` hook (or earlier, e.g. `[Before(TestSession)]`) so it is active before the discovery span begins. TUnit's hook execution order is:
+The listener **must** be registered in a `[Before(TestDiscovery)]` hook so it is active before the discovery span begins. TUnit's hook execution order is:
 
-1. `[Before(TestSession)]` — session-level setup
-2. `[Before(TestDiscovery)]` — register your listener here
-3. **Test discovery** — the `"test discovery"` span is emitted here
+1. `[Before(TestDiscovery)]` — register your listener here
+2. **Test discovery** — the `"test discovery"` span is emitted here
+3. `[Before(TestSession)]` — session-level setup
 4. Test execution — assembly, suite, and test case spans are emitted
 5. `[After(TestSession)]` — dispose your listener here
 
