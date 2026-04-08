@@ -113,20 +113,10 @@ This should NOT be used with TUnit. It'll stop test discovery from working prope
 :::
 
 ## .NET Framework
-If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
+If you are still targeting .NET Framework, TUnit relies on some types that are not available in the base class library (such as `ModuleInitializerAttribute`). We recommend installing a polyfill package such as [`Polyfill`](https://github.com/SimonCropp/Polyfill) to provide these missing types:
 
-If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` to stop TUnit generating them for you.
-
-### Central Package Management (CPM)
-TUnit is fully compatible with NuGet Central Package Management. When CPM is enabled (via `Directory.Packages.props`), TUnit will automatically inject the Polyfill package using `VersionOverride`, so you don't need to manually add it to your `Directory.Packages.props` file.
-
-If you prefer to manage the Polyfill version yourself, you can:
-- Add `<PackageVersion Include="Polyfill" Version="x.x.x" />` to your `Directory.Packages.props`, OR
-- Disable automatic injection with `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` and add it manually
-
-### Embedded Polyfill Attributes
-TUnit automatically sets `<PolyUseEmbeddedAttribute>true</PolyUseEmbeddedAttribute>` to ensure that Polyfill types are embedded in each project. This prevents type conflicts when using `InternalsVisibleTo` or when multiple projects in your solution reference Polyfill. Each project gets its own isolated copy of the polyfill types, following the [recommended Polyfill consuming pattern](https://github.com/SimonCropp/Polyfill/blob/main/consuming.md#recommended-consuming-pattern).
-
-You can override this behavior by setting `<PolyUseEmbeddedAttribute>false</PolyUseEmbeddedAttribute>` in your project file if needed.
+```xml
+<PackageReference Include="Polyfill" Version="*" PrivateAssets="all" />
+```
 
 **Next:** [Write Your First Test →](writing-your-first-test.md)
