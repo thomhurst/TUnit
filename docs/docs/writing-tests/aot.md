@@ -290,7 +290,7 @@ public async Task GenericTest<T>()
 ```csharp
 public class DataSourceDiagnostics
 {
-    // ❌ This will generate TUnit0059 error - dynamic data source
+    // ❌ This will generate TUnit0059 warning - dynamic data source
     [Test]
     [MethodDataSource(nameof(GetDynamicData))]
     public async Task TestWithDynamicDataSource(object value)

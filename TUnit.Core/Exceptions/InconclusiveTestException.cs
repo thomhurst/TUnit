@@ -1,3 +1,12 @@
 ﻿namespace TUnit.Core.Exceptions;
 
-public class InconclusiveTestException(string message, Exception exception) : TUnitException(message, exception);
+public class InconclusiveTestException : TUnitException
+{
+    public InconclusiveTestException(string message) : base(message)
+    {
+    }
+
+    public InconclusiveTestException(string message, Exception exception) : base(message, exception)
+    {
+    }
+}

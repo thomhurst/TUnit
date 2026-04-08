@@ -150,7 +150,7 @@ public class LoggingHookExecutor : IHookExecutor
 
     public async ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
-        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
+        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
 
         try
         {
@@ -190,7 +190,7 @@ public class LoggingHookExecutor : IHookExecutor
     public async ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
         await action();
-        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
+        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
     }
 
     public async ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)

@@ -32,7 +32,7 @@ Migrating from MSTest to TUnit can improve test execution speed. Check the [benc
 | `Assert.Inconclusive("reason")` | `Skip.Test("reason")` |
 | `CollectionAssert.Contains(collection, item)` | `await Assert.That(collection).Contains(item)` |
 | `StringAssert.Contains(text, substring)` | `await Assert.That(text).Contains(substring)` |
-| `Assert.AreSame(expected, actual)` | `await Assert.That(actual).IsSameReference(expected)` |
+| `Assert.AreSame(expected, actual)` | `await Assert.That(actual).IsSameReferenceAs(expected)` |
 
 ## Automated Migration with Code Fixers
 
@@ -279,8 +279,8 @@ Assert.AreSame(expected, actual);
 Assert.AreNotSame(expected, actual);
 
 // TUnit
-await Assert.That(actual).IsSameReference(expected);
-await Assert.That(actual).IsNotSameReference(expected);
+await Assert.That(actual).IsSameReferenceAs(expected);
+await Assert.That(actual).IsNotSameReferenceAs(expected);
 ```
 
 #### Type Assertions
@@ -1063,10 +1063,10 @@ public class ContextTests
         context.Output.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
 
         // Accessing attributes and properties
-        var properties = context.Metadata.TestDetails.Attributes.OfType<PropertyAttribute>();
+        var properties = context.Metadata.TestDetails.GetAttributes<PropertyAttribute>();
         foreach (var prop in properties)
         {
-            context.Output.WriteLine($"{prop.Key}: {prop.Value}");
+            context.Output.WriteLine($"{prop.Name}: {prop.Value}");
         }
 
         await Assert.That(true).IsTrue();
@@ -1077,13 +1077,13 @@ public class ContextTests
     [Property("Environment", "Staging")]
     public async Task TestWithProperties(TestContext context)
     {
-        var browserProp = context.Metadata.TestDetails.Attributes
-            .OfType<PropertyAttribute>()
-            .FirstOrDefault(p => p.Key == "Browser");
+        var browserProp = context.Metadata.TestDetails
+            .GetAttributes<PropertyAttribute>()
+            .FirstOrDefault(p => p.Name == "Browser");
 
-        var envProp = context.Metadata.TestDetails.Attributes
-            .OfType<PropertyAttribute>()
-            .FirstOrDefault(p => p.Key == "Environment");
+        var envProp = context.Metadata.TestDetails
+            .GetAttributes<PropertyAttribute>()
+            .FirstOrDefault(p => p.Name == "Environment");
 
         context.Output.WriteLine($"Running on {browserProp?.Value} in {envProp?.Value}");
     }

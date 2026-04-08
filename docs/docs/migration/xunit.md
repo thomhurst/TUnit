@@ -928,8 +928,8 @@ public async Task Assertions_Examples()
     await Assert.That(5 < 3).IsFalse();
     await Assert.That((object?)null).IsNull();
     await Assert.That("value").IsNotNull();
-    await Assert.That(obj1).IsSameReference(obj2);
-    await Assert.That(obj1).IsNotSameReference(obj3);
+    await Assert.That(obj1).IsSameReferenceAs(obj2);
+    await Assert.That(obj1).IsNotSameReferenceAs(obj3);
 }
 ```
 

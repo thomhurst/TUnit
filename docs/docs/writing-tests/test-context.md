@@ -15,12 +15,12 @@ if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("Some
 }
 ```
 
-The context has a `Results` object (nullable). It's null until an `AfterEachTest` method runs, since results are only available after test completion.
+The context has a `Result` object (nullable), accessed via `Execution.Result`. It's null until an `AfterEachTest` method runs, since results are only available after test completion.
 
-Use results to conditionally execute cleanup logic:
+Use the result to conditionally execute cleanup logic:
 
 ```csharp
-if (TestContext.Current?.Result?.State == TestState.Failed)
+if (TestContext.Current?.Execution.Result?.State == TestState.Failed)
 {
     // Take a screenshot?
 }
@@ -136,9 +136,9 @@ public static IEnumerable<object[]> MyDataGenerator()
     if (context != null)
     {
         // Access test information during data generation
-        Console.WriteLine($"Generating data for: {context.TestMethodName}");
-        Console.WriteLine($"Test class: {context.ClassInformation?.Type.Name}");
-        Console.WriteLine($"Assembly: {context.ClassInformation?.Assembly.Name}");
+        Console.WriteLine($"Generating data for: {context.TestMetadata.Name}");
+        Console.WriteLine($"Test class: {context.TestMetadata.Class.Type.Name}");
+        Console.WriteLine($"Assembly: {context.TestMetadata.Class.Assembly.Name}");
         
         // Store data for later use during test execution
         context.StateBag["GenerationTime"] = DateTime.Now;
@@ -182,14 +182,13 @@ public void MyTest(string value)
 ### Available Properties
 
 `TestBuilderContext` provides:
-- `TestMethodName` - The name of the test method being built
-- `ClassInformation` - Full information about the test class including:
-  - `Type` - The test class type
-  - `Assembly` - Assembly information
-  - `Namespace` - The namespace
-  - Properties, parameters, and more
-- `MethodInformation` - Full information about the test method
-- `StateBag` - A dictionary for storing custom data
+- `TestMetadata` - The `MethodMetadata` for the test method being built, including:
+  - `Name` - The test method name
+  - `Class` - The `ClassMetadata` for the containing class (`Type`, `Name`, `Namespace`, `Assembly`, parameters, properties, etc.)
+  - `Parameters`, `ReturnType`, `GenericTypeCount`, and more
+- `StateBag` - A dictionary for storing custom data, copied forward to `TestContext`
 - `Events` - Test events that can be subscribed to
+- `DataSourceAttribute` - The data source attribute driving the current build, if any
+- `DefinitionId` - A unique identifier for this context
 
 Note: `TestBuilderContext.Current` will be `null` if accessed outside of test discovery/building phase.

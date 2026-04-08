@@ -46,7 +46,7 @@ In an `[After(Test)]` hook, you can check whether the test failed via `TestConte
 [After(Test)]
 public async Task TakeScreenshotOnFailure(TestContext context)
 {
-    if (context.Result?.Exception is not null)
+    if (context.Execution.Result?.Exception is not null)
     {
         await SaveScreenshot(context.TestDetails.TestName);
     }
