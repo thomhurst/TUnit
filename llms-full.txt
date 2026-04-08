@@ -15950,7 +15950,7 @@ In an `[After(Test)]` hook, you can check whether the test failed via `TestConte
 [After(Test)]
 public async Task TakeScreenshotOnFailure(TestContext context)
 {
-    if (context.Result?.Exception is not null)
+    if (context.Execution.Result?.Exception is not null)
     {
         await SaveScreenshot(context.TestDetails.TestName);
     }
@@ -16112,7 +16112,7 @@ public class LoggingHookExecutor : IHookExecutor
 
     public async ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
-        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
+        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
 
         try
         {
@@ -16152,7 +16152,7 @@ public class LoggingHookExecutor : IHookExecutor
     public async ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
     {
         await action();
-        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
+        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
     }
 
     public async ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
@@ -18383,7 +18383,7 @@ Migrating from MSTest to TUnit can improve test execution speed. Check the [benc
 | `Assert.Inconclusive("reason")` | `Skip.Test("reason")` |
 | `CollectionAssert.Contains(collection, item)` | `await Assert.That(collection).Contains(item)` |
 | `StringAssert.Contains(text, substring)` | `await Assert.That(text).Contains(substring)` |
-| `Assert.AreSame(expected, actual)` | `await Assert.That(actual).IsSameReference(expected)` |
+| `Assert.AreSame(expected, actual)` | `await Assert.That(actual).IsSameReferenceAs(expected)` |
 
 ## Automated Migration with Code Fixers
 
@@ -18630,8 +18630,8 @@ Assert.AreSame(expected, actual);
 Assert.AreNotSame(expected, actual);
 
 // TUnit
-await Assert.That(actual).IsSameReference(expected);
-await Assert.That(actual).IsNotSameReference(expected);
+await Assert.That(actual).IsSameReferenceAs(expected);
+await Assert.That(actual).IsNotSameReferenceAs(expected);
 ```
 
 #### Type Assertions
@@ -19414,10 +19414,10 @@ public class ContextTests
         context.Output.WriteLine($"Method: {context.Metadata.TestDetails.MethodInfo.Name}");
 
         // Accessing attributes and properties
-        var properties = context.Metadata.TestDetails.Attributes.OfType<PropertyAttribute>();
+        var properties = context.Metadata.TestDetails.GetAttributes<PropertyAttribute>();
         foreach (var prop in properties)
         {
-            context.Output.WriteLine($"{prop.Key}: {prop.Value}");
+            context.Output.WriteLine($"{prop.Name}: {prop.Value}");
         }
 
         await Assert.That(true).IsTrue();
@@ -19428,13 +19428,13 @@ public class ContextTests
     [Property("Environment", "Staging")]
     public async Task TestWithProperties(TestContext context)
     {
-        var browserProp = context.Metadata.TestDetails.Attributes
-            .OfType<PropertyAttribute>()
-            .FirstOrDefault(p => p.Key == "Browser");
+        var browserProp = context.Metadata.TestDetails
+            .GetAttributes<PropertyAttribute>()
+            .FirstOrDefault(p => p.Name == "Browser");
 
-        var envProp = context.Metadata.TestDetails.Attributes
-            .OfType<PropertyAttribute>()
-            .FirstOrDefault(p => p.Key == "Environment");
+        var envProp = context.Metadata.TestDetails
+            .GetAttributes<PropertyAttribute>()
+            .FirstOrDefault(p => p.Name == "Environment");
 
         context.Output.WriteLine($"Running on {browserProp?.Value} in {envProp?.Value}");
     }
@@ -21692,8 +21692,8 @@ public async Task Assertions_Examples()
     await Assert.That(5 < 3).IsFalse();
     await Assert.That((object?)null).IsNull();
     await Assert.That("value").IsNotNull();
-    await Assert.That(obj1).IsSameReference(obj2);
-    await Assert.That(obj1).IsNotSameReference(obj3);
+    await Assert.That(obj1).IsSameReferenceAs(obj2);
+    await Assert.That(obj1).IsNotSameReferenceAs(obj3);
 }
 ```
 
@@ -22838,7 +22838,7 @@ public async Task GenericTest<T>()
 ```csharp
 public class DataSourceDiagnostics
 {
-    // ❌ This will generate TUnit0059 error - dynamic data source
+    // ❌ This will generate TUnit0059 warning - dynamic data source
     [Test]
     [MethodDataSource(nameof(GetDynamicData))]
     public async Task TestWithDynamicDataSource(object value)
@@ -28607,12 +28607,12 @@ if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("Some
 }
 ```
 
-The context has a `Results` object (nullable). It's null until an `AfterEachTest` method runs, since results are only available after test completion.
+The context has a `Result` object (nullable), accessed via `Execution.Result`. It's null until an `AfterEachTest` method runs, since results are only available after test completion.
 
-Use results to conditionally execute cleanup logic:
+Use the result to conditionally execute cleanup logic:
 
 ```csharp
-if (TestContext.Current?.Result?.State == TestState.Failed)
+if (TestContext.Current?.Execution.Result?.State == TestState.Failed)
 {
     // Take a screenshot?
 }
@@ -28728,9 +28728,9 @@ public static IEnumerable<object[]> MyDataGenerator()
     if (context != null)
     {
         // Access test information during data generation
-        Console.WriteLine($"Generating data for: {context.TestMethodName}");
-        Console.WriteLine($"Test class: {context.ClassInformation?.Type.Name}");
-        Console.WriteLine($"Assembly: {context.ClassInformation?.Assembly.Name}");
+        Console.WriteLine($"Generating data for: {context.TestMetadata.Name}");
+        Console.WriteLine($"Test class: {context.TestMetadata.Class.Type.Name}");
+        Console.WriteLine($"Assembly: {context.TestMetadata.Class.Assembly.Name}");
         
         // Store data for later use during test execution
         context.StateBag["GenerationTime"] = DateTime.Now;
@@ -28774,15 +28774,14 @@ public void MyTest(string value)
 ### Available Properties
 
 `TestBuilderContext` provides:
-- `TestMethodName` - The name of the test method being built
-- `ClassInformation` - Full information about the test class including:
-  - `Type` - The test class type
-  - `Assembly` - Assembly information
-  - `Namespace` - The namespace
-  - Properties, parameters, and more
-- `MethodInformation` - Full information about the test method
-- `StateBag` - A dictionary for storing custom data
+- `TestMetadata` - The `MethodMetadata` for the test method being built, including:
+  - `Name` - The test method name
+  - `Class` - The `ClassMetadata` for the containing class (`Type`, `Name`, `Namespace`, `Assembly`, parameters, properties, etc.)
+  - `Parameters`, `ReturnType`, `GenericTypeCount`, and more
+- `StateBag` - A dictionary for storing custom data, copied forward to `TestContext`
 - `Events` - Test events that can be subscribed to
+- `DataSourceAttribute` - The data source attribute driving the current build, if any
+- `DefinitionId` - A unique identifier for this context
 
 Note: `TestBuilderContext.Current` will be `null` if accessed outside of test discovery/building phase.
 
