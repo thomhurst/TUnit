@@ -375,19 +375,42 @@ internal static class MockTypeDiscovery
     }
 
     /// <summary>
-    /// Returns true if the type's effective accessibility is public — i.e., the type itself
-    /// and all its containing types are declared public. Generated wrapper/extension classes
-    /// for types that are not effectively public must themselves be internal to avoid
-    /// CS9338 / CS0051 inconsistent accessibility errors. (See issue #5426.)
+    /// True if every part of <paramref name="type"/>'s signature is publicly accessible: the
+    /// type itself, every enclosing type, and (recursively) every generic type argument and
+    /// array element. Mock wrappers built for types that are not effectively public must
+    /// themselves be emitted as <c>internal</c> to avoid CS9338 / CS0051 — including the
+    /// case where a public generic interface is closed over an internal type argument
+    /// (e.g. <c>ILogger&lt;InternalClass&gt;</c>). See issues #5426 and #5453.
     /// </summary>
-    private static bool IsEffectivelyPublic(INamedTypeSymbol type)
+    private static bool IsEffectivelyPublic(ITypeSymbol type)
     {
-        for (INamedTypeSymbol? t = type; t is not null; t = t.ContainingType)
+        switch (type)
         {
-            if (t.DeclaredAccessibility != Accessibility.Public)
-                return false;
+            case ITypeParameterSymbol:
+                // Bound at use site by the consumer; not the discovery point's concern.
+                return true;
+
+            case IArrayTypeSymbol array:
+                return IsEffectivelyPublic(array.ElementType);
+
+            case INamedTypeSymbol named:
+                for (INamedTypeSymbol? t = named; t is not null; t = t.ContainingType)
+                {
+                    if (t.DeclaredAccessibility != Accessibility.Public)
+                        return false;
+                }
+                foreach (var typeArg in named.TypeArguments)
+                {
+                    if (!IsEffectivelyPublic(typeArg))
+                        return false;
+                }
+                return true;
+
+            default:
+                // Pointers, function pointers, dynamic, error types — not expected in
+                // mockable signatures.
+                return true;
         }
-        return true;
     }
 
     // ─── IFoo.Mock() static extension discovery ────────────────────
