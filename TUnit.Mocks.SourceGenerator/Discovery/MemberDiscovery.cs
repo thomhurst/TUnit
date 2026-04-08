@@ -362,9 +362,12 @@ internal static class MemberDiscovery
     private static bool IsMemberAccessibleFromExternal(ISymbol member, IAssemblySymbol compilationAssembly, bool hasInternalAccess)
     {
         var accessibility = member.DeclaredAccessibility;
+        // Private: never accessible from another assembly (no InternalsVisibleTo equivalent for private).
         // ProtectedOrInternal (protected internal) is intentionally NOT blocked here:
         // the generated mock subclasses the target, so the protected part grants access.
         // ProtectedAndInternal (private protected) requires BOTH inheritance AND internal access.
+        if (accessibility == Accessibility.Private)
+            return false;
         if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
         {
             if (!hasInternalAccess)
@@ -376,7 +379,7 @@ internal static class MemberDiscovery
 
     /// <summary>
     /// Full accessibility check for members where the containing assembly isn't pre-computed
-    /// (used by DiscoverConstructors).
+    /// (used by DiscoverConstructors and IsAccessorAccessible).
     /// </summary>
     private static bool IsMemberAccessible(ISymbol member, IAssemblySymbol? compilationAssembly)
     {
@@ -387,6 +390,11 @@ internal static class MemberDiscovery
             return true;
 
         var accessibility = member.DeclaredAccessibility;
+        // Private: never accessible from another assembly. Also guards property accessors like
+        // `public virtual int Foo { get; private set; }` where the setter symbol exists but can't
+        // be overridden from outside — see IsAccessorAccessible.
+        if (accessibility == Accessibility.Private)
+            return false;
         if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)
         {
             if (!memberAssembly.GivesAccessTo(compilationAssembly))
