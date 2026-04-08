@@ -53,7 +53,7 @@
     "express/path-to-regexp": "8.4.2",
     "serialize-javascript": "7.0.5",
     "brace-expansion": "5.0.5",
-    "qs": "6.15.0",
+    "qs": "6.15.1",
     "dompurify": "3.3.3",
     "node-forge": "1.4.0",
     "picomatch": "4.0.4",
