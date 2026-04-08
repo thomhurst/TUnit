@@ -74,13 +74,13 @@ internal static class MemberDiscovery
                         {
                             if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
+                                MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
                             }
                         }
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly));
                         }
                         break;
                     }
@@ -93,13 +93,13 @@ internal static class MemberDiscovery
                         {
                             if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
+                                MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter, compilationAssembly);
                             }
                         }
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
+                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly));
                         }
                         break;
                     }
@@ -179,13 +179,13 @@ internal static class MemberDiscovery
                             {
                                 if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
                                 }
                             }
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
                             }
                             break;
                         }
@@ -198,13 +198,13 @@ internal static class MemberDiscovery
                             {
                                 if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter, compilationAssembly);
                                 }
                             }
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
                             }
                             break;
                         }
@@ -292,13 +292,13 @@ internal static class MemberDiscovery
                             {
                                 if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
                                 }
                             }
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, compilationAssembly: compilationAssembly));
                             }
                         }
                         else if (!seenProperties.ContainsKey(key))
@@ -318,13 +318,13 @@ internal static class MemberDiscovery
                             {
                                 if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter);
+                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter, compilationAssembly);
                                 }
                             }
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, compilationAssembly: compilationAssembly));
                             }
                         }
                         else if (!seenProperties.ContainsKey(key))
@@ -532,27 +532,38 @@ internal static class MemberDiscovery
     /// accessors so the generated class satisfies all interfaces.
     /// </summary>
     private static void MergePropertyAccessors(List<MockMemberModel> properties, int existingIndex,
-        IPropertySymbol newProperty, ref int memberIdCounter)
+        IPropertySymbol newProperty, ref int memberIdCounter, IAssemblySymbol? compilationAssembly = null)
     {
         var existing = properties[existingIndex];
-        var needsGetter = !existing.HasGetter && newProperty.GetMethod is not null;
-        var needsSetter = !existing.HasSetter && newProperty.SetMethod is not null;
+        var newGetterAccessible = IsAccessorAccessible(newProperty.GetMethod, compilationAssembly);
+        var newSetterAccessible = IsAccessorAccessible(newProperty.SetMethod, compilationAssembly);
+        var needsGetter = !existing.HasGetter && newGetterAccessible;
+        var needsSetter = !existing.HasSetter && newSetterAccessible;
 
         if (!needsGetter && !needsSetter) return;
 
         properties[existingIndex] = existing with
         {
-            HasGetter = existing.HasGetter || newProperty.GetMethod is not null,
-            HasSetter = existing.HasSetter || newProperty.SetMethod is not null,
+            HasGetter = existing.HasGetter || newGetterAccessible,
+            HasSetter = existing.HasSetter || newSetterAccessible,
             SetterMemberId = existing.HasSetter ? existing.SetterMemberId
-                : newProperty.SetMethod is not null ? memberIdCounter++ : existing.SetterMemberId
+                : newSetterAccessible ? memberIdCounter++ : existing.SetterMemberId
         };
     }
 
-    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
+    /// <summary>
+    /// Returns true if the accessor exists AND is accessible from the compilation assembly.
+    /// Needed because e.g. `internal set` on an external type exists in the symbol but can't be overridden.
+    /// </summary>
+    private static bool IsAccessorAccessible(IMethodSymbol? accessor, IAssemblySymbol? compilationAssembly)
+        => accessor is not null && IsMemberAccessible(accessor, compilationAssembly);
+
+    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
     {
+        var hasGetter = IsAccessorAccessible(property.GetMethod, compilationAssembly);
+        var hasSetter = IsAccessorAccessible(property.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
-        var setterId = property.SetMethod is not null ? memberIdCounter++ : 0;
+        var setterId = hasSetter ? memberIdCounter++ : 0;
 
         return new MockMemberModel
         {
@@ -563,8 +574,8 @@ internal static class MemberDiscovery
             IsVoid = false,
             IsAsync = false,
             IsProperty = true,
-            HasGetter = property.GetMethod is not null,
-            HasSetter = property.SetMethod is not null,
+            HasGetter = hasGetter,
+            HasSetter = hasSetter,
             SetterMemberId = setterId,
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
@@ -613,10 +624,12 @@ internal static class MemberDiscovery
         return new EquatableArray<MockConstructorModel>(constructors.ToImmutableArray());
     }
 
-    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
+    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
     {
+        var hasGetter = IsAccessorAccessible(indexer.GetMethod, compilationAssembly);
+        var hasSetter = IsAccessorAccessible(indexer.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
-        var setterId = indexer.SetMethod is not null ? memberIdCounter++ : 0;
+        var setterId = hasSetter ? memberIdCounter++ : 0;
 
         return new MockMemberModel
         {
@@ -629,8 +642,8 @@ internal static class MemberDiscovery
             IsAsync = false,
             IsProperty = true,
             IsIndexer = true,
-            HasGetter = indexer.GetMethod is not null,
-            HasSetter = indexer.SetMethod is not null,
+            HasGetter = hasGetter,
+            HasSetter = hasSetter,
             Parameters = new EquatableArray<MockParameterModel>(
                 indexer.Parameters.Select(p => new MockParameterModel
                 {
