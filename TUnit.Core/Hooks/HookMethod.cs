@@ -30,7 +30,20 @@ public abstract record HookMethod
     /// </summary>
     public TimeSpan? Timeout { get; internal set; } = Defaults.HookTimeout;
 
-    public required IHookExecutor HookExecutor { get; init; }
+    private IHookExecutor _hookExecutor = DefaultExecutor.Instance;
+
+    public required IHookExecutor HookExecutor
+    {
+        get => _hookExecutor;
+        init => _hookExecutor = value;
+    }
+
+    /// <summary>
+    /// Overrides the hook executor after construction. Called by
+    /// <c>EventReceiverOrchestrator</c> when an <see cref="Interfaces.IHookRegisteredEventReceiver"/>
+    /// (e.g. <c>CultureAttribute</c>) sets a custom executor on the registration context.
+    /// </summary>
+    internal void SetHookExecutor(IHookExecutor executor) => _hookExecutor = executor;
 
     public required int Order { get; init; }
     

@@ -307,6 +307,12 @@ internal sealed class EventReceiverOrchestrator
         {
             hookContext.HookMethod.Timeout = hookContext.Timeout;
         }
+
+        // Apply the hook executor override from the context back to the hook method
+        if (hookContext.HookExecutor is not null)
+        {
+            hookContext.HookMethod.SetHookExecutor(hookContext.HookExecutor);
+        }
     }
 
     // First/Last event methods with fast-path checks

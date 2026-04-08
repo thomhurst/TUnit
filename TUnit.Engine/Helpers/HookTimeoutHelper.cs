@@ -54,14 +54,20 @@ internal static class HookTimeoutHelper
     }
 
     /// <summary>
-    /// Executes a hook, using a custom executor if one is set on the TestContext
+    /// Executes a hook, using a custom executor if one is set on the TestContext.
+    /// Precedence: the hook's own HookExecutor wins if it was set explicitly. Only fall back
+    /// to the test-level CustomHookExecutor when the hook is still on DefaultExecutor —
+    /// this preserves the #2666 scenario (SetHookExecutor fills in for hooks that don't
+    /// specify their own executor) without overriding hooks that explicitly did.
     /// </summary>
     private static ValueTask ExecuteHookWithPotentialCustomExecutor<T>(StaticHookMethod<T> hook, T context, CancellationToken cancellationToken)
     {
-        // Check if this is a TestContext with a custom hook executor
-        if (context is TestContext testContext && testContext.CustomHookExecutor != null)
+        // Only consider CustomHookExecutor when the hook itself is still on the default
+        // executor — an explicit [HookExecutor<T>] attribute on the hook must win.
+        if (context is TestContext testContext
+            && testContext.CustomHookExecutor != null
+            && ReferenceEquals(hook.HookExecutor, DefaultExecutor.Instance))
         {
-            // BYPASS the hook's default executor and call the custom executor directly with the hook's body
             var customExecutor = testContext.CustomHookExecutor;
 
             // Determine which executor method to call based on hook type
@@ -75,7 +81,7 @@ internal static class HookTimeoutHelper
             }
         }
 
-        // No custom executor, use the hook's default executor
+        // Use the hook's own executor (default or explicit)
         return hook.ExecuteAsync(context, cancellationToken);
     }
 
