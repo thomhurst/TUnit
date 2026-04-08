@@ -6,10 +6,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 // Regression test for https://github.com/thomhurst/TUnit/issues/5428
-// A virtual [Before(Test)]/[After(Test)] hook in a base class that is overridden
-// in a derived class (also marked with the same hook attribute) should only execute
-// the override once — not twice — because both registrations would otherwise be
-// invoked via virtual dispatch on the same instance.
+// See Bugs/5450 for the [InheritsTests] variant.
 public class VirtualHookOverrideTests
 {
     public class BaseTestClass
@@ -18,29 +15,34 @@ public class VirtualHookOverrideTests
         public int TeardownCalls;
 
         [Before(Test)]
-        public virtual Task SetupAsync()
+        public virtual async Task SetupAsync()
         {
             SetupCalls++;
-            return Task.CompletedTask;
+            // Inline assertion: a duplicate registration would invoke this twice and fail on the
+            // second call. A separate verification hook can't sit after the base hook because
+            // After-hooks are sorted derived-class-first across the type hierarchy (Order only
+            // sorts within a single type level), so it would run before TeardownAsync below.
+            await Assert.That(SetupCalls).IsEqualTo(1);
         }
 
         [After(Test)]
-        public virtual Task TeardownAsync()
+        public virtual async Task TeardownAsync()
         {
             TeardownCalls++;
-            return Task.CompletedTask;
+            await Assert.That(TeardownCalls).IsEqualTo(1);
         }
     }
 
     public class DerivedTestClass : BaseTestClass
     {
-        [Before(Test)]
+        // No [Before(Test)] / [After(Test)] here — the base's attributes already register these
+        // methods and virtual dispatch routes to the override. TUnit0074 would flag a redundant
+        // re-declaration.
         public override async Task SetupAsync()
         {
             await base.SetupAsync();
         }
 
-        [After(Test)]
         public override async Task TeardownAsync()
         {
             await base.TeardownAsync();
@@ -48,20 +50,9 @@ public class VirtualHookOverrideTests
 
         [Test]
         [EngineTest(ExpectedResult.Pass)]
-        public async Task Override_Should_Run_Once()
+        public async Task Override_Runs_Exactly_Once()
         {
-            // TeardownCalls is verified by AfterTeardownAssertion below — by the time
-            // this test method runs, TeardownAsync has not yet executed (it's an After
-            // hook), so we can't assert it here. The dedicated [After(Test)] hook with
-            // Order = int.MaxValue runs last and performs the assertion.
             await Assert.That(SetupCalls).IsEqualTo(1);
-        }
-
-        // Runs after TeardownAsync to verify the After(Test) override also deduplicates.
-        [After(Test, Order = int.MaxValue)]
-        public async Task AfterTeardownAssertion()
-        {
-            await Assert.That(TeardownCalls).IsEqualTo(1);
         }
     }
 }

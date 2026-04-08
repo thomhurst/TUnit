@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Hooks;
 
@@ -11,27 +9,17 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     private readonly Type _classType = null!;
-    
+
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
     public override Type ClassType => _classType;
-    
-    public required Type InitClassType 
-    { 
+
+    public required Type InitClassType
+    {
         [param: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
-        init { _classType = value; } 
+        init { _classType = value; }
     }
 
     public Func<object, TestContext, CancellationToken, ValueTask>? Body { get; init; }
-
-    /// <summary>
-    /// The base method definition for this hook (i.e. <see cref="MethodInfo.GetBaseDefinition"/>),
-    /// used by the engine to deduplicate virtual hook methods that are overridden in a derived
-    /// class. Optional — when null, the engine resolves it via reflection from <see cref="ClassType"/>
-    /// and the metadata name/parameters. Set directly by the reflection discovery path which already
-    /// holds a <see cref="System.Reflection.MethodInfo"/> at registration time.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public MethodInfo? BaseDefinition { get; init; }
 
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
