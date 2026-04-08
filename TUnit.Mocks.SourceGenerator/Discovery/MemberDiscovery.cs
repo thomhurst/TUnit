@@ -390,9 +390,7 @@ internal static class MemberDiscovery
             return true;
 
         var accessibility = member.DeclaredAccessibility;
-        // Private: never accessible from another assembly. Also guards property accessors like
-        // `public virtual int Foo { get; private set; }` where the setter symbol exists but can't
-        // be overridden from outside — see IsAccessorAccessible.
+        // Private: never reachable cross-assembly (no InternalsVisibleTo equivalent for private).
         if (accessibility == Accessibility.Private)
             return false;
         if (accessibility is Accessibility.Internal or Accessibility.ProtectedAndInternal)

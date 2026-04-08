@@ -656,12 +656,12 @@ public class MockGeneratorTests : SnapshotTestBase
         return VerifyGeneratorOutput(source, [externalRef]);
     }
 
-    // Regression for https://github.com/thomhurst/TUnit/issues/5455 and reviewer-flagged
-    // private-setter gap. The base class has public virtual properties whose setters are
-    // individually inaccessible (internal/private) even though the property itself is public.
-    // The generated override must emit get-only — not set — for both cases.
+    // Regression for https://github.com/thomhurst/TUnit/issues/5455 — public virtual properties
+    // whose setters are individually inaccessible (internal/private) must emit getter-only overrides.
+    // `Reason` is the control: `protected internal set` is reachable via the mock's inheritance, so
+    // its setter must still be emitted.
     [Test]
-    public Task Partial_Mock_Filters_Inaccessible_Accessors_On_External_Virtual_Properties()
+    public Task Partial_Mock_Omits_Inaccessible_Property_Setters()
     {
         var externalSource = """
             namespace ExternalLib
