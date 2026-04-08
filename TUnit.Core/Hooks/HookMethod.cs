@@ -38,12 +38,15 @@ public abstract record HookMethod
         init => _hookExecutor = value;
     }
 
-    /// <summary>
-    /// Overrides the hook executor after construction. Called by
-    /// <c>EventReceiverOrchestrator</c> when an <see cref="Interfaces.IHookRegisteredEventReceiver"/>
-    /// (e.g. <c>CultureAttribute</c>) sets a custom executor on the registration context.
-    /// </summary>
     internal void SetHookExecutor(IHookExecutor executor) => _hookExecutor = executor;
+
+    // An explicit HookExecutor wins; CustomHookExecutor is only a fallback for hooks still
+    // on DefaultExecutor, so #2666's SetHookExecutor scenario keeps working without
+    // overriding hooks that specified their own executor.
+    internal IHookExecutor ResolveEffectiveExecutor(TestContext? testContext) =>
+        ReferenceEquals(_hookExecutor, DefaultExecutor.Instance) && testContext?.CustomHookExecutor is { } custom
+            ? custom
+            : _hookExecutor;
 
     public required int Order { get; init; }
     
