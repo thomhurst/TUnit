@@ -190,17 +190,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of dictionary type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -243,17 +233,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<IReadOnlyDictionary<TKey, TValue>>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -298,17 +278,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -351,17 +321,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of collection type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -403,17 +363,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<IEnumerable<TItem>>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -457,17 +407,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -510,17 +450,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of member type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -561,17 +491,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -614,17 +534,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -663,16 +573,7 @@ public static class AssertionExtensions
 
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -710,16 +611,7 @@ public static class AssertionExtensions
 
         var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
 
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -758,16 +650,27 @@ public static class AssertionExtensions
 
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Builds a MemberAssertionResult, optionally combining with a pending assertion from And/Or chaining.
+    /// </summary>
+    private static MemberAssertionResult<TObject> BuildMemberResult<TObject>(
+        AssertionContext<TObject> context,
+        Assertion<TObject>? pendingAssertion,
+        CombinerType? combinerType,
+        Assertion<object?> erasedAssertion)
+    {
         if (pendingAssertion != null && combinerType != null)
         {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+            Assertion<object?> combined = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(context, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(context, pendingAssertion, erasedAssertion);
+            return new MemberAssertionResult<TObject>(context, combined);
         }
 
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return new MemberAssertionResult<TObject>(context, erasedAssertion);
     }
 
     /// <summary>

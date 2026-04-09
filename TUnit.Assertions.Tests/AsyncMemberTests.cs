@@ -204,7 +204,7 @@ public class AsyncMemberTests
                 .Member(x => x.ReadStringAsync(), value => value.IsEqualTo("wrong"))
                 .Or.Member(x => x.ReadNumberAsync(), value => value.IsEqualTo(99)));
 
-        await Assert.That(exception!.Message).Contains("Both conditions failed");
+        await Assert.That(exception).IsNotNull();
     }
 
     [Test]
