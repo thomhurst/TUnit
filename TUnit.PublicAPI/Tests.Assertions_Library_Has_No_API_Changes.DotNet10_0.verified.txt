@@ -2672,6 +2672,11 @@ namespace .Extensions
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, object> assertions) { }
+        [.(1)]
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
+        [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
+            "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, object> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
@@ -2686,6 +2691,8 @@ namespace .Extensions
         [.(2)]
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions)
             where TKey :  notnull { }
+        [.(2)]
+        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         [.(2)]
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         [.(1)]
