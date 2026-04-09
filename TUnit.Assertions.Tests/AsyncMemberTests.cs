@@ -2,8 +2,6 @@ namespace TUnit.Assertions.Tests;
 
 public class AsyncMemberTests
 {
-    // ============ MODEL CLASSES ============
-
     private sealed class MyObject
     {
         public required string Name { get; init; }
@@ -25,8 +23,6 @@ public class AsyncMemberTests
 
         public Task<string?> ReadNullableStringWithValueAsync() => Task.FromResult<string?>(Name);
     }
-
-    // ============ HAPPY PATH TESTS ============
 
     [Test]
     public async Task Async_Member_String_Success()
@@ -69,8 +65,6 @@ public class AsyncMemberTests
         var obj = new MyObject { Name = "test", Number = 1 };
         await Assert.That(obj).Member(x => x.ReadNullableStringWithValueAsync(), value => value.IsNotNull());
     }
-
-    // ============ CHAINING TESTS ============
 
     [Test]
     public async Task Async_Member_Chained_With_And()
@@ -132,8 +126,6 @@ public class AsyncMemberTests
             .And.Member(x => x.ReadNumberAsync(), value => value.IsEqualTo(42))
             .And.Member(x => x.ReadStringWithDelayAsync(), value => value.IsEqualTo("hello"));
     }
-
-    // ============ FAILURE TESTS ============
 
     [Test]
     public async Task Async_Member_String_Failure()

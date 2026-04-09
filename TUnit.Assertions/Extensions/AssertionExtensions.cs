@@ -647,7 +647,7 @@ public static class AssertionExtensions
 
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
-        var compiledSelector = memberSelector.Compile();
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(async obj =>
         {
             if (obj == null)
@@ -655,7 +655,7 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            return await compiledSelector(obj);
+            return await compiled(obj);
         });
 
         var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
@@ -694,7 +694,7 @@ public static class AssertionExtensions
 
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
-        var compiledSelector = memberSelector.Compile();
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(async obj =>
         {
             if (obj == null)
@@ -702,7 +702,7 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            return await compiledSelector(obj);
+            return await compiled(obj);
         });
 
         var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
@@ -742,7 +742,7 @@ public static class AssertionExtensions
 
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
-        var compiledSelector = memberSelector.Compile();
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(async obj =>
         {
             if (obj == null)
@@ -750,7 +750,7 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            return await compiledSelector(obj);
+            return await compiled(obj);
         });
 
         var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
