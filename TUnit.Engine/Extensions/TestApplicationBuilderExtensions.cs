@@ -43,10 +43,6 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));
 
-        // Adaptive parallelism command providers
-        testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveMetricsCommandProvider(extension));
-
         // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
