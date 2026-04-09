@@ -13,7 +13,7 @@ public class CallbackTests
     {
         // Arrange
         var callbackInvoked = false;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Callback(() => callbackInvoked = true);
 
@@ -31,7 +31,7 @@ public class CallbackTests
     {
         // Arrange
         var callbackInvoked = false;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Callback(() => callbackInvoked = true)
             .Then()
@@ -54,7 +54,7 @@ public class CallbackTests
     {
         // Arrange
         var callCount = 0;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Callback(() => callCount++)
             .Then()
@@ -75,7 +75,7 @@ public class CallbackTests
     {
         // Arrange
         var callCount = 0;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Callback(() => callCount++);
 
@@ -95,7 +95,7 @@ public class CallbackTests
     {
         // Arrange
         var lastArgs = "";
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any())
             .Callback(() => lastArgs = "called")
             .Then()
@@ -119,7 +119,7 @@ public class CallbackTests
     {
         // Arrange
         var counter = 0;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Returns(() => ++counter);
 

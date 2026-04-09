@@ -143,7 +143,7 @@ public class PartialMockTests
     public async Task Of_Abstract_Class_Creates_Instance()
     {
         // Arrange & Act
-        var mock = Mock.Of<AbstractService>();
+        var mock = AbstractService.Mock();
 
         // Assert
         await Assert.That(mock).IsNotNull();
@@ -154,7 +154,7 @@ public class PartialMockTests
     public async Task Abstract_Method_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<AbstractService>();
+        var mock = AbstractService.Mock();
         mock.GetName().Returns("TestName");
 
         // Act
@@ -168,7 +168,7 @@ public class PartialMockTests
     public async Task Unconfigured_Virtual_Method_Calls_Base_Implementation()
     {
         // Arrange
-        var mock = Mock.Of<AbstractService>();
+        var mock = AbstractService.Mock();
         // GetName is abstract - configure it
         mock.GetName().Returns("TestName");
         // Calculate is virtual - do NOT configure it
@@ -184,7 +184,7 @@ public class PartialMockTests
     public async Task Configured_Virtual_Method_Returns_Override_Instead_Of_Base()
     {
         // Arrange
-        var mock = Mock.Of<AbstractService>();
+        var mock = AbstractService.Mock();
         mock.GetName().Returns("TestName");
         mock.Calculate(Any()).Returns(42);
 
@@ -199,7 +199,7 @@ public class PartialMockTests
     public async Task Concrete_Class_Partial_Mock_Calls_Base_When_Not_Configured()
     {
         // Arrange
-        var mock = Mock.Of<ConcreteService>();
+        var mock = ConcreteService.Mock();
 
         // Act - no setup, should call base
         var result = mock.Object.Greet("World");
@@ -212,7 +212,7 @@ public class PartialMockTests
     public async Task Concrete_Class_Override_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<ConcreteService>();
+        var mock = ConcreteService.Mock();
         mock.Greet(Any()).Returns("Mocked!");
 
         // Act
@@ -226,7 +226,7 @@ public class PartialMockTests
     public async Task Concrete_Class_Multiple_Methods_Mixed_Setup()
     {
         // Arrange
-        var mock = Mock.Of<ConcreteService>();
+        var mock = ConcreteService.Mock();
         mock.Greet("Alice").Returns("Hi Alice!");
         // Don't setup Add - let it call base
 
@@ -243,7 +243,7 @@ public class PartialMockTests
     public async Task Constructor_Args_Passed_To_Base()
     {
         // Arrange
-        var mock = Mock.Of<ServiceWithConstructor>("PREFIX");
+        var mock = ServiceWithConstructor.Mock("PREFIX");
         mock.Format(Any()).Returns("formatted");
 
         // Act - GetPrefix is virtual and unconfigured, so calls base which uses _prefix
@@ -257,7 +257,7 @@ public class PartialMockTests
     public async Task Constructor_Args_Abstract_Method_Override()
     {
         // Arrange
-        var mock = Mock.Of<ServiceWithConstructor>("test");
+        var mock = ServiceWithConstructor.Mock("test");
         mock.Format("value").Returns("test:value");
 
         // Act
@@ -271,7 +271,7 @@ public class PartialMockTests
     public async Task Non_Virtual_Method_Still_Works()
     {
         // Arrange
-        var mock = Mock.Of<AbstractService>();
+        var mock = AbstractService.Mock();
         mock.GetName().Returns("Name");
 
         // Act - NonVirtualMethod is not virtual, so it runs the original implementation
@@ -285,7 +285,7 @@ public class PartialMockTests
     public void Verify_Calls_On_Partial_Mock()
     {
         // Arrange
-        var mock = Mock.Of<ConcreteService>();
+        var mock = ConcreteService.Mock();
         mock.Greet(Any()).Returns("Hi");
 
         // Act
@@ -300,7 +300,7 @@ public class PartialMockTests
     public void Verify_Calls_On_Unconfigured_Virtual_Method()
     {
         // Arrange
-        var mock = Mock.Of<ConcreteService>();
+        var mock = ConcreteService.Mock();
 
         // Act - unconfigured, calls base
         mock.Object.Add(1, 2);
@@ -314,7 +314,7 @@ public class PartialMockTests
     public async Task Partial_Mock_With_Strict_Behavior_Abstract_Method_Throws_Without_Setup()
     {
         // Arrange
-        var mock = Mock.Of<AbstractService>(MockBehavior.Strict);
+        var mock = AbstractService.Mock(MockBehavior.Strict);
 
         // Act & Assert - abstract method with no setup in strict mode should throw
         var exception = Assert.Throws<MockStrictBehaviorException>(() =>
@@ -329,7 +329,7 @@ public class PartialMockTests
     public async Task Partial_Mock_With_Strict_Behavior_Virtual_Method_Calls_Base()
     {
         // Arrange - strict mode, but virtual methods should still call base when unconfigured
-        var mock = Mock.Of<ConcreteService>(MockBehavior.Strict);
+        var mock = ConcreteService.Mock(MockBehavior.Strict);
 
         // Act - virtual method with no setup should call base (not throw)
         var result = mock.Object.Add(2, 3);
@@ -346,7 +346,7 @@ public class PartialMockTests
     public async Task New_Method_Hiding__Non_Hidden_Virtual_Can_Be_Configured()
     {
         // DerivedClientWithNewMethods hides WithSnapshot/WithVersion but not Calculate
-        var mock = Mock.Of<DerivedClientWithNewMethods>();
+        var mock = DerivedClientWithNewMethods.Mock();
         mock.Calculate(Any()).Returns(42);
 
         var result = mock.Object.Calculate(5);
@@ -357,7 +357,7 @@ public class PartialMockTests
     [Test]
     public async Task New_Method_Hiding__Non_Hidden_Virtual_Falls_Back_To_Base()
     {
-        var mock = Mock.Of<DerivedClientWithNewMethods>();
+        var mock = DerivedClientWithNewMethods.Mock();
 
         // Calculate is virtual in base and not hidden — unconfigured should call base (x * 2)
         var result = mock.Object.Calculate(7);
@@ -368,7 +368,7 @@ public class PartialMockTests
     [Test]
     public async Task New_Method_Hiding__Strict_Mode_Works()
     {
-        var mock = Mock.Of<DerivedClientWithNewMethods>(MockBehavior.Strict);
+        var mock = DerivedClientWithNewMethods.Mock(MockBehavior.Strict);
         mock.Calculate(Any()).Returns(99);
 
         var result = mock.Object.Calculate(10);
@@ -379,7 +379,7 @@ public class PartialMockTests
     [Test]
     public void New_Method_Hiding__Verify_Calls_On_Non_Hidden_Virtual()
     {
-        var mock = Mock.Of<DerivedClientWithNewMethods>();
+        var mock = DerivedClientWithNewMethods.Mock();
 
         mock.Object.Calculate(1);
         mock.Object.Calculate(2);
@@ -391,7 +391,7 @@ public class PartialMockTests
     public async Task New_Property_Hiding__Non_Hidden_Virtual_Property_Can_Be_Configured()
     {
         // DerivedClientWithNewProperties hides Name but not Priority
-        var mock = Mock.Of<DerivedClientWithNewProperties>();
+        var mock = DerivedClientWithNewProperties.Mock();
         mock.Priority.Returns(42);
 
         var result = mock.Object.Priority;
@@ -402,7 +402,7 @@ public class PartialMockTests
     [Test]
     public async Task Mixed_New_And_Override__Override_Method_Can_Be_Configured()
     {
-        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        var mock = MixedNewAndOverrideClient.Mock();
         mock.WithVersion(Any()).Returns("mocked-version");
 
         var result = mock.Object.WithVersion("v1");
@@ -413,7 +413,7 @@ public class PartialMockTests
     [Test]
     public async Task Mixed_New_And_Override__Override_Method_Falls_Back_To_Override()
     {
-        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        var mock = MixedNewAndOverrideClient.Mock();
 
         // WithVersion is overridden (not hidden) — unconfigured should call the override
         var result = mock.Object.WithVersion("v1");
@@ -424,7 +424,7 @@ public class PartialMockTests
     [Test]
     public async Task Mixed_New_And_Override__Non_Hidden_Virtual_Still_Works()
     {
-        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        var mock = MixedNewAndOverrideClient.Mock();
         mock.Calculate(Any()).Returns(100);
 
         var result = mock.Object.Calculate(3);
@@ -435,7 +435,7 @@ public class PartialMockTests
     [Test]
     public async Task Mixed_New_And_Override__Override_Property_Can_Be_Configured()
     {
-        var mock = Mock.Of<MixedNewAndOverrideClient>();
+        var mock = MixedNewAndOverrideClient.Mock();
         mock.Priority.Returns(7);
 
         var result = mock.Object.Priority;
@@ -448,7 +448,7 @@ public class PartialMockTests
     {
         // GrandchildClient hides MiddleClient.WithSnapshot (which overrides base)
         // Only Calculate should be mockable
-        var mock = Mock.Of<GrandchildClient>();
+        var mock = GrandchildClient.Mock();
         mock.Calculate(Any()).Returns(55);
 
         var result = mock.Object.Calculate(1);
@@ -459,7 +459,7 @@ public class PartialMockTests
     [Test]
     public async Task Three_Level_Hierarchy__Non_Hidden_Virtuals_Fall_Back_To_Base()
     {
-        var mock = Mock.Of<GrandchildClient>();
+        var mock = GrandchildClient.Mock();
 
         // WithVersion is not hidden at any level — unconfigured should call base
         var result = mock.Object.WithVersion("v2");
@@ -471,7 +471,7 @@ public class PartialMockTests
     public async Task New_Virtual__Re_Introduced_Virtual_Can_Be_Configured()
     {
         // NewVirtualClient uses 'new virtual' — starts a new virtual chain
-        var mock = Mock.Of<NewVirtualClient>();
+        var mock = NewVirtualClient.Mock();
         mock.WithSnapshot(Any()).Returns("mocked-snap");
 
         var result = mock.Object.WithSnapshot("s1");
@@ -482,7 +482,7 @@ public class PartialMockTests
     [Test]
     public async Task New_Virtual__Unconfigured_Falls_Back_To_New_Virtual_Base()
     {
-        var mock = Mock.Of<NewVirtualClient>();
+        var mock = NewVirtualClient.Mock();
 
         var result = mock.Object.WithSnapshot("s1");
 
@@ -492,7 +492,7 @@ public class PartialMockTests
     [Test]
     public async Task New_Virtual_Derived__Can_Configure_Override_Of_New_Virtual()
     {
-        var mock = Mock.Of<NewVirtualDerivedClient>();
+        var mock = NewVirtualDerivedClient.Mock();
         mock.WithSnapshot(Any()).Returns("fully-mocked");
 
         var result = mock.Object.WithSnapshot("s1");
@@ -503,7 +503,7 @@ public class PartialMockTests
     [Test]
     public async Task New_Virtual_Derived__Unconfigured_Falls_Back_To_Derived_Override()
     {
-        var mock = Mock.Of<NewVirtualDerivedClient>();
+        var mock = NewVirtualDerivedClient.Mock();
 
         var result = mock.Object.WithSnapshot("s1");
 
@@ -556,7 +556,7 @@ public class PartialMockTests
     public async Task Complex_Mixture__Non_Hidden_Overload_Can_Be_Configured()
     {
         // Execute(string,int,bool) is NOT hidden — should be mockable
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
         mock.Execute(Any(), Any(), Any()).Returns("mocked-3-arg");
 
         var result = mock.Object.Execute("cmd", 30, true);
@@ -567,7 +567,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Non_Hidden_Overload_Falls_Back_To_Base()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         // Execute(string,int,bool) not configured — should call base
         var result = mock.Object.Execute("cmd", 30, true);
@@ -578,7 +578,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Override_Method_Can_Be_Configured()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
         mock.GetStatus().Returns(42);
 
         var result = mock.Object.GetStatus();
@@ -589,7 +589,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Override_Method_Falls_Back_To_Derived_Implementation()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         // GetStatus is overridden — unconfigured should call the override (returns 1)
         var result = mock.Object.GetStatus();
@@ -600,7 +600,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Non_Hidden_Format_Overloads_Can_Be_Configured()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         // Format(int) is NOT hidden
         mock.Format(Any<int>()).Returns("mocked-int-fmt");
@@ -616,7 +616,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Non_Hidden_Format_Overloads_Fall_Back_To_Base()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         var result1 = mock.Object.Format(42);
         await Assert.That(result1).IsEqualTo("base-fmt-42");
@@ -628,7 +628,7 @@ public class PartialMockTests
     [Test]
     public async Task Complex_Mixture__Non_Hidden_Properties_Can_Be_Configured()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         // Priority and Description are not hidden — should be mockable
         mock.Priority.Returns(10);
@@ -641,7 +641,7 @@ public class PartialMockTests
     [Test]
     public void Complex_Mixture__Verify_Calls_On_Non_Hidden_Members()
     {
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
 
         mock.Object.Execute("a", 1, true);
         mock.Object.Execute("b", 2, false);
@@ -657,7 +657,7 @@ public class PartialMockTests
     public async Task Complex_Mixture__Non_Hidden_Event_Can_Be_Raised()
     {
         // StatusChanged is hidden by 'new'; MessageReceived remains virtual from base
-        var mock = Mock.Of<ComplexDerivedService>();
+        var mock = ComplexDerivedService.Mock();
         string? received = null;
 
         mock.Object.MessageReceived += (_, msg) => received = msg;

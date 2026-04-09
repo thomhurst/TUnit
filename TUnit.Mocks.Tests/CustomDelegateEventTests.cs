@@ -20,7 +20,7 @@ public class CustomDelegateEventTests
     public async Task Raise_Action_Event()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         var wasCalled = false;
 
         mock.Object.OnSimpleAction += () => wasCalled = true;
@@ -36,7 +36,7 @@ public class CustomDelegateEventTests
     public async Task Raise_Action_String_Event()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         string? receivedValue = null;
 
         mock.Object.OnStringAction += value => receivedValue = value;
@@ -52,7 +52,7 @@ public class CustomDelegateEventTests
     public async Task Raise_MultiParam_Action_Event()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         string? receivedName = null;
         int receivedAge = 0;
 
@@ -74,7 +74,7 @@ public class CustomDelegateEventTests
     public async Task Raise_Standard_EventHandler_Still_Works()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         string? receivedValue = null;
 
         mock.Object.OnStandardEvent += (sender, e) => receivedValue = e;
@@ -90,7 +90,7 @@ public class CustomDelegateEventTests
     public async Task Multiple_Subscribers_All_Notified()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         var results = new List<string>();
 
         mock.Object.OnStringAction += val => results.Add("sub1:" + val);
@@ -109,7 +109,7 @@ public class CustomDelegateEventTests
     public async Task Unsubscribe_Stops_Notifications()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         var callCount = 0;
 
         Action<string> handler = _ => callCount++;
@@ -128,7 +128,7 @@ public class CustomDelegateEventTests
     public async Task No_Subscribers_Does_Not_Throw()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
 
         // Act & Assert — should not throw
         mock.RaiseOnSimpleAction();

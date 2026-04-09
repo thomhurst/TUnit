@@ -130,7 +130,7 @@ public class OverloadEdgeCaseTests
     public async Task Overload_Int_Vs_String_Different_Setups()
     {
         // Arrange
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Format(42).Returns("int:42");
         mock.Format("hello").Returns("str:hello");
 
@@ -148,7 +148,7 @@ public class OverloadEdgeCaseTests
     public async Task Overload_Two_Params_Different_Signatures()
     {
         // Arrange
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Format(10, "PREFIX").Returns("int-string:PREFIX10");
         mock.Format(3.14, 2).Returns("double-int:3.14:2");
 
@@ -168,7 +168,7 @@ public class OverloadEdgeCaseTests
         // Arrange
         var singleArgCalled = false;
         var twoArgCalled = false;
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Process(Any())
             .Callback(() => singleArgCalled = true);
         mock.Process(Any(), Any())
@@ -188,7 +188,7 @@ public class OverloadEdgeCaseTests
     public async Task Overload_Verify_Specific_Overload()
     {
         // Arrange
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Format(Any<int>()).Returns("int");
         mock.Format(Any<string>()).Returns("string");
 
@@ -214,7 +214,7 @@ public class LargeParameterCountTests
     public async Task Seven_Parameter_Method_With_Mixed_Matchers()
     {
         // Arrange
-        var mock = Mock.Of<IComplexOperations>();
+        var mock = IComplexOperations.Mock();
         mock.BuildQuery(
             "users",
             Any<string[]>(),
@@ -257,7 +257,7 @@ public class LargeParameterCountTests
     public async Task Payment_Method_With_CancellationToken_And_Nullable()
     {
         // Arrange
-        var mock = Mock.Of<IComplexOperations>();
+        var mock = IComplexOperations.Mock();
         mock.ProcessPaymentAsync(
             "merchant-123",
             Is<decimal>(a => a > 0),
@@ -304,7 +304,7 @@ public class InterfaceInheritanceTests
     public async Task Deep_Interface_Inheritance_All_Properties_Accessible()
     {
         // Arrange
-        var mock = Mock.Of<ISoftDeletable>();
+        var mock = ISoftDeletable.Mock();
         var now = DateTime.UtcNow;
 
         // Setup properties from all three levels of inheritance
@@ -338,12 +338,12 @@ public class InterfaceInheritanceTests
     public async Task Repository_Returning_Inherited_Interface()
     {
         // Arrange — create a mock ISoftDeletable to use as the return value
-        var entityMock = Mock.Of<ISoftDeletable>();
+        var entityMock = ISoftDeletable.Mock();
         entityMock.Id.Returns(1);
         entityMock.CreatedBy.Returns("system");
         entityMock.IsDeleted.Returns(false);
 
-        var repoMock = Mock.Of<IAuditRepository>();
+        var repoMock = IAuditRepository.Mock();
         repoMock.GetByIdAsync(1).Returns(entityMock.Object);
 
         var activeList = new List<ISoftDeletable> { entityMock.Object };
@@ -375,7 +375,7 @@ public class ExceptionEdgeCaseTests
     public async Task Throws_Specific_Exception_With_Message()
     {
         // Arrange
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         mock.GetConfig("missing-key").Throws<KeyNotFoundException>();
 
         // Act & Assert
@@ -392,7 +392,7 @@ public class ExceptionEdgeCaseTests
     public async Task Sequential_Throws_Then_Succeeds()
     {
         // Arrange — simulate a retry pattern: first call fails, second succeeds
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         mock.CallRemoteServiceAsync("https://api.example.com/data")
             .Throws<InvalidOperationException>()
             .Then()
@@ -424,7 +424,7 @@ public class ExceptionEdgeCaseTests
     public async Task Async_Throws_Returns_Faulted_Task_Not_Sync_Throw()
     {
         // Arrange
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         mock.CallRemoteServiceAsync(Any()).Throws<TimeoutException>();
 
         // Act — the method should return a faulted task, NOT throw synchronously
@@ -449,7 +449,7 @@ public class ExceptionEdgeCaseTests
     public async Task Different_Args_Different_Exceptions()
     {
         // Arrange
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         mock.GetConfig("arg-error").Throws<ArgumentException>();
         mock.GetConfig("timeout").Throws<TimeoutException>();
         mock.GetConfig("valid").Returns("value");
@@ -478,7 +478,7 @@ public class ComplexArgumentMatchingTests
     public async Task Predicate_Matcher_String_Length_Range()
     {
         // Arrange
-        var mock = Mock.Of<IValidator>();
+        var mock = IValidator.Mock();
         mock.Validate(Is<string>(s => s != null && s.Length >= 3 && s.Length <= 50)).Returns(true);
 
         // Act
@@ -499,7 +499,7 @@ public class ComplexArgumentMatchingTests
     public async Task Multiple_Predicates_On_Multiple_Args()
     {
         // Arrange
-        var mock = Mock.Of<IValidator>();
+        var mock = IValidator.Mock();
         mock.Score(
             Is<string>(t => t != null && t.Length > 0),
             Is<int>(w => w >= 1 && w <= 10)
@@ -523,7 +523,7 @@ public class ComplexArgumentMatchingTests
     public async Task Exact_Match_Overrides_Any_Match_Later_Wins()
     {
         // Arrange — setup Any first, then exact. Last setup wins for matching args.
-        var mock = Mock.Of<IValidator>();
+        var mock = IValidator.Mock();
         mock.Validate(Any()).Returns(false);
         mock.Validate("special").Returns(true);
 
@@ -541,7 +541,7 @@ public class ComplexArgumentMatchingTests
     {
         // Arrange
         var input = Any<string>();
-        var mock = Mock.Of<IValidator>();
+        var mock = IValidator.Mock();
         mock.Validate(input).Returns(true);
 
         // Act — 5 calls with different arguments
@@ -572,7 +572,7 @@ public class ResetReconfigurationTests
     public async Task Reset_Then_Reconfigure_Different_Behavior()
     {
         // Arrange
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         mock.GetConfig("key").Returns("A");
 
         IExternalApi api = mock.Object;
@@ -596,7 +596,7 @@ public class ResetReconfigurationTests
     public async Task Reset_Mid_Test_Changes_Verification_Baseline()
     {
         // Arrange
-        var mock = Mock.Of<IExternalApi>();
+        var mock = IExternalApi.Mock();
         IExternalApi api = mock.Object;
 
         // Act — make calls before reset
@@ -634,7 +634,7 @@ public class ConcurrentAccessTests
     public async Task Concurrent_Setup_And_Invocation_From_Multiple_Threads()
     {
         // Arrange
-        var mock = Mock.Of<IConcurrentService>();
+        var mock = IConcurrentService.Mock();
         mock.GetValue(Any()).Returns(42);
         IConcurrentService svc = mock.Object;
 
@@ -662,7 +662,7 @@ public class ConcurrentAccessTests
     public async Task Concurrent_Verification_After_Parallel_Calls()
     {
         // Arrange
-        var mock = Mock.Of<IConcurrentService>();
+        var mock = IConcurrentService.Mock();
         mock.IncrementAsync(Any()).Returns(1);
         IConcurrentService svc = mock.Object;
 
@@ -686,7 +686,7 @@ public class EnumParameterTests
     public async Task Enum_Parameter_Exact_Match()
     {
         // Arrange
-        var mock = Mock.Of<ITaskManager>();
+        var mock = ITaskManager.Mock();
 
         var lowItems = new List<TaskItem>
         {
@@ -718,7 +718,7 @@ public class EnumParameterTests
     public async Task Enum_Parameter_With_Predicate_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<ITaskManager>();
+        var mock = ITaskManager.Mock();
         mock.CountByStatusAsync(Is<Status>(s => s == Status.Active || s == Status.Pending)).Returns(10);
         mock.CountByStatusAsync(Is<Status>(s => s == Status.Completed || s == Status.Failed)).Returns(5);
 
@@ -738,7 +738,7 @@ public class EnumParameterTests
     public async Task Enum_Void_Method_Verify_Specific_Value()
     {
         // Arrange
-        var mock = Mock.Of<ITaskManager>();
+        var mock = ITaskManager.Mock();
         ITaskManager mgr = mock.Object;
 
         // Act

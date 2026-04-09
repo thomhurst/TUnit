@@ -12,7 +12,7 @@ public class RegexMatcherTests
     public async Task Arg_Matches_With_Pattern_Matches_Matching_Strings()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(@"^[A-Z]")).Returns("capitalized");
 
         // Act
@@ -27,7 +27,7 @@ public class RegexMatcherTests
     public async Task Arg_Matches_With_Pattern_Does_Not_Match_NonMatching()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(@"^[A-Z]")).Returns("capitalized");
 
         // Act
@@ -43,7 +43,7 @@ public class RegexMatcherTests
     {
         // Arrange
         var regex = new Regex(@"\d{3}-\d{4}", RegexOptions.Compiled);
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(regex)).Returns("phone");
 
         // Act
@@ -58,7 +58,7 @@ public class RegexMatcherTests
     public async Task Arg_Matches_Regex_Does_Not_Match_Null()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(".*")).Returns("matched");
 
         // Act
@@ -72,7 +72,7 @@ public class RegexMatcherTests
     public async Task Arg_Matches_Regex_With_Email_Pattern()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(@"^[\w.+-]+@[\w-]+\.[\w.]+$")).Returns("email");
 
         // Act

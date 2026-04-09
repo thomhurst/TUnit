@@ -168,7 +168,7 @@ public class MockRepositoryTests
     {
         // Arrange
         var repo = new MockRepository();
-        var externalMock = Mock.Of<IRepoService>();
+        var externalMock = IRepoService.Mock();
 
         // Act — track an externally-created mock
         repo.Track(externalMock);

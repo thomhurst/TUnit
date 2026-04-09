@@ -26,7 +26,7 @@ public class PropertyTests
     public async Task Getter_Returns_Default_When_Not_Configured()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -40,7 +40,7 @@ public class PropertyTests
     public async Task Getter_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
         mock.Name.Returns("TestName");
 
         // Act
@@ -55,7 +55,7 @@ public class PropertyTests
     public async Task Getter_Returns_Configured_Int_Value()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
         mock.Count.Returns(42);
 
         // Act
@@ -70,7 +70,7 @@ public class PropertyTests
     public async Task Setter_Records_Call()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -85,7 +85,7 @@ public class PropertyTests
     public async Task Setter_Verify_With_Any_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -102,7 +102,7 @@ public class PropertyTests
     public async Task Setter_Verify_With_Specific_Value()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -119,7 +119,7 @@ public class PropertyTests
     public async Task Setter_Verify_Never_Called()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act — don't set anything
 
@@ -132,7 +132,7 @@ public class PropertyTests
     public async Task Getter_Verify_Was_Called()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -148,7 +148,7 @@ public class PropertyTests
     public async Task Getter_Verify_Never_Called()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act — don't access the property
 
@@ -161,7 +161,7 @@ public class PropertyTests
     public async Task Getter_Returns_Default_Int_When_Not_Configured()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         // Act
         IPropertyService svc = mock.Object;
@@ -175,7 +175,7 @@ public class PropertyTests
     public async Task Multiple_Getter_Setups_Last_Wins()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
         mock.Name.Returns("First");
         mock.Name.Returns("Second");
 
@@ -191,7 +191,7 @@ public class PropertyTests
     public async Task Setter_Setup_Callback()
     {
         // Arrange
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
         var callbackCalled = false;
         Action callback = () => callbackCalled = true;
         mock.Count.Set(Any()).Callback(callback);

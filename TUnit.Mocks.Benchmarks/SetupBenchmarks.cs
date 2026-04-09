@@ -16,7 +16,7 @@ public class SetupBenchmarks
     [Benchmark(Description = "TUnit.Mocks")]
     public object TUnitMocks_Setup()
     {
-        var mock = Mock.Of<ICalculatorService>();
+        var mock = ICalculatorService.Mock();
         mock.Add(TUnitArg.Any<int>(), TUnitArg.Any<int>()).Returns(42);
         mock.Format(TUnitArg.Any<int>()).Returns("formatted");
         mock.Divide(TUnitArg.Any<double>(), TUnitArg.Any<double>()).Returns(1.5);
@@ -76,7 +76,7 @@ public class SetupBenchmarks
     [Benchmark(Description = "TUnit.Mocks (Multiple)")]
     public object TUnitMocks_MultipleSetups()
     {
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         mock.GetById(1).Returns(new User { Id = 1, Name = "Alice" });
         mock.GetById(2).Returns(new User { Id = 2, Name = "Bob" });
         mock.GetById(3).Returns(new User { Id = 3, Name = "Charlie" });

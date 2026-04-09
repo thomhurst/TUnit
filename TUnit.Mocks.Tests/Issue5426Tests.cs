@@ -31,7 +31,7 @@ public class Issue5426Tests
     [Test]
     public async Task Can_Mock_Internal_Interface_With_Generic_Task_Method()
     {
-        var mock = Mock.Of<IInternalDatabaseService>(MockBehavior.Loose);
+        var mock = IInternalDatabaseService.Mock(MockBehavior.Loose);
         mock.GetOpenOrdersAsync().Returns(42);
 
         var result = await mock.Object.GetOpenOrdersAsync();
@@ -42,7 +42,7 @@ public class Issue5426Tests
     [Test]
     public async Task Can_Mock_Internal_Interface_With_Internal_Parameter_Type()
     {
-        var mock = Mock.Of<IInternalDatabaseService>(MockBehavior.Loose);
+        var mock = IInternalDatabaseService.Mock(MockBehavior.Loose);
         mock.UpdateOrderProgressAsync(Arg.Any<int>(), Arg.Any<InternalProcessingStatus>())
             .Returns();
 
@@ -52,7 +52,7 @@ public class Issue5426Tests
     [Test]
     public async Task Can_Mock_Internal_Interface_With_Internal_Return_Type()
     {
-        var mock = Mock.Of<IInternalOrderRepository>(MockBehavior.Loose);
+        var mock = IInternalOrderRepository.Mock(MockBehavior.Loose);
         mock.Get(Arg.Any<int>()).Returns(new InternalOrderId(7));
 
         var result = mock.Object.Get(1);

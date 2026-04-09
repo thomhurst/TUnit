@@ -116,7 +116,7 @@ internal static class MockTypeDiscovery
         }
 
         // Can't mock sealed classes or structs (analyzers catch this, but skip generation)
-        if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+        if (namedType.IsSealed)
             return ImmutableArray<MockTypeModel>.Empty;
         if (namedType.IsValueType)
             return ImmutableArray<MockTypeModel>.Empty;
@@ -413,11 +413,12 @@ internal static class MockTypeDiscovery
         }
     }
 
-    // ─── IFoo.Mock() static extension discovery ────────────────────
+    // ─── T.Mock() static extension discovery ─────────────────────────
 
     /// <summary>
-    /// Syntax predicate: matches IFoo.Mock() — a static extension invocation where the
+    /// Syntax predicate: matches T.Mock() — a static extension invocation where the
     /// left-hand side is a type name (not a variable/field access).
+    /// Works for both interfaces (e.g. IFoo.Mock()) and classes (e.g. MyService.Mock()).
     /// </summary>
     public static bool IsMockExtensionInvocation(SyntaxNode node, CancellationToken ct)
     {
@@ -437,8 +438,8 @@ internal static class MockTypeDiscovery
     }
 
     /// <summary>
-    /// Semantic transform: resolve the left-hand side of X.Mock() to a type symbol.
-    /// If it's an interface, build a MockTypeModel for it.
+    /// Semantic transform: resolve the left-hand side of T.Mock() to a type symbol.
+    /// If it's a mockable type (interface or non-sealed class), build a MockTypeModel for it.
     /// </summary>
     public static ImmutableArray<MockTypeModel> TransformMockExtensionInvocation(
         GeneratorSyntaxContext context, CancellationToken ct)
@@ -448,17 +449,30 @@ internal static class MockTypeDiscovery
 
         // Resolve the LHS to a type symbol first (cheap lookup).
         var leftSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression, ct);
-        if (leftSymbol.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Interface } namedType)
+        if (leftSymbol.Symbol is not INamedTypeSymbol namedType)
+            return ImmutableArray<MockTypeModel>.Empty;
+
+        // Can't mock sealed classes, structs, or delegates via the extension
+        if (namedType.IsValueType)
+            return ImmutableArray<MockTypeModel>.Empty;
+        if (namedType.IsSealed)
+            return ImmutableArray<MockTypeModel>.Empty;
+        if (namedType.TypeKind is not (TypeKind.Interface or TypeKind.Class))
             return ImmutableArray<MockTypeModel>.Empty;
 
         // Skip if .Mock() already resolves to a generated specialization (2nd incremental pass).
+        // The generated per-type extension lives in a class named *_MockStaticExtension.
+        // This covers both interfaces (wrapper return type in TUnit.Mocks.Generated) and
+        // classes (Mock<T> return type in TUnit.Mocks).
         var invocationSymbol = context.SemanticModel.GetSymbolInfo(invocation, ct);
         if (invocationSymbol.Symbol is IMethodSymbol resolved
-            && resolved.ReturnType.ContainingNamespace?.ToDisplayString() == "TUnit.Mocks.Generated")
+            && resolved.ContainingType?.Name is { } containingName
+            && containingName.EndsWith("_MockStaticExtension"))
             return ImmutableArray<MockTypeModel>.Empty;
 
+        var isPartialMock = namedType.TypeKind == TypeKind.Class;
         var compilationAssembly = context.SemanticModel.Compilation.Assembly;
-        return BuildModelWithTransitiveDependencies(namedType, isPartialMock: false, compilationAssembly);
+        return BuildModelWithTransitiveDependencies(namedType, isPartialMock, compilationAssembly);
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
@@ -488,7 +502,7 @@ internal static class MockTypeDiscovery
                 continue;
 
             // Can't mock sealed classes or structs
-            if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+            if (namedType.IsSealed)
                 continue;
             if (namedType.IsValueType)
                 continue;

@@ -27,7 +27,7 @@ public class Issue5453Tests
     [Test]
     public async Task Can_Mock_Public_Generic_Interface_With_Internal_Type_Argument()
     {
-        var mock = Mock.Of<IPublicGenericProcessor<InternalConsumer>>(MockBehavior.Loose);
+        var mock = IPublicGenericProcessor<InternalConsumer>.Mock(MockBehavior.Loose);
         var instance = new InternalConsumer();
 
         mock.Process(Arg.Any<InternalConsumer>()).Returns();
@@ -42,7 +42,7 @@ public class Issue5453Tests
     [Test]
     public async Task Can_Mock_Public_Generic_Interface_With_Internal_Partial_Type_Argument()
     {
-        var mock = Mock.Of<IPublicGenericProcessor<InternalPartialConsumer>>(MockBehavior.Loose);
+        var mock = IPublicGenericProcessor<InternalPartialConsumer>.Mock(MockBehavior.Loose);
         var instance = new InternalPartialConsumer();
 
         mock.Get().Returns(instance);
@@ -57,7 +57,7 @@ public class Issue5453Tests
     [Test]
     public async Task Can_Configure_Method_Overload_With_Internal_Type_Argument()
     {
-        var mock = Mock.Of<IPublicGenericProcessor<InternalConsumer>>(MockBehavior.Loose);
+        var mock = IPublicGenericProcessor<InternalConsumer>.Mock(MockBehavior.Loose);
         var instance = new InternalConsumer();
 
         mock.GetAsync().Returns(instance);

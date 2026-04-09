@@ -12,7 +12,7 @@ public class MatcherTests
     public async Task InRange_MatchesWithinBounds()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsInRange(1, 10), Any()).Returns(99);
 
         // Act
@@ -28,7 +28,7 @@ public class MatcherTests
     public async Task InRange_RejectsOutsideBounds()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsInRange(1, 10), Any()).Returns(99);
 
         // Act
@@ -45,7 +45,7 @@ public class MatcherTests
     public async Task IsIn_MatchesSetMembers()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsIn(1, 3, 5), Any()).Returns(77);
 
         // Act
@@ -61,7 +61,7 @@ public class MatcherTests
     public async Task IsIn_RejectsNonMembers()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsIn(1, 3, 5), Any()).Returns(77);
 
         // Act
@@ -78,7 +78,7 @@ public class MatcherTests
     public async Task IsNotIn_MatchesNonMembers()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsNotIn(1, 3, 5), Any()).Returns(88);
 
         // Act
@@ -95,7 +95,7 @@ public class MatcherTests
     public async Task IsNotIn_RejectsSetMembers()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(IsNotIn(1, 3, 5), Any()).Returns(88);
 
         // Act
@@ -111,7 +111,7 @@ public class MatcherTests
     public async Task Not_NegatesInnerMatcher()
     {
         // Arrange — Not(Is(5)) should match everything except 5
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Not(Is(5)), Any()).Returns(66);
 
         // Act
@@ -128,7 +128,7 @@ public class MatcherTests
     public async Task Not_WithPredicateMatcher()
     {
         // Arrange — Not(Is<int>(x => x > 0)) should match non-positive values
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Not(Is<int>(x => x > 0)), Any()).Returns(55);
 
         // Act

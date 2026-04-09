@@ -14,7 +14,7 @@ public class VerifyNoOtherCallsTests
     [Test]
     public async Task VerifyNoOtherCalls_Passes_When_All_Calls_Verified()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -29,7 +29,7 @@ public class VerifyNoOtherCallsTests
     [Test]
     public async Task VerifyNoOtherCalls_Fails_When_Unverified_Calls_Exist()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -46,7 +46,7 @@ public class VerifyNoOtherCallsTests
     [Test]
     public async Task VerifyNoOtherCalls_Passes_When_No_Calls_Made()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.VerifyNoOtherCalls();
         await Assert.That(true).IsTrue();
     }
@@ -54,7 +54,7 @@ public class VerifyNoOtherCallsTests
     [Test]
     public async Task VerifyNoOtherCalls_Works_After_Reset()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -69,7 +69,7 @@ public class VerifyNoOtherCallsTests
     [Test]
     public async Task VerifyNoOtherCalls_Multiple_Unverified_Shows_All()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;

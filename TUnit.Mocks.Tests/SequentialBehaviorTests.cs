@@ -12,7 +12,7 @@ public class SequentialBehaviorTests
     public async Task Throws_Then_Returns_First_Call_Throws_Second_Returns()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Throws<InvalidOperationException>()
             .Then()
@@ -33,7 +33,7 @@ public class SequentialBehaviorTests
     public async Task ReturnsSequentially_Returns_Values_In_Order()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .ReturnsSequentially(1, 2, 3);
 
@@ -49,7 +49,7 @@ public class SequentialBehaviorTests
     public async Task ReturnsSequentially_Last_Value_Repeats()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .ReturnsSequentially(10, 20);
 
@@ -67,7 +67,7 @@ public class SequentialBehaviorTests
     {
         // Arrange
         var callbackInvoked = false;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Callback(() => callbackInvoked = true)
             .Then()
@@ -88,7 +88,7 @@ public class SequentialBehaviorTests
     public async Task Returns_Then_Throws_Sequence()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1)
             .Returns(42)
             .Then()
@@ -108,7 +108,7 @@ public class SequentialBehaviorTests
     public async Task Void_Returns_Then_Throws_Then_Returns()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Returns()
             .Then()
@@ -139,7 +139,7 @@ public class SequentialBehaviorTests
     public async Task Chained_Returns_With_Then()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any())
             .Returns("first")
             .Then()

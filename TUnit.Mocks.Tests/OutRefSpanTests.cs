@@ -26,7 +26,7 @@ public class OutRefSpanTests
     public async Task Out_ReadOnlySpan_Default_Works()
     {
         // Arrange
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do().SetsOutBuffer(new ReadOnlySpan<byte>());
 
         // Act
@@ -41,7 +41,7 @@ public class OutRefSpanTests
     public async Task Out_ReadOnlySpan_With_Data()
     {
         // Arrange
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do().SetsOutBuffer(new ReadOnlySpan<byte>([1, 2, 3]));
 
         // Act
@@ -62,7 +62,7 @@ public class OutRefSpanTests
     public async Task Out_ReadOnlySpan_Mixed_Params_With_Matching()
     {
         // Arrange — TryParse has a regular string param + out ReadOnlySpan<byte>
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("hello")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([0xCA, 0xFE]));
@@ -84,7 +84,7 @@ public class OutRefSpanTests
     public async Task Out_ReadOnlySpan_No_Setup_Stays_Default()
     {
         // Arrange — no SetsOut call
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("key").Returns(false);
 
         // Act

@@ -27,7 +27,7 @@ public class DefaultValueProviderTests
     public async Task Custom_Provider_Returns_String_Default()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.DefaultValueProvider = new CustomProvider();
 
         IGreeter greeter = mock.Object;
@@ -43,7 +43,7 @@ public class DefaultValueProviderTests
     public async Task Custom_Provider_Returns_Int_Default()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.DefaultValueProvider = new CustomProvider();
 
         ICalculator calc = mock.Object;
@@ -59,7 +59,7 @@ public class DefaultValueProviderTests
     public async Task Setup_Takes_Precedence_Over_Provider()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.DefaultValueProvider = new CustomProvider();
         mock.Add(1, 2).Returns(100);
 
@@ -91,7 +91,7 @@ public class DefaultValueProviderTests
     public async Task BuiltIn_Provider_Returns_Empty_String()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.DefaultValueProvider = DefaultValueProvider.Instance;
 
         IGreeter greeter = mock.Object;
@@ -107,7 +107,7 @@ public class DefaultValueProviderTests
     public async Task No_Provider_Uses_Smart_Default_For_String()
     {
         // Arrange — no provider set, source generator provides "" as smart default
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
 
         IGreeter greeter = mock.Object;
 

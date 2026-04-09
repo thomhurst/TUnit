@@ -20,7 +20,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_Event_When_Method_Returns_Value()
     {
-        var mock = Mock.Of<IProcessService>();
+        var mock = IProcessService.Mock();
         string? receivedStatus = null;
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
@@ -37,7 +37,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_Event_When_Void_Method_Called()
     {
-        var mock = Mock.Of<IProcessService>();
+        var mock = IProcessService.Mock();
         string? receivedStatus = null;
 
         mock.Object.StatusChanged += (sender, status) => receivedStatus = status;
@@ -53,7 +53,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Multiple_Raises_Fire_In_Order()
     {
-        var mock = Mock.Of<IProcessService>();
+        var mock = IProcessService.Mock();
         var receivedStatuses = new List<string>();
 
         mock.Object.StatusChanged += (sender, status) => receivedStatuses.Add(status);
@@ -73,7 +73,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_With_No_Subscribers_Does_Not_Throw()
     {
-        var mock = Mock.Of<IProcessService>();
+        var mock = IProcessService.Mock();
 
         mock.Process(Any())
             .Returns(true)
@@ -88,7 +88,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_On_Each_Call()
     {
-        var mock = Mock.Of<IProcessService>();
+        var mock = IProcessService.Mock();
         var callCount = 0;
 
         mock.Object.StatusChanged += (sender, status) => callCount++;
@@ -107,7 +107,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_Event_From_Zero_Param_Void_Method()
     {
-        var mock = Mock.Of<IMultiEventService>();
+        var mock = IMultiEventService.Mock();
         var wasCalled = false;
 
         mock.Object.OnSimple += () => wasCalled = true;
@@ -123,7 +123,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_Event_From_Zero_Param_Return_Method()
     {
-        var mock = Mock.Of<IMultiEventService>();
+        var mock = IMultiEventService.Mock();
         var wasCalled = false;
 
         mock.Object.OnSimple += () => wasCalled = true;
@@ -141,7 +141,7 @@ public class AutoRaiseEventTests
     [Test]
     public async Task Raises_Multi_Param_Event_Unpacks_Arguments()
     {
-        var mock = Mock.Of<IMultiEventService>();
+        var mock = IMultiEventService.Mock();
         string? receivedName = null;
         int receivedCount = 0;
 

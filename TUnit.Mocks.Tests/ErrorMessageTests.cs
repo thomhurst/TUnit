@@ -16,7 +16,7 @@ public class ErrorMessageTests
     public async Task Verification_Message_Contains_Expected_Call_Description()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act & Assert — verify a call that was never made
         var exception = Assert.Throws<MockVerificationException>(() =>
@@ -32,7 +32,7 @@ public class ErrorMessageTests
     public async Task Verification_Message_Contains_Actual_Count()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
         calc.Add(1, 2);
@@ -52,7 +52,7 @@ public class ErrorMessageTests
     public async Task Verification_Message_Contains_Formatted_Argument_Values()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(42, 99);
 
@@ -71,7 +71,7 @@ public class ErrorMessageTests
     public async Task Verification_Message_Contains_String_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         IGreeter greeter = mock.Object;
         greeter.Greet("Alice");
 
@@ -89,7 +89,7 @@ public class ErrorMessageTests
     public async Task Verification_Message_Contains_Expected_Times_Description()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act & Assert
         var exception = Assert.Throws<MockVerificationException>(() =>
@@ -106,7 +106,7 @@ public class ErrorMessageTests
     public async Task Verification_WasNeverCalled_Message_Shows_Actual_Count()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
         calc.Add(1, 2);
@@ -124,7 +124,7 @@ public class ErrorMessageTests
     public async Task Verification_AtLeast_Message_Shows_Shortfall()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
@@ -142,7 +142,7 @@ public class ErrorMessageTests
     public async Task Verification_Actual_Calls_List_Is_Populated()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(10, 20);
         calc.Add(30, 40);
@@ -163,7 +163,7 @@ public class ErrorMessageTests
     public async Task Strict_Message_Contains_Method_Name()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -180,7 +180,7 @@ public class ErrorMessageTests
     public async Task Strict_Message_Contains_Int_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -199,7 +199,7 @@ public class ErrorMessageTests
     public async Task Strict_Message_Contains_String_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>(MockBehavior.Strict);
+        var mock = IGreeter.Mock(MockBehavior.Strict);
         IGreeter greeter = mock.Object;
 
         // Act & Assert
@@ -218,7 +218,7 @@ public class ErrorMessageTests
     public async Task Strict_Message_Contains_Violation_Description()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -235,7 +235,7 @@ public class ErrorMessageTests
     public async Task Strict_Void_Method_Message_Contains_Method_Name_And_Args()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert

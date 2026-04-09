@@ -12,7 +12,7 @@ public class StrictModeTests
     public async Task Strict_Unconfigured_Void_Method_Throws()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert — unconfigured void method should throw
@@ -28,7 +28,7 @@ public class StrictModeTests
     public async Task Strict_Unconfigured_Return_Method_Throws()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert — unconfigured return method should throw
@@ -44,7 +44,7 @@ public class StrictModeTests
     public async Task Strict_Configured_Method_Works_Normally()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Add(2, 3).Returns(5);
 
         // Act
@@ -59,7 +59,7 @@ public class StrictModeTests
     public async Task Strict_Configured_Void_Method_Does_Not_Throw()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Log("expected message");
 
         // Act & Assert — configured void method should not throw
@@ -72,7 +72,7 @@ public class StrictModeTests
     public async Task Strict_Error_Message_Contains_Method_Name()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -88,7 +88,7 @@ public class StrictModeTests
     public async Task Strict_Error_Message_Contains_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -105,7 +105,7 @@ public class StrictModeTests
     public async Task Strict_Error_Message_Contains_String_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>(MockBehavior.Strict);
+        var mock = IGreeter.Mock(MockBehavior.Strict);
         IGreeter greeter = mock.Object;
 
         // Act & Assert
@@ -122,7 +122,7 @@ public class StrictModeTests
     public async Task Strict_Mixed_Some_Configured_Some_Not()
     {
         // Arrange — configure Add but not Log or GetName
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
@@ -150,7 +150,7 @@ public class StrictModeTests
     public async Task Strict_Configured_Args_Mismatch_Throws()
     {
         // Arrange — configure Add with specific args
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
@@ -170,7 +170,7 @@ public class StrictModeTests
     public async Task Strict_UnconfiguredCall_Property_Contains_Call_Info()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         ICalculator calc = mock.Object;
 
         // Act & Assert
@@ -188,7 +188,7 @@ public class StrictModeTests
     public async Task Loose_Is_Default_Behavior()
     {
         // Arrange — no behavior specified, should be Loose
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — unconfigured methods should NOT throw
         ICalculator calc = mock.Object;

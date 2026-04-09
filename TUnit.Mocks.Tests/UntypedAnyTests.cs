@@ -17,7 +17,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Int_And_Matches_All()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         await Assert.That(mock.Object.Add(0, 0)).IsEqualTo(42);
@@ -29,7 +29,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Bool()
     {
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Process(Any(), Any()).Callback(() => { });
 
         // Should not throw — Any() converts to Arg<bool>
@@ -42,7 +42,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Double()
     {
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Format(Any<double>(), Any()).Returns("ok");
 
         await Assert.That(mock.Object.Format(3.14, 2)).IsEqualTo("ok");
@@ -53,7 +53,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Enum()
     {
-        var mock = Mock.Of<ITaskManager>();
+        var mock = ITaskManager.Mock();
         mock.CountByStatusAsync(Any()).Returns(99);
 
         await Assert.That(await mock.Object.CountByStatusAsync(Status.Active)).IsEqualTo(99);
@@ -69,7 +69,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_String()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any()).Returns("hello");
 
         await Assert.That(mock.Object.Greet("Alice")).IsEqualTo("hello");
@@ -79,7 +79,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_String_And_Matches_Null()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any()).Returns("matched");
 
         await Assert.That(mock.Object.Greet(null!)).IsEqualTo("matched");
@@ -88,7 +88,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Array()
     {
-        var mock = Mock.Of<IComplexOperations>();
+        var mock = IComplexOperations.Mock();
         mock.BuildQuery(
             Any(), Any(), Any(), Any(), Any(), Any(), Any()
         ).Returns("query");
@@ -105,7 +105,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Nullable_String()
     {
-        var mock = Mock.Of<INullableService>();
+        var mock = INullableService.Mock();
         mock.Process(Any(), Any()).Callback(() => { });
 
         // Both null and non-null should match
@@ -118,7 +118,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Converts_To_Nullable_Int()
     {
-        var mock = Mock.Of<IComplexOperations>();
+        var mock = IComplexOperations.Mock();
         mock.BuildQuery("t", Any(), Any(), Any(), Any(), Any(), Any()).Returns("ok");
 
         // Nullable int? params (limit, offset) accept both null and values
@@ -133,7 +133,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Mixed_With_Exact_Value()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), 5).Returns(50);
 
         await Assert.That(mock.Object.Add(0, 5)).IsEqualTo(50);
@@ -144,7 +144,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Mixed_With_Typed_Any()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any<int>()).Returns(77);
 
         await Assert.That(mock.Object.Add(1, 2)).IsEqualTo(77);
@@ -154,7 +154,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Mixed_With_Predicate_Matcher()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Is<int>(x => x > 0)).Returns(100);
 
         await Assert.That(mock.Object.Add(0, 1)).IsEqualTo(100);
@@ -165,7 +165,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Mixed_With_IsNull_Matcher()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(IsNull<string>()).Returns("was null");
         mock.Greet(Any()).Returns("catch-all");
 
@@ -181,7 +181,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Works_In_Verification()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(1);
 
         mock.Object.Add(1, 2);
@@ -194,7 +194,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_WasNeverCalled_Verification()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Add(Any(), Any()).WasNeverCalled();
     }
@@ -202,7 +202,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Verification_On_Void_Method()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Object.Log("hello");
         mock.Object.Log("world");
@@ -217,7 +217,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_With_Throws()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Throws<InvalidOperationException>();
 
         await Assert.That(() => mock.Object.Add(1, 2)).Throws<InvalidOperationException>();
@@ -227,7 +227,7 @@ public class UntypedAnyTests
     public async Task Any_With_Callback()
     {
         var callCount = 0;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Callback(() => callCount++);
 
@@ -240,7 +240,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_With_Sequential_Returns()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any())
             .Returns("first")
             .Then()
@@ -258,7 +258,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_All_Seven_Params()
     {
-        var mock = Mock.Of<IComplexOperations>();
+        var mock = IComplexOperations.Mock();
         mock.BuildQuery(Any(), Any(), Any(), Any(), Any(), Any(), Any())
             .Returns("wildcard");
 
@@ -274,7 +274,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_With_Async_Method()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(Any()).Returns("async-result");
 
         var result = await mock.Object.GetNameAsync("key");
@@ -291,7 +291,7 @@ public class UntypedAnyTests
     {
         // Typed Any<T>() supports capture
         var typedArg = Any<int>();
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(typedArg, Any()).Returns(1);
 
         mock.Object.Add(10, 0);
@@ -313,7 +313,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Typed_Any_Disambiguates_Overloads()
     {
-        var mock = Mock.Of<IOverloadedService>();
+        var mock = IOverloadedService.Mock();
         mock.Format(Any<int>()).Returns("int-match");
         mock.Format(Any<string>()).Returns("str-match");
 
@@ -328,7 +328,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_Without_Setup_Returns_Default_In_Loose_Mode()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         // No setup — loose mode returns defaults
 
         await Assert.That(mock.Object.Add(1, 2)).IsEqualTo(0);
@@ -338,7 +338,7 @@ public class UntypedAnyTests
     [Test]
     public async Task Any_In_Strict_Mode_Allows_Configured_Calls()
     {
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Add(Any(), Any()).Returns(42);
 
         await Assert.That(mock.Object.Add(1, 2)).IsEqualTo(42);

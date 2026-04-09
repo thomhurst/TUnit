@@ -66,7 +66,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Returns_Configured_Value()
     {
         // Arrange — use the bridge type which resolves static abstract members
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         var expectedConfig = new ClientConfig { Region = "eu-west-1" };
         mock.CreateDefaultConfig().Returns(expectedConfig);
 
@@ -81,7 +81,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Returns_Default_When_No_Setup()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
 
         // Act — no setup, should return default
         var result = CallStaticAbstract<IAmazonServiceMockable>();
@@ -94,7 +94,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Throws_Configured_Exception()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.CreateDefaultConfig().Throws(new InvalidOperationException("not available"));
 
         // Act & Assert
@@ -107,7 +107,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Method_Verification()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.CreateDefaultConfig().Returns(new ClientConfig());
 
         // Act
@@ -122,7 +122,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Property_Getter_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.ServiceId.Getter.Returns("s3");
 
         // Act
@@ -136,7 +136,7 @@ public class StaticAbstractMemberTests
     public async Task Static_Abstract_Property_Setter_Can_Be_Verified()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
 
         // Act
         SetStaticAbstractProperty<IAmazonServiceMockable>("dynamodb");
@@ -149,7 +149,7 @@ public class StaticAbstractMemberTests
     public async Task Instance_And_Static_Members_Coexist()
     {
         // Arrange
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.GetEndpoint().Returns("https://s3.amazonaws.com");
         mock.CreateDefaultConfig().Returns(new ClientConfig { Region = "ap-southeast-1" });
 
@@ -167,7 +167,7 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultClientConfig_Returns_Configured_Value()
     {
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         var expected = new ClientConfig { Region = "sa-east-1" };
         mock.CreateDefaultClientConfig().Returns(expected);
 
@@ -179,7 +179,7 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultClientConfig_Verification()
     {
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.CreateDefaultClientConfig().Returns(new ClientConfig());
 
         CallCreateDefaultClientConfig<IAmazonServiceMockable>();
@@ -195,7 +195,7 @@ public class StaticAbstractMemberTests
     {
         // No setup — the generator uses HandleCallWithReturn<object?> + cast,
         // so the default null value is cast to IAmazonService and returned.
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
 
         var result = CallCreateDefaultServiceClient<IAmazonServiceMockable>(
             new AWSCredentials(), new ClientConfig());
@@ -209,7 +209,7 @@ public class StaticAbstractMemberTests
     {
         // Arrange — .Returns() works via MockMethodCall<object?> (not VoidMockMethodCall)
         // because the return type (IAmazonService) has static abstract members (CS8920).
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         var expectedService = mock.Object;
         mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
             .Returns(expectedService);
@@ -225,7 +225,7 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultServiceClient_Verification()
     {
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         var creds = new AWSCredentials { AccessKey = "AKID", AuthSignature = "test-sig" };
         var config = new ClientConfig { Region = "us-west-2" };
 
@@ -239,7 +239,7 @@ public class StaticAbstractMemberTests
     [Test]
     public async Task Static_Abstract_CreateDefaultServiceClient_Throws_Configured_Exception()
     {
-        var mock = Mock.Of<IAmazonServiceMockable>();
+        var mock = IAmazonServiceMockable.Mock();
         mock.CreateDefaultServiceClient(Arg.Any<AWSCredentials>(), Arg.Any<ClientConfig>())
             .Throws(new InvalidOperationException("service unavailable"));
 

@@ -13,7 +13,7 @@ public class VerificationTests
     public async Task Verify_Once_Succeeds_When_Called_Once()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
 
         // Act
@@ -29,7 +29,7 @@ public class VerificationTests
     public async Task Verify_Fails_With_Descriptive_Message_When_Count_Wrong()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call once
         ICalculator calc = mock.Object;
@@ -50,7 +50,7 @@ public class VerificationTests
     public async Task Verify_Never_Succeeds_When_Not_Called()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — don't call anything
 
@@ -63,7 +63,7 @@ public class VerificationTests
     public async Task Verify_Never_Fails_When_Called()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         ICalculator calc = mock.Object;
@@ -82,7 +82,7 @@ public class VerificationTests
     public async Task Verify_AtLeast_Succeeds()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call 3 times
         ICalculator calc = mock.Object;
@@ -99,7 +99,7 @@ public class VerificationTests
     public async Task Verify_AtMost_Succeeds()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call twice
         ICalculator calc = mock.Object;
@@ -115,7 +115,7 @@ public class VerificationTests
     public async Task Verify_AtMost_Fails_When_Exceeded()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call 3 times
         ICalculator calc = mock.Object;
@@ -136,7 +136,7 @@ public class VerificationTests
     public async Task Verify_Between_Succeeds()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call twice
         ICalculator calc = mock.Object;
@@ -152,7 +152,7 @@ public class VerificationTests
     public async Task Verify_Between_Fails_When_Outside_Range()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call once
         ICalculator calc = mock.Object;
@@ -171,7 +171,7 @@ public class VerificationTests
     public async Task Verify_With_Exact_Args_Only_Matching_Calls_Count()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call with different args
         ICalculator calc = mock.Object;
@@ -189,7 +189,7 @@ public class VerificationTests
     public async Task Verify_WasCalled_Shorthand_At_Least_Once()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         ICalculator calc = mock.Object;
@@ -204,7 +204,7 @@ public class VerificationTests
     public async Task Verify_WasCalled_Shorthand_Fails_When_Not_Called()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert — WasCalled() should fail when not called
         var exception = Assert.Throws<MockVerificationException>(() =>
@@ -219,7 +219,7 @@ public class VerificationTests
     public async Task Verify_Void_Method()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         ICalculator calc = mock.Object;
@@ -236,7 +236,7 @@ public class VerificationTests
     public async Task Verify_String_Method_On_Different_Interface()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("Alice").Returns("Hello, Alice!");
 
         // Act

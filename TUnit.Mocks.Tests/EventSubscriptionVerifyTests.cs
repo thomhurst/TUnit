@@ -9,7 +9,7 @@ public class EventSubscriptionVerifyTests
     public async Task WasEventSubscribed_Returns_True_After_Subscribe()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
 
         // Act
         mock.Object.OnStringAction += _ => { };
@@ -22,7 +22,7 @@ public class EventSubscriptionVerifyTests
     public async Task WasEventSubscribed_Returns_False_When_No_Subscription()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
 
         // Assert
         await Assert.That(mock.Events.OnStringAction.WasSubscribed).IsFalse();
@@ -32,7 +32,7 @@ public class EventSubscriptionVerifyTests
     public async Task GetEventSubscriberCount_Tracks_Subscriptions()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
 
         // Act
         mock.Object.OnStringAction += _ => { };
@@ -46,7 +46,7 @@ public class EventSubscriptionVerifyTests
     public async Task GetEventSubscriberCount_Decrements_On_Unsubscribe()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         Action<string> handler = _ => { };
 
         // Act
@@ -62,7 +62,7 @@ public class EventSubscriptionVerifyTests
     public async Task Different_Events_Tracked_Independently()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
 
         // Act
         mock.Object.OnStringAction += _ => { };
@@ -79,7 +79,7 @@ public class EventSubscriptionVerifyTests
     public async Task Reset_Clears_Subscription_History()
     {
         // Arrange
-        var mock = Mock.Of<ICustomEventService>();
+        var mock = ICustomEventService.Mock();
         mock.Object.OnStringAction += _ => { };
 
         // Act

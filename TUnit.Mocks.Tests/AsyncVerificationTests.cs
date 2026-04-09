@@ -8,7 +8,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasCalled_Times_Once_Passes()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -21,7 +21,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasCalled_Times_Exactly_Passes()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -36,7 +36,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasCalled_Wrong_Count_Fails()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -50,7 +50,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasNeverCalled_Passes_When_Not_Called()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         await Assert.That(mock.Add(Any(), Any()))
             .WasNeverCalled();
@@ -59,7 +59,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasNeverCalled_Fails_When_Called()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -73,7 +73,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task WasCalled_AtLeastOnce_Passes()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -87,7 +87,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task Property_Getter_WasCalled_Via_Assert()
     {
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
         mock.Name.Returns("Calculator");
 
         IPropertyService svc = mock.Object;
@@ -101,7 +101,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task Property_Setter_WasCalled_Via_Assert()
     {
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         IPropertyService svc = mock.Object;
         svc.Count = 10;
@@ -113,7 +113,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task Property_Getter_WasNeverCalled_Via_Assert()
     {
-        var mock = Mock.Of<IPropertyService>();
+        var mock = IPropertyService.Mock();
 
         await Assert.That(mock.Name)
             .WasNeverCalled();
@@ -122,7 +122,7 @@ public class AsyncVerificationTests
     [Test]
     public async Task Multiple_Verifications_In_Sequence()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
 

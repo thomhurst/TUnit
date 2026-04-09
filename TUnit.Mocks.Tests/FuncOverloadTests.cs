@@ -22,7 +22,7 @@ public class FuncOverloadTests
     public async Task Single_Param_Lambda_Setup_And_Match()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(s => s.StartsWith("Hi")).Returns("matched");
 
         // Act
@@ -36,7 +36,7 @@ public class FuncOverloadTests
     public async Task Single_Param_Lambda_No_Match_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(s => s.StartsWith("Hi")).Returns("matched");
 
         // Act
@@ -50,7 +50,7 @@ public class FuncOverloadTests
     public async Task Mixed_Lambda_And_Any()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(x => x > 5, Any()).Returns(100);
 
         // Act
@@ -64,7 +64,7 @@ public class FuncOverloadTests
     public async Task Mixed_Lambda_And_Any_No_Match()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(x => x > 5, Any()).Returns(100);
 
         // Act
@@ -78,7 +78,7 @@ public class FuncOverloadTests
     public async Task Mixed_Any_And_Lambda()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), y => y % 2 == 0).Returns(42);
 
         // Act
@@ -94,7 +94,7 @@ public class FuncOverloadTests
     public async Task Both_Params_Lambda()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(x => x > 0, y => y > 0).Returns(99);
 
         // Act
@@ -110,7 +110,7 @@ public class FuncOverloadTests
     public async Task Mixed_Lambda_And_Value()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(x => x > 5, 3).Returns(50);
 
         // Act
@@ -126,7 +126,7 @@ public class FuncOverloadTests
     public async Task Lambda_Verification_WasCalled()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         mock.Object.Add(10, 20);
@@ -139,7 +139,7 @@ public class FuncOverloadTests
     public async Task Lambda_Verification_WasNeverCalled()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         mock.Object.Add(10, 20);
@@ -152,7 +152,7 @@ public class FuncOverloadTests
     public async Task Void_Method_Lambda()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         var logged = false;
         mock.Log(s => s.Contains("error")).Callback(() => logged = true);
 
@@ -167,7 +167,7 @@ public class FuncOverloadTests
     public async Task Async_Method_Lambda()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(s => s.Length > 3).Returns("found");
 
         // Act
@@ -181,7 +181,7 @@ public class FuncOverloadTests
     public async Task String_Predicate_Lambda()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(name => name.Contains("World")).Returns("Hello World!");
 
         // Act
@@ -200,7 +200,7 @@ public class FuncOverloadTests
         // The base overload is Arg<Func<int, bool>> and the generated Func overload
         // is Func<Func<int, bool>, bool>. Passing a Func<int, bool> value should
         // target the base overload (implicit T -> Arg<T>), not cause ambiguity.
-        var mock = Mock.Of<IFilterService>();
+        var mock = IFilterService.Mock();
         Func<int, bool> isPositive = x => x > 0;
         mock.Apply(isPositive).Returns(42);
 
@@ -215,7 +215,7 @@ public class FuncOverloadTests
     public async Task Multiple_Lambda_Setups_Last_Wins()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(x => x > 0, Any()).Returns(50);
         mock.Add(x => x > 10, Any()).Returns(100);
 

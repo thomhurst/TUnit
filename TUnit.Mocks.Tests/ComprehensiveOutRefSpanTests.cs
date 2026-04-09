@@ -68,7 +68,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_Empty()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Fill().SetsOutBuffer(Span<byte>.Empty);
 
         mock.Object.Fill(out var buffer);
@@ -80,7 +80,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_With_Data()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Fill().SetsOutBuffer(new Span<byte>([10, 20, 30]));
 
         mock.Object.Fill(out var buffer);
@@ -98,7 +98,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_With_Returns_And_Mixed_Params()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Write("hello")
             .Returns(5)
             .SetsOutWritten(new Span<byte>([0x68, 0x65, 0x6C]));
@@ -116,7 +116,7 @@ public class OutMutableSpanTests
     public async Task Out_Span_Callback_Fires()
     {
         var wasCalled = false;
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Fill()
             .Callback(() => wasCalled = true)
             .SetsOutBuffer(new Span<byte>([1]));
@@ -129,7 +129,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_Throws()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Fill().Throws<InvalidOperationException>();
 
         var ex = Assert.Throws<InvalidOperationException>(() => mock.Object.Fill(out _));
@@ -140,7 +140,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_Verification()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
         mock.Object.Fill(out _);
         mock.Object.Fill(out _);
 
@@ -151,7 +151,7 @@ public class OutMutableSpanTests
     [Test]
     public async Task Out_Span_Never_Called()
     {
-        var mock = Mock.Of<IMutableSpanOutput>();
+        var mock = IMutableSpanOutput.Mock();
 
         mock.Fill().WasNeverCalled();
         await Assert.That(true).IsTrue();
@@ -167,7 +167,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_With_Data()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.TryReadLine()
             .Returns(true)
             .SetsOutLine("hello world".AsSpan());
@@ -186,7 +186,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_Empty()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.TryReadLine()
             .Returns(false)
             .SetsOutLine(ReadOnlySpan<char>.Empty);
@@ -201,7 +201,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_Mixed_Params_With_Matchers()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.GetToken("CSV")
             .Returns(3)
             .SetsOutToken("foo".AsSpan());
@@ -231,7 +231,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_Arg_Any_Matcher()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.GetToken(Any())
             .Returns(1)
             .SetsOutToken("x".AsSpan());
@@ -250,7 +250,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_Arg_Is_Predicate()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.GetToken(Is<string>(s => s.StartsWith("J")))
             .Returns(42)
             .SetsOutToken("json".AsSpan());
@@ -270,7 +270,7 @@ public class OutReadOnlySpanCharTests
     [Test]
     public async Task Out_ReadOnlySpan_Char_Verification_Multiple()
     {
-        var mock = Mock.Of<ICharSpanReader>();
+        var mock = ICharSpanReader.Mock();
         mock.GetToken(Any()).Returns(0);
 
         mock.Object.GetToken("a", out _);
@@ -294,7 +294,7 @@ public class MultipleOutParamsTests
     [Test]
     public async Task Multiple_Out_Int_And_Span()
     {
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract("test")
             .Returns(true)
             .SetsOutCount(3)
@@ -316,7 +316,7 @@ public class MultipleOutParamsTests
     public async Task Multiple_Out_Only_Int_Set()
     {
         // Only set the int out param, span stays default
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract("partial")
             .Returns(true)
             .SetsOutCount(7);
@@ -333,7 +333,7 @@ public class MultipleOutParamsTests
     public async Task Multiple_Out_Only_Span_Set()
     {
         // Only set the span out param, int stays default
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract("data-only")
             .Returns(false)
             .SetsOutData(new ReadOnlySpan<byte>([1, 2]));
@@ -349,7 +349,7 @@ public class MultipleOutParamsTests
     [Test]
     public async Task Multiple_Out_Chain_Order_SetsOut_Before_Returns()
     {
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract(Any())
             .SetsOutCount(99)
             .SetsOutData(new ReadOnlySpan<byte>([0xFF]))
@@ -366,7 +366,7 @@ public class MultipleOutParamsTests
     [Test]
     public async Task Multiple_Out_Different_Setups_Per_Input()
     {
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract("alpha")
             .Returns(true)
             .SetsOutCount(1)
@@ -399,7 +399,7 @@ public class MultipleOutParamsTests
     public async Task Multiple_Out_Callback_With_Args()
     {
         string? capturedInput = null;
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract(Any())
             .Callback((string input) => capturedInput = input)
             .Returns(true)
@@ -414,7 +414,7 @@ public class MultipleOutParamsTests
     [Test]
     public async Task Multiple_Out_Throws_Exception()
     {
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract("bad").Throws<ArgumentException>();
 
         var ex = Assert.Throws<ArgumentException>(() =>
@@ -426,7 +426,7 @@ public class MultipleOutParamsTests
     [Test]
     public async Task Multiple_Out_Verification()
     {
-        var mock = Mock.Of<IMultiOutput>();
+        var mock = IMultiOutput.Mock();
         mock.Extract(Any()).Returns(false);
 
         mock.Object.Extract("a", out _, out _);
@@ -450,7 +450,7 @@ public class RefAndOutSpanTests
     [Test]
     public async Task Ref_Int_And_Out_Span()
     {
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(0)
             .Returns(true)
             .SetsRefOffset(10)
@@ -472,7 +472,7 @@ public class RefAndOutSpanTests
     [Test]
     public async Task Ref_Int_And_Out_Span_Different_Offsets()
     {
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(0)
             .Returns(true)
             .SetsRefOffset(5)
@@ -512,7 +512,7 @@ public class RefAndOutSpanTests
     [Test]
     public async Task Ref_And_Out_Span_With_Any_Matcher()
     {
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(Any())
             .Returns(true)
             .SetsRefOffset(100)
@@ -530,7 +530,7 @@ public class RefAndOutSpanTests
     [Test]
     public async Task Ref_And_Out_Span_Verification()
     {
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(Any()).Returns(false);
 
         int p1 = 0, p2 = 5;
@@ -547,7 +547,7 @@ public class RefAndOutSpanTests
     [Test]
     public async Task Ref_And_Out_Span_Throws()
     {
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(-1).Throws<ArgumentOutOfRangeException>();
 
         int bad = -1;
@@ -561,7 +561,7 @@ public class RefAndOutSpanTests
     public async Task Ref_And_Out_Span_Callback()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ICodec>();
+        var mock = ICodec.Mock();
         mock.Decode(Any())
             .Callback(() => wasCalled = true)
             .Returns(true)
@@ -584,7 +584,7 @@ public class SpanInputAndOutputTests
     [Test]
     public async Task RefStructArg_Input_With_Out_Span()
     {
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Transform(RefStructArg<ReadOnlySpan<byte>>.Any)
             .SetsOutOutput(new ReadOnlySpan<byte>([0xDE, 0xAD]));
 
@@ -602,7 +602,7 @@ public class SpanInputAndOutputTests
     public async Task RefStructArg_Input_With_Out_Span_Callback()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Transform(RefStructArg<ReadOnlySpan<byte>>.Any)
             .Callback(() => wasCalled = true)
             .SetsOutOutput(new ReadOnlySpan<byte>([1]));
@@ -615,7 +615,7 @@ public class SpanInputAndOutputTests
     [Test]
     public async Task RefStructArg_Input_With_Out_Span_Throws()
     {
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Transform(RefStructArg<ReadOnlySpan<byte>>.Any)
             .Throws<NotSupportedException>();
 
@@ -628,7 +628,7 @@ public class SpanInputAndOutputTests
     [Test]
     public async Task RefStructArg_Input_With_Out_Span_Verification()
     {
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Object.Transform(new byte[] { 1 }, out _);
         mock.Object.Transform(ReadOnlySpan<byte>.Empty, out _);
 
@@ -640,7 +640,7 @@ public class SpanInputAndOutputTests
     public async Task PreNet9_Span_Input_With_Out_Span()
     {
         // Pre-NET9: ref struct input excluded from matching
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Transform()
             .SetsOutOutput(new ReadOnlySpan<byte>([0xBE, 0xEF]));
 
@@ -655,7 +655,7 @@ public class SpanInputAndOutputTests
     [Test]
     public async Task PreNet9_Span_Input_Verification()
     {
-        var mock = Mock.Of<ITransformer>();
+        var mock = ITransformer.Mock();
         mock.Object.Transform(new byte[] { 1 }, out _);
         mock.Object.Transform(ReadOnlySpan<byte>.Empty, out _);
 
@@ -674,7 +674,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_With_Return_Value()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Increment(Any(), 1)
             .Returns(1)
             .SetsRefValue(11);
@@ -689,7 +689,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Exact_Value_Matching()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Increment(10, 1).Returns(11).SetsRefValue(11);
         mock.Increment(20, 1).Returns(21).SetsRefValue(21);
 
@@ -708,7 +708,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Predicate_Matching()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.TryAdvance(Is<int>(v => v >= 0), 100)
             .Returns(true)
             .SetsRefPosition(50);
@@ -731,7 +731,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Void_Method()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Clear(Any()).SetsRefValue(0);
 
         int val = 42;
@@ -743,7 +743,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Not_Modified_Without_Setup()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         // No SetsRefValue configured
 
         int val = 42;
@@ -757,7 +757,7 @@ public class ComprehensiveRefTests
     public async Task Ref_Callback_Fires()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Clear(Any())
             .Callback(() => wasCalled = true)
             .SetsRefValue(0);
@@ -772,7 +772,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Throws()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Increment(Any(), 0).Throws<ArgumentException>();
 
         int val = 1;
@@ -784,7 +784,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Verification_With_Exact_Value()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Increment(Any(), Any()).Returns(0);
 
         int v1 = 5, v2 = 10;
@@ -801,7 +801,7 @@ public class ComprehensiveRefTests
     [Test]
     public async Task Ref_Verification_AtLeast_AtMost()
     {
-        var mock = Mock.Of<ICounter>();
+        var mock = ICounter.Mock();
         mock.Clear(Any());
 
         int v = 1;
@@ -825,7 +825,7 @@ public class RefAndOutCombinedTests
     [Test]
     public async Task Ref_And_Out_Both_Set()
     {
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
         mock.SwapAndReport(42)
             .SetsRefValue(0)
             .SetsOutReport("swapped 42 to 0");
@@ -840,7 +840,7 @@ public class RefAndOutCombinedTests
     [Test]
     public async Task Ref_And_Out_Only_Ref_Set()
     {
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
         mock.SwapAndReport(Any()).SetsRefValue(99);
 
         int val = 1;
@@ -853,7 +853,7 @@ public class RefAndOutCombinedTests
     [Test]
     public async Task Ref_And_Out_Only_Out_Set()
     {
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
         mock.SwapAndReport(Any()).SetsOutReport("report");
 
         int val = 50;
@@ -868,7 +868,7 @@ public class RefAndOutCombinedTests
     public async Task Ref_And_Out_Callback()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
         mock.SwapAndReport(Any())
             .Callback(() => wasCalled = true)
             .SetsRefValue(0)
@@ -883,7 +883,7 @@ public class RefAndOutCombinedTests
     [Test]
     public async Task Ref_And_Out_Throws()
     {
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
         mock.SwapAndReport(-1).Throws<ArgumentException>();
 
         int val = -1;
@@ -896,7 +896,7 @@ public class RefAndOutCombinedTests
     [Test]
     public async Task Ref_And_Out_Verification()
     {
-        var mock = Mock.Of<ISwapper>();
+        var mock = ISwapper.Mock();
 
         int v1 = 1, v2 = 2;
         mock.Object.SwapAndReport(ref v1, out _);
@@ -919,7 +919,7 @@ public class DualSpanOutputTests
     [Test]
     public async Task Two_Span_Out_Params_Both_Set()
     {
-        var mock = Mock.Of<IDualSpanOutput>();
+        var mock = IDualSpanOutput.Mock();
         mock.Split("hello")
             .SetsOutBytes(new ReadOnlySpan<byte>([0x68, 0x65]))
             .SetsOutChars("hi".AsSpan());
@@ -939,7 +939,7 @@ public class DualSpanOutputTests
     [Test]
     public async Task Two_Span_Out_Only_First_Set()
     {
-        var mock = Mock.Of<IDualSpanOutput>();
+        var mock = IDualSpanOutput.Mock();
         mock.Split("partial")
             .SetsOutBytes(new ReadOnlySpan<byte>([1, 2, 3]));
 
@@ -954,7 +954,7 @@ public class DualSpanOutputTests
     [Test]
     public async Task Two_Span_Out_Only_Second_Set()
     {
-        var mock = Mock.Of<IDualSpanOutput>();
+        var mock = IDualSpanOutput.Mock();
         mock.Split("chars-only")
             .SetsOutChars("abc".AsSpan());
 
@@ -971,7 +971,7 @@ public class DualSpanOutputTests
     [Test]
     public async Task Two_Span_Out_Verification()
     {
-        var mock = Mock.Of<IDualSpanOutput>();
+        var mock = IDualSpanOutput.Mock();
 
         mock.Object.Split("a", out _, out _);
         mock.Object.Split("b", out _, out _);
@@ -986,7 +986,7 @@ public class DualSpanOutputTests
     [Test]
     public async Task Two_Span_Out_Throws()
     {
-        var mock = Mock.Of<IDualSpanOutput>();
+        var mock = IDualSpanOutput.Mock();
         mock.Split("").Throws<ArgumentException>();
 
         var ex = Assert.Throws<ArgumentException>(() =>
@@ -1006,7 +1006,7 @@ public class SequentialSpanSetupTests
     public async Task Then_Returns_Sequence_With_Out_Span()
     {
         // SetsOut applies at setup level; Then() sequences Returns/Callback/Throws
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse(Any())
             .SetsOutData(new ReadOnlySpan<byte>([0xAA]))
             .Returns(true)
@@ -1032,7 +1032,7 @@ public class SequentialSpanSetupTests
     [Test]
     public async Task Then_Throws_After_Success_With_Out_Span()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("data")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([0xAA]))
@@ -1057,7 +1057,7 @@ public class SequentialSpanSetupTests
     {
         // Callbacks sequence correctly with Then(), span stays constant
         var callCount = 0;
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do()
             .Callback(() => callCount++)
             .SetsOutBuffer(new ReadOnlySpan<byte>([0xFF]))
@@ -1078,7 +1078,7 @@ public class SequentialSpanSetupTests
     [Test]
     public async Task ReturnsSequentially_With_Out_Span()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse(Any())
             .ReturnsSequentially(true, true, false)
             .SetsOutData(new ReadOnlySpan<byte>([0x01, 0x02]));
@@ -1103,7 +1103,7 @@ public class SequentialSpanSetupTests
     public async Task Separate_Setups_For_Different_Span_Data()
     {
         // Use separate setups per input value instead of Then() for different span data
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("first")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([0x01]));
@@ -1139,7 +1139,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     public async Task Callback_With_Void_Out_Span_Method()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do()
             .Callback(() => wasCalled = true)
             .SetsOutBuffer(new ReadOnlySpan<byte>([0xFF]));
@@ -1154,7 +1154,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Throws_With_Void_Out_Span_Method()
     {
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do().Throws<NotImplementedException>();
 
         var ex = Assert.Throws<NotImplementedException>(() =>
@@ -1166,7 +1166,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Throws_Instance_With_Out_Span()
     {
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do().Throws(new InvalidOperationException("custom message"));
 
         var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -1179,7 +1179,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Verification_Once()
     {
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Object.Do(out _);
 
         mock.Do().WasCalled(Times.Once);
@@ -1189,7 +1189,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Verification_Multiple()
     {
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Object.Do(out _);
         mock.Object.Do(out _);
         mock.Object.Do(out _);
@@ -1204,7 +1204,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Verification_Never()
     {
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
 
         mock.Do().WasNeverCalled();
         mock.Do().WasCalled(Times.Never);
@@ -1218,7 +1218,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
         for (int i = 0; i < largeData.Length; i++)
             largeData[i] = (byte)(i % 256);
 
-        var mock = Mock.Of<ISpanWriter>();
+        var mock = ISpanWriter.Mock();
         mock.Do().SetsOutBuffer(new ReadOnlySpan<byte>(largeData));
 
         mock.Object.Do(out var buffer);
@@ -1234,7 +1234,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Chaining_Returns_Then_SetsOut()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("a")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([1]));
@@ -1249,7 +1249,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Chaining_SetsOut_Then_Returns()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("b")
             .SetsOutData(new ReadOnlySpan<byte>([2, 3]))
             .Returns(true);
@@ -1264,7 +1264,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Typed_SetsOutData_With_Array()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("key")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([0xDE, 0xAD]));
@@ -1281,7 +1281,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Different_Values_Per_Input()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse("alpha")
             .Returns(true)
             .SetsOutData(new ReadOnlySpan<byte>([0x01]));
@@ -1322,7 +1322,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Verification_With_Mixed_Params()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse(Any()).Returns(false);
 
         mock.Object.TryParse("x", out _);
@@ -1340,7 +1340,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     public async Task Out_Span_Callback_With_Args()
     {
         string? capturedInput = null;
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse(Any())
             .Callback((string input) => capturedInput = input)
             .Returns(true)
@@ -1354,7 +1354,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     [Test]
     public async Task Out_Span_Throws_Exception_Factory()
     {
-        var mock = Mock.Of<ISpanParser>();
+        var mock = ISpanParser.Mock();
         mock.TryParse(Any())
             .Throws((string input) =>
                 new ArgumentException($"Bad input: {input}"));

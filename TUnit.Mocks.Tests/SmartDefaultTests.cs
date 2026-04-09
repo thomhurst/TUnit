@@ -25,7 +25,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_String_Returns_Empty_String()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -40,7 +40,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_Int_Returns_Zero()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -54,7 +54,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_Bool_Returns_False()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -68,7 +68,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_Nullable_Returns_Null()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -82,7 +82,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_List_Returns_Empty_Collection()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -97,7 +97,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_Double_Returns_Zero()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -111,7 +111,7 @@ public class SmartDefaultTests
     public async Task Unconfigured_Long_Returns_Zero()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
 
         // Act
         IDefaultsService svc = mock.Object;
@@ -125,7 +125,7 @@ public class SmartDefaultTests
     public async Task Configured_Overrides_Smart_Default()
     {
         // Arrange
-        var mock = Mock.Of<IDefaultsService>();
+        var mock = IDefaultsService.Mock();
         mock.GetName().Returns("custom");
         mock.GetCount().Returns(42);
 
@@ -141,7 +141,7 @@ public class SmartDefaultTests
     public async Task Smart_Defaults_Consistent_With_ICalculator()
     {
         // Verify that the existing ICalculator interface also has correct smart defaults
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // int -> 0

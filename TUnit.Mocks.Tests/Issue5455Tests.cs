@@ -10,7 +10,7 @@ public class Issue5455Tests
     [Test]
     public void Mocking_Response_With_Internal_Setter_Compiles()
     {
-        var mock = Mock.Of<Response>(MockBehavior.Strict);
+        var mock = Response.Mock(MockBehavior.Strict);
         _ = mock.Object;
     }
 }

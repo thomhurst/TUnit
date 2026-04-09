@@ -43,7 +43,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public async Task Generic_Interface_With_Enum_Type_Argument()
     {
-        var mock = Mock.Of<IValueHolder<Priority>>();
+        var mock = IValueHolder<Priority>.Mock();
         mock.Value.Returns(Priority.High);
 
         IValueHolder<Priority> holder = mock.Object;
@@ -67,7 +67,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public async Task Generic_Interface_With_Class_Type_Argument()
     {
-        var mock = Mock.Of<IValueHolder<ItemConfig>>();
+        var mock = IValueHolder<ItemConfig>.Mock();
         var config = new ItemConfig { Name = "Test", Value = 42 };
         mock.Value.Returns(config);
 
@@ -95,7 +95,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public async Task Generic_Interface_With_Two_Non_Builtin_Type_Arguments()
     {
-        var mock = Mock.Of<IMapper<ItemConfig, Priority>>();
+        var mock = IMapper<ItemConfig, Priority>.Mock();
         mock.Map(Any()).Returns(Priority.High);
 
         IMapper<ItemConfig, Priority> mapper = mock.Object;
@@ -107,7 +107,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public async Task Generic_Interface_With_Nested_Generic_Type_Argument()
     {
-        var mock = Mock.Of<IProvider<List<ItemConfig>>>();
+        var mock = IProvider<List<ItemConfig>>.Mock();
         var items = new List<ItemConfig> { new() { Name = "A", Value = 1 } };
         mock.Get().Returns(items);
 
@@ -121,7 +121,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public void Generic_Interface_With_Enum_Void_Method_Does_Not_Throw()
     {
-        var mock = Mock.Of<IValueHolder<Priority>>();
+        var mock = IValueHolder<Priority>.Mock();
 
         IValueHolder<Priority> holder = mock.Object;
         holder.SetValue(Priority.Low);
@@ -130,7 +130,7 @@ public class GenericInterfaceTypeArgumentTests
     [Test]
     public void Generic_Interface_With_Enum_Verify_Calls()
     {
-        var mock = Mock.Of<IValueHolder<Priority>>();
+        var mock = IValueHolder<Priority>.Mock();
 
         IValueHolder<Priority> holder = mock.Object;
         holder.SetValue(Priority.High);

@@ -56,7 +56,7 @@ public class AutoMockTests
     public async Task Interface_Return_Type_Auto_Mocked()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act — no setup for GetServiceB, should auto-mock
         var serviceB = mock.Object.GetServiceB();
@@ -69,7 +69,7 @@ public class AutoMockTests
     public async Task Auto_Mocked_Return_Is_Functional()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act
         var serviceB = mock.Object.GetServiceB();
@@ -83,7 +83,7 @@ public class AutoMockTests
     public async Task Same_Instance_On_Repeated_Calls()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act
         var serviceB1 = mock.Object.GetServiceB();
@@ -97,7 +97,7 @@ public class AutoMockTests
     public async Task Nested_Chain_A_To_B_To_C()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act — navigate the chain: A → B → C
         var serviceB = mock.Object.GetServiceB();
@@ -111,7 +111,7 @@ public class AutoMockTests
     public async Task Nested_Chain_Returns_Default_Values()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act
         var serviceC = mock.Object.GetServiceB().GetServiceC();
@@ -125,7 +125,7 @@ public class AutoMockTests
     public async Task Auto_Mock_Configurable_Via_Mock_Get()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Trigger auto-mock creation and retrieve the wrapper
         var serviceB = mock.Object.GetServiceB();
@@ -143,7 +143,7 @@ public class AutoMockTests
     public void Strict_Mode_Does_Not_Auto_Mock()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>(MockBehavior.Strict);
+        var mock = IServiceA.Mock(MockBehavior.Strict);
         mock.GetName().Returns("test");
 
         // Act & Assert — strict mode throws for unconfigured method
@@ -157,8 +157,8 @@ public class AutoMockTests
     public async Task Explicit_Setup_Overrides_Auto_Mock()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
-        var customServiceB = Mock.Of<IServiceB>();
+        var mock = IServiceA.Mock();
+        var customServiceB = IServiceB.Mock();
         customServiceB.GetValue().Returns(99);
         mock.GetServiceB().Returns(customServiceB.Object);
 
@@ -174,7 +174,7 @@ public class AutoMockTests
     public async Task Auto_Mock_With_Circular_References()
     {
         // Arrange
-        var mock = Mock.Of<INodeA>();
+        var mock = INodeA.Mock();
 
         // Act — navigate circular reference
         var nodeB = mock.Object.GetNext();
@@ -187,7 +187,7 @@ public class AutoMockTests
     public async Task Async_Method_Returns_Auto_Mock()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncProvider>();
+        var mock = IAsyncProvider.Mock();
 
         // Act — async method returning Task<IServiceB>
         var serviceB = await mock.Object.GetServiceAsync();
@@ -200,7 +200,7 @@ public class AutoMockTests
     public async Task Non_Interface_Return_Type_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IServiceA>();
+        var mock = IServiceA.Mock();
 
         // Act — GetName returns string, not an interface
         var name = mock.Object.GetName();

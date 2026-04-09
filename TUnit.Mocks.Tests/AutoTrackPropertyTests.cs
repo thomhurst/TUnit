@@ -22,7 +22,7 @@ public class AutoTrackPropertyTests
     public async Task AutoTrack_Set_Then_Get_Returns_Value()
     {
         // Arrange — opt in to auto-tracking
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
 
         // Act
@@ -37,7 +37,7 @@ public class AutoTrackPropertyTests
     public async Task AutoTrack_Multiple_Properties_Track_Independently()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
 
         // Act
@@ -55,7 +55,7 @@ public class AutoTrackPropertyTests
     public async Task AutoTrack_Unset_Returns_Smart_Default()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
 
         // Assert — unset properties return smart defaults
         await Assert.That(mock.Object.Name).IsEmpty();
@@ -67,7 +67,7 @@ public class AutoTrackPropertyTests
     public async Task Explicit_Setup_Overrides_AutoTrack()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
         mock.Name.Returns("Configured");
 
@@ -82,7 +82,7 @@ public class AutoTrackPropertyTests
     public async Task AutoTrack_Overwrite_Value()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
 
         // Act — set then overwrite
@@ -97,7 +97,7 @@ public class AutoTrackPropertyTests
     public async Task Loose_Mode_Does_Not_AutoTrack_By_Default()
     {
         // Arrange — loose mode does NOT auto-track; requires explicit SetupAllProperties()
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
 
         // Act
         mock.Object.Name = "Alice";
@@ -110,7 +110,7 @@ public class AutoTrackPropertyTests
     public async Task Loose_Mode_AutoTracks_After_SetupAllProperties()
     {
         // Arrange — explicit opt-in enables auto-tracking
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
 
         // Act
@@ -124,7 +124,7 @@ public class AutoTrackPropertyTests
     public async Task Strict_Mode_Does_Not_AutoTrack_By_Default()
     {
         // Arrange — strict mode requires explicit SetupAllProperties
-        var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
+        var mock = IAutoTrackEntity.Mock(MockBehavior.Strict);
         mock.Name.Set(Any());
         mock.Name.Returns("");
 
@@ -139,7 +139,7 @@ public class AutoTrackPropertyTests
     public async Task Strict_Mode_With_SetupAllProperties_Tracks()
     {
         // Arrange — strict mode with explicit opt-in
-        var mock = Mock.Of<IAutoTrackEntity>(MockBehavior.Strict);
+        var mock = IAutoTrackEntity.Mock(MockBehavior.Strict);
         mock.SetupAllProperties();
         mock.Name.Set(Any());
         mock.Name.Returns("");
@@ -155,7 +155,7 @@ public class AutoTrackPropertyTests
     public async Task Reset_Clears_Tracked_Values_But_Keeps_AutoTrack()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
         mock.SetupAllProperties();
         mock.Object.Name = "Alice";
 
@@ -174,7 +174,7 @@ public class AutoTrackPropertyTests
     public async Task ReadOnly_Property_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IAutoTrackEntity>();
+        var mock = IAutoTrackEntity.Mock();
 
         // Assert — read-only property has no setter, returns smart default
         await Assert.That(mock.Object.ReadOnly).IsEmpty();

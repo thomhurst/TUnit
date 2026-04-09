@@ -12,7 +12,7 @@ public class OrderedVerificationTests
     public void Correct_Order_Passes()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act
@@ -31,7 +31,7 @@ public class OrderedVerificationTests
     public async Task Wrong_Order_Fails_With_Message()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — call GetName first, then Add
@@ -55,8 +55,8 @@ public class OrderedVerificationTests
     public void Cross_Mock_Ordering_Passes_When_Correct()
     {
         // Arrange
-        var calcMock = Mock.Of<ICalculator>();
-        var greeterMock = Mock.Of<IGreeter>();
+        var calcMock = ICalculator.Mock();
+        var greeterMock = IGreeter.Mock();
         ICalculator calc = calcMock.Object;
         IGreeter greeter = greeterMock.Object;
 
@@ -78,8 +78,8 @@ public class OrderedVerificationTests
     public async Task Cross_Mock_Ordering_Fails_When_Wrong()
     {
         // Arrange
-        var calcMock = Mock.Of<ICalculator>();
-        var greeterMock = Mock.Of<IGreeter>();
+        var calcMock = ICalculator.Mock();
+        var greeterMock = IGreeter.Mock();
         ICalculator calc = calcMock.Object;
         IGreeter greeter = greeterMock.Object;
 
@@ -104,7 +104,7 @@ public class OrderedVerificationTests
     public void Single_Call_In_Ordered_Verification_Passes()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act
@@ -121,7 +121,7 @@ public class OrderedVerificationTests
     public async Task Error_Message_Describes_Expected_Vs_Actual_Order()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — call Log then Add
@@ -159,7 +159,7 @@ public class OrderedVerificationTests
     public async Task Missing_Call_Fails_With_Descriptive_Message()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — only call Add
@@ -182,7 +182,7 @@ public class OrderedVerificationTests
     public void Multiple_Calls_Same_Method_Correct_Order()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act
@@ -201,7 +201,7 @@ public class OrderedVerificationTests
     public async Task Multiple_Calls_Same_Method_Wrong_Order()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — call with (3,4) first, then (1,2)
@@ -225,7 +225,7 @@ public class OrderedVerificationTests
     public void VerifyInOrder_With_Times_Exactly_Multiple()
     {
         // Arrange — call Add(1,2) 3 times, then GetName once
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
@@ -245,7 +245,7 @@ public class OrderedVerificationTests
     public async Task VerifyInOrder_With_Times_Never_Throws_InvalidOperationException()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
@@ -265,7 +265,7 @@ public class OrderedVerificationTests
     public async Task VerifyInOrder_With_Times_AtMost_Throws_InvalidOperationException()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
@@ -285,7 +285,7 @@ public class OrderedVerificationTests
     public async Task VerifyInOrder_With_Times_Between_Zero_Min_Throws_InvalidOperationException()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
@@ -305,7 +305,7 @@ public class OrderedVerificationTests
     public void VerifyInOrder_With_Times_AtLeast_Passes()
     {
         // Arrange — AtLeast is allowed since min > 0
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2);
@@ -325,7 +325,7 @@ public class OrderedVerificationTests
     public void VerifyInOrder_Marks_Calls_As_Verified_For_VerifyNoOtherCalls()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act
@@ -347,7 +347,7 @@ public class OrderedVerificationTests
     public async Task VerifyInOrder_Partial_Verification_Leaves_Unverified_Calls()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — three calls
@@ -377,7 +377,7 @@ public class OrderedVerificationTests
         // Regression test for group-based ordering:
         // A(1), B, A(2) — verifying A(Times.Exactly(2)) then B should fail
         // because one of A's calls is after B
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         calc.Add(1, 2); // first A

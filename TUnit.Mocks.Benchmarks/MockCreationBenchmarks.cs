@@ -16,7 +16,7 @@ public class MockCreationBenchmarks
     [Benchmark(Description = "TUnit.Mocks")]
     public object TUnitMocks_CreateMock()
     {
-        var mock = Mock.Of<ICalculatorService>();
+        var mock = ICalculatorService.Mock();
         return mock.Object;
     }
 
@@ -58,7 +58,7 @@ public class MockCreationBenchmarks
     [Benchmark(Description = "TUnit.Mocks (Repository)")]
     public object TUnitMocks_CreateMock_Repository()
     {
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         return mock.Object;
     }
 

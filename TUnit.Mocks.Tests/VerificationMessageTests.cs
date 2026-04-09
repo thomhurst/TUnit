@@ -13,7 +13,7 @@ public class VerificationMessageTests
     public async Task WasCalled_With_Custom_Message_Includes_It()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — call once
         ICalculator calc = mock.Object;
@@ -33,7 +33,7 @@ public class VerificationMessageTests
     public async Task WasNeverCalled_With_Custom_Message_Includes_It()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
 
@@ -51,7 +51,7 @@ public class VerificationMessageTests
     public async Task WasCalled_Shorthand_With_Custom_Message_Includes_It()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert — not called at all
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -67,7 +67,7 @@ public class VerificationMessageTests
     public async Task WasCalled_Without_Message_Has_Standard_Output()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -83,7 +83,7 @@ public class VerificationMessageTests
     public async Task WasCalled_With_Null_Message_Has_Standard_Output()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -98,7 +98,7 @@ public class VerificationMessageTests
     public async Task WasCalled_With_Empty_Message_Has_Standard_Output()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert
         var ex = Assert.Throws<MockVerificationException>(() =>

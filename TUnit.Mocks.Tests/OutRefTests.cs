@@ -22,7 +22,7 @@ public class OutRefTests
     public async Task Out_Parameter_Method_Can_Be_Called()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act - should not throw, out param gets default
         IDictionary dict = mock.Object;
@@ -36,7 +36,7 @@ public class OutRefTests
     public async Task Out_Parameter_Method_Verify_Call_Was_Made()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act
         IDictionary dict = mock.Object;
@@ -51,7 +51,7 @@ public class OutRefTests
     public async Task Out_Parameter_Method_Setup_Return_Value()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet("found").Returns(true);
 
         // Act
@@ -66,7 +66,7 @@ public class OutRefTests
     public async Task Out_Parameter_Method_With_Any_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet(Any()).Returns(true);
 
         // Act
@@ -83,7 +83,7 @@ public class OutRefTests
     public async Task Out_Parameter_Int_Method_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act
         IDictionary dict = mock.Object;
@@ -98,7 +98,7 @@ public class OutRefTests
     public async Task Out_Parameter_Method_Verify_Never_Called()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Assert - never called
         mock.TryGet("key").WasNeverCalled();
@@ -109,7 +109,7 @@ public class OutRefTests
     public async Task Ref_Parameter_Method_Can_Be_Called()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act - ref param is passed in and out, but mock just records
         IDictionary dict = mock.Object;
@@ -125,7 +125,7 @@ public class OutRefTests
     public async Task Ref_Parameter_Method_Verify_Call()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act
         IDictionary dict = mock.Object;
@@ -141,7 +141,7 @@ public class OutRefTests
     public async Task Multiple_Out_Method_Calls_Tracked()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
 
         // Act
         IDictionary dict = mock.Object;
