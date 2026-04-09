@@ -14,7 +14,6 @@ namespace TUnit.TestProject;
 public class CultureHookTests_ClassLevel
 {
     private static string? _beforeClassCulture;
-    private static string? _afterClassCulture;
 
     [Before(Class)]
     public static Task BeforeClass()
@@ -24,10 +23,11 @@ public class CultureHookTests_ClassLevel
     }
 
     [After(Class)]
-    public static Task AfterClass()
+    public static async Task AfterClass()
     {
-        _afterClassCulture = CultureInfo.CurrentCulture.Name;
-        return Task.CompletedTask;
+        // Runs after the last test in this class — no subsequent test can read a captured
+        // value, so assert directly in the hook. A failure here fails the class teardown.
+        await Assert.That(CultureInfo.CurrentCulture.Name).IsEqualTo("de-AT");
     }
 
     [Before(Test)]
