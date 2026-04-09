@@ -309,7 +309,7 @@ await Assert.That(actual).IsEquivalentTo(expected);
 await Assert.That(actual).IsNotEquivalentTo(expected);
 await Assert.That(collection).Contains(item);
 await Assert.That(collection).DoesNotContain(item);
-await Assert.That(collection).AllSatisfy(x => x != null);
+await Assert.That(collection).All().Satisfy(item => item.IsNotNull());
 ```
 
 ### String Assertions

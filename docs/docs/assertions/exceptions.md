@@ -57,16 +57,28 @@ public async Task Throws_Exact_Type()
 
 ### Throws (Runtime Type)
 
-Use when the exception type is only known at runtime:
+Use when the exception type is only known at runtime. On a synchronous delegate, fluent chaining only supports the generic `Throws<T>()` / `ThrowsExactly<T>()` forms, so reach for the static `Assert.Throws(Type, Action)` helper instead. On an async delegate you can call `ThrowsAsync(Type)` directly.
 
 ```csharp
 [Test]
-public async Task Throws_Runtime_Type()
+public async Task Throws_Runtime_Type_Sync()
 {
     Type exceptionType = typeof(InvalidOperationException);
 
-    await Assert.That(() => throw new InvalidOperationException())
-        .Throws(exceptionType);
+    // Static helper for sync delegates
+    Assert.Throws(exceptionType, () => throw new InvalidOperationException());
+}
+
+[Test]
+public async Task Throws_Runtime_Type_Async()
+{
+    Type exceptionType = typeof(InvalidOperationException);
+
+    await Assert.That(async () =>
+    {
+        await Task.Yield();
+        throw new InvalidOperationException();
+    }).Throws(exceptionType);
 }
 ```
 

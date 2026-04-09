@@ -95,7 +95,7 @@ public async Task MultipleMatchAssertions()
 
 ## Match Position and Length
 
-You can assert on where a match occurs and its length:
+To assert on where a match occurs or how long it is, use `.Match(index)` to select a match from the collection, then assert on the resulting `RegexMatch` (you can also combine this with `Regex.Match(...)` directly if you need more detailed inspection):
 
 ```csharp
 [Test]
@@ -104,21 +104,16 @@ public async Task PositionAndLengthAssertions()
     var text = "Hello World 123";
     var pattern = @"\d+";
 
-    // Assert that match is at specific index
-    await Assert.That(text)
-        .Matches(pattern)
-        .AtIndex(12);
+    // Directly inspect the first match for position and length
+    var match = System.Text.RegularExpressions.Regex.Match(text, pattern);
 
-    // Assert that match has specific length
-    await Assert.That(text)
-        .Matches(pattern)
-        .Length().IsEqualTo(3);
+    await Assert.That(match.Index).IsEqualTo(12);
+    await Assert.That(match.Length).IsEqualTo(3);
 
-    // Combine with group assertions
+    // Or combine the TUnit regex assertion with a direct group check
     await Assert.That(text)
         .Matches(pattern)
-        .AtIndex(12)
-        .And.Length().IsEqualTo(3);
+        .And.Group(0, g => g.IsEqualTo("123"));
 }
 ```
 
@@ -178,7 +173,7 @@ public async Task UrlParsingAssertions()
 
 ## Regex Options
 
-Use `.IgnoringCase()` or `.WithOptions()` for case-insensitive or other regex options:
+The `Matches(string)` overload does not take `RegexOptions`. To apply options like case-insensitivity, construct a `Regex` (or use a source-generated regex) with the desired options and pass it to `Matches`:
 
 ```csharp
 [Test]
@@ -186,15 +181,13 @@ public async Task RegexOptionsAssertions()
 {
     var text = "HELLO world";
 
-    // Case-insensitive matching
-    await Assert.That(text)
-        .Matches(@"hello")
-        .IgnoringCase();
+    // Case-insensitive matching via a Regex instance
+    var caseInsensitive = new Regex("hello", RegexOptions.IgnoreCase);
+    await Assert.That(text).Matches(caseInsensitive);
 
-    // Custom options
-    await Assert.That(text)
-        .Matches(@"^hello.*world$")
-        .WithOptions(RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    // Custom combined options
+    var multi = new Regex(@"^hello.*world$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    await Assert.That(text).Matches(multi);
 }
 ```
 
@@ -263,15 +256,18 @@ public async Task CompleteEmailValidation()
         .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
-        .And.Group("tld", tld => tld.Length().IsEqualTo(3))
-        .And.AtIndex(0)
-        .And.Length().IsEqualTo(email.Length);
+        .And.Group("tld", tld => tld.Length().IsEqualTo(3));
+
+    // For position/length checks, use Regex.Match directly
+    var match = System.Text.RegularExpressions.Regex.Match(email, pattern);
+    await Assert.That(match.Index).IsEqualTo(0);
+    await Assert.That(match.Length).IsEqualTo(email.Length);
 }
 ```
 
 ## Error Handling
 
-The regex assertions throw specific exceptions for common error cases:
+The regex assertions surface standard exceptions for common error cases. Wrap the call in an `Assert.That(() => ...)` delegate and assert on the thrown exception type:
 
 ```csharp
 [Test]
@@ -280,28 +276,18 @@ public async Task RegexAssertionErrors()
     var text = "Hello123World";
 
     // Throws ArgumentNullException if text is null
-    await Assert.That((string?)null)
-        .ThrowsAsync<ArgumentNullException>()
-        .When(() => Matches(@"\d+"));
+    await Assert.That(async () =>
+        await Assert.That((string?)null!).Matches(@"\d+"))
+        .Throws<ArgumentNullException>();
 
     // Throws RegexParseException for invalid patterns
-    await Assert.That(text)
-        .ThrowsAsync<RegexParseException>()
-        .When(() => Matches(@"[invalid"));
-
-    // Throws ArgumentOutOfRangeException for invalid group index
-    await Assert.That(text)
-        .Matches(@"Hello(\d+)World")
-        .ThrowsAsync<ArgumentOutOfRangeException>()
-        .When(m => m.Group(99, g => g.IsEqualTo("123")));
-
-    // Throws ArgumentException for empty group name
-    await Assert.That(text)
-        .Matches(@"Hello(?<num>\d+)World")
-        .ThrowsAsync<ArgumentException>()
-        .When(m => m.Group("", g => g.IsEqualTo("123")));
+    await Assert.That(async () =>
+        await Assert.That(text).Matches(@"[invalid"))
+        .Throws<RegexParseException>();
 }
 ```
+
+For invalid group indices or names, let the underlying `Regex` call throw and assert on it via a delegate in the same way.
 
 ## Best Practices
 

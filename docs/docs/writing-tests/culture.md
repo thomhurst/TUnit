@@ -35,6 +35,7 @@ public async Task Stable_With_Culture()
 
 ```csharp
 using TUnit.Core;
+using TUnit.Core.Executors;
 
 namespace MyTestProject;
 
@@ -53,6 +54,8 @@ public class MyTestClass
 Apply the attribute to the class to set the culture for every test in that fixture:
 
 ```csharp
+using TUnit.Core.Executors;
+
 [Culture("fr-FR")]
 public class FrenchFormattingTests
 {
@@ -70,6 +73,8 @@ public class FrenchFormattingTests
 Lock the culture for the entire test assembly:
 
 ```csharp
+using TUnit.Core.Executors;
+
 [assembly: Culture("en-US")]
 ```
 

@@ -31,8 +31,7 @@ The above would generate two test cases with their respective display name as:
 If you have custom classes, you can combine this with [Argument Formatters](argument-formatters.md) to specify how to show them.
 
 :::info
-If you want to include a literal `$` in your display name, escape it as `$$`.  
-For example: `[DisplayName("Total cost: $$100")]` will display as "Total cost: $100".
+Only substrings of the form `$parameterName` are substituted, where `parameterName` matches a method or class parameter. Any other text — including a literal `$` followed by text that does not match a parameter name — is left unchanged. For example, `[DisplayName("Total cost: $100")]` will display as "Total cost: $100" (unless a parameter named `1`, `10`, or `100` exists, which is not possible in C#).
 :::
 
 ## Custom Logic

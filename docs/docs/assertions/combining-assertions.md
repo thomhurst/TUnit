@@ -40,7 +40,22 @@ public async Task MyTest()
 }
 ```
 
-`.And` and `.Or` can be mixed in a single chain. Conditions are evaluated left-to-right.
+:::warning Mixing And/Or is not supported
+`.And` and `.Or` cannot be mixed in a single chain. Attempting to use `.Or` after `.And` (or vice versa) throws `MixedAndOrAssertionsException` at runtime. If you need both kinds of logic, split the chain across multiple `Assert.That(...)` calls, or combine the conditions into a single boolean expression beforehand.
+
+```csharp
+// NOT supported - throws MixedAndOrAssertionsException at runtime
+await Assert.That(result)
+    .IsPositive()
+    .And.IsLessThan(10)
+    .Or.IsEqualTo(100);
+
+// Supported - use separate assertions
+await Assert.That(result).IsPositive().And.IsLessThan(10);
+// or fall back to a single boolean check when you need And/Or together
+await Assert.That((result > 0 && result < 10) || result == 100).IsTrue();
+```
+:::
 
 ## Assertion Scopes
 

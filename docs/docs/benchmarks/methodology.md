@@ -89,11 +89,13 @@ public async Task TestAsyncOperation()
 **What's tested**:
 ```csharp
 [Test]
-[Matrix("Create", "Update", "Delete")] // Operation
-[Matrix("User", "Admin", "Guest")]     // Role
-public void TestPermissions(string op, string role)
+[MatrixDataSource]
+public async Task TestPermissions(
+    [Matrix("Create", "Update", "Delete")] string op,
+    [Matrix("User", "Admin", "Guest")] string role)
 {
-    // 9 test combinations
+    // 3 × 3 = 9 test combinations
+    await Task.CompletedTask;
 }
 ```
 

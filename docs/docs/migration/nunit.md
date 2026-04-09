@@ -761,8 +761,8 @@ public async Task ComplexAssertions()
     // Collection assertions
     await Assert.That(list).Count().IsEqualTo(5);
     await Assert.That(list).Contains(3);
-    await Assert.That(list).AllSatisfy(x => x > 0);
-    await Assert.That(list).IsInAscendingOrder();
+    await Assert.That(list).All().Satisfy(item => item.IsGreaterThan(0));
+    await Assert.That(list).IsInOrder();
 
     // Compound assertions (using And/Or)
     await Assert.That(value).IsGreaterThan(40).And.IsLessThan(50);

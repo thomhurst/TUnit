@@ -48,7 +48,7 @@ public async Task TakeScreenshotOnFailure(TestContext context)
 {
     if (context.Execution.Result?.Exception is not null)
     {
-        await SaveScreenshot(context.TestDetails.TestName);
+        await SaveScreenshot(context.Metadata.TestDetails.TestName);
     }
 }
 ```

@@ -63,7 +63,7 @@ public class MyTests
     {
         var testContext = TestContext.Current;
         
-        if (testContext?.Result?.State == TestState.Failed)
+        if (testContext?.Execution.Result?.State == TestState.Failed)
         {
             // Capture screenshot
             var screenshotPath = await CaptureScreenshot();
@@ -275,7 +275,7 @@ public async Task ConditionalArtifactAttachment()
 {
     var testContext = TestContext.Current;
     
-    if (testContext?.Result?.State is TestState.Failed or TestState.TimedOut)
+    if (testContext?.Execution.Result?.State is TestState.Failed or TestState.Timeout)
     {
         // Only attach expensive artifacts on failure
         var videoPath = await StopRecording();
@@ -342,7 +342,7 @@ public async Task CapturePlaywrightArtifacts()
 {
     var testContext = TestContext.Current;
     
-    if (testContext?.Result?.State != TestState.Passed)
+    if (testContext?.Execution.Result?.State != TestState.Passed)
     {
         // Capture screenshot
         var screenshotPath = $"artifacts/screenshot-{testContext.Id}.png";

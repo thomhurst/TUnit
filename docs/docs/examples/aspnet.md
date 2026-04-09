@@ -461,14 +461,31 @@ public class CaptureTests : TestsBase
 
 ### Capture Options
 
+`WebApplicationTestOptions` only exposes the `EnableHttpExchangeCapture` toggle. Body
+capture settings (`CaptureRequestBody`, `CaptureResponseBody`, `MaxBodySize`) live on
+the `HttpExchangeCapture` service itself. To configure them, register
+`HttpExchangeCapture` explicitly inside `ConfigureTestServices`:
+
 ```csharp
-protected override WebApplicationTestOptions Options => new()
+using TUnit.AspNetCore.Interception;
+
+public class CaptureTests : TestsBase
 {
-    EnableHttpExchangeCapture = true,
-    CaptureRequestBody = true,
-    CaptureResponseBody = true,
-    MaxBodySize = 1024 * 1024  // 1MB limit
-};
+    protected override WebApplicationTestOptions Options => new()
+    {
+        EnableHttpExchangeCapture = true
+    };
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddHttpExchangeCapture(capture =>
+        {
+            capture.CaptureRequestBody = true;
+            capture.CaptureResponseBody = true;
+            capture.MaxBodySize = 1024 * 1024; // 1MB limit
+        });
+    }
+}
 ```
 
 ### Inspecting Captured Exchanges
@@ -478,7 +495,7 @@ protected override WebApplicationTestOptions Options => new()
 var last = HttpCapture!.Last;
 
 // Get all exchanges
-var all = HttpCapture.All;
+var all = HttpCapture!.Exchanges;
 
 // Inspect request
 await Assert.That(last!.Request.Method).IsEqualTo("POST");

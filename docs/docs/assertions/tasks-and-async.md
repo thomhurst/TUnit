@@ -93,7 +93,7 @@ public async Task Task_Not_Faulted()
 }
 ```
 
-### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 6+)
+### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 8+)
 
 Tests whether a task completed successfully (not faulted or canceled):
 
@@ -150,7 +150,7 @@ public async Task Task_Exceeds_Timeout()
 
 ### WaitsFor
 
-Waits for a condition to become true within a timeout:
+Polls a value source until a nested assertion passes or the timeout expires. `WaitsFor` takes an assertion-builder lambda (not a bool predicate), so you write the same fluent assertions you would elsewhere:
 
 ```csharp
 [Test]
@@ -165,9 +165,11 @@ public async Task Wait_For_Condition()
     });
 
     await Assert.That(() => condition)
-        .WaitsFor(c => c == true, timeout: TimeSpan.FromSeconds(2));
+        .WaitsFor(src => src.IsEqualTo(true), timeout: TimeSpan.FromSeconds(2));
 }
 ```
+
+`Eventually` is provided as an alias for `WaitsFor` when it reads more naturally.
 
 ## Practical Examples
 

@@ -117,7 +117,7 @@ jobs:
         dotnet-version: '9.0.x'
     
     - name: Run Tests with Collapsible Reporter
-      run: dotnet test --logger "console;verbosity=normal"
+      run: dotnet test -- --output Detailed
       # GitHub reporter auto-detects and uses collapsible style by default
     
     - name: Run Tests with Full Reporter
@@ -133,7 +133,7 @@ If you need to disable the GitHub reporter entirely:
 
 ```bash
 export TUNIT_DISABLE_GITHUB_REPORTER=true
-# or
+# or (deprecated legacy name, kept for backwards compatibility)
 export DISABLE_GITHUB_REPORTER=true
 ```
 
@@ -184,7 +184,7 @@ Jenkins can consume various test output formats:
 dotnet test -- --report-trx
 
 # Or use console output with appropriate verbosity
-dotnet test --logger "console;verbosity=detailed"
+dotnet test -- --output Detailed
 ```
 
 ### GitLab CI
@@ -207,21 +207,16 @@ The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
 ## Environment Detection
 
-TUnit automatically detects common CI environments through environment variables:
+TUnit reads a small set of CI environment variables to enable platform-specific behavior:
 
-| Platform | Detection Variables |
+| Variable | Used for |
 | --- | --- |
-| GitHub Actions | `GITHUB_ACTIONS` |
-| Azure DevOps | `AZURE_PIPELINES` |
-| Jenkins | `JENKINS_URL` |
-| GitLab CI | `GITLAB_CI` |
-| CircleCI | `CIRCLECI` |
-| Travis CI | `TRAVIS` |
-| AppVeyor | `APPVEYOR` |
-| TeamCity | `TEAMCITY_VERSION` |
-| Generic CI | `CI`, `CONTINUOUS_INTEGRATION` |
+| `GITHUB_ACTIONS` | Enables the GitHub Actions reporter and workflow summary integration |
+| `GITHUB_STEP_SUMMARY` | Destination file for the GitHub Actions job summary |
+| `GITLAB_CI` | Detects GitLab CI runs |
+| `CI_SERVER` | Generic CI detection signal |
 
-This detection helps TUnit optimize its behavior for each platform.
+Other CI systems (Azure DevOps, Jenkins, CircleCI, Travis CI, AppVeyor, TeamCity, etc.) do not have TUnit-specific detection logic. They integrate through the standard Microsoft.Testing.Platform test result outputs such as `--report-trx` and `--report-junit`, which every major CI platform can ingest.
 
 ## Best Practices
 
@@ -247,7 +242,7 @@ If the GitHub reporter isn't generating summaries:
    ```bash
    # Ensure these are not set
    echo $TUNIT_DISABLE_GITHUB_REPORTER
-   echo $DISABLE_GITHUB_REPORTER
+   echo $DISABLE_GITHUB_REPORTER  # deprecated legacy name
    ```
 
 3. **Check File Permissions**: Ensure the process can write to `GITHUB_STEP_SUMMARY` file

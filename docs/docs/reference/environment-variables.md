@@ -97,6 +97,43 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 
 **Note:** Command-line arguments take precedence over environment variables.
 
+### TUNIT_EXECUTION_MODE
+
+Controls whether tests run in source-generation (AOT-optimized) mode or reflection mode.
+
+```bash
+export TUNIT_EXECUTION_MODE=sourcegeneration   # or "aot"
+export TUNIT_EXECUTION_MODE=reflection
+```
+
+**Values:**
+- `sourcegeneration` / `aot`: Use source-generated test metadata (default, AOT-compatible)
+- `reflection`: Use reflection-based discovery and execution
+
+**Equivalent to:** `--reflection` flag (when set to `reflection`).
+
+**Priority:** AOT platform check > `--reflection` flag > `[ReflectionMode]` assembly attribute > this environment variable > built-in default.
+
+### TUNIT_DISCOVERY_DIAGNOSTICS
+
+Enables discovery-time diagnostic logging. Useful when investigating why a test is (or isn't) being picked up by discovery.
+
+```bash
+export TUNIT_DISCOVERY_DIAGNOSTICS=1
+```
+
+**Use case:** Debugging test discovery problems in source-generation or reflection mode.
+
+### TUNIT_DIAGNOSTIC_CAST
+
+Enables diagnostic logging for argument/value conversions performed by TUnit's `CastHelper`. When a conversion fails, the helper writes a line describing the attempted source and target types.
+
+```bash
+export TUNIT_DIAGNOSTIC_CAST=true
+```
+
+**Use case:** Debugging `InvalidCastException` or silent conversion failures for data-driven tests.
+
 ### TUNIT_ENABLE_IDE_STREAMING
 
 Enables real-time output streaming to IDE test explorers (Rider, VS Code, Visual Studio).
@@ -230,4 +267,7 @@ When the same setting is configured in multiple places, TUnit follows this prior
 | `TUNIT_DISABLE_HTML_REPORTER` | - | Disables HTML report generation |
 | `JUNIT_XML_OUTPUT_PATH` | - | JUnit output path |
 | `TUNIT_MAX_PARALLEL_TESTS` | `--maximum-parallel-tests` | Max parallel tests |
+| `TUNIT_EXECUTION_MODE` | `--reflection` | Selects source-generation (`sourcegeneration`/`aot`) or `reflection` execution mode |
+| `TUNIT_DISCOVERY_DIAGNOSTICS` | - | Enables discovery-time diagnostics (`1` to enable) |
+| `TUNIT_DIAGNOSTIC_CAST` | - | Enables `CastHelper` conversion diagnostics (`true` to enable) |
 | `TUNIT_ENABLE_IDE_STREAMING` | - | Enable real-time IDE output streaming |

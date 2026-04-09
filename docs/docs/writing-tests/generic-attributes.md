@@ -100,34 +100,29 @@ public class ShippingTests
 
 ### DataSourceGeneratorAttribute&lt;T&gt;
 
-Create strongly-typed data source generators:
+Create strongly-typed data source generators by inheriting from `DataSourceGeneratorAttribute<T>` and overriding `GenerateDataSources`, which returns an `IEnumerable<Func<T>>` — each `Func<T>` produces one test row.
 
 ```csharp
-public abstract class DataSourceGeneratorAttribute<T> : Attribute
-{
-    public abstract IEnumerable<T> GenerateData();
-}
-
 // Custom implementation
 public class RandomNumbersAttribute : DataSourceGeneratorAttribute<int>
 {
     private readonly int _count;
     private readonly int _min;
     private readonly int _max;
-    
+
     public RandomNumbersAttribute(int count, int min = 0, int max = 100)
     {
         _count = count;
         _min = min;
         _max = max;
     }
-    
-    public override IEnumerable<int> GenerateData()
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var random = new Random();
         for (int i = 0; i < _count; i++)
         {
-            yield return random.Next(_min, _max);
+            yield return () => random.Next(_min, _max);
         }
     }
 }
@@ -141,32 +136,34 @@ public async Task TestWithRandomNumbers(int number)
 }
 ```
 
+Overloads of `DataSourceGeneratorAttribute<T1, T2, ...>` (up to five type parameters) are available for tests with multiple parameters — they yield `Func<(T1, T2, ...)>` tuples.
+
 ### AsyncDataSourceGeneratorAttribute&lt;T&gt;
 
-For asynchronous data generation:
+For asynchronous data generation, inherit from `AsyncDataSourceGeneratorAttribute<T>` and override `GenerateDataSourcesAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`. Each yielded `Func<Task<T>>` produces one test row asynchronously, so the heavy work (DB queries, HTTP calls) can be deferred until the test actually runs.
 
 ```csharp
-public abstract class AsyncDataSourceGeneratorAttribute<T> : Attribute
-{
-    public abstract Task<IEnumerable<T>> GenerateDataAsync();
-}
-
 // Custom implementation
 public class DatabaseUsersAttribute : AsyncDataSourceGeneratorAttribute<User>
 {
     private readonly string _role;
-    
+
     public DatabaseUsersAttribute(string role)
     {
         _role = role;
     }
-    
-    public override async Task<IEnumerable<User>> GenerateDataAsync()
+
+    protected override async IAsyncEnumerable<Func<Task<User>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         using var db = new DatabaseContext();
-        return await db.Users
+        var users = await db.Users
             .Where(u => u.Role == _role)
             .ToListAsync();
+
+        foreach (var user in users)
+        {
+            yield return () => Task.FromResult(user);
+        }
     }
 }
 
@@ -182,21 +179,19 @@ public async Task AdminUser_ShouldHaveFullPermissions(User adminUser)
 
 ### TypedDataSourceAttribute&lt;T&gt;
 
-Base class for creating custom typed data sources:
+`TypedDataSourceAttribute<T>` is the lowest-level extension point for a strongly-typed data source. Most users should prefer `DataSourceGeneratorAttribute<T>` (sync) or `AsyncDataSourceGeneratorAttribute<T>` (async) — both ultimately derive from this class. Override it directly only when you need full control over the async row-production pipeline.
+
+To inherit it, override `GetTypedDataRowsAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`:
 
 ```csharp
-public abstract class TypedDataSourceAttribute<T> : DataSourceAttribute
-{
-    public abstract IEnumerable<T> GetData();
-}
-
 // Custom implementation
 public class SampleUsersAttribute : TypedDataSourceAttribute<User>
 {
-    public override IEnumerable<User> GetData()
+    public override async IAsyncEnumerable<Func<Task<User>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return new User { Id = 1, Name = "Alice", Role = "Admin" };
-        yield return new User { Id = 2, Name = "Bob", Role = "User" };
+        yield return () => Task.FromResult(new User { Id = 1, Name = "Alice", Role = "Admin" });
+        yield return () => Task.FromResult(new User { Id = 2, Name = "Bob", Role = "User" });
+        await Task.CompletedTask;
     }
 }
 

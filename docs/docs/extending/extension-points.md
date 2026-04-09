@@ -354,7 +354,7 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     {
         await ReportingService.ReportTestStarted(
             context.GetDisplayName(),
-            context.Metadata.TestDetails.TestClass?.FullName,
+            context.Metadata.TestDetails.ClassType.FullName,
             context.Metadata.TestDetails.TestMethodArguments
         );
     }

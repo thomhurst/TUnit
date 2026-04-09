@@ -93,7 +93,7 @@ public async Task AsyncTestWithAssertions()  // ✅ Recommended - asynchronous t
 **Important Notes:**
 - If you use `Assert.That(...)`, your test **must** be `async Task` — assertions return awaitable objects that won't execute without `await`
 - Synchronous `void` tests are allowed but cannot use assertions
-- `async void` tests are **not allowed** and will cause a compiler error
+- `async void` tests are **not allowed** — the TUnit analyzers report this as a build error (diagnostic `TUnit0031`)
 
 See [Awaiting Assertions](../assertions/awaiting.md) for more details.
 

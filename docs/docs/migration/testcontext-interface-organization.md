@@ -308,8 +308,8 @@ public interface ITestExecution
     Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; }
     IHookExecutor? CustomHookExecutor { get; set; }
     bool ReportResult { get; set; }
+    bool IsNotDiscoverable { get; set; }
 
-    void OverrideResult(string reason);
     void OverrideResult(TestState state, string reason);
     void AddLinkedCancellationToken(CancellationToken cancellationToken);
 }
@@ -322,6 +322,7 @@ Test metadata and identity:
 ```csharp
 public interface ITestMetadata
 {
+    string DefinitionId { get; }
     TestDetails TestDetails { get; }
     string TestName { get; }
     string DisplayName { get; set; }
@@ -329,7 +330,7 @@ public interface ITestMetadata
 }
 ```
 
-**Note:** `Id` is available only through the `ITestMetadata` interface (accessed via `TestContext.Metadata.Id`), not as a direct property on `TestContext`.
+**Note:** `DefinitionId` identifies the test definition (template/source) and is shared across all instances of parameterized tests. The per-instance `Id` is a direct property on `TestContext` (see above).
 
 ### ITestEvents
 
@@ -359,10 +360,16 @@ For completeness, here are the other interface properties available:
 ```csharp
 public interface ITestOutput
 {
+    TextWriter StandardOutput { get; }
+    TextWriter ErrorOutput { get; }
+    IReadOnlyCollection<Artifact> Artifacts { get; }
+
+    void AttachArtifact(Artifact artifact);
+    void AttachArtifact(string filePath, string? displayName = null, string? description = null);
+    string GetStandardOutput();
+    string GetErrorOutput();
     void WriteLine(string message);
     void WriteError(string message);
-    string GetOutput();
-    string GetErrorOutput();
 }
 ```
 
@@ -394,6 +401,10 @@ public static void OnTestRegistered(TestRegisteredContext context)
 ```csharp
 public interface ITestDependencies
 {
+    IReadOnlyList<TestDetails> DependsOn { get; }
+    string? ParentTestId { get; }
+    TestRelationship Relationship { get; }
+
     IReadOnlyList<TestContext> GetTests(Func<TestContext, bool> predicate);
     IReadOnlyList<TestContext> GetTests(string testName);
     IReadOnlyList<TestContext> GetTests(string testName, Type classType);

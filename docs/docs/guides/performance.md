@@ -76,20 +76,29 @@ public class LazyDataProvider
 
 ### Limit Matrix Test Combinations
 
-```csharp
-// ❌ Bad: Exponential test explosion
-[Test]
-[Arguments(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
-[Arguments("a", "b", "c", "d", "e")]
-[Arguments(true, false)]
-// Creates 10 × 5 × 2 = 100 tests!
+Remember that each `[Arguments(...)]` attribute produces exactly **one** test case, while `[Matrix]` on parameters produces the cross-product of every combination. It's the matrix that can explode — so reach for it deliberately.
 
-// ✅ Good: Targeted test combinations
+```csharp
+// ❌ Bad: Combinatorial explosion via [Matrix]
+[Test]
+[MatrixDataSource]
+public void Process(
+    [Matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int count,
+    [Matrix("a", "b", "c", "d", "e")] string label,
+    [Matrix(true, false)] bool flag)
+{
+    // Creates 10 × 5 × 2 = 100 tests!
+}
+
+// ✅ Good: Targeted test cases with [Arguments]
 [Test]
 [Arguments(1, "a", true)]
 [Arguments(5, "c", false)]
 [Arguments(10, "e", true)]
-// Only 3 specific test cases
+public void Process(int count, string label, bool flag)
+{
+    // Only 3 specific test cases — each [Arguments] attribute is one test
+}
 ```
 
 ## Test Execution Performance
@@ -123,25 +132,34 @@ export TUNIT_MAX_PARALLEL_TESTS=8
 #### Group Related Tests
 
 ```csharp
-// Tests in the same group run sequentially but different groups run in parallel
+// Tests in the same group run in parallel with each other.
+// Different groups run sequentially — the engine processes one group at a time.
+// Use this to batch tests by resource category while keeping each batch concurrent.
 [ParallelGroup("DatabaseTests")]
 public class UserRepositoryTests
 {
-    // These tests share database resources
+    // These run in parallel with OrderRepositoryTests (same group)
 }
 
 [ParallelGroup("DatabaseTests")]
 public class OrderRepositoryTests
 {
-    // These also share database resources
+    // Runs concurrently with UserRepositoryTests
 }
 
 [ParallelGroup("ApiTests")]
 public class ApiIntegrationTests
 {
-    // These can run in parallel with database tests
+    // This group runs after DatabaseTests has fully finished
 }
 ```
+
+:::note
+`[ParallelGroup]` is **not** for serializing access to a shared resource — tests within a
+group still run concurrently. If two tests must not touch the same resource at the same
+time, use `[NotInParallel("ResourceKey")]` instead, which serializes tests that share
+the same key.
+:::
 
 #### Use Parallel Limiters Wisely
 

@@ -13,7 +13,7 @@ TUnit offers several ways to provide data to your tests. Use this guide to pick 
 | All parameter combinations | `[MatrixDataSource]` | [Matrix Tests](matrix-tests.md) |
 | Multiple sources on one method | Combined attributes | [Combined Data Sources](combined-data-source.md) |
 | Hierarchical injection | Nested properties | [Nested Data Sources](nested-data-sources.md) |
-| Custom generic attributes | `[GenericArguments<T>]` | [Generic Attributes](generic-attributes.md) |
+| Custom generic attributes | `[GenerateGenericTest(typeof(...))]` | [Generic Attributes](generic-attributes.md) |
 
 ## Quick Examples
 

@@ -4,6 +4,12 @@ TUnit supports having a `testconfig.json` file within your test project.
 
 This can be used to store key-value configuration pairs. To retrieve these within tests, use the static method `TestContext.Configuration.Get(key)`.
 
+:::note
+
+TUnit delegates configuration loading to Microsoft.Testing.Platform's `IConfiguration`. The platform's actual filename convention is `[AppName].testconfig.json` (for example, `MyTests.testconfig.json`), which is what gets discovered and loaded at runtime. The name `testconfig.json` is used throughout this page as a convenient shorthand.
+
+:::
+
 ## Example
 
 `testconfig.json`

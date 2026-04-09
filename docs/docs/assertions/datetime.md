@@ -206,7 +206,7 @@ public async Task DateTimeOffset_Comparison()
 }
 ```
 
-## DateOnly (.NET 6+)
+## DateOnly (.NET 8+)
 
 DateOnly represents just a date without time:
 
@@ -230,7 +230,7 @@ public async Task DateOnly_With_Tolerance()
     var date1 = new DateOnly(2024, 1, 15);
     var date2 = new DateOnly(2024, 1, 17);
 
-    await Assert.That(date2).IsEqualTo(date1, daysTolerance: 5);
+    await Assert.That(date2).IsEqualTo(date1).WithinDays(5);
 }
 ```
 
@@ -248,7 +248,7 @@ public async Task DateOnly_Comparison()
 }
 ```
 
-## TimeOnly (.NET 6+)
+## TimeOnly (.NET 8+)
 
 TimeOnly represents just time without a date:
 

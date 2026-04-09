@@ -598,9 +598,9 @@ public async Task Verify_Ordering_Separately()
 
 ## Structural Equivalency
 
-### IsStructurallyEqualTo
+`IsEquivalentTo` already performs deep structural comparison by default, using `StructuralEqualityComparer<T>` — nested objects, anonymous types, and records are all compared by their properties and fields rather than by reference.
 
-Deep comparison of collections including nested objects:
+### Deep Comparison with IsEquivalentTo
 
 ```csharp
 [Test]
@@ -618,11 +618,11 @@ public async Task Structurally_Equal()
         new { Name = "Bob", Address = new { City = "Portland" } }
     };
 
-    await Assert.That(actual).IsStructurallyEqualTo(expected);
+    await Assert.That(actual).IsEquivalentTo(expected);
 }
 ```
 
-### IsNotStructurallyEqualTo
+### IsNotEquivalentTo for Deep Comparison
 
 ```csharp
 [Test]
@@ -638,7 +638,7 @@ public async Task Not_Structurally_Equal()
         new { Name = "Alice", Age = 31 }
     };
 
-    await Assert.That(actual).IsNotStructurallyEqualTo(different);
+    await Assert.That(actual).IsNotEquivalentTo(different);
 }
 ```
 
