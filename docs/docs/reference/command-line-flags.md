@@ -138,11 +138,11 @@ Please note that for the coverage and trx report, you need to install [additiona
 
     --report-html-filename
         Path for the HTML test report file
-        (default: TestResults/{AssemblyName}-report.html).
+        (default: TestResults/{'{AssemblyName}'}-report.html).
 
     --junit-output-path
         Path to output JUnit XML file
-        (default: TestResults/{AssemblyName}-junit.xml).
+        (default: TestResults/{'{AssemblyName}'}-junit.xml).
         The JUnit reporter is also togglable via TUNIT_ENABLE_JUNIT_REPORTER /
         TUNIT_DISABLE_JUNIT_REPORTER environment variables.
 </pre>

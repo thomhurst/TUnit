@@ -1976,6 +1976,7 @@ namespace .Exceptions
     }
     public class InconclusiveTestException : .
     {
+        public InconclusiveTestException(string message) { }
         public InconclusiveTestException(string message,  exception) { }
     }
     public class SkipTestException : .
