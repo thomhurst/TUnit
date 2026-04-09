@@ -709,16 +709,7 @@ public static class AssertionExtensions
 
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -756,16 +747,7 @@ public static class AssertionExtensions
 
         var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
 
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -804,16 +786,7 @@ public static class AssertionExtensions
 
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
