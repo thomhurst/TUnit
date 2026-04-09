@@ -23,7 +23,7 @@ internal static class MockStaticExtensionBuilder
         });
     }
 
-    public static string BuildForClass(MockTypeModel model)
+    public static string BuildForPartialMock(MockTypeModel model)
     {
         return BuildCore(model, (writer, mockableType, visibility) =>
         {

@@ -116,7 +116,7 @@ internal static class MockTypeDiscovery
         }
 
         // Can't mock sealed classes or structs (analyzers catch this, but skip generation)
-        if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+        if (namedType.IsSealed)
             return ImmutableArray<MockTypeModel>.Empty;
         if (namedType.IsValueType)
             return ImmutableArray<MockTypeModel>.Empty;
@@ -455,7 +455,7 @@ internal static class MockTypeDiscovery
         // Can't mock sealed classes, structs, or delegates via the extension
         if (namedType.IsValueType)
             return ImmutableArray<MockTypeModel>.Empty;
-        if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+        if (namedType.IsSealed)
             return ImmutableArray<MockTypeModel>.Empty;
         if (namedType.TypeKind is not (TypeKind.Interface or TypeKind.Class))
             return ImmutableArray<MockTypeModel>.Empty;
@@ -502,7 +502,7 @@ internal static class MockTypeDiscovery
                 continue;
 
             // Can't mock sealed classes or structs
-            if (namedType.IsSealed && namedType.TypeKind != TypeKind.Interface)
+            if (namedType.IsSealed)
                 continue;
             if (namedType.IsValueType)
                 continue;
