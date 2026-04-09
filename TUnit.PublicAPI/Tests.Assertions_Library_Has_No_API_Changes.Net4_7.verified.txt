@@ -2388,6 +2388,10 @@ namespace .Extensions
         public static . Length(this .<string> source, <.<int>, .<int>?> lengthAssertion, [.("lengthAssertion")] string? expression = null) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, object> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, object> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, object> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, object> assertions) { }
         public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
@@ -2395,6 +2399,8 @@ namespace .Extensions
             where TKey :  notnull { }
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions)
             where TKey :  notnull { }
+        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions)
             where TKey :  notnull { }

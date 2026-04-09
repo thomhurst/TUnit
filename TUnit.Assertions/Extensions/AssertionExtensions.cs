@@ -172,6 +172,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IReadOnlyDictionary<TKey, TValue>>(obj =>
         {
             if (obj == null)
@@ -179,7 +180,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -190,17 +190,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of dictionary type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -225,6 +215,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IReadOnlyDictionary<TKey, TValue>>(obj =>
         {
             if (obj == null)
@@ -232,7 +223,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -243,17 +233,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<IReadOnlyDictionary<TKey, TValue>>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -280,6 +260,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IReadOnlyDictionary<TKey, TValue>>(obj =>
         {
             if (obj == null)
@@ -287,7 +268,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -298,17 +278,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -333,6 +303,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IEnumerable<TItem>>(obj =>
         {
             if (obj == null)
@@ -340,7 +311,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -351,17 +321,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of collection type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -385,6 +345,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IEnumerable<TItem>>(obj =>
         {
             if (obj == null)
@@ -392,7 +353,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -403,17 +363,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<IEnumerable<TItem>>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -439,6 +389,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<IEnumerable<TItem>>(obj =>
         {
             if (obj == null)
@@ -446,7 +397,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -457,17 +407,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -492,6 +432,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(obj =>
         {
             if (obj == null)
@@ -499,7 +440,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -510,17 +450,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage - using TTransformed instead of member type
         var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -543,6 +473,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(obj =>
         {
             if (obj == null)
@@ -550,7 +481,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -561,17 +491,7 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
 
-        // If there was a pending link, wrap both assertions together
-        if (pendingAssertion != null && combinerType != null)
-        {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
-        }
-
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -596,6 +516,7 @@ public static class AssertionExtensions
         var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
 
         // Map to member context
+        var compiled = memberSelector.Compile();
         var memberContext = parentContext.Map<TMember>(obj =>
         {
             if (obj == null)
@@ -603,7 +524,6 @@ public static class AssertionExtensions
                 throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
             }
 
-            var compiled = memberSelector.Compile();
             return compiled(obj);
         });
 
@@ -614,17 +534,259 @@ public static class AssertionExtensions
         // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
-        // If there was a pending link, wrap both assertions together
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a Task.
+    /// The Task is awaited and the assertion lambda receives the unwrapped result value.
+    /// Supports type transformations like IsTypeOf within the assertion lambda.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, Task<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TTransformed>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a Task.
+    /// The Task is awaited and the assertion lambda receives the unwrapped result value.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, Task<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TMember>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a Task.
+    /// The Task is awaited and the assertion lambda receives the unwrapped result value.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// Note: This is a catch-all overload for when the compiler cannot resolve the assertion return type. For AOT compatibility, use the TTransformed overload instead.
+    /// </summary>
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TMember, TTransformed> overload with strongly-typed assertions.")]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, Task<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, object> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertionObj = assertions(memberSource);
+
+        var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Builds a MemberAssertionResult, optionally combining with a pending assertion from And/Or chaining.
+    /// </summary>
+    private static MemberAssertionResult<TObject> BuildMemberResult<TObject>(
+        AssertionContext<TObject> context,
+        Assertion<TObject>? pendingAssertion,
+        CombinerType? combinerType,
+        Assertion<object?> erasedAssertion)
+    {
         if (pendingAssertion != null && combinerType != null)
         {
-            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
-                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
-                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
-
-            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+            Assertion<object?> combined = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(context, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(context, pendingAssertion, erasedAssertion);
+            return new MemberAssertionResult<TObject>(context, combined);
         }
 
-        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+        return new MemberAssertionResult<TObject>(context, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a ValueTask.
+    /// The ValueTask is awaited and the assertion lambda receives the unwrapped result value.
+    /// Supports type transformations like IsTypeOf within the assertion lambda.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, ValueTask<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TTransformed>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a ValueTask.
+    /// The ValueTask is awaited and the assertion lambda receives the unwrapped result value.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, ValueTask<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TMember>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on an async member of an object using a lambda selector that returns a ValueTask.
+    /// The ValueTask is awaited and the assertion lambda receives the unwrapped result value.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.ReadStringAsync(), value => value.IsEqualTo(expectedValue));
+    /// Note: This is a catch-all overload for when the compiler cannot resolve the assertion return type. For AOT compatibility, use the TTransformed overload instead.
+    /// </summary>
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TMember, TTransformed> overload with strongly-typed assertions.")]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, ValueTask<TMember>>> memberSelector,
+        Func<IAssertionSource<TMember>, object> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        var compiled = memberSelector.Compile();
+        var memberContext = parentContext.Map<TMember>(async obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            return await compiled(obj);
+        });
+
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertionObj = assertions(memberSource);
+
+        var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
+
+        return BuildMemberResult(parentContext, pendingAssertion, combinerType, erasedAssertion);
     }
 
     /// <summary>
@@ -676,10 +838,20 @@ public static class AssertionExtensions
         var body = expression.Body;
         var parts = new List<string>();
 
-        while (body is MemberExpression memberExpr)
+        // Walk the expression tree, handling both property/field access and method calls
+        // (e.g., x => x.Foo.GetBar().BazAsync() produces "Foo.GetBar().BazAsync()")
+        while (body is MemberExpression or MethodCallExpression)
         {
-            parts.Insert(0, memberExpr.Member.Name);
-            body = memberExpr.Expression;
+            if (body is MethodCallExpression methodCall)
+            {
+                parts.Insert(0, $"{methodCall.Method.Name}()");
+                body = methodCall.Object;
+            }
+            else if (body is MemberExpression memberExpr)
+            {
+                parts.Insert(0, memberExpr.Member.Name);
+                body = memberExpr.Expression;
+            }
         }
 
         return parts.Count > 0 ? string.Join('.', parts) : "Unknown";
