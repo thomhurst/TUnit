@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TUnit.UnitTests" />
-    <InternalsVisibleTo Include="TUnit.AspNetCore" />
     <InternalsVisibleTo Include="TUnit.Engine.Tests" />
   </ItemGroup>
 
