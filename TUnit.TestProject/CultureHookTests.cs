@@ -71,7 +71,10 @@ public class CultureHookTests_MethodLevelOverride
     {
         // Before(Test) shares the same CustomHookExecutor as the test body, so it runs
         // under the most-specific [Culture] resolved for each test — fr-FR when the
-        // test method has its own override.
+        // test method has its own override. This fixture intentionally contains a single
+        // test with [Culture("fr-FR")]; adding a test without that override would fail
+        // this assertion because the class-level de-AT would apply instead — use
+        // CultureHookTests_MethodLevelInheritsClass below for the no-override case.
         await Assert.That(CultureInfo.CurrentCulture.Name).IsEqualTo("fr-FR");
     }
 }
