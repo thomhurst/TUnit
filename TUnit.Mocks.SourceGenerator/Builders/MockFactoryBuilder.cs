@@ -161,25 +161,9 @@ internal static class MockFactoryBuilder
                     writer.AppendLine($"impl = new {safeName}MockImpl(engine);");
                 }
             }
-            else if (ctorsInGroup.Count == 1)
-            {
-                // Single constructor at this arity — simple dispatch
-                var ctor = ctorsInGroup[0];
-                using (writer.Block($"{keyword} (constructorArgs.Length == {group.Key})"))
-                {
-                    var castArgs = new List<string>();
-                    for (int i = 0; i < ctor.Parameters.Length; i++)
-                    {
-                        var p = ctor.Parameters[i];
-                        castArgs.Add($"({p.FullyQualifiedType})constructorArgs[{i}]");
-                    }
-                    var argList = string.Join(", ", castArgs);
-                    writer.AppendLine($"impl = new {safeName}MockImpl(engine, {argList});");
-                }
-            }
             else
             {
-                // Multiple constructors at the same arity — type-check dispatch
+                // Type-check dispatch — handles both single and multiple constructors at this arity
                 using (writer.Block($"{keyword} (constructorArgs.Length == {group.Key})"))
                 {
                     bool innerFirst = true;

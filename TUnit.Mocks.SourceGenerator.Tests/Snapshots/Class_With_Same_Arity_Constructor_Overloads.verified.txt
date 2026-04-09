@@ -10,15 +10,19 @@ namespace TUnit.Mocks.Generated
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine) : base()
+        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string name) : base(name)
         {
             _engine = engine;
         }
-        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string connectionString, int timeout) : base(connectionString, timeout)
+        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, int id) : base(id)
         {
             _engine = engine;
         }
-        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string connectionString, int timeout, bool verbose) : base(connectionString, timeout, verbose)
+        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string host, int port) : base(host, port)
+        {
+            _engine = engine;
+        }
+        internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, int timeout, bool verbose) : base(timeout, verbose)
         {
             _engine = engine;
         }
@@ -51,9 +55,20 @@ namespace TUnit.Mocks.Generated
         {
             var engine = new global::TUnit.Mocks.MockEngine<global::MyService>(behavior);
             MyServiceMockImpl impl;
-            if (constructorArgs.Length == 0)
+            if (constructorArgs.Length == 1)
             {
-                impl = new MyServiceMockImpl(engine);
+                if ((constructorArgs[0] is null or string))
+                {
+                    impl = new MyServiceMockImpl(engine, (string)constructorArgs[0]);
+                }
+                else if (constructorArgs[0] is int)
+                {
+                    impl = new MyServiceMockImpl(engine, (int)constructorArgs[0]);
+                }
+                else
+                {
+                    throw new global::System.ArgumentException($"No matching constructor found for type 'global::MyService' with the provided argument types.");
+                }
             }
             else if (constructorArgs.Length == 2)
             {
@@ -61,16 +76,9 @@ namespace TUnit.Mocks.Generated
                 {
                     impl = new MyServiceMockImpl(engine, (string)constructorArgs[0], (int)constructorArgs[1]);
                 }
-                else
+                else if (constructorArgs[0] is int && constructorArgs[1] is bool)
                 {
-                    throw new global::System.ArgumentException($"No matching constructor found for type 'global::MyService' with the provided argument types.");
-                }
-            }
-            else if (constructorArgs.Length == 3)
-            {
-                if ((constructorArgs[0] is null or string) && constructorArgs[1] is int && constructorArgs[2] is bool)
-                {
-                    impl = new MyServiceMockImpl(engine, (string)constructorArgs[0], (int)constructorArgs[1], (bool)constructorArgs[2]);
+                    impl = new MyServiceMockImpl(engine, (int)constructorArgs[0], (bool)constructorArgs[1]);
                 }
                 else
                 {
@@ -123,14 +131,24 @@ namespace TUnit.Mocks
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string connectionString, int timeout, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string name, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, connectionString, timeout);
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, name);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string connectionString, int timeout, bool verbose, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int id, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, connectionString, timeout, verbose);
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, id);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string host, int port, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, host, port);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int timeout, bool verbose, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, timeout, verbose);
             }
         }
     }
