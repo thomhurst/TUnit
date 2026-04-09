@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Library.props" />
+
+  <PropertyGroup>
+    <!-- ASP.NET Core MVC Testing only supports .NET 8.0+ -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <RootNamespace>TUnit.AspNetCore</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TUnit.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+    <ProjectReference Include="..\TUnit.Logging.Microsoft\TUnit.Logging.Microsoft.csproj" />
+  </ItemGroup>
+
+  <!-- Framework-specific package versions for Microsoft.AspNetCore.Mvc.Testing -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" VersionOverride="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" VersionOverride="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- Pack AspNetCore Analyzers for different Roslyn versions -->
+  <ItemGroup>
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+
+    <None
+      Include="$(MSBuildProjectDirectory)\..\TUnit.AspNetCore.Analyzers.Roslyn414\bin\$(Configuration)\netstandard2.0\TUnit.AspNetCore.Analyzers.dll"
+      Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs" Visible="false" />
+  </ItemGroup>
+
+  <Import Project="..\Library.targets" />
+
+</Project>

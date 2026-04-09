@@ -5,7 +5,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="TUnit.Engine" />
         <InternalsVisibleTo Include="TUnit.UnitTests" />
-        <InternalsVisibleTo Include="TUnit.AspNetCore" />
+        <InternalsVisibleTo Include="TUnit.AspNetCore.Core" />
         <InternalsVisibleTo Include="TUnit.Logging.Microsoft" />
         <InternalsVisibleTo Include="TUnit.Aspire" />
     </ItemGroup>

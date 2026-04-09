@@ -18,6 +18,7 @@
   <Folder Name="/Libraries/">
     <Project Path="TUnit.Aspire/TUnit.Aspire.csproj" />
     <Project Path="TUnit.AspNetCore/TUnit.AspNetCore.csproj" />
+    <Project Path="TUnit.AspNetCore.Core/TUnit.AspNetCore.Core.csproj" />
     <Project Path="TUnit.FsCheck/TUnit.FsCheck.csproj" />
     <Project Path="TUnit.Logging.Microsoft/TUnit.Logging.Microsoft.csproj" />
     <Project Path="TUnit.Mocks/TUnit.Mocks.csproj" />
