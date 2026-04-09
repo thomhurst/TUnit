@@ -1022,9 +1022,9 @@ public async Task Verify_Ordering_Separately()
 
 ## Structural Equivalency
 
-### IsStructurallyEqualTo
+`IsEquivalentTo` already performs deep structural comparison by default, using `StructuralEqualityComparer<T>` — nested objects, anonymous types, and records are all compared by their properties and fields rather than by reference.
 
-Deep comparison of collections including nested objects:
+### Deep Comparison with IsEquivalentTo
 
 ```csharp
 [Test]
@@ -1042,11 +1042,11 @@ public async Task Structurally_Equal()
         new { Name = "Bob", Address = new { City = "Portland" } }
     };
 
-    await Assert.That(actual).IsStructurallyEqualTo(expected);
+    await Assert.That(actual).IsEquivalentTo(expected);
 }
 ```
 
-### IsNotStructurallyEqualTo
+### IsNotEquivalentTo for Deep Comparison
 
 ```csharp
 [Test]
@@ -1062,7 +1062,7 @@ public async Task Not_Structurally_Equal()
         new { Name = "Alice", Age = 31 }
     };
 
-    await Assert.That(actual).IsNotStructurallyEqualTo(different);
+    await Assert.That(actual).IsNotEquivalentTo(different);
 }
 ```
 
@@ -1370,7 +1370,22 @@ public async Task MyTest()
 }
 ```
 
-`.And` and `.Or` can be mixed in a single chain. Conditions are evaluated left-to-right.
+:::warning Mixing And/Or is not supported
+`.And` and `.Or` cannot be mixed in a single chain. Attempting to use `.Or` after `.And` (or vice versa) throws `MixedAndOrAssertionsException` at runtime. If you need both kinds of logic, split the chain across multiple `Assert.That(...)` calls, or combine the conditions into a single boolean expression beforehand.
+
+```csharp
+// NOT supported - throws MixedAndOrAssertionsException at runtime
+await Assert.That(result)
+    .IsPositive()
+    .And.IsLessThan(10)
+    .Or.IsEqualTo(100);
+
+// Supported - use separate assertions
+await Assert.That(result).IsPositive().And.IsLessThan(10);
+// or fall back to a single boolean check when you need And/Or together
+await Assert.That((result > 0 && result < 10) || result == 100).IsTrue();
+```
+:::
 
 ## Assertion Scopes
 
@@ -1621,7 +1636,7 @@ public async Task DateTimeOffset_Comparison()
 }
 ```
 
-## DateOnly (.NET 6+)
+## DateOnly (.NET 8+)
 
 DateOnly represents just a date without time:
 
@@ -1645,7 +1660,7 @@ public async Task DateOnly_With_Tolerance()
     var date1 = new DateOnly(2024, 1, 15);
     var date2 = new DateOnly(2024, 1, 17);
 
-    await Assert.That(date2).IsEqualTo(date1, daysTolerance: 5);
+    await Assert.That(date2).IsEqualTo(date1).WithinDays(5);
 }
 ```
 
@@ -1663,7 +1678,7 @@ public async Task DateOnly_Comparison()
 }
 ```
 
-## TimeOnly (.NET 6+)
+## TimeOnly (.NET 8+)
 
 TimeOnly represents just time without a date:
 
@@ -2592,7 +2607,7 @@ public async Task Using_EqualTo_Alias()
     var numbers = new[] { 1, 2, 3 };
 
     await Assert.That(numbers)
-        .Count().EqualTo(3)
+        .Count().IsEqualTo(3)
         .And.Contains(2);
 }
 ```
@@ -3005,16 +3020,28 @@ public async Task Throws_Exact_Type()
 
 ### Throws (Runtime Type)
 
-Use when the exception type is only known at runtime:
+Use when the exception type is only known at runtime. On a synchronous delegate, fluent chaining only supports the generic `Throws<T>()` / `ThrowsExactly<T>()` forms, so reach for the static `Assert.Throws(Type, Action)` helper instead. On an async delegate you can call `ThrowsAsync(Type)` directly.
 
 ```csharp
 [Test]
-public async Task Throws_Runtime_Type()
+public async Task Throws_Runtime_Type_Sync()
 {
     Type exceptionType = typeof(InvalidOperationException);
 
-    await Assert.That(() => throw new InvalidOperationException())
-        .Throws(exceptionType);
+    // Static helper for sync delegates
+    Assert.Throws(exceptionType, () => throw new InvalidOperationException());
+}
+
+[Test]
+public async Task Throws_Runtime_Type_Async()
+{
+    Type exceptionType = typeof(InvalidOperationException);
+
+    await Assert.That(async () =>
+    {
+        await Task.Yield();
+        throw new InvalidOperationException();
+    }).Throws(exceptionType);
 }
 ```
 
@@ -6005,7 +6032,7 @@ public async Task MultipleMatchAssertions()
 
 ## Match Position and Length
 
-You can assert on where a match occurs and its length:
+To assert on where a match occurs or how long it is, use `.Match(index)` to select a match from the collection, then assert on the resulting `RegexMatch` (you can also combine this with `Regex.Match(...)` directly if you need more detailed inspection):
 
 ```csharp
 [Test]
@@ -6014,21 +6041,16 @@ public async Task PositionAndLengthAssertions()
     var text = "Hello World 123";
     var pattern = @"\d+";
 
-    // Assert that match is at specific index
-    await Assert.That(text)
-        .Matches(pattern)
-        .AtIndex(12);
+    // Directly inspect the first match for position and length
+    var match = System.Text.RegularExpressions.Regex.Match(text, pattern);
 
-    // Assert that match has specific length
-    await Assert.That(text)
-        .Matches(pattern)
-        .Length().IsEqualTo(3);
+    await Assert.That(match.Index).IsEqualTo(12);
+    await Assert.That(match.Length).IsEqualTo(3);
 
-    // Combine with group assertions
+    // Or combine the TUnit regex assertion with a direct group check
     await Assert.That(text)
         .Matches(pattern)
-        .AtIndex(12)
-        .And.Length().IsEqualTo(3);
+        .And.Group(0, g => g.IsEqualTo("123"));
 }
 ```
 
@@ -6088,7 +6110,7 @@ public async Task UrlParsingAssertions()
 
 ## Regex Options
 
-Use `.IgnoringCase()` or `.WithOptions()` for case-insensitive or other regex options:
+The `Matches(string)` overload does not take `RegexOptions`. To apply options like case-insensitivity, construct a `Regex` (or use a source-generated regex) with the desired options and pass it to `Matches`:
 
 ```csharp
 [Test]
@@ -6096,15 +6118,13 @@ public async Task RegexOptionsAssertions()
 {
     var text = "HELLO world";
 
-    // Case-insensitive matching
-    await Assert.That(text)
-        .Matches(@"hello")
-        .IgnoringCase();
+    // Case-insensitive matching via a Regex instance
+    var caseInsensitive = new Regex("hello", RegexOptions.IgnoreCase);
+    await Assert.That(text).Matches(caseInsensitive);
 
-    // Custom options
-    await Assert.That(text)
-        .Matches(@"^hello.*world$")
-        .WithOptions(RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    // Custom combined options
+    var multi = new Regex(@"^hello.*world$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+    await Assert.That(text).Matches(multi);
 }
 ```
 
@@ -6173,15 +6193,18 @@ public async Task CompleteEmailValidation()
         .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
-        .And.Group("tld", tld => tld.Length().IsEqualTo(3))
-        .And.AtIndex(0)
-        .And.Length().IsEqualTo(email.Length);
+        .And.Group("tld", tld => tld.Length().IsEqualTo(3));
+
+    // For position/length checks, use Regex.Match directly
+    var match = System.Text.RegularExpressions.Regex.Match(email, pattern);
+    await Assert.That(match.Index).IsEqualTo(0);
+    await Assert.That(match.Length).IsEqualTo(email.Length);
 }
 ```
 
 ## Error Handling
 
-The regex assertions throw specific exceptions for common error cases:
+The regex assertions surface standard exceptions for common error cases. Wrap the call in an `Assert.That(() => ...)` delegate and assert on the thrown exception type:
 
 ```csharp
 [Test]
@@ -6190,28 +6213,18 @@ public async Task RegexAssertionErrors()
     var text = "Hello123World";
 
     // Throws ArgumentNullException if text is null
-    await Assert.That((string?)null)
-        .ThrowsAsync<ArgumentNullException>()
-        .When(() => Matches(@"\d+"));
+    await Assert.That(async () =>
+        await Assert.That((string?)null!).Matches(@"\d+"))
+        .Throws<ArgumentNullException>();
 
     // Throws RegexParseException for invalid patterns
-    await Assert.That(text)
-        .ThrowsAsync<RegexParseException>()
-        .When(() => Matches(@"[invalid"));
-
-    // Throws ArgumentOutOfRangeException for invalid group index
-    await Assert.That(text)
-        .Matches(@"Hello(\d+)World")
-        .ThrowsAsync<ArgumentOutOfRangeException>()
-        .When(m => m.Group(99, g => g.IsEqualTo("123")));
-
-    // Throws ArgumentException for empty group name
-    await Assert.That(text)
-        .Matches(@"Hello(?<num>\d+)World")
-        .ThrowsAsync<ArgumentException>()
-        .When(m => m.Group("", g => g.IsEqualTo("123")));
+    await Assert.That(async () =>
+        await Assert.That(text).Matches(@"[invalid"))
+        .Throws<RegexParseException>();
 }
 ```
+
+For invalid group indices or names, let the underlying `Regex` call throw and assert on it via a delegate in the same way.
 
 ## Best Practices
 
@@ -7853,7 +7866,7 @@ public async Task Task_Not_Faulted()
 }
 ```
 
-### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 6+)
+### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 8+)
 
 Tests whether a task completed successfully (not faulted or canceled):
 
@@ -7910,7 +7923,7 @@ public async Task Task_Exceeds_Timeout()
 
 ### WaitsFor
 
-Waits for a condition to become true within a timeout:
+Polls a value source until a nested assertion passes or the timeout expires. `WaitsFor` takes an assertion-builder lambda (not a bool predicate), so you write the same fluent assertions you would elsewhere:
 
 ```csharp
 [Test]
@@ -7925,9 +7938,11 @@ public async Task Wait_For_Condition()
     });
 
     await Assert.That(() => condition)
-        .WaitsFor(c => c == true, timeout: TimeSpan.FromSeconds(2));
+        .WaitsFor(src => src.IsEqualTo(true), timeout: TimeSpan.FromSeconds(2));
 }
 ```
+
+`Eventually` is provided as an alias for `WaitsFor` when it reads more naturally.
 
 ## Practical Examples
 
@@ -9103,7 +9118,7 @@ public async Task Record_Properties()
 # AsyncTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9112,11 +9127,11 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 528.7 ms | 528.1 ms | 4.20 ms |
-| NUnit | 4.5.1 | 725.3 ms | 726.0 ms | 4.58 ms |
-| MSTest | 4.2.1 | 627.7 ms | 626.8 ms | 5.08 ms |
-| xUnit3 | 3.2.2 | 774.1 ms | 774.8 ms | 3.64 ms |
-| **TUnit (AOT)** | 1.29.0 | 120.9 ms | 121.0 ms | 0.18 ms |
+| **TUnit** | 1.29.0 | 520.1 ms | 518.7 ms | 4.53 ms |
+| NUnit | 4.5.1 | 682.9 ms | 682.5 ms | 7.39 ms |
+| MSTest | 4.2.1 | 595.2 ms | 595.7 ms | 6.52 ms |
+| xUnit3 | 3.2.2 | 733.2 ms | 732.4 ms | 10.93 ms |
+| **TUnit (AOT)** | 1.29.0 | 120.6 ms | 120.6 ms | 0.24 ms |
 
 ## 📈 Visual Comparison
 
@@ -9154,8 +9169,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "AsyncTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 929
-  bar [528.7, 725.3, 627.7, 774.1, 120.9]
+  y-axis "Time (ms)" 0 --> 880
+  bar [520.1, 682.9, 595.2, 733.2, 120.6]
 ```
 
 ## 🎯 Key Insights
@@ -9168,7 +9183,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.022Z*
+*Last generated: 2026-04-09T00:35:45.725Z*
 
 ---
 
@@ -9177,7 +9192,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # Build Performance Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9188,10 +9203,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 1.842 s | 1.834 s | 0.0284 s |
-| Build_NUnit | 4.5.1 | 1.651 s | 1.651 s | 0.0141 s |
-| Build_MSTest | 4.2.1 | 1.703 s | 1.708 s | 0.0194 s |
-| Build_xUnit3 | 3.2.2 | 1.625 s | 1.628 s | 0.0229 s |
+| **TUnit** | 1.29.0 | 1.829 s | 1.823 s | 0.0256 s |
+| Build_NUnit | 4.5.1 | 1.634 s | 1.634 s | 0.0159 s |
+| Build_MSTest | 4.2.1 | 1.719 s | 1.713 s | 0.0367 s |
+| Build_xUnit3 | 3.2.2 | 1.614 s | 1.620 s | 0.0238 s |
 
 ## 📈 Visual Comparison
 
@@ -9230,7 +9245,7 @@ xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
   y-axis "Time (s)" 0 --> 3
-  bar [1.842, 1.651, 1.703, 1.625]
+  bar [1.829, 1.634, 1.719, 1.614]
 ```
 
 ---
@@ -9239,7 +9254,7 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.024Z*
+*Last generated: 2026-04-09T00:35:45.727Z*
 
 ---
 
@@ -9248,7 +9263,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # DataDrivenTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9257,11 +9272,11 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 473.79 ms | 472.13 ms | 4.500 ms |
-| NUnit | 4.5.1 | 593.30 ms | 591.70 ms | 7.750 ms |
-| MSTest | 4.2.1 | 590.47 ms | 589.75 ms | 9.122 ms |
-| xUnit3 | 3.2.2 | 635.06 ms | 635.60 ms | 6.296 ms |
-| **TUnit (AOT)** | 1.29.0 | 22.25 ms | 22.29 ms | 0.391 ms |
+| **TUnit** | 1.29.0 | 462.62 ms | 462.54 ms | 1.239 ms |
+| NUnit | 4.5.1 | 547.88 ms | 547.82 ms | 5.547 ms |
+| MSTest | 4.2.1 | 448.62 ms | 446.50 ms | 6.440 ms |
+| xUnit3 | 3.2.2 | 587.17 ms | 583.95 ms | 10.727 ms |
+| **TUnit (AOT)** | 1.29.0 | 23.17 ms | 23.04 ms | 0.341 ms |
 
 ## 📈 Visual Comparison
 
@@ -9299,8 +9314,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "DataDrivenTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 763
-  bar [473.79, 593.3, 590.47, 635.06, 22.25]
+  y-axis "Time (ms)" 0 --> 705
+  bar [462.62, 547.88, 448.62, 587.17, 23.17]
 ```
 
 ## 🎯 Key Insights
@@ -9313,7 +9328,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.022Z*
+*Last generated: 2026-04-09T00:35:45.726Z*
 
 ---
 
@@ -9322,7 +9337,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # MassiveParallelTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9331,11 +9346,11 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 665.1 ms | 665.0 ms | 4.92 ms |
-| NUnit | 4.5.1 | 1,255.8 ms | 1,256.9 ms | 8.14 ms |
-| MSTest | 4.2.1 | 2,973.6 ms | 2,974.5 ms | 7.20 ms |
-| xUnit3 | 3.2.2 | 3,129.5 ms | 3,130.4 ms | 12.75 ms |
-| **TUnit (AOT)** | 1.29.0 | 228.0 ms | 228.0 ms | 0.57 ms |
+| **TUnit** | 1.29.0 | 672.3 ms | 672.4 ms | 3.06 ms |
+| NUnit | 4.5.1 | 1,262.2 ms | 1,261.8 ms | 7.39 ms |
+| MSTest | 4.2.1 | 2,978.8 ms | 2,976.6 ms | 13.11 ms |
+| xUnit3 | 3.2.2 | 3,158.9 ms | 3,157.2 ms | 12.26 ms |
+| **TUnit (AOT)** | 1.29.0 | 229.7 ms | 229.6 ms | 0.52 ms |
 
 ## 📈 Visual Comparison
 
@@ -9373,8 +9388,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "MassiveParallelTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 3756
-  bar [665.1, 1255.8, 2973.6, 3129.5, 228]
+  y-axis "Time (ms)" 0 --> 3791
+  bar [672.3, 1262.2, 2978.8, 3158.9, 229.7]
 ```
 
 ## 🎯 Key Insights
@@ -9387,7 +9402,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.022Z*
+*Last generated: 2026-04-09T00:35:45.726Z*
 
 ---
 
@@ -9396,7 +9411,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # MatrixTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9405,11 +9420,11 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 583.1 ms | 582.3 ms | 2.39 ms |
-| NUnit | 4.5.1 | 1,574.6 ms | 1,575.7 ms | 5.28 ms |
-| MSTest | 4.2.1 | 1,477.3 ms | 1,474.8 ms | 9.98 ms |
-| xUnit3 | 3.2.2 | 1,621.3 ms | 1,618.5 ms | 7.54 ms |
-| **TUnit (AOT)** | 1.29.0 | 126.3 ms | 126.3 ms | 0.44 ms |
+| **TUnit** | 1.29.0 | 581.2 ms | 582.0 ms | 8.89 ms |
+| NUnit | 4.5.1 | 1,577.4 ms | 1,573.7 ms | 11.07 ms |
+| MSTest | 4.2.1 | 1,473.2 ms | 1,471.9 ms | 10.58 ms |
+| xUnit3 | 3.2.2 | 1,615.7 ms | 1,615.0 ms | 6.88 ms |
+| **TUnit (AOT)** | 1.29.0 | 125.9 ms | 125.9 ms | 0.56 ms |
 
 ## 📈 Visual Comparison
 
@@ -9447,8 +9462,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "MatrixTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1946
-  bar [583.1, 1574.6, 1477.3, 1621.3, 126.3]
+  y-axis "Time (ms)" 0 --> 1939
+  bar [581.2, 1577.4, 1473.2, 1615.7, 125.9]
 ```
 
 ## 🎯 Key Insights
@@ -9461,7 +9476,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.023Z*
+*Last generated: 2026-04-09T00:35:45.726Z*
 
 ---
 
@@ -9470,7 +9485,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # ScaleTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9479,11 +9494,11 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 455.16 ms | 455.92 ms | 3.600 ms |
-| NUnit | 4.5.1 | 568.17 ms | 569.51 ms | 6.337 ms |
-| MSTest | 4.2.1 | 526.13 ms | 523.75 ms | 15.376 ms |
-| xUnit3 | 3.2.2 | 589.61 ms | 589.49 ms | 9.581 ms |
-| **TUnit (AOT)** | 1.29.0 | 36.02 ms | 36.37 ms | 3.222 ms |
+| **TUnit** | 1.29.0 | 484.64 ms | 485.40 ms | 4.299 ms |
+| NUnit | 4.5.1 | 645.44 ms | 646.37 ms | 7.363 ms |
+| MSTest | 4.2.1 | 612.08 ms | 608.11 ms | 14.334 ms |
+| xUnit3 | 3.2.2 | 657.96 ms | 657.99 ms | 5.992 ms |
+| **TUnit (AOT)** | 1.29.0 | 32.98 ms | 32.75 ms | 2.506 ms |
 
 ## 📈 Visual Comparison
 
@@ -9521,8 +9536,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "ScaleTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 708
-  bar [455.16, 568.17, 526.13, 589.61, 36.02]
+  y-axis "Time (ms)" 0 --> 790
+  bar [484.64, 645.44, 612.08, 657.96, 32.98]
 ```
 
 ## 🎯 Key Insights
@@ -9535,7 +9550,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.023Z*
+*Last generated: 2026-04-09T00:35:45.726Z*
 
 ---
 
@@ -9544,7 +9559,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 # SetupTeardownTests Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9553,10 +9568,10 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.29.0 | 577.9 ms | 576.3 ms | 4.30 ms |
-| NUnit | 4.5.1 | 1,194.4 ms | 1,194.5 ms | 6.02 ms |
-| MSTest | 4.2.1 | 1,105.4 ms | 1,105.7 ms | 9.88 ms |
-| xUnit3 | 3.2.2 | 1,268.8 ms | 1,265.1 ms | 16.90 ms |
+| **TUnit** | 1.29.0 | 569.7 ms | 569.8 ms | 4.13 ms |
+| NUnit | 4.5.1 | 1,205.6 ms | 1,203.9 ms | 7.24 ms |
+| MSTest | 4.2.1 | 1,127.2 ms | 1,124.7 ms | 7.94 ms |
+| xUnit3 | 3.2.2 | 1,259.8 ms | 1,259.4 ms | 5.34 ms |
 | **TUnit (AOT)** | 1.29.0 | NA | NA | NA |
 
 ## 📈 Visual Comparison
@@ -9595,8 +9610,8 @@ This benchmark was automatically generated on **2026-04-08** from the latest CI 
 xychart-beta
   title "SetupTeardownTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1523
-  bar [577.9, 1194.4, 1105.4, 1268.8, 0]
+  y-axis "Time (ms)" 0 --> 1512
+  bar [569.7, 1205.6, 1127.2, 1259.8, 0]
 ```
 
 ## 🎯 Key Insights
@@ -9609,7 +9624,7 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T00:41:52.023Z*
+*Last generated: 2026-04-09T00:35:45.726Z*
 
 ---
 
@@ -9617,7 +9632,7 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-04-08** from the latest CI run.
+These benchmarks were automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9688,7 +9703,7 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-04-08T00:41:52.024Z*
+*Last generated: 2026-04-09T00:35:45.727Z*
 
 ---
 
@@ -9778,11 +9793,13 @@ public async Task TestAsyncOperation()
 **What's tested**:
 ```csharp
 [Test]
-[Matrix("Create", "Update", "Delete")] // Operation
-[Matrix("User", "Admin", "Guest")]     // Role
-public void TestPermissions(string op, string role)
+[MatrixDataSource]
+public async Task TestPermissions(
+    [Matrix("Create", "Update", "Delete")] string op,
+    [Matrix("User", "Admin", "Guest")] string role)
 {
-    // 9 test combinations
+    // 3 × 3 = 9 test combinations
+    await Task.CompletedTask;
 }
 ```
 
@@ -9983,7 +10000,7 @@ Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst
 # Callback Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -9994,12 +10011,12 @@ Callback registration and execution:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 840.6 ns | 16.72 ns | 19.91 ns | 3.13 KB |
-| Imposter | 560.5 ns | 10.89 ns | 11.65 ns | 2.66 KB |
-| Mockolate | 614.4 ns | 6.70 ns | 5.94 ns | 1.8 KB |
-| Moq | 140,130.3 ns | 897.78 ns | 839.79 ns | 13.29 KB |
-| NSubstitute | 4,307.0 ns | 25.01 ns | 23.40 ns | 7.93 KB |
-| FakeItEasy | 5,535.4 ns | 32.79 ns | 29.07 ns | 7.43 KB |
+| **TUnit.Mocks** | 683.4 ns | 13.70 ns | 16.82 ns | 3.13 KB |
+| Imposter | 464.4 ns | 9.11 ns | 9.75 ns | 2.66 KB |
+| Mockolate | 505.2 ns | 5.77 ns | 5.40 ns | 1.8 KB |
+| Moq | 182,018.6 ns | 913.00 ns | 809.35 ns | 13.14 KB |
+| NSubstitute | 4,332.1 ns | 40.48 ns | 37.87 ns | 7.93 KB |
+| FakeItEasy | 5,080.6 ns | 20.20 ns | 16.86 ns | 7.44 KB |
 
 ```mermaid
 %%{init: {
@@ -10025,8 +10042,8 @@ Callback registration and execution:
 xychart-beta
   title "Callback Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 168157
-  bar [840.6, 560.5, 614.4, 140130.3, 4307, 5535.4]
+  y-axis "Time (ns)" 0 --> 218423
+  bar [683.4, 464.4, 505.2, 182018.6, 4332.1, 5080.6]
 ```
 
 ---
@@ -10035,12 +10052,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 949.3 ns | 7.73 ns | 7.23 ns | 3.22 KB |
-| Imposter | 625.3 ns | 12.27 ns | 13.12 ns | 2.82 KB |
-| Mockolate | 762.0 ns | 7.65 ns | 7.16 ns | 2.13 KB |
-| Moq | 145,388.9 ns | 1,028.96 ns | 912.14 ns | 13.75 KB |
-| NSubstitute | 4,890.5 ns | 27.56 ns | 23.01 ns | 8.53 KB |
-| FakeItEasy | 6,437.6 ns | 51.02 ns | 47.72 ns | 9.26 KB |
+| **TUnit.Mocks** | 829.4 ns | 16.30 ns | 15.24 ns | 3.22 KB |
+| Imposter | 548.6 ns | 10.80 ns | 10.10 ns | 2.82 KB |
+| Mockolate | 665.6 ns | 10.40 ns | 9.73 ns | 2.13 KB |
+| Moq | 192,517.3 ns | 1,279.34 ns | 1,196.70 ns | 13.73 KB |
+| NSubstitute | 5,229.9 ns | 61.87 ns | 54.85 ns | 8.53 KB |
+| FakeItEasy | 6,597.0 ns | 84.00 ns | 74.46 ns | 9.26 KB |
 
 ```mermaid
 %%{init: {
@@ -10066,8 +10083,8 @@ xychart-beta
 xychart-beta
   title "Callback (with args) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 174467
-  bar [949.3, 625.3, 762, 145388.9, 4890.5, 6437.6]
+  y-axis "Time (ns)" 0 --> 231021
+  bar [829.4, 548.6, 665.6, 192517.3, 5229.9, 6597]
 ```
 
 ## 🎯 Key Insights
@@ -10080,7 +10097,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10089,7 +10106,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 # CombinedWorkflow Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10100,12 +10117,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1.884 μs | 0.0062 μs | 0.0055 μs | 6.34 KB |
-| Imposter | 2.472 μs | 0.0145 μs | 0.0136 μs | 15.71 KB |
-| Mockolate | 2.316 μs | 0.0080 μs | 0.0063 μs | 7.09 KB |
-| Moq | 311.170 μs | 1.7446 μs | 1.4568 μs | 36.47 KB |
-| NSubstitute | 15.487 μs | 0.0545 μs | 0.0455 μs | 26.72 KB |
-| FakeItEasy | 15.285 μs | 0.1628 μs | 0.1359 μs | 25.74 KB |
+| **TUnit.Mocks** | 1.949 μs | 0.0390 μs | 0.0534 μs | 6.34 KB |
+| Imposter | 2.697 μs | 0.0538 μs | 0.0899 μs | 15.71 KB |
+| Mockolate | 2.436 μs | 0.0451 μs | 0.0422 μs | 7.09 KB |
+| Moq | 403.629 μs | 3.0154 μs | 2.6731 μs | 36.6 KB |
+| NSubstitute | 17.563 μs | 0.2364 μs | 0.2212 μs | 26.72 KB |
+| FakeItEasy | 18.167 μs | 0.3550 μs | 0.4088 μs | 25.52 KB |
 
 ```mermaid
 %%{init: {
@@ -10131,8 +10148,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 374
-  bar [1.884, 2.472, 2.316, 311.17, 15.487, 15.285]
+  y-axis "Time (μs)" 0 --> 485
+  bar [1.949, 2.697, 2.436, 403.629, 17.563, 18.167]
 ```
 
 ## 🎯 Key Insights
@@ -10145,7 +10162,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10154,7 +10171,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 # Invocation Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10165,12 +10182,12 @@ Calling methods on mock objects:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 256.3 ns | 79.33 ns | 4.35 ns | 120 B |
-| Imposter | 293.4 ns | 98.43 ns | 5.40 ns | 168 B |
-| Mockolate | 644.1 ns | 144.89 ns | 7.94 ns | 640 B |
-| Moq | 808.8 ns | 599.84 ns | 32.88 ns | 376 B |
-| NSubstitute | 733.1 ns | 169.93 ns | 9.31 ns | 304 B |
-| FakeItEasy | 1,677.3 ns | 185.63 ns | 10.18 ns | 944 B |
+| **TUnit.Mocks** | 258.5 ns | 106.64 ns | 5.85 ns | 120 B |
+| Imposter | 291.1 ns | 77.88 ns | 4.27 ns | 168 B |
+| Mockolate | 652.8 ns | 394.46 ns | 21.62 ns | 640 B |
+| Moq | 811.7 ns | 114.71 ns | 6.29 ns | 376 B |
+| NSubstitute | 714.4 ns | 51.08 ns | 2.80 ns | 304 B |
+| FakeItEasy | 1,753.6 ns | 97.68 ns | 5.35 ns | 944 B |
 
 ```mermaid
 %%{init: {
@@ -10196,8 +10213,8 @@ Calling methods on mock objects:
 xychart-beta
   title "Invocation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2013
-  bar [256.3, 293.4, 644.1, 808.8, 733.1, 1677.3]
+  y-axis "Time (ns)" 0 --> 2105
+  bar [258.5, 291.1, 652.8, 811.7, 714.4, 1753.6]
 ```
 
 ---
@@ -10206,12 +10223,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 156.4 ns | 66.27 ns | 3.63 ns | 88 B |
-| Imposter | 287.3 ns | 107.35 ns | 5.88 ns | 168 B |
-| Mockolate | 510.4 ns | 119.33 ns | 6.54 ns | 520 B |
-| Moq | 519.4 ns | 243.23 ns | 13.33 ns | 296 B |
-| NSubstitute | 603.6 ns | 189.90 ns | 10.41 ns | 272 B |
-| FakeItEasy | 1,599.1 ns | 961.14 ns | 52.68 ns | 776 B |
+| **TUnit.Mocks** | 181.0 ns | 55.32 ns | 3.03 ns | 88 B |
+| Imposter | 292.1 ns | 54.18 ns | 2.97 ns | 168 B |
+| Mockolate | 527.3 ns | 189.35 ns | 10.38 ns | 520 B |
+| Moq | 523.1 ns | 252.71 ns | 13.85 ns | 296 B |
+| NSubstitute | 609.9 ns | 171.99 ns | 9.43 ns | 272 B |
+| FakeItEasy | 1,545.9 ns | 399.68 ns | 21.91 ns | 776 B |
 
 ```mermaid
 %%{init: {
@@ -10237,8 +10254,8 @@ xychart-beta
 xychart-beta
   title "Invocation (String) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 1919
-  bar [156.4, 287.3, 510.4, 519.4, 603.6, 1599.1]
+  y-axis "Time (ns)" 0 --> 1856
+  bar [181, 292.1, 527.3, 523.1, 609.9, 1545.9]
 ```
 
 ---
@@ -10247,12 +10264,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 26,345.4 ns | 6,687.33 ns | 366.56 ns | 11936 B |
-| Imposter | 28,606.6 ns | 12,600.34 ns | 690.67 ns | 16800 B |
-| Mockolate | 64,539.3 ns | 27,979.44 ns | 1,533.65 ns | 64000 B |
-| Moq | 80,516.4 ns | 35,288.62 ns | 1,934.29 ns | 37600 B |
-| NSubstitute | 72,674.0 ns | 17,366.20 ns | 951.90 ns | 30848 B |
-| FakeItEasy | 177,835.2 ns | 13,362.99 ns | 732.47 ns | 94400 B |
+| **TUnit.Mocks** | 26,052.4 ns | 8,929.36 ns | 489.45 ns | 11936 B |
+| Imposter | 28,886.9 ns | 11,038.75 ns | 605.07 ns | 16800 B |
+| Mockolate | 67,035.7 ns | 32,626.56 ns | 1,788.37 ns | 64000 B |
+| Moq | 79,757.0 ns | 18,676.91 ns | 1,023.74 ns | 37600 B |
+| NSubstitute | 72,447.8 ns | 9,213.09 ns | 505.00 ns | 30848 B |
+| FakeItEasy | 176,659.2 ns | 71,866.48 ns | 3,939.24 ns | 94400 B |
 
 ```mermaid
 %%{init: {
@@ -10278,8 +10295,8 @@ xychart-beta
 xychart-beta
   title "Invocation (100 calls) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 213403
-  bar [26345.4, 28606.6, 64539.3, 80516.4, 72674, 177835.2]
+  y-axis "Time (ns)" 0 --> 211992
+  bar [26052.4, 28886.9, 67035.7, 79757, 72447.8, 176659.2]
 ```
 
 ## 🎯 Key Insights
@@ -10292,7 +10309,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10301,7 +10318,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 # MockCreation Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10312,12 +10329,12 @@ Mock instance creation performance:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 33.30 ns | 0.288 ns | 0.270 ns | 192 B |
-| Imposter | 86.03 ns | 0.378 ns | 0.316 ns | 440 B |
-| Mockolate | 62.30 ns | 0.403 ns | 0.357 ns | 384 B |
-| Moq | 1,245.13 ns | 15.237 ns | 14.252 ns | 2048 B |
-| NSubstitute | 1,847.32 ns | 11.261 ns | 10.533 ns | 5000 B |
-| FakeItEasy | 1,693.15 ns | 32.310 ns | 33.180 ns | 2715 B |
+| **TUnit.Mocks** | 37.69 ns | 0.426 ns | 0.399 ns | 192 B |
+| Imposter | 107.70 ns | 2.065 ns | 1.932 ns | 440 B |
+| Mockolate | 68.38 ns | 0.333 ns | 0.311 ns | 384 B |
+| Moq | 1,241.21 ns | 7.600 ns | 7.109 ns | 2048 B |
+| NSubstitute | 1,723.41 ns | 10.491 ns | 9.300 ns | 5000 B |
+| FakeItEasy | 1,668.99 ns | 7.802 ns | 7.298 ns | 2715 B |
 
 ```mermaid
 %%{init: {
@@ -10343,8 +10360,8 @@ Mock instance creation performance:
 xychart-beta
   title "MockCreation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2217
-  bar [33.3, 86.03, 62.3, 1245.13, 1847.32, 1693.15]
+  y-axis "Time (ns)" 0 --> 2069
+  bar [37.69, 107.7, 68.38, 1241.21, 1723.41, 1668.99]
 ```
 
 ---
@@ -10353,12 +10370,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 33.35 ns | 0.112 ns | 0.099 ns | 192 B |
-| Imposter | 134.23 ns | 0.666 ns | 0.623 ns | 696 B |
-| Mockolate | 64.16 ns | 0.439 ns | 0.410 ns | 384 B |
-| Moq | 1,389.00 ns | 5.231 ns | 4.637 ns | 1912 B |
-| NSubstitute | 1,729.86 ns | 6.728 ns | 6.294 ns | 5000 B |
-| FakeItEasy | 1,637.10 ns | 23.929 ns | 19.982 ns | 2715 B |
+| **TUnit.Mocks** | 35.74 ns | 0.156 ns | 0.146 ns | 192 B |
+| Imposter | 149.85 ns | 0.355 ns | 0.315 ns | 696 B |
+| Mockolate | 69.98 ns | 0.372 ns | 0.348 ns | 384 B |
+| Moq | 1,253.25 ns | 9.900 ns | 8.267 ns | 1912 B |
+| NSubstitute | 1,769.68 ns | 34.315 ns | 35.239 ns | 5000 B |
+| FakeItEasy | 1,691.85 ns | 13.217 ns | 11.037 ns | 2715 B |
 
 ```mermaid
 %%{init: {
@@ -10384,8 +10401,8 @@ xychart-beta
 xychart-beta
   title "MockCreation (Repository) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2076
-  bar [33.35, 134.23, 64.16, 1389, 1729.86, 1637.1]
+  y-axis "Time (ns)" 0 --> 2124
+  bar [35.74, 149.85, 69.98, 1253.25, 1769.68, 1691.85]
 ```
 
 ## 🎯 Key Insights
@@ -10398,7 +10415,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10407,7 +10424,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 # Setup Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10418,12 +10435,12 @@ Mock behavior configuration (returns, matchers):
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 537.9 ns | 7.59 ns | 6.73 ns | 2.34 KB |
-| Imposter | 807.6 ns | 15.95 ns | 30.73 ns | 6.12 KB |
-| Mockolate | 443.5 ns | 8.64 ns | 8.48 ns | 2.03 KB |
-| Moq | 426,929.6 ns | 2,319.73 ns | 2,056.38 ns | 28.52 KB |
-| NSubstitute | 5,439.6 ns | 57.07 ns | 53.38 ns | 9.01 KB |
-| FakeItEasy | 7,932.6 ns | 95.53 ns | 79.77 ns | 10.45 KB |
+| **TUnit.Mocks** | 605.2 ns | 11.26 ns | 10.53 ns | 2.34 KB |
+| Imposter | 889.7 ns | 17.54 ns | 17.23 ns | 6.12 KB |
+| Mockolate | 534.2 ns | 5.47 ns | 5.11 ns | 2.03 KB |
+| Moq | 433,029.3 ns | 1,280.50 ns | 1,135.13 ns | 28.63 KB |
+| NSubstitute | 5,727.9 ns | 20.62 ns | 19.29 ns | 9.06 KB |
+| FakeItEasy | 8,193.3 ns | 65.14 ns | 60.93 ns | 10.45 KB |
 
 ```mermaid
 %%{init: {
@@ -10449,8 +10466,8 @@ Mock behavior configuration (returns, matchers):
 xychart-beta
   title "Setup Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 512316
-  bar [537.9, 807.6, 443.5, 426929.6, 5439.6, 7932.6]
+  y-axis "Time (ns)" 0 --> 519636
+  bar [605.2, 889.7, 534.2, 433029.3, 5727.9, 8193.3]
 ```
 
 ---
@@ -10459,12 +10476,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 709.1 ns | 13.80 ns | 21.48 ns | 2.93 KB |
-| Imposter | 1,457.6 ns | 28.42 ns | 30.41 ns | 10.59 KB |
-| Mockolate | 750.5 ns | 11.63 ns | 10.88 ns | 3.07 KB |
-| Moq | 117,302.6 ns | 749.52 ns | 701.10 ns | 16.53 KB |
-| NSubstitute | 12,338.8 ns | 207.97 ns | 194.53 ns | 20.31 KB |
-| FakeItEasy | 8,335.2 ns | 116.64 ns | 103.40 ns | 11.79 KB |
+| **TUnit.Mocks** | 754.8 ns | 13.52 ns | 12.64 ns | 2.93 KB |
+| Imposter | 1,424.6 ns | 27.92 ns | 34.28 ns | 10.59 KB |
+| Mockolate | 735.1 ns | 14.57 ns | 24.35 ns | 3.07 KB |
+| Moq | 114,776.0 ns | 496.05 ns | 439.73 ns | 16.53 KB |
+| NSubstitute | 12,347.5 ns | 104.15 ns | 97.42 ns | 20.31 KB |
+| FakeItEasy | 8,232.0 ns | 140.57 ns | 131.49 ns | 11.85 KB |
 
 ```mermaid
 %%{init: {
@@ -10490,8 +10507,8 @@ xychart-beta
 xychart-beta
   title "Setup (Multiple) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 140764
-  bar [709.1, 1457.6, 750.5, 117302.6, 12338.8, 8335.2]
+  y-axis "Time (ns)" 0 --> 137732
+  bar [754.8, 1424.6, 735.1, 114776, 12347.5, 8232]
 ```
 
 ## 🎯 Key Insights
@@ -10504,7 +10521,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10513,7 +10530,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 # Verification Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-08** from the latest CI run.
+This benchmark was automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10524,12 +10541,12 @@ Verifying mock method calls:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 729.07 ns | 12.189 ns | 11.402 ns | 3080 B |
-| Imposter | 701.94 ns | 10.373 ns | 8.662 ns | 4688 B |
-| Mockolate | 921.45 ns | 17.590 ns | 17.275 ns | 3152 B |
-| Moq | 343,571.12 ns | 2,384.353 ns | 2,230.325 ns | 24325 B |
-| NSubstitute | 6,132.88 ns | 29.961 ns | 28.025 ns | 10064 B |
-| FakeItEasy | 7,438.86 ns | 104.639 ns | 92.760 ns | 10724 B |
+| **TUnit.Mocks** | 746.63 ns | 8.631 ns | 8.073 ns | 3080 B |
+| Imposter | 703.66 ns | 14.085 ns | 19.280 ns | 4688 B |
+| Mockolate | 920.04 ns | 8.875 ns | 7.867 ns | 3152 B |
+| Moq | 337,002.91 ns | 1,828.250 ns | 1,710.146 ns | 24325 B |
+| NSubstitute | 6,176.36 ns | 28.778 ns | 26.919 ns | 10064 B |
+| FakeItEasy | 7,196.42 ns | 28.265 ns | 25.056 ns | 10722 B |
 
 ```mermaid
 %%{init: {
@@ -10555,8 +10572,8 @@ Verifying mock method calls:
 xychart-beta
   title "Verification Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 412286
-  bar [729.07, 701.94, 921.45, 343571.12, 6132.88, 7438.86]
+  y-axis "Time (ns)" 0 --> 404404
+  bar [746.63, 703.66, 920.04, 337002.91, 6176.36, 7196.42]
 ```
 
 ---
@@ -10565,12 +10582,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 60.61 ns | 1.063 ns | 0.942 ns | 328 B |
-| Imposter | 316.11 ns | 6.331 ns | 9.280 ns | 2400 B |
-| Mockolate | 227.62 ns | 1.804 ns | 1.600 ns | 952 B |
-| Moq | 86,340.24 ns | 279.275 ns | 261.234 ns | 6918 B |
-| NSubstitute | 3,483.65 ns | 22.916 ns | 21.436 ns | 7088 B |
-| FakeItEasy | 3,428.31 ns | 25.406 ns | 23.765 ns | 5210 B |
+| **TUnit.Mocks** | 60.93 ns | 0.647 ns | 0.606 ns | 328 B |
+| Imposter | 313.05 ns | 2.122 ns | 1.881 ns | 2400 B |
+| Mockolate | 213.06 ns | 1.064 ns | 0.943 ns | 952 B |
+| Moq | 86,942.44 ns | 348.243 ns | 325.746 ns | 6918 B |
+| NSubstitute | 3,676.85 ns | 13.320 ns | 11.123 ns | 7088 B |
+| FakeItEasy | 3,563.31 ns | 55.100 ns | 48.844 ns | 5210 B |
 
 ```mermaid
 %%{init: {
@@ -10596,8 +10613,8 @@ xychart-beta
 xychart-beta
   title "Verification (Never) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 103609
-  bar [60.61, 316.11, 227.62, 86340.24, 3483.65, 3428.31]
+  y-axis "Time (ns)" 0 --> 104331
+  bar [60.93, 313.05, 213.06, 86942.44, 3676.85, 3563.31]
 ```
 
 ---
@@ -10606,12 +10623,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1,404.99 ns | 27.112 ns | 35.254 ns | 4608 B |
-| Imposter | 1,737.98 ns | 34.278 ns | 67.661 ns | 11192 B |
-| Mockolate | 1,843.17 ns | 16.745 ns | 14.844 ns | 5496 B |
-| Moq | 470,425.90 ns | 2,068.305 ns | 1,727.128 ns | 34699 B |
-| NSubstitute | 11,217.46 ns | 126.871 ns | 118.675 ns | 16763 B |
-| FakeItEasy | 13,106.85 ns | 243.766 ns | 203.556 ns | 19233 B |
+| **TUnit.Mocks** | 1,266.34 ns | 11.516 ns | 10.772 ns | 4608 B |
+| Imposter | 1,699.14 ns | 12.153 ns | 11.368 ns | 11192 B |
+| Mockolate | 1,745.51 ns | 10.336 ns | 9.668 ns | 5496 B |
+| Moq | 474,966.08 ns | 2,439.490 ns | 2,162.545 ns | 34779 B |
+| NSubstitute | 11,332.58 ns | 152.948 ns | 143.067 ns | 16929 B |
+| FakeItEasy | 12,907.29 ns | 93.733 ns | 78.271 ns | 19233 B |
 
 ```mermaid
 %%{init: {
@@ -10637,8 +10654,8 @@ xychart-beta
 xychart-beta
   title "Verification (Multiple) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 564512
-  bar [1404.99, 1737.98, 1843.17, 470425.9, 11217.46, 13106.85]
+  y-axis "Time (ns)" 0 --> 569960
+  bar [1266.34, 1699.14, 1745.51, 474966.08, 11332.58, 12907.29]
 ```
 
 ## 🎯 Key Insights
@@ -10651,7 +10668,7 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -10659,7 +10676,7 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-04-08** from the latest CI run.
+These benchmarks were automatically generated on **2026-04-09** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.201
 :::
@@ -10728,7 +10745,7 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-04-08T03:21:46.624Z*
+*Last generated: 2026-04-09T03:21:47.332Z*
 
 ---
 
@@ -11938,14 +11955,31 @@ public class CaptureTests : TestsBase
 
 ### Capture Options
 
+`WebApplicationTestOptions` only exposes the `EnableHttpExchangeCapture` toggle. Body
+capture settings (`CaptureRequestBody`, `CaptureResponseBody`, `MaxBodySize`) live on
+the `HttpExchangeCapture` service itself. To configure them, register
+`HttpExchangeCapture` explicitly inside `ConfigureTestServices`:
+
 ```csharp
-protected override WebApplicationTestOptions Options => new()
+using TUnit.AspNetCore.Interception;
+
+public class CaptureTests : TestsBase
 {
-    EnableHttpExchangeCapture = true,
-    CaptureRequestBody = true,
-    CaptureResponseBody = true,
-    MaxBodySize = 1024 * 1024  // 1MB limit
-};
+    protected override WebApplicationTestOptions Options => new()
+    {
+        EnableHttpExchangeCapture = true
+    };
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+    {
+        services.AddHttpExchangeCapture(capture =>
+        {
+            capture.CaptureRequestBody = true;
+            capture.CaptureResponseBody = true;
+            capture.MaxBodySize = 1024 * 1024; // 1MB limit
+        });
+    }
+}
 ```
 
 ### Inspecting Captured Exchanges
@@ -11955,7 +11989,7 @@ protected override WebApplicationTestOptions Options => new()
 var last = HttpCapture!.Last;
 
 // Get all exchanges
-var all = HttpCapture.All;
+var all = HttpCapture!.Exchanges;
 
 // Inspect request
 await Assert.That(last!.Request.Method).IsEqualTo("POST");
@@ -13205,69 +13239,71 @@ format. To use TUnit with F# Interactive, follow these steps:
    #r "nuget: TUnit, 1.6.0"
    ```
 
-2. **Write your tests**: You can write your tests in the same way you would in a regular F# project. For example:
+2. **Write your tests**: You can write your tests in the same way you would in a regular F# project. Because TUnit discovers tests via a source generator at build time, scripts must declare tests dynamically using `[<DynamicTestBuilder>]`. For example:
 
    ```fsharp
       #r "nuget: TUnit"
-      #r "nuget: TUnit.Assertions.Fsharp"
+      #r "nuget: TUnit.Assertions.FSharp"
 
       open System
-      open TUnit
-      open TUnit.Engine
       open TUnit.Core
-      open TUnit.Assertions
       open TUnit.Assertions
       open TUnit.Assertions.Extensions
       open TUnit.Assertions.FSharp.Operations
-      open TUnit.Engine.Services
-      open System.Collections.Generic
+      open TUnit.Engine.Extensions
+      open Microsoft.Testing.Platform.Builder
 
-      type tests() =
-         [<Test>]
+      type Tests() =
          member _.Basic() =
             Console.WriteLine("This is a basic test")
 
-         [<Test>]
-         [<Arguments(1, 2, 3)>]
-         [<Arguments(2, 3, 5)>]
          member _.DataDrivenArguments(a: int, b: int, c: int) =
-            async {
-                  Console.WriteLine("This one can accept arguments from an attribute")
+            task {
+                  Console.WriteLine("This one can accept arguments")
                   let result = a + b
                   do! check (Assert.That(result).IsEqualTo(c))
             }
 
          [<DynamicTestBuilder>]
          member _.BuildTests(context: DynamicTestBuilderContext) =
-            context.AddTest(DynamicTest<tests>(TestMethod = fun instance -> instance.Basic()))
+            context.AddTest(DynamicTest<Tests>(TestMethod = fun instance -> instance.Basic()))
 
             context.AddTest(
-                  DynamicTest<tests>(
-                     TestMethod = fun instance -> instance.DataDrivenArguments(1, 2, 3) |> Async.RunSynchronously
-                  )
+               DynamicTest<Tests>(
+                  TestMethod = fun instance ->
+                     instance.DataDrivenArguments(1, 2, 3) |> ignore
+               )
             )
 
-      // Instantiate your test class
-      let testInstance = tests ()
-
-      testInstance.BuildTests
-
-      // Create a test runner and get the results
-      let resultsTask =
+      // Bootstrap Microsoft.Testing.Platform the same way a compiled
+      // TUnit project's Program.cs does, then run the host.
+      let runAsync (args: string array) =
          task {
-            // Set results directory to current working directory
-            let args = [| "--results-directory"; System.IO.Directory.GetCurrentDirectory() |]
-            let! testResults = TUnitRunner.RunTests(args)
-            return testResults
+            let! builder = TestApplication.CreateBuilderAsync(args)
+            builder.AddTUnit()
+            use! app = builder.BuildAsync()
+            return! app.RunAsync()
          }
 
-      printf "Running tests..."
+      printfn "Running tests..."
+      let exitCode =
+         runAsync [| "--results-directory"; System.IO.Directory.GetCurrentDirectory() |]
+         |> Async.AwaitTask
+         |> Async.RunSynchronously
 
-      resultsTask |> Async.AwaitTask |> Async.RunSynchronously
+      printfn "Exit code: %d" exitCode
    ```
 
-3. **Run your tests**: You can run your tests by executing the script in F# Interactive. The results will be printed to the console.
-   To run the script, you can use the following command
+   :::caution Experimental
+   TUnit is designed around a source generator that discovers tests at build time. In
+   F# Interactive there is no build step, so **only tests added through
+   `[<DynamicTestBuilder>]` are discovered** — plain `[<Test>]`-annotated members on
+   script-defined types will not run. If you need the full TUnit experience (attributes,
+   data sources, hooks, filters) prefer a regular `.fsproj` project targeting TUnit
+   rather than a `.fsx` script.
+   :::
+
+3. **Run your tests**: Execute the script in F# Interactive. Results are printed to the console.
 
    ```powershell
    dotnet fsi your_script.fsx
@@ -14448,7 +14484,7 @@ jobs:
         dotnet-version: '9.0.x'
     
     - name: Run Tests with Collapsible Reporter
-      run: dotnet test --logger "console;verbosity=normal"
+      run: dotnet test -- --output Detailed
       # GitHub reporter auto-detects and uses collapsible style by default
     
     - name: Run Tests with Full Reporter
@@ -14464,7 +14500,7 @@ If you need to disable the GitHub reporter entirely:
 
 ```bash
 export TUNIT_DISABLE_GITHUB_REPORTER=true
-# or
+# or (deprecated legacy name, kept for backwards compatibility)
 export DISABLE_GITHUB_REPORTER=true
 ```
 
@@ -14515,7 +14551,7 @@ Jenkins can consume various test output formats:
 dotnet test -- --report-trx
 
 # Or use console output with appropriate verbosity
-dotnet test --logger "console;verbosity=detailed"
+dotnet test -- --output Detailed
 ```
 
 ### GitLab CI
@@ -14538,21 +14574,16 @@ The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
 ## Environment Detection
 
-TUnit automatically detects common CI environments through environment variables:
+TUnit reads a small set of CI environment variables to enable platform-specific behavior:
 
-| Platform | Detection Variables |
+| Variable | Used for |
 | --- | --- |
-| GitHub Actions | `GITHUB_ACTIONS` |
-| Azure DevOps | `AZURE_PIPELINES` |
-| Jenkins | `JENKINS_URL` |
-| GitLab CI | `GITLAB_CI` |
-| CircleCI | `CIRCLECI` |
-| Travis CI | `TRAVIS` |
-| AppVeyor | `APPVEYOR` |
-| TeamCity | `TEAMCITY_VERSION` |
-| Generic CI | `CI`, `CONTINUOUS_INTEGRATION` |
+| `GITHUB_ACTIONS` | Enables the GitHub Actions reporter and workflow summary integration |
+| `GITHUB_STEP_SUMMARY` | Destination file for the GitHub Actions job summary |
+| `GITLAB_CI` | Detects GitLab CI runs |
+| `CI_SERVER` | Generic CI detection signal |
 
-This detection helps TUnit optimize its behavior for each platform.
+Other CI systems (Azure DevOps, Jenkins, CircleCI, Travis CI, AppVeyor, TeamCity, etc.) do not have TUnit-specific detection logic. They integrate through the standard Microsoft.Testing.Platform test result outputs such as `--report-trx` and `--report-junit`, which every major CI platform can ingest.
 
 ## Best Practices
 
@@ -14578,7 +14609,7 @@ If the GitHub reporter isn't generating summaries:
    ```bash
    # Ensure these are not set
    echo $TUNIT_DISABLE_GITHUB_REPORTER
-   echo $DISABLE_GITHUB_REPORTER
+   echo $DISABLE_GITHUB_REPORTER  # deprecated legacy name
    ```
 
 3. **Check File Permissions**: Ensure the process can write to `GITHUB_STEP_SUMMARY` file
@@ -15808,8 +15839,7 @@ The above would generate two test cases with their respective display name as:
 If you have custom classes, you can combine this with [Argument Formatters](argument-formatters.md) to specify how to show them.
 
 :::info
-If you want to include a literal `$` in your display name, escape it as `$$`.  
-For example: `[DisplayName("Total cost: $$100")]` will display as "Total cost: $100".
+Only substrings of the form `$parameterName` are substituted, where `parameterName` matches a method or class parameter. Any other text — including a literal `$` followed by text that does not match a parameter name — is left unchanged. For example, `[DisplayName("Total cost: $100")]` will display as "Total cost: $100" (unless a parameter named `1`, `10`, or `100` exists, which is not possible in C#).
 :::
 
 ## Custom Logic
@@ -15952,7 +15982,7 @@ public async Task TakeScreenshotOnFailure(TestContext context)
 {
     if (context.Execution.Result?.Exception is not null)
     {
-        await SaveScreenshot(context.TestDetails.TestName);
+        await SaveScreenshot(context.Metadata.TestDetails.TestName);
     }
 }
 ```
@@ -16316,7 +16346,7 @@ public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEn
     {
         await ReportingService.ReportTestStarted(
             context.GetDisplayName(),
-            context.Metadata.TestDetails.TestClass?.FullName,
+            context.Metadata.TestDetails.ClassType.FullName,
             context.Metadata.TestDetails.TestMethodArguments
         );
     }
@@ -17375,7 +17405,7 @@ public async Task AsyncTestWithAssertions()  // ✅ Recommended - asynchronous t
 **Important Notes:**
 - If you use `Assert.That(...)`, your test **must** be `async Task` — assertions return awaitable objects that won't execute without `await`
 - Synchronous `void` tests are allowed but cannot use assertions
-- `async void` tests are **not allowed** and will cause a compiler error
+- `async void` tests are **not allowed** — the TUnit analyzers report this as a build error (diagnostic `TUnit0031`)
 
 See [Awaiting Assertions](../assertions/awaiting.md) for more details.
 
@@ -17905,20 +17935,29 @@ public class LazyDataProvider
 
 ### Limit Matrix Test Combinations
 
-```csharp
-// ❌ Bad: Exponential test explosion
-[Test]
-[Arguments(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
-[Arguments("a", "b", "c", "d", "e")]
-[Arguments(true, false)]
-// Creates 10 × 5 × 2 = 100 tests!
+Remember that each `[Arguments(...)]` attribute produces exactly **one** test case, while `[Matrix]` on parameters produces the cross-product of every combination. It's the matrix that can explode — so reach for it deliberately.
 
-// ✅ Good: Targeted test combinations
+```csharp
+// ❌ Bad: Combinatorial explosion via [Matrix]
+[Test]
+[MatrixDataSource]
+public void Process(
+    [Matrix(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)] int count,
+    [Matrix("a", "b", "c", "d", "e")] string label,
+    [Matrix(true, false)] bool flag)
+{
+    // Creates 10 × 5 × 2 = 100 tests!
+}
+
+// ✅ Good: Targeted test cases with [Arguments]
 [Test]
 [Arguments(1, "a", true)]
 [Arguments(5, "c", false)]
 [Arguments(10, "e", true)]
-// Only 3 specific test cases
+public void Process(int count, string label, bool flag)
+{
+    // Only 3 specific test cases — each [Arguments] attribute is one test
+}
 ```
 
 ## Test Execution Performance
@@ -17952,25 +17991,34 @@ export TUNIT_MAX_PARALLEL_TESTS=8
 #### Group Related Tests
 
 ```csharp
-// Tests in the same group run sequentially but different groups run in parallel
+// Tests in the same group run in parallel with each other.
+// Different groups run sequentially — the engine processes one group at a time.
+// Use this to batch tests by resource category while keeping each batch concurrent.
 [ParallelGroup("DatabaseTests")]
 public class UserRepositoryTests
 {
-    // These tests share database resources
+    // These run in parallel with OrderRepositoryTests (same group)
 }
 
 [ParallelGroup("DatabaseTests")]
 public class OrderRepositoryTests
 {
-    // These also share database resources
+    // Runs concurrently with UserRepositoryTests
 }
 
 [ParallelGroup("ApiTests")]
 public class ApiIntegrationTests
 {
-    // These can run in parallel with database tests
+    // This group runs after DatabaseTests has fully finished
 }
 ```
+
+:::note
+`[ParallelGroup]` is **not** for serializing access to a shared resource — tests within a
+group still run concurrently. If two tests must not touch the same resource at the same
+time, use `[NotInParallel("ResourceKey")]` instead, which serializes tests that share
+the same key.
+:::
 
 #### Use Parallel Limiters Wisely
 
@@ -18660,7 +18708,7 @@ await Assert.That(actual).IsEquivalentTo(expected);
 await Assert.That(actual).IsNotEquivalentTo(expected);
 await Assert.That(collection).Contains(item);
 await Assert.That(collection).DoesNotContain(item);
-await Assert.That(collection).AllSatisfy(x => x != null);
+await Assert.That(collection).All().Satisfy(item => item.IsNotNull());
 ```
 
 ### String Assertions
@@ -20243,8 +20291,8 @@ public async Task ComplexAssertions()
     // Collection assertions
     await Assert.That(list).Count().IsEqualTo(5);
     await Assert.That(list).Contains(3);
-    await Assert.That(list).AllSatisfy(x => x > 0);
-    await Assert.That(list).IsInAscendingOrder();
+    await Assert.That(list).All().Satisfy(item => item.IsGreaterThan(0));
+    await Assert.That(list).IsInOrder();
 
     // Compound assertions (using And/Or)
     await Assert.That(value).IsGreaterThan(40).And.IsLessThan(50);
@@ -20637,8 +20685,8 @@ public interface ITestExecution
     Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; }
     IHookExecutor? CustomHookExecutor { get; set; }
     bool ReportResult { get; set; }
+    bool IsNotDiscoverable { get; set; }
 
-    void OverrideResult(string reason);
     void OverrideResult(TestState state, string reason);
     void AddLinkedCancellationToken(CancellationToken cancellationToken);
 }
@@ -20651,6 +20699,7 @@ Test metadata and identity:
 ```csharp
 public interface ITestMetadata
 {
+    string DefinitionId { get; }
     TestDetails TestDetails { get; }
     string TestName { get; }
     string DisplayName { get; set; }
@@ -20658,7 +20707,7 @@ public interface ITestMetadata
 }
 ```
 
-**Note:** `Id` is available only through the `ITestMetadata` interface (accessed via `TestContext.Metadata.Id`), not as a direct property on `TestContext`.
+**Note:** `DefinitionId` identifies the test definition (template/source) and is shared across all instances of parameterized tests. The per-instance `Id` is a direct property on `TestContext` (see above).
 
 ### ITestEvents
 
@@ -20688,10 +20737,16 @@ For completeness, here are the other interface properties available:
 ```csharp
 public interface ITestOutput
 {
+    TextWriter StandardOutput { get; }
+    TextWriter ErrorOutput { get; }
+    IReadOnlyCollection<Artifact> Artifacts { get; }
+
+    void AttachArtifact(Artifact artifact);
+    void AttachArtifact(string filePath, string? displayName = null, string? description = null);
+    string GetStandardOutput();
+    string GetErrorOutput();
     void WriteLine(string message);
     void WriteError(string message);
-    string GetOutput();
-    string GetErrorOutput();
 }
 ```
 
@@ -20723,6 +20778,10 @@ public static void OnTestRegistered(TestRegisteredContext context)
 ```csharp
 public interface ITestDependencies
 {
+    IReadOnlyList<TestDetails> DependsOn { get; }
+    string? ParentTestId { get; }
+    TestRelationship Relationship { get; }
+
     IReadOnlyList<TestContext> GetTests(Func<TestContext, bool> predicate);
     IReadOnlyList<TestContext> GetTests(string testName);
     IReadOnlyList<TestContext> GetTests(string testName, Type classType);
@@ -22040,7 +22099,7 @@ Please note that for the coverage and trx report, you need to install [additiona
         This prevents console spam while keeping IDEs responsive (each test has its own output window).
 
     --reflection
-        Enable reflection mode for test discovery and execution (defaults to source generation mode)
+        Enable reflection mode for test discovery and execution (defaults to AOT-optimized mode)
 
     --report-trx
         Enable generating TRX report
@@ -22059,6 +22118,33 @@ Please note that for the coverage and trx report, you need to install [additiona
         Valid values are 'collapsible' (default) or 'full'.
         'collapsible' wraps detailed test results in expandable HTML blocks.
         'full' displays all test details directly.
+
+    --detailed-stacktrace
+        Display TUnit internals within stack traces.
+        By default, TUnit frames are hidden to keep failure output focused on user code.
+
+    --output-json
+        Write a JSON report of the test run.
+
+    --output-json-filename
+        File name for the JSON report produced by --output-json.
+
+    --output-json-prefix
+        File name prefix for the JSON report produced by --output-json.
+
+    --report-html
+        (Deprecated) The HTML report is now generated by default.
+        Disable it with the TUNIT_DISABLE_HTML_REPORTER environment variable.
+
+    --report-html-filename
+        Path for the HTML test report file
+        (default: TestResults/{'{AssemblyName}'}-report.html).
+
+    --junit-output-path
+        Path to output JUnit XML file
+        (default: TestResults/{'{AssemblyName}'}-junit.xml).
+        The JUnit reporter is also togglable via TUNIT_ENABLE_JUNIT_REPORTER /
+        TUNIT_DISABLE_JUNIT_REPORTER environment variables.
 </pre>
 
 ---
@@ -22162,6 +22248,43 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 **Equivalent to:** `--maximum-parallel-tests`
 
 **Note:** Command-line arguments take precedence over environment variables.
+
+### TUNIT_EXECUTION_MODE
+
+Controls whether tests run in source-generation (AOT-optimized) mode or reflection mode.
+
+```bash
+export TUNIT_EXECUTION_MODE=sourcegeneration   # or "aot"
+export TUNIT_EXECUTION_MODE=reflection
+```
+
+**Values:**
+- `sourcegeneration` / `aot`: Use source-generated test metadata (default, AOT-compatible)
+- `reflection`: Use reflection-based discovery and execution
+
+**Equivalent to:** `--reflection` flag (when set to `reflection`).
+
+**Priority:** AOT platform check > `--reflection` flag > `[ReflectionMode]` assembly attribute > this environment variable > built-in default.
+
+### TUNIT_DISCOVERY_DIAGNOSTICS
+
+Enables discovery-time diagnostic logging. Useful when investigating why a test is (or isn't) being picked up by discovery.
+
+```bash
+export TUNIT_DISCOVERY_DIAGNOSTICS=1
+```
+
+**Use case:** Debugging test discovery problems in source-generation or reflection mode.
+
+### TUNIT_DIAGNOSTIC_CAST
+
+Enables diagnostic logging for argument/value conversions performed by TUnit's `CastHelper`. When a conversion fails, the helper writes a line describing the attempted source and target types.
+
+```bash
+export TUNIT_DIAGNOSTIC_CAST=true
+```
+
+**Use case:** Debugging `InvalidCastException` or silent conversion failures for data-driven tests.
 
 ### TUNIT_ENABLE_IDE_STREAMING
 
@@ -22296,6 +22419,9 @@ When the same setting is configured in multiple places, TUnit follows this prior
 | `TUNIT_DISABLE_HTML_REPORTER` | - | Disables HTML report generation |
 | `JUNIT_XML_OUTPUT_PATH` | - | JUnit output path |
 | `TUNIT_MAX_PARALLEL_TESTS` | `--maximum-parallel-tests` | Max parallel tests |
+| `TUNIT_EXECUTION_MODE` | `--reflection` | Selects source-generation (`sourcegeneration`/`aot`) or `reflection` execution mode |
+| `TUNIT_DISCOVERY_DIAGNOSTICS` | - | Enables discovery-time diagnostics (`1` to enable) |
+| `TUNIT_DIAGNOSTIC_CAST` | - | Enables `CastHelper` conversion diagnostics (`true` to enable) |
 | `TUNIT_ENABLE_IDE_STREAMING` | - | Enable real-time IDE output streaming |
 
 ---
@@ -22306,6 +22432,12 @@ When the same setting is configured in multiple places, TUnit follows this prior
 TUnit supports having a `testconfig.json` file within your test project.
 
 This can be used to store key-value configuration pairs. To retrieve these within tests, use the static method `TestContext.Configuration.Get(key)`.
+
+:::note
+
+TUnit delegates configuration loading to Microsoft.Testing.Platform's `IConfiguration`. The platform's actual filename convention is `[AppName].testconfig.json` (for example, `MyTests.testconfig.json`), which is what gets discovered and loaded at runtime. The name `testconfig.json` is used throughout this page as a convenient shorthand.
+
+:::
 
 ## Example
 
@@ -23072,7 +23204,7 @@ public class MyTests
     {
         var testContext = TestContext.Current;
         
-        if (testContext?.Result?.State == TestState.Failed)
+        if (testContext?.Execution.Result?.State == TestState.Failed)
         {
             // Capture screenshot
             var screenshotPath = await CaptureScreenshot();
@@ -23284,7 +23416,7 @@ public async Task ConditionalArtifactAttachment()
 {
     var testContext = TestContext.Current;
     
-    if (testContext?.Result?.State is TestState.Failed or TestState.TimedOut)
+    if (testContext?.Execution.Result?.State is TestState.Failed or TestState.Timeout)
     {
         // Only attach expensive artifacts on failure
         var videoPath = await StopRecording();
@@ -23351,7 +23483,7 @@ public async Task CapturePlaywrightArtifacts()
 {
     var testContext = TestContext.Current;
     
-    if (testContext?.Result?.State != TestState.Passed)
+    if (testContext?.Execution.Result?.State != TestState.Passed)
     {
         // Capture screenshot
         var screenshotPath = $"artifacts/screenshot-{testContext.Id}.png";
@@ -24015,6 +24147,7 @@ public async Task Stable_With_Culture()
 
 ```csharp
 using TUnit.Core;
+using TUnit.Core.Executors;
 
 namespace MyTestProject;
 
@@ -24033,6 +24166,8 @@ public class MyTestClass
 Apply the attribute to the class to set the culture for every test in that fixture:
 
 ```csharp
+using TUnit.Core.Executors;
+
 [Culture("fr-FR")]
 public class FrenchFormattingTests
 {
@@ -24050,6 +24185,8 @@ public class FrenchFormattingTests
 Lock the culture for the entire test assembly:
 
 ```csharp
+using TUnit.Core.Executors;
+
 [assembly: Culture("en-US")]
 ```
 
@@ -24080,7 +24217,7 @@ TUnit offers several ways to provide data to your tests. Use this guide to pick 
 | All parameter combinations | `[MatrixDataSource]` | [Matrix Tests](matrix-tests.md) |
 | Multiple sources on one method | Combined attributes | [Combined Data Sources](combined-data-source.md) |
 | Hierarchical injection | Nested properties | [Nested Data Sources](nested-data-sources.md) |
-| Custom generic attributes | `[GenericArguments<T>]` | [Generic Attributes](generic-attributes.md) |
+| Custom generic attributes | `[GenerateGenericTest(typeof(...))]` | [Generic Attributes](generic-attributes.md) |
 
 ## Quick Examples
 
@@ -24589,34 +24726,29 @@ public class ShippingTests
 
 ### DataSourceGeneratorAttribute&lt;T&gt;
 
-Create strongly-typed data source generators:
+Create strongly-typed data source generators by inheriting from `DataSourceGeneratorAttribute<T>` and overriding `GenerateDataSources`, which returns an `IEnumerable<Func<T>>` — each `Func<T>` produces one test row.
 
 ```csharp
-public abstract class DataSourceGeneratorAttribute<T> : Attribute
-{
-    public abstract IEnumerable<T> GenerateData();
-}
-
 // Custom implementation
 public class RandomNumbersAttribute : DataSourceGeneratorAttribute<int>
 {
     private readonly int _count;
     private readonly int _min;
     private readonly int _max;
-    
+
     public RandomNumbersAttribute(int count, int min = 0, int max = 100)
     {
         _count = count;
         _min = min;
         _max = max;
     }
-    
-    public override IEnumerable<int> GenerateData()
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var random = new Random();
         for (int i = 0; i < _count; i++)
         {
-            yield return random.Next(_min, _max);
+            yield return () => random.Next(_min, _max);
         }
     }
 }
@@ -24630,32 +24762,34 @@ public async Task TestWithRandomNumbers(int number)
 }
 ```
 
+Overloads of `DataSourceGeneratorAttribute<T1, T2, ...>` (up to five type parameters) are available for tests with multiple parameters — they yield `Func<(T1, T2, ...)>` tuples.
+
 ### AsyncDataSourceGeneratorAttribute&lt;T&gt;
 
-For asynchronous data generation:
+For asynchronous data generation, inherit from `AsyncDataSourceGeneratorAttribute<T>` and override `GenerateDataSourcesAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`. Each yielded `Func<Task<T>>` produces one test row asynchronously, so the heavy work (DB queries, HTTP calls) can be deferred until the test actually runs.
 
 ```csharp
-public abstract class AsyncDataSourceGeneratorAttribute<T> : Attribute
-{
-    public abstract Task<IEnumerable<T>> GenerateDataAsync();
-}
-
 // Custom implementation
 public class DatabaseUsersAttribute : AsyncDataSourceGeneratorAttribute<User>
 {
     private readonly string _role;
-    
+
     public DatabaseUsersAttribute(string role)
     {
         _role = role;
     }
-    
-    public override async Task<IEnumerable<User>> GenerateDataAsync()
+
+    protected override async IAsyncEnumerable<Func<Task<User>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         using var db = new DatabaseContext();
-        return await db.Users
+        var users = await db.Users
             .Where(u => u.Role == _role)
             .ToListAsync();
+
+        foreach (var user in users)
+        {
+            yield return () => Task.FromResult(user);
+        }
     }
 }
 
@@ -24671,21 +24805,19 @@ public async Task AdminUser_ShouldHaveFullPermissions(User adminUser)
 
 ### TypedDataSourceAttribute&lt;T&gt;
 
-Base class for creating custom typed data sources:
+`TypedDataSourceAttribute<T>` is the lowest-level extension point for a strongly-typed data source. Most users should prefer `DataSourceGeneratorAttribute<T>` (sync) or `AsyncDataSourceGeneratorAttribute<T>` (async) — both ultimately derive from this class. Override it directly only when you need full control over the async row-production pipeline.
+
+To inherit it, override `GetTypedDataRowsAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`:
 
 ```csharp
-public abstract class TypedDataSourceAttribute<T> : DataSourceAttribute
-{
-    public abstract IEnumerable<T> GetData();
-}
-
 // Custom implementation
 public class SampleUsersAttribute : TypedDataSourceAttribute<User>
 {
-    public override IEnumerable<User> GetData()
+    public override async IAsyncEnumerable<Func<Task<User>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return new User { Id = 1, Name = "Alice", Role = "Admin" };
-        yield return new User { Id = 2, Name = "Bob", Role = "User" };
+        yield return () => Task.FromResult(new User { Id = 1, Name = "Alice", Role = "Admin" });
+        yield return () => Task.FromResult(new User { Id = 2, Name = "Bob", Role = "User" });
+        await Task.CompletedTask;
     }
 }
 

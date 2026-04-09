@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.0">
 <title data-rh="true">Writing your first test | TUnit</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://tunit.dev/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://tunit.dev/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://tunit.dev/docs/getting-started/writing-your-first-test"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Writing your first test | TUnit"><meta data-rh="true" name="description" content="Quick Start: Complete Example"><meta data-rh="true" property="og:description" content="Quick Start: Complete Example"><link data-rh="true" rel="icon" href="/img/tunit-favicon.svg"><link data-rh="true" rel="canonical" href="https://tunit.dev/docs/getting-started/writing-your-first-test"><link data-rh="true" rel="alternate" href="https://tunit.dev/docs/getting-started/writing-your-first-test" hreflang="en"><link data-rh="true" rel="alternate" href="https://tunit.dev/docs/getting-started/writing-your-first-test" hreflang="x-default"><link data-rh="true" rel="preconnect" href="https://RLNKZO4OTO-dsn.algolia.net" crossorigin="anonymous"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Writing your first test","item":"https://tunit.dev/docs/getting-started/writing-your-first-test"}]}</script><link rel="search" type="application/opensearchdescription+xml" title="TUnit" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.bd3cf430.css">
-<script src="/assets/js/runtime~main.f57772f3.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.502fb0bc.js" defer="defer"></script>
 <script src="/assets/js/main.a6dbecaf.js" defer="defer"></script>
 </head>
 <body>
@@ -32,7 +32,7 @@
 <ul>
 <li class="">If you use <code>Assert.That(...)</code>, your test <strong>must</strong> be <code>async Task</code> — assertions return awaitable objects that won&#x27;t execute without <code>await</code></li>
 <li class="">Synchronous <code>void</code> tests are allowed but cannot use assertions</li>
-<li class=""><code>async void</code> tests are <strong>not allowed</strong> and will cause a compiler error</li>
+<li class=""><code>async void</code> tests are <strong>not allowed</strong> — the TUnit analyzers report this as a build error (diagnostic <code>TUnit0031</code>)</li>
 </ul>
 <p>See <a class="" href="/docs/assertions/awaiting">Awaiting Assertions</a> for more details.</p>
 <p>Let&#x27;s add some code to show you how a test might look once finished:</p>
