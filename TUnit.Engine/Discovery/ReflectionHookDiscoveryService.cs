@@ -999,39 +999,10 @@ internal sealed class ReflectionHookDiscoveryService
             }
         }
 
-        return new DefaultHookExecutor();
+        // Share the same sentinel singleton as source-gen so the precedence check in
+        // HookMethod.ResolveEffectiveExecutor (ReferenceEquals DefaultExecutor.Instance)
+        // recognizes this as "no explicit executor" and lets TestContext.CustomHookExecutor
+        // fill in via SetHookExecutor (#2666).
+        return DefaultExecutor.Instance;
     }
-}
-
-internal class DefaultHookExecutor : IHookExecutor
-{
-    public ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata testMethod, BeforeTestDiscoveryContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata testMethod, TestDiscoveryContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteBeforeAssemblyHook(MethodMetadata testMethod, AssemblyHookContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteAfterAssemblyHook(MethodMetadata testMethod, AssemblyHookContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteBeforeClassHook(MethodMetadata testMethod, ClassHookContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteAfterClassHook(MethodMetadata testMethod, ClassHookContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteBeforeTestHook(MethodMetadata testMethod, TestContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteAfterTestHook(MethodMetadata testMethod, TestContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteBeforeTestSessionHook(MethodMetadata testMethod, TestSessionContext context, Func<ValueTask> action)
-        => action();
-
-    public ValueTask ExecuteAfterTestSessionHook(MethodMetadata testMethod, TestSessionContext context, Func<ValueTask> action)
-        => action();
 }

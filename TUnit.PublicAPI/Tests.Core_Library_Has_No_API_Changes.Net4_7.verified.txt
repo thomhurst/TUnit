@@ -816,6 +816,7 @@ namespace
     public class HookRegisteredContext
     {
         public HookRegisteredContext(. hookMethod) { }
+        public .? HookExecutor { get; set; }
         public . HookMethod { get; }
         public string HookName { get; }
         public ? Timeout { get; set; }
@@ -1921,6 +1922,7 @@ namespace .Exceptions
     }
     public class InconclusiveTestException : .
     {
+        public InconclusiveTestException(string message) { }
         public InconclusiveTestException(string message,  exception) { }
     }
     public class SkipTestException : .
@@ -1961,12 +1963,13 @@ namespace .Exceptions
 namespace .Executors
 {
     [(.Assembly | .Class | .Method)]
-    public class CultureAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    public class CultureAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
         public CultureAttribute(.CultureInfo cultureInfo) { }
         public CultureAttribute(string cultureName) { }
         public int Order { get; }
         public  ScopeType { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     public class HookExecutorAttribute : .TUnitAttribute
@@ -1986,28 +1989,31 @@ namespace .Executors
         public InvariantCultureAttribute() { }
     }
     [(.Assembly | .Class | .Method)]
-    public class STAThreadExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    public class STAThreadExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
         public STAThreadExecutorAttribute() { }
         public int Order { get; }
         public  ScopeType { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class TestExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    public sealed class TestExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
         public TestExecutorAttribute( type) { }
         public int Order { get; }
         public  ScopeType { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class TestExecutorAttribute<T> : .TUnitAttribute, .IScopedAttribute, ., .
+    public sealed class TestExecutorAttribute<T> : .TUnitAttribute, .IScopedAttribute, ., ., .
         where T : ., new ()
     {
         public TestExecutorAttribute() { }
         public int Order { get; }
         public  ScopeType { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
 }

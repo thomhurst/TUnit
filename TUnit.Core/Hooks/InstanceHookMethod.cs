@@ -35,7 +35,7 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
             throw new InvalidOperationException($"Cannot execute instance hook {Name} because the test instance has not been created yet. This is likely a framework bug.");
         }
 
-        return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
+        return ResolveEffectiveExecutor(context).ExecuteBeforeTestHook(MethodInfo, context,
             () => Body!.Invoke(context.Metadata.TestDetails.ClassInstance, context, cancellationToken)
         );
     }

@@ -302,10 +302,14 @@ internal sealed class EventReceiverOrchestrator
             await receiver.OnHookRegistered(hookContext);
         }
 
-        // Apply the timeout from the context back to the hook method
         if (hookContext is { Timeout: not null })
         {
             hookContext.HookMethod.Timeout = hookContext.Timeout;
+        }
+
+        if (hookContext.HookExecutor is not null)
+        {
+            hookContext.HookMethod.SetHookExecutor(hookContext.HookExecutor);
         }
     }
 

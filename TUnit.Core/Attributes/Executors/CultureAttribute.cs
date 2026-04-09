@@ -1,11 +1,14 @@
-﻿using System.Globalization;
+using System.Globalization;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Executors;
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
-public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRegisteredEventReceiver, IScopedAttribute
+public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRegisteredEventReceiver, IHookRegisteredEventReceiver, IScopedAttribute
 {
+    private CultureExecutor? _executor;
+    private CultureExecutor Executor => _executor ??= new CultureExecutor(cultureInfo);
+
     public CultureAttribute(string cultureName) : this(CultureInfo.GetCultureInfo(cultureName))
     {
     }
@@ -19,7 +22,16 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
     /// <inheritdoc />
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
-        context.SetTestExecutor(new CultureExecutor(cultureInfo));
+        var executor = Executor;
+        context.SetTestExecutor(executor);
+        context.SetHookExecutor(executor);
+        return default(ValueTask);
+    }
+
+    /// <inheritdoc />
+    public ValueTask OnHookRegistered(HookRegisteredContext context)
+    {
+        context.HookExecutor = Executor;
         return default(ValueTask);
     }
 }
