@@ -31,7 +31,7 @@ public class RefStructTests
     public async Task Normal_Method_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.GetName().Returns("processor-1");
 
         // Act
@@ -49,7 +49,7 @@ public class RefStructTests
     {
         // Arrange
         var wasCalled = false;
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Process().Callback(() => wasCalled = true);
 
         // Act
@@ -64,7 +64,7 @@ public class RefStructTests
     public async Task Void_RefStruct_Method_Verification_Works()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         IBufferProcessor processor = mock.Object;
 
         // Act
@@ -80,7 +80,7 @@ public class RefStructTests
     public async Task Void_RefStruct_Method_Throws_Configured_Exception()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Process().Throws<InvalidOperationException>();
 
         // Act & Assert
@@ -97,7 +97,7 @@ public class RefStructTests
     public async Task NonVoid_RefStruct_Param_Method_Returns_Configured_Value()
     {
         // Arrange — Parse takes ReadOnlySpan<char> param but returns int
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Parse().Returns(42);
 
         // Act
@@ -112,7 +112,7 @@ public class RefStructTests
     public async Task NonVoid_RefStruct_Param_Verification()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Parse().Returns(0);
 
         // Act
@@ -132,7 +132,7 @@ public class RefStructTests
     {
         // Arrange
         var wasCalled = false;
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Clear().Callback(() => wasCalled = true);
 
         // Act
@@ -151,7 +151,7 @@ public class RefStructTests
     {
         // Arrange — Compute(int id, ReadOnlySpan<byte> data) returns int
         // Only 'id' participates in argument matching
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         mock.Compute(1).Returns(100);
         mock.Compute(2).Returns(200);
 
@@ -171,7 +171,7 @@ public class RefStructTests
     public async Task Mixed_Params_Verification_With_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         IMixedProcessor processor = mock.Object;
 
         // Act
@@ -195,7 +195,7 @@ public class RefStructTests
     {
         // Arrange
         var wasCalled = false;
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Callback(() => wasCalled = true);
 
         // Act
@@ -209,7 +209,7 @@ public class RefStructTests
     public async Task RefStructArg_Any_Matches_Return_Method()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(99);
 
         // Act
@@ -223,7 +223,7 @@ public class RefStructTests
     public async Task RefStructArg_Mixed_Params_Works()
     {
         // Arrange — Compute(int id, ReadOnlySpan<byte> data)
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
         mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
 
@@ -240,7 +240,7 @@ public class RefStructTests
     public async Task RefStructArg_Verification_With_Any()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Object.Process(new byte[] { 1, 2, 3 });
         mock.Object.Process(ReadOnlySpan<byte>.Empty);
 
@@ -253,7 +253,7 @@ public class RefStructTests
     public async Task RefStructArg_Mixed_Verification()
     {
         // Arrange — Send(string destination, ReadOnlySpan<byte> payload)
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         mock.Object.Send("server-a", new byte[] { 1, 2, 3 });
         mock.Object.Send("server-b", ReadOnlySpan<byte>.Empty);
 
@@ -267,7 +267,7 @@ public class RefStructTests
     public async Task RefStructArg_Void_Method_Throws_Configured_Exception()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Throws<InvalidOperationException>();
 
         // Act & Assert
@@ -284,7 +284,7 @@ public class RefStructTests
     public async Task RefStructArg_NonVoid_Method_Returns_Configured_Value()
     {
         // Arrange — Parse takes ReadOnlySpan<char> param but returns int
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(42);
 
         // Act
@@ -299,7 +299,7 @@ public class RefStructTests
     public async Task RefStructArg_NonVoid_Method_Verification()
     {
         // Arrange
-        var mock = Mock.Of<IBufferProcessor>();
+        var mock = IBufferProcessor.Mock();
         mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(0);
 
         // Act
@@ -317,7 +317,7 @@ public class RefStructTests
     {
         // Arrange — Compute(int id, ReadOnlySpan<byte> data) returns int
         // Both params participate in matching on net9.0+ via RefStructArg.Any
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
         mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
 
@@ -337,7 +337,7 @@ public class RefStructTests
     public async Task RefStructArg_Mixed_Params_Verification_With_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IMixedProcessor>();
+        var mock = IMixedProcessor.Mock();
         IMixedProcessor processor = mock.Object;
 
         // Act

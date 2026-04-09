@@ -810,6 +810,32 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Class_With_Constructor_Parameters_Extension_Discovery()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public class MyService
+            {
+                public MyService() { }
+                public MyService(string connectionString, int timeout) { }
+                public MyService(string connectionString, int timeout, bool verbose) { }
+                public virtual string GetValue() => "real";
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = MyService.Mock();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Static_Extension_Discovery_Without_Mock_Of()
     {
         // IFoo.Mock() should trigger generation even without Mock.Of<IFoo>()

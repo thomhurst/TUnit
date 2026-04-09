@@ -146,7 +146,7 @@ public class RealWorldScenarioTests
     public async Task Repository_CRUD_Full_Lifecycle()
     {
         // Arrange
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         var user = new UserDto { Id = 1, Name = "Alice", Email = "alice@example.com" };
 
         mock.CreateAsync(Any()).Returns(user);
@@ -183,7 +183,7 @@ public class RealWorldScenarioTests
     public async Task Repository_With_CancellationToken_Default_Parameter()
     {
         // Arrange
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         var users = new List<UserDto>
         {
             new() { Id = 1, Name = "Alice Smith", Email = "alice@example.com" },
@@ -209,8 +209,8 @@ public class RealWorldScenarioTests
     public async Task UnitOfWork_Transaction_Commit_Flow()
     {
         // Arrange
-        var mockTx = Mock.Of<ITransaction>();
-        var mockUow = Mock.Of<IUnitOfWork>();
+        var mockTx = ITransaction.Mock();
+        var mockUow = IUnitOfWork.Mock();
         mockUow.BeginTransactionAsync().Returns(mockTx.Object);
 
         IUnitOfWork uow = mockUow.Object;
@@ -231,8 +231,8 @@ public class RealWorldScenarioTests
     public async Task UnitOfWork_Transaction_Rollback_On_Exception()
     {
         // Arrange
-        var mockTx = Mock.Of<ITransaction>();
-        var mockUow = Mock.Of<IUnitOfWork>();
+        var mockTx = ITransaction.Mock();
+        var mockUow = IUnitOfWork.Mock();
         mockUow.BeginTransactionAsync().Returns(mockTx.Object);
         mockUow.SaveChangesAsync(Any())
             .Throws<InvalidOperationException>();
@@ -259,7 +259,7 @@ public class RealWorldScenarioTests
     public async Task Repository_Returns_Null_For_NotFound()
     {
         // Arrange
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         mock.GetByIdAsync(999).Returns((UserDto?)null);
 
         IUserRepository repo = mock.Object;
@@ -279,9 +279,9 @@ public class RealWorldScenarioTests
     public async Task Multiple_Mocks_Injected_Into_Service_Orchestration()
     {
         // Arrange — create 3 mocks that a hypothetical service would depend on
-        var mockRepo = Mock.Of<IUserRepository>();
-        var mockNotify = Mock.Of<INotificationService>();
-        var mockLogger = Mock.Of<ILogger>();
+        var mockRepo = IUserRepository.Mock();
+        var mockNotify = INotificationService.Mock();
+        var mockLogger = ILogger.Mock();
 
         var user = new UserDto { Id = 1, Name = "Bob", Email = "bob@example.com" };
         mockRepo.GetByIdAsync(1).Returns(user);
@@ -306,7 +306,7 @@ public class RealWorldScenarioTests
     public async Task Logger_Method_Overloads_Distinct_Setups()
     {
         // Arrange
-        var mock = Mock.Of<ILogger>();
+        var mock = ILogger.Mock();
         var twoArgCallCount = 0;
         var threeArgCallCount = 0;
 
@@ -334,7 +334,7 @@ public class RealWorldScenarioTests
     public async Task Cache_Generic_Methods_With_Different_Types()
     {
         // Arrange
-        var mock = Mock.Of<ICache>();
+        var mock = ICache.Mock();
         var user = new UserDto { Id = 1, Name = "Alice", Email = "alice@example.com" };
         var order = new OrderDto { OrderId = 42, ItemName = "Widget", Price = 9.99m };
 
@@ -362,7 +362,7 @@ public class RealWorldScenarioTests
     public async Task Notification_Conditional_Send()
     {
         // Arrange — SendSmsAsync returns true for one number, false for another
-        var mock = Mock.Of<INotificationService>();
+        var mock = INotificationService.Mock();
         mock.SendSmsAsync("+1234567890", Any()).Returns(true);
         mock.SendSmsAsync("+0000000000", Any()).Returns(false);
 
@@ -385,7 +385,7 @@ public class RealWorldScenarioTests
     public async Task Complex_Dictionary_Return_Type()
     {
         // Arrange
-        var mock = Mock.Of<IAnalyticsService>();
+        var mock = IAnalyticsService.Mock();
         var metrics = new Dictionary<string, List<decimal>>
         {
             ["revenue"] = [100.50m, 200.75m, 300.00m],
@@ -410,7 +410,7 @@ public class RealWorldScenarioTests
     public async Task Tuple_Return_Type()
     {
         // Arrange
-        var mock = Mock.Of<IAnalyticsService>();
+        var mock = IAnalyticsService.Mock();
         mock.Validate("good-input").Returns((true, (string?)null));
         mock.Validate("bad-input").Returns((false, (string?)"Invalid format"));
 
@@ -431,7 +431,7 @@ public class RealWorldScenarioTests
     public async Task ReadOnlyDictionary_Return()
     {
         // Arrange
-        var mock = Mock.Of<IAnalyticsService>();
+        var mock = IAnalyticsService.Mock();
         var lookup = new Dictionary<int, string>
         {
             [1] = "Active",
@@ -462,9 +462,9 @@ public class RealWorldScenarioTests
     public async Task DI_Integration_Happy_Path()
     {
         // Arrange
-        var mockRepo = Mock.Of<IUserRepository>();
-        var mockNotify = Mock.Of<INotificationService>();
-        var mockLogger = Mock.Of<ILogger>();
+        var mockRepo = IUserRepository.Mock();
+        var mockNotify = INotificationService.Mock();
+        var mockLogger = ILogger.Mock();
 
         var user = new UserDto { Id = 1, Name = "Alice", Email = "alice@example.com" };
         mockRepo.GetByIdAsync(1).Returns(user);
@@ -495,9 +495,9 @@ public class RealWorldScenarioTests
     public async Task DI_Integration_User_Not_Found()
     {
         // Arrange
-        var mockRepo = Mock.Of<IUserRepository>();
-        var mockNotify = Mock.Of<INotificationService>();
-        var mockLogger = Mock.Of<ILogger>();
+        var mockRepo = IUserRepository.Mock();
+        var mockNotify = INotificationService.Mock();
+        var mockLogger = ILogger.Mock();
 
         mockRepo.GetByIdAsync(999).Returns((UserDto?)null);
 
@@ -522,9 +522,9 @@ public class RealWorldScenarioTests
     public async Task DI_Integration_Verify_Exact_Email_Content()
     {
         // Arrange
-        var mockRepo = Mock.Of<IUserRepository>();
-        var mockNotify = Mock.Of<INotificationService>();
-        var mockLogger = Mock.Of<ILogger>();
+        var mockRepo = IUserRepository.Mock();
+        var mockNotify = INotificationService.Mock();
+        var mockLogger = ILogger.Mock();
 
         var bodyArg = Any<string>();
 
@@ -553,7 +553,7 @@ public class RealWorldScenarioTests
     public async Task Nullable_String_Return_Configured_Null()
     {
         // Arrange
-        var mock = Mock.Of<INullableService>();
+        var mock = INullableService.Mock();
         mock.GetNullableString(1).Returns((string?)null);
 
         INullableService svc = mock.Object;
@@ -569,7 +569,7 @@ public class RealWorldScenarioTests
     public async Task Nullable_Parameter_Matching()
     {
         // Arrange
-        var mock = Mock.Of<INullableService>();
+        var mock = INullableService.Mock();
         var callCount = 0;
         mock.Process(IsNull<string>(), Any<int?>())
             .Callback(() => callCount++);
@@ -591,7 +591,7 @@ public class RealWorldScenarioTests
     public async Task Nullable_Async_Return()
     {
         // Arrange
-        var mock = Mock.Of<INullableService>();
+        var mock = INullableService.Mock();
         mock.FindUserAsync(Any<string?>()).Returns((UserDto?)null);
 
         INullableService svc = mock.Object;

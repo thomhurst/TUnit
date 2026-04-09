@@ -14,7 +14,7 @@ public class StateMachineTests
     [Test]
     public async Task State_Machine_Returns_Different_Values_Per_State()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("disconnected");
 
         mock.InState("disconnected", m =>
@@ -41,7 +41,7 @@ public class StateMachineTests
     [Test]
     public async Task TransitionsTo_Changes_State_After_Call()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("disconnected");
 
         mock.InState("disconnected", m =>
@@ -70,7 +70,7 @@ public class StateMachineTests
     [Test]
     public async Task State_Scoped_Throws()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("connected");
 
         mock.InState("connected", m =>
@@ -96,7 +96,7 @@ public class StateMachineTests
     [Test]
     public async Task No_State_Setups_Match_In_Any_State()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("disconnected");
 
         // Setup without state guard — matches in any state
@@ -115,7 +115,7 @@ public class StateMachineTests
     [Test]
     public async Task State_Scoped_Setup_Overrides_Global_When_In_State()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
 
         // Global setup (no state guard)
         mock.GetStatus().Returns("DEFAULT");
@@ -143,7 +143,7 @@ public class StateMachineTests
     [Test]
     public async Task Strict_Mode_Throws_For_Unconfigured_Call_In_State()
     {
-        var mock = Mock.Of<IConnection>(MockBehavior.Strict);
+        var mock = IConnection.Mock(MockBehavior.Strict);
         mock.SetState("disconnected");
 
         mock.InState("disconnected", m =>
@@ -162,7 +162,7 @@ public class StateMachineTests
     public async Task Nested_InState_Restores_Previous_State_Scope()
     {
         // Regression test: nested InState calls must save/restore PendingRequiredState
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("outer");
 
         mock.InState("outer", m =>
@@ -193,7 +193,7 @@ public class StateMachineTests
     [Test]
     public async Task SetState_Null_Clears_State()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
 
         // Global (no-state) setup — added first
         mock.GetStatus().Returns("NO_STATE");
@@ -217,7 +217,7 @@ public class StateMachineTests
     [Test]
     public async Task Reset_Clears_State()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("connected");
 
         mock.Reset();
@@ -229,7 +229,7 @@ public class StateMachineTests
     [Test]
     public async Task Verify_Works_With_State_Scoped_Setups()
     {
-        var mock = Mock.Of<IConnection>();
+        var mock = IConnection.Mock();
         mock.SetState("disconnected");
 
         mock.InState("disconnected", m =>

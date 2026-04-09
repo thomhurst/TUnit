@@ -29,7 +29,7 @@ public class EventTests
     public async Task Raise_Event_Notifies_Subscriber()
     {
         // Arrange
-        var mock = Mock.Of<IEventService>();
+        var mock = IEventService.Mock();
         string? receivedMessage = null;
 
         IEventService svc = mock.Object;
@@ -46,7 +46,7 @@ public class EventTests
     public async Task Raise_Event_Notifies_Multiple_Subscribers()
     {
         // Arrange
-        var mock = Mock.Of<IEventService>();
+        var mock = IEventService.Mock();
         var messages = new List<string>();
 
         IEventService svc = mock.Object;
@@ -66,7 +66,7 @@ public class EventTests
     public async Task Raise_Event_With_No_Subscribers_Does_Not_Throw()
     {
         // Arrange
-        var mock = Mock.Of<IEventService>();
+        var mock = IEventService.Mock();
 
         // Act & Assert — should not throw when no subscribers
         mock.RaiseOnMessage("nobody listening");
@@ -77,7 +77,7 @@ public class EventTests
     public async Task Unsubscribe_From_Event_Stops_Notifications()
     {
         // Arrange
-        var mock = Mock.Of<IEventService>();
+        var mock = IEventService.Mock();
         var callCount = 0;
 
         IEventService svc = mock.Object;
@@ -101,7 +101,7 @@ public class EventTests
     [Test]
     public async Task Mock_With_Multiple_Multi_Parameter_Events_Compiles_And_Raises()
     {
-        var mock = Mock.Of<IMultiEventNotifier>();
+        var mock = IMultiEventNotifier.Mock();
         var notifier = mock.Object;
 
         string? changingProperty = null;

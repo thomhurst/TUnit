@@ -17,7 +17,7 @@ public class ArgumentMatcherTests
     public async Task Arg_Any_Matches_All_Values()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         // Act
@@ -34,7 +34,7 @@ public class ArgumentMatcherTests
     public async Task Arg_Is_With_Predicate_Matches_When_True()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(a => a > 0), Is<int>(b => b > 0)).Returns(100);
 
         // Act
@@ -54,7 +54,7 @@ public class ArgumentMatcherTests
     public async Task Arg_Is_With_Exact_Value()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is(10), Is(20)).Returns(30);
 
         // Act
@@ -73,7 +73,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var firstArg = Any<int>();
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(firstArg, Any()).Returns(1);
 
         // Act
@@ -94,7 +94,7 @@ public class ArgumentMatcherTests
     public async Task Mixed_Matchers_And_Exact_Values()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         // First arg: any int. Second arg: exact 5.
         mock.Add(Any(), 5).Returns(99);
 
@@ -115,7 +115,7 @@ public class ArgumentMatcherTests
     public async Task Arg_IsNull_Matches_Null_Values()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(IsNull<string>()).Returns("got null");
 
         // Act
@@ -132,7 +132,7 @@ public class ArgumentMatcherTests
     public async Task Arg_IsNotNull_Matches_NonNull_Values()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(IsNotNull<string>()).Returns("got something");
 
         // Act
@@ -152,7 +152,7 @@ public class ArgumentMatcherTests
     {
         // Arrange
         var nameArg = Any<string>();
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(nameArg).Returns("hi");
 
         // Act
@@ -171,7 +171,7 @@ public class ArgumentMatcherTests
     public async Task Multiple_Setups_With_Different_Matchers()
     {
         // Arrange — more specific setup first, then broader
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(100);
         mock.Add(Any(), Any()).Returns(42);
 
@@ -187,7 +187,7 @@ public class ArgumentMatcherTests
     public async Task Specific_Setup_After_Any_Takes_Precedence()
     {
         // Arrange — broad setup first, then specific
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.Add(1, 1).Returns(100);
 
@@ -215,7 +215,7 @@ public class ArgumentMatcherTests
     {
         // Arrange — setup requires first arg = any (captured), second arg starts with "prefix"
         var firstArg = Any<int>();
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(firstArg, Is<int>(b => b > 100)).Returns(999);
 
         ICalculator calc = mock.Object;
@@ -239,7 +239,7 @@ public class ArgumentMatcherTests
     public async Task Arg_IsNull_Matches_Null_Nullable_Value_Type()
     {
         // Arrange
-        var mock = Mock.Of<INullableValueConsumer>();
+        var mock = INullableValueConsumer.Mock();
         mock.Process(IsNull<int?>()).Returns("got null");
 
         // Act
@@ -256,7 +256,7 @@ public class ArgumentMatcherTests
     public async Task Arg_IsNotNull_Matches_NonNull_Nullable_Value_Type()
     {
         // Arrange
-        var mock = Mock.Of<INullableValueConsumer>();
+        var mock = INullableValueConsumer.Mock();
         mock.Process(IsNotNull<int?>()).Returns("got value");
 
         // Act
@@ -274,7 +274,7 @@ public class ArgumentMatcherTests
     public async Task Predicate_Matcher_With_String()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Is<string>(s => s != null && s.StartsWith("A"))).Returns("starts with A");
 
         // Act

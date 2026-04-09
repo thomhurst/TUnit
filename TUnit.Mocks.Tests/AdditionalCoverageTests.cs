@@ -18,7 +18,7 @@ public class MockVerificationExceptionTests
     public async Task Exception_Properties_Populated_On_Verification_Failure()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Object.Add(1, 2);
 
         // Act — verify wrong count
@@ -38,7 +38,7 @@ public class MockVerificationExceptionTests
     public async Task Exception_Message_Contains_Custom_Message()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — verify with custom message
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -54,7 +54,7 @@ public class MockVerificationExceptionTests
     public async Task Exception_ActualCalls_Lists_All_Calls_To_Member()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Object.Add(1, 2);
         mock.Object.Add(3, 4);
         mock.Object.Add(5, 6);
@@ -145,7 +145,7 @@ public class MockObjectAccessTests
     [Test]
     public async Task Object_Property_Returns_Mock_Implementation()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
 
         var calc = mock.Object;
@@ -157,7 +157,7 @@ public class MockObjectAccessTests
     [Test]
     public async Task Object_Property_Returns_Same_Reference()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         var first = mock.Object;
         var second = mock.Object;
@@ -168,7 +168,7 @@ public class MockObjectAccessTests
     [Test]
     public async Task IMock_ObjectInstance_Returns_Same_As_Object()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         IMock imock = mock;
         var fromIMock = imock.ObjectInstance;
@@ -205,7 +205,7 @@ public class VerifyAllMessageTests
     public async Task VerifyAll_Message_Includes_Matcher_Descriptions()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Is<int>(x => x > 0)).Returns(1);
 
         // Act — don't call the method
@@ -220,7 +220,7 @@ public class VerifyAllMessageTests
     public async Task VerifyAll_Message_Lists_Multiple_Uninvoked_Setups()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         mock.GetName().Returns("name");
         mock.Log("msg");
@@ -238,7 +238,7 @@ public class VerifyAllMessageTests
     public async Task VerifyAll_Passes_When_All_Setups_Invoked()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(1);
         mock.GetName().Returns("name");
 
@@ -259,7 +259,7 @@ public class InvocationOrderingTests
     [Test]
     public async Task Invocations_Are_In_Call_Order()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Object.Add(1, 2);
         mock.Object.Log("hello");
@@ -277,7 +277,7 @@ public class InvocationOrderingTests
     [Test]
     public async Task Invocations_Sequence_Numbers_Are_Monotonically_Increasing()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Object.Add(1, 2);
         mock.Object.GetName();
@@ -305,7 +305,7 @@ public class AutoTrackPropertyResetTests
     [Test]
     public async Task Reset_Clears_Auto_Tracked_Property_Values()
     {
-        var mock = Mock.Of<ISettingsService>();
+        var mock = ISettingsService.Mock();
         mock.SetupAllProperties();
 
         var svc = mock.Object;
@@ -332,7 +332,7 @@ public class VerificationCustomMessageTests
     [Test]
     public async Task WasNeverCalled_With_Custom_Message()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Object.Add(1, 2);
 
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -346,7 +346,7 @@ public class VerificationCustomMessageTests
     [Test]
     public async Task WasCalled_No_Args_With_Custom_Message()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         // Don't call Add
 
         var ex = Assert.Throws<MockVerificationException>(() =>
@@ -371,7 +371,7 @@ public class MockDefaultValueProviderPropertyTests
     [Test]
     public async Task DefaultValueProvider_Get_Set_Roundtrip()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         var provider = new FixedStringProvider();
 
         mock.DefaultValueProvider = provider;
@@ -398,14 +398,14 @@ public class MockBehaviorPropertyTests
     [Test]
     public async Task Loose_Mock_Has_Loose_Behavior()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Loose);
     }
 
     [Test]
     public async Task Strict_Mock_Has_Strict_Behavior()
     {
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         await Assert.That(mock.Behavior).IsEqualTo(MockBehavior.Strict);
     }
 }

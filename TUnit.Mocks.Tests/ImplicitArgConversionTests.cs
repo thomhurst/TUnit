@@ -16,7 +16,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Int_Matches_Exact()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(2, 3).Returns(5);
 
         await Assert.That(mock.Object.Add(2, 3)).IsEqualTo(5);
@@ -25,7 +25,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Int_Does_Not_Match_Different_Value()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(2, 3).Returns(5);
 
         await Assert.That(mock.Object.Add(2, 4)).IsEqualTo(0);
@@ -35,7 +35,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_String_Matches_Exact()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("Alice").Returns("Hello, Alice!");
 
         await Assert.That(mock.Object.Greet("Alice")).IsEqualTo("Hello, Alice!");
@@ -44,7 +44,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_String_Does_Not_Match_Different_Value()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("Alice").Returns("Hello, Alice!");
 
         await Assert.That(mock.Object.Greet("Bob")).IsNotEqualTo("Hello, Alice!");
@@ -55,7 +55,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Zero_Matches()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(0, 0).Returns(99);
 
         await Assert.That(mock.Object.Add(0, 0)).IsEqualTo(99);
@@ -64,7 +64,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Negative_Numbers_Match()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(-1, -2).Returns(-3);
 
         await Assert.That(mock.Object.Add(-1, -2)).IsEqualTo(-3);
@@ -74,7 +74,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Empty_String_Matches()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("").Returns("empty");
 
         await Assert.That(mock.Object.Greet("")).IsEqualTo("empty");
@@ -84,7 +84,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Mixed_With_Explicit_Matcher()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), 5).Returns(50);
 
         await Assert.That(mock.Object.Add(0, 5)).IsEqualTo(50);
@@ -95,7 +95,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Multiple_Setups_Last_Wins()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(10);
         mock.Add(1, 1).Returns(20);
 
@@ -105,7 +105,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_IntMaxValue_And_IntMinValue()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(int.MaxValue, int.MinValue).Returns(1);
 
         await Assert.That(mock.Object.Add(int.MaxValue, int.MinValue)).IsEqualTo(1);
@@ -120,7 +120,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Int_Greater_Than_Matches()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(x => x > 5), Any()).Returns(100);
 
         await Assert.That(mock.Object.Add(6, 0)).IsEqualTo(100);
@@ -131,7 +131,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Int_Greater_Than_Does_Not_Match()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(x => x > 5), Any()).Returns(100);
 
         await Assert.That(mock.Object.Add(5, 0)).IsEqualTo(0);
@@ -142,7 +142,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_String_StartsWith_Matches()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> startsWithHi = s => s != null && s.StartsWith("Hi");
         mock.Greet(startsWithHi).Returns("matched");
 
@@ -153,7 +153,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_String_StartsWith_Does_Not_Match()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> startsWithHi = s => s != null && s.StartsWith("Hi");
         mock.Greet(startsWithHi).Returns("matched");
 
@@ -165,7 +165,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Both_Args()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(x => x > 0), Is<int>(x => x % 2 == 0)).Returns(42);
 
         await Assert.That(mock.Object.Add(1, 2)).IsEqualTo(42);
@@ -183,7 +183,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_String_Contains()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> containsWorld = s => s != null && s.Contains("world");
         mock.Greet(containsWorld).Returns("has world");
 
@@ -195,7 +195,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_String_Length_Check()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> shortString = s => s != null && s.Length <= 3;
         mock.Greet(shortString).Returns("short");
 
@@ -207,7 +207,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Always_True_Matches_Everything()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> always = _ => true;
         mock.Greet(always).Returns("always");
 
@@ -218,7 +218,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Always_False_Matches_Nothing()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> never = _ => false;
         mock.Greet(never).Returns("never");
 
@@ -230,7 +230,7 @@ public class ImplicitArgConversionTests
     public async Task Implicit_Predicate_With_Closure()
     {
         var threshold = 10;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(x => x > threshold), Any()).Returns(1);
 
         await Assert.That(mock.Object.Add(11, 0)).IsEqualTo(1);
@@ -240,7 +240,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Int_Range_Check()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(x => x >= 1 && x <= 10), Is<int>(x => x >= 1 && x <= 10)).Returns(50);
 
         await Assert.That(mock.Object.Add(1, 10)).IsEqualTo(50);
@@ -252,7 +252,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Handles_Null_String()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> isNull = s => s is null;
         mock.Greet(isNull).Returns("was null");
 
@@ -264,7 +264,7 @@ public class ImplicitArgConversionTests
     public async Task Implicit_Predicate_Func_Variable_For_String()
     {
         // Verifies the implicit Func<T?, bool> → Arg<T> operator works via variable
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> predicate = s => s != null && s.Length > 3;
         mock.Greet(predicate).Returns("long name");
 
@@ -275,7 +275,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Func_Variable_Multiple_Setups()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         Func<string?, bool> startsA = s => s != null && s.StartsWith("A");
         Func<string?, bool> startsB = s => s != null && s.StartsWith("B");
         mock.Greet(startsA).Returns("A-name");
@@ -293,7 +293,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_And_Predicate_Mixed()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(10, Is<int>(x => x % 2 == 0)).Returns(77);
 
         // First arg must be exactly 10, second must be even
@@ -310,7 +310,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Predicate_Overrides_Earlier_Value_Setup()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(5, 5).Returns(10);
         mock.Add(Is<int>(_ => true), Is<int>(_ => true)).Returns(99);
 
@@ -322,7 +322,7 @@ public class ImplicitArgConversionTests
     [Test]
     public async Task Implicit_Value_Overrides_Earlier_Predicate_Setup()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Is<int>(_ => true), Is<int>(_ => true)).Returns(99);
         mock.Add(5, 5).Returns(10);
 
@@ -335,7 +335,7 @@ public class ImplicitArgConversionTests
     public async Task Implicit_Predicate_With_Capture_On_Other_Arg()
     {
         var captured = Any<int>();
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(captured, Is<int>(x => x > 0)).Returns(1);
 
         mock.Object.Add(42, 1);

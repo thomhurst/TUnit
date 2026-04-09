@@ -24,7 +24,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_ReadOnlySpan_Byte_With_Data()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Returns(new ReadOnlySpan<byte>([1, 2, 3]));
 
         var result = mock.Object.GetBytes();
@@ -42,7 +42,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_ReadOnlySpan_Byte_Empty()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Returns(ReadOnlySpan<byte>.Empty);
 
         var result = mock.Object.GetBytes();
@@ -55,7 +55,7 @@ public class SpanReturnTests
     public async Task Returns_ReadOnlySpan_No_Setup_Returns_Default()
     {
         // No .Returns() call — should return empty span (default)
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
 
         var result = mock.Object.GetBytes();
         var len = result.Length;
@@ -66,7 +66,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_ReadOnlySpan_With_Arg_Matching()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes("hello").Returns(new ReadOnlySpan<byte>([0xCA, 0xFE]));
         mock.GetBytes("world").Returns(new ReadOnlySpan<byte>([0xDE, 0xAD]));
 
@@ -92,7 +92,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_ReadOnlySpan_With_Arg_Any()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes(Any()).Returns(new ReadOnlySpan<byte>([0xFF]));
 
         var result = mock.Object.GetBytes("anything");
@@ -106,7 +106,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_ReadOnlySpan_Char()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetChars(42).Returns(new ReadOnlySpan<char>(['a', 'b', 'c']));
 
         var result = mock.Object.GetChars(42);
@@ -124,7 +124,7 @@ public class SpanReturnTests
     [Test]
     public async Task Returns_Mutable_Span()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetMutableBuffer().Returns(new Span<byte>([10, 20, 30]));
 
         var result = mock.Object.GetMutableBuffer();
@@ -142,7 +142,7 @@ public class SpanReturnTests
     [Test]
     public void Span_Return_Throws_Exception()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Throws<InvalidOperationException>();
 
         Assert.Throws<InvalidOperationException>(() => mock.Object.GetBytes());
@@ -152,7 +152,7 @@ public class SpanReturnTests
     public async Task Span_Return_Callback_Is_Invoked()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Callback(() => wasCalled = true)
             .Returns(new ReadOnlySpan<byte>([1]));
 
@@ -164,7 +164,7 @@ public class SpanReturnTests
     [Test]
     public async Task Span_Return_Verify_WasCalled()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Returns(new ReadOnlySpan<byte>([1]));
 
         mock.Object.GetBytes();
@@ -177,7 +177,7 @@ public class SpanReturnTests
     [Test]
     public async Task Span_Return_Verify_WasNeverCalled()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
 
         mock.GetBytes().WasNeverCalled();
         await Assert.That(true).IsTrue();
@@ -186,7 +186,7 @@ public class SpanReturnTests
     [Test]
     public async Task Span_Return_Verify_With_Specific_Args()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes(Any()).Returns(new ReadOnlySpan<byte>([1]));
 
         mock.Object.GetBytes("hello");
@@ -205,7 +205,7 @@ public class SpanReturnTests
         for (int i = 0; i < largeData.Length; i++)
             largeData[i] = (byte)(i % 256);
 
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes().Returns(new ReadOnlySpan<byte>(largeData));
 
         var result = mock.Object.GetBytes();
@@ -221,7 +221,7 @@ public class SpanReturnTests
     [Test]
     public async Task Span_Return_Unmatched_Args_Returns_Default()
     {
-        var mock = Mock.Of<ISpanProducer>();
+        var mock = ISpanProducer.Mock();
         mock.GetBytes("specific").Returns(new ReadOnlySpan<byte>([1, 2, 3]));
 
         // Call with different arg — should return default (empty span)

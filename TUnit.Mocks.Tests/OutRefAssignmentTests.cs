@@ -12,7 +12,7 @@ public class OutRefAssignmentTests
     public async Task Out_Parameter_Can_Be_Set_Via_Typed_Api()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet("found")
             .Returns(true)
             .SetsOutValue("found-value");
@@ -31,7 +31,7 @@ public class OutRefAssignmentTests
     public async Task Out_Parameter_Stays_Default_Without_Assignment()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet("key").Returns(false);
 
         IDictionary dict = mock.Object;
@@ -48,7 +48,7 @@ public class OutRefAssignmentTests
     public async Task Out_Parameter_Int_Can_Be_Set_Via_Typed_Api()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryParse(Any())
             .Returns(true)
             .SetsOutResult(42);
@@ -67,7 +67,7 @@ public class OutRefAssignmentTests
     public async Task Out_Parameter_With_Any_Matcher_Via_Typed_Api()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet(Any())
             .Returns(true)
             .SetsOutValue("any-value");
@@ -87,7 +87,7 @@ public class OutRefAssignmentTests
     public async Task Ref_Parameter_Can_Be_Set_Via_Typed_Api()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.Swap(Any())
             .SetsRefValue(99);
 
@@ -105,7 +105,7 @@ public class OutRefAssignmentTests
     public async Task Typed_SetsOutValue_Works()
     {
         // Arrange
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet("key")
             .Returns(true)
             .SetsOutValue("untyped-value");
@@ -124,7 +124,7 @@ public class OutRefAssignmentTests
     public async Task Typed_And_Chaining_Works()
     {
         // Arrange — chain typed out/ref setter with Returns
-        var mock = Mock.Of<IDictionary>();
+        var mock = IDictionary.Mock();
         mock.TryGet(Any())
             .SetsOutValue("chained")
             .Returns(true);

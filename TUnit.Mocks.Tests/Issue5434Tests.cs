@@ -13,14 +13,14 @@ public class Issue5434Tests
     [Test]
     public void Can_Mock_BlobClient()
     {
-        var mock = Mock.Of<BlobClient>(MockBehavior.Strict);
+        var mock = BlobClient.Mock(MockBehavior.Strict);
         _ = mock.Object;
     }
 
     [Test]
     public void Can_Mock_TableClient()
     {
-        var mock = Mock.Of<TableClient>(MockBehavior.Strict);
+        var mock = TableClient.Mock(MockBehavior.Strict);
         _ = mock.Object;
     }
 
@@ -30,7 +30,7 @@ public class Issue5434Tests
     [Test]
     public void Can_Configure_BlobClient_GenerateSasUri_OutOverload()
     {
-        var mock = Mock.Of<BlobClient>(MockBehavior.Loose);
+        var mock = BlobClient.Mock(MockBehavior.Loose);
         _ = mock.GenerateSasUri(Arg.Any<BlobSasPermissions>(), Arg.Any<System.DateTimeOffset>(), out _);
     }
 
@@ -39,7 +39,7 @@ public class Issue5434Tests
     [Test]
     public void Can_Configure_TableClient_GetEntity_Generic()
     {
-        var mock = Mock.Of<TableClient>(MockBehavior.Loose);
+        var mock = TableClient.Mock(MockBehavior.Loose);
         _ = mock.GetEntity<TableEntity>(
             Arg.Any<string>(),
             Arg.Any<string>(),

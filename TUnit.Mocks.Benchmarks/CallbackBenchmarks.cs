@@ -17,7 +17,7 @@ public class CallbackBenchmarks
     public int TUnitMocks_Callback()
     {
         var count = 0;
-        var mock = Mock.Of<INotificationService>();
+        var mock = INotificationService.Mock();
         mock.Send(TUnitArg.Any<string>(), TUnitArg.Any<string>())
             .Callback(() => count++);
 
@@ -98,7 +98,7 @@ public class CallbackBenchmarks
     public string TUnitMocks_CallbackWithArgs()
     {
         var lastMessage = "";
-        var mock = Mock.Of<ILogger>();
+        var mock = ILogger.Mock();
         mock.Log(TUnitArg.Any<string>(), TUnitArg.Any<string>())
             .Callback((string _, string msg) => lastMessage = msg);
 

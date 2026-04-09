@@ -115,7 +115,7 @@ mock.Name.Setter.Throws<NotSupportedException>();
 Call `SetupAllProperties()` to make properties behave like real auto-properties — setters store values, getters return them:
 
 ```csharp
-var mock = Mock.Of<IEntity>();
+var mock = IEntity.Mock();
 mock.SetupAllProperties();
 
 mock.Object.Name = "Alice";
@@ -167,7 +167,7 @@ public abstract class Calculator
     public abstract int Multiply(int a, int b);
 }
 
-var mock = Mock.Of<Calculator>();
+var mock = Calculator.Mock();
 mock.Multiply(Any(), Any()).Returns(99);
 
 mock.Object.Add(2, 3);      // 5 (base implementation)
@@ -177,7 +177,7 @@ mock.Object.Multiply(2, 3); // 99 (mocked)
 Pass constructor arguments for non-default constructors:
 
 ```csharp
-var mock = Mock.Of<MyService>("connectionString", 42);
+var mock = MyService.Mock("connectionString", 42);
 ```
 
 ## Interfaces with Static Abstract Members

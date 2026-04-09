@@ -13,7 +13,7 @@ public class TypedCallbackTests
     {
         // Arrange
         (int a, int b)? capturedArgs = null;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Callback((int a, int b) => capturedArgs = (a, b));
 
@@ -33,7 +33,7 @@ public class TypedCallbackTests
     {
         // Arrange
         string? capturedMsg = null;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Callback((string msg) => capturedMsg = msg);
 
@@ -50,7 +50,7 @@ public class TypedCallbackTests
     public async Task Returns_With_Args_Computes_From_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Returns((int a, int b) => a + b);
 
@@ -66,7 +66,7 @@ public class TypedCallbackTests
     public async Task Returns_With_Args_String_Concatenation()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any())
             .Returns((string name) => $"Hello, {name}!");
 
@@ -81,7 +81,7 @@ public class TypedCallbackTests
     public async Task Computed_Throw_With_Args()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Throws((int a, int b) =>
                 new ArgumentException($"Bad args: {a}, {b}"));
@@ -97,7 +97,7 @@ public class TypedCallbackTests
     public async Task Computed_Throw_On_Void_Method()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Throws((string msg) =>
                 new InvalidOperationException($"Cannot log: {msg}"));
@@ -114,7 +114,7 @@ public class TypedCallbackTests
     {
         // Arrange
         (int a, int b)? capturedArgs = null;
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Callback((int a, int b) => capturedArgs = (a, b))
             .Then()
@@ -136,7 +136,7 @@ public class TypedCallbackTests
     public async Task Returns_With_Args_Repeats_On_Subsequent_Calls()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Returns((int a, int b) => a * b);
 
@@ -153,7 +153,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Returns_Computes_From_Arguments()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns((int a, int b) => a + b);
 
         ICalculator calc = mock.Object;
@@ -165,7 +165,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Callback_Receives_Arguments()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         var capturedArgs = new List<(int a, int b)>();
 
         // Callback is a behavior — first call runs callback, second call runs Returns
@@ -185,7 +185,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Throws_With_Argument_Dependent_Exception()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Throws((int a, int b) => new ArgumentException($"Cannot add {a} and {b}"));
 
@@ -198,7 +198,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Void_Callback()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         string? capturedMessage = null;
 
         mock.Log(Any())
@@ -213,7 +213,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Void_Throws()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Log(Any())
             .Throws((string msg) => new InvalidOperationException($"Cannot log: {msg}"));
 
@@ -226,7 +226,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Returns_Single_Parameter()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any()).Returns((string name) => $"Hello, {name}!");
 
         IGreeter greeter = mock.Object;
@@ -237,7 +237,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_With_Then_Chain()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any())
             .Returns((int a, int b) => a + b)
             .Then()
@@ -253,7 +253,7 @@ public class TypedCallbackTests
     public async Task StronglyTyped_Existing_Untyped_Returns_Still_Works()
     {
         // Verify that existing untyped API still compiles and works
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -264,7 +264,7 @@ public class TypedCallbackTests
     [Test]
     public async Task StronglyTyped_Existing_Untyped_Callback_Still_Works()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         var called = false;
         mock.Add(Any(), Any())
             .Callback(() => called = true)

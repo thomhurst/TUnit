@@ -20,7 +20,7 @@ public class CollectionMatcherTests
     public async Task Arg_Contains_Matches_List_With_Item()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(Contains<List<int>, int>(42)).Returns(1);
 
         // Act
@@ -35,7 +35,7 @@ public class CollectionMatcherTests
     public async Task Arg_Contains_Does_Not_Match_Without_Item()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(Contains<List<int>, int>(42)).Returns(1);
 
         // Act
@@ -50,7 +50,7 @@ public class CollectionMatcherTests
     public async Task Arg_HasCount_Matches_List_With_Exact_Count()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(HasCount<List<int>>(3)).Returns(99);
 
         // Act
@@ -65,7 +65,7 @@ public class CollectionMatcherTests
     public async Task Arg_HasCount_Does_Not_Match_Wrong_Count()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(HasCount<List<int>>(3)).Returns(99);
 
         // Act
@@ -80,7 +80,7 @@ public class CollectionMatcherTests
     public async Task Arg_IsEmpty_Matches_Empty_List()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(IsEmpty<List<int>>()).Returns(77);
 
         // Act
@@ -94,7 +94,7 @@ public class CollectionMatcherTests
     public async Task Arg_IsEmpty_Does_Not_Match_NonEmpty()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(IsEmpty<List<int>>()).Returns(77);
 
         // Act
@@ -108,7 +108,7 @@ public class CollectionMatcherTests
     public async Task Arg_SequenceEquals_Matches_Exact_Sequence()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
 
         // Act
@@ -122,7 +122,7 @@ public class CollectionMatcherTests
     public async Task Arg_SequenceEquals_Does_Not_Match_Different_Sequence()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.ProcessItems(SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })).Returns(55);
 
         // Act
@@ -138,7 +138,7 @@ public class CollectionMatcherTests
     public async Task Arg_SequenceEquals_With_Strings()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.JoinNames(SequenceEquals<IEnumerable<string>, string>(new[] { "a", "b" })).Returns("matched");
 
         // Act
@@ -154,7 +154,7 @@ public class CollectionMatcherTests
     public async Task Arg_Contains_With_Strings()
     {
         // Arrange
-        var mock = Mock.Of<ICollectionService>();
+        var mock = ICollectionService.Mock();
         mock.JoinNames(Contains<IEnumerable<string>, string>("hello")).Returns("found");
 
         // Act

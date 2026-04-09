@@ -54,7 +54,7 @@ public class CustomMatcherTests
     public async Task Custom_String_Length_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Matches(new StringLengthMatcher(3, 10))).Returns("valid");
 
         // Act
@@ -71,7 +71,7 @@ public class CustomMatcherTests
     public async Task Custom_Range_Matcher_With_Calculator()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Matches(new RangeMatcher(1, 10)), Any()).Returns(100);
 
         // Act
@@ -89,7 +89,7 @@ public class CustomMatcherTests
     public async Task Custom_Matcher_With_Predicate_Combined()
     {
         // Arrange — custom matcher for first arg, predicate for second
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Matches(new RangeMatcher(0, 100)), Is<int>(b => b > 0)).Returns(42);
 
         // Act
@@ -116,7 +116,7 @@ public class CustomMatcherTests
     public async Task Custom_Matcher_With_Verification()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(0);
 
         // Act

@@ -27,7 +27,7 @@ public class BasicMockTests
     public async Task Mock_Of_Creates_Mock_Instance()
     {
         // Arrange & Act
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert
         await Assert.That(mock).IsNotNull();
@@ -38,7 +38,7 @@ public class BasicMockTests
     public async Task Setup_Returns_Configures_Return_Value()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(2, 3).Returns(5);
 
         // Act
@@ -53,7 +53,7 @@ public class BasicMockTests
     public async Task Setup_Returns_With_String()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("Alice").Returns("Hello, Alice!");
 
         // Act
@@ -68,7 +68,7 @@ public class BasicMockTests
     public async Task Unconfigured_Method_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         ICalculator calc = mock.Object;
@@ -82,7 +82,7 @@ public class BasicMockTests
     public async Task Implicit_Conversion_To_Interface()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — .Object access
         ICalculator calc = mock.Object;
@@ -95,7 +95,7 @@ public class BasicMockTests
     public async Task Multiple_Setups_Last_Wins()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(10);
         mock.Add(1, 1).Returns(20); // Last setup wins
 
@@ -111,7 +111,7 @@ public class BasicMockTests
     public async Task Different_Args_Different_Returns()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         mock.Add(10, 20).Returns(30);
 
@@ -128,7 +128,7 @@ public class BasicMockTests
     public void Void_Method_Does_Not_Throw_In_Loose_Mode()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act & Assert — should not throw
         ICalculator calc = mock.Object;
@@ -139,7 +139,7 @@ public class BasicMockTests
     public async Task String_Method_Unconfigured_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act
         ICalculator calc = mock.Object;
@@ -153,7 +153,7 @@ public class BasicMockTests
     public async Task Reset_Clears_Setups()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(42);
 
         ICalculator calc = mock.Object;

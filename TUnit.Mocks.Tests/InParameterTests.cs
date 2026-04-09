@@ -34,7 +34,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Returns_Value()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(1, 2).Returns(3);
 
         var result = mock.Object.Add(1, 2);
@@ -45,7 +45,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Arg_Any_Matching()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Returns(42);
 
         var result = mock.Object.Add(10, 20);
@@ -56,7 +56,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Specific_Value_Matching()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(5, 10).Returns(15);
         mock.Add(1, 1).Returns(2);
 
@@ -71,7 +71,7 @@ public class InParameterTests
     public async Task In_Params_Void_Method()
     {
         var wasCalled = false;
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Log(Any()).Callback(() => wasCalled = true);
 
         mock.Object.Log("hello");
@@ -82,7 +82,7 @@ public class InParameterTests
     [Test]
     public void In_Params_Throws()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Throws<InvalidOperationException>();
 
         Assert.Throws<InvalidOperationException>(() => mock.Object.Add(1, 2));
@@ -91,7 +91,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Verify_WasCalled()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Returns(0);
 
         mock.Object.Add(1, 2);
@@ -104,7 +104,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Verify_WasNeverCalled()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
 
         mock.Add(1, 2).WasNeverCalled();
         await Assert.That(true).IsTrue();
@@ -113,7 +113,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Mixed_With_Regular_Params()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Compute(Any(), Any()).Returns(99.5);
 
         var result = mock.Object.Compute(42, 2.0);
@@ -124,7 +124,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Specific_Mixed_Matching()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Compute(10, 2.5).Returns(25.0);
         mock.Compute(20, 3.0).Returns(60.0);
 
@@ -138,7 +138,7 @@ public class InParameterTests
     [Test]
     public async Task In_Struct_Params()
     {
-        var mock = Mock.Of<IGeometry>();
+        var mock = IGeometry.Mock();
         mock.Distance(Any(), Any()).Returns(5.0);
 
         var origin = new Point { X = 0, Y = 0 };
@@ -151,7 +151,7 @@ public class InParameterTests
     [Test]
     public async Task In_Struct_Mixed_With_Regular()
     {
-        var mock = Mock.Of<IGeometry>();
+        var mock = IGeometry.Mock();
         mock.Contains(Any(), Any()).Returns(true);
 
         var center = new Point { X = 5, Y = 5 };
@@ -164,7 +164,7 @@ public class InParameterTests
     public async Task In_Params_Callback_With_Args()
     {
         int capturedA = 0, capturedB = 0;
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any())
             .Callback((int a, int b) =>
             {
@@ -182,7 +182,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Verify_Specific_Values()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Returns(0);
 
         mock.Object.Add(1, 2);
@@ -198,7 +198,7 @@ public class InParameterTests
     public async Task In_String_Param_Matching()
     {
         var messages = new List<string>();
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Log(Any()).Callback((string msg) => messages.Add(msg));
 
         mock.Object.Log("first");
@@ -212,7 +212,7 @@ public class InParameterTests
     [Test]
     public async Task In_Params_Arg_Is_Predicate()
     {
-        var mock = Mock.Of<ICalculatorWithIn>();
+        var mock = ICalculatorWithIn.Mock();
         mock.Add(Is<int>(x => x > 0), Is<int>(x => x > 0)).Returns(100);
 
         var r1 = mock.Object.Add(5, 10);

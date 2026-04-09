@@ -21,8 +21,8 @@ public class CombinedWorkflowBenchmarks
     public void TUnitMocks_FullWorkflow()
     {
         // Create
-        var repoMock = Mock.Of<IUserRepository>();
-        var loggerMock = Mock.Of<ILogger>();
+        var repoMock = IUserRepository.Mock();
+        var loggerMock = ILogger.Mock();
 
         // Setup
         repoMock.GetById(1).Returns(new User { Id = 1, Name = "Alice", Email = "alice@test.com" });

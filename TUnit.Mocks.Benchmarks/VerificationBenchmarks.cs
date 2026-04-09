@@ -17,7 +17,7 @@ public class VerificationBenchmarks
     [Benchmark(Description = "TUnit.Mocks")]
     public void TUnitMocks_Verify()
     {
-        var mock = Mock.Of<ICalculatorService>();
+        var mock = ICalculatorService.Mock();
         mock.Add(TUnitArg.Any<int>(), TUnitArg.Any<int>()).Returns(42);
         var calc = mock.Object;
         calc.Add(1, 2);
@@ -86,7 +86,7 @@ public class VerificationBenchmarks
     [Benchmark(Description = "TUnit.Mocks (Never)")]
     public void TUnitMocks_VerifyNever()
     {
-        var mock = Mock.Of<ICalculatorService>();
+        var mock = ICalculatorService.Mock();
         mock.Format(TUnitArg.Any<int>()).WasNeverCalled();
     }
 
@@ -129,7 +129,7 @@ public class VerificationBenchmarks
     [Benchmark(Description = "TUnit.Mocks (Multiple)")]
     public void TUnitMocks_VerifyMultiple()
     {
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         mock.GetById(TUnitArg.Any<int>()).Returns(new User { Id = 1, Name = "Test" });
         mock.Exists(TUnitArg.Any<int>()).Returns(true);
 

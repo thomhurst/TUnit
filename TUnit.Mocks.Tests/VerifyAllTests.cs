@@ -13,7 +13,7 @@ public class VerifyAllTests
     [Test]
     public async Task VerifyAll_Passes_When_All_Setups_Invoked()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
         mock.Process(Any());
 
@@ -28,7 +28,7 @@ public class VerifyAllTests
     [Test]
     public async Task VerifyAll_Fails_When_Setup_Not_Invoked()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
         mock.Process(Any());
 
@@ -42,7 +42,7 @@ public class VerifyAllTests
     [Test]
     public async Task VerifyAll_Fails_When_No_Setups_Called()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var ex = Assert.Throws<MockVerificationException>(() => mock.VerifyAll());
@@ -52,7 +52,7 @@ public class VerifyAllTests
     [Test]
     public async Task VerifyAll_Passes_When_No_Setups_Registered()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.VerifyAll(); // No setups = nothing to verify
         await Assert.That(true).IsTrue();
     }
@@ -60,7 +60,7 @@ public class VerifyAllTests
     [Test]
     public async Task VerifyAll_Multiple_Uninvoked_Shows_All()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue("a").Returns("val");
         mock.Process(42);
 

@@ -26,7 +26,7 @@ public class AsyncTests
     public async Task Task_Int_Returns_Unwrapped_Value()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().Returns(5);
 
         IAsyncService service = mock.Object;
@@ -42,7 +42,7 @@ public class AsyncTests
     public async Task Task_String_Returns_Unwrapped_Value()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(Any()).Returns("hello");
 
         IAsyncService service = mock.Object;
@@ -58,7 +58,7 @@ public class AsyncTests
     public async Task Task_String_With_Exact_Arg_Match()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync("key1").Returns("value1");
         mock.GetNameAsync("key2").Returns("value2");
 
@@ -73,7 +73,7 @@ public class AsyncTests
     public async Task Void_Task_Method_Works_In_Loose_Mode()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
 
         IAsyncService service = mock.Object;
 
@@ -88,7 +88,7 @@ public class AsyncTests
     public async Task ValueTask_Int_Returns_Unwrapped_Value()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueValueTaskAsync().Returns(42);
 
         IAsyncService service = mock.Object;
@@ -104,7 +104,7 @@ public class AsyncTests
     public async Task Async_Method_Throws_Returns_Faulted_Task()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().Throws<InvalidOperationException>();
 
         IAsyncService service = mock.Object;
@@ -132,7 +132,7 @@ public class AsyncTests
     public async Task Unconfigured_Async_Method_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
 
         IAsyncService service = mock.Object;
 
@@ -147,7 +147,7 @@ public class AsyncTests
     public async Task Unconfigured_Async_String_Method_Returns_Smart_Default()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
 
         IAsyncService service = mock.Object;
 
@@ -162,7 +162,7 @@ public class AsyncTests
     public async Task Async_Method_Sequential_Returns()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().ReturnsSequentially(10, 20, 30);
 
         IAsyncService service = mock.Object;
@@ -179,7 +179,7 @@ public class AsyncTests
     public async Task Async_Method_Verify_Called()
     {
         // Arrange
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().Returns(5);
 
         IAsyncService service = mock.Object;
@@ -198,7 +198,7 @@ public class AsyncTests
     {
         // Arrange
         var tcs = new TaskCompletionSource<int>();
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().ReturnsAsync(tcs.Task);
 
         IAsyncService service = mock.Object;
@@ -220,7 +220,7 @@ public class AsyncTests
     {
         // Arrange
         var tcs = new TaskCompletionSource<int>();
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueValueTaskAsync().ReturnsAsync(new ValueTask<int>(tcs.Task));
 
         IAsyncService service = mock.Object;
@@ -242,7 +242,7 @@ public class AsyncTests
     {
         // Arrange
         var tcs = new TaskCompletionSource();
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.DoWorkAsync().ReturnsAsync(tcs.Task);
 
         IAsyncService service = mock.Object;
@@ -266,7 +266,7 @@ public class AsyncTests
         var tcs1 = new TaskCompletionSource<int>();
         var tcs2 = new TaskCompletionSource<int>();
         var callCount = 0;
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().ReturnsAsync(() => (++callCount == 1) ? tcs1.Task : tcs2.Task);
 
         IAsyncService service = mock.Object;
@@ -291,7 +291,7 @@ public class AsyncTests
     {
         // Arrange — mix ReturnsAsync and Returns in a sequence
         var tcs = new TaskCompletionSource<int>();
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync()
             .Returns(1)
             .Then()
@@ -321,7 +321,7 @@ public class AsyncTests
     public async Task ReturnsAsync_Already_Completed_Task()
     {
         // Arrange — pass an already-completed task
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetValueAsync().ReturnsAsync(Task.FromResult(123));
 
         IAsyncService service = mock.Object;
@@ -336,7 +336,7 @@ public class AsyncTests
     [Test]
     public async Task ReturnsAsync_Typed_Factory_Receives_Arguments()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(Any()).ReturnsAsync((string key) => Task.FromResult($"value-{key}"));
 
         IAsyncService service = mock.Object;
@@ -351,7 +351,7 @@ public class AsyncTests
     [Test]
     public async Task ReturnsAsync_Typed_Factory_ValueTask_Receives_Arguments()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.ComputeValueTaskAsync(Any()).ReturnsAsync((int input) => new ValueTask<int>(input * 10));
 
         IAsyncService service = mock.Object;
@@ -366,7 +366,7 @@ public class AsyncTests
     [Test]
     public async Task ReturnsAsync_Typed_Factory_With_Then_Chain()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(Any())
             .ReturnsAsync((string key) => Task.FromResult($"first-{key}"))
             .Then()
@@ -384,7 +384,7 @@ public class AsyncTests
     [Test]
     public async Task Typed_Callback_On_Async_Task_Method()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         string? capturedKey = null;
 
         mock.GetNameAsync(Any())
@@ -401,7 +401,7 @@ public class AsyncTests
     [Test]
     public async Task Typed_Callback_On_Async_ValueTask_Method()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         int? capturedInput = null;
 
         mock.ComputeValueTaskAsync(Any())
@@ -418,7 +418,7 @@ public class AsyncTests
     [Test]
     public async Task Typed_Throws_On_Async_Task_Method()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.GetNameAsync(Any())
             .Throws((string key) => new InvalidOperationException($"No value for: {key}"));
 
@@ -431,7 +431,7 @@ public class AsyncTests
     [Test]
     public async Task Typed_Throws_On_Async_ValueTask_Method()
     {
-        var mock = Mock.Of<IAsyncService>();
+        var mock = IAsyncService.Mock();
         mock.ComputeValueTaskAsync(Any())
             .Throws((int input) => new ArgumentException($"Invalid input: {input}"));
 

@@ -12,7 +12,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Calls_Are_Thread_Safe()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -32,7 +32,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Void_Calls_Are_Thread_Safe()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — 100 concurrent void calls
@@ -48,7 +48,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Setup_And_Call()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — one thread adds setups, others call methods simultaneously
@@ -78,7 +78,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Calls_With_Different_Args()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(10);
         mock.Add(2, 2).Returns(20);
         mock.Add(3, 3).Returns(30);
@@ -104,7 +104,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Verification_Is_Thread_Safe()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — make some calls first
@@ -129,11 +129,11 @@ public class ThreadSafetyTests
     public async Task Concurrent_Calls_On_Different_Interfaces()
     {
         // Arrange
-        var calcMock = Mock.Of<ICalculator>();
+        var calcMock = ICalculator.Mock();
         calcMock.Add(Any(), Any()).Returns(99);
         ICalculator calc = calcMock.Object;
 
-        var greeterMock = Mock.Of<IGreeter>();
+        var greeterMock = IGreeter.Mock();
         greeterMock.Greet(Any()).Returns("hi");
         IGreeter greeter = greeterMock.Object;
 
@@ -163,7 +163,7 @@ public class ThreadSafetyTests
     public async Task Concurrent_Calls_All_Recorded_In_History()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Any()).Returns("hello");
         IGreeter greeter = mock.Object;
 

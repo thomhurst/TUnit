@@ -63,10 +63,10 @@ public class GreeterTests
 }
 ```
 
-You can also use the `Mock.Of<T>()` factory — both produce the same result for interfaces:
+The `Mock.Of<T>()` factory is also available as an alternative syntax:
 
 ```csharp
-var mock = Mock.Of<IGreeter>();
+var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock()
 ```
 
 ## Key Concepts
@@ -75,8 +75,7 @@ var mock = Mock.Of<IGreeter>();
 
 | Factory Method | Use Case |
 |---|---|
-| `Mock.Of<T>()` | Mock an interface, abstract class, or concrete class |
-| `IMyInterface.Mock()` | Create a mock that directly implements the interface ([details](#typed-mock-wrapper)) |
+| `T.Mock()` | Mock an interface, abstract class, or concrete class — the recommended syntax ([details](#typed-mock-wrapper)) |
 | `Mock.OfDelegate<T>()` | Mock a delegate (`Func<>`, `Action<>`, etc.) |
 | `Mock.Wrap<T>(instance)` | Wrap a real object with selective overrides |
 | `Mock.Of<T1, T2>()` | Mock multiple interfaces on a single object |
@@ -89,13 +88,13 @@ var mock = Mock.Of<IGreeter>();
 All factory methods accept an optional `MockBehavior` parameter:
 
 ```csharp
-var loose = Mock.Of<IService>();                       // loose (default)
-var strict = Mock.Of<IService>(MockBehavior.Strict);   // throws on unconfigured calls
+var loose = IService.Mock();                           // loose (default)
+var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
 ```
 
 ### The Mock Wrapper
 
-`IService.Mock()` and `Mock.Of<T>()` return a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
+`T.Mock()` returns a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
 
 ```csharp
 var mock = IService.Mock();
@@ -108,7 +107,7 @@ mock.Object                                  // the T instance (also available v
 
 ### Typed Mock Wrapper
 
-The `IMyInterface.Mock()` syntax (a C# 14 static extension member) returns a specialized wrapper type that extends `Mock<T>` **and** implements the interface directly. This means the mock can be used anywhere the interface is expected — no `.Object` or cast needed:
+For interfaces, `IMyInterface.Mock()` (a C# 14 static extension member) returns a specialized wrapper type that extends `Mock<T>` **and** implements the interface directly. This means the mock can be used anywhere the interface is expected — no `.Object` or cast needed:
 
 ```csharp
 var mock = IGreeter.Mock();
@@ -123,24 +122,23 @@ mock.Greet(Any()).Returns("Hello!");
 mock.Greet("Alice").WasCalled();
 ```
 
-Both `Mock.Of<T>()` and `IMyInterface.Mock()` produce the same wrapper type for interfaces, so you can use them interchangeably. The `IMyInterface.Mock()` form is more concise and makes the intent clearer.
-
-An optional `MockBehavior` parameter is supported:
+`T.Mock()` is the recommended syntax for all types — interfaces, abstract classes, and concrete classes. For interfaces it returns a typed wrapper; for classes it returns `Mock<T>`. Constructor arguments are supported as strongly-typed parameters:
 
 ```csharp
 var strict = IGreeter.Mock(MockBehavior.Strict);
+var service = MyService.Mock("connectionString", 42);
 ```
 
 :::note
-`IMyInterface.Mock()` requires C# 14 / .NET 10 or later (it uses C# 14 static extension members). For older language versions, or for multi-interface mocks, interfaces with static abstract members, delegates, partial mocks, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
+`T.Mock()` requires C# 14 / .NET 10 or later (it uses C# 14 static extension members). For older language versions, or for multi-interface mocks, interfaces with static abstract members, delegates, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
 :::
 
 ### Implicit Conversion
 
-`Mock<T>` also supports implicit conversion to `T` — so `Mock.Of<T>()` works without `.Object` too:
+`Mock<T>` also supports implicit conversion to `T` — so `T.Mock()` works without `.Object`:
 
 ```csharp
-var mock = Mock.Of<IGreeter>();
+var mock = IGreeter.Mock();
 IGreeter greeter = mock; // implicit conversion
 ```
 
@@ -156,7 +154,7 @@ IGreeter greeter = mock; // implicit conversion
 TUnit.Mocks imports matchers globally — no `Arg.` prefix needed. Raw values, inline lambdas, and `Any()` work directly as arguments:
 
 ```csharp
-var mock = Mock.Of<IUserService>();
+var mock = IUserService.Mock();
 
 // Any() — matches everything
 mock.GetUser(Any()).Returns(user);

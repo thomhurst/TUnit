@@ -32,7 +32,7 @@ public class GenericConstraintTests
     [Test]
     public async Task Notnull_Constraint_Mock_Returns_Configured_Value()
     {
-        var mock = Mock.Of<INotnullService>();
+        var mock = INotnullService.Mock();
         mock.Get<int>("key").Returns(42);
 
         INotnullService svc = mock.Object;
@@ -44,7 +44,7 @@ public class GenericConstraintTests
     [Test]
     public void New_Constraint_Mock_Does_Not_Throw()
     {
-        var mock = Mock.Of<INewConstraintService>();
+        var mock = INewConstraintService.Mock();
 
         INewConstraintService svc = mock.Object;
         _ = svc.Create<object>();
@@ -53,7 +53,7 @@ public class GenericConstraintTests
     [Test]
     public void Base_Type_Constraint_Mock_Does_Not_Throw()
     {
-        var mock = Mock.Of<IBaseTypeConstraintService>();
+        var mock = IBaseTypeConstraintService.Mock();
 
         IBaseTypeConstraintService svc = mock.Object;
         _ = svc.Get<MemoryStream>();
@@ -62,7 +62,7 @@ public class GenericConstraintTests
     [Test]
     public void Composite_Class_Constraint_Mock_Does_Not_Throw()
     {
-        var mock = Mock.Of<ICompositeConstraintService>();
+        var mock = ICompositeConstraintService.Mock();
 
         ICompositeConstraintService svc = mock.Object;
         _ = svc.Create<MemoryStream>();
@@ -71,7 +71,7 @@ public class GenericConstraintTests
     [Test]
     public async Task Composite_Struct_Constraint_Mock_Returns_Default()
     {
-        var mock = Mock.Of<ICompositeConstraintService>();
+        var mock = ICompositeConstraintService.Mock();
 
         ICompositeConstraintService svc = mock.Object;
         var result = svc.Read<int>();

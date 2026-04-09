@@ -7,7 +7,7 @@ public class DiagnosticsTests
     [Test]
     public async Task Unused_Setups_Detected()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Configure two setups but only exercise one
         mock.Add(1, 2).Returns(3);
@@ -27,7 +27,7 @@ public class DiagnosticsTests
     [Test]
     public async Task Unmatched_Calls_Detected()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Configure setup only for specific args
         mock.Add(1, 2).Returns(3);
@@ -45,7 +45,7 @@ public class DiagnosticsTests
     [Test]
     public async Task All_Setups_Exercised()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Add(Any(), Any()).Returns(42);
 
@@ -62,7 +62,7 @@ public class DiagnosticsTests
     [Test]
     public async Task No_Calls_Means_All_Setups_Unused()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         mock.Add(1, 2).Returns(3);
         mock.Add(3, 4).Returns(7);
@@ -77,7 +77,7 @@ public class DiagnosticsTests
     [Test]
     public async Task Matcher_Descriptions_Populated()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Is<int>(x => x > 0)).Returns(1);
 
         var diag = mock.GetDiagnostics();
@@ -92,7 +92,7 @@ public class DiagnosticsTests
     [Test]
     public async Task Reset_Clears_Diagnostics()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
@@ -111,7 +111,7 @@ public class DiagnosticsTests
     [Test]
     public async Task Empty_Mock_Has_Clean_Diagnostics()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         var diag = mock.GetDiagnostics();
 

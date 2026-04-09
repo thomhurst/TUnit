@@ -17,7 +17,7 @@ public interface IConnection
     event Action? OnDisconnect;
 }
 
-var mock = Mock.Of<IConnection>();
+var mock = IConnection.Mock();
 
 // Subscribe to the event
 string? received = null;
@@ -47,7 +47,7 @@ The typed raise methods are generated per-event with correct parameter types, gi
 Query and react to event subscriptions through the strongly-typed `Events` surface:
 
 ```csharp
-var mock = Mock.Of<IConnection>();
+var mock = IConnection.Mock();
 
 // Register callbacks for subscribe/unsubscribe
 mock.Events.OnMessage.OnSubscribe(() => Console.WriteLine("subscribed"));
@@ -73,7 +73,7 @@ public interface IConnection
     void Disconnect();
 }
 
-var mock = Mock.Of<IConnection>();
+var mock = IConnection.Mock();
 mock.SetState("disconnected");
 
 mock.InState("disconnected", m =>
@@ -122,7 +122,7 @@ public interface IServiceB
     int GetValue();
 }
 
-var mock = Mock.Of<IServiceA>();
+var mock = IServiceA.Mock();
 
 // GetServiceB() automatically returns an auto-mock
 var serviceB = mock.Object.GetServiceB();
@@ -135,7 +135,7 @@ autoMock.GetValue().Returns(42);
 var value = serviceB.GetValue(); // 42
 ```
 
-Use `Mock.Get(obj)` to retrieve the `Mock<T>` wrapper for any mock object — auto-mocked return values, or any object created by `Mock.Of`. Auto-mocks are cached — calling the same method returns the same mock instance.
+Use `Mock.Get(obj)` to retrieve the `Mock<T>` wrapper for any mock object — auto-mocked return values, or any object created by `T.Mock()`. Auto-mocks are cached — calling the same method returns the same mock instance.
 
 ## MockRepository
 
@@ -214,7 +214,7 @@ public class TestDefaults : IDefaultValueProvider
     };
 }
 
-var mock = Mock.Of<IService>();
+var mock = IService.Mock();
 mock.DefaultValueProvider = new TestDefaults();
 
 var name = mock.Object.GetName();  // "test-default" (no setup needed)

@@ -33,7 +33,7 @@ public class GenericTests
     public async Task Generic_Method_Returns_Configured_Value()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var customer = new Customer { Id = 1, Name = "Alice" };
         mock.Get<Customer>(1).Returns(customer);
 
@@ -50,7 +50,7 @@ public class GenericTests
     public async Task Generic_Method_Unconfigured_Returns_Default()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
 
         // Act
         IRepository repo = mock.Object;
@@ -64,7 +64,7 @@ public class GenericTests
     public async Task Generic_Method_Different_Type_Arguments()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var customer = new Customer { Id = 1, Name = "Alice" };
         var order = new Order { OrderId = 42 };
 
@@ -87,7 +87,7 @@ public class GenericTests
     public void Generic_Void_Method_Does_Not_Throw()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var customer = new Customer { Id = 1, Name = "Bob" };
 
         // Act & Assert - should not throw in loose mode
@@ -99,7 +99,7 @@ public class GenericTests
     public async Task Generic_Void_Method_Verify()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var customer = new Customer { Id = 1, Name = "Charlie" };
 
         // Act
@@ -115,7 +115,7 @@ public class GenericTests
     public async Task Generic_Method_With_Any_Matcher()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var customer = new Customer { Id = 1, Name = "Any" };
         mock.Get<Customer>(Any()).Returns(customer);
 
@@ -133,7 +133,7 @@ public class GenericTests
     public async Task Generic_Method_With_Two_Type_Parameters()
     {
         // Arrange
-        var mock = Mock.Of<IRepository>();
+        var mock = IRepository.Mock();
         var order = new Order { OrderId = 10 };
         mock.Transform<Customer, Order>(Any()).Returns(order);
 

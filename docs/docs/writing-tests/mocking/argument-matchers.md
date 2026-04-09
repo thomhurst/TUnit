@@ -243,7 +243,7 @@ public interface IBufferProcessor
     int Parse(ReadOnlySpan<char> text);
 }
 
-var mock = Mock.Of<IBufferProcessor>();
+var mock = IBufferProcessor.Mock();
 
 // Setup — ref struct param is visible in the API
 mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Callback(() => Console.WriteLine("called"));
@@ -263,7 +263,7 @@ public interface IMixedProcessor
     int Compute(int id, ReadOnlySpan<byte> data);
 }
 
-var mock = Mock.Of<IMixedProcessor>();
+var mock = IMixedProcessor.Mock();
 
 // Match on 'id', accept any span value
 mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);

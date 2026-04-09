@@ -21,7 +21,7 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Invocations_Track_Per_Member_Counts_Correctly()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
         ICalculator calc = mock.Object;
@@ -47,7 +47,7 @@ public class PerformanceOptimizationTests
     public async Task Invocations_Per_Member_Independent_After_Reset()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -70,7 +70,7 @@ public class PerformanceOptimizationTests
     public async Task GetCallsFor_Returns_Only_Matching_Member_Calls()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
         ICalculator calc = mock.Object;
@@ -96,7 +96,7 @@ public class PerformanceOptimizationTests
     public async Task Setups_For_Multiple_Members_Work_Independently()
     {
         // Arrange — setup all 3 members of ICalculator
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         mock.Add(10, 20).Returns(30);
         mock.GetName().Returns("calculator");
@@ -113,7 +113,7 @@ public class PerformanceOptimizationTests
     public async Task Many_Setups_On_Same_Member_Last_Wins()
     {
         // Arrange — multiple setups with same args, last should win
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(10);
         mock.Add(1, 2).Returns(20);
         mock.Add(1, 2).Returns(30);
@@ -129,7 +129,7 @@ public class PerformanceOptimizationTests
     {
         // Arrange — IUserRepository has 7 methods, testing that the flat array
         // handles larger interfaces correctly
-        var mock = Mock.Of<IUserRepository>();
+        var mock = IUserRepository.Mock();
         var user = new UserDto { Id = 1, Name = "Alice" };
 
         mock.GetByIdAsync(1).Returns(user);
@@ -155,7 +155,7 @@ public class PerformanceOptimizationTests
     public async Task Verification_Zero_Param_Method_Uses_Fast_Path()
     {
         // GetName() has zero parameters, so _matchers.Length == 0 → fast path (per-member counter)
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.GetName().Returns("test");
         ICalculator calc = mock.Object;
 
@@ -173,7 +173,7 @@ public class PerformanceOptimizationTests
     public async Task Verification_With_Any_Matchers_Uses_Matcher_Path()
     {
         // Any() creates argument matchers, so _matchers.Length > 0 → matcher path
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -192,7 +192,7 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Verification_With_Exact_Args_Uses_Matcher_Path()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -210,7 +210,7 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Verification_WasNeverCalled_Zero_Param_Method()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Zero-param method → fast path with per-member counter = 0
         mock.GetName().WasNeverCalled();
@@ -220,7 +220,7 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Verification_WasNeverCalled_With_Matchers()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Any() creates matchers → matcher path, but still zero calls
         mock.Add(Any(), Any()).WasNeverCalled();
@@ -232,7 +232,7 @@ public class PerformanceOptimizationTests
     public async Task Verification_Failure_With_No_Matchers_Shows_Correct_Message()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
@@ -251,7 +251,7 @@ public class PerformanceOptimizationTests
     public async Task Concurrent_Calls_To_Multiple_Members_All_Recorded()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
         ICalculator calc = mock.Object;
@@ -271,7 +271,7 @@ public class PerformanceOptimizationTests
     public async Task Concurrent_Setup_Then_Calls_Across_Members()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Act — setup and call concurrently across members
         var setupAndCallTasks = Enumerable.Range(0, 20).Select(i => Task.Run(() =>
@@ -289,7 +289,7 @@ public class PerformanceOptimizationTests
     public async Task Concurrent_Verification_With_Per_Member_Counters()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -316,7 +316,7 @@ public class PerformanceOptimizationTests
     public async Task VerifyAll_Works_With_Flat_Array_Setup_Storage()
     {
         // Arrange — setups across multiple members
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         mock.GetName().Returns("test");
 
@@ -333,7 +333,7 @@ public class PerformanceOptimizationTests
     public async Task VerifyAll_Fails_When_Setup_Not_Invoked_With_Flat_Array()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(3);
         mock.GetName().Returns("test");
 
@@ -349,7 +349,7 @@ public class PerformanceOptimizationTests
     public async Task VerifyNoOtherCalls_Works_With_Per_Member_Index()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -368,7 +368,7 @@ public class PerformanceOptimizationTests
     public async Task VerifyNoOtherCalls_Fails_With_Unverified_Member()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         mock.GetName().Returns("test");
         ICalculator calc = mock.Object;
@@ -392,7 +392,7 @@ public class PerformanceOptimizationTests
     public async Task Reset_Clears_Per_Member_Call_Index_And_Counters()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
         ICalculator calc = mock.Object;
 
@@ -415,7 +415,7 @@ public class PerformanceOptimizationTests
     public async Task Reset_Clears_Flat_Array_Setups_And_Allows_Reconfiguration()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(100);
         mock.GetName().Returns("first");
         ICalculator calc = mock.Object;
@@ -436,7 +436,7 @@ public class PerformanceOptimizationTests
     [Test]
     public async Task Multiple_Reset_Cycles_Work_Correctly()
     {
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         for (int cycle = 0; cycle < 5; cycle++)
@@ -461,7 +461,7 @@ public class PerformanceOptimizationTests
     public async Task Verification_Before_Any_Setup_Or_Call()
     {
         // Arrange — fresh mock, no setups, no calls
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
 
         // Assert — should not throw, all members have zero calls
         mock.Add(Any(), Any()).WasNeverCalled();
@@ -474,7 +474,7 @@ public class PerformanceOptimizationTests
     public async Task Call_Without_Setup_Still_Recorded_In_Per_Member_Index()
     {
         // Arrange — no setup, loose mode
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // Act — call without any setup

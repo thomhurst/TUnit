@@ -27,7 +27,7 @@ public class InvocationBenchmarks
     public void Setup()
     {
         // TUnit.Mocks
-        _tunitMock = Mock.Of<ICalculatorService>();
+        _tunitMock = ICalculatorService.Mock();
         _tunitMock.Add(TUnitArg.Any<int>(), TUnitArg.Any<int>()).Returns(42);
         _tunitMock.Format(TUnitArg.Any<int>()).Returns("formatted");
         _tunitObject = _tunitMock.Object;

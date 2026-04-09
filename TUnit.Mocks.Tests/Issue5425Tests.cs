@@ -45,21 +45,21 @@ public class Issue5425Tests
     [Test]
     public async Task Can_Mock_Event_With_Nullable_Type_Argument()
     {
-        var mock = Mock.Of<IWithNullableTypeArg>();
+        var mock = IWithNullableTypeArg.Mock();
         await Assert.That(mock).IsNotNull();
     }
 
     [Test]
     public async Task Can_Mock_Nullable_Event()
     {
-        var mock = Mock.Of<IWithNullableEvent>();
+        var mock = IWithNullableEvent.Mock();
         await Assert.That(mock).IsNotNull();
     }
 
     [Test]
     public async Task Can_Mock_Nullable_Event_With_Nullable_Type_Argument()
     {
-        var mock = Mock.Of<IWithBothNullable>();
+        var mock = IWithBothNullable.Mock();
         await Assert.That(mock).IsNotNull();
     }
 }

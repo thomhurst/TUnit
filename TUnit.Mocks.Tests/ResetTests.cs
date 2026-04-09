@@ -14,7 +14,7 @@ public class ResetTests
     public async Task Reset_Clears_All_Setups()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(42);
         mock.Add(3, 4).Returns(99);
 
@@ -34,7 +34,7 @@ public class ResetTests
     public async Task Reset_Clears_Call_History()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
         calc.Add(3, 4);
@@ -55,7 +55,7 @@ public class ResetTests
     public async Task Reset_Allows_Fresh_Setup()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 2).Returns(42);
 
         ICalculator calc = mock.Object;
@@ -73,7 +73,7 @@ public class ResetTests
     public async Task Reset_Allows_Fresh_Verification()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Add(1, 2);
         calc.Add(1, 2);
@@ -95,7 +95,7 @@ public class ResetTests
     public async Task Reset_On_Strict_Mock_Restores_Strict_Behavior()
     {
         // Arrange — strict mock with a configured method
-        var mock = Mock.Of<ICalculator>(MockBehavior.Strict);
+        var mock = ICalculator.Mock(MockBehavior.Strict);
         mock.Add(1, 2).Returns(3);
 
         ICalculator calc = mock.Object;
@@ -118,7 +118,7 @@ public class ResetTests
     public async Task Reset_Clears_String_Method_Setup()
     {
         // Arrange
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet("Alice").Returns("Hello, Alice!");
 
         IGreeter greeter = mock.Object;
@@ -136,7 +136,7 @@ public class ResetTests
     public async Task Reset_Clears_Void_Method_Call_History()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
         calc.Log("message1");
         calc.Log("message2");
@@ -155,7 +155,7 @@ public class ResetTests
     public async Task Reset_Followed_By_New_Setup_And_Verification()
     {
         // Arrange — full lifecycle: setup, use, reset, re-setup, re-use, re-verify
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         mock.Add(1, 1).Returns(10);
 
         ICalculator calc = mock.Object;
@@ -182,7 +182,7 @@ public class ResetTests
     public async Task Multiple_Resets()
     {
         // Arrange
-        var mock = Mock.Of<ICalculator>();
+        var mock = ICalculator.Mock();
         ICalculator calc = mock.Object;
 
         // First cycle

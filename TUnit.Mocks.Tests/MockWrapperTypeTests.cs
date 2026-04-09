@@ -12,7 +12,7 @@ public class MockWrapperTypeTests
     [Test]
     public async Task Mock_Of_Returns_Wrapper_That_Implements_Interface()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
 
         // The runtime type should implement IGreeter directly
         await Assert.That(mock is IGreeter).IsTrue();
@@ -21,7 +21,7 @@ public class MockWrapperTypeTests
     [Test]
     public async Task Wrapper_Can_Be_Cast_To_Interface()
     {
-        var mock = Mock.Of<IGreeter>();
+        var mock = IGreeter.Mock();
         mock.Greet(Arg.Any<string>()).Returns("Hello!");
 
         // Cast via the wrapper type (which IS the interface)

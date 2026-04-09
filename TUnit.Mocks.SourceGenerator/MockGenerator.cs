@@ -112,6 +112,14 @@ public class MockGenerator : IIncrementalGenerator
                 }
             }
         }
+        else if (model.IsPartialMock)
+        {
+            var extensionSource = MockStaticExtensionBuilder.BuildForClass(model);
+            if (!string.IsNullOrEmpty(extensionSource))
+            {
+                spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
+            }
+        }
     }
 
     private static void GenerateDelegateMock(SourceProductionContext spc, MockTypeModel model)

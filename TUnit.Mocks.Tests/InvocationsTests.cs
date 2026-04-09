@@ -11,7 +11,7 @@ public class InvocationsTests
     [Test]
     public async Task Invocations_Returns_All_Calls()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -25,7 +25,7 @@ public class InvocationsTests
     [Test]
     public async Task Invocations_Contains_Correct_Method_Names()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -40,7 +40,7 @@ public class InvocationsTests
     [Test]
     public async Task Invocations_Contains_Correct_Arguments()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;
@@ -52,14 +52,14 @@ public class InvocationsTests
     [Test]
     public async Task Invocations_Is_Empty_When_No_Calls_Made()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         await Assert.That(mock.Invocations.Count).IsEqualTo(0);
     }
 
     [Test]
     public async Task Invocations_Is_Empty_After_Reset()
     {
-        var mock = Mock.Of<IService>();
+        var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
 
         var svc = mock.Object;

@@ -10,7 +10,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task OnSubscribe_Callback_Fires_When_Handler_Subscribes()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
         var callbackFired = false;
 
         mock.Events.DataReady.OnSubscribe(() => callbackFired = true);
@@ -23,7 +23,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task OnUnsubscribe_Callback_Fires_When_Handler_Unsubscribes()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
         var callbackFired = false;
 
         mock.Events.DataReady.OnUnsubscribe(() => callbackFired = true);
@@ -38,7 +38,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task Multiple_Subscriptions_Fire_Callback_Each_Time()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
         var callCount = 0;
 
         mock.Events.DataReady.OnSubscribe(() => callCount++);
@@ -53,7 +53,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task No_Callback_Fires_When_None_Configured()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
 
         // Subscribe without configuring any callback — should not throw
         mock.Object.DataReady += (sender, args) => { };
@@ -64,7 +64,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task Subscribe_And_Unsubscribe_Callbacks_Work_Independently()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
         var subscribeCount = 0;
         var unsubscribeCount = 0;
 
@@ -83,7 +83,7 @@ public class EventSubscriptionSetupTests
     [Test]
     public async Task Reset_Clears_Subscription_Callbacks()
     {
-        var mock = Mock.Of<INotifyService>();
+        var mock = INotifyService.Mock();
         var callbackFired = false;
 
         mock.Events.DataReady.OnSubscribe(() => callbackFired = true);
