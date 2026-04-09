@@ -31,22 +31,33 @@ public abstract record HookMethod
     public TimeSpan? Timeout { get; internal set; } = Defaults.HookTimeout;
 
     private IHookExecutor _hookExecutor = DefaultExecutor.Instance;
+    private bool _hookExecutorIsExplicit;
 
     public required IHookExecutor HookExecutor
     {
         get => _hookExecutor;
-        init => _hookExecutor = value;
+        init
+        {
+            _hookExecutor = value;
+            // An init-time value other than DefaultExecutor means an explicit [HookExecutor<T>]
+            // attribute was present at discovery time (source-gen or reflection).
+            _hookExecutorIsExplicit = !ReferenceEquals(value, DefaultExecutor.Instance);
+        }
     }
 
     internal void SetHookExecutor(IHookExecutor executor) => _hookExecutor = executor;
 
-    // An explicit HookExecutor wins; CustomHookExecutor is only a fallback for hooks still
-    // on DefaultExecutor, so #2666's SetHookExecutor scenario keeps working without
-    // overriding hooks that specified their own executor.
+    // Explicit [HookExecutor<T>] on the hook method itself always wins.
+    // Otherwise, prefer the per-test CustomHookExecutor (set via OnTestRegistered with
+    // ScopedAttributeFilter, so it reflects the most-specific scoped attribute for this
+    // test — e.g. method-level [Culture] over class-level). Fall back to _hookExecutor
+    // which may have been set via OnHookRegistered from class/assembly-level attributes.
     internal IHookExecutor ResolveEffectiveExecutor(TestContext? testContext) =>
-        ReferenceEquals(_hookExecutor, DefaultExecutor.Instance) && testContext?.CustomHookExecutor is { } custom
-            ? custom
-            : _hookExecutor;
+        _hookExecutorIsExplicit
+            ? _hookExecutor
+            : testContext?.CustomHookExecutor is { } custom
+                ? custom
+                : _hookExecutor;
 
     public required int Order { get; init; }
     
