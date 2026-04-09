@@ -23,6 +23,9 @@ internal static class MockStaticExtensionBuilder
         });
     }
 
+    // No CanGenerateWrapper check — that guard gates interface-specific wrapper type
+    // generation (e.g. static abstract members, indexers). Class mocks always return
+    // Mock<T> and don't need a wrapper type.
     public static string BuildForPartialMock(MockTypeModel model)
     {
         return BuildCore(model, (writer, mockableType, visibility) =>
