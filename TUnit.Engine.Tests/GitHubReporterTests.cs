@@ -10,9 +10,14 @@ public class GitHubReporterTests
 {
     private readonly List<string> _tempFiles = [];
 
-    [After(Test)]
-    public void CleanupAfterTest()
+    [Before(Test)]
+    public void ResetEnvironmentBeforeTest()
     {
+        // The CI pipeline (RunEngineTestsModule) launches this process with
+        // TUNIT_DISABLE_GITHUB_REPORTER=true to prevent the test-runner's own
+        // GitHubReporter from writing to the step summary.  Clear ALL reporter-
+        // related env vars before every test so each test starts from a known
+        // clean state regardless of execution order.
         Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
         Environment.SetEnvironmentVariable("TUNIT_GITHUB_REPORTER_STYLE", null);
@@ -20,6 +25,12 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
         Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
         Environment.SetEnvironmentVariable("GITHUB_SHA", null);
+    }
+
+    [After(Test)]
+    public void CleanupAfterTest()
+    {
+        ResetEnvironmentBeforeTest();
 
         foreach (var file in _tempFiles)
         {
