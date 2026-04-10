@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using TUnit.Core;
 using TUnit.Logging.Microsoft;
@@ -9,23 +8,18 @@ namespace TUnit.AspNetCore.Logging;
 /// A logger that resolves the current test context per log call, supporting shared web application scenarios.
 /// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
 /// and all registered log sinks naturally route the output to the correct test.
-/// The resolution chain is:
-/// <list type="number">
-///   <item>Test context from <see cref="HttpContext.Items"/> (set by <see cref="TUnitTestContextMiddleware"/>)</item>
-///   <item><see cref="TestContext.Current"/> (AsyncLocal fallback)</item>
-///   <item>No-op if no test context is available</item>
-/// </list>
+/// Resolution is delegated to the <see cref="TestContextResolverRegistry"/> (which includes the
+/// <see cref="HttpContextTestContextResolver"/> registered by <see cref="CorrelatedTUnitLoggingExtensions"/>),
+/// then falls back to <see cref="TestContext.Current"/> (AsyncLocal).
 /// </summary>
 public sealed class CorrelatedTUnitLogger : ILogger
 {
     private readonly string _categoryName;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly LogLevel _minLogLevel;
 
-    internal CorrelatedTUnitLogger(string categoryName, IHttpContextAccessor httpContextAccessor, LogLevel minLogLevel)
+    internal CorrelatedTUnitLogger(string categoryName, LogLevel minLogLevel)
     {
         _categoryName = categoryName;
-        _httpContextAccessor = httpContextAccessor;
         _minLogLevel = minLogLevel;
     }
 
@@ -85,15 +79,10 @@ public sealed class CorrelatedTUnitLogger : ILogger
         }
     }
 
-    private TestContext? ResolveTestContext()
+    private static TestContext? ResolveTestContext()
     {
-        // 1. Try to get from HttpContext.Items (set by TUnitTestContextMiddleware)
-        if (_httpContextAccessor.HttpContext?.Items[TUnitTestContextMiddleware.HttpContextKey] is TestContext httpTestContext)
-        {
-            return httpTestContext;
-        }
-
+        // 1. Consult custom resolvers (includes HttpContextTestContextResolver for ASP.NET Core)
         // 2. Fall back to AsyncLocal
-        return TestContext.Current;
+        return TestContextResolverRegistry.Resolve() ?? TestContext.Current;
     }
 }

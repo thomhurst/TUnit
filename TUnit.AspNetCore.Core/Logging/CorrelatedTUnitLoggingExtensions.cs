@@ -14,7 +14,10 @@ public static class CorrelatedTUnitLoggingExtensions
     /// <summary>
     /// Adds correlated TUnit logging to the service collection.
     /// This registers the <see cref="TUnitTestContextMiddleware"/> via an <see cref="IStartupFilter"/>
-    /// and a <see cref="CorrelatedTUnitLoggerProvider"/> that resolves the test context per log call.
+    /// and a <see cref="CorrelatedTUnitLoggerProvider"/> that resolves the test context per log call
+    /// and registers an <see cref="HttpContextTestContextResolver"/> with
+    /// <see cref="TUnit.Core.TestContextResolverRegistry"/> for automatic context resolution
+    /// on ASP.NET Core request-processing threads.
     /// Use with <see cref="TUnitTestIdHandler"/> on the client side to propagate test context.
     /// </summary>
     /// <param name="services">The service collection.</param>
