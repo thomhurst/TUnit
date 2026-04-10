@@ -334,7 +334,6 @@ internal static partial class HtmlReportGenerator
         sb.AppendLine("<span class=\"bar-info\" id=\"filterSummary\" aria-live=\"polite\" aria-atomic=\"true\"></span>");
         sb.AppendLine("</div>");
 
-        // Category filter pills (populated dynamically by JS if categories exist)
         sb.AppendLine("<div class=\"cat-row\" id=\"categoryPills\" role=\"group\" aria-label=\"Filter by category\"></div>");
     }
 
@@ -1258,7 +1257,6 @@ let activeCategories = new Set();
 let renderLimit = 20;
 let kbIdx = -1;
 
-// Collect distinct categories and their test counts
 const catCounts = {};
 groups.forEach(function(g){g.tests.forEach(function(t){
     if(t.categories){t.categories.forEach(function(c){catCounts[c]=(catCounts[c]||0)+1;});}
@@ -1327,7 +1325,7 @@ function matchesFilter(t) {
         } else if (t.status !== activeFilter) return false;
     }
     if (activeCategories.size > 0) {
-        if (!(t.categories || []).some(function(c){ return activeCategories.has(c); })) return false;
+        if (!t.categories || !t.categories.some(function(c){ return activeCategories.has(c); })) return false;
     }
     if (searchText) {
         const q = searchText.toLowerCase();
@@ -1892,10 +1890,7 @@ container.addEventListener('click',function(e){
     const catLink = e.target.closest('.cat-link');
     if(catLink){
         e.stopPropagation();
-        var cat=catLink.getAttribute('data-category');
-        if(activeCategories.has(cat)) activeCategories.delete(cat);
-        else activeCategories.add(cat);
-        buildCatPills();renderLimit=20;render();syncHash();
+        toggleCategory(catLink.getAttribute('data-category'));
         return;
     }
     const hd = e.target.closest('.grp-hd');
@@ -1922,16 +1917,15 @@ filterBtns.addEventListener('click',function(e){
     syncHash();
 });
 
-// Category pill click handler (toggle OR-based multi-select)
+function toggleCategory(cat){
+    if(activeCategories.has(cat)) activeCategories.delete(cat);
+    else activeCategories.add(cat);
+    buildCatPills();renderLimit=20;render();syncHash();
+}
 catRow.addEventListener('click',function(e){
     const btn=e.target.closest('.cat-pill');
     if(!btn)return;
-    const cat=btn.getAttribute('data-category');
-    if(activeCategories.has(cat)){activeCategories.delete(cat);}
-    else{activeCategories.add(cat);}
-    buildCatPills();
-    renderLimit=20;render();
-    syncHash();
+    toggleCategory(btn.getAttribute('data-category'));
 });
 
 searchInput.addEventListener('input',function(){
