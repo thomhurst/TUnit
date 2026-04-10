@@ -2,8 +2,8 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Registry for custom <see cref="ITestContextResolver"/> instances.
-/// Registered resolvers are consulted (in registration order) before the built-in
-/// <c>AsyncLocal</c> chain when determining the current <see cref="Context"/>.
+/// Registered resolvers are consulted (in registration order) as a fallback when the built-in
+/// <c>AsyncLocal</c> chain cannot determine the current <see cref="Context"/>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -44,6 +44,12 @@ public static class TestContextResolverRegistry
         lock (_lock)
         {
             var current = _resolvers;
+
+            if (Array.IndexOf(current, resolver) >= 0)
+            {
+                return;
+            }
+
             var newArray = new ITestContextResolver[current.Length + 1];
             current.CopyTo(newArray, 0);
             newArray[current.Length] = resolver;
@@ -96,10 +102,18 @@ public static class TestContextResolverRegistry
 
         foreach (var resolver in resolvers)
         {
-            var context = resolver.ResolveCurrentTestContext();
-            if (context is not null)
+            try
             {
-                return context;
+                var context = resolver.ResolveCurrentTestContext();
+                if (context is not null)
+                {
+                    return context;
+                }
+            }
+            catch
+            {
+                // Swallow exceptions from user-provided resolvers on the hot path.
+                // A faulty resolver must not crash Console.Write/WriteLine.
             }
         }
 

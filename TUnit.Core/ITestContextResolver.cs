@@ -1,14 +1,15 @@
 namespace TUnit.Core;
 
 /// <summary>
-/// Allows custom logic for resolving which <see cref="TestContext"/> should receive console output,
-/// beyond the built-in <see cref="AsyncLocal{T}"/>-based mechanism.
+/// Allows custom logic for resolving which <see cref="TestContext"/> should receive console output
+/// when the built-in <see cref="AsyncLocal{T}"/>-based mechanism cannot determine the context.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The built-in context resolution uses <c>AsyncLocal&lt;T&gt;</c> which works when code runs on the same
-/// async execution flow as the test. However, it breaks when shared services (e.g., hosted services,
+/// async execution flow as the test. However, it returns <c>null</c> when shared services (e.g., hosted services,
 /// gRPC handlers, message queue consumers) process work on their own thread pool threads.
+/// Registered resolvers act as a fallback, consulted only when the <c>AsyncLocal</c> chain yields no result.
 /// </para>
 /// <para>
 /// Implement this interface and register it via <see cref="TestContextResolverRegistry.Register"/>

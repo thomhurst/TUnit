@@ -13,8 +13,8 @@ public abstract class Context : IContext, IDisposable
     }
 
     public static Context Current =>
-        TestContextResolverRegistry.Resolve() as Context
-        ?? TestContext.Current as Context
+        TestContext.Current as Context
+        ?? TestContextResolverRegistry.Resolve() as Context
         ?? TestBuildContext.Current as Context
         ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context

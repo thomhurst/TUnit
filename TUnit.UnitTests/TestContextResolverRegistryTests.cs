@@ -101,17 +101,16 @@ public class TestContextResolverRegistryTests
     }
 
     [Test]
-    public async Task ContextCurrent_ConsultsResolversBeforeAsyncLocal()
+    public async Task ContextCurrent_AsyncLocalTakesPrecedenceOverResolvers()
     {
-        // Arrange - register a resolver that returns the current test context
-        // even when AsyncLocal is cleared
+        // Arrange - register a resolver, but AsyncLocal should win
         var testContext = TestContext.Current!;
         TestContextResolverRegistry.Register(new FixedResolver(testContext));
 
-        // Act - Context.Current should use our resolver
+        // Act - Context.Current should use AsyncLocal first (since we're on the test thread)
         var result = Context.Current;
 
-        // Assert - should be our test context (from resolver), not some other context
+        // Assert - resolved via AsyncLocal, same reference since both point to current test
         await Assert.That(result).IsSameReferenceAs(testContext);
     }
 
@@ -152,6 +151,39 @@ public class TestContextResolverRegistryTests
     }
 
     [Test]
+    public async Task Register_DuplicateResolver_IsIdempotent()
+    {
+        // Arrange
+        var expectedContext = TestContext.Current!;
+        var resolver = new FixedResolver(expectedContext);
+
+        // Act - register the same instance twice
+        TestContextResolverRegistry.Register(resolver);
+        TestContextResolverRegistry.Register(resolver);
+
+        // Unregister once should remove it completely
+        TestContextResolverRegistry.Unregister(resolver);
+
+        // Assert - no resolvers left, so Resolve returns null
+        await Assert.That(TestContextResolverRegistry.Resolve()).IsNull();
+    }
+
+    [Test]
+    public async Task Resolve_SwallowsResolverExceptions()
+    {
+        // Arrange - a faulty resolver followed by a working one
+        var expectedContext = TestContext.Current!;
+        TestContextResolverRegistry.Register(new ThrowingResolver());
+        TestContextResolverRegistry.Register(new FixedResolver(expectedContext));
+
+        // Act - should skip the throwing resolver and return the second one
+        var result = TestContextResolverRegistry.Resolve();
+
+        // Assert
+        await Assert.That(result).IsSameReferenceAs(expectedContext);
+    }
+
+    [Test]
     public async Task ContextCurrent_FallsBackToAsyncLocal_WhenResolverReturnsNull()
     {
         // Arrange - resolver returns null, so should fall back to AsyncLocal
@@ -168,6 +200,11 @@ public class TestContextResolverRegistryTests
     private class NullResolver : ITestContextResolver
     {
         public TestContext? ResolveCurrentTestContext() => null;
+    }
+
+    private class ThrowingResolver : ITestContextResolver
+    {
+        public TestContext? ResolveCurrentTestContext() => throw new InvalidOperationException("Faulty resolver");
     }
 
     private class FixedResolver : ITestContextResolver
