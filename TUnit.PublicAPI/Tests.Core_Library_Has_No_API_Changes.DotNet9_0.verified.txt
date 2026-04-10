@@ -902,10 +902,6 @@ namespace
     {
          ScopeType { get; }
     }
-    public interface ITestContextResolver
-    {
-        .TestContext? ResolveCurrentTestContext();
-    }
     public interface ITestDefinition { }
     public interface ITestEntrySource
     {
@@ -1412,11 +1408,6 @@ namespace
         public .AsyncEvent<<.TestContext, int>>? OnTestRetry { get; set; }
         public .AsyncEvent<.TestContext>? OnTestSkipped { get; set; }
         public .AsyncEvent<.TestContext>? OnTestStart { get; set; }
-    }
-    public static class TestContextResolverRegistry
-    {
-        public static void Register(.ITestContextResolver resolver) { }
-        public static bool Unregister(.ITestContextResolver resolver) { }
     }
     public class TestDataCombination
     {

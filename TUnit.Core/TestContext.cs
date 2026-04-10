@@ -139,9 +139,7 @@ public partial class TestContext : Context,
     /// </summary>
     /// <remarks>
     /// Use this in protocol handlers (gRPC, MCP, message queue consumers, etc.) after
-    /// extracting the test ID from the incoming request. This is the primary public API
-    /// for correlating background-thread output to a test — prefer this over implementing
-    /// a custom <see cref="ITestContextResolver"/>.
+    /// extracting the test ID from the incoming request.
     /// </remarks>
     /// <example>
     /// <code>

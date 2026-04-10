@@ -8,9 +8,8 @@ namespace TUnit.AspNetCore.Logging;
 /// A logger that resolves the current test context per log call, supporting shared web application scenarios.
 /// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
 /// and all registered log sinks naturally route the output to the correct test.
-/// Resolution checks <see cref="TestContext.Current"/> (AsyncLocal) first, then falls back to the
-/// <see cref="TestContextResolverRegistry"/> (which includes the <see cref="HttpContextTestContextResolver"/>
-/// registered by <see cref="CorrelatedTUnitLoggingExtensions"/>).
+/// Resolution uses <see cref="TestContext.Current"/> (AsyncLocal), which is set by the middleware via
+/// <see cref="TestContext.MakeCurrent"/>.
 /// </summary>
 public sealed class CorrelatedTUnitLogger : ILogger
 {
@@ -84,6 +83,6 @@ public sealed class CorrelatedTUnitLogger : ILogger
 
     private static TestContext? ResolveTestContext()
     {
-        return TestContext.Current ?? TestContextResolverRegistry.Resolve();
+        return TestContext.Current;
     }
 }

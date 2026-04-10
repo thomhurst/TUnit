@@ -19,7 +19,6 @@ public abstract class Context : IContext, IDisposable
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
-        ?? TestContextResolverRegistry.Resolve() as Context
         ?? GlobalContext.Current;
 
     private readonly StringBuilder _outputBuilder = new();
