@@ -28,6 +28,8 @@ public static class TestApplicationBuilderExtensions
         var htmlReporter = new Reporters.Html.HtmlReporter(extension);
         var htmlReporterCommandProvider = new HtmlReporterCommandProvider(extension);
 
+        htmlReporter.SetGitHubReporter(githubReporter);
+
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
             (capabilities, serviceProvider) => new TUnitTestFramework(extension, serviceProvider, capabilities));

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -24,6 +25,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     private const long MaxFileSizeInBytes = EngineDefaults.GitHubSummaryMaxFileSizeBytes;
     private string _outputSummaryFilePath = null!;
     private GitHubReporterStyle _reporterStyle = GitHubReporterStyle.Collapsible;
+    private Stopwatch? _runStopwatch;
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -85,6 +87,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
+        _runStopwatch = Stopwatch.StartNew();
         return Task.CompletedTask;
     }
 
@@ -133,108 +136,288 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var inProgress = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
+        _runStopwatch?.Stop();
+        var elapsed = _runStopwatch?.Elapsed;
+
+        var hasFailures = failed.Length > 0 || timeout.Length > 0 || cancelled.Length > 0;
+        var statusEmoji = hasFailures ? "\u274C" : "\u2705";
+
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name} ({targetFramework})");
+
+        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+
+        if (!string.IsNullOrEmpty(ArtifactUrl))
+        {
+            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework}) [(View Report)]({ArtifactUrl})");
+        }
+        else
+        {
+            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework})");
+        }
 
         if (!string.IsNullOrEmpty(Filter))
         {
             stringBuilder.AppendLine($"#### Filter: `{Filter}`");
         }
 
+        var totalCount = last.Count;
+        var passRate = totalCount > 0 ? (double)passedCount / totalCount * 100 : 0;
+
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Test Count | Status |");
-        stringBuilder.AppendLine("| --- | --- |");
-        stringBuilder.AppendLine($"| {passedCount} | Passed |");
-        stringBuilder.AppendLine($"| {failed.Length} | Failed |");
+        stringBuilder.AppendLine($"**{totalCount} tests** completed in **{FormatDuration(elapsed)}** \u2014 **{passRate:F1}%** passed");
+        stringBuilder.AppendLine();
+
+        // Only show the segment breakdown when there's more than just "N passed"
+        if (passedCount != totalCount)
+        {
+            var segments = new List<string> { $"\u2705 {passedCount} passed" };
+
+            if (failed.Length > 0)
+            {
+                segments.Add($"\u274C {failed.Length} failed");
+            }
+
+            if (skipped.Length > 0)
+            {
+                segments.Add($"\u23ED\uFE0F {skipped.Length} skipped");
+            }
+
+            if (timeout.Length > 0)
+            {
+                segments.Add($"\u23F1\uFE0F {timeout.Length} timed out");
+            }
+
+            if (cancelled.Length > 0)
+            {
+                segments.Add($"\uD83D\uDEAB {cancelled.Length} cancelled");
+            }
+
+            if (inProgress.Length > 0)
+            {
+                segments.Add($"\u26A0\uFE0F {inProgress.Length} in progress");
+            }
+
+            stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
+        }
+
+        // Detect flaky tests (passed after retry)
+        var flakyTests = new List<(string Name, int Attempts, TimeSpan? Duration)>();
+        foreach (var kvp in _updates)
+        {
+            var finalStateCount = 0;
+            foreach (var update in kvp.Value)
+            {
+                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+                {
+                    finalStateCount++;
+                }
+            }
+
+            if (finalStateCount > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
+            {
+                var props = lastUpdate.TestNode.Properties.AsEnumerable();
+                if (props.Any(p => p is PassedTestNodeStateProperty))
+                {
+                    var name = GetTestDisplayName(lastUpdate.TestNode);
+                    var timing = props.OfType<TimingProperty>().FirstOrDefault();
+                    flakyTests.Add((name, finalStateCount, timing?.GlobalTiming.Duration));
+                }
+            }
+        }
+
+        if (flakyTests.Count > 0)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"> **\u26a0\ufe0f {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
+            foreach (var (name, attempts, duration) in flakyTests)
+            {
+                stringBuilder.AppendLine($"> - `{name}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
+            }
+        }
 
         if (skipped.Length > 0)
         {
-            stringBuilder.AppendLine($"| {skipped.Length} | Skipped |");
+            var skipGroups = skipped
+                .Select(x => x.Value.TestNode.Properties.AsEnumerable()
+                    .OfType<SkippedTestNodeStateProperty>().FirstOrDefault()?.Explanation ?? "No reason provided")
+                .GroupBy(reason => reason)
+                .OrderByDescending(g => g.Count());
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("<details>");
+            stringBuilder.AppendLine($"<summary>\u23ed\ufe0f {skipped.Length} skipped {(skipped.Length == 1 ? "test" : "tests")}</summary>");
+            stringBuilder.AppendLine();
+            foreach (var group in skipGroups)
+            {
+                stringBuilder.AppendLine($"- **{group.Count()}** \u2014 {group.Key}");
+            }
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("</details>");
         }
 
-        if (timeout.Length > 0)
+        if (ShowArtifactUploadTip)
         {
-            stringBuilder.AppendLine($"| {timeout.Length} | Timed Out |");
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
         }
 
-        if (cancelled.Length > 0)
+        if (failed.Length > 0)
         {
-            stringBuilder.AppendLine($"| {cancelled.Length} | Cancelled |");
-        }
+            var failureGroups = failed
+                .Select(x =>
+                {
+                    var state = x.Value.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
+                    var exceptionType = state switch
+                    {
+                        FailedTestNodeStateProperty f => f.Exception?.GetType().Name ?? "Unknown",
+                        ErrorTestNodeStateProperty e => e.Exception?.GetType().Name ?? "Unknown",
+                        _ => "Unknown"
+                    };
+                    var method = x.Value.TestNode.Properties.AsEnumerable()
+                        .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+                    return (ExceptionType: exceptionType, ClassName: method?.TypeName ?? "Unknown");
+                })
+                .GroupBy(x => x.ExceptionType)
+                .OrderByDescending(g => g.Count())
+                .Take(3);
 
-        if (inProgress.Length > 0)
-        {
-            stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
+            var diagParts = failureGroups.Select(g =>
+            {
+                var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
+                return $"{g.Count()} \u00d7 `{g.Key}` in `{topClass.Key}`";
+            });
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
         }
 
         if (passedCount == last.Count)
         {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("---");
             return WriteFile(stringBuilder.ToString());
         }
 
-        // Build the details table
-        var detailsBuilder = new StringBuilder();
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine("### Details");
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
-        detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
-        detailsBuilder.AppendLine("<tbody>");
+        // Cache env vars for source links (read once, not per test)
+        var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
+        var githubWorkspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
+        var githubServerUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com";
+
+        // Separate failures from other non-passing tests
+        var failureMessages = new List<(string Name, string? SourceLink, string Details, string Duration)>();
+        var otherMessages = new List<(string Name, string Status, string Details, string Duration)>();
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
-            var testMethodIdentifier = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
-                .OfType<TestMethodIdentifierProperty>()
-                .FirstOrDefault();
+            var props = testNodeUpdateMessage.TestNode.Properties.AsEnumerable();
+            if (props.Any(p => p is PassedTestNodeStateProperty)) continue;
 
-            var className = testMethodIdentifier?.TypeName;
-            var displayName = testNodeUpdateMessage.TestNode.DisplayName;
-            var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
+            var name = GetTestDisplayName(testNodeUpdateMessage.TestNode);
+            var stateProperty = props.FirstOrDefault(p => p is TestNodeStateProperty);
+            var timingProp = props.OfType<TimingProperty>().FirstOrDefault();
+            var duration = FormatDuration(timingProp?.GlobalTiming.Duration);
 
-            var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+            var isFailed = stateProperty is FailedTestNodeStateProperty or ErrorTestNodeStateProperty
+                or TimeoutTestNodeStateProperty;
 
-            if (passedProperty != null)
+            if (isFailed)
             {
-                continue;
+                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace, githubServerUrl);
+                var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
+                failureMessages.Add((name, sourceLink, details, duration));
+            }
+            else
+            {
+                var status = GetStatus(stateProperty);
+                var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
+                otherMessages.Add((name, status, details, duration));
+            }
+        }
+
+        // Show top failures inline
+        const int maxInlineFailures = 5;
+        if (failureMessages.Count > 0)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("#### Failures");
+            stringBuilder.AppendLine();
+
+            var inlineCount = Math.Min(failureMessages.Count, maxInlineFailures);
+            for (int i = 0; i < inlineCount; i++)
+            {
+                var (name, sourceLink, details, duration) = failureMessages[i];
+                var sourcePart = sourceLink is not null ? $" \u2014 {sourceLink}" : "";
+                stringBuilder.AppendLine("<details>");
+                stringBuilder.AppendLine($"<summary><code>{name}</code> ({duration}){sourcePart}</summary>");
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine(details);
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("</details>");
             }
 
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
-
-            var status = GetStatus(stateProperty);
-
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
-
-            var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
-
-            var duration = timingProperty?.GlobalTiming.Duration;
-
-            detailsBuilder.AppendLine("<tr>");
-            detailsBuilder.AppendLine($"<td>{name}</td>");
-            detailsBuilder.AppendLine($"<td>{status}</td>");
-            detailsBuilder.AppendLine($"<td>{details}</td>");
-            detailsBuilder.AppendLine($"<td>{duration}</td>");
-            detailsBuilder.AppendLine("</tr>");
+            if (failureMessages.Count > maxInlineFailures)
+            {
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"*...and {failureMessages.Count - maxInlineFailures} more failures*");
+            }
         }
-        detailsBuilder.AppendLine("</tbody></table>");
 
-        // Wrap in collapsible section if using collapsible style
-        if (_reporterStyle == GitHubReporterStyle.Collapsible)
+        // Build the full details table for remaining items
+        var remainingFailures = failureMessages.Count > maxInlineFailures
+            ? failureMessages.Skip(maxInlineFailures).ToList()
+            : new List<(string Name, string? SourceLink, string Details, string Duration)>();
+        var hasRemainingDetails = remainingFailures.Count > 0 || otherMessages.Count > 0;
+
+        if (hasRemainingDetails)
         {
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("<details>");
-            stringBuilder.AppendLine("<summary>📊 Test Details (click to expand)</summary>");
-            stringBuilder.Append(detailsBuilder.ToString());
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("</details>");
-            stringBuilder.AppendLine();
+            var detailsBuilder = new StringBuilder();
+            detailsBuilder.AppendLine();
+            detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
+            detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
+            detailsBuilder.AppendLine("<tbody>");
+
+            foreach (var (name, sourceLink, details, duration) in remainingFailures)
+            {
+                detailsBuilder.AppendLine("<tr>");
+                detailsBuilder.AppendLine($"<td>{name}</td>");
+                detailsBuilder.AppendLine("<td>Failed</td>");
+                detailsBuilder.AppendLine($"<td>{details}</td>");
+                detailsBuilder.AppendLine($"<td>{duration}</td>");
+                detailsBuilder.AppendLine("</tr>");
+            }
+
+            foreach (var (name, status, details, duration) in otherMessages)
+            {
+                detailsBuilder.AppendLine("<tr>");
+                detailsBuilder.AppendLine($"<td>{name}</td>");
+                detailsBuilder.AppendLine($"<td>{status}</td>");
+                detailsBuilder.AppendLine($"<td>{details}</td>");
+                detailsBuilder.AppendLine($"<td>{duration}</td>");
+                detailsBuilder.AppendLine("</tr>");
+            }
+
+            detailsBuilder.AppendLine("</tbody></table>");
+
+            if (_reporterStyle == GitHubReporterStyle.Collapsible)
+            {
+                var totalNonPassing = remainingFailures.Count + otherMessages.Count;
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("<details>");
+                stringBuilder.AppendLine($"<summary>All non-passing tests ({totalNonPassing} total)</summary>");
+                stringBuilder.Append(detailsBuilder.ToString());
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("</details>");
+            }
+            else
+            {
+                stringBuilder.Append(detailsBuilder.ToString());
+            }
         }
-        else
-        {
-            // Full style - append details directly
-            stringBuilder.Append(detailsBuilder.ToString());
-        }
+
+        stringBuilder.AppendLine();
+        stringBuilder.AppendLine("---");
 
         return WriteFile(stringBuilder.ToString());
     }
@@ -368,10 +551,63 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         };
     }
 
+    private static string GetTestDisplayName(TestNode testNode)
+    {
+        var testMethodIdentifier = testNode.Properties.AsEnumerable()
+            .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+        var className = testMethodIdentifier?.TypeName;
+        var displayName = testNode.DisplayName;
+        return string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
+    }
+
+    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace, string serverUrl)
+    {
+        var fileLocation = testNode.Properties.AsEnumerable()
+            .OfType<TestFileLocationProperty>().FirstOrDefault();
+        if (fileLocation is null) return null;
+
+        if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha)) return null;
+
+        var filePath = fileLocation.FilePath.Replace('\\', '/');
+
+        // Prefer GITHUB_WORKSPACE for reliable path stripping; fall back to repo name matching
+        if (!string.IsNullOrEmpty(workspace) && filePath.StartsWith(workspace!, StringComparison.OrdinalIgnoreCase))
+        {
+            filePath = filePath[workspace!.Length..].TrimStart('/');
+        }
+        else
+        {
+            var repoName = repo!.Split('/').LastOrDefault() ?? "";
+            var repoIndex = filePath.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
+            if (repoIndex >= 0)
+            {
+                filePath = filePath[(repoIndex + repoName.Length + 2)..];
+            }
+        }
+
+        var line = fileLocation.LineSpan.Start.Line + 1; // 0-based to 1-based
+        var fileName = Path.GetFileName(fileLocation.FilePath);
+        return $"[{fileName}:{line}]({serverUrl.TrimEnd('/')}/{repo}/blob/{sha}/{filePath}#L{line})";
+    }
+
     public string? Filter { get; set; }
+
+    // Set by HtmlReporter during OnTestSessionFinishingAsync, which MTP invokes before AfterRunAsync.
+    internal string? ArtifactUrl { get; set; }
+    internal bool ShowArtifactUploadTip { get; set; }
 
     internal void SetReporterStyle(GitHubReporterStyle style)
     {
         _reporterStyle = style;
     }
+
+    private static string FormatDuration(TimeSpan? duration) => duration switch
+    {
+        null => "-",
+        { TotalMilliseconds: < 1 } => "< 1ms",
+        { TotalSeconds: < 1 } d => $"{d.TotalMilliseconds:F0}ms",
+        { TotalMinutes: < 1 } d => $"{d.TotalSeconds:F1}s",
+        { TotalHours: < 1 } d => $"{d.Minutes}m {d.Seconds}s",
+        var d => $"{(int)d.Value.TotalHours}h {d.Value.Minutes}m"
+    };
 }
