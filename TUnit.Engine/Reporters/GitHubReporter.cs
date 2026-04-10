@@ -298,6 +298,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         if (passedCount == last.Count)
         {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("---");
             return WriteFile(stringBuilder.ToString());
         }
 
@@ -417,6 +419,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 stringBuilder.Append(detailsBuilder.ToString());
             }
         }
+
+        stringBuilder.AppendLine();
+        stringBuilder.AppendLine("---");
 
         return WriteFile(stringBuilder.ToString());
     }
