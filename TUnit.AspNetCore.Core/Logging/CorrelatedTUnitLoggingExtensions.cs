@@ -22,7 +22,7 @@ public static class CorrelatedTUnitLoggingExtensions
         this IServiceCollection services)
     {
         services.AddSingleton<IStartupFilter>(new TUnitTestContextStartupFilter());
-        services.AddSingleton<ILoggerProvider>(new SynchronousTUnitLoggerProvider());
+        services.AddSingleton<ILoggerProvider>(new CorrelatedTUnitLoggerProvider());
 
         return services;
     }

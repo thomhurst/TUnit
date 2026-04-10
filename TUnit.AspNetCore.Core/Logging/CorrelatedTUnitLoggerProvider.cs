@@ -9,18 +9,18 @@ namespace TUnit.AspNetCore.Logging;
 /// that does not inherit the <c>AsyncLocal</c> set by <see cref="TestContext.MakeCurrent"/>.
 /// By writing on the request thread, TUnit's console interceptor can route the output to the correct test.
 /// </summary>
-internal sealed class SynchronousTUnitLoggerProvider : ILoggerProvider
+internal sealed class CorrelatedTUnitLoggerProvider : ILoggerProvider
 {
-    public ILogger CreateLogger(string categoryName) => new SynchronousTUnitLogger(categoryName);
+    public ILogger CreateLogger(string categoryName) => new CorrelatedTUnitLogger(categoryName);
 
     public void Dispose() { }
 }
 
-internal sealed class SynchronousTUnitLogger : ILogger
+internal sealed class CorrelatedTUnitLogger : ILogger
 {
     private readonly string _categoryName;
 
-    internal SynchronousTUnitLogger(string categoryName) => _categoryName = categoryName;
+    internal CorrelatedTUnitLogger(string categoryName) => _categoryName = categoryName;
 
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
