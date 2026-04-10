@@ -1374,6 +1374,10 @@ function fmtTime(iso) {
     return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3});
 }
 
+// Strip anything that isn't a valid CSS identifier character before using
+// a value as a class name — guards against future status values with spaces/quotes.
+function safeClass(s) { return (s||'').replace(/[^a-zA-Z0-9_-]/g,''); }
+
 const copyIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>';
 const checkIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>';
 
@@ -2065,7 +2069,7 @@ function renderFailureClusters() {
         h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
         c.tests.forEach(function(f){
             h += '<div class="fc-test" data-scroll-tid="'+esc(f.t.id)+'">';
-            h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
+            h += '<span class="t-badge '+safeClass(f.t.status)+'">'+esc(f.t.status)+'</span>';
             h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
             h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
             h += '<span class="fc-test-dur">'+fmt(f.t.durationMs)+'</span>';
@@ -2150,7 +2154,7 @@ function renderParallelTimeline() {
         const top = f.lane * 22;
         const isFail = f.t.status==='failed'||f.t.status==='error'||f.t.status==='timedOut';
         const isSlow = f.t.durationMs >= p90 && p90 > 0;
-        h += '<div class="pt-bar '+f.t.status+'" style="left:'+left+'%;width:'+width+'%;top:'+top+'px" data-pt-idx="'+idx+'" data-pt-tid="'+esc(f.t.id)+'"';
+        h += '<div class="pt-bar '+safeClass(f.t.status)+'" style="left:'+left+'%;width:'+width+'%;top:'+top+'px" data-pt-idx="'+idx+'" data-pt-tid="'+esc(f.t.id)+'"';
         if (isFail) h += ' data-pt-fail="1"';
         if (isSlow) h += ' data-pt-slow="1"';
         h += '></div>';
@@ -2165,26 +2169,28 @@ function renderParallelTimeline() {
     h += '</div>';
     h += '</div></div></div></div>';
     sec.innerHTML = h;
-    // Tooltip + interaction
+    // Tooltip + interaction — create eagerly so re-renders don't orphan old elements
     const ptData = allTests;
-    let tip = null;
+    const tip = document.createElement('div');
+    tip.className = 'pt-tooltip';
+    tip.style.display = 'none';
+    document.body.appendChild(tip);
     sec.addEventListener('mouseover', function(e){
         const bar = e.target.closest('.pt-bar');
         if (!bar) return;
         const idx = parseInt(bar.dataset.ptIdx, 10);
         const f = ptData[idx];
         if (!f) return;
-        if (!tip) { tip = document.createElement('div'); tip.className = 'pt-tooltip'; document.body.appendChild(tip); }
         tip.innerHTML = '<div class="pt-tip-name">'+esc(f.t.displayName)+'</div>'
             + '<div class="pt-tip-class">'+esc(f.cls)+'</div>'
             + '<div class="pt-tip-info">'+esc(f.t.status)+' \u00b7 '+fmt(f.t.durationMs)+' \u00b7 lane '+(f.lane+1)+'</div>';
         tip.style.display = 'block';
     });
     sec.addEventListener('mousemove', function(e){
-        if (tip) { tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 10) + 'px'; }
+        tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 10) + 'px';
     });
     sec.addEventListener('mouseleave', function(){
-        if (tip) tip.style.display = 'none';
+        tip.style.display = 'none';
     });
     sec.addEventListener('click', function(e){
         const bar = e.target.closest('.pt-bar');
