@@ -1119,7 +1119,6 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 .pt-filter-pills{display:flex;gap:4px}
 .pt-canvas{position:relative;overflow-x:auto;overflow-y:hidden;min-height:80px}
 .pt-chart{position:relative;min-height:80px}
-.pt-lane{position:relative;height:20px;margin-bottom:2px}
 .pt-bar{position:absolute;top:2px;height:16px;border-radius:3px;min-width:3px;cursor:pointer;transition:filter .15s,opacity .15s}
 .pt-bar:hover{filter:brightness(1.2);z-index:1}
 .pt-bar.passed{background:linear-gradient(90deg,rgba(52,211,153,.7),var(--emerald))}
@@ -2046,7 +2045,7 @@ function renderFailureClusters() {
                 if (l.startsWith('at ')) { frame = l.substring(3).replace(/\s+in\s+.+$/, '').replace(/\[.+\]/, '').trim(); break; }
             }
         }
-        const key = type + '||' + frame;
+        const key = JSON.stringify([type, frame]);
         if (!clusters[key]) clusters[key] = {type: type, frame: frame, tests: [], msg: ex.message || ''};
         clusters[key].tests.push(f);
     });
@@ -2056,7 +2055,7 @@ function renderFailureClusters() {
     let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Failure Clusters ('+sorted.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
     sorted.forEach(function(c, ci){
         const truncMsg = c.msg.length > 100 ? c.msg.substring(0,100)+'\u2026' : c.msg;
-        h += '<div class="fc-cluster" data-fci="'+ci+'">';
+        h += '<div class="fc-cluster">';
         h += '<div class="fc-hd">';
         h += '<span class="fc-type" title="'+esc(c.type)+'">'+esc(c.type)+'</span>';
         if (c.frame) h += '<span class="fc-frame" title="'+esc(c.frame)+'">'+esc(c.frame)+'</span>';
@@ -2065,7 +2064,7 @@ function renderFailureClusters() {
         if (truncMsg) h += '<div class="fc-msg" title="'+esc(c.msg)+'">'+esc(truncMsg)+'</div>';
         h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
         c.tests.forEach(function(f){
-            h += '<div class="fc-test" data-scroll-tid="'+f.t.id+'">';
+            h += '<div class="fc-test" data-scroll-tid="'+esc(f.t.id)+'">';
             h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
             h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
             h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
@@ -2106,7 +2105,7 @@ function renderParallelTimeline() {
     // Sort by start time
     allTests.sort(function(a,b){ return a.start - b.start || a.end - b.end; });
     const globalMin = allTests[0].start;
-    const globalMax = Math.max.apply(null, allTests.map(function(f){ return f.end; }));
+    const globalMax = allTests.reduce(function(m, f){ return Math.max(m, f.end); }, -Infinity);
     const totalDur = globalMax - globalMin || 1;
     // Assign lanes (greedy algorithm: assign to earliest-available lane)
     const lanes = []; // each lane tracks its end time
@@ -2141,16 +2140,17 @@ function renderParallelTimeline() {
     h += '</div>';
     // Chart
     h += '<div class="pt-canvas"><div class="pt-chart" style="height:'+(maxConcurrency * 22)+'px">';
-    // Compute p90 duration for "slow" highlighting
+    // Compute p90 duration for "slow" highlighting (ensure at least top 2 qualify with small counts)
     const durs = allTests.map(function(f){ return f.t.durationMs; }).sort(function(a,b){ return a - b; });
-    const p90 = durs[Math.floor(durs.length * 0.9)] || 0;
+    const p90Idx = Math.min(Math.floor(durs.length * 0.9), durs.length - 2);
+    const p90 = p90Idx >= 0 ? (durs[p90Idx] || 0) : 0;
     allTests.forEach(function(f, idx){
         const left = ((f.start - globalMin) / totalDur * 100).toFixed(3);
         const width = Math.max(((f.end - f.start) / totalDur * 100), 0.15).toFixed(3);
         const top = f.lane * 22;
         const isFail = f.t.status==='failed'||f.t.status==='error'||f.t.status==='timedOut';
         const isSlow = f.t.durationMs >= p90 && p90 > 0;
-        h += '<div class="pt-bar '+f.t.status+'" style="left:'+left+'%;width:'+width+'%;top:'+top+'px" data-pt-idx="'+idx+'" data-pt-tid="'+f.t.id+'"';
+        h += '<div class="pt-bar '+f.t.status+'" style="left:'+left+'%;width:'+width+'%;top:'+top+'px" data-pt-idx="'+idx+'" data-pt-tid="'+esc(f.t.id)+'"';
         if (isFail) h += ' data-pt-fail="1"';
         if (isSlow) h += ' data-pt-slow="1"';
         h += '></div>';
@@ -2183,9 +2183,8 @@ function renderParallelTimeline() {
     sec.addEventListener('mousemove', function(e){
         if (tip) { tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 10) + 'px'; }
     });
-    sec.addEventListener('mouseout', function(e){
-        const bar = e.target.closest('.pt-bar');
-        if (bar && tip) { tip.style.display = 'none'; }
+    sec.addEventListener('mouseleave', function(){
+        if (tip) tip.style.display = 'none';
     });
     sec.addEventListener('click', function(e){
         const bar = e.target.closest('.pt-bar');
