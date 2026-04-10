@@ -1277,8 +1277,10 @@ function buildCatPills(){
     var showing = catExpanded ? catNames : catNames.slice(0, catLimit);
     showing.forEach(function(c){
         var btn = document.createElement('button');
-        btn.className = 'pill cat-pill' + (activeCategories.has(c) ? ' active' : '');
+        var isActive = activeCategories.has(c);
+        btn.className = 'pill cat-pill' + (isActive ? ' active' : '');
         btn.setAttribute('data-category', c);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
         btn.textContent = c + ' ';
         var cnt = document.createElement('span');
         cnt.className='cat-count';
@@ -1301,7 +1303,6 @@ function buildCatPills(){
     }
     catRow.classList.add('visible');
 }
-if(catNames.length > 0) buildCatPills();
 
 const spansByTrace = {};
 const bySpanId = {};
@@ -1776,7 +1777,7 @@ function syncHash() {
     if (sortMode !== 'default') p.push('sort=' + encodeURIComponent(sortMode));
     if (searchText) p.push('search=' + encodeURIComponent(searchText));
     if (groupMode !== 'class') p.push('group=' + encodeURIComponent(groupMode));
-    if (activeCategories.size > 0) p.push('category=' + encodeURIComponent(Array.from(activeCategories).join(',')));
+    if (activeCategories.size > 0) p.push('category=' + Array.from(activeCategories).map(encodeURIComponent).join(','));
     history.replaceState(null, '', p.length ? '#' + p.join('&') : location.pathname);
 }
 
@@ -1790,12 +1791,16 @@ function loadFromHash() {
         const eq = pair.indexOf('=');
         if (eq < 0) return;
         const k = decodeURIComponent(pair.substring(0, eq));
-        const v = decodeURIComponent(pair.substring(eq + 1));
-        if (k === 'filter') activeFilter = v;
-        else if (k === 'sort') sortMode = v;
-        else if (k === 'search') { searchText = v; searchInput.value = v; clearBtn.style.display = v ? 'block' : 'none'; }
-        else if (k === 'group') groupMode = v;
-        else if (k === 'category') { v.split(',').forEach(function(c){ if(c) activeCategories.add(c); }); }
+        const rawV = pair.substring(eq + 1);
+        if (k === 'category') {
+            rawV.split(',').forEach(function(c){ c = decodeURIComponent(c); if(c && catCounts[c]) activeCategories.add(c); });
+        } else {
+            const v = decodeURIComponent(rawV);
+            if (k === 'filter') activeFilter = v;
+            else if (k === 'sort') sortMode = v;
+            else if (k === 'search') { searchText = v; searchInput.value = v; clearBtn.style.display = v ? 'block' : 'none'; }
+            else if (k === 'group') groupMode = v;
+        }
     });
     // Sync button active states
     filterBtns.querySelectorAll('.pill').forEach(function(b) {
@@ -1813,7 +1818,6 @@ function loadFromHash() {
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-checked', isActive ? 'true' : 'false');
     });
-    if(activeCategories.size > 0) buildCatPills();
 }
 
 let lazyObs = null;
@@ -1889,7 +1893,8 @@ container.addEventListener('click',function(e){
     if(catLink){
         e.stopPropagation();
         var cat=catLink.getAttribute('data-category');
-        if(!activeCategories.has(cat)) activeCategories.add(cat);
+        if(activeCategories.has(cat)) activeCategories.delete(cat);
+        else activeCategories.add(cat);
         buildCatPills();renderLimit=20;render();syncHash();
         return;
     }
@@ -2000,6 +2005,7 @@ document.documentElement.setAttribute('data-theme', initTheme);
 document.getElementById('globalTimeline').innerHTML = renderGlobalTimeline();
 
 loadFromHash();
+if(catNames.length > 0) buildCatPills();
 render();
 renderFailedSection();
 renderFailureClusters();
