@@ -303,6 +303,11 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return WriteFile(stringBuilder.ToString());
         }
 
+        // Cache env vars for source links (read once, not per test)
+        var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
+        var githubWorkspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
+
         // Separate failures from other non-passing tests
         var failureMessages = new List<(string Name, string? SourceLink, string Details, string Duration)>();
         var otherMessages = new List<(string Name, string Status, string Details, string Duration)>();
@@ -328,7 +333,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             if (isFailed)
             {
-                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode);
+                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace);
                 var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
                 failureMessages.Add((name, sourceLink, details, duration));
             }
@@ -406,7 +411,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             if (_reporterStyle == GitHubReporterStyle.Collapsible)
             {
-                var totalNonPassing = failureMessages.Count + otherMessages.Count;
+                var totalNonPassing = remainingFailures.Count + otherMessages.Count;
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine("<details>");
                 stringBuilder.AppendLine($"<summary>All non-passing tests ({totalNonPassing} total)</summary>");
@@ -555,22 +560,29 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         };
     }
 
-    private static string? GetSourceLink(TestNode testNode)
+    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace)
     {
         var fileLocation = testNode.Properties.AsEnumerable()
             .OfType<TestFileLocationProperty>().FirstOrDefault();
         if (fileLocation is null) return null;
 
-        var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-        var sha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
         if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha)) return null;
 
         var filePath = fileLocation.FilePath.Replace('\\', '/');
-        var repoName = repo.Split('/').LastOrDefault() ?? "";
-        var repoIndex = filePath.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
-        if (repoIndex >= 0)
+
+        // Prefer GITHUB_WORKSPACE for reliable path stripping; fall back to repo name matching
+        if (!string.IsNullOrEmpty(workspace) && filePath.StartsWith(workspace!, StringComparison.OrdinalIgnoreCase))
         {
-            filePath = filePath[(repoIndex + repoName.Length + 2)..];
+            filePath = filePath[workspace!.Length..].TrimStart('/');
+        }
+        else
+        {
+            var repoName = repo!.Split('/').LastOrDefault() ?? "";
+            var repoIndex = filePath.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
+            if (repoIndex >= 0)
+            {
+                filePath = filePath[(repoIndex + repoName.Length + 2)..];
+            }
         }
 
         var line = fileLocation.LineSpan.Start.Line + 1; // 0-based to 1-based
@@ -596,6 +608,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         { TotalSeconds: < 1 } d => $"{d.TotalMilliseconds:F0}ms",
         { TotalMinutes: < 1 } d => $"{d.TotalSeconds:F1}s",
         { TotalHours: < 1 } d => $"{d.Minutes}m {d.Seconds}s",
-        var d => $"{d.Value.TotalHours:F0}h {d.Value.Minutes}m"
+        var d => $"{(int)d.Value.TotalHours}h {d.Value.Minutes}m"
     };
 }
