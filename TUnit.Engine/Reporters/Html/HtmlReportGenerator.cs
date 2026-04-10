@@ -1488,11 +1488,12 @@ function renderTrace(tid, rootSpanId) {
     let sp = getDescendants(allSpans, rootSpanId);
     if (!sp.length) return '';
     // If the only direct child of the test case is "test body", the span itself is
-    // redundant — remove it and re-parent its children directly under the test case
+    // redundant — remove it and re-parent its children directly under the test case.
+    // Note: 'test body' must match TUnitActivitySource.SpanTestBody in C#.
     const directChildren = sp.filter(s => s.parentSpanId === rootSpanId);
     if (directChildren.length === 1 && directChildren[0].name === 'test body') {
         const tbId = directChildren[0].spanId;
-        sp = sp.filter(s => s.spanId !== tbId).map(s => s.parentSpanId === tbId ? Object.assign({}, s, {parentSpanId: rootSpanId}) : s);
+        sp = sp.filter(s => s.spanId !== tbId).map(s => s.parentSpanId === tbId ? {...s, parentSpanId: rootSpanId} : s);
     }
     if (sp.length <= 1) return '';
     // Include the parent suite span so the test bar is shown relative to the class duration
