@@ -5,11 +5,10 @@ using TUnit.Logging.Microsoft;
 namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
-/// A logger that resolves the current test context per log call, supporting shared web application scenarios.
-/// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
-/// and all registered log sinks naturally route the output to the correct test.
-/// Resolution uses <see cref="TestContext.Current"/> (AsyncLocal), which is set by the middleware via
-/// <see cref="TestContext.MakeCurrent"/>.
+/// A logger that routes output to the current test via <see cref="TestContext.Current"/> (AsyncLocal),
+/// which is set by the middleware via <see cref="TestContext.MakeCurrent"/>.
+/// Writes via <see cref="Console"/> so the console interceptor and all registered log sinks
+/// naturally route the output to the correct test.
 /// </summary>
 public sealed class CorrelatedTUnitLogger : ILogger
 {
@@ -41,7 +40,7 @@ public sealed class CorrelatedTUnitLogger : ILogger
             return;
         }
 
-        var testContext = ResolveTestContext();
+        var testContext = TestContext.Current;
 
         if (testContext is null)
         {
@@ -53,13 +52,6 @@ public sealed class CorrelatedTUnitLogger : ILogger
         if (TUnitLoggingRegistry.PerTestLoggingActive.ContainsKey(testContext.Id))
         {
             return;
-        }
-
-        // Set the current test context so the console interceptor routes output
-        // to the correct test's sinks (test output, IDE real-time, console)
-        if (TestContext.Current != testContext)
-        {
-            TestContext.Current = testContext;
         }
 
         var message = formatter(state, exception);
@@ -79,10 +71,5 @@ public sealed class CorrelatedTUnitLogger : ILogger
         {
             Console.WriteLine(formattedMessage);
         }
-    }
-
-    private static TestContext? ResolveTestContext()
-    {
-        return TestContext.Current;
     }
 }
