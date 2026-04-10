@@ -2068,32 +2068,32 @@ if(data.summary.passed===data.summary.total&&data.summary.total>0){
 // ── Feature 11: Minimap Sidebar Navigator ──────────
 function updateMinimap(allDisplayGroups) {
     if (!mmToggle || !mmContent) return;
-    var visibleGroups = [];
+    const visibleGroups = [];
     allDisplayGroups.forEach(function(g, idx) {
-        var ft = g.tests.filter(matchesFilter);
+        const ft = g.tests.filter(matchesFilter);
         if (ft.length) visibleGroups.push({group: g, tests: ft, counts: countStatuses(ft), dgIdx: idx});
     });
     mmToggle.classList.toggle('visible', visibleGroups.length > 10);
-    var maxTests = 0;
+    let maxTests = 0;
     visibleGroups.forEach(function(item) {
         if (item.tests.length > maxTests) maxTests = item.tests.length;
     });
-    var h = '';
+    let h = '';
     visibleGroups.forEach(function(item) {
-        var c = item.counts;
-        var barCls = 'mm-ok';
+        const c = item.counts;
+        let barCls = 'mm-ok';
         if (c.f && c.p) barCls = 'mm-mix';
         else if (c.f) barCls = 'mm-fail';
         else if (c.s && !c.p) barCls = 'mm-warn';
-        var pct = maxTests > 0 ? Math.max(Math.round((item.tests.length / maxTests) * 100), 8) : 100;
-        var counts = [];
+        const pct = maxTests > 0 ? Math.max(Math.round((item.tests.length / maxTests) * 100), 8) : 100;
+        const counts = [];
         if (c.p) counts.push(c.p + ' passed');
         if (c.f) counts.push(c.f + ' failed');
         if (c.s) counts.push(c.s + ' skipped');
-        var tip = esc(item.group.label + ' \u2014 ' + counts.join(', ')).replace(/"/g,'&quot;');
-        h += '<div class="minimap-row" data-dgi="'+item.dgIdx+'" title="'+tip+'">';
+        const tip = esc(item.group.label + ' \u2014 ' + counts.join(', ')).replace(/"/g,'&quot;');
+        h += '<div class="minimap-row" role="button" tabindex="0" data-dgi="'+item.dgIdx+'" title="'+tip+'">';
         if (barCls === 'mm-mix') {
-            var failPct = Math.round((c.f / item.tests.length) * 100);
+            const failPct = Math.round((c.f / item.tests.length) * 100);
             h += '<span class="minimap-bar mm-mix" style="width:'+pct+'%;--fail-pct:'+failPct+'%"></span>';
         } else {
             h += '<span class="minimap-bar '+barCls+'" style="width:'+pct+'%"></span>';
@@ -2102,12 +2102,12 @@ function updateMinimap(allDisplayGroups) {
     });
     mmContent.innerHTML = h;
     if (spyObs) spyObs.disconnect();
-    var grpEls = container.querySelectorAll('.grp[data-gi]');
+    const grpEls = container.querySelectorAll('.grp[data-gi]');
     if (!grpEls.length) return;
     spyObs = new IntersectionObserver(function(entries) {
         entries.forEach(function(en) {
-            var gi = en.target.dataset.gi;
-            var mmRow = mmContent.querySelector('.minimap-row[data-dgi="'+gi+'"]');
+            const gi = en.target.dataset.gi;
+            const mmRow = mmContent.querySelector('.minimap-row[data-dgi="'+gi+'"]');
             if (mmRow) {
                 mmRow.classList.toggle('active', en.isIntersecting);
                 if (en.isIntersecting && minimapOpen) {
@@ -2140,24 +2140,31 @@ function toggleMinimap() {
     if (!mmToggle || !mm || !mmContent) return;
     mmToggle.addEventListener('click', toggleMinimap);
     if (mmBackdrop) mmBackdrop.addEventListener('click', closeMinimap);
-    mmContent.addEventListener('click', function(e) {
-        var row = e.target.closest('.minimap-row');
-        if (!row) return;
-        var dgi = parseInt(row.dataset.dgi);
+    function navigateToRow(row) {
+        const dgi = parseInt(row.dataset.dgi, 10);
         if (dgi >= renderLimit) {
             renderLimit = dgi + 5;
             render();
         }
-        var el = container.querySelector('.grp[data-gi="'+dgi+'"]');
+        const el = container.querySelector('.grp[data-gi="'+dgi+'"]');
         if (el) {
             el.scrollIntoView({behavior:'smooth', block:'start'});
             if (!el.classList.contains('open')) {
                 el.classList.add('open');
-                var hd = el.querySelector('.grp-hd');
+                const hd = el.querySelector('.grp-hd');
                 if (hd) hd.setAttribute('aria-expanded','true');
             }
         }
         if (window.innerWidth < 769) closeMinimap();
+    }
+    mmContent.addEventListener('click', function(e) {
+        const row = e.target.closest('.minimap-row');
+        if (row) navigateToRow(row);
+    });
+    mmContent.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const row = e.target.closest('.minimap-row');
+        if (row) { e.preventDefault(); navigateToRow(row); }
     });
     if (minimapOpen) openMinimap();
 })();
