@@ -25,8 +25,8 @@ public sealed class TUnitTestContextMiddleware
     public async Task InvokeAsync(HttpContext httpContext)
     {
         if (httpContext.Request.Headers.TryGetValue(TUnitTestIdHandler.HeaderName, out var values)
-            && values.FirstOrDefault() is { } testId
-            && TestContext.GetById(testId) is { } testContext)
+            && values.Count > 0
+            && TestContext.GetById(values[0]!) is { } testContext)
         {
             using (testContext.MakeCurrent())
             {
