@@ -262,18 +262,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
         }
 
-        if (failed.Length > 0)
+        if (failed.Length > 0 || timeout.Length > 0)
         {
-            var failureGroups = failed
+            var failureGroups = failed.Concat(timeout)
                 .Select(x =>
                 {
                     var state = x.Value.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
-                    var exceptionType = state switch
-                    {
-                        FailedTestNodeStateProperty f => f.Exception?.GetType().Name ?? "Unknown",
-                        ErrorTestNodeStateProperty e => e.Exception?.GetType().Name ?? "Unknown",
-                        _ => "Unknown"
-                    };
+                    var exceptionType = GetExceptionTypeName(state);
                     var method = x.Value.TestNode.Properties.AsEnumerable()
                         .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
                     return (ExceptionType: exceptionType, ClassName: method?.TypeName ?? "Unknown");
@@ -306,7 +301,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var githubServerUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com";
 
         // Separate failures from other non-passing tests
-        var failureMessages = new List<(string Name, string? SourceLink, string Details, string Duration)>();
+        var failureMessages = new List<FailureEntry>();
         var otherMessages = new List<(string Name, string Status, string Details, string Duration)>();
 
         foreach (var testNodeUpdateMessage in last.Values)
@@ -325,8 +320,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             if (isFailed)
             {
                 var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace, githubServerUrl);
-                var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
-                failureMessages.Add((name, sourceLink, details, duration));
+                var exceptionType = GetExceptionTypeName(stateProperty);
+                var commonError = GetError(stateProperty);
+                failureMessages.Add(new FailureEntry(name, sourceLink, duration, exceptionType, commonError));
             }
             else
             {
@@ -336,57 +332,76 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             }
         }
 
-        // Show top failures inline
-        const int maxInlineFailures = 5;
+        const int maxTestsPerGroup = 50;
         if (failureMessages.Count > 0)
         {
             stringBuilder.AppendLine();
-            stringBuilder.AppendLine("#### Failures");
+            stringBuilder.AppendLine("#### Failures by Cause");
             stringBuilder.AppendLine();
 
-            var inlineCount = Math.Min(failureMessages.Count, maxInlineFailures);
-            for (int i = 0; i < inlineCount; i++)
-            {
-                var (name, sourceLink, details, duration) = failureMessages[i];
-                var sourcePart = sourceLink is not null ? $" \u2014 {sourceLink}" : "";
-                stringBuilder.AppendLine("<details>");
-                stringBuilder.AppendLine($"<summary><code>{name}</code> ({duration}){sourcePart}</summary>");
-                stringBuilder.AppendLine();
-                stringBuilder.AppendLine(details);
-                stringBuilder.AppendLine();
-                stringBuilder.AppendLine("</details>");
-            }
+            var grouped = failureMessages
+                .GroupBy(f => f.ExceptionType)
+                .OrderByDescending(g => g.Count());
 
-            if (failureMessages.Count > maxInlineFailures)
+            foreach (var group in grouped)
             {
+                var entries = group.ToList();
+                var count = entries.Count;
+                var label = $"{group.Key} ({count} {(count == 1 ? "test" : "tests")})";
+
+                if (_reporterStyle == GitHubReporterStyle.Collapsible)
+                {
+                    stringBuilder.AppendLine("<details>");
+                    stringBuilder.AppendLine($"<summary>{label}</summary>");
+                }
+                else
+                {
+                    stringBuilder.AppendLine($"**{label}**");
+                }
+
                 stringBuilder.AppendLine();
-                stringBuilder.AppendLine($"*...and {failureMessages.Count - maxInlineFailures} more failures*");
+                stringBuilder.AppendLine("| Test | Duration |");
+                stringBuilder.AppendLine("| --- | --- |");
+
+                var displayCount = Math.Min(count, maxTestsPerGroup);
+                for (int i = 0; i < displayCount; i++)
+                {
+                    var entry = entries[i];
+                    var sourcePart = entry.SourceLink is not null ? $" {entry.SourceLink}" : "";
+                    stringBuilder.AppendLine($"| `{entry.Name}`{sourcePart} | {entry.Duration} |");
+                }
+
+                if (count > maxTestsPerGroup)
+                {
+                    stringBuilder.AppendLine($"| *...and {count - maxTestsPerGroup} more* | |");
+                }
+
+                var firstError = entries[0].CommonError;
+                if (!string.IsNullOrWhiteSpace(firstError))
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.AppendLine("**Common error:**");
+                    stringBuilder.AppendLine($"<pre>{firstError}</pre>");
+                }
+
+                if (_reporterStyle == GitHubReporterStyle.Collapsible)
+                {
+                    stringBuilder.AppendLine();
+                    stringBuilder.AppendLine("</details>");
+                }
+
+                stringBuilder.AppendLine();
             }
         }
 
-        // Build the full details table for remaining items
-        var remainingFailures = failureMessages.Count > maxInlineFailures
-            ? failureMessages.Skip(maxInlineFailures).ToList()
-            : new List<(string Name, string? SourceLink, string Details, string Duration)>();
-        var hasRemainingDetails = remainingFailures.Count > 0 || otherMessages.Count > 0;
-
-        if (hasRemainingDetails)
+        // Build the details table for other non-passing tests (cancelled, in-progress, etc.)
+        if (otherMessages.Count > 0)
         {
             var detailsBuilder = new StringBuilder();
             detailsBuilder.AppendLine();
             detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
             detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
             detailsBuilder.AppendLine("<tbody>");
-
-            foreach (var (name, sourceLink, details, duration) in remainingFailures)
-            {
-                detailsBuilder.AppendLine("<tr>");
-                detailsBuilder.AppendLine($"<td>{name}</td>");
-                detailsBuilder.AppendLine("<td>Failed</td>");
-                detailsBuilder.AppendLine($"<td>{details}</td>");
-                detailsBuilder.AppendLine($"<td>{duration}</td>");
-                detailsBuilder.AppendLine("</tr>");
-            }
 
             foreach (var (name, status, details, duration) in otherMessages)
             {
@@ -402,10 +417,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             if (_reporterStyle == GitHubReporterStyle.Collapsible)
             {
-                var totalNonPassing = remainingFailures.Count + otherMessages.Count;
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine("<details>");
-                stringBuilder.AppendLine($"<summary>All non-passing tests ({totalNonPassing} total)</summary>");
+                stringBuilder.AppendLine($"<summary>Other non-passing tests ({otherMessages.Count} total)</summary>");
                 stringBuilder.Append(detailsBuilder.ToString());
                 stringBuilder.AppendLine();
                 stringBuilder.AppendLine("</details>");
@@ -610,4 +624,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         { TotalHours: < 1 } d => $"{d.Minutes}m {d.Seconds}s",
         var d => $"{(int)d.Value.TotalHours}h {d.Value.Minutes}m"
     };
+
+    private static string GetExceptionTypeName(IProperty? stateProperty) => stateProperty switch
+    {
+        FailedTestNodeStateProperty f => f.Exception?.GetType().Name ?? "Unknown",
+        ErrorTestNodeStateProperty e => e.Exception?.GetType().Name ?? "Unknown",
+        TimeoutTestNodeStateProperty => "Timeout",
+        _ => "Unknown"
+    };
+
+    private record FailureEntry(
+        string Name, string? SourceLink, string Duration,
+        string ExceptionType, string? CommonError);
 }
