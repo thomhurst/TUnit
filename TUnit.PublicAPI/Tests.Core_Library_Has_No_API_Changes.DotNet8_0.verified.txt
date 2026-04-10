@@ -902,6 +902,10 @@ namespace
     {
          ScopeType { get; }
     }
+    public interface ITestContextResolver
+    {
+        .TestContext? ResolveCurrentTestContext();
+    }
     public interface ITestDefinition { }
     public interface ITestEntrySource
     {
@@ -1387,8 +1391,13 @@ namespace
         public static string WorkingDirectory { get; set; }
         public override string GetErrorOutput() { }
         public override string GetStandardOutput() { }
+        public . MakeCurrent() { }
         public void RegisterTrace(.ActivityTraceId traceId) { }
         public static .TestContext? GetById(string id) { }
+        public readonly struct ContextScope : 
+        {
+            public void Dispose() { }
+        }
     }
     public class TestContextEvents : .
     {
@@ -1403,6 +1412,11 @@ namespace
         public .AsyncEvent<<.TestContext, int>>? OnTestRetry { get; set; }
         public .AsyncEvent<.TestContext>? OnTestSkipped { get; set; }
         public .AsyncEvent<.TestContext>? OnTestStart { get; set; }
+    }
+    public static class TestContextResolverRegistry
+    {
+        public static void Register(.ITestContextResolver resolver) { }
+        public static bool Unregister(.ITestContextResolver resolver) { }
     }
     public class TestDataCombination
     {
