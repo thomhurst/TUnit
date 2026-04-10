@@ -133,17 +133,30 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var inProgress = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
+        var totalDuration = TimeSpan.Zero;
+        foreach (var msg in last.Values)
+        {
+            var timing = msg.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
+            if (timing is not null)
+            {
+                totalDuration += timing.GlobalTiming.Duration;
+            }
+        }
+
+        var hasFailures = failed.Length > 0 || timeout.Length > 0 || cancelled.Length > 0;
+        var statusEmoji = hasFailures ? "\u274C" : "\u2705";
+
         var stringBuilder = new StringBuilder();
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
         if (!string.IsNullOrEmpty(ArtifactUrl))
         {
-            stringBuilder.AppendLine($"### {assemblyName} ({targetFramework}) [(View Report)]({ArtifactUrl})");
+            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework}) [(View Report)]({ArtifactUrl})");
         }
         else
         {
-            stringBuilder.AppendLine($"### {assemblyName} ({targetFramework})");
+            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework})");
         }
 
         if (!string.IsNullOrEmpty(Filter))
@@ -151,31 +164,41 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine($"#### Filter: `{Filter}`");
         }
 
+        var totalCount = last.Count;
+        var passRate = totalCount > 0 ? (double)passedCount / totalCount * 100 : 0;
+
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Test Count | Status |");
-        stringBuilder.AppendLine("| --- | --- |");
-        stringBuilder.AppendLine($"| {passedCount} | Passed |");
-        stringBuilder.AppendLine($"| {failed.Length} | Failed |");
+        stringBuilder.AppendLine($"**{totalCount} tests** completed in **{FormatDuration(totalDuration)}** \u2014 **{passRate:F1}%** passed");
+        stringBuilder.AppendLine();
+
+        var segments = new List<string> { $"\u2705 {passedCount} passed" };
+
+        if (failed.Length > 0)
+        {
+            segments.Add($"\u274C {failed.Length} failed");
+        }
 
         if (skipped.Length > 0)
         {
-            stringBuilder.AppendLine($"| {skipped.Length} | Skipped |");
+            segments.Add($"\u23ED\uFE0F {skipped.Length} skipped");
         }
 
         if (timeout.Length > 0)
         {
-            stringBuilder.AppendLine($"| {timeout.Length} | Timed Out |");
+            segments.Add($"\u23F1\uFE0F {timeout.Length} timed out");
         }
 
         if (cancelled.Length > 0)
         {
-            stringBuilder.AppendLine($"| {cancelled.Length} | Cancelled |");
+            segments.Add($"\uD83D\uDEAB {cancelled.Length} cancelled");
         }
 
         if (inProgress.Length > 0)
         {
-            stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
+            segments.Add($"\u26A0\uFE0F {inProgress.Length} in progress");
         }
+
+        stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
 
         if (ShowArtifactUploadTip)
         {
@@ -394,4 +417,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     {
         _reporterStyle = style;
     }
+
+    private static string FormatDuration(TimeSpan? duration) => duration switch
+    {
+        null => "-",
+        { TotalMilliseconds: < 1 } => "< 1ms",
+        { TotalSeconds: < 1 } d => $"{d.TotalMilliseconds:F0}ms",
+        { TotalMinutes: < 1 } d => $"{d.TotalSeconds:F1}s",
+        { TotalHours: < 1 } d => $"{d.Minutes}m {d.Seconds}s",
+        var d => $"{d.Value.TotalHours:F0}h {d.Value.Minutes}m"
+    };
 }
