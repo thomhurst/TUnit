@@ -85,6 +85,14 @@ internal static partial class HtmlReportGenerator
         AppendJavaScript(sb);
 
         sb.AppendLine("</div>");
+
+        // Feature 11: Minimap sidebar navigator
+        sb.AppendLine("<div class=\"minimap-backdrop\" id=\"minimapBackdrop\"></div>");
+        sb.AppendLine("<div class=\"minimap\" id=\"minimap\" role=\"navigation\" aria-label=\"Test group navigator\">");
+        sb.AppendLine("<div class=\"minimap-hd\">Navigator</div>");
+        sb.AppendLine("<div id=\"minimapContent\"></div>");
+        sb.AppendLine("</div>");
+
         sb.AppendLine("</body>");
     }
 
@@ -314,6 +322,7 @@ internal static partial class HtmlReportGenerator
         sb.AppendLine("<div class=\"bar-actions\">");
         sb.AppendLine("<button id=\"expandAll\" class=\"bar-btn\" aria-label=\"Expand all groups\" title=\"Expand all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M1.75 10a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75Zm12.5 0a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75h-3.25a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 .75-.75ZM1.75 6a.75.75 0 0 0 .75-.75v-2.5h2.5a.75.75 0 0 0 0-1.5h-3.25a.75.75 0 0 0-.75.75v3.25a.75.75 0 0 0 .75.75ZM14.25 6a.75.75 0 0 0 .75-.75v-3.25a.75.75 0 0 0-.75-.75h-3.25a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 .75.75Z\"/></svg></button>");
         sb.AppendLine("<button id=\"collapseAll\" class=\"bar-btn\" aria-label=\"Collapse all groups\" title=\"Collapse all groups\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M3.75 14a.75.75 0 0 1-.75-.75v-2.5h-2.5a.75.75 0 0 1 0-1.5h3.25a.75.75 0 0 1 .75.75v3.25a.75.75 0 0 1-.75.75Zm8.5 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 .75-.75h3.25a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-.75.75ZM.5 4.75a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0v3.25a.75.75 0 0 1-.75.75H.5Zm11 0a.75.75 0 0 1-.75-.75v-3.25a.75.75 0 0 1 1.5 0v2.5h2.5a.75.75 0 0 1 0 1.5h-3.25Z\"/></svg></button>");
+        sb.AppendLine("<button id=\"minimapToggle\" class=\"bar-btn minimap-toggle\" aria-label=\"Toggle minimap navigator\" title=\"Minimap navigator\"><svg viewBox=\"0 0 16 16\" fill=\"currentColor\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path d=\"M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75Zm0 4A.75.75 0 0 1 2.75 7h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 2 7.75Zm0 4a.75.75 0 0 1 .75-.75h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1-.75-.75Z\"/></svg></button>");
         sb.AppendLine("<span class=\"bar-sep\"></span>");
         sb.AppendLine("<span class=\"bar-lbl\" id=\"groupLabel\">Group:</span>");
         sb.AppendLine("<div class=\"grp-toggle\" role=\"radiogroup\" aria-labelledby=\"groupLabel\">");
@@ -1171,6 +1180,52 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
   .grp-indicator{forced-color-adjust:none}
   .t-row.kb-focus{outline:2px solid LinkText}
 }
+
+/* ── Feature 11: Minimap Sidebar Navigator ─────────── */
+.minimap-toggle{display:none}
+.minimap-toggle.visible{display:flex}
+.minimap-toggle.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.minimap{
+  position:fixed;right:0;top:0;bottom:0;
+  width:180px;z-index:90;
+  background:var(--surface-0);border-left:1px solid var(--border);
+  overflow-y:auto;overflow-x:hidden;
+  transform:translateX(100%);
+  transition:transform .25s var(--ease);
+  scrollbar-width:thin;
+}
+.minimap.open{transform:none;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
+.minimap-hd{
+  padding:8px 10px 6px;font-size:.62rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--text-3);border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--surface-0);z-index:1;
+}
+.minimap-row{
+  display:flex;align-items:center;
+  padding:2px 10px;cursor:pointer;
+  transition:background .1s var(--ease);
+}
+.minimap-row:hover{background:var(--surface-1)}
+.minimap-row:hover .minimap-bar{filter:brightness(1.3)}
+.minimap-row.active{background:var(--indigo-d)}
+.minimap-bar{
+  height:5px;border-radius:2px;min-width:6px;
+  transition:filter .12s var(--ease);
+}
+.minimap-bar.mm-ok{background:var(--emerald)}
+.minimap-bar.mm-fail{background:var(--rose)}
+.minimap-bar.mm-warn{background:var(--amber)}
+.minimap-bar.mm-mix{
+  background:linear-gradient(90deg,var(--rose) 0%,var(--rose) var(--fail-pct),var(--emerald) var(--fail-pct),var(--emerald) 100%);
+}
+.minimap-backdrop{position:fixed;inset:0;z-index:89;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);display:none}
+.minimap-backdrop.open{display:block}
+@media(min-width:769px){.minimap-backdrop{display:none!important}}
+@media(max-width:768px){.minimap{width:200px}}
+@media(pointer:coarse){.minimap-row{padding:4px 10px}}
+@media print{.minimap,.minimap-toggle,.minimap-backdrop{display:none!important}}
+@media(forced-colors:active){.minimap-toggle.active{border:2px solid LinkText}}
 """;
     }
 
@@ -1204,6 +1259,10 @@ const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearSearch');
 const filterBtns = document.getElementById('filterButtons');
 const filterSummary = document.getElementById('filterSummary');
+const mmToggle = document.getElementById('minimapToggle');
+const mmContent = document.getElementById('minimapContent');
+const mm = document.getElementById('minimap');
+const mmBackdrop = document.getElementById('minimapBackdrop');
 let activeFilter = 'all';
 let searchText = '';
 let debounceTimer;
@@ -1211,6 +1270,8 @@ let sortMode = 'default';
 let groupMode = 'class';
 let renderLimit = 20;
 let kbIdx = -1;
+let minimapOpen = localStorage.getItem('tunit-minimap') === 'open';
+let spyObs = null;
 
 const spansByTrace = {};
 const bySpanId = {};
@@ -1270,6 +1331,16 @@ function sortTests(tests) {
     if (sortMode === 'duration') return [...tests].sort((a,b) => b.durationMs - a.durationMs);
     if (sortMode === 'name') return [...tests].sort((a,b) => a.displayName.localeCompare(b.displayName));
     return [...tests].sort((a,b) => (statusOrder[a.status]??9) - (statusOrder[b.status]??9));
+}
+
+function countStatuses(tests) {
+    var c = {p:0,f:0,s:0};
+    tests.forEach(function(t) {
+        if (t.status==='passed') c.p++;
+        else if (t.status==='failed'||t.status==='error'||t.status==='timedOut') c.f++;
+        else if (t.status==='skipped') c.s++;
+    });
+    return c;
 }
 
 function computeDisplayGroups() {
@@ -1626,14 +1697,9 @@ function render() {
         const ft = sortTests(g.tests.filter(matchesFilter));
         if (!ft.length) return;
         total += ft.length;
-        const fail = ft.some(t=>t.status==='failed'||t.status==='error'||t.status==='timedOut');
+        const c = countStatuses(ft);
+        const fail = c.f > 0;
         const open = fail || searchText;
-        const c = {p:0,f:0,s:0};
-        ft.forEach(t=>{
-            if(t.status==='passed')c.p++;
-            else if(t.status==='failed'||t.status==='error'||t.status==='timedOut')c.f++;
-            else if(t.status==='skipped')c.s++;
-        });
         html += '<div class="grp'+(open?' open':'')+'" data-gi="'+gi+'">';
         html += '<div class="grp-hd'+(fail?' fail':'')+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'">';
         html += '<div class="grp-indicator"></div>';
@@ -1670,6 +1736,7 @@ function render() {
     filterSummary.textContent = (activeFilter!=='all'||searchText)
         ? 'Showing '+total+' of '+data.summary.total+' tests' : '';
     kbIdx = -1;
+    updateMinimap(displayGroups);
 }
 
 function syncHash() {
@@ -1922,6 +1989,7 @@ function showKbHelp(){
         +'<div class="kb-row"><span>Close / clear</span><span class="kb-key">Esc</span></div>'
         +'<div class="kb-row"><span>Focus search</span><span class="kb-key">/</span></div>'
         +'<div class="kb-row"><span>This help</span><span class="kb-key">?</span></div>'
+        +'<div class="kb-row"><span>Toggle minimap</span><span class="kb-key">m</span></div>'
         +'<button class="bar-btn" style="margin-top:14px" aria-label="Close" id="kbClose">&times;</button>'
         +'</div>';
     ov.addEventListener('click',function(ev){if(ev.target===ov)ov.remove();});
@@ -1952,6 +2020,7 @@ document.addEventListener('keydown',function(e){
         return;
     }
     if(e.key==='/'){e.preventDefault();searchInput.focus();return;}
+    if(e.key==='m'){e.preventDefault();if(mmToggle&&mmToggle.classList.contains('visible'))toggleMinimap();return;}
     if(e.key==='?'){e.preventDefault();showKbHelp();return;}
 });
 
@@ -1994,6 +2063,103 @@ if(data.summary.passed===data.summary.total&&data.summary.total>0){
         h+='<div class="dur-hist-bar" style="height:'+pct.toFixed(1)+'%" data-tip="'+fmt(lo)+' \u2013 '+fmt(hi)+': '+buckets[i]+'"></div>';
     }
     hist.innerHTML=h;
+})();
+
+// ── Feature 11: Minimap Sidebar Navigator ──────────
+function updateMinimap(allDisplayGroups) {
+    if (!mmToggle || !mmContent) return;
+    var visibleGroups = [];
+    allDisplayGroups.forEach(function(g, idx) {
+        var ft = g.tests.filter(matchesFilter);
+        if (ft.length) visibleGroups.push({group: g, tests: ft, counts: countStatuses(ft), dgIdx: idx});
+    });
+    mmToggle.classList.toggle('visible', visibleGroups.length > 10);
+    var maxTests = 0;
+    visibleGroups.forEach(function(item) {
+        if (item.tests.length > maxTests) maxTests = item.tests.length;
+    });
+    var h = '';
+    visibleGroups.forEach(function(item) {
+        var c = item.counts;
+        var barCls = 'mm-ok';
+        if (c.f && c.p) barCls = 'mm-mix';
+        else if (c.f) barCls = 'mm-fail';
+        else if (c.s && !c.p) barCls = 'mm-warn';
+        var pct = maxTests > 0 ? Math.max(Math.round((item.tests.length / maxTests) * 100), 8) : 100;
+        var counts = [];
+        if (c.p) counts.push(c.p + ' passed');
+        if (c.f) counts.push(c.f + ' failed');
+        if (c.s) counts.push(c.s + ' skipped');
+        var tip = esc(item.group.label + ' \u2014 ' + counts.join(', ')).replace(/"/g,'&quot;');
+        h += '<div class="minimap-row" data-dgi="'+item.dgIdx+'" title="'+tip+'">';
+        if (barCls === 'mm-mix') {
+            var failPct = Math.round((c.f / item.tests.length) * 100);
+            h += '<span class="minimap-bar mm-mix" style="width:'+pct+'%;--fail-pct:'+failPct+'%"></span>';
+        } else {
+            h += '<span class="minimap-bar '+barCls+'" style="width:'+pct+'%"></span>';
+        }
+        h += '</div>';
+    });
+    mmContent.innerHTML = h;
+    if (spyObs) spyObs.disconnect();
+    var grpEls = container.querySelectorAll('.grp[data-gi]');
+    if (!grpEls.length) return;
+    spyObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(en) {
+            var gi = en.target.dataset.gi;
+            var mmRow = mmContent.querySelector('.minimap-row[data-dgi="'+gi+'"]');
+            if (mmRow) {
+                mmRow.classList.toggle('active', en.isIntersecting);
+                if (en.isIntersecting && minimapOpen) {
+                    mmRow.scrollIntoView({block:'nearest', behavior:'auto'});
+                }
+            }
+        });
+    }, {rootMargin: '0px 0px -75% 0px', threshold: 0});
+    grpEls.forEach(function(el) { spyObs.observe(el); });
+}
+
+function openMinimap() {
+    minimapOpen = true;
+    if (mm) mm.classList.add('open');
+    if (mmToggle) mmToggle.classList.add('active');
+    if (mmBackdrop) mmBackdrop.classList.add('open');
+    localStorage.setItem('tunit-minimap', 'open');
+}
+function closeMinimap() {
+    minimapOpen = false;
+    if (mm) mm.classList.remove('open');
+    if (mmToggle) mmToggle.classList.remove('active');
+    if (mmBackdrop) mmBackdrop.classList.remove('open');
+    localStorage.setItem('tunit-minimap', 'closed');
+}
+function toggleMinimap() {
+    if (minimapOpen) closeMinimap(); else openMinimap();
+}
+(function(){
+    if (!mmToggle || !mm || !mmContent) return;
+    mmToggle.addEventListener('click', toggleMinimap);
+    if (mmBackdrop) mmBackdrop.addEventListener('click', closeMinimap);
+    mmContent.addEventListener('click', function(e) {
+        var row = e.target.closest('.minimap-row');
+        if (!row) return;
+        var dgi = parseInt(row.dataset.dgi);
+        if (dgi >= renderLimit) {
+            renderLimit = dgi + 5;
+            render();
+        }
+        var el = container.querySelector('.grp[data-gi="'+dgi+'"]');
+        if (el) {
+            el.scrollIntoView({behavior:'smooth', block:'start'});
+            if (!el.classList.contains('open')) {
+                el.classList.add('open');
+                var hd = el.querySelector('.grp-hd');
+                if (hd) hd.setAttribute('aria-expanded','true');
+            }
+        }
+        if (window.innerWidth < 769) closeMinimap();
+    });
+    if (minimapOpen) openMinimap();
 })();
 })().catch(e => console.error('TUnit report init failed:', e));
 """;
