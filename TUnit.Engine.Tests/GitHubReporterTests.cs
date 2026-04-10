@@ -206,17 +206,32 @@ public class GitHubReporterTests
 
         await FeedTestMessages(reporter,
             CreateFailedTestMessage("1", "T1", "Svc", new NullReferenceException("Object reference not set")),
-            CreateFailedTestMessage("2", "T2", "Svc", new NullReferenceException("Different message"))
+            CreateFailedTestMessage("2", "T2", "Svc", new NullReferenceException("Object reference not set")),
+            CreateFailedTestMessage("3", "T3", "Svc", new NullReferenceException("Different message"))
         );
 
         await reporter.AfterRunAsync(1, CancellationToken.None);
 
         var output = await File.ReadAllTextAsync(outputFile);
         output.ShouldContain("**Common error:**");
-        // The common error is from the first entry in the group (order not guaranteed),
-        // so check that at least one of the messages appears
-        (output.Contains("Object reference not set") || output.Contains("Different message"))
-            .ShouldBeTrue("Common error should contain one of the exception messages");
+        // Most frequent error message in the group wins
+        output.ShouldContain("Object reference not set");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Caps_Group_At_50_Tests()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        var messages = Enumerable.Range(1, 55)
+            .Select(i => CreateFailedTestMessage(i.ToString(), $"T{i}", "Svc", new NullReferenceException("n")))
+            .ToArray();
+        await FeedTestMessages(reporter, messages);
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("...and 5 more");
     }
 
     [Test]

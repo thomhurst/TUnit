@@ -376,12 +376,18 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                     stringBuilder.AppendLine($"| *...and {count - maxTestsPerGroup} more* | |");
                 }
 
-                var firstError = entries[0].CommonError;
-                if (!string.IsNullOrWhiteSpace(firstError))
+                var commonError = entries
+                    .Where(e => !string.IsNullOrWhiteSpace(e.CommonError))
+                    .GroupBy(e => e.CommonError)
+                    .OrderByDescending(g => g.Count())
+                    .FirstOrDefault()
+                    ?.Key;
+
+                if (commonError is not null)
                 {
                     stringBuilder.AppendLine();
                     stringBuilder.AppendLine("**Common error:**");
-                    stringBuilder.AppendLine($"<pre>{firstError}</pre>");
+                    stringBuilder.AppendLine($"<pre>{System.Net.WebUtility.HtmlEncode(commonError)}</pre>");
                 }
 
                 if (_reporterStyle == GitHubReporterStyle.Collapsible)
