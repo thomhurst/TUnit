@@ -262,45 +262,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
         }
 
-        if (failed.Length > 0 || timeout.Length > 0)
-        {
-            var failureGroups = failed.Concat(timeout)
-                .Select(x =>
-                {
-                    var state = x.Value.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
-                    var exceptionType = GetExceptionTypeName(state);
-                    var method = x.Value.TestNode.Properties.AsEnumerable()
-                        .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
-                    return (ExceptionType: exceptionType, ClassName: method?.TypeName ?? "Unknown");
-                })
-                .GroupBy(x => x.ExceptionType)
-                .OrderByDescending(g => g.Count())
-                .Take(3);
-
-            var diagParts = failureGroups.Select(g =>
-            {
-                var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
-                return $"{g.Count()} \u00d7 `{g.Key}` in `{topClass.Key}`";
-            });
-
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
-        }
-
-        if (passedCount == last.Count)
-        {
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("---");
-            return WriteFile(stringBuilder.ToString());
-        }
-
         // Cache env vars for source links (read once, not per test)
         var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
         var githubWorkspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
         var githubServerUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com";
 
-        // Separate failures from other non-passing tests
+        // Separate failures from other non-passing tests (built once, used by both quick diagnosis and full rendering)
         var failureMessages = new List<FailureEntry>();
         var otherMessages = new List<(string Name, string Status, string Details, string Duration)>();
 
@@ -322,7 +290,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace, githubServerUrl);
                 var exceptionType = GetExceptionTypeName(stateProperty);
                 var commonError = GetError(stateProperty);
-                failureMessages.Add(new FailureEntry(name, sourceLink, duration, exceptionType, commonError));
+                var method = props.OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+                var className = method?.TypeName ?? "Unknown";
+                failureMessages.Add(new FailureEntry(name, sourceLink, duration, exceptionType, commonError, className));
             }
             else
             {
@@ -332,6 +302,31 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             }
         }
 
+        if (failureMessages.Count > 0)
+        {
+            var failureGroups = failureMessages
+                .GroupBy(f => f.ExceptionType)
+                .OrderByDescending(g => g.Count())
+                .Take(3);
+
+            var diagParts = failureGroups.Select(g =>
+            {
+                var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
+                return $"{g.Count()} \u00d7 `{g.Key}` in `{topClass.Key}`";
+            });
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
+        }
+
+        if (passedCount == last.Count)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("---");
+            return WriteFile(stringBuilder.ToString());
+        }
+
+        // Cap per group to keep the GitHub step summary within the 1 MB file-size limit
         const int maxTestsPerGroup = 50;
         if (failureMessages.Count > 0)
         {
@@ -519,7 +514,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return "Unknown Test State";
     }
 
-    private string? GetError(IProperty? stateProperty)
+    private static string? GetError(IProperty? stateProperty)
     {
         return stateProperty switch
         {
@@ -641,5 +636,5 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private record FailureEntry(
         string Name, string? SourceLink, string Duration,
-        string ExceptionType, string? CommonError);
+        string ExceptionType, string? CommonError, string ClassName);
 }

@@ -1,5 +1,3 @@
-#pragma warning disable TPEXP
-
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
