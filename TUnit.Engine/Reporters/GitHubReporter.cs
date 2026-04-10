@@ -177,7 +177,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
         }
 
-        if (string.IsNullOrEmpty(ArtifactUrl))
+        if (ShowArtifactUploadTip)
         {
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
@@ -388,6 +388,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     // Set by HtmlReporter during OnTestSessionFinishingAsync, which MTP invokes before AfterRunAsync.
     internal string? ArtifactUrl { get; set; }
+    internal bool ShowArtifactUploadTip { get; set; }
 
     internal void SetReporterStyle(GitHubReporterStyle style)
     {

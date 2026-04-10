@@ -673,6 +673,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         if (!hasRuntimeToken)
         {
+            if (_githubReporter is not null)
+            {
+                _githubReporter.ShowArtifactUploadTip = true;
+            }
+
             Console.WriteLine("Tip: To enable automatic HTML report artifact upload, see https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload");
         }
 
