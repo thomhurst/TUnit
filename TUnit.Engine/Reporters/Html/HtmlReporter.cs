@@ -672,15 +672,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         if (!hasRuntimeToken)
         {
-            if (_githubReporter is not null)
-            {
-                _githubReporter.ShowArtifactUploadTip = true;
-            }
-
             Console.WriteLine("Tip: To enable automatic HTML report artifact upload, see https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload");
         }
-
-        if (hasRuntimeToken)
+        else
         {
             try
             {
@@ -697,9 +691,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
         }
 
-        if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+        if (_githubReporter is not null)
         {
-            if (_githubReporter is not null)
+            if (!hasRuntimeToken)
+            {
+                _githubReporter.ShowArtifactUploadTip = true;
+            }
+            else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
             {
                 _githubReporter.ArtifactUrl = $"https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
