@@ -1097,6 +1097,8 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 .fc-cluster{margin-bottom:4px}
 .fc-hd{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s var(--ease);border-radius:var(--r)}
 .fc-hd:hover{background:var(--surface-2)}
+.fc-hd .tl-arrow{transition:transform .2s var(--ease);flex-shrink:0}
+.fc-cluster.open .fc-hd .tl-arrow{transform:rotate(90deg)}
 .fc-type{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--rose);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
 .fc-frame{font-family:var(--mono);font-size:.74rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .fc-count{font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--rose-d);color:var(--rose);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
@@ -2034,6 +2036,7 @@ function renderFailureClusters() {
         const truncMsg = c.msg.length > 100 ? c.msg.substring(0,100)+'\u2026' : c.msg;
         h += '<div class="fc-cluster">';
         h += '<div class="fc-hd">';
+        h += tlArrow;
         h += '<span class="fc-type" title="'+esc(c.type)+'">'+esc(c.type)+'</span>';
         if (c.frame) h += '<span class="fc-frame" title="'+esc(c.frame)+'">'+esc(c.frame)+'</span>';
         h += '<span class="fc-count">'+c.tests.length+' tests</span>';
