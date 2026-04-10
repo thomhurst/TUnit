@@ -266,73 +266,156 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
         }
 
+        if (failed.Length > 0)
+        {
+            var failureGroups = failed
+                .Select(x =>
+                {
+                    var state = x.Value.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
+                    var exceptionType = state switch
+                    {
+                        FailedTestNodeStateProperty f => f.Exception?.GetType().Name ?? "Unknown",
+                        ErrorTestNodeStateProperty e => e.Exception?.GetType().Name ?? "Unknown",
+                        _ => "Unknown"
+                    };
+                    var method = x.Value.TestNode.Properties.AsEnumerable()
+                        .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+                    return (ExceptionType: exceptionType, ClassName: method?.TypeName ?? "Unknown");
+                })
+                .GroupBy(x => x.ExceptionType)
+                .OrderByDescending(g => g.Count())
+                .Take(3);
+
+            var diagParts = failureGroups.Select(g =>
+            {
+                var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
+                return $"{g.Count()} \u00d7 `{g.Key}` in `{topClass.Key}`";
+            });
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
+        }
+
         if (passedCount == last.Count)
         {
             return WriteFile(stringBuilder.ToString());
         }
 
-        // Build the details table
-        var detailsBuilder = new StringBuilder();
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine("### Details");
-        detailsBuilder.AppendLine();
-        detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
-        detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
-        detailsBuilder.AppendLine("<tbody>");
+        // Separate failures from other non-passing tests
+        var failureMessages = new List<(string Name, string? SourceLink, string Details, string Duration)>();
+        var otherMessages = new List<(string Name, string Status, string Details, string Duration)>();
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
-            var testMethodIdentifier = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
-                .OfType<TestMethodIdentifierProperty>()
-                .FirstOrDefault();
+            var passedProp = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+            if (passedProp != null) continue;
 
+            var testMethodIdentifier = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
+                .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
             var className = testMethodIdentifier?.TypeName;
             var displayName = testNodeUpdateMessage.TestNode.DisplayName;
             var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
+                .FirstOrDefault(p => p is TestNodeStateProperty);
+            var timingProp = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
+                .OfType<TimingProperty>().FirstOrDefault();
+            var duration = FormatDuration(timingProp?.GlobalTiming.Duration);
 
-            var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+            var isFailed = stateProperty is FailedTestNodeStateProperty or ErrorTestNodeStateProperty
+                or TimeoutTestNodeStateProperty;
 
-            if (passedProperty != null)
+            if (isFailed)
             {
-                continue;
+                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode);
+                var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
+                failureMessages.Add((name, sourceLink, details, duration));
+            }
+            else
+            {
+                var status = GetStatus(stateProperty);
+                var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
+                otherMessages.Add((name, status, details, duration));
+            }
+        }
+
+        // Show top failures inline
+        const int maxInlineFailures = 5;
+        if (failureMessages.Count > 0)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("#### Failures");
+            stringBuilder.AppendLine();
+
+            var inlineCount = Math.Min(failureMessages.Count, maxInlineFailures);
+            for (int i = 0; i < inlineCount; i++)
+            {
+                var (name, sourceLink, details, duration) = failureMessages[i];
+                var sourcePart = sourceLink is not null ? $" \u2014 {sourceLink}" : "";
+                stringBuilder.AppendLine("<details>");
+                stringBuilder.AppendLine($"<summary><code>{name}</code> ({duration}){sourcePart}</summary>");
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine(details);
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("</details>");
             }
 
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
-
-            var status = GetStatus(stateProperty);
-
-            var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
-
-            var timingProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
-
-            var duration = timingProperty?.GlobalTiming.Duration;
-
-            detailsBuilder.AppendLine("<tr>");
-            detailsBuilder.AppendLine($"<td>{name}</td>");
-            detailsBuilder.AppendLine($"<td>{status}</td>");
-            detailsBuilder.AppendLine($"<td>{details}</td>");
-            detailsBuilder.AppendLine($"<td>{duration}</td>");
-            detailsBuilder.AppendLine("</tr>");
+            if (failureMessages.Count > maxInlineFailures)
+            {
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine($"*...and {failureMessages.Count - maxInlineFailures} more failures*");
+            }
         }
-        detailsBuilder.AppendLine("</tbody></table>");
 
-        // Wrap in collapsible section if using collapsible style
-        if (_reporterStyle == GitHubReporterStyle.Collapsible)
+        // Build the full details table for remaining items
+        var remainingFailures = failureMessages.Count > maxInlineFailures
+            ? failureMessages.Skip(maxInlineFailures).ToList()
+            : new List<(string Name, string? SourceLink, string Details, string Duration)>();
+        var hasRemainingDetails = remainingFailures.Count > 0 || otherMessages.Count > 0;
+
+        if (hasRemainingDetails)
         {
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("<details>");
-            stringBuilder.AppendLine("<summary>📊 Test Details (click to expand)</summary>");
-            stringBuilder.Append(detailsBuilder.ToString());
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine("</details>");
-            stringBuilder.AppendLine();
-        }
-        else
-        {
-            // Full style - append details directly
-            stringBuilder.Append(detailsBuilder.ToString());
+            var detailsBuilder = new StringBuilder();
+            detailsBuilder.AppendLine();
+            detailsBuilder.AppendLine("""<table role="table" tabindex="0">""");
+            detailsBuilder.AppendLine("<thead><tr><th>Test</th><th>Status</th><th>Details</th><th>Duration</th></tr></thead>");
+            detailsBuilder.AppendLine("<tbody>");
+
+            foreach (var (name, sourceLink, details, duration) in remainingFailures)
+            {
+                detailsBuilder.AppendLine("<tr>");
+                detailsBuilder.AppendLine($"<td>{name}</td>");
+                detailsBuilder.AppendLine("<td>Failed</td>");
+                detailsBuilder.AppendLine($"<td>{details}</td>");
+                detailsBuilder.AppendLine($"<td>{duration}</td>");
+                detailsBuilder.AppendLine("</tr>");
+            }
+
+            foreach (var (name, status, details, duration) in otherMessages)
+            {
+                detailsBuilder.AppendLine("<tr>");
+                detailsBuilder.AppendLine($"<td>{name}</td>");
+                detailsBuilder.AppendLine($"<td>{status}</td>");
+                detailsBuilder.AppendLine($"<td>{details}</td>");
+                detailsBuilder.AppendLine($"<td>{duration}</td>");
+                detailsBuilder.AppendLine("</tr>");
+            }
+
+            detailsBuilder.AppendLine("</tbody></table>");
+
+            if (_reporterStyle == GitHubReporterStyle.Collapsible)
+            {
+                var totalNonPassing = failureMessages.Count + otherMessages.Count;
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("<details>");
+                stringBuilder.AppendLine($"<summary>All non-passing tests ({totalNonPassing} total)</summary>");
+                stringBuilder.Append(detailsBuilder.ToString());
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine("</details>");
+            }
+            else
+            {
+                stringBuilder.Append(detailsBuilder.ToString());
+            }
         }
 
         return WriteFile(stringBuilder.ToString());
@@ -465,6 +548,29 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             TimeoutTestNodeStateProperty => "Timed Out",
             _ => "Unknown"
         };
+    }
+
+    private static string? GetSourceLink(TestNode testNode)
+    {
+        var fileLocation = testNode.Properties.AsEnumerable()
+            .OfType<TestFileLocationProperty>().FirstOrDefault();
+        if (fileLocation is null) return null;
+
+        var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        var sha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
+        if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha)) return null;
+
+        var filePath = fileLocation.FilePath.Replace('\\', '/');
+        var repoName = repo.Split('/').LastOrDefault() ?? "";
+        var repoIndex = filePath.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
+        if (repoIndex >= 0)
+        {
+            filePath = filePath[(repoIndex + repoName.Length + 2)..];
+        }
+
+        var line = fileLocation.LineSpan.Start.Line + 1; // 0-based to 1-based
+        var fileName = Path.GetFileName(fileLocation.FilePath);
+        return $"[{fileName}:{line}](https://github.com/{repo}/blob/{sha}/{filePath}#L{line})";
     }
 
     public string? Filter { get; set; }
