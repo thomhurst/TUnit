@@ -333,6 +333,9 @@ internal static partial class HtmlReportGenerator
 
         sb.AppendLine("<span class=\"bar-info\" id=\"filterSummary\" aria-live=\"polite\" aria-atomic=\"true\"></span>");
         sb.AppendLine("</div>");
+
+        // Category filter pills (populated dynamically by JS if categories exist)
+        sb.AppendLine("<div class=\"cat-row\" id=\"categoryPills\" role=\"group\" aria-label=\"Filter by category\"></div>");
     }
 
     private static void AppendTestGroups(StringBuilder sb, ReportData data)
@@ -461,6 +464,7 @@ internal static partial class HtmlReportGenerator
   --slate-d:   rgba(148,163,184,.10);
   --indigo:    #818cf8;
   --indigo-d:  rgba(129,140,248,.10);
+  --violet:    #a78bfa;
 
   --font:      'Segoe UI Variable','Segoe UI',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --mono:      'Cascadia Code','JetBrains Mono','Fira Code','SF Mono',ui-monospace,monospace;
@@ -477,7 +481,7 @@ internal static partial class HtmlReportGenerator
   --text:#1a1d24;--text-2:#5a5f6e;--text-3:#8b91a0;
   --emerald-d:rgba(52,211,153,.15);--rose-d:rgba(251,113,133,.15);
   --amber-d:rgba(251,191,36,.12);--slate-d:rgba(148,163,184,.12);
-  --indigo-d:rgba(129,140,248,.12);
+  --indigo-d:rgba(129,140,248,.12);--violet:#7c3aed;
 }
 :root[data-theme="light"] .grain{opacity:.008}
 
@@ -701,6 +705,21 @@ body{
 .dot.amber{background:var(--amber)}
 .dot.slate{background:var(--slate)}
 .bar-info{font-size:.8rem;color:var(--text-3);margin-left:auto}
+
+/* Category filter pills — extends .pill with smaller sizing and violet accent */
+.cat-row{display:none;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.cat-row.visible{display:flex}
+.cat-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-3);letter-spacing:.07em;margin-right:2px}
+.cat-pill{padding:5px 12px;font-size:.76rem;gap:4px}
+.cat-pill.active{background:var(--violet);border-color:var(--violet);color:#fff}
+.cat-pill .cat-count{font-size:.68rem;opacity:.7}
+.cat-link{cursor:pointer}
+.cat-more{
+  font-size:.72rem;color:var(--text-3);cursor:pointer;
+  background:none;border:none;font-family:var(--font);
+  text-decoration:underline;text-underline-offset:2px;
+}
+.cat-more:hover{color:var(--text-2)}
 
 /* ── Groups ────────────────────────────────────────── */
 .groups{display:flex;flex-direction:column;gap:6px}
@@ -1235,8 +1254,54 @@ let searchText = '';
 let debounceTimer;
 let sortMode = 'default';
 let groupMode = 'class';
+let activeCategories = new Set();
 let renderLimit = 20;
 let kbIdx = -1;
+
+// Collect distinct categories and their test counts
+const catCounts = {};
+groups.forEach(function(g){g.tests.forEach(function(t){
+    if(t.categories){t.categories.forEach(function(c){catCounts[c]=(catCounts[c]||0)+1;});}
+});});
+const catNames = Object.keys(catCounts).sort();
+const catRow = document.getElementById('categoryPills');
+const catLimit = 8;
+let catExpanded = false;
+function buildCatPills(){
+    while(catRow.firstChild) catRow.removeChild(catRow.firstChild);
+    if(!catNames.length) return;
+    var lbl = document.createElement('span');
+    lbl.className='cat-lbl';
+    lbl.textContent='Categories:';
+    catRow.appendChild(lbl);
+    var showing = catExpanded ? catNames : catNames.slice(0, catLimit);
+    showing.forEach(function(c){
+        var btn = document.createElement('button');
+        btn.className = 'pill cat-pill' + (activeCategories.has(c) ? ' active' : '');
+        btn.setAttribute('data-category', c);
+        btn.textContent = c + ' ';
+        var cnt = document.createElement('span');
+        cnt.className='cat-count';
+        cnt.textContent='('+catCounts[c]+')';
+        btn.appendChild(cnt);
+        catRow.appendChild(btn);
+    });
+    if(!catExpanded && catNames.length > catLimit){
+        var more = document.createElement('button');
+        more.className='cat-more';
+        more.textContent='+'+(catNames.length-catLimit)+' more';
+        more.addEventListener('click',function(){catExpanded=true;buildCatPills();});
+        catRow.appendChild(more);
+    } else if(catExpanded && catNames.length > catLimit){
+        var less = document.createElement('button');
+        less.className='cat-more';
+        less.textContent='Show less';
+        less.addEventListener('click',function(){catExpanded=false;buildCatPills();});
+        catRow.appendChild(less);
+    }
+    catRow.classList.add('visible');
+}
+if(catNames.length > 0) buildCatPills();
 
 const spansByTrace = {};
 const bySpanId = {};
@@ -1259,6 +1324,9 @@ function matchesFilter(t) {
         if (activeFilter === 'failed') {
             if (t.status !== 'failed' && t.status !== 'error' && t.status !== 'timedOut') return false;
         } else if (t.status !== activeFilter) return false;
+    }
+    if (activeCategories.size > 0) {
+        if (!(t.categories || []).some(function(c){ return activeCategories.has(c); })) return false;
     }
     if (searchText) {
         const q = searchText.toLowerCase();
@@ -1401,7 +1469,7 @@ function renderDetail(t) {
     }
     if (t.categories && t.categories.length > 0) {
         h += '<div class="d-sec"><div class="d-lbl">Categories</div><div class="d-tags">';
-        t.categories.forEach(c => { h += '<span class="d-tag">'+esc(c)+'</span>'; });
+        t.categories.forEach(c => { h += '<span class="d-tag cat-link" data-category="'+esc(c)+'" title="Filter by '+esc(c)+'">'+esc(c)+'</span>'; });
         h += '</div></div>';
     }
     if (t.customProperties && t.customProperties.length > 0) {
@@ -1697,7 +1765,7 @@ function render() {
     }
     container.innerHTML = html;
     observeSentinel();
-    filterSummary.textContent = (activeFilter!=='all'||searchText)
+    filterSummary.textContent = (activeFilter!=='all'||searchText||activeCategories.size>0)
         ? 'Showing '+total+' of '+data.summary.total+' tests' : '';
     kbIdx = -1;
 }
@@ -1708,6 +1776,7 @@ function syncHash() {
     if (sortMode !== 'default') p.push('sort=' + encodeURIComponent(sortMode));
     if (searchText) p.push('search=' + encodeURIComponent(searchText));
     if (groupMode !== 'class') p.push('group=' + encodeURIComponent(groupMode));
+    if (activeCategories.size > 0) p.push('category=' + encodeURIComponent(Array.from(activeCategories).join(',')));
     history.replaceState(null, '', p.length ? '#' + p.join('&') : location.pathname);
 }
 
@@ -1726,6 +1795,7 @@ function loadFromHash() {
         else if (k === 'sort') sortMode = v;
         else if (k === 'search') { searchText = v; searchInput.value = v; clearBtn.style.display = v ? 'block' : 'none'; }
         else if (k === 'group') groupMode = v;
+        else if (k === 'category') { v.split(',').forEach(function(c){ if(c) activeCategories.add(c); }); }
     });
     // Sync button active states
     filterBtns.querySelectorAll('.pill').forEach(function(b) {
@@ -1743,6 +1813,7 @@ function loadFromHash() {
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-checked', isActive ? 'true' : 'false');
     });
+    if(activeCategories.size > 0) buildCatPills();
 }
 
 let lazyObs = null;
@@ -1814,6 +1885,14 @@ container.addEventListener('click',function(e){
         });
         return;
     }
+    const catLink = e.target.closest('.cat-link');
+    if(catLink){
+        e.stopPropagation();
+        var cat=catLink.getAttribute('data-category');
+        if(!activeCategories.has(cat)) activeCategories.add(cat);
+        buildCatPills();renderLimit=20;render();syncHash();
+        return;
+    }
     const hd = e.target.closest('.grp-hd');
     if(hd){const grp=hd.parentElement;grp.classList.toggle('open');hd.setAttribute('aria-expanded',grp.classList.contains('open')?'true':'false');return;}
     const row = e.target.closest('.t-row');
@@ -1834,6 +1913,18 @@ filterBtns.addEventListener('click',function(e){
     btn.classList.add('active');
     btn.setAttribute('aria-pressed','true');
     activeFilter=btn.dataset.filter;
+    renderLimit=20;render();
+    syncHash();
+});
+
+// Category pill click handler (toggle OR-based multi-select)
+catRow.addEventListener('click',function(e){
+    const btn=e.target.closest('.cat-pill');
+    if(!btn)return;
+    const cat=btn.getAttribute('data-category');
+    if(activeCategories.has(cat)){activeCategories.delete(cat);}
+    else{activeCategories.add(cat);}
+    buildCatPills();
     renderLimit=20;render();
     syncHash();
 });
