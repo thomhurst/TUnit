@@ -134,7 +134,17 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"### {Assembly.GetEntryAssembly()?.GetName().Name} ({targetFramework})");
+
+        var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+
+        if (!string.IsNullOrEmpty(ArtifactUrl))
+        {
+            stringBuilder.AppendLine($"### {assemblyName} ({targetFramework}) [(View Report)]({ArtifactUrl})");
+        }
+        else
+        {
+            stringBuilder.AppendLine($"### {assemblyName} ({targetFramework})");
+        }
 
         if (!string.IsNullOrEmpty(Filter))
         {
@@ -165,6 +175,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (inProgress.Length > 0)
         {
             stringBuilder.AppendLine($"| {inProgress.Length} | In Progress (never completed) |");
+        }
+
+        if (string.IsNullOrEmpty(ArtifactUrl))
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("> **Tip:** You can have HTML reports uploaded automatically as artifacts. [Learn more](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)");
         }
 
         if (passedCount == last.Count)
@@ -369,6 +385,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     }
 
     public string? Filter { get; set; }
+
+    // Set by HtmlReporter during OnTestSessionFinishingAsync, which MTP invokes before AfterRunAsync.
+    internal string? ArtifactUrl { get; set; }
 
     internal void SetReporterStyle(GitHubReporterStyle style)
     {

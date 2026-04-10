@@ -25,6 +25,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
+    private GitHubReporter? _githubReporter;
 
 #if NET
     private ActivityCollector? _activityCollector;
@@ -177,6 +178,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     internal void SetMessageBus(IMessageBus? messageBus)
     {
         _messageBus = messageBus;
+    }
+
+    internal void SetGitHubReporter(GitHubReporter githubReporter)
+    {
+        _githubReporter = githubReporter;
     }
 
     // Called by the AddTestSessionLifetimeHandler factory at startup, before any session events fire,
@@ -648,7 +654,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static async Task TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
+    private async Task TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
     {
         if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
         {
@@ -697,7 +703,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
                 if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
                 {
-                    line = $"\n\ud83d\udcca [{assemblyName} — View HTML Report](https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId})\n";
+                    var artifactUrl = $"https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
+
+                    if (_githubReporter is not null)
+                    {
+                        _githubReporter.ArtifactUrl = artifactUrl;
+                    }
+
+                    line = $"\n\ud83d\udcca [{assemblyName} — View HTML Report]({artifactUrl})\n";
                 }
                 else
                 {
