@@ -4,7 +4,7 @@ namespace TUnit.UnitTests;
 
 /// <summary>
 /// Tests for <see cref="TestContextResolverRegistry"/> and <see cref="ITestContextResolver"/>.
-/// Verifies that custom resolvers are consulted before the AsyncLocal chain when resolving Context.Current.
+/// Verifies that custom resolvers act as a fallback when AsyncLocal cannot resolve the context.
 /// </summary>
 [NotInParallel]
 public class TestContextResolverRegistryTests

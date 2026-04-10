@@ -8,9 +8,9 @@ namespace TUnit.AspNetCore.Logging;
 /// A logger that resolves the current test context per log call, supporting shared web application scenarios.
 /// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
 /// and all registered log sinks naturally route the output to the correct test.
-/// Resolution is delegated to the <see cref="TestContextResolverRegistry"/> (which includes the
-/// <see cref="HttpContextTestContextResolver"/> registered by <see cref="CorrelatedTUnitLoggingExtensions"/>),
-/// then falls back to <see cref="TestContext.Current"/> (AsyncLocal).
+/// Resolution checks <see cref="TestContext.Current"/> (AsyncLocal) first, then falls back to the
+/// <see cref="TestContextResolverRegistry"/> (which includes the <see cref="HttpContextTestContextResolver"/>
+/// registered by <see cref="CorrelatedTUnitLoggingExtensions"/>).
 /// </summary>
 public sealed class CorrelatedTUnitLogger : ILogger
 {
@@ -58,7 +58,10 @@ public sealed class CorrelatedTUnitLogger : ILogger
 
         // Set the current test context so the console interceptor routes output
         // to the correct test's sinks (test output, IDE real-time, console)
-        TestContext.Current = testContext;
+        if (TestContext.Current != testContext)
+        {
+            TestContext.Current = testContext;
+        }
 
         var message = formatter(state, exception);
 
@@ -81,8 +84,6 @@ public sealed class CorrelatedTUnitLogger : ILogger
 
     private static TestContext? ResolveTestContext()
     {
-        // 1. Consult custom resolvers (includes HttpContextTestContextResolver for ASP.NET Core)
-        // 2. Fall back to AsyncLocal
-        return TestContextResolverRegistry.Resolve() ?? TestContext.Current;
+        return TestContext.Current ?? TestContextResolverRegistry.Resolve();
     }
 }

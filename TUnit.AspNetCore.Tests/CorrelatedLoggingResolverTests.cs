@@ -17,7 +17,6 @@ namespace TUnit.AspNetCore.Tests;
 /// 5. Console interceptor routes output to the correct test's output buffer
 /// 6. Test verifies its own GetStandardOutput() contains the expected marker
 /// </summary>
-[NotInParallel("CorrelatedLogging")]
 public class CorrelatedLoggingResolverTests
 {
     /// <summary>
