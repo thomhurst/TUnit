@@ -699,7 +699,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
             else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
             {
-                _githubReporter.ArtifactUrl = $"https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
+                var serverUrl = (Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com").TrimEnd('/');
+                _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }
     }

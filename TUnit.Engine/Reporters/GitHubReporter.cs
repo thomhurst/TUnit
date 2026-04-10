@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -24,6 +25,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     private const long MaxFileSizeInBytes = EngineDefaults.GitHubSummaryMaxFileSizeBytes;
     private string _outputSummaryFilePath = null!;
     private GitHubReporterStyle _reporterStyle = GitHubReporterStyle.Collapsible;
+    private Stopwatch? _runStopwatch;
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -85,6 +87,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public Task BeforeRunAsync(CancellationToken cancellationToken)
     {
+        _runStopwatch = Stopwatch.StartNew();
         return Task.CompletedTask;
     }
 
@@ -133,15 +136,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var inProgress = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
-        var totalDuration = TimeSpan.Zero;
-        foreach (var msg in last.Values)
-        {
-            var timing = msg.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
-            if (timing is not null)
-            {
-                totalDuration += timing.GlobalTiming.Duration;
-            }
-        }
+        _runStopwatch?.Stop();
+        var elapsed = _runStopwatch?.Elapsed;
 
         var hasFailures = failed.Length > 0 || timeout.Length > 0 || cancelled.Length > 0;
         var statusEmoji = hasFailures ? "\u274C" : "\u2705";
@@ -168,7 +164,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var passRate = totalCount > 0 ? (double)passedCount / totalCount * 100 : 0;
 
         stringBuilder.AppendLine();
-        stringBuilder.AppendLine($"**{totalCount} tests** completed in **{FormatDuration(totalDuration)}** \u2014 **{passRate:F1}%** passed");
+        stringBuilder.AppendLine($"**{totalCount} tests** completed in **{FormatDuration(elapsed)}** \u2014 **{passRate:F1}%** passed");
         stringBuilder.AppendLine();
 
         var segments = new List<string> { $"\u2705 {passedCount} passed" };
