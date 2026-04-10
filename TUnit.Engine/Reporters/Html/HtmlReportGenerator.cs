@@ -86,7 +86,7 @@ internal static partial class HtmlReportGenerator
 
         sb.AppendLine("</div>");
 
-        // Feature 11: Minimap sidebar navigator
+        // Minimap sidebar navigator
         sb.AppendLine("<div class=\"minimap-backdrop\" id=\"minimapBackdrop\"></div>");
         sb.AppendLine("<div class=\"minimap\" id=\"minimap\" role=\"navigation\" aria-label=\"Test group navigator\">");
         sb.AppendLine("<div class=\"minimap-hd\">Navigator</div>");
@@ -1181,7 +1181,7 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
   .t-row.kb-focus{outline:2px solid LinkText}
 }
 
-/* ── Feature 11: Minimap Sidebar Navigator ─────────── */
+/* ── Minimap Sidebar Navigator ─────────── */
 .minimap-toggle{display:none}
 .minimap-toggle.visible{display:flex}
 .minimap-toggle.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
@@ -2070,7 +2070,7 @@ if(data.summary.passed===data.summary.total&&data.summary.total>0){
     hist.innerHTML=h;
 })();
 
-// ── Feature 11: Minimap Sidebar Navigator ──────────
+// ── Minimap Sidebar Navigator ──────────
 function updateMinimap(allDisplayGroups) {
     if (!mmToggle || !mmContent) return;
     const visibleGroups = [];
@@ -2130,14 +2130,14 @@ function updateMinimap(allDisplayGroups) {
 function openMinimap() {
     minimapOpen = true;
     if (mm) mm.classList.add('open');
-    if (mmToggle) mmToggle.classList.add('active');
+    if (mmToggle) { mmToggle.classList.add('active'); mmToggle.setAttribute('aria-expanded','true'); }
     if (mmBackdrop) mmBackdrop.classList.add('open');
     localStorage.setItem('tunit-minimap', 'open');
 }
 function closeMinimap() {
     minimapOpen = false;
     if (mm) mm.classList.remove('open');
-    if (mmToggle) mmToggle.classList.remove('active');
+    if (mmToggle) { mmToggle.classList.remove('active'); mmToggle.setAttribute('aria-expanded','false'); }
     if (mmBackdrop) mmBackdrop.classList.remove('open');
     localStorage.setItem('tunit-minimap', 'closed');
 }
