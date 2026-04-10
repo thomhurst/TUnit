@@ -168,6 +168,7 @@ public partial class TestContext : Context,
     /// <summary>
     /// A disposable scope returned by <see cref="MakeCurrent"/> that restores the previous
     /// <see cref="TestContext.Current"/> value when disposed.
+    /// This is a value type — do not dispose more than once.
     /// </summary>
     public readonly struct ContextScope : IDisposable
     {
