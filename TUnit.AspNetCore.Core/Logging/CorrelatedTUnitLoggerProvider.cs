@@ -1,59 +1,44 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
-using TUnit.Core;
 
 namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
-/// A logger provider that writes ILogger output to <see cref="Console"/> synchronously on the calling thread.
-/// This is necessary because ASP.NET Core's built-in <c>ConsoleLogger</c> writes from a background queue thread
-/// that does not inherit the <c>AsyncLocal</c> set by <see cref="TestContext.MakeCurrent"/>.
-/// By writing on the request thread, TUnit's console interceptor can route the output to the correct test.
+/// A logger provider that creates <see cref="CorrelatedTUnitLogger"/> instances.
+/// Each log call resolves the current test context dynamically via <see cref="TUnit.Core.TestContext.Current"/>,
+/// supporting shared web application scenarios where a single host serves multiple tests.
 /// </summary>
-internal sealed class CorrelatedTUnitLoggerProvider : ILoggerProvider
+public sealed class CorrelatedTUnitLoggerProvider : ILoggerProvider
 {
-    public ILogger CreateLogger(string categoryName) => new CorrelatedTUnitLogger(categoryName);
+    private readonly ConcurrentDictionary<string, CorrelatedTUnitLogger> _loggers = new();
+    private readonly LogLevel _minLogLevel;
+    private bool _disposed;
 
-    public void Dispose() { }
-}
-
-internal sealed class CorrelatedTUnitLogger : ILogger
-{
-    private readonly string _categoryName;
-
-    internal CorrelatedTUnitLogger(string categoryName) => _categoryName = categoryName;
-
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-
-    public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information && TestContext.Current is not null;
-
-    public void Log<TState>(
-        LogLevel logLevel,
-        EventId eventId,
-        TState state,
-        Exception? exception,
-        Func<TState, Exception?, string> formatter)
+    /// <summary>
+    /// Creates a new <see cref="CorrelatedTUnitLoggerProvider"/>.
+    /// </summary>
+    /// <param name="minLogLevel">The minimum log level to capture. Defaults to Information.</param>
+    public CorrelatedTUnitLoggerProvider(LogLevel minLogLevel = LogLevel.Information)
     {
-        if (!IsEnabled(logLevel))
+        _minLogLevel = minLogLevel;
+    }
+
+    public ILogger CreateLogger(string categoryName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        return _loggers.GetOrAdd(categoryName,
+            name => new CorrelatedTUnitLogger(name, _minLogLevel));
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
         {
             return;
         }
 
-        var message = formatter(state, exception);
-
-        if (exception is not null)
-        {
-            message = $"{message}{Environment.NewLine}{exception}";
-        }
-
-        var formattedMessage = $"[{logLevel}] {_categoryName}: {message}";
-
-        if (logLevel >= LogLevel.Error)
-        {
-            Console.Error.WriteLine(formattedMessage);
-        }
-        else
-        {
-            Console.WriteLine(formattedMessage);
-        }
+        _disposed = true;
+        _loggers.Clear();
     }
 }
