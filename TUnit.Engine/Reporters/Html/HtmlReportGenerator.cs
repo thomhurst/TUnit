@@ -76,6 +76,7 @@ internal static partial class HtmlReportGenerator
 
         // Quick-access sections populated by JS
         sb.AppendLine("<div id=\"failedSection\" role=\"region\" aria-label=\"Failed tests\"></div>");
+        sb.AppendLine("<div id=\"flakySection\" role=\"region\" aria-label=\"Flaky tests\"></div>");
         sb.AppendLine("<div id=\"failureClusters\" role=\"region\" aria-label=\"Failure clusters\"></div>");
         sb.AppendLine("<div id=\"slowestSection\" role=\"region\" aria-label=\"Slowest tests\"></div>");
 
@@ -256,6 +257,8 @@ internal static partial class HtmlReportGenerator
         sb.AppendLine("<div id=\"durationHist\" class=\"dur-hist\"></div>");
         sb.AppendLine("</div>");
 
+        sb.AppendLine("<div class=\"flaky-indicator\" id=\"flakyIndicator\"></div>");
+
         sb.AppendLine("</section>");
     }
 
@@ -308,6 +311,7 @@ internal static partial class HtmlReportGenerator
         sb.Append("<button class=\"pill\" data-filter=\"passed\" aria-pressed=\"false\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
         sb.Append(summary.Passed);
         sb.AppendLine("</span></button>");
+        sb.AppendLine("<button class=\"pill\" data-filter=\"flaky\" aria-pressed=\"false\" id=\"flakyPill\" style=\"display:none\"><span class=\"dot orange\"></span>Flaky <span class=\"pill-count\" id=\"flakyPillCount\">0</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"failed\" aria-pressed=\"false\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
         sb.Append(summary.Failed + summary.TimedOut);
         sb.AppendLine("</span></button>");
@@ -473,6 +477,8 @@ internal static partial class HtmlReportGenerator
   --indigo:    #818cf8;
   --indigo-d:  rgba(129,140,248,.10);
   --violet:    #a78bfa;
+  --orange:    #fb923c;
+  --orange-d:  rgba(251,146,60,.12);
 
   --font:      'Segoe UI Variable','Segoe UI',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --mono:      'Cascadia Code','JetBrains Mono','Fira Code','SF Mono',ui-monospace,monospace;
@@ -490,6 +496,7 @@ internal static partial class HtmlReportGenerator
   --emerald-d:rgba(52,211,153,.15);--rose-d:rgba(251,113,133,.15);
   --amber-d:rgba(251,191,36,.12);--slate-d:rgba(148,163,184,.12);
   --indigo-d:rgba(129,140,248,.12);--violet:#7c3aed;
+  --orange-d:rgba(251,146,60,.15);
 }
 :root[data-theme="light"] .grain{opacity:.008}
 
@@ -512,6 +519,7 @@ internal static partial class HtmlReportGenerator
 @property --amber-d   { syntax:'<color>'; inherits:true; initial-value:rgba(251,191,36,.10) }
 @property --slate-d   { syntax:'<color>'; inherits:true; initial-value:rgba(148,163,184,.10) }
 @property --indigo-d  { syntax:'<color>'; inherits:true; initial-value:rgba(129,140,248,.10) }
+@property --orange-d  { syntax:'<color>'; inherits:true; initial-value:rgba(251,146,60,.12) }
 
 :root {
   transition:
@@ -520,7 +528,8 @@ internal static partial class HtmlReportGenerator
     --border .3s var(--ease), --border-h .3s var(--ease),
     --text .3s var(--ease), --text-2 .3s var(--ease), --text-3 .3s var(--ease),
     --emerald-d .3s var(--ease), --rose-d .3s var(--ease), --amber-d .3s var(--ease),
-    --slate-d .3s var(--ease), --indigo-d .3s var(--ease);
+    --slate-d .3s var(--ease), --indigo-d .3s var(--ease),
+    --orange-d .3s var(--ease);
 }
 /* Suppress per-element transitions during theme switch so only the
    @property variable interpolations drive the animation — no stagger. */
@@ -669,6 +678,8 @@ body{
 .dash-dur{text-align:center;padding:4px 20px;flex-shrink:0}
 .dash-dur-val{display:block;font-size:1.5rem;font-weight:800;font-family:var(--mono);letter-spacing:-.02em}
 .dash-dur-lbl{display:block;font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.flaky-indicator{display:none;text-align:center;margin-top:6px;font-size:.78rem;font-weight:700;color:var(--orange)}
+.flaky-indicator.visible{display:block}
 
 /* ── Toolbar (search + pills) ──────────────────────── */
 .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;justify-content:flex-end}
@@ -712,6 +723,7 @@ body{
 .dot.rose{background:var(--rose)}
 .dot.amber{background:var(--amber)}
 .dot.slate{background:var(--slate)}
+.dot.orange{background:var(--orange)}
 .bar-info{font-size:.8rem;color:var(--text-3);margin-left:auto}
 
 /* Category filter pills — extends .pill with smaller sizing and violet accent */
@@ -787,6 +799,7 @@ body{
 .t-badge.failed,.t-badge.error,.t-badge.timedOut{background:var(--rose-d);color:var(--rose);box-shadow:0 0 6px rgba(251,113,133,.15)}
 .t-badge.skipped{background:var(--amber-d);color:var(--amber);box-shadow:0 0 6px rgba(251,191,36,.12)}
 .t-badge.cancelled{background:var(--slate-d);color:var(--slate)}
+.t-badge.flaky{background:var(--orange-d);color:var(--orange);box-shadow:0 0 6px rgba(251,146,60,.15)}
 .t-badge.inProgress,.t-badge.unknown{background:var(--surface-2);color:var(--text-3)}
 .t-name{flex:1;font-size:.88rem;word-break:break-word;color:var(--text)}
 .t-dur{font-size:.78rem;color:var(--text-3);font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -1379,9 +1392,14 @@ spans.forEach(s => {
     if (tag) suiteSpanByClass[tag.value] = s;
 });
 
+function isFlaky(t) { return t.status === 'passed' && t.retryAttempt > 0; }
 function matchesFilter(t) {
     if (activeFilter !== 'all') {
-        if (activeFilter === 'failed') {
+        if (activeFilter === 'flaky') {
+            if (!isFlaky(t)) return false;
+        } else if (activeFilter === 'passed') {
+            if (t.status !== 'passed' || isFlaky(t)) return false;
+        } else if (activeFilter === 'failed') {
             if (t.status !== 'failed' && t.status !== 'error' && t.status !== 'timedOut') return false;
         } else if (t.status !== activeFilter) return false;
     }
@@ -1782,6 +1800,46 @@ function renderSlowestSection() {
     sec.innerHTML = h;
 }
 
+function renderFlakySection() {
+    const sec = document.getElementById('flakySection');
+    if (!sec) return;
+    const flaky = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (isFlaky(t)) flaky.push({t:t,cls:g.className});
+        });
+    });
+    // Update pill visibility and count
+    const pill = document.getElementById('flakyPill');
+    const pillCount = document.getElementById('flakyPillCount');
+    if (pill) pill.style.display = flaky.length ? '' : 'none';
+    if (pillCount) pillCount.textContent = flaky.length;
+    // Update dashboard indicator
+    const indicator = document.getElementById('flakyIndicator');
+    if (indicator) {
+        if (flaky.length) {
+            indicator.textContent = flaky.length + ' flaky';
+            indicator.classList.add('visible');
+        } else {
+            indicator.classList.remove('visible');
+        }
+    }
+    if (!flaky.length) { sec.innerHTML=''; return; }
+    flaky.sort(function(a,b){ return b.t.retryAttempt - a.t.retryAttempt; });
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Flaky Tests ('+flaky.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    flaky.forEach(function(f){
+        h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
+        h += '<span class="t-badge flaky">flaky</span>';
+        h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
+        h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
+        h += '<span class="retry-tag">'+f.t.retryAttempt+' '+(f.t.retryAttempt===1?'retry':'retries')+'</span>';
+        h += '<span class="qa-dur">'+fmt(f.t.durationMs)+'</span>';
+        h += '</div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+}
+
 function sortGroups(grps) {
     if (sortMode === 'duration') {
         const maxDur = new Map(grps.map(g => [g, g.tests.length ? Math.max(...g.tests.map(t => t.durationMs)) : 0]));
@@ -2081,6 +2139,7 @@ loadFromHash();
 if(catNames.length > 0) buildCatPills();
 render();
 renderFailedSection();
+renderFlakySection();
 renderFailureClusters();
 renderSlowestSection();
 checkHash();
