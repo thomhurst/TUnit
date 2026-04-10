@@ -76,7 +76,9 @@ internal static partial class HtmlReportGenerator
 
         // Quick-access sections populated by JS
         sb.AppendLine("<div id=\"failedSection\" role=\"region\" aria-label=\"Failed tests\"></div>");
+        sb.AppendLine("<div id=\"failureClusters\" role=\"region\" aria-label=\"Failure clusters\"></div>");
         sb.AppendLine("<div id=\"slowestSection\" role=\"region\" aria-label=\"Slowest tests\"></div>");
+        sb.AppendLine("<div id=\"parallelTimeline\" role=\"region\" aria-label=\"Parallel execution timeline\"></div>");
 
         AppendTestGroups(sb, data);
         sb.AppendLine("</main>");
@@ -1092,6 +1094,55 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 }
 .dur-hist-bar:hover::after{opacity:1}
 
+/* ── Failure Clusters ──────────────────────────── */
+.fc-cluster{margin-bottom:4px}
+.fc-hd{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s var(--ease);border-radius:var(--r)}
+.fc-hd:hover{background:var(--surface-2)}
+.fc-type{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--rose);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+.fc-frame{font-family:var(--mono);font-size:.74rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.fc-count{font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--rose-d);color:var(--rose);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
+.fc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.fc-cluster.open .fc-body{grid-template-rows:1fr}
+.fc-body-inner{overflow:hidden;min-height:0}
+.fc-tests{padding:0 14px 8px}
+.fc-test{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:var(--r);cursor:pointer;transition:background .12s var(--ease);font-size:.84rem}
+.fc-test:hover{background:var(--surface-2)}
+.fc-test-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.fc-test-class{font-size:.72rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fc-test-dur{font-size:.76rem;color:var(--text-3);font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fc-msg{font-family:var(--mono);font-size:.76rem;color:var(--text-3);padding:4px 14px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Parallel Execution Timeline ─────────────────── */
+.pt-wrap{padding:14px 16px}
+.pt-controls{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.pt-controls label{font-size:.74rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+.pt-filter-pills{display:flex;gap:4px}
+.pt-canvas{position:relative;overflow-x:auto;overflow-y:hidden;min-height:80px}
+.pt-chart{position:relative;min-height:80px}
+.pt-lane{position:relative;height:20px;margin-bottom:2px}
+.pt-bar{position:absolute;top:2px;height:16px;border-radius:3px;min-width:3px;cursor:pointer;transition:filter .15s,opacity .15s}
+.pt-bar:hover{filter:brightness(1.2);z-index:1}
+.pt-bar.passed{background:linear-gradient(90deg,rgba(52,211,153,.7),var(--emerald))}
+.pt-bar.failed,.pt-bar.error,.pt-bar.timedOut{background:linear-gradient(90deg,rgba(251,113,133,.7),var(--rose))}
+.pt-bar.skipped{background:linear-gradient(90deg,rgba(251,191,36,.7),var(--amber))}
+.pt-bar.cancelled{background:linear-gradient(90deg,rgba(148,163,184,.5),var(--slate))}
+.pt-bar.pt-dim{opacity:.15}
+.pt-tooltip{position:fixed;z-index:10001;padding:8px 12px;border-radius:var(--r);background:var(--surface-3);border:1px solid var(--border-h);color:var(--text);font-size:.78rem;pointer-events:none;max-width:360px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.pt-tooltip .pt-tip-name{font-weight:600;margin-bottom:4px;word-break:break-word}
+.pt-tooltip .pt-tip-class{font-size:.72rem;color:var(--text-3);margin-bottom:4px}
+.pt-tooltip .pt-tip-info{font-size:.72rem;color:var(--text-2);font-family:var(--mono)}
+.pt-axis{display:flex;justify-content:space-between;padding:4px 0;font-size:.66rem;color:var(--text-3);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pt-legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.pt-legend-item{display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--text-2)}
+.pt-legend-dot{width:10px;height:10px;border-radius:3px}
+.pt-summary{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding:8px 12px;background:var(--surface-0);border:1px solid var(--border);border-radius:var(--r);font-size:.78rem;color:var(--text-2)}
+.pt-summary strong{color:var(--text);font-variant-numeric:tabular-nums}
+@media(max-width:768px){
+  .fc-frame{display:none}
+  .fc-type{max-width:200px}
+  .pt-canvas{min-height:60px}
+}
+
 /* ── Lazy Sentinel ──────────────────────────────── */
 .lazy-sentinel{display:flex;align-items:center;justify-content:center;padding:16px;color:var(--text-3);font-size:.82rem}
 
@@ -1881,7 +1932,9 @@ document.getElementById('globalTimeline').innerHTML = renderGlobalTimeline();
 loadFromHash();
 render();
 renderFailedSection();
+renderFailureClusters();
 renderSlowestSection();
+renderParallelTimeline();
 checkHash();
 
 // Theme toggle handler
@@ -1967,6 +2020,189 @@ document.addEventListener('keydown',function(e){
     var ssb=document.getElementById('stickySearchBtn');
     if(ssb) ssb.addEventListener('click',function(){searchInput.focus();searchInput.scrollIntoView({behavior:'smooth',block:'center'});});
 })();
+
+// ── Failure Clustering ───────────────────────────────
+function renderFailureClusters() {
+    const sec = document.getElementById('failureClusters');
+    if (!sec) return;
+    const failed = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (t.status==='failed'||t.status==='error'||t.status==='timedOut') failed.push({t:t,cls:g.className});
+        });
+    });
+    if (failed.length < 2) { sec.innerHTML=''; return; }
+    // Cluster by exception type + top stack frame
+    const clusters = {};
+    failed.forEach(function(f){
+        const ex = f.t.exception;
+        if (!ex) return;
+        const type = ex.type || 'Unknown';
+        let frame = '';
+        if (ex.stackTrace) {
+            const lines = ex.stackTrace.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i].trim();
+                if (l.startsWith('at ')) { frame = l.substring(3).replace(/\s+in\s+.+$/, '').replace(/\[.+\]/, '').trim(); break; }
+            }
+        }
+        const key = type + '||' + frame;
+        if (!clusters[key]) clusters[key] = {type: type, frame: frame, tests: [], msg: ex.message || ''};
+        clusters[key].tests.push(f);
+    });
+    // Filter to clusters with 2+ tests, sort by count descending
+    const sorted = Object.values(clusters).filter(c => c.tests.length >= 2).sort((a,b) => b.tests.length - a.tests.length);
+    if (!sorted.length) { sec.innerHTML=''; return; }
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Failure Clusters ('+sorted.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    sorted.forEach(function(c, ci){
+        const truncMsg = c.msg.length > 100 ? c.msg.substring(0,100)+'\u2026' : c.msg;
+        h += '<div class="fc-cluster" data-fci="'+ci+'">';
+        h += '<div class="fc-hd">';
+        h += '<span class="fc-type" title="'+esc(c.type)+'">'+esc(c.type)+'</span>';
+        if (c.frame) h += '<span class="fc-frame" title="'+esc(c.frame)+'">'+esc(c.frame)+'</span>';
+        h += '<span class="fc-count">'+c.tests.length+' tests</span>';
+        h += '</div>';
+        if (truncMsg) h += '<div class="fc-msg" title="'+esc(c.msg)+'">'+esc(truncMsg)+'</div>';
+        h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
+        c.tests.forEach(function(f){
+            h += '<div class="fc-test" data-scroll-tid="'+f.t.id+'">';
+            h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
+            h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
+            h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
+            h += '<span class="fc-test-dur">'+fmt(f.t.durationMs)+'</span>';
+            h += '</div>';
+        });
+        h += '</div></div></div></div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+}
+
+// Click handler for failure cluster expand/collapse
+document.addEventListener('click', function(e){
+    const hd = e.target.closest('.fc-hd');
+    if (hd) { hd.closest('.fc-cluster').classList.toggle('open'); return; }
+    const ft = e.target.closest('.fc-test');
+    if (ft && ft.dataset.scrollTid) { scrollToTest(ft.dataset.scrollTid); }
+});
+
+// ── Parallel Execution Timeline ─────────────────────
+function renderParallelTimeline() {
+    const sec = document.getElementById('parallelTimeline');
+    if (!sec) return;
+    const allTests = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (t.startTime && t.endTime) allTests.push({t:t, cls:g.className});
+        });
+    });
+    if (allTests.length < 2) { sec.innerHTML=''; return; }
+    // Parse times
+    allTests.forEach(function(f){
+        f.start = new Date(f.t.startTime).getTime();
+        f.end = new Date(f.t.endTime).getTime();
+        if (f.end <= f.start) f.end = f.start + 1;
+    });
+    // Sort by start time
+    allTests.sort(function(a,b){ return a.start - b.start || a.end - b.end; });
+    const globalMin = allTests[0].start;
+    const globalMax = Math.max.apply(null, allTests.map(function(f){ return f.end; }));
+    const totalDur = globalMax - globalMin || 1;
+    // Assign lanes (greedy algorithm: assign to earliest-available lane)
+    const lanes = []; // each lane tracks its end time
+    allTests.forEach(function(f){
+        let assigned = false;
+        for (let i = 0; i < lanes.length; i++) {
+            if (f.start >= lanes[i]) { lanes[i] = f.end; f.lane = i; assigned = true; break; }
+        }
+        if (!assigned) { f.lane = lanes.length; lanes.push(f.end); }
+    });
+    const maxConcurrency = lanes.length;
+    // Build HTML
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Parallel Execution Timeline</div><div class="tl-content"><div class="tl-content-inner"><div class="pt-wrap">';
+    // Summary
+    h += '<div class="pt-summary">';
+    h += '<span><strong>'+allTests.length+'</strong> tests with timing data</span>';
+    h += '<span>Peak concurrency: <strong>'+maxConcurrency+'</strong> lanes</span>';
+    h += '<span>Wall time: <strong>'+fmt(totalDur)+'</strong></span>';
+    h += '</div>';
+    // Controls
+    h += '<div class="pt-controls"><label>Highlight:</label><div class="pt-filter-pills">';
+    h += '<button class="pill pt-pill active" data-pt-filter="all">All</button>';
+    h += '<button class="pill pt-pill" data-pt-filter="failed"><span class="dot rose"></span>Failed</button>';
+    h += '<button class="pill pt-pill" data-pt-filter="slow"><span class="dot amber"></span>Slow</button>';
+    h += '</div></div>';
+    // Axis
+    h += '<div class="pt-axis">';
+    const axisSteps = 5;
+    for (let i = 0; i <= axisSteps; i++) {
+        h += '<span>'+fmt(totalDur * i / axisSteps)+'</span>';
+    }
+    h += '</div>';
+    // Chart
+    h += '<div class="pt-canvas"><div class="pt-chart" style="height:'+(maxConcurrency * 22)+'px">';
+    // Compute p90 duration for "slow" highlighting
+    const durs = allTests.map(function(f){ return f.t.durationMs; }).sort(function(a,b){ return a - b; });
+    const p90 = durs[Math.floor(durs.length * 0.9)] || 0;
+    allTests.forEach(function(f, idx){
+        const left = ((f.start - globalMin) / totalDur * 100).toFixed(3);
+        const width = Math.max(((f.end - f.start) / totalDur * 100), 0.15).toFixed(3);
+        const top = f.lane * 22;
+        const isFail = f.t.status==='failed'||f.t.status==='error'||f.t.status==='timedOut';
+        const isSlow = f.t.durationMs >= p90 && p90 > 0;
+        h += '<div class="pt-bar '+f.t.status+'" style="left:'+left+'%;width:'+width+'%;top:'+top+'px" data-pt-idx="'+idx+'" data-pt-tid="'+f.t.id+'"';
+        if (isFail) h += ' data-pt-fail="1"';
+        if (isSlow) h += ' data-pt-slow="1"';
+        h += '></div>';
+    });
+    h += '</div></div>';
+    // Legend
+    h += '<div class="pt-legend">';
+    h += '<span class="pt-legend-item"><span class="pt-legend-dot" style="background:var(--emerald)"></span>Passed</span>';
+    h += '<span class="pt-legend-item"><span class="pt-legend-dot" style="background:var(--rose)"></span>Failed</span>';
+    h += '<span class="pt-legend-item"><span class="pt-legend-dot" style="background:var(--amber)"></span>Skipped</span>';
+    h += '<span class="pt-legend-item"><span class="pt-legend-dot" style="background:var(--slate)"></span>Cancelled</span>';
+    h += '</div>';
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+    // Tooltip + interaction
+    const ptData = allTests;
+    let tip = null;
+    sec.addEventListener('mouseover', function(e){
+        const bar = e.target.closest('.pt-bar');
+        if (!bar) return;
+        const idx = parseInt(bar.dataset.ptIdx, 10);
+        const f = ptData[idx];
+        if (!f) return;
+        if (!tip) { tip = document.createElement('div'); tip.className = 'pt-tooltip'; document.body.appendChild(tip); }
+        tip.innerHTML = '<div class="pt-tip-name">'+esc(f.t.displayName)+'</div>'
+            + '<div class="pt-tip-class">'+esc(f.cls)+'</div>'
+            + '<div class="pt-tip-info">'+esc(f.t.status)+' \u00b7 '+fmt(f.t.durationMs)+' \u00b7 lane '+(f.lane+1)+'</div>';
+        tip.style.display = 'block';
+    });
+    sec.addEventListener('mousemove', function(e){
+        if (tip) { tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 10) + 'px'; }
+    });
+    sec.addEventListener('mouseout', function(e){
+        const bar = e.target.closest('.pt-bar');
+        if (bar && tip) { tip.style.display = 'none'; }
+    });
+    sec.addEventListener('click', function(e){
+        const bar = e.target.closest('.pt-bar');
+        if (bar && bar.dataset.ptTid) { scrollToTest(bar.dataset.ptTid); return; }
+        const pill = e.target.closest('.pt-pill');
+        if (pill) {
+            sec.querySelectorAll('.pt-pill').forEach(function(p){ p.classList.remove('active'); });
+            pill.classList.add('active');
+            const mode = pill.dataset.ptFilter;
+            sec.querySelectorAll('.pt-bar').forEach(function(b){
+                b.classList.remove('pt-dim');
+                if (mode === 'failed' && !b.dataset.ptFail) b.classList.add('pt-dim');
+                if (mode === 'slow' && !b.dataset.ptSlow) b.classList.add('pt-dim');
+            });
+        }
+    });
+}
 
 // ── Feature 9: 100% Pass Celebration ────────────────
 if(data.summary.passed===data.summary.total&&data.summary.total>0){
