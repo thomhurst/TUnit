@@ -21,6 +21,10 @@ namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
+    // System.Text.Json's Utf8JsonWriter limits a single string token to int.MaxValue / 6 characters.
+    // Truncate large outputs early so report generation never fails for test suites with excessive logging.
+    internal const int MaxOutputLength = 1 * 1024 * 1024; // 1 MB
+
     private string? _outputPath;
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
@@ -460,10 +464,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     fileLocation = f;
                     break;
                 case StandardOutputProperty o:
-                    stdOut = o.StandardOutput;
+                    stdOut = TruncateOutput(o.StandardOutput);
                     break;
                 case StandardErrorProperty e:
-                    stdErr = e.StandardError;
+                    stdErr = TruncateOutput(e.StandardError);
                     break;
                 case TestMetadataProperty meta:
                     if (string.IsNullOrEmpty(meta.Key))
@@ -515,6 +519,26 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             SpanId = spanId,
             AdditionalTraceIds = additionalTraceIds
         };
+    }
+
+    internal static string? TruncateOutput(string? value)
+    {
+        if (value is null || value.Length <= MaxOutputLength)
+        {
+            return value;
+        }
+
+        // Back off one char if we would split a surrogate pair, which would produce invalid UTF-16.
+        var cutAt = MaxOutputLength;
+        if (char.IsHighSurrogate(value[cutAt - 1]))
+        {
+            cutAt--;
+        }
+
+        return new System.Text.StringBuilder(cutAt + 64)
+            .Append(value, 0, cutAt)
+            .Append($"\n[... output truncated \u2014 {value.Length:N0} total characters]")
+            .ToString();
     }
 
     private static (string Status, ReportExceptionData? Exception, string? SkipReason) ExtractStatus(IProperty? stateProperty)
