@@ -1,36 +1,51 @@
 namespace TUnit.Core;
 
 /// <summary>
-/// Allows custom logic for resolving which <see cref="TestContext"/> should receive console output
-/// when the built-in <see cref="AsyncLocal{T}"/>-based mechanism cannot determine the context.
+/// Advanced extension point for resolving which <see cref="TestContext"/> should receive console output
+/// when the built-in <c>AsyncLocal</c> mechanism cannot determine the context.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The built-in context resolution uses <c>AsyncLocal&lt;T&gt;</c> which works when code runs on the same
-/// async execution flow as the test. However, it returns <c>null</c> when shared services (e.g., hosted services,
-/// gRPC handlers, message queue consumers) process work on their own thread pool threads.
-/// Registered resolvers act as a fallback, consulted only when the <c>AsyncLocal</c> chain yields no result.
+/// <strong>Prefer <see cref="TestContext.MakeCurrent"/>.</strong> For most scenarios (gRPC handlers,
+/// message queue consumers, MCP servers, etc.), call <see cref="TestContext.MakeCurrent"/> in your
+/// handler after extracting the test ID. This sets the <c>AsyncLocal</c> directly and is simpler,
+/// safer, and more efficient than implementing a resolver.
 /// </para>
 /// <para>
-/// Implement this interface and register it via <see cref="TestContextResolverRegistry.Register"/>
-/// to provide custom resolution logic for these scenarios.
+/// Implement this interface only when you need <em>automatic</em> protocol-level correlation
+/// without requiring each handler to call <see cref="TestContext.MakeCurrent"/> explicitly
+/// (for example, the built-in ASP.NET Core middleware).
+/// </para>
+/// <para>
+/// <strong>Do not register a resolver per test.</strong> Resolvers must use ambient state
+/// (e.g., <c>HttpContext.Items</c>, <c>Activity.Current</c>) to determine which test
+/// is active. A resolver that always returns a fixed <see cref="TestContext"/> will produce
+/// incorrect results when multiple tests run concurrently.
 /// </para>
 /// <para>
 /// <strong>Performance and thread safety:</strong> This method is called on every
-/// <c>Console.Write</c> / <c>Console.WriteLine</c> from arbitrary threads,
-/// so implementations must be thread-safe and very cheap. Avoid allocations, locks, and I/O in the hot path.
+/// <c>Console.Write</c> / <c>Console.WriteLine</c> when no <c>AsyncLocal</c> context is available,
+/// so implementations must be thread-safe and very cheap.
 /// </para>
 /// <para>
 /// <strong>Ordering:</strong> In <see cref="Context.Current"/>, registered resolvers are consulted
-/// after <see cref="TestContext.Current"/> (AsyncLocal) but before hook contexts
-/// (<c>TestBuildContext</c>, <c>ClassHookContext</c>, <c>AssemblyHookContext</c>).
-/// If your resolver returns a non-null value on threads that execute class- or assembly-level hooks,
-/// it will shadow those hook contexts. Ensure your resolver returns <c>null</c> when no
-/// protocol request (HTTP, gRPC, etc.) is in-flight.
+/// only after all <c>AsyncLocal</c>-based contexts (test, build, class hook, assembly hook, session,
+/// and discovery contexts) return <c>null</c>. Resolvers are a true last resort before
+/// <see cref="GlobalContext"/>.
 /// </para>
 /// </remarks>
 /// <example>
 /// <code>
+/// // Prefer MakeCurrent() for simple cases:
+/// if (TestContext.GetById(testId) is { } ctx)
+/// {
+///     using (ctx.MakeCurrent())
+///     {
+///         await ProcessRequest();
+///     }
+/// }
+///
+/// // Use ITestContextResolver only for automatic protocol-level correlation:
 /// public class McpTestContextResolver : ITestContextResolver
 /// {
 ///     public TestContext? ResolveCurrentTestContext()
@@ -39,9 +54,6 @@ namespace TUnit.Core;
 ///         return testId is not null ? TestContext.GetById(testId) : null;
 ///     }
 /// }
-///
-/// // Register in a [Before(Assembly)] hook:
-/// TestContextResolverRegistry.Register(new McpTestContextResolver());
 /// </code>
 /// </example>
 public interface ITestContextResolver

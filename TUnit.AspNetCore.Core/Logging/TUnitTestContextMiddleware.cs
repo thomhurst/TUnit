@@ -34,6 +34,13 @@ public sealed class TUnitTestContextMiddleware
             && TestContext.GetById(testId) is { } testContext)
         {
             httpContext.Items[HttpContextKey] = testContext;
+
+            using (testContext.MakeCurrent())
+            {
+                await _next(httpContext);
+            }
+
+            return;
         }
 
         await _next(httpContext);

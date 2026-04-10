@@ -5,7 +5,9 @@ using TUnit.Core;
 namespace TUnit.AspNetCore.Tests;
 
 /// <summary>
-/// Tests both AsyncLocal and resolver-based test context correlation paths.
+/// Tests correlated logging via both resolution paths:
+/// AsyncLocal inherited from test thread (TestServer), and
+/// MakeCurrent() set by middleware when AsyncLocal is absent (simulated Kestrel).
 /// </summary>
 public class CorrelatedLoggingResolverTests
 {
@@ -13,7 +15,7 @@ public class CorrelatedLoggingResolverTests
     public TestWebAppFactory Factory { get; set; } = null!;
 
     [Test]
-    public async Task AsyncLocalPath_ServerLog_CorrelatedToCorrectTest()
+    public async Task InheritedAsyncLocal_ServerLog_CorrelatedToCorrectTest()
     {
         var marker = Guid.NewGuid().ToString("N");
         using var client = Factory.CreateClientWithTestContext();
@@ -27,7 +29,7 @@ public class CorrelatedLoggingResolverTests
     }
 
     [Test]
-    public async Task AsyncLocalPath_MultipleRequests_EachCorrelatedToSameTest()
+    public async Task InheritedAsyncLocal_MultipleRequests_EachCorrelatedToSameTest()
     {
         var marker1 = $"first_{Guid.NewGuid():N}";
         var marker2 = $"second_{Guid.NewGuid():N}";
@@ -42,7 +44,7 @@ public class CorrelatedLoggingResolverTests
     }
 
     [Test]
-    public async Task ResolverPath_ServerLog_CorrelatedToCorrectTest()
+    public async Task MiddlewareMakeCurrent_ServerLog_CorrelatedToCorrectTest()
     {
         var testContext = TestContext.Current!;
         var marker = Guid.NewGuid().ToString("N");
@@ -56,7 +58,7 @@ public class CorrelatedLoggingResolverTests
     }
 
     [Test]
-    public async Task ResolverPath_MultipleRequests_EachCorrelatedToSameTest()
+    public async Task MiddlewareMakeCurrent_MultipleRequests_EachCorrelatedToSameTest()
     {
         var testContext = TestContext.Current!;
         var marker1 = $"first_{Guid.NewGuid():N}";
@@ -80,8 +82,9 @@ public class CorrelatedLoggingResolverTests
 
     /// <summary>
     /// Sends an HTTP request on a thread pool thread whose execution context does NOT
-    /// inherit the test's AsyncLocal values, simulating real Kestrel behavior and forcing
-    /// the resolver fallback path.
+    /// inherit the test's AsyncLocal values. This simulates real Kestrel behavior where
+    /// the middleware's <see cref="TestContext.MakeCurrent"/> call is the only way
+    /// the test context reaches server-side code.
     /// </summary>
     private static async Task<HttpResponseMessage> SendWithSuppressedFlow(
         TestWebAppFactory factory, string path, TestContext testContext)

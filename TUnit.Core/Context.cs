@@ -14,12 +14,12 @@ public abstract class Context : IContext, IDisposable
 
     public static Context Current =>
         TestContext.Current as Context
-        ?? TestContextResolverRegistry.Resolve() as Context
         ?? TestBuildContext.Current as Context
         ?? ClassHookContext.Current as Context
         ?? AssemblyHookContext.Current as Context
         ?? TestSessionContext.Current as Context
         ?? BeforeTestDiscoveryContext.Current as Context
+        ?? TestContextResolverRegistry.Resolve() as Context
         ?? GlobalContext.Current;
 
     private readonly StringBuilder _outputBuilder = new();
