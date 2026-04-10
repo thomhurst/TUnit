@@ -1487,9 +1487,7 @@ function renderTrace(tid, rootSpanId) {
     if (!allSpans || !allSpans.length) return '';
     let sp = getDescendants(allSpans, rootSpanId);
     if (!sp.length) return '';
-    // If the only direct child of the test case is "test body", the span itself is
-    // redundant — remove it and re-parent its children directly under the test case.
-    // Note: 'test body' must match TUnitActivitySource.SpanTestBody in C#.
+    // 'test body' must match TUnitActivitySource.SpanTestBody in C#
     const directChildren = sp.filter(s => s.parentSpanId === rootSpanId);
     if (directChildren.length === 1 && directChildren[0].name === 'test body') {
         const tbId = directChildren[0].spanId;
