@@ -167,34 +167,38 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         stringBuilder.AppendLine($"**{totalCount} tests** completed in **{FormatDuration(elapsed)}** \u2014 **{passRate:F1}%** passed");
         stringBuilder.AppendLine();
 
-        var segments = new List<string> { $"\u2705 {passedCount} passed" };
-
-        if (failed.Length > 0)
+        // Only show the segment breakdown when there's more than just "N passed"
+        if (passedCount != totalCount)
         {
-            segments.Add($"\u274C {failed.Length} failed");
-        }
+            var segments = new List<string> { $"\u2705 {passedCount} passed" };
 
-        if (skipped.Length > 0)
-        {
-            segments.Add($"\u23ED\uFE0F {skipped.Length} skipped");
-        }
+            if (failed.Length > 0)
+            {
+                segments.Add($"\u274C {failed.Length} failed");
+            }
 
-        if (timeout.Length > 0)
-        {
-            segments.Add($"\u23F1\uFE0F {timeout.Length} timed out");
-        }
+            if (skipped.Length > 0)
+            {
+                segments.Add($"\u23ED\uFE0F {skipped.Length} skipped");
+            }
 
-        if (cancelled.Length > 0)
-        {
-            segments.Add($"\uD83D\uDEAB {cancelled.Length} cancelled");
-        }
+            if (timeout.Length > 0)
+            {
+                segments.Add($"\u23F1\uFE0F {timeout.Length} timed out");
+            }
 
-        if (inProgress.Length > 0)
-        {
-            segments.Add($"\u26A0\uFE0F {inProgress.Length} in progress");
-        }
+            if (cancelled.Length > 0)
+            {
+                segments.Add($"\uD83D\uDEAB {cancelled.Length} cancelled");
+            }
 
-        stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
+            if (inProgress.Length > 0)
+            {
+                segments.Add($"\u26A0\uFE0F {inProgress.Length} in progress");
+            }
+
+            stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
+        }
 
         // Detect flaky tests (passed after retry)
         var flakyTests = new List<(string Name, int Attempts, TimeSpan? Duration)>();
