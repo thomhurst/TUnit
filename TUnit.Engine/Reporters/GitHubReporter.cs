@@ -216,15 +216,11 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             if (finalStateCount > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
             {
-                var passed = lastUpdate.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty);
-                if (passed)
+                var props = lastUpdate.TestNode.Properties.AsEnumerable();
+                if (props.Any(p => p is PassedTestNodeStateProperty))
                 {
-                    var testMethodIdentifier = lastUpdate.TestNode.Properties.AsEnumerable()
-                        .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
-                    var className = testMethodIdentifier?.TypeName;
-                    var displayName = lastUpdate.TestNode.DisplayName;
-                    var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
-                    var timing = lastUpdate.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
+                    var name = GetTestDisplayName(lastUpdate.TestNode);
+                    var timing = props.OfType<TimingProperty>().FirstOrDefault();
                     flakyTests.Add((name, finalStateCount, timing?.GlobalTiming.Duration));
                 }
             }
@@ -315,18 +311,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
-            var passedProp = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
-            if (passedProp != null) continue;
+            var props = testNodeUpdateMessage.TestNode.Properties.AsEnumerable();
+            if (props.Any(p => p is PassedTestNodeStateProperty)) continue;
 
-            var testMethodIdentifier = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
-                .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
-            var className = testMethodIdentifier?.TypeName;
-            var displayName = testNodeUpdateMessage.TestNode.DisplayName;
-            var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
-                .FirstOrDefault(p => p is TestNodeStateProperty);
-            var timingProp = testNodeUpdateMessage.TestNode.Properties.AsEnumerable()
-                .OfType<TimingProperty>().FirstOrDefault();
+            var name = GetTestDisplayName(testNodeUpdateMessage.TestNode);
+            var stateProperty = props.FirstOrDefault(p => p is TestNodeStateProperty);
+            var timingProp = props.OfType<TimingProperty>().FirstOrDefault();
             var duration = FormatDuration(timingProp?.GlobalTiming.Duration);
 
             var isFailed = stateProperty is FailedTestNodeStateProperty or ErrorTestNodeStateProperty
@@ -559,6 +549,15 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             TimeoutTestNodeStateProperty => "Timed Out",
             _ => "Unknown"
         };
+    }
+
+    private static string GetTestDisplayName(TestNode testNode)
+    {
+        var testMethodIdentifier = testNode.Properties.AsEnumerable()
+            .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+        var className = testMethodIdentifier?.TypeName;
+        var displayName = testNode.DisplayName;
+        return string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
     }
 
     private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace, string serverUrl)
