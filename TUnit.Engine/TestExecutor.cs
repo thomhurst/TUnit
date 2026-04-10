@@ -166,7 +166,7 @@ internal class TestExecutor
             if (TUnitActivitySource.Source.HasListeners())
             {
                 testBodyActivity = TUnitActivitySource.StartActivity(
-                    "test body",
+                    TUnitActivitySource.SpanTestBody,
                     ActivityKind.Internal,
                     executableTest.Context.Activity?.Context ?? default);
             }

@@ -1623,8 +1623,15 @@ function renderSpanRows(sp, uid) {
 function renderTrace(tid, rootSpanId) {
     const allSpans = spansByTrace[tid];
     if (!allSpans || !allSpans.length) return '';
-    const sp = getDescendants(allSpans, rootSpanId);
+    let sp = getDescendants(allSpans, rootSpanId);
     if (!sp.length) return '';
+    // 'test body' must match TUnitActivitySource.SpanTestBody in C#
+    const directChildren = sp.filter(s => s.parentSpanId === rootSpanId);
+    if (directChildren.length === 1 && directChildren[0].name === 'test body') {
+        const tbId = directChildren[0].spanId;
+        sp = sp.filter(s => s.spanId !== tbId).map(s => s.parentSpanId === tbId ? {...s, parentSpanId: rootSpanId} : s);
+    }
+    if (sp.length <= 1) return '';
     // Include the parent suite span so the test bar is shown relative to the class duration
     const root = bySpanId[rootSpanId];
     if (root && root.parentSpanId && bySpanId[root.parentSpanId]) {

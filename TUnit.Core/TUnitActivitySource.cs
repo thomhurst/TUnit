@@ -16,6 +16,7 @@ internal static class TUnitActivitySource
     internal const string SpanTestAssembly = "test assembly";
     internal const string SpanTestSuite = "test suite";
     internal const string SpanTestCase = "test case";
+    internal const string SpanTestBody = "test body";
 
     // Tag keys used across init/dispose spans and the HTML report.
     internal const string TagTestId = "tunit.test.id";
