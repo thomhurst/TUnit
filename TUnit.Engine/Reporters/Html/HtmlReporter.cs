@@ -661,7 +661,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return;
         }
 
-        var summaryPath = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubStepSummary);
         var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
 
@@ -698,39 +697,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
         }
 
-        // Write to step summary
-        if (!string.IsNullOrEmpty(summaryPath))
+        if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
         {
-            try
+            if (_githubReporter is not null)
             {
-                var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? Path.GetFileNameWithoutExtension(filePath);
-                string line;
-
-                if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
-                {
-                    var artifactUrl = $"https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
-
-                    if (_githubReporter is not null)
-                    {
-                        _githubReporter.ArtifactUrl = artifactUrl;
-                    }
-
-                    line = $"\n\ud83d\udcca [{assemblyName} — View HTML Report]({artifactUrl})\n";
-                }
-                else
-                {
-                    line = $"\n\ud83d\udcca **{assemblyName}** HTML report was generated — [Enable automatic artifact upload](https://tunit.dev/docs/guides/html-report#enabling-automatic-artifact-upload)\n";
-                }
-
-#if NET
-                await File.AppendAllTextAsync(summaryPath, line, cancellationToken);
-#else
-                File.AppendAllText(summaryPath, line);
-#endif
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to write GitHub step summary: {ex.Message}");
+                _githubReporter.ArtifactUrl = $"https://github.com/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }
     }
