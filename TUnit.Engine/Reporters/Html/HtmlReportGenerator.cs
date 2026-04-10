@@ -1334,7 +1334,7 @@ function sortTests(tests) {
 }
 
 function countStatuses(tests) {
-    var c = {p:0,f:0,s:0};
+    const c = {p:0,f:0,s:0};
     tests.forEach(function(t) {
         if (t.status==='passed') c.p++;
         else if (t.status==='failed'||t.status==='error'||t.status==='timedOut') c.f++;
@@ -1793,12 +1793,17 @@ function observeSentinel() {
     lazyObs.observe(el);
 }
 
+function ensureGroupOpen(grp) {
+    if (!grp || grp.classList.contains('open')) return;
+    grp.classList.add('open');
+    const hd = grp.querySelector('.grp-hd');
+    if (hd) hd.setAttribute('aria-expanded','true');
+}
+
 function scrollToTest(testId) {
     const row = document.getElementById('test-' + testId);
     if (!row) return;
-    // Expand parent group
-    const grp = row.closest('.grp');
-    if (grp && !grp.classList.contains('open')) grp.classList.add('open');
+    ensureGroupOpen(row.closest('.grp'));
     // Expand detail panel
     const det = row.nextElementSibling;
     if (det && det.classList.contains('t-detail') && !det.classList.contains('open')) { ensureDetailRendered(det); det.classList.add('open'); }
@@ -2101,13 +2106,16 @@ function updateMinimap(allDisplayGroups) {
         h += '</div>';
     });
     mmContent.innerHTML = h;
+    const rowsByGi = new Map();
+    mmContent.querySelectorAll('.minimap-row[data-dgi]').forEach(function(row) {
+        rowsByGi.set(row.dataset.dgi, row);
+    });
     if (spyObs) spyObs.disconnect();
     const grpEls = container.querySelectorAll('.grp[data-gi]');
     if (!grpEls.length) return;
     spyObs = new IntersectionObserver(function(entries) {
         entries.forEach(function(en) {
-            const gi = en.target.dataset.gi;
-            const mmRow = mmContent.querySelector('.minimap-row[data-dgi="'+gi+'"]');
+            const mmRow = rowsByGi.get(en.target.dataset.gi);
             if (mmRow) {
                 mmRow.classList.toggle('active', en.isIntersecting);
                 if (en.isIntersecting && minimapOpen) {
@@ -2149,11 +2157,7 @@ function toggleMinimap() {
         const el = container.querySelector('.grp[data-gi="'+dgi+'"]');
         if (el) {
             el.scrollIntoView({behavior:'smooth', block:'start'});
-            if (!el.classList.contains('open')) {
-                el.classList.add('open');
-                const hd = el.querySelector('.grp-hd');
-                if (hd) hd.setAttribute('aria-expanded','true');
-            }
+            ensureGroupOpen(el);
         }
         if (window.innerWidth < 769) closeMinimap();
     }
