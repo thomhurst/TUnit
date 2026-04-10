@@ -10,6 +10,12 @@ namespace TUnit.AspNetCore.Logging;
 /// Each log call resolves the current test context dynamically via <see cref="TestContextResolverRegistry"/>,
 /// supporting shared web application scenarios where a single host serves multiple tests.
 /// </summary>
+/// <remarks>
+/// Each provider instance registers its own <see cref="HttpContextTestContextResolver"/> in the global
+/// <see cref="TestContextResolverRegistry"/> and unregisters it on <see cref="Dispose"/>. In multi-factory
+/// scenarios, each factory's provider adds one resolver — this is correct because each resolver queries
+/// its own factory's <see cref="Microsoft.AspNetCore.Http.IHttpContextAccessor"/>.
+/// </remarks>
 public sealed class CorrelatedTUnitLoggerProvider : ILoggerProvider
 {
     private readonly ConcurrentDictionary<string, CorrelatedTUnitLogger> _loggers = new();

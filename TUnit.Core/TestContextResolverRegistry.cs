@@ -112,8 +112,9 @@ public static class TestContextResolverRegistry
             }
             catch
             {
-                // Swallow exceptions from user-provided resolvers on the hot path.
-                // A faulty resolver must not crash Console.Write/WriteLine.
+                // Must swallow: this runs inside Console.Write, so logging the error
+                // via Console/stderr would re-enter this method. A broken resolver
+                // manifests as uncorrelated test output, which is visible in results.
             }
         }
 

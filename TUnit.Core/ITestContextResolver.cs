@@ -20,6 +20,14 @@ namespace TUnit.Core;
 /// <c>Console.Write</c> / <c>Console.WriteLine</c> from arbitrary threads,
 /// so implementations must be thread-safe and very cheap. Avoid allocations, locks, and I/O in the hot path.
 /// </para>
+/// <para>
+/// <strong>Ordering:</strong> In <see cref="Context.Current"/>, registered resolvers are consulted
+/// after <see cref="TestContext.Current"/> (AsyncLocal) but before hook contexts
+/// (<c>TestBuildContext</c>, <c>ClassHookContext</c>, <c>AssemblyHookContext</c>).
+/// If your resolver returns a non-null value on threads that execute class- or assembly-level hooks,
+/// it will shadow those hook contexts. Ensure your resolver returns <c>null</c> when no
+/// protocol request (HTTP, gRPC, etc.) is in-flight.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code>

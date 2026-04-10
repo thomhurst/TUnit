@@ -7,9 +7,10 @@ namespace TUnit.AspNetCore.Tests;
 
 /// <summary>
 /// Shared web application factory for integration tests.
-/// Extends TestWebApplicationFactory which automatically registers AddCorrelatedTUnitLogging()
-/// (and therefore the HttpContextTestContextResolver) so that server-side logs are correlated
-/// to the correct test context via the resolver mechanism.
+/// Overrides <see cref="ConfigureWebHost"/> to register <see cref="CorrelatedTUnitLoggingExtensions.AddCorrelatedTUnitLogging"/>
+/// because the base class registers it in <c>CreateHostBuilder()</c>, which returns <c>null</c> for
+/// minimal API apps (top-level statements). This is a known gap in <c>TestWebApplicationFactory</c>
+/// — any minimal API host must register correlated logging via <c>ConfigureWebHost</c> instead.
 /// </summary>
 public class TestWebAppFactory : TestWebApplicationFactory<Program>, IAsyncInitializer
 {
