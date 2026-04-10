@@ -76,6 +76,7 @@ internal static partial class HtmlReportGenerator
 
         // Quick-access sections populated by JS
         sb.AppendLine("<div id=\"failedSection\" role=\"region\" aria-label=\"Failed tests\"></div>");
+        sb.AppendLine("<div id=\"failureClusters\" role=\"region\" aria-label=\"Failure clusters\"></div>");
         sb.AppendLine("<div id=\"slowestSection\" role=\"region\" aria-label=\"Slowest tests\"></div>");
 
         AppendTestGroups(sb, data);
@@ -1092,6 +1093,29 @@ mark{background:rgba(251,191,36,.25);color:inherit;border-radius:2px;padding:0 1
 }
 .dur-hist-bar:hover::after{opacity:1}
 
+/* ── Failure Clusters ──────────────────────────── */
+.fc-cluster{margin-bottom:4px}
+.fc-hd{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s var(--ease);border-radius:var(--r)}
+.fc-hd:hover{background:var(--surface-2)}
+.fc-type{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--rose);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+.fc-frame{font-family:var(--mono);font-size:.74rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.fc-count{font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--rose-d);color:var(--rose);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
+.fc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.fc-cluster.open .fc-body{grid-template-rows:1fr}
+.fc-body-inner{overflow:hidden;min-height:0}
+.fc-tests{padding:0 14px 8px}
+.fc-test{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:var(--r);cursor:pointer;transition:background .12s var(--ease);font-size:.84rem}
+.fc-test:hover{background:var(--surface-2)}
+.fc-test-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.fc-test-class{font-size:.72rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fc-test-dur{font-size:.76rem;color:var(--text-3);font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.fc-msg{font-family:var(--mono);font-size:.76rem;color:var(--text-3);padding:4px 14px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media(max-width:768px){
+  .fc-frame{display:none}
+  .fc-type{max-width:200px}
+}
+
 /* ── Lazy Sentinel ──────────────────────────────── */
 .lazy-sentinel{display:flex;align-items:center;justify-content:center;padding:16px;color:var(--text-3);font-size:.82rem}
 
@@ -1323,6 +1347,10 @@ function fmtTime(iso) {
     const d = new Date(iso);
     return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3});
 }
+
+// Strip anything that isn't a valid CSS identifier character before using
+// a value as a class name — guards against future status values with spaces/quotes.
+function safeClass(s) { return (s||'').replace(/[^a-zA-Z0-9_-]/g,''); }
 
 const copyIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>';
 const checkIcon = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>';
@@ -1881,6 +1909,7 @@ document.getElementById('globalTimeline').innerHTML = renderGlobalTimeline();
 loadFromHash();
 render();
 renderFailedSection();
+renderFailureClusters();
 renderSlowestSection();
 checkHash();
 
@@ -1967,6 +1996,71 @@ document.addEventListener('keydown',function(e){
     var ssb=document.getElementById('stickySearchBtn');
     if(ssb) ssb.addEventListener('click',function(){searchInput.focus();searchInput.scrollIntoView({behavior:'smooth',block:'center'});});
 })();
+
+// ── Failure Clustering ───────────────────────────────
+function renderFailureClusters() {
+    const sec = document.getElementById('failureClusters');
+    if (!sec) return;
+    const failed = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (t.status==='failed'||t.status==='error'||t.status==='timedOut') failed.push({t:t,cls:g.className});
+        });
+    });
+    if (failed.length < 2) { sec.innerHTML=''; return; }
+    // Cluster by exception type + top stack frame
+    const clusters = {};
+    failed.forEach(function(f){
+        const ex = f.t.exception;
+        if (!ex) return;
+        const type = ex.type || 'Unknown';
+        let frame = '';
+        if (ex.stackTrace) {
+            const lines = ex.stackTrace.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i].trim();
+                if (l.startsWith('at ')) { frame = l.substring(3).replace(/\s+in\s+.+$/, '').replace(/\[.+\]/, '').trim(); break; }
+            }
+        }
+        const key = JSON.stringify([type, frame]);
+        if (!clusters[key]) clusters[key] = {type: type, frame: frame, tests: [], msg: ex.message || ''};
+        clusters[key].tests.push(f);
+    });
+    // Filter to clusters with 2+ tests, sort by count descending
+    const sorted = Object.values(clusters).filter(c => c.tests.length >= 2).sort((a,b) => b.tests.length - a.tests.length);
+    if (!sorted.length) { sec.innerHTML=''; return; }
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Failure Clusters ('+sorted.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    sorted.forEach(function(c, ci){
+        const truncMsg = c.msg.length > 100 ? c.msg.substring(0,100)+'\u2026' : c.msg;
+        h += '<div class="fc-cluster">';
+        h += '<div class="fc-hd">';
+        h += '<span class="fc-type" title="'+esc(c.type)+'">'+esc(c.type)+'</span>';
+        if (c.frame) h += '<span class="fc-frame" title="'+esc(c.frame)+'">'+esc(c.frame)+'</span>';
+        h += '<span class="fc-count">'+c.tests.length+' tests</span>';
+        h += '</div>';
+        if (truncMsg) h += '<div class="fc-msg" title="'+esc(c.msg)+'">'+esc(truncMsg)+'</div>';
+        h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
+        c.tests.forEach(function(f){
+            h += '<div class="fc-test" data-scroll-tid="'+esc(f.t.id)+'">';
+            h += '<span class="t-badge '+safeClass(f.t.status)+'">'+esc(f.t.status)+'</span>';
+            h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
+            h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
+            h += '<span class="fc-test-dur">'+fmt(f.t.durationMs)+'</span>';
+            h += '</div>';
+        });
+        h += '</div></div></div></div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+}
+
+// Click handler for failure cluster expand/collapse
+document.addEventListener('click', function(e){
+    const hd = e.target.closest('.fc-hd');
+    if (hd) { hd.closest('.fc-cluster').classList.toggle('open'); return; }
+    const ft = e.target.closest('.fc-test');
+    if (ft && ft.dataset.scrollTid) { scrollToTest(ft.dataset.scrollTid); }
+});
 
 // ── Feature 9: 100% Pass Celebration ────────────────
 if(data.summary.passed===data.summary.total&&data.summary.total>0){
