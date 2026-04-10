@@ -307,6 +307,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
         var githubWorkspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
+        var githubServerUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com";
 
         // Separate failures from other non-passing tests
         var failureMessages = new List<(string Name, string? SourceLink, string Details, string Duration)>();
@@ -333,7 +334,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             if (isFailed)
             {
-                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace);
+                var sourceLink = GetSourceLink(testNodeUpdateMessage.TestNode, githubRepo, githubSha, githubWorkspace, githubServerUrl);
                 var details = GetDetails(stateProperty, testNodeUpdateMessage.TestNode.Properties);
                 failureMessages.Add((name, sourceLink, details, duration));
             }
@@ -560,7 +561,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         };
     }
 
-    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace)
+    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace, string serverUrl)
     {
         var fileLocation = testNode.Properties.AsEnumerable()
             .OfType<TestFileLocationProperty>().FirstOrDefault();
@@ -587,7 +588,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var line = fileLocation.LineSpan.Start.Line + 1; // 0-based to 1-based
         var fileName = Path.GetFileName(fileLocation.FilePath);
-        return $"[{fileName}:{line}](https://github.com/{repo}/blob/{sha}/{filePath}#L{line})";
+        return $"[{fileName}:{line}]({serverUrl.TrimEnd('/')}/{repo}/blob/{sha}/{filePath}#L{line})";
     }
 
     public string? Filter { get; set; }
