@@ -93,14 +93,19 @@ public class CorrelatedLoggingResolverTests
         using var request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.TryAddWithoutValidation(TUnitTestIdHandler.HeaderName, testContext.Id);
 
+        // SuppressFlow + Undo must run on the same thread (before the await),
+        // so we capture the task first, then undo, then await.
         var flowControl = ExecutionContext.SuppressFlow();
+        Task<HttpResponseMessage> task;
         try
         {
-            return await Task.Run(() => client.SendAsync(request));
+            task = Task.Run(() => client.SendAsync(request));
         }
         finally
         {
             flowControl.Undo();
         }
+
+        return await task;
     }
 }
