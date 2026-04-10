@@ -94,9 +94,13 @@ public class CorrelatedLoggingResolverTests
         request.Headers.TryAddWithoutValidation(TUnitTestIdHandler.HeaderName, testContext.Id);
 
         var flowControl = ExecutionContext.SuppressFlow();
-        var task = Task.Run(() => client.SendAsync(request));
-        flowControl.Undo();
-
-        return await task;
+        try
+        {
+            return await Task.Run(() => client.SendAsync(request));
+        }
+        finally
+        {
+            flowControl.Undo();
+        }
     }
 }
