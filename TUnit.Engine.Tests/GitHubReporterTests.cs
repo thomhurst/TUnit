@@ -288,7 +288,8 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", outputFile);
 
         var reporter = new GitHubReporter(new MockExtension());
-        await reporter.IsEnabledAsync();
+        var enabled = await reporter.IsEnabledAsync();
+        enabled.ShouldBeTrue("Reporter should be enabled — check env var setup");
         reporter.SetReporterStyle(style);
         await reporter.BeforeRunAsync(CancellationToken.None);
 
