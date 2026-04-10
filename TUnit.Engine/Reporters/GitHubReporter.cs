@@ -200,6 +200,66 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
 
+        // Detect flaky tests (passed after retry)
+        var flakyTests = new List<(string Name, int Attempts, TimeSpan? Duration)>();
+        foreach (var kvp in _updates)
+        {
+            var finalStateCount = 0;
+            foreach (var update in kvp.Value)
+            {
+                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+                {
+                    finalStateCount++;
+                }
+            }
+
+            if (finalStateCount > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
+            {
+                var passed = lastUpdate.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty);
+                if (passed)
+                {
+                    var testMethodIdentifier = lastUpdate.TestNode.Properties.AsEnumerable()
+                        .OfType<TestMethodIdentifierProperty>().FirstOrDefault();
+                    var className = testMethodIdentifier?.TypeName;
+                    var displayName = lastUpdate.TestNode.DisplayName;
+                    var name = string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
+                    var timing = lastUpdate.TestNode.Properties.AsEnumerable().OfType<TimingProperty>().FirstOrDefault();
+                    flakyTests.Add((name, finalStateCount, timing?.GlobalTiming.Duration));
+                }
+            }
+        }
+
+        if (flakyTests.Count > 0)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine($"> **\u26a0\ufe0f {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
+            foreach (var (name, attempts, duration) in flakyTests)
+            {
+                stringBuilder.AppendLine($"> - `{name}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
+            }
+        }
+
+        if (skipped.Length > 0)
+        {
+            var skipGroups = skipped
+                .Select(x => x.Value.TestNode.Properties.AsEnumerable()
+                    .OfType<SkippedTestNodeStateProperty>().FirstOrDefault()?.Explanation ?? "No reason provided")
+                .GroupBy(reason => reason)
+                .OrderByDescending(g => g.Count());
+
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("<details>");
+            stringBuilder.AppendLine($"<summary>\u23ed\ufe0f {skipped.Length} skipped {(skipped.Length == 1 ? "test" : "tests")}</summary>");
+            stringBuilder.AppendLine();
+            foreach (var group in skipGroups)
+            {
+                stringBuilder.AppendLine($"- **{group.Count()}** \u2014 {group.Key}");
+            }
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("</details>");
+        }
+
         if (ShowArtifactUploadTip)
         {
             stringBuilder.AppendLine();
