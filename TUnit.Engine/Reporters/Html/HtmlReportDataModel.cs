@@ -72,6 +72,12 @@ internal sealed class ReportSummary
 
     [JsonPropertyName("flaky")]
     public int Flaky { get; set; }
+
+    [JsonIgnore]
+    public int CleanPassed => Passed - Flaky;
+
+    [JsonIgnore]
+    public int TotalFailed => Failed + TimedOut;
 }
 
 internal sealed class ReportTestGroup

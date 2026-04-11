@@ -190,16 +190,15 @@ internal static partial class HtmlReportGenerator
 
     private static void AppendSummaryDashboard(StringBuilder sb, ReportSummary summary, double totalDurationMs)
     {
-        var cleanPassed = summary.Passed - summary.Flaky;
-        var passRate = summary.Total > 0 ? (double)cleanPassed / summary.Total * 100 : 0;
+        var passRate = summary.Total > 0 ? (double)summary.Passed / summary.Total * 100 : 0;
 
         sb.AppendLine("<section class=\"dash\" data-anim=\"fade-up\" aria-label=\"Test summary\">");
 
         // Ring chart — SVG
         var circumference = 2 * Math.PI * 54; // r=54
-        var cleanPassLen = summary.Total > 0 ? circumference * cleanPassed / summary.Total : 0;
+        var cleanPassLen = summary.Total > 0 ? circumference * summary.CleanPassed / summary.Total : 0;
         var flakyLen = summary.Total > 0 ? circumference * summary.Flaky / summary.Total : 0;
-        var failLen = summary.Total > 0 ? circumference * (summary.Failed + summary.TimedOut) / summary.Total : 0;
+        var failLen = summary.Total > 0 ? circumference * summary.TotalFailed / summary.Total : 0;
         var skipLen = summary.Total > 0 ? circumference * summary.Skipped / summary.Total : 0;
         var cancelLen = summary.Total > 0 ? circumference * summary.Cancelled / summary.Total : 0;
 
@@ -250,13 +249,13 @@ internal static partial class HtmlReportGenerator
         // Stat cards
         sb.AppendLine("<div class=\"stats\">");
         AppendStatCard(sb, "total", summary.Total.ToString(), "Total", null);
-        AppendStatCard(sb, "passed", cleanPassed.ToString(), "Passed", "var(--emerald)");
+        AppendStatCard(sb, "passed", summary.CleanPassed.ToString(), "Passed", "var(--emerald)");
         if (summary.Flaky > 0)
         {
             AppendStatCard(sb, "flaky", summary.Flaky.ToString(), "Flaky", "var(--orange)");
         }
 
-        AppendStatCard(sb, "failed", (summary.Failed + summary.TimedOut).ToString(), "Failed", "var(--rose)");
+        AppendStatCard(sb, "failed", summary.TotalFailed.ToString(), "Failed", "var(--rose)");
         AppendStatCard(sb, "skipped", summary.Skipped.ToString(), "Skipped", "var(--amber)");
         AppendStatCard(sb, "cancelled", summary.Cancelled.ToString(), "Cancelled", "var(--slate)");
         sb.AppendLine("</div>");
@@ -320,13 +319,13 @@ internal static partial class HtmlReportGenerator
         sb.Append(summary.Total);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"passed\" aria-pressed=\"false\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
-        sb.Append(summary.Passed - summary.Flaky);
+        sb.Append(summary.CleanPassed);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill hidden\" data-filter=\"flaky\" aria-pressed=\"false\" id=\"flakyPill\"><span class=\"dot orange\"></span>Flaky <span class=\"pill-count\" id=\"flakyPillCount\">");
         sb.Append(summary.Flaky);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"failed\" aria-pressed=\"false\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
-        sb.Append(summary.Failed + summary.TimedOut);
+        sb.Append(summary.TotalFailed);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"skipped\" aria-pressed=\"false\"><span class=\"dot amber\"></span>Skipped <span class=\"pill-count\">");
         sb.Append(summary.Skipped);
