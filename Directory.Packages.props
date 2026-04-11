@@ -97,14 +97,14 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.11.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.11.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.30.8" />
+    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.31.0" />
     <PackageVersion Include="Verify" Version="31.15.0" />
     <PackageVersion Include="Verify.NUnit" Version="31.15.0" />
-    <PackageVersion Include="TUnit" Version="1.30.8" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.30.8" />
-    <PackageVersion Include="TUnit.Core" Version="1.30.8" />
-    <PackageVersion Include="TUnit.Engine" Version="1.30.8" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.30.8" />
+    <PackageVersion Include="TUnit" Version="1.31.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.31.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.31.0" />
+    <PackageVersion Include="TUnit.Engine" Version="1.31.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.31.0" />
     <PackageVersion Include="Verify.TUnit" Version="31.15.0" />
     <PackageVersion Include="Vogen" Version="8.0.5" />
     <PackageVersion Include="xunit" Version="2.9.3" />
