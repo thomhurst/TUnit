@@ -130,4 +130,18 @@ public class StackTraceFilterTests
         result.ShouldContain("MyApp.UserService.GetUser");
         result.ShouldContain("MyApp.Tests.UserTests.TestGetUser");
     }
+
+    [Test]
+    public void AllTUnitFrames_WithAsyncSeparators_PreservesFullTrace()
+    {
+        // TUnit bug with async separators — should still return full trace
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at TUnit.Engine.SomeService.Process()",
+            "--- End of stack trace from previous location ---",
+            "   at TUnit.Engine.TestExecutor.ExecuteAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        result.ShouldBe(stackTrace);
+    }
 }

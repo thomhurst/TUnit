@@ -42,7 +42,9 @@ public abstract class TUnitFailedException : TUnitException
                 continue;
             }
 
-            if (trimmed.Length > 0)
+            // Only actual stack frames count as user frames, not separator lines
+            // like "--- End of stack trace from previous location ---"
+            if (trimmed.StartsWith("at "))
             {
                 hasUserFrame = true;
             }
