@@ -309,9 +309,11 @@ internal static partial class HtmlReportGenerator
         sb.Append(summary.Total);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"passed\" aria-pressed=\"false\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
-        sb.Append(summary.Passed);
+        sb.Append(summary.Passed - summary.Flaky);
         sb.AppendLine("</span></button>");
-        sb.AppendLine("<button class=\"pill\" data-filter=\"flaky\" aria-pressed=\"false\" id=\"flakyPill\" style=\"display:none\"><span class=\"dot orange\"></span>Flaky <span class=\"pill-count\" id=\"flakyPillCount\">0</span></button>");
+        sb.Append("<button class=\"pill hidden\" data-filter=\"flaky\" aria-pressed=\"false\" id=\"flakyPill\"><span class=\"dot orange\"></span>Flaky <span class=\"pill-count\" id=\"flakyPillCount\">");
+        sb.Append(summary.Flaky);
+        sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"failed\" aria-pressed=\"false\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
         sb.Append(summary.Failed + summary.TimedOut);
         sb.AppendLine("</span></button>");
@@ -718,6 +720,7 @@ body{
 }
 .pill:hover{border-color:var(--border-h);color:var(--text)}
 .pill.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.pill.hidden{display:none}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .dot.emerald{background:var(--emerald)}
 .dot.rose{background:var(--rose)}
@@ -1812,7 +1815,7 @@ function renderFlakySection() {
     // Update pill visibility and count
     const pill = document.getElementById('flakyPill');
     const pillCount = document.getElementById('flakyPillCount');
-    if (pill) pill.style.display = flaky.length ? '' : 'none';
+    if (pill) { if (flaky.length) pill.classList.remove('hidden'); else pill.classList.add('hidden'); }
     if (pillCount) pillCount.textContent = flaky.length;
     // Update dashboard indicator
     const indicator = document.getElementById('flakyIndicator');

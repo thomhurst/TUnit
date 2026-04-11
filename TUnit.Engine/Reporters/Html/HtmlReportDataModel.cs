@@ -69,6 +69,9 @@ internal sealed class ReportSummary
 
     [JsonPropertyName("timedOut")]
     public int TimedOut { get; set; }
+
+    [JsonPropertyName("flaky")]
+    public int Flaky { get; set; }
 }
 
 internal sealed class ReportTestGroup
