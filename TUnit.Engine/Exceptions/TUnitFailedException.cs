@@ -43,6 +43,9 @@ public abstract class TUnitFailedException : TUnitException
         var vsb = new ValueStringBuilder(stackalloc char[1024]);
         var added = false;
         var omittedAny = false;
+        var lastWasStripped = false;
+        Range pendingSeparator = default;
+        var hasPendingSeparator = false;
 
         foreach (var range in span.Split(Environment.NewLine))
         {
@@ -52,25 +55,46 @@ public abstract class TUnitFailedException : TUnitException
             if (IsTUnitInternalFrame(trimmed))
             {
                 omittedAny = true;
+                // A separator we were holding described resumption *into* the frame
+                // we're now stripping — its anchor is gone, so drop it.
+                hasPendingSeparator = false;
+                lastWasStripped = true;
                 continue;
             }
 
-            // Skip separator/non-frame lines until we've emitted a frame, otherwise
-            // an "End of stack trace from previous location" line that originally
-            // followed a stripped TUnit frame would orphan at the top of the output.
             var isFrame = trimmed.StartsWith("at ");
-            if (!added && !isFrame)
+            if (isFrame)
+            {
+                if (added)
+                {
+                    vsb.Append(Environment.NewLine);
+                }
+
+                if (hasPendingSeparator)
+                {
+                    vsb.Append(span[pendingSeparator]);
+                    vsb.Append(Environment.NewLine);
+                    hasPendingSeparator = false;
+                }
+
+                vsb.Append(slice);
+                added = true;
+                lastWasStripped = false;
+                continue;
+            }
+
+            // Separator/non-frame line: only emit if it sits between two surviving
+            // user frames. Drop it if nothing has been emitted yet (would orphan at
+            // the top), or if the previous non-separator line was a stripped TUnit
+            // frame (its "before" anchor is gone). Otherwise buffer — we'll flush
+            // it when (and only when) a surviving user frame follows.
+            if (!added || lastWasStripped)
             {
                 continue;
             }
 
-            if (added)
-            {
-                vsb.Append(Environment.NewLine);
-            }
-
-            vsb.Append(slice);
-            added = true;
+            pendingSeparator = range;
+            hasPendingSeparator = true;
         }
 
         // If every frame is TUnit-internal, the error originates inside TUnit itself —

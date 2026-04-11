@@ -164,6 +164,62 @@ public class StackTraceFilterTests
     }
 
     [Test]
+    public void TrailingSeparator_BeforeOnlyStrippedFrames_IsRemoved()
+    {
+        // The separator originally pointed at a TUnit frame; once that frame
+        // is stripped, the separator must not dangle right before the hint.
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at MyApp.Tests.MyTest() in C:\\src\\Tests.cs:line 15",
+            "--- End of stack trace from previous location ---",
+            "   at TUnit.Core.RunHelpers.RunAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        result.ShouldNotContain("End of stack trace from previous location");
+        result.ShouldContain("MyApp.Tests.MyTest");
+        result.ShouldContain("--detailed-stacktrace");
+    }
+
+    [Test]
+    public void Separator_BetweenStrippedTUnitAndUserFrame_IsRemoved()
+    {
+        // Separator's "before" anchor (the TUnit frame above) is gone after
+        // stripping, so it would misleadingly imply an async boundary between
+        // First() and Second() that wasn't really there in user code.
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at MyApp.First() in C:\\src\\App.cs:line 10",
+            "   at TUnit.Core.SomeHelper.DoSomething()",
+            "--- End of stack trace from previous location ---",
+            "   at MyApp.Second() in C:\\src\\App.cs:line 20",
+            "   at TUnit.Engine.TestExecutor.ExecuteAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        result.ShouldContain("MyApp.First");
+        result.ShouldContain("MyApp.Second");
+        result.ShouldNotContain("End of stack trace from previous location");
+        result.ShouldNotContain("TUnit.Core.SomeHelper");
+        result.ShouldNotContain("TUnit.Engine.TestExecutor");
+    }
+
+    [Test]
+    public void Separator_BetweenTwoUserFrames_IsPreserved()
+    {
+        // Both anchors are kept user frames — separator stays.
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at MyApp.First() in C:\\src\\App.cs:line 10",
+            "--- End of stack trace from previous location ---",
+            "   at MyApp.Second() in C:\\src\\App.cs:line 20",
+            "   at TUnit.Engine.TestExecutor.ExecuteAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        result.ShouldContain("End of stack trace from previous location");
+        result.ShouldContain("MyApp.First");
+        result.ShouldContain("MyApp.Second");
+    }
+
+    [Test]
     public void FilteredTrace_HintHasCorrectFormat()
     {
         var stackTrace = string.Join(Environment.NewLine,
