@@ -32,10 +32,17 @@ public abstract class TUnitFailedException : TUnitException
         }
 
         var span = stackTrace.AsSpan();
+
+        // Fast path: user-code failures usually throw from pure user frames with no
+        // TUnit internals at all — skip the split/copy loop entirely in that case.
+        if (span.IndexOf("at TUnit.".AsSpan()) < 0)
+        {
+            return stackTrace;
+        }
+
         var vsb = new ValueStringBuilder(stackalloc char[1024]);
         var added = false;
         var omittedAny = false;
-        var hasUserFrame = false;
 
         foreach (var range in span.Split(Environment.NewLine))
         {
@@ -48,18 +55,10 @@ public abstract class TUnitFailedException : TUnitException
                 continue;
             }
 
-            var isFrame = trimmed.StartsWith("at ");
-
-            // Only actual stack frames count as user frames, not separator lines
-            // like "--- End of stack trace from previous location ---"
-            if (isFrame)
-            {
-                hasUserFrame = true;
-            }
-
             // Skip separator/non-frame lines until we've emitted a frame, otherwise
             // an "End of stack trace from previous location" line that originally
             // followed a stripped TUnit frame would orphan at the top of the output.
+            var isFrame = trimmed.StartsWith("at ");
             if (!added && !isFrame)
             {
                 continue;
@@ -75,9 +74,10 @@ public abstract class TUnitFailedException : TUnitException
         }
 
         // If every frame is TUnit-internal, the error originates inside TUnit itself —
-        // return the full unfiltered trace so the bug can be diagnosed.
-        // Also return the original when nothing was omitted (no TUnit frames at all).
-        if (!hasUserFrame || !omittedAny)
+        // return the full unfiltered trace so the bug can be diagnosed. Also return
+        // the original if nothing was actually omitted (the fast-path `at TUnit.` match
+        // landed inside a non-frame line, e.g. an embedded message).
+        if (!added || !omittedAny)
         {
             vsb.Dispose();
             return stackTrace;
