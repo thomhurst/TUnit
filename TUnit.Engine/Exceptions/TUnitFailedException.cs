@@ -18,6 +18,12 @@ public abstract class TUnitFailedException : TUnitException
 
     public override string StackTrace { get; }
 
+    // The hint only mentions --detailed-stacktrace because filtering is bypassed
+    // entirely when --log-level Debug/Trace is set (see TUnitMessageBus.SimplifyStacktrace),
+    // so users on debug logging will never see this message.
+    private const string OmittedHint =
+        $"   --- TUnit internals omitted (run with --{DetailedStacktraceCommandProvider.DetailedStackTrace} for full trace) ---";
+
     internal static string FilterStackTrace(string? stackTrace)
     {
         if (string.IsNullOrEmpty(stackTrace))
@@ -42,11 +48,21 @@ public abstract class TUnitFailedException : TUnitException
                 continue;
             }
 
+            var isFrame = trimmed.StartsWith("at ");
+
             // Only actual stack frames count as user frames, not separator lines
             // like "--- End of stack trace from previous location ---"
-            if (trimmed.StartsWith("at "))
+            if (isFrame)
             {
                 hasUserFrame = true;
+            }
+
+            // Skip separator/non-frame lines until we've emitted a frame, otherwise
+            // an "End of stack trace from previous location" line that originally
+            // followed a stripped TUnit frame would orphan at the top of the output.
+            if (!added && !isFrame)
+            {
+                continue;
             }
 
             if (added)
@@ -68,7 +84,7 @@ public abstract class TUnitFailedException : TUnitException
         }
 
         vsb.Append(Environment.NewLine);
-        vsb.Append($"   --- TUnit internals omitted (run with --{DetailedStacktraceCommandProvider.DetailedStackTrace} for full trace) ---");
+        vsb.Append(OmittedHint);
 
         return vsb.ToString();
     }

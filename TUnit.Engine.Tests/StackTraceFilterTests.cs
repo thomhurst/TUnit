@@ -144,4 +144,37 @@ public class StackTraceFilterTests
 
         result.ShouldBe(stackTrace);
     }
+
+    [Test]
+    public void OrphanedSeparator_AfterStrippedTUnitFrame_IsRemoved()
+    {
+        // The separator originally followed a TUnit frame; once stripped, the
+        // separator must not orphan at the top of the output.
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at TUnit.Assertions.Check()",
+            "--- End of stack trace from previous location ---",
+            "   at MyApp.Tests.MyTest() in C:\\src\\Tests.cs:line 15",
+            "   at TUnit.Core.RunHelpers.RunAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        var lines = result.Split(Environment.NewLine);
+        lines[0].ShouldNotContain("End of stack trace from previous location");
+        lines[0].ShouldContain("MyApp.Tests.MyTest");
+    }
+
+    [Test]
+    public void FilteredTrace_HintHasCorrectFormat()
+    {
+        var stackTrace = string.Join(Environment.NewLine,
+            "   at MyApp.Tests.MyTest() in C:\\src\\Tests.cs:line 15",
+            "   at TUnit.Core.RunHelpers.RunAsync()");
+
+        var result = TUnitFailedException.FilterStackTrace(stackTrace);
+
+        var lines = result.Split(Environment.NewLine);
+        lines.Length.ShouldBe(2);
+        lines[0].ShouldContain("MyApp.Tests.MyTest");
+        lines[1].ShouldContain("--detailed-stacktrace");
+    }
 }
