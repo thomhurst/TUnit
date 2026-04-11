@@ -137,6 +137,9 @@ internal class TestExecutor
                         new("tunit.test.node_uid", testDetails.TestId),
                         new("tunit.test.categories", testDetails.Categories.ToArray())
                     ]);
+
+                // Same key as the span tag above — set as baggage for cross-boundary propagation via W3C headers
+                executableTest.Context.Activity?.SetBaggage(TUnitActivitySource.TagTestId, executableTest.Context.Id);
             }
 #endif
 

@@ -68,6 +68,42 @@ using (testContext.MakeCurrent())
 // Previous context is automatically restored
 ```
 
+### Automatic Correlation via OpenTelemetry
+
+If your application uses OpenTelemetry (or any framework that propagates W3C `traceparent`/`baggage` headers), test context correlation works **automatically** — no `MakeCurrent()` or manual header-passing needed.
+
+TUnit sets the test context ID as `Activity` baggage (`tunit.test.id`) on each test's span. When a framework propagates that Activity across a boundary (e.g., an HTTP call from a test to a shared service host), `TestContext.Current` on the receiving side automatically resolves the originating test from the propagated baggage.
+
+This works out of the box with OTel-instrumented:
+- **HTTP** (via `HttpClient` / ASP.NET Core)
+- **gRPC** (via `Grpc.Net.Client` / ASP.NET Core gRPC)
+- **Messaging** (via libraries like MassTransit or NServiceBus with OTel support)
+
+```csharp
+// Test side — nothing special needed beyond normal OTel setup
+[Test]
+public async Task MyTest()
+{
+    // HttpClient propagates Activity automatically when OTel is configured
+    var response = await _httpClient.GetAsync("/api/process");
+}
+
+// Server side — TestContext.Current resolves automatically
+public async Task<IResult> HandleProcess()
+{
+    // TestContext.Current is non-null here because the Activity
+    // carrying tunit.test.id baggage was propagated via HTTP headers
+    Console.WriteLine("This output is attributed to the test");
+    return Results.Ok();
+}
+```
+
+:::note
+This requires .NET 8+ and an active OpenTelemetry `TracerProvider` (or `ActivityListener`) subscribed to the `"TUnit"` source **on the test runner side**. The baggage is only set when the test runner's ActivitySource has listeners — without this, no Activity is created and the baggage cannot propagate. See [OpenTelemetry Tracing](/docs/examples/opentelemetry) for setup instructions.
+:::
+
+For applications **without** Activity propagation, use the manual `MakeCurrent()` approach described below.
+
 ### How to Get the Test Context
 
 Your background service needs a way to know **which test** to correlate to. The typical pattern is to propagate the test's unique ID through your protocol (HTTP header, gRPC metadata, message property, etc.), then look it up on the receiving side with `TestContext.GetById()`.

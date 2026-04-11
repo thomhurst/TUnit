@@ -1321,6 +1321,10 @@ namespace
         [.("Data source initialization may require dynamic code generation")]
         public static . InitializeStaticPropertiesForType( type) { }
     }
+    public static class TUnitActivitySource
+    {
+        public const string TagTestId = ".id";
+    }
     public class TUnitAttribute :  { }
     [(.Method)]
     public sealed class TestAttribute : .BaseTestAttribute

@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace TUnit.Core;
 
-internal static class TUnitActivitySource
+public static class TUnitActivitySource
 {
     private static readonly string Version =
         typeof(TUnitActivitySource).Assembly.GetName().Version?.ToString() ?? "0.0.0";
@@ -18,8 +18,14 @@ internal static class TUnitActivitySource
     internal const string SpanTestCase = "test case";
     internal const string SpanTestBody = "test body";
 
-    // Tag keys used across init/dispose spans and the HTML report.
-    internal const string TagTestId = "tunit.test.id";
+    // Tag and baggage keys used across init/dispose spans, HTML report, and cross-boundary correlation.
+
+    /// <summary>
+    /// The key used for the test context ID in both Activity span tags and Activity baggage.
+    /// Set as baggage on each test's Activity span to enable automatic
+    /// <see cref="TestContext.Current"/> resolution when OpenTelemetry propagation is configured.
+    /// </summary>
+    public const string TagTestId = "tunit.test.id";
     internal const string TagTestClass = "tunit.test.class";
     internal const string TagTraceScope = "tunit.trace.scope";
 
