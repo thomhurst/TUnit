@@ -5,16 +5,11 @@ namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
 /// Middleware that extracts the TUnit test context ID from incoming HTTP request headers
-/// and stores the associated <see cref="TestContext"/> in <see cref="HttpContext.Items"/>
-/// for correlated logging.
+/// and calls <see cref="TestContext.MakeCurrent"/> so that console output and log routing
+/// within the request are attributed to the correct test.
 /// </summary>
 public sealed class TUnitTestContextMiddleware
 {
-    /// <summary>
-    /// The key used to store the <see cref="TestContext"/> in <see cref="HttpContext.Items"/>.
-    /// </summary>
-    public const string HttpContextKey = "TUnit.TestContext";
-
     private readonly RequestDelegate _next;
 
     /// <summary>
@@ -30,10 +25,15 @@ public sealed class TUnitTestContextMiddleware
     public async Task InvokeAsync(HttpContext httpContext)
     {
         if (httpContext.Request.Headers.TryGetValue(TUnitTestIdHandler.HeaderName, out var values)
-            && values.FirstOrDefault() is { } testId
-            && TestContext.GetById(testId) is { } testContext)
+            && values.Count > 0
+            && TestContext.GetById(values[0]!) is { } testContext)
         {
-            httpContext.Items[HttpContextKey] = testContext;
+            using (testContext.MakeCurrent())
+            {
+                await _next(httpContext);
+            }
+
+            return;
         }
 
         await _next(httpContext);

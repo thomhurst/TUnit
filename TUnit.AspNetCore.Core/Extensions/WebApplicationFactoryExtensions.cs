@@ -12,7 +12,7 @@ public static class WebApplicationFactoryExtensions
     /// Creates an <see cref="HttpClient"/> with a <see cref="TUnitTestIdHandler"/> that automatically
     /// propagates the current test context ID to the server via HTTP headers.
     /// Use with <see cref="Logging.CorrelatedTUnitLoggingExtensions.AddCorrelatedTUnitLogging"/>
-    /// on the server side to correlate logs with tests.
+    /// on the server side to enable the test context middleware.
     /// </summary>
     /// <typeparam name="TEntryPoint">The entry point class of the web application.</typeparam>
     /// <param name="factory">The web application factory.</param>

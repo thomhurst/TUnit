@@ -80,6 +80,8 @@
     <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />
     <Project Path="TUnit.Aspire.Tests/TUnit.Aspire.Tests.csproj" />
     <Project Path="TUnit.Aspire.Tests.AppHost/TUnit.Aspire.Tests.AppHost.csproj" />
+    <Project Path="TUnit.AspNetCore.Tests/TUnit.AspNetCore.Tests.csproj" />
+    <Project Path="TUnit.AspNetCore.Tests.WebApp/TUnit.AspNetCore.Tests.WebApp.csproj" />
   </Folder>
 
   <!-- Benchmarks -->

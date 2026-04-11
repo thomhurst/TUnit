@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -14,8 +13,10 @@ public static class CorrelatedTUnitLoggingExtensions
     /// <summary>
     /// Adds correlated TUnit logging to the service collection.
     /// This registers the <see cref="TUnitTestContextMiddleware"/> via an <see cref="IStartupFilter"/>
-    /// and a <see cref="CorrelatedTUnitLoggerProvider"/> that resolves the test context per log call.
-    /// Use with <see cref="TUnitTestIdHandler"/> on the client side to propagate test context.
+    /// and a <see cref="CorrelatedTUnitLoggerProvider"/> that writes <c>ILogger</c> output to
+    /// <see cref="System.Console"/> on the calling thread so TUnit's console interceptor can route
+    /// it to the correct test.
+    /// Use with <see cref="TUnitTestIdHandler"/> on the client side to propagate the test context ID.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="minLogLevel">The minimum log level to capture. Defaults to Information.</param>
@@ -24,12 +25,8 @@ public static class CorrelatedTUnitLoggingExtensions
         this IServiceCollection services,
         LogLevel minLogLevel = LogLevel.Information)
     {
-        services.AddHttpContextAccessor();
         services.AddSingleton<IStartupFilter>(new TUnitTestContextStartupFilter());
-        services.AddSingleton<ILoggerProvider>(sp =>
-            new CorrelatedTUnitLoggerProvider(
-                sp.GetRequiredService<IHttpContextAccessor>(),
-                minLogLevel));
+        services.AddSingleton<ILoggerProvider>(new CorrelatedTUnitLoggerProvider(minLogLevel));
 
         return services;
     }

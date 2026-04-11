@@ -1338,7 +1338,12 @@ namespace
         public static string WorkingDirectory { get; set; }
         public override string GetErrorOutput() { }
         public override string GetStandardOutput() { }
+        public . MakeCurrent() { }
         public static .TestContext? GetById(string id) { }
+        public readonly struct ContextScope : 
+        {
+            public void Dispose() { }
+        }
     }
     public class TestContextEvents : .
     {

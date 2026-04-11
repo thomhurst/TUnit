@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using TUnit.Core;
 using TUnit.Logging.Microsoft;
@@ -7,25 +6,23 @@ namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
 /// A logger that resolves the current test context per log call, supporting shared web application scenarios.
-/// Sets <see cref="TestContext.Current"/> and writes via <see cref="Console"/> so the console interceptor
-/// and all registered log sinks naturally route the output to the correct test.
-/// The resolution chain is:
-/// <list type="number">
-///   <item>Test context from <see cref="HttpContext.Items"/> (set by <see cref="TUnitTestContextMiddleware"/>)</item>
-///   <item><see cref="TestContext.Current"/> (AsyncLocal fallback)</item>
-///   <item>No-op if no test context is available</item>
-/// </list>
+/// Writes via <see cref="Console"/> synchronously on the calling thread so TUnit's console interceptor
+/// can route the output to the correct test via <see cref="TestContext.Current"/> (set by
+/// <see cref="TUnitTestContextMiddleware"/> calling <see cref="TestContext.MakeCurrent"/>).
 /// </summary>
+/// <remarks>
+/// This logger is necessary because ASP.NET Core's built-in <c>ConsoleLogger</c> writes from a background
+/// queue thread that does not inherit the <c>AsyncLocal</c> set by <see cref="TestContext.MakeCurrent"/>.
+/// By writing synchronously on the request thread, the output is attributed to the correct test.
+/// </remarks>
 public sealed class CorrelatedTUnitLogger : ILogger
 {
     private readonly string _categoryName;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly LogLevel _minLogLevel;
 
-    internal CorrelatedTUnitLogger(string categoryName, IHttpContextAccessor httpContextAccessor, LogLevel minLogLevel)
+    internal CorrelatedTUnitLogger(string categoryName, LogLevel minLogLevel)
     {
         _categoryName = categoryName;
-        _httpContextAccessor = httpContextAccessor;
         _minLogLevel = minLogLevel;
     }
 
@@ -48,7 +45,7 @@ public sealed class CorrelatedTUnitLogger : ILogger
             return;
         }
 
-        var testContext = ResolveTestContext();
+        var testContext = TestContext.Current;
 
         if (testContext is null)
         {
@@ -61,10 +58,6 @@ public sealed class CorrelatedTUnitLogger : ILogger
         {
             return;
         }
-
-        // Set the current test context so the console interceptor routes output
-        // to the correct test's sinks (test output, IDE real-time, console)
-        TestContext.Current = testContext;
 
         var message = formatter(state, exception);
 
@@ -83,17 +76,5 @@ public sealed class CorrelatedTUnitLogger : ILogger
         {
             Console.WriteLine(formattedMessage);
         }
-    }
-
-    private TestContext? ResolveTestContext()
-    {
-        // 1. Try to get from HttpContext.Items (set by TUnitTestContextMiddleware)
-        if (_httpContextAccessor.HttpContext?.Items[TUnitTestContextMiddleware.HttpContextKey] is TestContext httpTestContext)
-        {
-            return httpTestContext;
-        }
-
-        // 2. Fall back to AsyncLocal
-        return TestContext.Current;
     }
 }

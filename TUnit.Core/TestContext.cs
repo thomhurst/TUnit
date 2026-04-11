@@ -133,6 +133,54 @@ public partial class TestContext : Context,
     }
 
     /// <summary>
+    /// Associates the current async scope with this test context so that console output
+    /// and log routing within the scope are attributed to this test.
+    /// Dispose the returned <see cref="ContextScope"/> to restore the previous context.
+    /// </summary>
+    /// <remarks>
+    /// Use this in protocol handlers (gRPC, MCP, message queue consumers, etc.) after
+    /// extracting the test ID from the incoming request.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // In a gRPC handler:
+    /// var testId = context.RequestHeaders.GetValue("x-tunit-test-id");
+    /// if (TestContext.GetById(testId) is { } testContext)
+    /// {
+    ///     using (testContext.MakeCurrent())
+    ///     {
+    ///         // All Console.Write / ILogger calls here route to the test
+    ///         await ProcessRequest();
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    /// <returns>A disposable scope that restores the previous context on disposal.</returns>
+    public ContextScope MakeCurrent()
+    {
+        var previous = Current;
+        Current = this;
+        return new ContextScope(previous);
+    }
+
+    /// <summary>
+    /// A disposable scope returned by <see cref="MakeCurrent"/> that restores the previous
+    /// <see cref="TestContext.Current"/> value when disposed.
+    /// This is a value type — do not dispose more than once.
+    /// </summary>
+    public readonly struct ContextScope : IDisposable
+    {
+        private readonly TestContext? _previous;
+
+        internal ContextScope(TestContext? previous) => _previous = previous;
+
+        /// <summary>
+        /// Restores the previous test context.
+        /// </summary>
+        public void Dispose() => Current = _previous;
+    }
+
+    /// <summary>
     /// Gets a <see cref="TestContext"/> by its unique identifier, or <c>null</c> if not found.
     /// </summary>
     /// <param name="id">The unique identifier of the test context.</param>

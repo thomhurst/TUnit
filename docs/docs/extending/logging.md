@@ -31,6 +31,146 @@ public async Task MyTest()
 
 This logger can integrate with other logging frameworks like Microsoft.Extensions.Logging for ASP.NET applications.
 
+## Cross-Thread Output Correlation
+
+By default, TUnit uses `AsyncLocal` to track which test is running on the current async flow. This works automatically when your code runs on the same async context as the test — for example, calling `Console.WriteLine()` from test code, or from services invoked directly by the test.
+
+However, when work runs on a **different thread or async context** — such as inside a gRPC handler, message queue consumer, MCP server, or background service — the `AsyncLocal` context is not inherited, and TUnit cannot automatically determine which test the output belongs to.
+
+### The Problem
+
+```csharp
+[Test]
+public async Task MyTest()
+{
+    // ✅ This works — same async context as the test
+    Console.WriteLine("This is captured by the test");
+
+    // Start some background work that processes on its own thread
+    await myService.ProcessAsync(requestId);
+
+    // ❌ Inside ProcessAsync, if it runs on a different thread,
+    // Console.WriteLine output won't be associated with this test
+}
+```
+
+### The Solution: `TestContext.MakeCurrent()`
+
+Use `TestContext.MakeCurrent()` to associate a scope with a specific test. All `Console.Write`, `Console.WriteLine`, and `ILogger` calls within that scope are routed to the correct test's output.
+
+```csharp
+using (testContext.MakeCurrent())
+{
+    // All output here is attributed to the test
+    Console.WriteLine("This goes to the right test");
+    await ProcessRequest();
+}
+// Previous context is automatically restored
+```
+
+### How to Get the Test Context
+
+Your background service needs a way to know **which test** to correlate to. The typical pattern is to propagate the test's unique ID through your protocol (HTTP header, gRPC metadata, message property, etc.), then look it up on the receiving side with `TestContext.GetById()`.
+
+#### Step 1: Send the Test ID
+
+From your test, include `TestContext.Current!.Id` in the request:
+
+```csharp
+[Test]
+public async Task MyTest()
+{
+    var request = new MyRequest
+    {
+        Payload = "test data",
+        TestId = TestContext.Current!.Id  // Propagate the test ID
+    };
+
+    await myService.SendAsync(request);
+
+    var output = TestContext.Current!.GetStandardOutput();
+    await Assert.That(output).Contains("processed");
+}
+```
+
+#### Step 2: Resolve and Activate on the Receiving Side
+
+In your handler, extract the test ID and call `MakeCurrent()`:
+
+```csharp
+public async Task HandleAsync(MyRequest request)
+{
+    // Look up the test context by the propagated ID
+    if (TestContext.GetById(request.TestId) is { } testContext)
+    {
+        using (testContext.MakeCurrent())
+        {
+            // All output here is attributed to the originating test
+            Console.WriteLine("processed");
+            await DoWork(request);
+        }
+    }
+}
+```
+
+### Protocol-Specific Examples
+
+#### gRPC Server Interceptor
+
+```csharp
+public class TUnitGrpcInterceptor : Interceptor
+{
+    public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
+        TRequest request,
+        ServerCallContext context,
+        UnaryServerMethod<TRequest, TResponse> continuation)
+    {
+        var testId = context.RequestHeaders.GetValue("x-tunit-test-id");
+
+        if (testId is not null && TestContext.GetById(testId) is { } testContext)
+        {
+            using (testContext.MakeCurrent())
+            {
+                return await continuation(request, context);
+            }
+        }
+
+        return await continuation(request, context);
+    }
+}
+```
+
+#### Message Queue Consumer
+
+```csharp
+public class OrderConsumer : IConsumer<OrderMessage>
+{
+    public async Task Consume(ConsumeContext<OrderMessage> context)
+    {
+        var testId = context.Headers.Get<string>("x-tunit-test-id");
+
+        if (testId is not null && TestContext.GetById(testId) is { } testContext)
+        {
+            using (testContext.MakeCurrent())
+            {
+                await ProcessOrder(context.Message);
+            }
+        }
+    }
+}
+```
+
+#### ASP.NET Core (Built-In)
+
+For ASP.NET Core, `TUnit.AspNetCore` handles this automatically. The `TUnitTestIdHandler` propagates the test ID via an HTTP header, and the `TUnitTestContextMiddleware` calls `MakeCurrent()` on the server side. See [ASP.NET Core Integration Testing](/docs/examples/aspnet#tunit-logging-integration) for details.
+
+### Key Points
+
+- `MakeCurrent()` returns a disposable scope — always use it with `using` to ensure the previous context is restored
+- `TestContext.GetById()` returns `null` if the ID is not found (e.g., if the test has already completed), so always null-check
+- `MakeCurrent()` is safe for concurrent tests — each call sets its own `AsyncLocal` scope independently
+- The scope only affects the current async flow — other threads/tasks are not affected unless they inherit the `ExecutionContext`
+
 ## Log Sinks
 
 TUnit uses a sink-based architecture where all output is routed through registered log sinks. Each sink decides how to handle the messages - write to files, stream to IDEs, send to external services, etc.
