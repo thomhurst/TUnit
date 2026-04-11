@@ -62,12 +62,23 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
         hostBuilder?.ConfigureHostConfiguration(ConfigureStartupConfiguration);
 
-        hostBuilder?.ConfigureServices(services =>
+        return hostBuilder;
+    }
+
+    /// <summary>
+    /// Registers <see cref="CorrelatedTUnitLoggingExtensions.AddCorrelatedTUnitLogging"/> here
+    /// (rather than in <see cref="CreateHostBuilder"/>) so that minimal API hosts — where
+    /// <see cref="CreateHostBuilder"/> returns <c>null</c> — also get correlated logging.
+    /// Subclasses overriding this method must call <c>base.ConfigureWebHost(builder)</c>.
+    /// </summary>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+
+        builder.ConfigureServices(services =>
         {
             services.AddCorrelatedTUnitLogging();
         });
-
-        return hostBuilder;
     }
 
 }

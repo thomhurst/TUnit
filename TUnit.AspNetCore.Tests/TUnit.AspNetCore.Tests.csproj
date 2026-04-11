@@ -10,6 +10,7 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit.AspNetCore\TUnit.AspNetCore.csproj" />
         <ProjectReference Include="..\TUnit.AspNetCore.Tests.WebApp\TUnit.AspNetCore.Tests.WebApp.csproj" />
+        <ProjectReference Include="..\TUnit.AspNetCore.Tests.MinimalApi\TUnit.AspNetCore.Tests.MinimalApi.csproj" />
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
     </ItemGroup>
 
