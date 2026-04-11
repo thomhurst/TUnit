@@ -35,16 +35,20 @@ public class TestContextTests
             {
                 // Simulate what OTel does on the receiving side:
                 // create a new Activity with baggage extracted from W3C headers
+                const string sourceName = "test-otel-simulation";
                 using var listener = new ActivityListener
                 {
-                    ShouldListenTo = _ => true,
+                    ShouldListenTo = source => source.Name == sourceName,
                     Sample = (ref ActivityCreationOptions<ActivityContext> _) =>
                         ActivitySamplingResult.AllDataAndRecorded
                 };
                 ActivitySource.AddActivityListener(listener);
 
-                using var source = new ActivitySource("test-otel-simulation");
+                using var source = new ActivitySource(sourceName);
                 using var activity = source.StartActivity("incoming-request");
+                // Matches TUnitActivitySource.TagTestId ("tunit.test.id") — the key
+                // the engine sets as baggage and ResolveFromActivityBaggage reads.
+                // TUnitActivitySource is internal so we use the literal here.
                 activity?.SetBaggage("tunit.test.id", testId);
 
                 return TestContext.Current;
