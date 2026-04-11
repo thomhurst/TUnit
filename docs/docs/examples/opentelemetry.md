@@ -175,6 +175,31 @@ dotnet add package OpenTelemetry.Exporter.Zipkin
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
 
+## Test Context Correlation via Activity Baggage
+
+TUnit stores the test context ID as Activity baggage (`tunit.test.id`) on each test case span. This enables automatic `TestContext.Current` resolution across service boundaries when Activity propagation is in place.
+
+When a test triggers work in a shared service host (e.g., via HTTP, gRPC, or messaging), the `AsyncLocal<TestContext>` doesn't flow because the server processes requests on its own thread pool. However, if OpenTelemetry propagation is configured, `Activity.Current` **does** flow via W3C `traceparent`/`baggage` headers. TUnit uses this: when `TestContext.Current` finds no AsyncLocal value, it falls back to checking `Activity.Current` for the `tunit.test.id` baggage item and resolves the originating test context automatically.
+
+This means console output, `ILogger` calls, and any code that reads `TestContext.Current` on the server side will automatically correlate to the correct test — with no manual setup beyond enabling OpenTelemetry propagation.
+
+```csharp
+// No extra code needed — just having OTel configured is sufficient.
+// The test's Activity carries tunit.test.id baggage, which propagates
+// automatically via W3C headers to OTel-instrumented services.
+
+[Test]
+public async Task Api_Returns_Expected_Result()
+{
+    // Activity baggage propagates via HTTP headers automatically
+    var response = await _httpClient.GetAsync("/api/data");
+
+    await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+}
+```
+
+For scenarios without OpenTelemetry, see [Cross-Thread Output Correlation](/docs/extending/logging#cross-thread-output-correlation) for the manual `TestContext.MakeCurrent()` approach.
+
 ## HTML Report Integration
 
 TUnit's built-in [HTML test report](/docs/guides/html-report) automatically captures activity spans and renders them as trace timelines — no OpenTelemetry SDK required. The report also captures spans from instrumented libraries like HttpClient, ASP.NET Core, and EF Core when they execute within a test's context.
