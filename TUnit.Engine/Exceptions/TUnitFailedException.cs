@@ -26,7 +26,10 @@ public abstract class TUnitFailedException : TUnitException
 
     internal static string FilterStackTrace(string? stackTrace)
     {
-        if (string.IsNullOrEmpty(stackTrace))
+        // Pattern check (rather than `string.IsNullOrEmpty`) so the compiler narrows
+        // `stackTrace` to non-null in the rest of the method on netstandard2.0,
+        // where `IsNullOrEmpty` lacks `[NotNullWhen(false)]`.
+        if (stackTrace is null || stackTrace.Length == 0)
         {
             return string.Empty;
         }
@@ -44,7 +47,10 @@ public abstract class TUnitFailedException : TUnitException
         var added = false;
         var omittedAny = false;
         var lastWasStripped = false;
-        Range pendingSeparator = default;
+        // ReadOnlySpan rather than Range to avoid a nullability warning from the
+        // netstandard2.0 polyfill — Range is a value type but the polyfill annotates
+        // `default` as a possible null assignment.
+        ReadOnlySpan<char> pendingSeparator = default;
         var hasPendingSeparator = false;
 
         foreach (var range in span.Split(Environment.NewLine))
@@ -72,7 +78,7 @@ public abstract class TUnitFailedException : TUnitException
 
                 if (hasPendingSeparator)
                 {
-                    vsb.Append(span[pendingSeparator]);
+                    vsb.Append(pendingSeparator);
                     vsb.Append(Environment.NewLine);
                     hasPendingSeparator = false;
                 }
@@ -93,7 +99,7 @@ public abstract class TUnitFailedException : TUnitException
                 continue;
             }
 
-            pendingSeparator = range;
+            pendingSeparator = slice;
             hasPendingSeparator = true;
         }
 
