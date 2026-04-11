@@ -1977,10 +1977,14 @@ namespace .Executors
         public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
-    public class HookExecutorAttribute : .TUnitAttribute
+    [(.Assembly | .Class | .Method)]
+    public class HookExecutorAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public HookExecutorAttribute( type) { }
         public  HookExecutorType { get; }
+        public int Order { get; }
+        public  ScopeType { get; }
+        public . OnHookRegistered(.HookRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
     public sealed class HookExecutorAttribute<T> : .
