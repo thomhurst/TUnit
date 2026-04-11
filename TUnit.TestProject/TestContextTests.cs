@@ -46,10 +46,7 @@ public class TestContextTests
 
                 using var source = new ActivitySource(sourceName);
                 using var activity = source.StartActivity("incoming-request");
-                // Matches TUnitActivitySource.TagTestId ("tunit.test.id") — the key
-                // the engine sets as baggage and ResolveFromActivityBaggage reads.
-                // TUnitActivitySource is internal so we use the literal here.
-                activity?.SetBaggage("tunit.test.id", testId);
+                activity?.SetBaggage(TUnitActivitySource.TagTestId, testId);
 
                 return TestContext.Current;
             });
