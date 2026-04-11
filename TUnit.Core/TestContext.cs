@@ -124,13 +124,29 @@ public partial class TestContext : Context,
     /// </example>
     public static new TestContext? Current
     {
-        get => TestContexts.Value;
+        get => TestContexts.Value
+#if NET
+            ?? ResolveFromActivityBaggage()
+#endif
+            ;
         internal set
         {
             TestContexts.Value = value;
             ClassHookContext.Current = value?.ClassContext;
         }
     }
+
+#if NET
+    private static TestContext? ResolveFromActivityBaggage()
+    {
+        if (System.Diagnostics.Activity.Current?.GetBaggageItem(TUnitActivitySource.TagTestId) is { } testId)
+        {
+            return GetById(testId);
+        }
+
+        return null;
+    }
+#endif
 
     /// <summary>
     /// Associates the current async scope with this test context so that console output
