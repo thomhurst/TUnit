@@ -190,8 +190,8 @@ internal static partial class HtmlReportGenerator
 
     private static void AppendSummaryDashboard(StringBuilder sb, ReportSummary summary, double totalDurationMs)
     {
-        var passRate = summary.Total > 0 ? (double)summary.Passed / summary.Total * 100 : 0;
         var cleanPassed = summary.Passed - summary.Flaky;
+        var passRate = summary.Total > 0 ? (double)cleanPassed / summary.Total * 100 : 0;
 
         sb.AppendLine("<section class=\"dash\" data-anim=\"fade-up\" aria-label=\"Test summary\">");
 
@@ -251,6 +251,11 @@ internal static partial class HtmlReportGenerator
         sb.AppendLine("<div class=\"stats\">");
         AppendStatCard(sb, "total", summary.Total.ToString(), "Total", null);
         AppendStatCard(sb, "passed", cleanPassed.ToString(), "Passed", "var(--emerald)");
+        if (summary.Flaky > 0)
+        {
+            AppendStatCard(sb, "flaky", summary.Flaky.ToString(), "Flaky", "var(--orange)");
+        }
+
         AppendStatCard(sb, "failed", (summary.Failed + summary.TimedOut).ToString(), "Failed", "var(--rose)");
         AppendStatCard(sb, "skipped", summary.Skipped.ToString(), "Skipped", "var(--amber)");
         AppendStatCard(sb, "cancelled", summary.Cancelled.ToString(), "Cancelled", "var(--slate)");
@@ -264,8 +269,6 @@ internal static partial class HtmlReportGenerator
         sb.AppendLine("<span class=\"dash-dur-lbl\">duration</span>");
         sb.AppendLine("<div id=\"durationHist\" class=\"dur-hist\"></div>");
         sb.AppendLine("</div>");
-
-        sb.AppendLine("<div class=\"flaky-indicator\" id=\"flakyIndicator\"></div>");
 
         sb.AppendLine("</section>");
     }
@@ -688,8 +691,6 @@ body{
 .dash-dur{text-align:center;padding:4px 20px;flex-shrink:0}
 .dash-dur-val{display:block;font-size:1.5rem;font-weight:800;font-family:var(--mono);letter-spacing:-.02em}
 .dash-dur-lbl{display:block;font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.flaky-indicator{display:none;text-align:center;margin-top:6px;font-size:.78rem;font-weight:700;color:var(--orange)}
-.flaky-indicator.visible{display:block}
 
 /* ── Toolbar (search + pills) ──────────────────────── */
 .bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;justify-content:flex-end}
@@ -1826,16 +1827,6 @@ function renderFlakySection() {
     const pillCount = document.getElementById('flakyPillCount');
     if (pill) pill.classList.toggle('hidden', !flaky.length);
     if (pillCount) pillCount.textContent = flaky.length;
-    // Update dashboard indicator
-    const indicator = document.getElementById('flakyIndicator');
-    if (indicator) {
-        if (flaky.length) {
-            indicator.textContent = flaky.length + ' flaky';
-            indicator.classList.add('visible');
-        } else {
-            indicator.classList.remove('visible');
-        }
-    }
     if (!flaky.length) { sec.innerHTML=''; return; }
     flaky.sort(function(a,b){ return b.t.retryAttempt - a.t.retryAttempt; });
     let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Flaky Tests ('+flaky.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
