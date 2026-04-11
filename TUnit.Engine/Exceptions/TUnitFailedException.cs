@@ -1,5 +1,6 @@
 ﻿using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
+using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine.Exceptions;
 
@@ -24,35 +25,15 @@ public abstract class TUnitFailedException : TUnitException
             return string.Empty;
         }
 
-        // First pass: check if any non-TUnit frames exist.
-        // If every frame is TUnit-internal, the error originates inside TUnit itself —
-        // keep the full trace so the bug can be diagnosed.
-        var hasUserFrame = false;
-        foreach (var range in stackTrace.AsSpan().Split(Environment.NewLine))
-        {
-            var trimmed = stackTrace.AsSpan()[range].Trim();
-            if (trimmed.Length > 0 && !IsTUnitInternalFrame(trimmed))
-            {
-                hasUserFrame = true;
-                break;
-            }
-        }
-
-        if (!hasUserFrame)
-        {
-            return stackTrace;
-        }
-
-        // Second pass: remove TUnit-internal frames but keep all user frames,
-        // even if they appear after TUnit frames (e.g. assertion internals above
-        // the user's test method).
-        var vsb = new ValueStringBuilder(stackalloc char[256]);
+        var span = stackTrace.AsSpan();
+        var vsb = new ValueStringBuilder(stackalloc char[1024]);
         var added = false;
         var omittedAny = false;
+        var hasUserFrame = false;
 
-        foreach (var range in stackTrace.AsSpan().Split(Environment.NewLine))
+        foreach (var range in span.Split(Environment.NewLine))
         {
-            var slice = stackTrace.AsSpan()[range];
+            var slice = span[range];
             var trimmed = slice.Trim();
 
             if (IsTUnitInternalFrame(trimmed))
@@ -61,23 +42,37 @@ public abstract class TUnitFailedException : TUnitException
                 continue;
             }
 
-            vsb.Append(added ? Environment.NewLine : "");
+            if (trimmed.Length > 0)
+            {
+                hasUserFrame = true;
+            }
+
+            if (added)
+            {
+                vsb.Append(Environment.NewLine);
+            }
+
             vsb.Append(slice);
             added = true;
         }
 
-        if (omittedAny)
+        // If every frame is TUnit-internal, the error originates inside TUnit itself —
+        // return the full unfiltered trace so the bug can be diagnosed.
+        // Also return the original when nothing was omitted (no TUnit frames at all).
+        if (!hasUserFrame || !omittedAny)
         {
-            vsb.Append(Environment.NewLine);
-            vsb.Append("   --- TUnit internals omitted (run with --detailed-stacktrace for full trace) ---");
+            vsb.Dispose();
+            return stackTrace;
         }
+
+        vsb.Append(Environment.NewLine);
+        vsb.Append($"   --- TUnit internals omitted (run with --{DetailedStacktraceCommandProvider.DetailedStackTrace} for full trace) ---");
 
         return vsb.ToString();
     }
 
     private static bool IsTUnitInternalFrame(ReadOnlySpan<char> trimmedLine)
     {
-        // Match frames from TUnit's own namespaces (TUnit.Engine, TUnit.Core, TUnit.Assertions, etc.)
         // Uses "at TUnit." with the dot to avoid false positives on user types whose names
         // happen to start with "TUnit" (e.g. a hypothetical "TUnitExtensions" namespace).
         return trimmedLine.StartsWith("at TUnit.");
