@@ -76,6 +76,7 @@ internal static partial class HtmlReportGenerator
 
         // Quick-access sections populated by JS
         sb.AppendLine("<div id=\"failedSection\" role=\"region\" aria-label=\"Failed tests\"></div>");
+        sb.AppendLine("<div id=\"flakySection\" role=\"region\" aria-label=\"Flaky tests\"></div>");
         sb.AppendLine("<div id=\"failureClusters\" role=\"region\" aria-label=\"Failure clusters\"></div>");
         sb.AppendLine("<div id=\"slowestSection\" role=\"region\" aria-label=\"Slowest tests\"></div>");
 
@@ -195,8 +196,9 @@ internal static partial class HtmlReportGenerator
 
         // Ring chart — SVG
         var circumference = 2 * Math.PI * 54; // r=54
-        var passLen = summary.Total > 0 ? circumference * summary.Passed / summary.Total : 0;
-        var failLen = summary.Total > 0 ? circumference * (summary.Failed + summary.TimedOut) / summary.Total : 0;
+        var cleanPassLen = summary.Total > 0 ? circumference * summary.CleanPassed / summary.Total : 0;
+        var flakyLen = summary.Total > 0 ? circumference * summary.Flaky / summary.Total : 0;
+        var failLen = summary.Total > 0 ? circumference * summary.TotalFailed / summary.Total : 0;
         var skipLen = summary.Total > 0 ? circumference * summary.Skipped / summary.Total : 0;
         var cancelLen = summary.Total > 0 ? circumference * summary.Cancelled / summary.Total : 0;
 
@@ -207,10 +209,16 @@ internal static partial class HtmlReportGenerator
 
         // Segments — stacked with dasharray/dashoffset
         double offset = 0;
-        if (passLen > 0)
+        if (cleanPassLen > 0)
         {
-            AppendRingSegment(sb, "var(--emerald)", passLen, offset, circumference);
-            offset += passLen;
+            AppendRingSegment(sb, "var(--emerald)", cleanPassLen, offset, circumference);
+            offset += cleanPassLen;
+        }
+
+        if (flakyLen > 0)
+        {
+            AppendRingSegment(sb, "var(--orange)", flakyLen, offset, circumference);
+            offset += flakyLen;
         }
 
         if (failLen > 0)
@@ -241,8 +249,13 @@ internal static partial class HtmlReportGenerator
         // Stat cards
         sb.AppendLine("<div class=\"stats\">");
         AppendStatCard(sb, "total", summary.Total.ToString(), "Total", null);
-        AppendStatCard(sb, "passed", summary.Passed.ToString(), "Passed", "var(--emerald)");
-        AppendStatCard(sb, "failed", (summary.Failed + summary.TimedOut).ToString(), "Failed", "var(--rose)");
+        AppendStatCard(sb, "passed", summary.CleanPassed.ToString(), "Passed", "var(--emerald)");
+        if (summary.Flaky > 0)
+        {
+            AppendStatCard(sb, "flaky", summary.Flaky.ToString(), "Flaky", "var(--orange)");
+        }
+
+        AppendStatCard(sb, "failed", summary.TotalFailed.ToString(), "Failed", "var(--rose)");
         AppendStatCard(sb, "skipped", summary.Skipped.ToString(), "Skipped", "var(--amber)");
         AppendStatCard(sb, "cancelled", summary.Cancelled.ToString(), "Cancelled", "var(--slate)");
         sb.AppendLine("</div>");
@@ -306,10 +319,13 @@ internal static partial class HtmlReportGenerator
         sb.Append(summary.Total);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"passed\" aria-pressed=\"false\"><span class=\"dot emerald\"></span>Passed <span class=\"pill-count\">");
-        sb.Append(summary.Passed);
+        sb.Append(summary.CleanPassed);
+        sb.AppendLine("</span></button>");
+        sb.Append("<button class=\"pill hidden\" data-filter=\"flaky\" aria-pressed=\"false\" id=\"flakyPill\"><span class=\"dot orange\"></span>Flaky <span class=\"pill-count\" id=\"flakyPillCount\">");
+        sb.Append(summary.Flaky);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"failed\" aria-pressed=\"false\"><span class=\"dot rose\"></span>Failed <span class=\"pill-count\">");
-        sb.Append(summary.Failed + summary.TimedOut);
+        sb.Append(summary.TotalFailed);
         sb.AppendLine("</span></button>");
         sb.Append("<button class=\"pill\" data-filter=\"skipped\" aria-pressed=\"false\"><span class=\"dot amber\"></span>Skipped <span class=\"pill-count\">");
         sb.Append(summary.Skipped);
@@ -473,6 +489,8 @@ internal static partial class HtmlReportGenerator
   --indigo:    #818cf8;
   --indigo-d:  rgba(129,140,248,.10);
   --violet:    #a78bfa;
+  --orange:    #fb923c;
+  --orange-d:  rgba(251,146,60,.12);
 
   --font:      'Segoe UI Variable','Segoe UI',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --mono:      'Cascadia Code','JetBrains Mono','Fira Code','SF Mono',ui-monospace,monospace;
@@ -490,6 +508,7 @@ internal static partial class HtmlReportGenerator
   --emerald-d:rgba(52,211,153,.15);--rose-d:rgba(251,113,133,.15);
   --amber-d:rgba(251,191,36,.12);--slate-d:rgba(148,163,184,.12);
   --indigo-d:rgba(129,140,248,.12);--violet:#7c3aed;
+  --orange-d:rgba(251,146,60,.15);
 }
 :root[data-theme="light"] .grain{opacity:.008}
 
@@ -512,6 +531,7 @@ internal static partial class HtmlReportGenerator
 @property --amber-d   { syntax:'<color>'; inherits:true; initial-value:rgba(251,191,36,.10) }
 @property --slate-d   { syntax:'<color>'; inherits:true; initial-value:rgba(148,163,184,.10) }
 @property --indigo-d  { syntax:'<color>'; inherits:true; initial-value:rgba(129,140,248,.10) }
+@property --orange-d  { syntax:'<color>'; inherits:true; initial-value:rgba(251,146,60,.12) }
 
 :root {
   transition:
@@ -520,7 +540,8 @@ internal static partial class HtmlReportGenerator
     --border .3s var(--ease), --border-h .3s var(--ease),
     --text .3s var(--ease), --text-2 .3s var(--ease), --text-3 .3s var(--ease),
     --emerald-d .3s var(--ease), --rose-d .3s var(--ease), --amber-d .3s var(--ease),
-    --slate-d .3s var(--ease), --indigo-d .3s var(--ease);
+    --slate-d .3s var(--ease), --indigo-d .3s var(--ease),
+    --orange-d .3s var(--ease);
 }
 /* Suppress per-element transitions during theme switch so only the
    @property variable interpolations drive the animation — no stagger. */
@@ -707,11 +728,13 @@ body{
 }
 .pill:hover{border-color:var(--border-h);color:var(--text)}
 .pill.active{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.pill.hidden{display:none}
 .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .dot.emerald{background:var(--emerald)}
 .dot.rose{background:var(--rose)}
 .dot.amber{background:var(--amber)}
 .dot.slate{background:var(--slate)}
+.dot.orange{background:var(--orange)}
 .bar-info{font-size:.8rem;color:var(--text-3);margin-left:auto}
 
 /* Category filter pills — extends .pill with smaller sizing and violet accent */
@@ -787,6 +810,7 @@ body{
 .t-badge.failed,.t-badge.error,.t-badge.timedOut{background:var(--rose-d);color:var(--rose);box-shadow:0 0 6px rgba(251,113,133,.15)}
 .t-badge.skipped{background:var(--amber-d);color:var(--amber);box-shadow:0 0 6px rgba(251,191,36,.12)}
 .t-badge.cancelled{background:var(--slate-d);color:var(--slate)}
+.t-badge.flaky{background:var(--orange-d);color:var(--orange);box-shadow:0 0 6px rgba(251,146,60,.15)}
 .t-badge.inProgress,.t-badge.unknown{background:var(--surface-2);color:var(--text-3)}
 .t-name{flex:1;font-size:.88rem;word-break:break-word;color:var(--text)}
 .t-dur{font-size:.78rem;color:var(--text-3);font-family:var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -1379,9 +1403,15 @@ spans.forEach(s => {
     if (tag) suiteSpanByClass[tag.value] = s;
 });
 
+function isFlaky(t) { return t.status === 'passed' && t.retryAttempt > 0; }
+function badgeLabel(t) { return isFlaky(t) ? 'flaky' : t.status; }
 function matchesFilter(t) {
     if (activeFilter !== 'all') {
-        if (activeFilter === 'failed') {
+        if (activeFilter === 'flaky') {
+            if (!isFlaky(t)) return false;
+        } else if (activeFilter === 'passed') {
+            if (t.status !== 'passed' || isFlaky(t)) return false;
+        } else if (activeFilter === 'failed') {
             if (t.status !== 'failed' && t.status !== 'error' && t.status !== 'timedOut') return false;
         } else if (t.status !== activeFilter) return false;
     }
@@ -1745,7 +1775,7 @@ function renderFailedSection() {
         const errMsg = f.t.exception ? (f.t.exception.type+': '+f.t.exception.message) : '';
         const truncErr = errMsg.length > 120 ? errMsg.substring(0,120)+'…' : errMsg;
         h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
-        h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
+        var bl=badgeLabel(f.t);h += '<span class="t-badge '+bl+'">'+esc(bl)+'</span>';
         h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
         h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
         if (truncErr) h += '<span class="qa-err" title="'+esc(errMsg)+'">'+esc(truncErr)+'</span>';
@@ -1775,6 +1805,36 @@ function renderSlowestSection() {
         h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
         h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
         h += '<div class="slow-bar-track"><div class="slow-bar-fill" style="width:'+pct+'%"></div></div>';
+        h += '<span class="qa-dur">'+fmt(f.t.durationMs)+'</span>';
+        h += '</div>';
+    });
+    h += '</div></div></div></div>';
+    sec.innerHTML = h;
+}
+
+function renderFlakySection() {
+    const sec = document.getElementById('flakySection');
+    if (!sec) return;
+    const flaky = [];
+    groups.forEach(function(g){
+        g.tests.forEach(function(t){
+            if (isFlaky(t)) flaky.push({t:t,cls:g.className});
+        });
+    });
+    // Update pill visibility and count
+    const pill = document.getElementById('flakyPill');
+    const pillCount = document.getElementById('flakyPillCount');
+    if (pill) pill.classList.toggle('hidden', !flaky.length);
+    if (pillCount) pillCount.textContent = flaky.length;
+    if (!flaky.length) { sec.innerHTML=''; return; }
+    flaky.sort(function(a,b){ return b.t.retryAttempt - a.t.retryAttempt; });
+    let h = '<div class="qa-section"><div class="tl-toggle">'+tlArrow+' Flaky Tests ('+flaky.length+')</div><div class="tl-content"><div class="tl-content-inner"><div class="tl-content-pad">';
+    flaky.forEach(function(f){
+        h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
+        h += '<span class="t-badge flaky">flaky</span>';
+        h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
+        h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
+        h += '<span class="retry-tag">'+f.t.retryAttempt+' '+(f.t.retryAttempt===1?'retry':'retries')+'</span>';
         h += '<span class="qa-dur">'+fmt(f.t.durationMs)+'</span>';
         h += '</div>';
     });
@@ -1822,7 +1882,7 @@ function render() {
         }
         ft.forEach((t,ti)=>{
             html += '<div class="t-row" id="test-'+t.id+'" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'" style="--row-idx:'+Math.min(ti,7)+'">';
-            html += '<span class="t-badge '+t.status+'">'+esc(t.status)+'</span>';
+            var bl=badgeLabel(t);html += '<span class="t-badge '+bl+'">'+esc(bl)+'</span>';
             html += '<span class="t-name">'+(searchText?highlight(t.displayName,searchText):esc(t.displayName))+'</span>';
             if(t.retryAttempt>0) html += '<span class="retry-tag">retry '+t.retryAttempt+'</span>';
             html += '<button class="t-link-btn" data-link-tid="'+t.id+'" title="Copy link">'+linkIcon+'</button>';
@@ -2081,6 +2141,7 @@ loadFromHash();
 if(catNames.length > 0) buildCatPills();
 render();
 renderFailedSection();
+renderFlakySection();
 renderFailureClusters();
 renderSlowestSection();
 checkHash();
@@ -2217,7 +2278,7 @@ function renderFailureClusters() {
         h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
         c.tests.forEach(function(f){
             h += '<div class="fc-test" data-scroll-tid="'+esc(f.t.id)+'">';
-            h += '<span class="t-badge '+safeClass(f.t.status)+'">'+esc(f.t.status)+'</span>';
+            var bl=badgeLabel(f.t);h += '<span class="t-badge '+safeClass(bl)+'">'+esc(bl)+'</span>';
             h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
             h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
             h += '<span class="fc-test-dur">'+fmt(f.t.durationMs)+'</span>';

@@ -276,7 +276,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
             var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult);
 
-            AccumulateStatus(summary, testResult.Status);
+            AccumulateStatus(summary, testResult);
 
             // Group by class name
             var className = testResult.ClassName;
@@ -327,7 +327,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             var groupSummary = new ReportSummary();
             foreach (var test in kvp.Value)
             {
-                AccumulateStatus(groupSummary, test.Status);
+                AccumulateStatus(groupSummary, test);
             }
 
             groups[i++] = new ReportTestGroup
@@ -413,11 +413,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         return (commitSha, branch, prNumber, repoSlug);
     }
 
-    private static void AccumulateStatus(ReportSummary summary, string status)
+    private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
     {
         summary.Total++;
-        switch (status)
+        switch (testResult.Status)
         {
+            case "passed" when testResult.RetryAttempt > 0:
+                summary.Passed++;
+                summary.Flaky++;
+                break;
             case "passed":
                 summary.Passed++;
                 break;
