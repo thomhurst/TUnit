@@ -191,12 +191,14 @@ internal static partial class HtmlReportGenerator
     private static void AppendSummaryDashboard(StringBuilder sb, ReportSummary summary, double totalDurationMs)
     {
         var passRate = summary.Total > 0 ? (double)summary.Passed / summary.Total * 100 : 0;
+        var cleanPassed = summary.Passed - summary.Flaky;
 
         sb.AppendLine("<section class=\"dash\" data-anim=\"fade-up\" aria-label=\"Test summary\">");
 
         // Ring chart — SVG
         var circumference = 2 * Math.PI * 54; // r=54
-        var passLen = summary.Total > 0 ? circumference * summary.Passed / summary.Total : 0;
+        var cleanPassLen = summary.Total > 0 ? circumference * cleanPassed / summary.Total : 0;
+        var flakyLen = summary.Total > 0 ? circumference * summary.Flaky / summary.Total : 0;
         var failLen = summary.Total > 0 ? circumference * (summary.Failed + summary.TimedOut) / summary.Total : 0;
         var skipLen = summary.Total > 0 ? circumference * summary.Skipped / summary.Total : 0;
         var cancelLen = summary.Total > 0 ? circumference * summary.Cancelled / summary.Total : 0;
@@ -208,10 +210,16 @@ internal static partial class HtmlReportGenerator
 
         // Segments — stacked with dasharray/dashoffset
         double offset = 0;
-        if (passLen > 0)
+        if (cleanPassLen > 0)
         {
-            AppendRingSegment(sb, "var(--emerald)", passLen, offset, circumference);
-            offset += passLen;
+            AppendRingSegment(sb, "var(--emerald)", cleanPassLen, offset, circumference);
+            offset += cleanPassLen;
+        }
+
+        if (flakyLen > 0)
+        {
+            AppendRingSegment(sb, "var(--orange)", flakyLen, offset, circumference);
+            offset += flakyLen;
         }
 
         if (failLen > 0)
@@ -242,7 +250,7 @@ internal static partial class HtmlReportGenerator
         // Stat cards
         sb.AppendLine("<div class=\"stats\">");
         AppendStatCard(sb, "total", summary.Total.ToString(), "Total", null);
-        AppendStatCard(sb, "passed", summary.Passed.ToString(), "Passed", "var(--emerald)");
+        AppendStatCard(sb, "passed", cleanPassed.ToString(), "Passed", "var(--emerald)");
         AppendStatCard(sb, "failed", (summary.Failed + summary.TimedOut).ToString(), "Failed", "var(--rose)");
         AppendStatCard(sb, "skipped", summary.Skipped.ToString(), "Skipped", "var(--amber)");
         AppendStatCard(sb, "cancelled", summary.Cancelled.ToString(), "Cancelled", "var(--slate)");
@@ -1396,6 +1404,7 @@ spans.forEach(s => {
 });
 
 function isFlaky(t) { return t.status === 'passed' && t.retryAttempt > 0; }
+function badgeLabel(t) { return isFlaky(t) ? 'flaky' : t.status; }
 function matchesFilter(t) {
     if (activeFilter !== 'all') {
         if (activeFilter === 'flaky') {
@@ -1766,7 +1775,7 @@ function renderFailedSection() {
         const errMsg = f.t.exception ? (f.t.exception.type+': '+f.t.exception.message) : '';
         const truncErr = errMsg.length > 120 ? errMsg.substring(0,120)+'…' : errMsg;
         h += '<div class="qa-item" data-scroll-tid="'+f.t.id+'">';
-        h += '<span class="t-badge '+f.t.status+'">'+esc(f.t.status)+'</span>';
+        var bl=badgeLabel(f.t);h += '<span class="t-badge '+bl+'">'+esc(bl)+'</span>';
         h += '<div class="qa-info"><div class="qa-info-name">'+esc(f.t.displayName)+'</div>';
         h += '<div class="qa-info-class">'+esc(f.cls)+'</div></div>';
         if (truncErr) h += '<span class="qa-err" title="'+esc(errMsg)+'">'+esc(truncErr)+'</span>';
@@ -1815,7 +1824,7 @@ function renderFlakySection() {
     // Update pill visibility and count
     const pill = document.getElementById('flakyPill');
     const pillCount = document.getElementById('flakyPillCount');
-    if (pill) { if (flaky.length) pill.classList.remove('hidden'); else pill.classList.add('hidden'); }
+    if (pill) pill.classList.toggle('hidden', !flaky.length);
     if (pillCount) pillCount.textContent = flaky.length;
     // Update dashboard indicator
     const indicator = document.getElementById('flakyIndicator');
@@ -1883,7 +1892,7 @@ function render() {
         }
         ft.forEach((t,ti)=>{
             html += '<div class="t-row" id="test-'+t.id+'" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'" style="--row-idx:'+Math.min(ti,7)+'">';
-            html += '<span class="t-badge '+t.status+'">'+esc(t.status)+'</span>';
+            var bl=badgeLabel(t);html += '<span class="t-badge '+bl+'">'+esc(bl)+'</span>';
             html += '<span class="t-name">'+(searchText?highlight(t.displayName,searchText):esc(t.displayName))+'</span>';
             if(t.retryAttempt>0) html += '<span class="retry-tag">retry '+t.retryAttempt+'</span>';
             html += '<button class="t-link-btn" data-link-tid="'+t.id+'" title="Copy link">'+linkIcon+'</button>';
@@ -2279,7 +2288,7 @@ function renderFailureClusters() {
         h += '<div class="fc-body"><div class="fc-body-inner"><div class="fc-tests">';
         c.tests.forEach(function(f){
             h += '<div class="fc-test" data-scroll-tid="'+esc(f.t.id)+'">';
-            h += '<span class="t-badge '+safeClass(f.t.status)+'">'+esc(f.t.status)+'</span>';
+            var bl=badgeLabel(f.t);h += '<span class="t-badge '+safeClass(bl)+'">'+esc(bl)+'</span>';
             h += '<span class="fc-test-name" title="'+esc(f.t.displayName)+'">'+esc(f.t.displayName)+'</span>';
             h += '<span class="fc-test-class">'+esc(f.cls)+'</span>';
             h += '<span class="fc-test-dur">'+fmt(f.t.durationMs)+'</span>';
