@@ -254,7 +254,7 @@ internal sealed class TestBuilderPipeline
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
                 AttributesByType = attributes.ToAttributeDictionary(),
-                Timeout = Core.Settings.TUnitSettings.Timeouts.DefaultTestTimeout // Default timeout (can be overridden by TimeoutAttribute)
+                Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout // Default timeout (can be overridden by TimeoutAttribute)
                 // Don't set RetryLimit here - let discovery event receivers set it
             };
 
@@ -382,7 +382,7 @@ internal sealed class TestBuilderPipeline
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
                         AttributesByType = attributes.ToAttributeDictionary(),
-                        Timeout = Core.Settings.TUnitSettings.Timeouts.DefaultTestTimeout // Default timeout (can be overridden by TimeoutAttribute)
+                        Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout // Default timeout (can be overridden by TimeoutAttribute)
                         // Don't set Timeout and RetryLimit here - let discovery event receivers set them
                     };
 
@@ -462,7 +462,7 @@ internal sealed class TestBuilderPipeline
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = Core.Settings.TUnitSettings.Timeouts.DefaultTestTimeout // Default timeout
+            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout // Default timeout
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -515,7 +515,7 @@ internal sealed class TestBuilderPipeline
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = Core.Settings.TUnitSettings.Timeouts.DefaultTestTimeout // Default timeout
+            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout // Default timeout
         };
 
         var context = _contextProvider.CreateTestContext(

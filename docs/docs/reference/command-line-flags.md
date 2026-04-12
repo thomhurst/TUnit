@@ -80,11 +80,11 @@ Please note that for the coverage and trx report, you need to install [additiona
 
     --fail-fast
         Cancel the test run after the first test failure
-        Programmatic equivalent: TUnitSettings.Execution.FailFast
+        Programmatic equivalent: context.Settings.Execution.FailFast
 
     --maximum-parallel-tests
         Maximum Parallel Tests
-        Programmatic equivalent: TUnitSettings.Parallelism.MaximumParallelTests
+        Programmatic equivalent: context.Settings.Parallelism.MaximumParallelTests
 
     --no-ansi
         Disable outputting ANSI escape characters to screen.
@@ -124,7 +124,7 @@ Please note that for the coverage and trx report, you need to install [additiona
     --detailed-stacktrace
         Display TUnit internals within stack traces.
         By default, TUnit frames are hidden to keep failure output focused on user code.
-        Programmatic equivalent: TUnitSettings.Display.DetailedStackTrace
+        Programmatic equivalent: context.Settings.Display.DetailedStackTrace
 
     --output-json
         Write a JSON report of the test run.

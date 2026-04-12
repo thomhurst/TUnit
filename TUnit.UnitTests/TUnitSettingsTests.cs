@@ -18,43 +18,43 @@ public class TUnitSettingsTests
     [Before(HookType.Test)]
     public void SnapshotSettings()
     {
-        _savedTestTimeout = TUnitSettings.Timeouts.DefaultTestTimeout;
-        _savedHookTimeout = TUnitSettings.Timeouts.DefaultHookTimeout;
-        _savedForcefulExitTimeout = TUnitSettings.Timeouts.ForcefulExitTimeout;
-        _savedProcessExitHookDelay = TUnitSettings.Timeouts.ProcessExitHookDelay;
-        _savedMaximumParallelTests = TUnitSettings.Parallelism.MaximumParallelTests;
-        _savedDetailedStackTrace = TUnitSettings.Display.DetailedStackTrace;
-        _savedFailFast = TUnitSettings.Execution.FailFast;
+        _savedTestTimeout = TUnitSettings.Default.Timeouts.DefaultTestTimeout;
+        _savedHookTimeout = TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+        _savedForcefulExitTimeout = TUnitSettings.Default.Timeouts.ForcefulExitTimeout;
+        _savedProcessExitHookDelay = TUnitSettings.Default.Timeouts.ProcessExitHookDelay;
+        _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
+        _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
+        _savedFailFast = TUnitSettings.Default.Execution.FailFast;
     }
 
     [After(HookType.Test)]
     public void RestoreSettings()
     {
-        TUnitSettings.Timeouts.DefaultTestTimeout = _savedTestTimeout;
-        TUnitSettings.Timeouts.DefaultHookTimeout = _savedHookTimeout;
-        TUnitSettings.Timeouts.ForcefulExitTimeout = _savedForcefulExitTimeout;
-        TUnitSettings.Timeouts.ProcessExitHookDelay = _savedProcessExitHookDelay;
-        TUnitSettings.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
-        TUnitSettings.Display.DetailedStackTrace = _savedDetailedStackTrace;
-        TUnitSettings.Execution.FailFast = _savedFailFast;
+        TUnitSettings.Default.Timeouts.DefaultTestTimeout = _savedTestTimeout;
+        TUnitSettings.Default.Timeouts.DefaultHookTimeout = _savedHookTimeout;
+        TUnitSettings.Default.Timeouts.ForcefulExitTimeout = _savedForcefulExitTimeout;
+        TUnitSettings.Default.Timeouts.ProcessExitHookDelay = _savedProcessExitHookDelay;
+        TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
+        TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
+        TUnitSettings.Default.Execution.FailFast = _savedFailFast;
     }
 
     [Test]
     public async Task Defaults_Are_Correct()
     {
-        await Assert.That(TUnitSettings.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(30));
-        await Assert.That(TUnitSettings.Timeouts.DefaultHookTimeout).IsEqualTo(TimeSpan.FromMinutes(5));
-        await Assert.That(TUnitSettings.Timeouts.ForcefulExitTimeout).IsEqualTo(TimeSpan.FromSeconds(30));
-        await Assert.That(TUnitSettings.Timeouts.ProcessExitHookDelay).IsEqualTo(TimeSpan.FromMilliseconds(500));
-        await Assert.That(TUnitSettings.Parallelism.MaximumParallelTests).IsNull();
-        await Assert.That(TUnitSettings.Display.DetailedStackTrace).IsFalse();
-        await Assert.That(TUnitSettings.Execution.FailFast).IsFalse();
+        await Assert.That(TUnitSettings.Default.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(30));
+        await Assert.That(TUnitSettings.Default.Timeouts.DefaultHookTimeout).IsEqualTo(TimeSpan.FromMinutes(5));
+        await Assert.That(TUnitSettings.Default.Timeouts.ForcefulExitTimeout).IsEqualTo(TimeSpan.FromSeconds(30));
+        await Assert.That(TUnitSettings.Default.Timeouts.ProcessExitHookDelay).IsEqualTo(TimeSpan.FromMilliseconds(500));
+        await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
+        await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
+        await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
     }
 
     [Test]
     public async Task Settings_Can_Be_Modified()
     {
-        TUnitSettings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(10);
-        await Assert.That(TUnitSettings.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(10));
+        TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(10);
+        await Assert.That(TUnitSettings.Default.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(10));
     }
 }

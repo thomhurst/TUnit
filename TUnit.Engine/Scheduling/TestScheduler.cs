@@ -564,7 +564,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         // Check TUnitSettings (third priority — code-level project defaults)
-        if (TUnitSettings.Parallelism.MaximumParallelTests is { } codeLimit)
+        if (TUnitSettings.Default.Parallelism.MaximumParallelTests is { } codeLimit)
         {
             if (codeLimit == 0)
             {

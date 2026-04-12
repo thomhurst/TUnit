@@ -1,3 +1,5 @@
+using TUnit.Core.Settings;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -28,6 +30,12 @@ public class BeforeTestDiscoveryContext : Context
     /// Gets or sets the test filter.
     /// </summary>
     public required string? TestFilter { get; init; }
+
+    /// <summary>
+    /// Programmatic settings for TUnit. Configure these here to establish project-level defaults
+    /// before any tests are discovered or executed.
+    /// </summary>
+    public TUnitSettings Settings => TUnitSettings.Default;
 
     internal override void SetAsyncLocalContext()
     {

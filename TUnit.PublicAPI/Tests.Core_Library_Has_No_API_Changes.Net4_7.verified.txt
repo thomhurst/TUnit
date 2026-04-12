@@ -210,6 +210,7 @@ namespace
     public class BeforeTestDiscoveryContext : .Context
     {
         public .GlobalContext GlobalContext { get; }
+        public . Settings { get; }
         public required string? TestFilter { get; init; }
         public new static .BeforeTestDiscoveryContext? Current { get; }
     }
@@ -2861,12 +2862,12 @@ namespace .Settings
         public ParallelismSettings() { }
         public int? MaximumParallelTests { get; set; }
     }
-    public static class TUnitSettings
+    public sealed class TUnitSettings
     {
-        public static . Display { get; }
-        public static . Execution { get; }
-        public static . Parallelism { get; }
-        public static . Timeouts { get; }
+        public . Display { get; }
+        public . Execution { get; }
+        public . Parallelism { get; }
+        public . Timeouts { get; }
     }
     public sealed class TimeoutSettings
     {

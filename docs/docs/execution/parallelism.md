@@ -179,7 +179,7 @@ dotnet run --project MyTests -- --maximum-parallel-tests 4
 TUNIT_MAX_PARALLEL_TESTS=4 dotnet run --project MyTests
 ```
 
-The `TUnitSettings.Parallelism.MaximumParallelTests` property is also available, but the scheduler reads it before `[Before(HookType.TestDiscovery)]` hooks run, so the CLI flag or environment variable is the recommended approach. See the [Programmatic Configuration](/docs/reference/programmatic-configuration) reference for details.
+The `context.Settings.Parallelism.MaximumParallelTests` property is also available, but the scheduler reads it before `[Before(HookType.TestDiscovery)]` hooks run, so the CLI flag or environment variable is the recommended approach. See the [Programmatic Configuration](/docs/reference/programmatic-configuration) reference for details.
 
 ## When to Use Which
 

@@ -1,7 +1,7 @@
 namespace TUnit.Core.Settings;
 
 /// <summary>
-/// Programmatic configuration for TUnit. Set these in a
+/// Programmatic configuration for TUnit. Access via <c>context.Settings</c> in a
 /// <c>[Before(HookType.TestDiscovery)]</c> hook to establish project-level defaults.
 /// <para>
 /// Precedence: CLI flag → environment variable → <see cref="TUnitSettings"/> → built-in default.
@@ -13,25 +13,29 @@ namespace TUnit.Core.Settings;
 /// is required. Modifying settings during parallel test execution is not supported.
 /// </para>
 /// </summary>
-public static class TUnitSettings
+public sealed class TUnitSettings
 {
+    internal static TUnitSettings Default { get; } = new();
+
+    internal TUnitSettings() { }
+
     /// <summary>
     /// Default timeouts for tests and hooks.
     /// </summary>
-    public static TimeoutSettings Timeouts { get; } = new();
+    public TimeoutSettings Timeouts { get; } = new();
 
     /// <summary>
     /// Controls concurrent test execution.
     /// </summary>
-    public static ParallelismSettings Parallelism { get; } = new();
+    public ParallelismSettings Parallelism { get; } = new();
 
     /// <summary>
     /// Controls visual output.
     /// </summary>
-    public static DisplaySettings Display { get; } = new();
+    public DisplaySettings Display { get; } = new();
 
     /// <summary>
     /// Controls test run behavior.
     /// </summary>
-    public static ExecutionSettings Execution { get; } = new();
+    public ExecutionSettings Execution { get; } = new();
 }

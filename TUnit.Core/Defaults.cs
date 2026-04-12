@@ -14,26 +14,26 @@ public static class Defaults
     /// Can be overridden per-test via <see cref="TUnit.Core.TimeoutAttribute"/>.
     /// </summary>
     [Obsolete($"Use {nameof(TUnitSettings)}.{nameof(TUnitSettings.Timeouts)}.{nameof(TimeoutSettings.DefaultTestTimeout)} instead.")]
-    public static TimeSpan TestTimeout => TUnitSettings.Timeouts.DefaultTestTimeout;
+    public static TimeSpan TestTimeout => TUnitSettings.Default.Timeouts.DefaultTestTimeout;
 
     /// <summary>
     /// Default timeout applied to hook methods (Before/After at every level)
     /// when no explicit timeout is configured.
     /// </summary>
     [Obsolete($"Use {nameof(TUnitSettings)}.{nameof(TUnitSettings.Timeouts)}.{nameof(TimeoutSettings.DefaultHookTimeout)} instead.")]
-    public static TimeSpan HookTimeout => TUnitSettings.Timeouts.DefaultHookTimeout;
+    public static TimeSpan HookTimeout => TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
     /// <summary>
     /// Time allowed for a graceful shutdown after a cancellation request (Ctrl+C / SIGTERM)
     /// before the process is forcefully terminated.
     /// </summary>
     [Obsolete($"Use {nameof(TUnitSettings)}.{nameof(TUnitSettings.Timeouts)}.{nameof(TimeoutSettings.ForcefulExitTimeout)} instead.")]
-    public static TimeSpan ForcefulExitTimeout => TUnitSettings.Timeouts.ForcefulExitTimeout;
+    public static TimeSpan ForcefulExitTimeout => TUnitSettings.Default.Timeouts.ForcefulExitTimeout;
 
     /// <summary>
     /// Brief delay during process exit to allow After hooks registered via
     /// <see cref="CancellationToken.Register"/> to execute before the process terminates.
     /// </summary>
     [Obsolete($"Use {nameof(TUnitSettings)}.{nameof(TUnitSettings.Timeouts)}.{nameof(TimeoutSettings.ProcessExitHookDelay)} instead.")]
-    public static TimeSpan ProcessExitHookDelay => TUnitSettings.Timeouts.ProcessExitHookDelay;
+    public static TimeSpan ProcessExitHookDelay => TUnitSettings.Default.Timeouts.ProcessExitHookDelay;
 }
