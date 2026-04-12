@@ -310,9 +310,10 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        if (_maxParallelismSemaphore.Value != null)
+        var semaphore = _maxParallelismSemaphore.Value;
+        if (semaphore != null)
         {
-            await ExecuteWithGlobalLimitAsync(tests, cancellationToken).ConfigureAwait(false);
+            await ExecuteWithGlobalLimitAsync(tests, semaphore, cancellationToken).ConfigureAwait(false);
         }
         else
         {
@@ -383,8 +384,11 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
+        SemaphoreSlim globalSemaphore,
         CancellationToken cancellationToken)
     {
+        var maxParallelism = _maxParallelism.Value;
+
 #if NET8_0_OR_GREATER
         // PERFORMANCE OPTIMIZATION: Partition tests by whether they have parallel limiters
         // Tests without limiters can run with unlimited parallelism (avoiding global semaphore overhead)
@@ -405,11 +409,11 @@ internal sealed class TestScheduler : ITestScheduler
 
         // Execute both groups concurrently
         var limitedTask = testsWithLimiters.Count > 0
-            ? ExecuteWithLimitAsync(testsWithLimiters, cancellationToken)
+            ? ExecuteWithLimitAsync(testsWithLimiters, maxParallelism, cancellationToken)
             : Task.CompletedTask;
 
         var unlimitedTask = testsWithoutLimiters.Count > 0
-            ? ExecuteUnlimitedAsync(testsWithoutLimiters, cancellationToken)
+            ? ExecuteUnlimitedAsync(testsWithoutLimiters, maxParallelism, cancellationToken)
             : Task.CompletedTask;
 
         await Task.WhenAll(limitedTask, unlimitedTask).ConfigureAwait(false);
@@ -423,7 +427,7 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 SemaphoreSlim? parallelLimiterSemaphore = null;
 
-                await _maxParallelismSemaphore.Value!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     if (test.Context.ParallelLimiter != null)
@@ -444,7 +448,7 @@ internal sealed class TestScheduler : ITestScheduler
                 }
                 finally
                 {
-                    _maxParallelismSemaphore.Value!.Release();
+                    globalSemaphore.Release();
                 }
             }, CancellationToken.None);
         }
@@ -455,6 +459,7 @@ internal sealed class TestScheduler : ITestScheduler
 #if NET8_0_OR_GREATER
     private async Task ExecuteWithLimitAsync(
         List<AbstractExecutableTest> tests,
+        int maxParallelism,
         CancellationToken cancellationToken)
     {
         // Execute tests with parallel limiters using the global limit
@@ -462,7 +467,7 @@ internal sealed class TestScheduler : ITestScheduler
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = _maxParallelism.Value,
+                MaxDegreeOfParallelism = maxParallelism,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
@@ -485,6 +490,7 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ExecuteUnlimitedAsync(
         List<AbstractExecutableTest> tests,
+        int maxParallelism,
         CancellationToken cancellationToken)
     {
         // Execute tests without per-test limiters, but still apply global parallelism limit
@@ -492,7 +498,7 @@ internal sealed class TestScheduler : ITestScheduler
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = _maxParallelism.Value,
+                MaxDegreeOfParallelism = maxParallelism,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
@@ -573,7 +579,6 @@ internal sealed class TestScheduler : ITestScheduler
                 return int.MaxValue;
             }
 
-            // Setter guarantees no negative values
             logger.LogDebug($"Maximum parallel tests limit set to {codeLimit} (from TUnitSettings)");
             return codeLimit;
         }
