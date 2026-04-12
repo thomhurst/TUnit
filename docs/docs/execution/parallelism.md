@@ -167,6 +167,27 @@ With a limit of `2`, at most two of these 20 test invocations execute at the sam
 
 More specific attributes override less specific ones. Precedence: Method > Class > Assembly.
 
+## Setting Maximum Parallel Tests in Code
+
+You can cap the total number of concurrent tests globally using the `TUnitSettings` API. Set the value in a `[Before(HookType.TestDiscovery)]` hook:
+
+```csharp
+using TUnit.Core;
+using TUnit.Core.Settings;
+
+public class TestSetup
+{
+    [Before(HookType.TestDiscovery)]
+    public static Task Configure(BeforeTestDiscoveryContext context)
+    {
+        TUnitSettings.Parallelism.MaximumParallelTests = 4;
+        return Task.CompletedTask;
+    }
+}
+```
+
+This is equivalent to passing `--maximum-parallel-tests 4` on the command line or setting the `TUNIT_MAX_PARALLEL_TESTS=4` environment variable. Command-line flags and environment variables take precedence over code-level settings. See the [Programmatic Configuration](/docs/reference/programmatic-configuration) reference for the full precedence rules.
+
 ## When to Use Which
 
 | Scenario | Attribute |

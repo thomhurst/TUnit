@@ -77,12 +77,15 @@ Please note that for the coverage and trx report, you need to install [additiona
     --disable-logo
         Disables the TUnit logo when starting a test session.
         Can also be set via TUNIT_DISABLE_LOGO environment variable.
+        Programmatic equivalent: TUnitSettings.Display.DisableLogo
 
     --fail-fast
         Cancel the test run after the first test failure
+        Programmatic equivalent: TUnitSettings.Execution.FailFast
 
     --maximum-parallel-tests
         Maximum Parallel Tests
+        Programmatic equivalent: TUnitSettings.Parallelism.MaximumParallelTests
 
     --no-ansi
         Disable outputting ANSI escape characters to screen.
@@ -122,6 +125,7 @@ Please note that for the coverage and trx report, you need to install [additiona
     --detailed-stacktrace
         Display TUnit internals within stack traces.
         By default, TUnit frames are hidden to keep failure output focused on user code.
+        Programmatic equivalent: TUnitSettings.Display.DetailedStackTrace
 
     --output-json
         Write a JSON report of the test run.

@@ -21,6 +21,8 @@ set TUNIT_DISABLE_LOGO=true
 
 **Equivalent to:** `--disable-logo`
 
+**Programmatic equivalent:** `TUnitSettings.Display.DisableLogo` (see [Programmatic Configuration](./programmatic-configuration.md))
+
 **Use case:** Reduces output noise in CI/CD logs or when using AI/LLM coding assistants that parse test output.
 
 ### TUNIT_DISABLE_GITHUB_REPORTER
@@ -94,6 +96,8 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 ```
 
 **Equivalent to:** `--maximum-parallel-tests`
+
+**Programmatic equivalent:** `TUnitSettings.Parallelism.MaximumParallelTests` (see [Programmatic Configuration](./programmatic-configuration.md))
 
 **Note:** Command-line arguments take precedence over environment variables.
 
@@ -253,7 +257,8 @@ When the same setting is configured in multiple places, TUnit follows this prior
 
 1. **Command-line arguments** - Always take precedence
 2. **Environment variables** - Applied when command-line argument is not provided
-3. **Configuration files** - Applied as defaults
+3. **`TUnitSettings` (code)** - Values set in `[Before(HookType.TestDiscovery)]` hooks (see [Programmatic Configuration](./programmatic-configuration.md))
+4. **Built-in defaults**
 
 ## Summary Table
 
