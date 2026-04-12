@@ -48,13 +48,13 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public string Description => extension.Description;
 
-    private readonly ConcurrentDictionary<string, List<TestNodeUpdateMessage>> _updates = [];
+    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
 
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
+        _latestUpdates[testNodeUpdateMessage.TestNode.Uid.Value] = testNodeUpdateMessage;
 
         return Task.CompletedTask;
     }
@@ -68,16 +68,16 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
-        if (!_isEnabled || _updates.Count == 0)
+        if (!_isEnabled || _latestUpdates.IsEmpty)
         {
             return;
         }
 
         // Get the last update for each test
-        var lastUpdates = new List<TestNodeUpdateMessage>(_updates.Count);
-        foreach (var kvp in _updates.Where(kvp => kvp.Value.Count > 0))
+        var lastUpdates = new List<TestNodeUpdateMessage>(_latestUpdates.Count);
+        foreach (var kvp in _latestUpdates)
         {
-            lastUpdates.Add(kvp.Value[kvp.Value.Count - 1]);
+            lastUpdates.Add(kvp.Value);
         }
 
         // Generate JUnit XML

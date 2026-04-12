@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Data;
@@ -18,12 +19,12 @@ internal sealed class EventReceiverOrchestrator
     private readonly TUnitFrameworkLogger _logger;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
-    private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
+    private ThreadSafeDictionary<Assembly, Task> _firstTestInAssemblyTasks = new();
     private ThreadSafeDictionary<Type, Task> _firstTestInClassTasks = new();
     private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
-    private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
+    private readonly ConcurrentDictionary<Assembly, Counter> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
 
     // Accessed from multiple threads via Interlocked to ensure atomic updates
@@ -355,9 +356,9 @@ internal sealed class EventReceiverOrchestrator
             return default;
         }
 
-        var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
+        var assembly = assemblyContext.Assembly;
 
-        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
+        var task = _firstTestInAssemblyTasks.GetOrAdd(assembly,
             static (_, args) => args.self.InvokeFirstTestInAssemblyEventReceiversCoreAsync(args.context, args.assemblyContext, args.cancellationToken),
             (self: this, context, assemblyContext, cancellationToken));
         return new ValueTask(task);
@@ -459,11 +460,11 @@ internal sealed class EventReceiverOrchestrator
             return ValueTask.CompletedTask;
         }
 
-        var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
+        var assembly = assemblyContext.Assembly;
 
-        if (!_assemblyTestCounts.TryGetValue(assemblyName, out var assemblyCounter))
+        if (!_assemblyTestCounts.TryGetValue(assembly, out var assemblyCounter))
         {
-            assemblyCounter = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter());
+            assemblyCounter = _assemblyTestCounts.GetOrAdd(assembly, static _ => new Counter());
         }
 
         var assemblyCount = assemblyCounter.Decrement();
@@ -553,28 +554,19 @@ internal sealed class EventReceiverOrchestrator
         Interlocked.Exchange(ref _sessionTestCount, contexts.Count);
 
         // Clear first-event tracking to ensure clean state for each test execution
-        _firstTestInAssemblyTasks = new ThreadSafeDictionary<string, Task>();
+        _firstTestInAssemblyTasks = new ThreadSafeDictionary<Assembly, Task>();
         _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
         _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
-        foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
+        foreach (var context in contexts)
         {
-            if (!_assemblyTestCounts.TryGetValue(group.Key, out var counter))
-            {
-                counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
-            }
+            var assembly = context.ClassContext.AssemblyContext.Assembly;
+            var assemblyCounter = _assemblyTestCounts.GetOrAdd(assembly, static _ => new Counter());
+            assemblyCounter.Add(1);
 
-            counter.Add(group.Count());
-        }
-
-        foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
-        {
-            if (!_classTestCounts.TryGetValue(group.Key, out var counter))
-            {
-                counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
-            }
-
-            counter.Add(group.Count());
+            var classType = context.ClassContext.ClassType;
+            var classCounter = _classTestCounts.GetOrAdd(classType, static _ => new Counter());
+            classCounter.Add(1);
         }
     }
 

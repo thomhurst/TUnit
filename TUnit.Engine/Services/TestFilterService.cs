@@ -1,5 +1,6 @@
 ﻿#pragma warning disable TPEXP
 
+using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -12,6 +13,7 @@ namespace TUnit.Engine.Services;
 
 internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegistrationService testArgumentRegistrationService)
 {
+    private static readonly ConcurrentDictionary<Type, bool> _explicitClassCache = new();
     public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
@@ -227,7 +229,8 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
 
         var testClassType = test.Context.Metadata.TestDetails.ClassType;
-        return testClassType.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0;
+        return _explicitClassCache.GetOrAdd(testClassType,
+            static t => t.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0);
     }
 
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)

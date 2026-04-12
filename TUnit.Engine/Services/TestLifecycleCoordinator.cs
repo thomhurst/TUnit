@@ -32,18 +32,15 @@ internal sealed class TestLifecycleCoordinator
         // Initialize session counter
         _sessionTestCount.Add(testList.Count);
 
-        // Initialize assembly counters
-        foreach (var assemblyGroup in testList.GroupBy(t => t.Metadata.TestClassType.Assembly))
+        foreach (var test in testList)
         {
-            var counter = _assemblyTestCounts.GetOrAdd(assemblyGroup.Key, static _ => new Counter());
-            counter.Add(assemblyGroup.Count());
-        }
+            var assembly = test.Metadata.TestClassType.Assembly;
+            var assemblyCounter = _assemblyTestCounts.GetOrAdd(assembly, static _ => new Counter());
+            assemblyCounter.Add(1);
 
-        // Initialize class counters
-        foreach (var classGroup in testList.GroupBy(t => t.Metadata.TestClassType))
-        {
-            var counter = _classTestCounts.GetOrAdd(classGroup.Key, static _ => new Counter());
-            counter.Add(classGroup.Count());
+            var classType = test.Metadata.TestClassType;
+            var classCounter = _classTestCounts.GetOrAdd(classType, static _ => new Counter());
+            classCounter.Add(1);
         }
     }
 

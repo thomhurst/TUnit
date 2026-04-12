@@ -30,7 +30,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
     private readonly MetadataDependencyExpander _dependencyExpander;
-    private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests = [];
+    private readonly ConcurrentQueue<AbstractExecutableTest> _cachedTests = new();
     private readonly TestDependencyResolver _dependencyResolver = new();
 
     public string Uid => "TUnit";
@@ -156,7 +156,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
                 foreach (var test in testsList)
                 {
-                    _cachedTests.Add(test);
+                    _cachedTests.Enqueue(test);
                     _dependencyResolver.RegisterTest(test);
                 }
 
@@ -202,7 +202,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         foreach (var test in tests)
         {
             _dependencyResolver.RegisterTest(test);
-            _cachedTests.Add(test);
+            _cachedTests.Enqueue(test);
             yield return test;
         }
     }
@@ -256,42 +256,85 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
 
         var yieldedTests = new HashSet<string>(independentTests.Select(static t => t.TestId));
-        var remainingTests = new List<AbstractExecutableTest>(dependentTests);
 
-        while (remainingTests.Count > 0)
+        // Kahn's algorithm: build in-degree map and reverse-dependency map for O(V+E) topological sort
+        var inDegree = new Dictionary<string, int>(dependentTests.Count);
+        var reverseDeps = new Dictionary<string, List<AbstractExecutableTest>>();
+
+        foreach (var test in dependentTests)
         {
-            var readyTests = new List<AbstractExecutableTest>();
-
-            foreach (var test in remainingTests)
+            var pendingCount = 0;
+            foreach (var dep in test.Dependencies)
             {
-                var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
-
-                if (allDependenciesYielded)
+                if (!yieldedTests.Contains(dep.Test.TestId))
                 {
-                    readyTests.Add(test);
+                    pendingCount++;
                 }
+
+                // Build reverse map: when dep.Test is yielded, this test's in-degree decreases
+                var depId = dep.Test.TestId;
+                if (!reverseDeps.TryGetValue(depId, out var dependents))
+                {
+                    dependents = [];
+                    reverseDeps[depId] = dependents;
+                }
+                dependents.Add(test);
             }
 
-            if (readyTests.Count == 0 && remainingTests.Count > 0)
+            inDegree[test.TestId] = pendingCount;
+        }
+
+        // Seed queue with dependent tests whose dependencies are all already yielded
+        var readyQueue = new Queue<AbstractExecutableTest>();
+        foreach (var test in dependentTests)
+        {
+            if (inDegree[test.TestId] == 0)
             {
-                foreach (var test in remainingTests)
+                readyQueue.Enqueue(test);
+            }
+        }
+
+        var yieldedCount = 0;
+        while (readyQueue.Count > 0)
+        {
+            var test = readyQueue.Dequeue();
+            yieldedCount++;
+
+            if (_testFilterService.MatchesTest(filter, test))
+            {
+                yield return test;
+            }
+
+            yieldedTests.Add(test.TestId);
+
+            // Decrement in-degree for all tests that depend on this one
+            if (reverseDeps.TryGetValue(test.TestId, out var dependentsOfTest))
+            {
+                foreach (var dependent in dependentsOfTest)
+                {
+                    var newDegree = --inDegree[dependent.TestId];
+                    if (newDegree == 0)
+                    {
+                        readyQueue.Enqueue(dependent);
+                    }
+                }
+            }
+        }
+
+        // Cycle-break fallback: if some tests remain, their dependency graph has a cycle.
+        // Yield them without respecting order — CircularDependencyDetector will report
+        // the cycle with a proper error during scheduling.
+        if (yieldedCount < dependentTests.Count)
+        {
+            foreach (var test in dependentTests)
+            {
+                if (!yieldedTests.Contains(test.TestId))
                 {
                     if (_testFilterService.MatchesTest(filter, test))
                     {
                         yield return test;
                     }
                 }
-                break;
-            }
-
-            foreach (var test in readyTests)
-            {
-                if (_testFilterService.MatchesTest(filter, test))
-                {
-                    yield return test;
-                }
-                yieldedTests.Add(test.TestId);
-                remainingTests.Remove(test);
             }
         }
     }

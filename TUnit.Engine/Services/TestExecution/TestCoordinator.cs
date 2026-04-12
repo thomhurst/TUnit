@@ -98,9 +98,6 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Note: test.Context._dependencies is already populated during discovery
             // in TestBuilder.InvokePostResolutionEventsAsync after dependencies are resolved
 
-            // Ensure TestSession hooks run before creating test instances
-            await _testExecutor.EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
-
             // Check if we can use the fast path (no retry, no timeout)
             // Note: retryLimit == 0 means "no retries" (run once), not "unlimited retries"
             var retryLimit = test.Context.Metadata.TestDetails.RetryLimit;
@@ -245,6 +242,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     throw new ArgumentOutOfRangeException();
             }
 
+            TestContext.RemoveById(test.Context.Id);
         }
     }
 

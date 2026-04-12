@@ -72,13 +72,23 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public string Description => extension.Description;
 
-    private readonly ConcurrentDictionary<string, List<TestNodeUpdateMessage>> _updates = [];
+    // Counts terminal state transitions per test UID (for flaky detection).
+    private readonly ConcurrentDictionary<string, int> _terminalStateCounts = [];
+    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage) value;
 
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
+        var uid = testNodeUpdateMessage.TestNode.Uid.Value;
+
+        var state = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+        if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+        {
+            _terminalStateCounts.AddOrUpdate(uid, 1, static (_, count) => count + 1);
+        }
+
+        _latestUpdates[uid] = testNodeUpdateMessage;
 
         return Task.CompletedTask;
     }
@@ -93,7 +103,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
-        if (_updates.Count is 0)
+        if (_latestUpdates.IsEmpty)
         {
             return Task.CompletedTask;
         }
@@ -104,42 +114,51 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 ?.FrameworkDisplayName
             ?? RuntimeInformation.FrameworkDescription;
 
-        var last = new Dictionary<string, TestNodeUpdateMessage>(_updates.Count);
-        foreach (var kvp in _updates)
+        var last = new Dictionary<string, TestNodeUpdateMessage>(_latestUpdates.Count);
+        foreach (var kvp in _latestUpdates)
         {
-            if (kvp.Value.Count > 0)
-            {
-                last[kvp.Key] = kvp.Value[kvp.Value.Count - 1];
-            }
+            last[kvp.Key] = kvp.Value;
         }
 
-        var passedCount = last.Count(x =>
-            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
+        var passedCount = 0;
+        var failed = new List<KeyValuePair<string, TestNodeUpdateMessage>>();
+        var cancelled = new List<KeyValuePair<string, TestNodeUpdateMessage>>();
+        var timeout = new List<KeyValuePair<string, TestNodeUpdateMessage>>();
+        var skipped = new List<KeyValuePair<string, TestNodeUpdateMessage>>();
+        var inProgress = new List<KeyValuePair<string, TestNodeUpdateMessage>>();
 
-        var failed = last.Where(x =>
-            x.Value.TestNode.Properties.AsEnumerable()
-                .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
-
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
-        var cancelled = last.Where(x =>
-            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+        foreach (var kvp in last)
+        {
+            var state = kvp.Value.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+            switch (state)
+            {
+                case PassedTestNodeStateProperty:
+                    passedCount++;
+                    break;
+                case FailedTestNodeStateProperty or ErrorTestNodeStateProperty:
+                    failed.Add(kvp);
+                    break;
+                case TimeoutTestNodeStateProperty:
+                    timeout.Add(kvp);
+                    break;
+                case SkippedTestNodeStateProperty:
+                    skipped.Add(kvp);
+                    break;
+                case InProgressTestNodeStateProperty:
+                    inProgress.Add(kvp);
+                    break;
+#pragma warning disable CS0618
+                case CancelledTestNodeStateProperty:
 #pragma warning restore CS0618
-
-        var timeout = last
-            .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty))
-            .ToArray();
-
-        var skipped = last
-            .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty))
-            .ToArray();
-
-        var inProgress = last.Where(x =>
-            x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
+                    cancelled.Add(kvp);
+                    break;
+            }
+        }
 
         _runStopwatch?.Stop();
         var elapsed = _runStopwatch?.Elapsed;
 
-        var hasFailures = failed.Length > 0 || timeout.Length > 0 || cancelled.Length > 0;
+        var hasFailures = failed.Count > 0 || timeout.Count > 0 || cancelled.Count > 0;
         var statusEmoji = hasFailures ? "\u274C" : "\u2705";
 
         var stringBuilder = new StringBuilder();
@@ -172,29 +191,29 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             var segments = new List<string> { $"\u2705 {passedCount} passed" };
 
-            if (failed.Length > 0)
+            if (failed.Count > 0)
             {
-                segments.Add($"\u274C {failed.Length} failed");
+                segments.Add($"\u274C {failed.Count} failed");
             }
 
-            if (skipped.Length > 0)
+            if (skipped.Count > 0)
             {
-                segments.Add($"\u23ED\uFE0F {skipped.Length} skipped");
+                segments.Add($"\u23ED\uFE0F {skipped.Count} skipped");
             }
 
-            if (timeout.Length > 0)
+            if (timeout.Count > 0)
             {
-                segments.Add($"\u23F1\uFE0F {timeout.Length} timed out");
+                segments.Add($"\u23F1\uFE0F {timeout.Count} timed out");
             }
 
-            if (cancelled.Length > 0)
+            if (cancelled.Count > 0)
             {
-                segments.Add($"\uD83D\uDEAB {cancelled.Length} cancelled");
+                segments.Add($"\uD83D\uDEAB {cancelled.Count} cancelled");
             }
 
-            if (inProgress.Length > 0)
+            if (inProgress.Count > 0)
             {
-                segments.Add($"\u26A0\uFE0F {inProgress.Length} in progress");
+                segments.Add($"\u26A0\uFE0F {inProgress.Count} in progress");
             }
 
             stringBuilder.AppendLine(string.Join(" \u00B7 ", segments));
@@ -202,26 +221,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         // Detect flaky tests (passed after retry)
         var flakyTests = new List<(string Name, int Attempts, TimeSpan? Duration)>();
-        foreach (var kvp in _updates)
+        foreach (var kvp in _terminalStateCounts)
         {
-            var finalStateCount = 0;
-            foreach (var update in kvp.Value)
-            {
-                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
-                {
-                    finalStateCount++;
-                }
-            }
-
-            if (finalStateCount > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
+            if (kvp.Value > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
             {
                 var props = lastUpdate.TestNode.Properties.AsEnumerable();
                 if (props.Any(p => p is PassedTestNodeStateProperty))
                 {
                     var name = GetTestDisplayName(lastUpdate.TestNode);
                     var timing = props.OfType<TimingProperty>().FirstOrDefault();
-                    flakyTests.Add((name, finalStateCount, timing?.GlobalTiming.Duration));
+                    flakyTests.Add((name, kvp.Value, timing?.GlobalTiming.Duration));
                 }
             }
         }
@@ -236,7 +245,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             }
         }
 
-        if (skipped.Length > 0)
+        if (skipped.Count > 0)
         {
             var skipGroups = skipped
                 .Select(x => x.Value.TestNode.Properties.AsEnumerable()
@@ -246,7 +255,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("<details>");
-            stringBuilder.AppendLine($"<summary>\u23ed\ufe0f {skipped.Length} skipped {(skipped.Length == 1 ? "test" : "tests")}</summary>");
+            stringBuilder.AppendLine($"<summary>\u23ed\ufe0f {skipped.Count} skipped {(skipped.Count == 1 ? "test" : "tests")}</summary>");
             stringBuilder.AppendLine();
             foreach (var group in skipGroups)
             {
