@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Settings;
 
 namespace TUnit.Core.Hooks;
 
@@ -28,7 +29,7 @@ public abstract record HookMethod
     /// Gets the timeout for this hook method. This will be set during hook registration
     /// by the event receiver infrastructure, falling back to the default 5-minute timeout.
     /// </summary>
-    public TimeSpan? Timeout { get; internal set; } = Settings.TUnitSettings.Timeouts.DefaultHookTimeout;
+    public TimeSpan? Timeout { get; internal set; } = TUnitSettings.Timeouts.DefaultHookTimeout;
 
     private IHookExecutor _hookExecutor = DefaultExecutor.Instance;
     private bool _hookExecutorIsExplicit;
