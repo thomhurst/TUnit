@@ -118,6 +118,13 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         test.Context.InvalidateDisplayNameCache();
     }
 
+    /// <summary>
+    /// Registers tests by invoking event receivers and argument registration.
+    /// Parallelized for 8+ tests. Concurrency contract: RegisterTest operates on
+    /// per-test state (TestContext), and shared services (EventReceiverRegistry,
+    /// TestArgumentRegistrationService) use ConcurrentDictionary internally.
+    /// ITestRegisteredEventReceiver implementations must be thread-safe.
+    /// </summary>
     public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         var testList = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();

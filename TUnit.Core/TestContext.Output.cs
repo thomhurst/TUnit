@@ -15,12 +15,14 @@ internal record TimingEntry(string StepName, DateTimeOffset Start, DateTimeOffse
 public partial class TestContext
 {
     // Internal backing fields and properties
-    // List<T> instead of ConcurrentBag<T>: Timings are written sequentially during test
-    // execution and read once after completion. Artifacts are added at known points.
+    // Timings are written sequentially by the framework during test execution, never by user code.
     internal List<TimingEntry> Timings { get; } = [];
+    // Artifacts use a lock because AttachArtifact is user-facing and can be called
+    // from parallel Task.WhenAll branches within a single test.
+    private readonly Lock _artifactsLock = new();
     private readonly List<Artifact> _artifacts = [];
 
-    internal IReadOnlyList<Artifact> Artifacts => _artifacts;
+    internal IReadOnlyList<Artifact> Artifacts { get { lock (_artifactsLock) return [.. _artifacts]; } }
 
     // Explicit interface implementations for ITestOutput
     TextWriter ITestOutput.StandardOutput => OutputWriter;
@@ -29,18 +31,19 @@ public partial class TestContext
 
     void ITestOutput.AttachArtifact(Artifact artifact)
     {
-        _artifacts.Add(artifact);
+        lock (_artifactsLock) _artifacts.Add(artifact);
     }
 
     void ITestOutput.AttachArtifact(string filePath, string? displayName, string? description)
     {
         var fileInfo = new FileInfo(filePath);
-        _artifacts.Add(new Artifact
+        var artifact = new Artifact
         {
             File = fileInfo,
             DisplayName = displayName ?? fileInfo.Name,
             Description = description
-        });
+        };
+        lock (_artifactsLock) _artifacts.Add(artifact);
     }
 
     string ITestOutput.GetStandardOutput() => GetOutput();
