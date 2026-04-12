@@ -2,6 +2,8 @@ using TUnit.Core.Settings;
 
 namespace TUnit.UnitTests;
 
+// [NotInParallel] because tests mutate static TUnitSettings state;
+// Before/After hooks snapshot and restore values so test order doesn't matter.
 [NotInParallel]
 public class TUnitSettingsTests
 {
