@@ -45,7 +45,7 @@ public sealed class ReferenceEqualityComparer : IEqualityComparer<object>
 /// <summary>
 /// Generic version of <see cref="ReferenceEqualityComparer"/> for strongly-typed collections.
 /// </summary>
-public sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
 {
     public static readonly ReferenceEqualityComparer<T> Instance = new();
 
