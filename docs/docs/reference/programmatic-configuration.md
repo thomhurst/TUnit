@@ -30,7 +30,6 @@ public class TestSetup
     {
         TUnitSettings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
         TUnitSettings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
-        TUnitSettings.Parallelism.MaximumParallelTests = 4;
         TUnitSettings.Execution.FailFast = true;
 
         return Task.CompletedTask;
@@ -56,6 +55,8 @@ Place this class anywhere in your test project. TUnit will discover and run the 
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `MaximumParallelTests` | `int?` | `null` (4 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic. |
+
+> **Note:** `MaximumParallelTests` is read during scheduler initialization, which occurs before `[Before(HookType.TestDiscovery)]` hooks run. Use the `--maximum-parallel-tests` CLI flag or the `TUNIT_MAX_PARALLEL_TESTS` environment variable to override this setting.
 
 ### `TUnitSettings.Display`
 
