@@ -59,6 +59,27 @@ public class ParallelLimiterExceedsLimitTests
         await Assert.That(s_peak).IsLessThanOrEqualTo(2);
     }
 
+    /// <summary>
+    /// Same assertion but this test also carries the limiter — verifies the
+    /// two-phase acquire (deps first, then limiter) works when the depending
+    /// test shares the same limiter as its dependencies.
+    /// </summary>
+    [Test, ParallelLimiter<Limit2>]
+    [DependsOn(nameof(T01)), DependsOn(nameof(T02)),
+     DependsOn(nameof(T03)), DependsOn(nameof(T04)),
+     DependsOn(nameof(T05)), DependsOn(nameof(T06)),
+     DependsOn(nameof(T07)), DependsOn(nameof(T08)),
+     DependsOn(nameof(T09)), DependsOn(nameof(T10)),
+     DependsOn(nameof(T11)), DependsOn(nameof(T12)),
+     DependsOn(nameof(T13)), DependsOn(nameof(T14)),
+     DependsOn(nameof(T15)), DependsOn(nameof(T16)),
+     DependsOn(nameof(T17)), DependsOn(nameof(T18)),
+     DependsOn(nameof(T19)), DependsOn(nameof(T20))]
+    public async Task PeakIsAtMostLimitWithSameLimiterOnDependent()
+    {
+        await Assert.That(s_peak).IsLessThanOrEqualTo(2);
+    }
+
     private static async Task MeasureAsync()
     {
         var current = Interlocked.Increment(ref s_concurrent);
