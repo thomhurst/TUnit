@@ -57,13 +57,19 @@ public sealed class TimeoutSettings
     /// <summary>
     /// Brief delay during process exit to allow After hooks registered via
     /// <see cref="CancellationToken.Register"/> to execute. Default: 500ms.
+    /// Set to <see cref="TimeSpan.Zero"/> to disable the delay.
     /// </summary>
     public TimeSpan ProcessExitHookDelay
     {
         get => _processExitHookDelay;
         set
         {
-            ValidatePositive(value);
+            if (value < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "ProcessExitHookDelay cannot be negative.");
+            }
+
             _processExitHookDelay = value;
         }
     }
