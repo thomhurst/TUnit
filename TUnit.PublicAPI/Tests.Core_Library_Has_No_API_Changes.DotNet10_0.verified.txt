@@ -528,11 +528,16 @@ namespace
         public static readonly .DefaultExecutor Instance;
         protected override . ExecuteAsync(<.> action) { }
     }
+    [("Use  instead.")]
     public static class Defaults
     {
+        [("Use .ForcefulExitTimeout instead.")]
         public static readonly  ForcefulExitTimeout;
+        [("Use .DefaultHookTimeout instead.")]
         public static readonly  HookTimeout;
+        [("Use .ProcessExitHookDelay instead.")]
         public static readonly  ProcessExitHookDelay;
+        [("Use .DefaultTestTimeout instead.")]
         public static readonly  TestTimeout;
     }
     public abstract class DependencyInjectionDataSourceAttribute<TScope> : .UntypedDataSourceGeneratorAttribute
@@ -2912,6 +2917,40 @@ namespace .Services
         public . AddTransient<T>(<T> factory)
             where T :  class { }
         public object? GetService( serviceType) { }
+    }
+}
+namespace .Settings
+{
+    public sealed class DisplaySettings
+    {
+        public DisplaySettings() { }
+        public bool DetailedStackTrace { get; set; }
+        public bool DisableLogo { get; set; }
+    }
+    public sealed class ExecutionSettings
+    {
+        public ExecutionSettings() { }
+        public bool FailFast { get; set; }
+    }
+    public sealed class ParallelismSettings
+    {
+        public ParallelismSettings() { }
+        public int? MaximumParallelTests { get; set; }
+    }
+    public static class TUnitSettings
+    {
+        public static . Display { get; }
+        public static . Execution { get; }
+        public static . Parallelism { get; }
+        public static . Timeouts { get; }
+    }
+    public sealed class TimeoutSettings
+    {
+        public TimeoutSettings() { }
+        public  DefaultHookTimeout { get; set; }
+        public  DefaultTestTimeout { get; set; }
+        public  ForcefulExitTimeout { get; set; }
+        public  ProcessExitHookDelay { get; set; }
     }
 }
 namespace .StaticProperties
