@@ -2924,17 +2924,14 @@ namespace .Settings
 {
     public sealed class DisplaySettings
     {
-        public DisplaySettings() { }
         public bool DetailedStackTrace { get; set; }
     }
     public sealed class ExecutionSettings
     {
-        public ExecutionSettings() { }
         public bool FailFast { get; set; }
     }
     public sealed class ParallelismSettings
     {
-        public ParallelismSettings() { }
         public int? MaximumParallelTests { get; set; }
     }
     public sealed class TUnitSettings
@@ -2946,7 +2943,6 @@ namespace .Settings
     }
     public sealed class TimeoutSettings
     {
-        public TimeoutSettings() { }
         public  DefaultHookTimeout { get; set; }
         public  DefaultTestTimeout { get; set; }
         public  ForcefulExitTimeout { get; set; }

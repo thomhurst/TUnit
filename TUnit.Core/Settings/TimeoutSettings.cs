@@ -6,6 +6,8 @@ namespace TUnit.Core.Settings;
 /// </summary>
 public sealed class TimeoutSettings
 {
+    internal TimeoutSettings() { }
+
     /// <summary>
     /// Default timeout for individual tests. Default: 30 minutes.
     /// Overridden per-test by <see cref="TimeoutAttribute"/>.

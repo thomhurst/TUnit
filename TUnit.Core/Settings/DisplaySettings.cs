@@ -5,6 +5,8 @@ namespace TUnit.Core.Settings;
 /// </summary>
 public sealed class DisplaySettings
 {
+    internal DisplaySettings() { }
+
     /// <summary>
     /// Whether to show full stack traces including TUnit internals. Default: <c>false</c>.
     /// Precedence: <c>--detailed-stacktrace</c> → TUnitSettings → built-in default.
