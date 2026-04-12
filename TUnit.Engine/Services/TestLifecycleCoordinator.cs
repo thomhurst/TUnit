@@ -32,7 +32,6 @@ internal sealed class TestLifecycleCoordinator
         // Initialize session counter
         _sessionTestCount.Add(testList.Count);
 
-        // Initialize assembly and class counters in a single pass
         foreach (var test in testList)
         {
             var assembly = test.Metadata.TestClassType.Assembly;

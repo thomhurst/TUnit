@@ -242,8 +242,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                     throw new ArgumentOutOfRangeException();
             }
 
-            // Remove test context from static registry to prevent memory accumulation
-            // in long-running test host scenarios (e.g., MTP hot reload mode)
             TestContext.RemoveById(test.Context.Id);
         }
     }

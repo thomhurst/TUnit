@@ -181,8 +181,12 @@ internal sealed class TestScheduler : ITestScheduler
             var orderedTestsArray = new AbstractExecutableTest[totalCount];
             var idx = 0;
             foreach (var list in group.Value.Values)
+            {
                 foreach (var t in list)
+                {
                     orderedTestsArray[idx++] = t;
+                }
+            }
 
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);

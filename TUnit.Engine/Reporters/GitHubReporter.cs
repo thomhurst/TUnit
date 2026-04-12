@@ -72,9 +72,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public string Description => extension.Description;
 
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
-    // Last-write-wins; not atomic with _updates.Enqueue but test state transitions are
-    // monotonic (InProgress → terminal), so a stale read is harmless at report time.
+    // Counts terminal state transitions per test UID (for flaky detection).
+    private readonly ConcurrentDictionary<string, int> _terminalStateCounts = [];
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
@@ -82,7 +81,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var testNodeUpdateMessage = (TestNodeUpdateMessage) value;
 
         var uid = testNodeUpdateMessage.TestNode.Uid.Value;
-        _updates.GetOrAdd(uid, static _ => []).Enqueue(testNodeUpdateMessage);
+
+        var state = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+        if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+        {
+            _terminalStateCounts.AddOrUpdate(uid, 1, static (_, count) => count + 1);
+        }
+
         _latestUpdates[uid] = testNodeUpdateMessage;
 
         return Task.CompletedTask;
@@ -216,26 +221,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         // Detect flaky tests (passed after retry)
         var flakyTests = new List<(string Name, int Attempts, TimeSpan? Duration)>();
-        foreach (var kvp in _updates)
+        foreach (var kvp in _terminalStateCounts)
         {
-            var finalStateCount = 0;
-            foreach (var update in kvp.Value)
-            {
-                var state = update.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
-                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
-                {
-                    finalStateCount++;
-                }
-            }
-
-            if (finalStateCount > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
+            if (kvp.Value > 1 && last.TryGetValue(kvp.Key, out var lastUpdate))
             {
                 var props = lastUpdate.TestNode.Properties.AsEnumerable();
                 if (props.Any(p => p is PassedTestNodeStateProperty))
                 {
                     var name = GetTestDisplayName(lastUpdate.TestNode);
                     var timing = props.OfType<TimingProperty>().FirstOrDefault();
-                    flakyTests.Add((name, finalStateCount, timing?.GlobalTiming.Duration));
+                    flakyTests.Add((name, kvp.Value, timing?.GlobalTiming.Duration));
                 }
             }
         }

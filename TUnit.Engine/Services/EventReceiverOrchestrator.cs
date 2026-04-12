@@ -558,7 +558,6 @@ internal sealed class EventReceiverOrchestrator
         _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
         _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
-        // Initialize assembly and class counters in a single pass
         foreach (var context in contexts)
         {
             var assembly = context.ClassContext.AssemblyContext.Assembly;
