@@ -57,8 +57,6 @@ Settings are accessed exclusively through `context.Settings` in the discovery ho
 |---|---|---|---|
 | `MaximumParallelTests` | `int?` | `null` (4 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic. |
 
-> **Note:** `MaximumParallelTests` is read during scheduler initialization, which occurs before `[Before(HookType.TestDiscovery)]` hooks run. Use the `--maximum-parallel-tests` CLI flag or the `TUNIT_MAX_PARALLEL_TESTS` environment variable to override this setting.
-
 ### `context.Settings.Display`
 
 | Property | Type | Default | Description |
@@ -100,7 +98,4 @@ The command-line flag takes precedence, so 8 parallel tests will be used.
 
 Set most values via `context.Settings` inside a `[Before(HookType.TestDiscovery)]` hook. This is the earliest point in the TUnit lifecycle where user code runs and ensures your values are in place before test discovery begins. Setting values later (for example in a `[Before(HookType.TestSession)]` hook) may have no effect for settings that are read during discovery.
 
-Two settings are exceptions:
-
-- **`Parallelism.MaximumParallelTests`** is read during scheduler initialization before discovery hooks run — use the CLI flag or environment variable for that setting (see the note above).
-- **`Timeouts.DefaultHookTimeout`** is captured at hook registration time, which also occurs before discovery hooks run. Use the `[Timeout]` attribute on individual hook methods for reliable per-hook timeout control.
+The exception is **`Timeouts.DefaultHookTimeout`**, which is captured at hook registration time before discovery hooks run. Use the `[Timeout]` attribute on individual hook methods for reliable per-hook timeout control.

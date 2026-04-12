@@ -28,8 +28,8 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly AfterHookPairTracker _afterHookPairTracker;
     private readonly StaticPropertyHandler _staticPropertyHandler;
     private readonly IDynamicTestQueue _dynamicTestQueue;
-    private readonly int _maxParallelism;
-    private readonly SemaphoreSlim? _maxParallelismSemaphore;
+    private readonly Lazy<int> _maxParallelism;
+    private readonly Lazy<SemaphoreSlim?> _maxParallelismSemaphore;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -59,11 +59,12 @@ internal sealed class TestScheduler : ITestScheduler
         _staticPropertyHandler = staticPropertyHandler;
         _dynamicTestQueue = dynamicTestQueue;
 
-        _maxParallelism = GetMaxParallelism(logger, commandLineOptions);
+        _maxParallelism = new Lazy<int>(() => GetMaxParallelism(logger, commandLineOptions));
 
-        _maxParallelismSemaphore = _maxParallelism == int.MaxValue
-            ? null
-            : new SemaphoreSlim(_maxParallelism, _maxParallelism);
+        _maxParallelismSemaphore = new Lazy<SemaphoreSlim?>(() =>
+            _maxParallelism.Value == int.MaxValue
+                ? null
+                : new SemaphoreSlim(_maxParallelism.Value, _maxParallelism.Value));
     }
 
     #if NET8_0_OR_GREATER
@@ -309,7 +310,7 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        if (_maxParallelismSemaphore != null)
+        if (_maxParallelismSemaphore.Value != null)
         {
             await ExecuteWithGlobalLimitAsync(tests, cancellationToken).ConfigureAwait(false);
         }
@@ -422,7 +423,7 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 SemaphoreSlim? parallelLimiterSemaphore = null;
 
-                await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                await _maxParallelismSemaphore.Value!.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     if (test.Context.ParallelLimiter != null)
@@ -443,7 +444,7 @@ internal sealed class TestScheduler : ITestScheduler
                 }
                 finally
                 {
-                    _maxParallelismSemaphore.Release();
+                    _maxParallelismSemaphore.Value!.Release();
                 }
             }, CancellationToken.None);
         }
@@ -461,7 +462,7 @@ internal sealed class TestScheduler : ITestScheduler
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = _maxParallelism,
+                MaxDegreeOfParallelism = _maxParallelism.Value,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
@@ -491,7 +492,7 @@ internal sealed class TestScheduler : ITestScheduler
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = _maxParallelism,
+                MaxDegreeOfParallelism = _maxParallelism.Value,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
