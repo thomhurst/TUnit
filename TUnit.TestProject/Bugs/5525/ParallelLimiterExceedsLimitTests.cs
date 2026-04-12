@@ -15,6 +15,13 @@ public class ParallelLimiterExceedsLimitTests
     private static int s_concurrent;
     private static int s_peak;
 
+    [Before(Class)]
+    public static void Reset()
+    {
+        s_concurrent = 0;
+        s_peak = 0;
+    }
+
     [Test, ParallelLimiter<Limit2>] public Task T01() => MeasureAsync();
     [Test, ParallelLimiter<Limit2>] public Task T02() => MeasureAsync();
     [Test, ParallelLimiter<Limit2>] public Task T03() => MeasureAsync();
