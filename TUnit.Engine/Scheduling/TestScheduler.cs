@@ -572,11 +572,9 @@ internal sealed class TestScheduler : ITestScheduler
                 return int.MaxValue;
             }
 
-            if (codeLimit > 0)
-            {
-                logger.LogDebug($"Maximum parallel tests limit set to {codeLimit} (from TUnitSettings)");
-                return codeLimit;
-            }
+            // Setter guarantees no negative values
+            logger.LogDebug($"Maximum parallel tests limit set to {codeLimit} (from TUnitSettings)");
+            return codeLimit;
         }
 
         // Default: 4x CPU cores (empirically optimized for async/IO-bound workloads)

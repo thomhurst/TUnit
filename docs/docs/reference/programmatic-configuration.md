@@ -99,4 +99,7 @@ The command-line flag takes precedence, so 8 parallel tests will be used.
 
 Set most `TUnitSettings` values inside a `[Before(HookType.TestDiscovery)]` hook. This is the earliest point in the TUnit lifecycle where user code runs and ensures your values are in place before test discovery begins. Setting values later (for example in a `[Before(HookType.TestSession)]` hook) may have no effect for settings that are read during discovery.
 
-The exception is `Parallelism.MaximumParallelTests`, which is read during scheduler initialization before discovery hooks run — use the CLI flag or environment variable for that setting (see the note above).
+Two settings are exceptions:
+
+- **`Parallelism.MaximumParallelTests`** is read during scheduler initialization before discovery hooks run — use the CLI flag or environment variable for that setting (see the note above).
+- **`Timeouts.DefaultHookTimeout`** is captured at hook registration time, which also occurs before discovery hooks run. Use the `[Timeout]` attribute on individual hook methods for reliable per-hook timeout control.
