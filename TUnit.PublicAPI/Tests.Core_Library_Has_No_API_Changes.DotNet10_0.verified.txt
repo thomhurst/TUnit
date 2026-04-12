@@ -532,13 +532,13 @@ namespace
     public static class Defaults
     {
         [("Use .ForcefulExitTimeout instead.")]
-        public static readonly  ForcefulExitTimeout;
+        public static  ForcefulExitTimeout { get; }
         [("Use .DefaultHookTimeout instead.")]
-        public static readonly  HookTimeout;
+        public static  HookTimeout { get; }
         [("Use .ProcessExitHookDelay instead.")]
-        public static readonly  ProcessExitHookDelay;
+        public static  ProcessExitHookDelay { get; }
         [("Use .DefaultTestTimeout instead.")]
-        public static readonly  TestTimeout;
+        public static  TestTimeout { get; }
     }
     public abstract class DependencyInjectionDataSourceAttribute<TScope> : .UntypedDataSourceGeneratorAttribute
     {
