@@ -349,12 +349,12 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 var waitTask = Task.Run(async () =>
                 {
                     // For .NET Standard 2.0 compatibility, use Task.Delay for timeout
-                    var timeoutTask = Task.Delay(Defaults.TestTimeout);
+                    var timeoutTask = Task.Delay(Settings.TUnitSettings.Timeouts.DefaultTestTimeout);
                     var completedTask = await Task.WhenAny(tcs.Task, timeoutTask).ConfigureAwait(false);
 
                     if (completedTask == timeoutTask)
                     {
-                        throw new TimeoutException($"Synchronous operation on dedicated thread timed out after {Defaults.TestTimeout.TotalMinutes} minutes");
+                        throw new TimeoutException($"Synchronous operation on dedicated thread timed out after {Settings.TUnitSettings.Timeouts.DefaultTestTimeout.TotalMinutes} minutes");
                     }
 
                     // Await the actual task to get its result or exception

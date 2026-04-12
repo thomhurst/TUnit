@@ -62,7 +62,7 @@ public class EngineCancellationToken : IDisposable
             _forcefulExitStarted = true;
 
             // Start a new forceful exit timer
-            _ = Task.Delay(Defaults.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
+            _ = Task.Delay(Settings.TUnitSettings.Timeouts.ForcefulExitTimeout, CancellationToken.None).ContinueWith(t =>
             {
                 if (!t.IsCanceled)
                 {
@@ -86,7 +86,7 @@ public class EngineCancellationToken : IDisposable
             // ProcessExit has limited time (~3s on Windows), so we can only wait briefly.
             // Thread.Sleep is appropriate here: we're on a synchronous event handler thread
             // and just need a simple delay — no need to involve the task scheduler.
-            Thread.Sleep(Defaults.ProcessExitHookDelay);
+            Thread.Sleep(Settings.TUnitSettings.Timeouts.ProcessExitHookDelay);
         }
     }
 
