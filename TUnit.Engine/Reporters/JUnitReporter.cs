@@ -48,18 +48,13 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public string Description => extension.Description;
 
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
-    // Last-write-wins; not atomic with _updates.Enqueue but test state transitions are
-    // monotonic (InProgress → terminal), so a stale read is harmless at report time.
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
 
-        var uid = testNodeUpdateMessage.TestNode.Uid.Value;
-        _updates.GetOrAdd(uid, static _ => []).Enqueue(testNodeUpdateMessage);
-        _latestUpdates[uid] = testNodeUpdateMessage;
+        _latestUpdates[testNodeUpdateMessage.TestNode.Uid.Value] = testNodeUpdateMessage;
 
         return Task.CompletedTask;
     }
@@ -73,7 +68,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
-        if (!_isEnabled || _updates.Count == 0)
+        if (!_isEnabled || _latestUpdates.IsEmpty)
         {
             return;
         }

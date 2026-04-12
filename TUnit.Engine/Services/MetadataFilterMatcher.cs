@@ -117,7 +117,8 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 {
 #pragma warning disable TPEXP
     private static readonly ConstructorInfo _treeNodeFilterConstructor =
-        typeof(TreeNodeFilter).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0];
+        typeof(TreeNodeFilter).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
 #pragma warning restore TPEXP
 
     private static readonly PropertyBag _emptyPropertyBag = new();

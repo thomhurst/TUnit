@@ -98,7 +98,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
-        if (_updates.Count is 0)
+        if (_latestUpdates.IsEmpty)
         {
             return Task.CompletedTask;
         }
@@ -221,7 +221,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             var finalStateCount = 0;
             foreach (var update in kvp.Value)
             {
-                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                var state = update.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
                 if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
                 {
                     finalStateCount++;
