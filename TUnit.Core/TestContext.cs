@@ -210,6 +210,11 @@ public partial class TestContext : Context,
     public static TestContext? GetById(string id) => _testContextsById.GetValueOrDefault(id);
 
     /// <summary>
+    /// Removes a test context from the static registry. Called when test execution completes.
+    /// </summary>
+    internal static void RemoveById(string id) => _testContextsById.TryRemove(id, out _);
+
+    /// <summary>
     /// Gets the dictionary of test parameters indexed by parameter name.
     /// </summary>
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;

@@ -22,9 +22,24 @@ internal static class JUnitXmlWriter
             return string.Empty;
         }
 
-        // At this point, value is guaranteed to not be null
-        var builder = new StringBuilder(value!.Length);
+        // Fast path: check if sanitization is needed
         foreach (var ch in value!)
+        {
+            if (!(ch == 0x9 || ch == 0xA || ch == 0xD ||
+                  (ch >= 0x20 && ch <= 0xD7FF) ||
+                  (ch >= 0xE000 && ch <= 0xFFFD)))
+            {
+                return SanitizeForXmlSlow(value);
+            }
+        }
+
+        return value; // Return original string unchanged — zero allocation
+    }
+
+    private static string SanitizeForXmlSlow(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        foreach (var ch in value)
         {
             // Check if character is valid according to XML 1.0 spec
             if (ch == 0x9 || ch == 0xA || ch == 0xD ||

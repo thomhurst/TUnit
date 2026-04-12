@@ -89,34 +89,31 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
             var notInParallel = sortKey.NotInParallelConstraint;
 
-            // Log parallel limiter if present
-            var parallelLimiterInfo = test.Context.ParallelLimiter != null
-                ? $" [ParallelLimiter: {test.Context.ParallelLimiter.GetType().Name} (limit: {test.Context.ParallelLimiter.Limit})]"
-                : "";
-
             if (parallelGroup != null && notInParallel != null)
             {
-                // Test has both ParallelGroup and NotInParallel constraints
-                await _logger.LogTraceAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{parallelLimiterInfo}").ConfigureAwait(false);
+                if (_logger.IsTraceEnabled)
+                    await _logger.LogTraceAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
                 ProcessCombinedConstraints(test, sortKey.ClassFullName, parallelGroup, notInParallel, constrainedParallelGroups);
             }
             else if (parallelGroup != null)
             {
-                // Only ParallelGroup constraint
-                await _logger.LogTraceAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{parallelLimiterInfo}").ConfigureAwait(false);
+                if (_logger.IsTraceEnabled)
+                    await _logger.LogTraceAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
                 ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
             }
             else if (notInParallel != null)
             {
-                // Only NotInParallel constraint
-                var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
-                await _logger.LogTraceAsync($"Test '{test.TestId}': → NotInParallel{keys}{parallelLimiterInfo}").ConfigureAwait(false);
+                if (_logger.IsTraceEnabled)
+                {
+                    var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
+                    await _logger.LogTraceAsync($"Test '{test.TestId}': → NotInParallel{keys}{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
+                }
                 ProcessNotInParallelConstraint(test, sortKey.ClassFullName, notInParallel, notInParallelList, keyedNotInParallelList);
             }
             else
             {
-                // No constraints - can run in parallel
-                await _logger.LogTraceAsync($"Test '{test.TestId}': → Parallel (no constraints){parallelLimiterInfo}").ConfigureAwait(false);
+                if (_logger.IsTraceEnabled)
+                    await _logger.LogTraceAsync($"Test '{test.TestId}': → Parallel (no constraints){FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
                 parallelTests.Add(test);
             }
         }
@@ -199,13 +196,16 @@ internal sealed class TestGroupingService : ITestGroupingService
         };
 
         // Log summary of test categorization
-        await _logger.LogTraceAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
-        await _logger.LogTraceAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
-        await _logger.LogTraceAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
-        await _logger.LogTraceAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
-        await _logger.LogTraceAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
-        await _logger.LogTraceAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
-        await _logger.LogTraceAsync("════════════════════════════").ConfigureAwait(false);
+        if (_logger.IsTraceEnabled)
+        {
+            await _logger.LogTraceAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
+            await _logger.LogTraceAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
+            await _logger.LogTraceAsync("════════════════════════════").ConfigureAwait(false);
+        }
 
         return result;
     }
@@ -251,6 +251,11 @@ internal sealed class TestGroupingService : ITestGroupingService
         tests.Add(test);
     }
     
+    private static string FormatParallelLimiterInfo(AbstractExecutableTest test) =>
+        test.Context.ParallelLimiter != null
+            ? $" [ParallelLimiter: {test.Context.ParallelLimiter.GetType().Name} (limit: {test.Context.ParallelLimiter.Limit})]"
+            : "";
+
     private static void ProcessCombinedConstraints(
         AbstractExecutableTest test,
         string className,

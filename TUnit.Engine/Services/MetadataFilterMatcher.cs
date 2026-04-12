@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -113,6 +115,15 @@ internal readonly struct FilterHints
 /// </summary>
 internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 {
+#pragma warning disable TPEXP
+    private static readonly ConstructorInfo _treeNodeFilterConstructor =
+        typeof(TreeNodeFilter).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0];
+#pragma warning restore TPEXP
+
+    private static readonly PropertyBag _emptyPropertyBag = new();
+
+    private static readonly ConcurrentDictionary<string, string> _strippedFilterCache = new();
+
     /// <summary>
     /// Extract hints from a filter that can be used to pre-filter test sources by type.
     /// </summary>
@@ -391,7 +402,8 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         TreeNodeFilter pathOnlyFilter;
         if (filterString.Contains('['))
         {
-            var strippedFilterString = System.Text.RegularExpressions.Regex.Replace(filterString, @"\[([^\]]*)\]", "");
+            var strippedFilterString = _strippedFilterCache.GetOrAdd(filterString,
+                static fs => System.Text.RegularExpressions.Regex.Replace(fs, @"\[([^\]]*)\]", ""));
             pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
         }
         else
@@ -400,16 +412,12 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         }
 
         var path = BuildPathFromMetadata(metadata);
-        var emptyPropertyBag = new PropertyBag();
-        return pathOnlyFilter.MatchesFilter(path, emptyPropertyBag);
+        return pathOnlyFilter.MatchesFilter(path, _emptyPropertyBag);
     }
 
     private static TreeNodeFilter CreateTreeNodeFilterViaReflection(string filterString)
     {
-        var constructor = typeof(TreeNodeFilter).GetConstructors(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
-
-        return (TreeNodeFilter)constructor.Invoke([filterString]);
+        return (TreeNodeFilter)_treeNodeFilterConstructor.Invoke([filterString]);
     }
 #pragma warning restore TPEXP
 

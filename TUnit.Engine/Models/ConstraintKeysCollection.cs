@@ -27,7 +27,19 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
             return false;
         }
 
-        return _constraintKeys.Intersect(other._constraintKeys).Any();
+        // Constraint key lists are typically 1-2 items; nested loop beats HashSet allocation
+        foreach (var key in _constraintKeys)
+        {
+            foreach (var otherKey in other._constraintKeys)
+            {
+                if (StringComparer.Ordinal.Equals(key, otherKey))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public int CompareTo(ConstraintKeysCollection? other)
@@ -62,7 +74,14 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
 
     public override int GetHashCode()
     {
-        return 1;
+        var hash = 0;
+
+        foreach (var key in _constraintKeys)
+        {
+            hash ^= StringComparer.Ordinal.GetHashCode(key);
+        }
+
+        return hash;
     }
 
     public int CompareTo(object? obj)
@@ -93,23 +112,15 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
                 return true;
             }
 
-            if (x == null)
+            if (x == null || y == null)
             {
                 return false;
             }
 
-            if (y == null)
-            {
-                return false;
-            }
-
-            return x._constraintKeys.Intersect(y._constraintKeys).Any();
+            return x.Equals(y);
         }
 
-        public int GetHashCode(ConstraintKeysCollection obj)
-        {
-            return 1;
-        }
+        public int GetHashCode(ConstraintKeysCollection obj) => obj.GetHashCode();
     }
 
     public static IEqualityComparer<ConstraintKeysCollection> ConstraintKeysCollectionComparer { get; } = new ConstraintKeysCollectionEqualityComparer();

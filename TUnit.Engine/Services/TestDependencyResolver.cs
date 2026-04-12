@@ -192,7 +192,14 @@ internal sealed class TestDependencyResolver
     /// </summary>
     public void BatchResolveDependencies(List<AbstractExecutableTest> tests)
     {
-        var testsWithDependencies = tests.Where(t => t.Metadata.Dependencies.Length > 0).ToList();
+        var testsWithDependencies = new List<AbstractExecutableTest>();
+        foreach (var test in tests)
+        {
+            if (test.Metadata.Dependencies.Length > 0)
+            {
+                testsWithDependencies.Add(test);
+            }
+        }
 
         if (testsWithDependencies.Count == 0)
         {
