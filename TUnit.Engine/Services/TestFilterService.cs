@@ -158,22 +158,15 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 #pragma warning disable TPEXP
         TestNodeUidListFilter filter
 #pragma warning restore TPEXP
-    )
+    ) => LazyInitializer.EnsureInitialized(ref _uidFilterSet, () =>
     {
-        if (_uidFilterSet != null)
-        {
-            return _uidFilterSet;
-        }
-
         var set = new HashSet<string>(StringComparer.Ordinal);
         foreach (var uid in filter.TestNodeUids)
         {
             set.Add(uid.Value);
         }
-
-        _uidFilterSet = set;
         return set;
-    }
+    })!;
 
     private string BuildPath(AbstractExecutableTest test)
     {

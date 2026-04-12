@@ -82,7 +82,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var uid = testNodeUpdateMessage.TestNode.Uid.Value;
 
-        var state = testNodeUpdateMessage.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+        var state = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
         if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
         {
             _terminalStateCounts.AddOrUpdate(uid, 1, static (_, count) => count + 1);

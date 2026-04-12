@@ -10,6 +10,7 @@ namespace TUnit.Engine.Helpers;
 /// </summary>
 internal static class HookTimeoutHelper
 {
+    private static readonly TimeSpan EffectivelyInfiniteTimeout = TimeSpan.FromDays(1);
     /// <summary>
     /// Creates a timeout-aware action wrapper for a hook
     /// </summary>
@@ -21,7 +22,7 @@ internal static class HookTimeoutHelper
         var timeout = hook.Timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
         // Fast path: skip CTS allocation when timeout is effectively infinite
-        if (timeout == Timeout.InfiniteTimeSpan || timeout >= TimeSpan.FromDays(1))
+        if (timeout == Timeout.InfiniteTimeSpan || timeout >= EffectivelyInfiniteTimeout)
         {
             return hook.ExecuteAsync(context, cancellationToken).AsTask();
         }
@@ -64,7 +65,7 @@ internal static class HookTimeoutHelper
         var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
         // Fast path: skip CTS allocation when timeout is effectively infinite
-        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= TimeSpan.FromDays(1))
+        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= EffectivelyInfiniteTimeout)
         {
             return () => hookDelegate(context, cancellationToken);
         }
@@ -103,7 +104,7 @@ internal static class HookTimeoutHelper
         var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
         // Fast path: skip CTS allocation when timeout is effectively infinite
-        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= TimeSpan.FromDays(1))
+        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= EffectivelyInfiniteTimeout)
         {
             return () => hookDelegate(context, cancellationToken).AsTask();
         }
