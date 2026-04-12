@@ -246,7 +246,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
-                testStateManager));
+                testStateManager,
+                ParallelLimitLockProvider));
 
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
@@ -254,8 +255,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
-            Logger,
-            ParallelLimitLockProvider));
+            Logger));
 
         var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer, lazyPropertyInjector, objectGraphDiscoveryService));
 
@@ -266,7 +266,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             testGroupingService,
             MessageBus,
             CommandLineOptions,
-            ParallelLimitLockProvider,
             testStateManager,
             testRunner,
             circularDependencyDetector,

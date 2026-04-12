@@ -1,4 +1,3 @@
-using System.Buffers;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -19,7 +18,6 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
-    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
     private readonly TestStateManager _testStateManager;
     private readonly TestRunner _testRunner;
     private readonly CircularDependencyDetector _circularDependencyDetector;
@@ -36,7 +34,6 @@ internal sealed class TestScheduler : ITestScheduler
         ITestGroupingService groupingService,
         ITUnitMessageBus messageBus,
         ICommandLineOptions commandLineOptions,
-        ParallelLimitLockProvider parallelLimitLockProvider,
         TestStateManager testStateManager,
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
@@ -49,7 +46,6 @@ internal sealed class TestScheduler : ITestScheduler
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _parallelLimitLockProvider = parallelLimitLockProvider;
         _testStateManager = testStateManager;
         _testRunner = testRunner;
         _circularDependencyDetector = circularDependencyDetector;
@@ -330,7 +326,7 @@ internal sealed class TestScheduler : ITestScheduler
                 new ParallelOptions { CancellationToken = cancellationToken },
                 async (test, ct) =>
                 {
-                    test.ExecutionTask ??= ExecuteSingleTestAsync(test, ct);
+                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
                     await test.ExecutionTask.ConfigureAwait(false);
                 }
             ).ConfigureAwait(false);
@@ -340,36 +336,10 @@ internal sealed class TestScheduler : ITestScheduler
             for (var i = 0; i < tests.Length; i++)
             {
                 var test = tests[i];
-                tasks[i] = test.ExecutionTask ??= ExecuteSingleTestAsync(test, cancellationToken);
+                tasks[i] = test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
             }
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #endif
-        }
-    }
-
-    #if NET8_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
-    private async Task ExecuteSingleTestAsync(
-        AbstractExecutableTest test,
-        CancellationToken cancellationToken)
-    {
-        if (test.Context.ParallelLimiter != null)
-        {
-            var semaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                semaphore.Release();
-            }
-        }
-        else
-        {
-            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -382,7 +352,7 @@ internal sealed class TestScheduler : ITestScheduler
     {
         foreach (var test in tests)
         {
-            test.ExecutionTask ??= ExecuteSingleTestAsync(test, cancellationToken);
+            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
             await test.ExecutionTask.ConfigureAwait(false);
         }
     }
@@ -395,110 +365,6 @@ internal sealed class TestScheduler : ITestScheduler
         var maxParallelism = _maxParallelism.Value;
 
 #if NET8_0_OR_GREATER
-        // PERFORMANCE OPTIMIZATION: Partition tests by whether they have parallel limiters
-        // Tests without limiters can run with unlimited parallelism (avoiding global semaphore overhead)
-        var testsWithLimiters = new List<AbstractExecutableTest>();
-        var testsWithoutLimiters = new List<AbstractExecutableTest>();
-
-        foreach (var test in tests)
-        {
-            if (test.Context.ParallelLimiter != null)
-            {
-                testsWithLimiters.Add(test);
-            }
-            else
-            {
-                testsWithoutLimiters.Add(test);
-            }
-        }
-
-        // Execute both groups concurrently
-        var limitedTask = testsWithLimiters.Count > 0
-            ? ExecuteWithLimitAsync(testsWithLimiters, maxParallelism, cancellationToken)
-            : Task.CompletedTask;
-
-        var unlimitedTask = testsWithoutLimiters.Count > 0
-            ? ExecuteUnlimitedAsync(testsWithoutLimiters, maxParallelism, cancellationToken)
-            : Task.CompletedTask;
-
-        await Task.WhenAll(limitedTask, unlimitedTask).ConfigureAwait(false);
-#else
-        // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
-        var tasks = new Task[tests.Length];
-        for (var i = 0; i < tests.Length; i++)
-        {
-            var test = tests[i];
-            tasks[i] = Task.Run(async () =>
-            {
-                SemaphoreSlim? parallelLimiterSemaphore = null;
-
-                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
-                {
-                    if (test.Context.ParallelLimiter != null)
-                    {
-                        parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-                        await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    }
-
-                    try
-                    {
-                        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
-                        await test.ExecutionTask.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        parallelLimiterSemaphore?.Release();
-                    }
-                }
-                finally
-                {
-                    globalSemaphore.Release();
-                }
-            }, CancellationToken.None);
-        }
-        await Task.WhenAll(tasks).ConfigureAwait(false);
-#endif
-    }
-
-#if NET8_0_OR_GREATER
-    private async Task ExecuteWithLimitAsync(
-        List<AbstractExecutableTest> tests,
-        int maxParallelism,
-        CancellationToken cancellationToken)
-    {
-        // Execute tests with parallel limiters using the global limit
-        await Parallel.ForEachAsync(
-            tests,
-            new ParallelOptions
-            {
-                MaxDegreeOfParallelism = maxParallelism,
-                CancellationToken = cancellationToken
-            },
-            async (test, ct) =>
-            {
-                var parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter!);
-                await parallelLimiterSemaphore.WaitAsync(ct).ConfigureAwait(false);
-
-                try
-                {
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
-                    await test.ExecutionTask.ConfigureAwait(false);
-                }
-                finally
-                {
-                    parallelLimiterSemaphore.Release();
-                }
-            }
-        ).ConfigureAwait(false);
-    }
-
-    private async Task ExecuteUnlimitedAsync(
-        List<AbstractExecutableTest> tests,
-        int maxParallelism,
-        CancellationToken cancellationToken)
-    {
-        // Execute tests without per-test limiters, but still apply global parallelism limit
         await Parallel.ForEachAsync(
             tests,
             new ParallelOptions
@@ -512,8 +378,29 @@ internal sealed class TestScheduler : ITestScheduler
                 await test.ExecutionTask.ConfigureAwait(false);
             }
         ).ConfigureAwait(false);
-    }
+#else
+        // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
+        var tasks = new Task[tests.Length];
+        for (var i = 0; i < tests.Length; i++)
+        {
+            var test = tests[i];
+            tasks[i] = Task.Run(async () =>
+            {
+                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
+                    await test.ExecutionTask.ConfigureAwait(false);
+                }
+                finally
+                {
+                    globalSemaphore.Release();
+                }
+            }, CancellationToken.None);
+        }
+        await Task.WhenAll(tasks).ConfigureAwait(false);
 #endif
+    }
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
     {

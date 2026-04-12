@@ -19,6 +19,7 @@ public sealed class TestRunner
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
     private readonly TestStateManager _testStateManager;
+    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
     internal TestRunner(
         ITestCoordinator testCoordinator,
@@ -26,7 +27,8 @@ public sealed class TestRunner
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
-        TestStateManager testStateManager)
+        TestStateManager testStateManager,
+        ParallelLimitLockProvider parallelLimitLockProvider)
     {
         _testCoordinator = testCoordinator;
         _tunitMessageBus = tunitMessageBus;
@@ -34,6 +36,7 @@ public sealed class TestRunner
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
         _testStateManager = testStateManager;
+        _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
@@ -74,7 +77,8 @@ public sealed class TestRunner
     {
         try
         {
-            // First, execute all dependencies recursively
+            // First, execute all dependencies recursively (without holding the limiter
+            // semaphore — avoids deadlocks in dependency chains sharing a limiter).
             foreach (var dependency in test.Dependencies)
             {
                 await ExecuteTestAsync(dependency.Test, cancellationToken).ConfigureAwait(false);
@@ -87,21 +91,38 @@ public sealed class TestRunner
                 }
             }
 
-            test.State = TestState.Running;
-            test.StartTime = DateTimeOffset.UtcNow;
-
-            // TestCoordinator handles sending InProgress message
-            await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
-
-            if ((_isFailFastEnabled || TUnitSettings.Default.Execution.FailFast) && test.Result?.State == TestState.Failed)
+            // Acquired here (not in the scheduler) so the limit is enforced
+            // regardless of entry point — scheduler or dependency recursion.
+            SemaphoreSlim? acquiredLimiter = null;
+            try
             {
-                // Capture the first failure exception before triggering cancellation
-                if (test.Result.Exception != null)
+                if (test.Context.ParallelLimiter is { } parallelLimiter)
                 {
-                    Interlocked.CompareExchange(ref _firstFailFastException, test.Result.Exception, null);
+                    var limiter = _parallelLimitLockProvider.GetLock(parallelLimiter);
+                    await limiter.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    acquiredLimiter = limiter;
                 }
-                await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
-                _failFastCancellationSource.Cancel();
+
+                test.State = TestState.Running;
+                test.StartTime = DateTimeOffset.UtcNow;
+
+                // TestCoordinator handles sending InProgress message
+                await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+
+                if ((_isFailFastEnabled || TUnitSettings.Default.Execution.FailFast) && test.Result?.State == TestState.Failed)
+                {
+                    // Capture the first failure exception before triggering cancellation
+                    if (test.Result.Exception != null)
+                    {
+                        Interlocked.CompareExchange(ref _firstFailFastException, test.Result.Exception, null);
+                    }
+                    await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
+                    _failFastCancellationSource.Cancel();
+                }
+            }
+            finally
+            {
+                acquiredLimiter?.Release();
             }
         }
         catch (Exception ex)

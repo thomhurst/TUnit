@@ -9,16 +9,13 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
 {
     private readonly TestRunner _testRunner;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
 
     public ConstraintKeyScheduler(
         TestRunner testRunner,
-        TUnitFrameworkLogger logger,
-        ParallelLimitLockProvider parallelLimitLockProvider)
+        TUnitFrameworkLogger logger)
     {
         _testRunner = testRunner;
         _logger = logger;
-        _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
     #if NET8_0_OR_GREATER
@@ -146,26 +143,12 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         WaitingTestIndex waitingTestIndex,
         CancellationToken cancellationToken)
     {
-        SemaphoreSlim? parallelLimiterSemaphore = null;
-
         try
         {
-            // Two-phase acquisition: Acquire ParallelLimiter BEFORE executing
-            // This ensures constrained resources are acquired before holding constraint keys
-            if (test.Context.ParallelLimiter != null)
-            {
-                parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-                await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            // Execute the test (constraint keys are already held by caller)
             await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            // Release ParallelLimiter if we acquired it
-            parallelLimiterSemaphore?.Release();
-
             // Release the constraint keys and check if any waiting tests can now run
             var testsToStart = new List<WaitingTest>();
 
