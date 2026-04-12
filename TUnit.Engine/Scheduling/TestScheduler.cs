@@ -9,6 +9,7 @@ using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
+using TUnit.Core.Settings;
 using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Scheduling;
@@ -559,6 +560,22 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 logger.LogDebug($"Maximum parallel tests limit set to {envLimit} (from TUNIT_MAX_PARALLEL_TESTS environment variable)");
                 return envLimit;
+            }
+        }
+
+        // Check TUnitSettings (third priority — code-level project defaults)
+        if (TUnitSettings.Parallelism.MaximumParallelTests is { } codeLimit)
+        {
+            if (codeLimit == 0)
+            {
+                logger.LogDebug("Maximum parallel tests: unlimited (from TUnitSettings)");
+                return int.MaxValue;
+            }
+
+            if (codeLimit > 0)
+            {
+                logger.LogDebug($"Maximum parallel tests limit set to {codeLimit} (from TUnitSettings)");
+                return codeLimit;
             }
         }
 

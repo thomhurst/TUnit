@@ -17,6 +17,7 @@ using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Core.Settings;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Discovery;
 using TUnit.Engine.Extensions;
@@ -236,7 +237,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
         var sessionUid = context.Request.Session.SessionUid;
-        var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
+        var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _)
+            || TUnitSettings.Execution.FailFast;
         FailFastCancellationSource = Register(new CancellationTokenSource());
 
         var testRunner = Register(
