@@ -20,7 +20,7 @@ public static class NuGetDownloader
         if (!Directory.Exists(extractedPath))
         {
 
-            var settings = Settings.LoadDefaultSettings(null);
+            var settings = NuGet.Configuration.Settings.LoadDefaultSettings(null);
             var sourceRepositoryProvider = new SourceRepositoryProvider(new PackageSourceProvider(settings), Repository.Provider.GetCoreV3());
             var repository = sourceRepositoryProvider.CreateRepository(new PackageSource("https://api.nuget.org/v3/index.json"));
 

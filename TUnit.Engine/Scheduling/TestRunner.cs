@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Services.TestExecution;
@@ -92,7 +93,7 @@ public sealed class TestRunner
             // TestCoordinator handles sending InProgress message
             await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
-            if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
+            if ((_isFailFastEnabled || TUnitSettings.Default.Execution.FailFast) && test.Result?.State == TestState.Failed)
             {
                 // Capture the first failure exception before triggering cancellation
                 if (test.Result.Exception != null)
@@ -109,7 +110,7 @@ public sealed class TestRunner
             // We only need to handle fail-fast logic here
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}").ConfigureAwait(false);
 
-            if (_isFailFastEnabled)
+            if (_isFailFastEnabled || TUnitSettings.Default.Execution.FailFast)
             {
                 // Capture the first failure exception before triggering cancellation
                 Interlocked.CompareExchange(ref _firstFailFastException, ex, null);

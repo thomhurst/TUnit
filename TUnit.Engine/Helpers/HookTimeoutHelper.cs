@@ -1,9 +1,12 @@
 using TUnit.Core.Hooks;
+using TUnit.Core.Settings;
 
 namespace TUnit.Engine.Helpers;
 
 /// <summary>
-/// Helper class for executing hooks with timeout enforcement
+/// Helper class for executing hooks with timeout enforcement.
+/// When no explicit timeout is set on a hook, falls back to
+/// <see cref="TUnitSettings.Default"/>.<see cref="TUnitSettings.Timeouts"/>.<see cref="TimeoutSettings.DefaultHookTimeout"/>.
 /// </summary>
 internal static class HookTimeoutHelper
 {
@@ -15,14 +18,9 @@ internal static class HookTimeoutHelper
         T context,
         CancellationToken cancellationToken)
     {
-        var timeout = hook.Timeout;
+        var timeout = hook.Timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
-        if (timeout == null)
-        {
-            return hook.ExecuteAsync(context, cancellationToken).AsTask();
-        }
-
-        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+        var timeoutMs = (int)timeout.TotalMilliseconds;
 
         return CreateTimeoutHookActionAsync(hook, context, timeoutMs, cancellationToken);
 
@@ -57,13 +55,8 @@ internal static class HookTimeoutHelper
         string hookName,
         CancellationToken cancellationToken)
     {
-        if (timeout == null)
-        {
-            // No timeout specified, execute normally
-            return async () => await hookDelegate(context, cancellationToken);
-        }
-
-        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+        var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+        var timeoutMs = (int)effectiveTimeout.TotalMilliseconds;
 
         return async () =>
         {
@@ -83,9 +76,9 @@ internal static class HookTimeoutHelper
     }
 
     /// <summary>
-    /// Creates a timeout-aware action wrapper for a hook delegate that returns ValueTask
-    /// This overload is used for instance hooks (InstanceHookMethod)
-    /// Custom executor handling for instance hooks is done in HookDelegateBuilder.CreateInstanceHookDelegateAsync
+    /// Creates a timeout-aware action wrapper for a hook delegate that returns ValueTask.
+    /// This overload is used for instance hooks (InstanceHookMethod).
+    /// Custom executor handling for instance hooks is done in HookDelegateBuilder.CreateInstanceHookDelegateAsync.
     /// </summary>
     public static Func<Task> CreateTimeoutHookAction<T>(
         Func<T, CancellationToken, ValueTask> hookDelegate,
@@ -94,13 +87,8 @@ internal static class HookTimeoutHelper
         string hookName,
         CancellationToken cancellationToken)
     {
-        if (timeout == null)
-        {
-            // No timeout specified, execute normally
-            return async () => await hookDelegate(context, cancellationToken);
-        }
-
-        var timeoutMs = (int)timeout.Value.TotalMilliseconds;
+        var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+        var timeoutMs = (int)effectiveTimeout.TotalMilliseconds;
 
         return async () =>
         {

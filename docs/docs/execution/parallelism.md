@@ -167,6 +167,20 @@ With a limit of `2`, at most two of these 20 test invocations execute at the sam
 
 More specific attributes override less specific ones. Precedence: Method > Class > Assembly.
 
+## Setting Maximum Parallel Tests
+
+You can cap the total number of concurrent tests globally using the command line or an environment variable:
+
+```bash
+# Command-line flag
+dotnet run --project MyTests -- --maximum-parallel-tests 4
+
+# Environment variable
+TUNIT_MAX_PARALLEL_TESTS=4 dotnet run --project MyTests
+```
+
+You can also set this programmatically via `context.Settings.Parallelism.MaximumParallelTests` in a `[Before(HookType.TestDiscovery)]` hook. See the [Programmatic Configuration](/docs/reference/programmatic-configuration) reference for details.
+
 ## When to Use Which
 
 | Scenario | Attribute |

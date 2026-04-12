@@ -95,6 +95,8 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Unlimited parallelism
 
 **Equivalent to:** `--maximum-parallel-tests`
 
+**Programmatic equivalent:** `context.Settings.Parallelism.MaximumParallelTests` (see [Programmatic Configuration](./programmatic-configuration.md))
+
 **Note:** Command-line arguments take precedence over environment variables.
 
 ### TUNIT_EXECUTION_MODE
@@ -253,7 +255,8 @@ When the same setting is configured in multiple places, TUnit follows this prior
 
 1. **Command-line arguments** - Always take precedence
 2. **Environment variables** - Applied when command-line argument is not provided
-3. **Configuration files** - Applied as defaults
+3. **`context.Settings` (code)** - Values set in `[Before(HookType.TestDiscovery)]` hooks (see [Programmatic Configuration](./programmatic-configuration.md))
+4. **Built-in defaults**
 
 ## Summary Table
 

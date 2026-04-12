@@ -210,6 +210,7 @@ namespace
     public class BeforeTestDiscoveryContext : .Context
     {
         public .GlobalContext GlobalContext { get; }
+        public . Settings { get; }
         public required string? TestFilter { get; init; }
         public new static .BeforeTestDiscoveryContext? Current { get; }
     }
@@ -507,12 +508,17 @@ namespace
         public static readonly .DefaultExecutor Instance;
         protected override . ExecuteAsync(<.> action) { }
     }
+    [("Use  instead.")]
     public static class Defaults
     {
-        public static readonly  ForcefulExitTimeout;
-        public static readonly  HookTimeout;
-        public static readonly  ProcessExitHookDelay;
-        public static readonly  TestTimeout;
+        [("Use .ForcefulExitTimeout instead.")]
+        public static  ForcefulExitTimeout { get; }
+        [("Use .DefaultHookTimeout instead.")]
+        public static  HookTimeout { get; }
+        [("Use .ProcessExitHookDelay instead.")]
+        public static  ProcessExitHookDelay { get; }
+        [("Use .DefaultTestTimeout instead.")]
+        public static  TestTimeout { get; }
     }
     public abstract class DependencyInjectionDataSourceAttribute<TScope> : .UntypedDataSourceGeneratorAttribute
     {
@@ -2837,6 +2843,35 @@ namespace .Services
         public . AddTransient<T>(<T> factory)
             where T :  class { }
         public object? GetService( serviceType) { }
+    }
+}
+namespace .Settings
+{
+    public sealed class DisplaySettings
+    {
+        public bool DetailedStackTrace { get; set; }
+    }
+    public sealed class ExecutionSettings
+    {
+        public bool FailFast { get; set; }
+    }
+    public sealed class ParallelismSettings
+    {
+        public int? MaximumParallelTests { get; set; }
+    }
+    public sealed class TUnitSettings
+    {
+        public . Display { get; }
+        public . Execution { get; }
+        public . Parallelism { get; }
+        public . Timeouts { get; }
+    }
+    public sealed class TimeoutSettings
+    {
+        public  DefaultHookTimeout { get; set; }
+        public  DefaultTestTimeout { get; set; }
+        public  ForcefulExitTimeout { get; set; }
+        public  ProcessExitHookDelay { get; set; }
     }
 }
 namespace .StaticProperties

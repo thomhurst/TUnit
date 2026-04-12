@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Enums;
 using TUnit.Engine.Exceptions;
@@ -85,6 +86,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         // Check both the legacy --detailed-stacktrace flag and the new verbosity system
         if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace) ||
+            TUnitSettings.Default.Display.DetailedStackTrace ||
             verbosityService?.ShowDetailedStackTrace == true)
         {
             return exception;
