@@ -32,7 +32,6 @@ public class TestSetup
         TUnitSettings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         TUnitSettings.Parallelism.MaximumParallelTests = 4;
         TUnitSettings.Execution.FailFast = true;
-        TUnitSettings.Display.DisableLogo = true;
 
         return Task.CompletedTask;
     }
@@ -62,7 +61,6 @@ Place this class anywhere in your test project. TUnit will discover and run the 
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `DisableLogo` | `bool` | `false` | Suppresses the TUnit ASCII art logo at startup. |
 | `DetailedStackTrace` | `bool` | `false` | Includes TUnit internal frames in stack traces. By default, internal frames are hidden to keep failure output focused on user code. |
 
 ### `TUnitSettings.Execution`

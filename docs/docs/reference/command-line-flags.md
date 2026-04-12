@@ -77,7 +77,6 @@ Please note that for the coverage and trx report, you need to install [additiona
     --disable-logo
         Disables the TUnit logo when starting a test session.
         Can also be set via TUNIT_DISABLE_LOGO environment variable.
-        Programmatic equivalent: TUnitSettings.Display.DisableLogo
 
     --fail-fast
         Cancel the test run after the first test failure

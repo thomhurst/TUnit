@@ -2925,7 +2925,6 @@ namespace .Settings
     {
         public DisplaySettings() { }
         public bool DetailedStackTrace { get; set; }
-        public bool DisableLogo { get; set; }
     }
     public sealed class ExecutionSettings
     {

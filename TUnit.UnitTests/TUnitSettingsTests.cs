@@ -13,7 +13,6 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Timeouts.ForcefulExitTimeout).IsEqualTo(TimeSpan.FromSeconds(30));
         await Assert.That(TUnitSettings.Timeouts.ProcessExitHookDelay).IsEqualTo(TimeSpan.FromMilliseconds(500));
         await Assert.That(TUnitSettings.Parallelism.MaximumParallelTests).IsNull();
-        await Assert.That(TUnitSettings.Display.DisableLogo).IsFalse();
         await Assert.That(TUnitSettings.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Execution.FailFast).IsFalse();
     }

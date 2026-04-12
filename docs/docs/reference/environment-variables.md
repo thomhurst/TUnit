@@ -21,8 +21,6 @@ set TUNIT_DISABLE_LOGO=true
 
 **Equivalent to:** `--disable-logo`
 
-**Programmatic equivalent:** `TUnitSettings.Display.DisableLogo` (see [Programmatic Configuration](./programmatic-configuration.md))
-
 **Use case:** Reduces output noise in CI/CD logs or when using AI/LLM coding assistants that parse test output.
 
 ### TUNIT_DISABLE_GITHUB_REPORTER
