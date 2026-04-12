@@ -24,11 +24,6 @@ public sealed class TimeoutSettings
     /// <summary>
     /// Default timeout for hook methods (Before/After at every level). Default: 5 minutes.
     /// Overridden per-hook by <see cref="TimeoutAttribute"/>.
-    /// <para>
-    /// <b>Note:</b> Hook methods capture this value at registration time, which occurs before
-    /// <c>[Before(HookType.TestDiscovery)]</c> hooks run. Use the <c>[Timeout]</c> attribute
-    /// on individual hook methods for reliable per-hook timeout control.
-    /// </para>
     /// </summary>
     public TimeSpan DefaultHookTimeout
     {

@@ -26,10 +26,12 @@ public abstract record HookMethod
     public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
 
     /// <summary>
-    /// Gets the timeout for this hook method. This will be set during hook registration
-    /// by the event receiver infrastructure, falling back to the default 5-minute timeout.
+    /// Gets the timeout for this hook method. When <c>null</c>, the engine falls back to
+    /// <see cref="Settings.TUnitSettings.Timeouts"/>.<see cref="Settings.TimeoutSettings.DefaultHookTimeout"/>
+    /// at execution time, so discovery-hook configuration is respected.
+    /// Set explicitly by the <c>[Timeout]</c> attribute or event receiver infrastructure.
     /// </summary>
-    public TimeSpan? Timeout { get; internal set; } = TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+    public TimeSpan? Timeout { get; internal set; }
 
     private IHookExecutor _hookExecutor = DefaultExecutor.Instance;
     private bool _hookExecutorIsExplicit;

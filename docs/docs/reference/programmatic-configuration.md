@@ -28,6 +28,7 @@ public class TestSetup
     public static Task Configure(BeforeTestDiscoveryContext context)
     {
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
+        context.Settings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         context.Settings.Execution.FailFast = true;
 
         return Task.CompletedTask;
@@ -96,5 +97,3 @@ The command-line flag takes precedence, so 8 parallel tests will be used.
 ## When to Set
 
 Set most values via `context.Settings` inside a `[Before(HookType.TestDiscovery)]` hook. This is the earliest point in the TUnit lifecycle where user code runs and ensures your values are in place before test discovery begins. Setting values later (for example in a `[Before(HookType.TestSession)]` hook) may have no effect for settings that are read during discovery.
-
-The exception is **`Timeouts.DefaultHookTimeout`**, which is captured at hook registration time before discovery hooks run. Use the `[Timeout]` attribute on individual hook methods for reliable per-hook timeout control.
