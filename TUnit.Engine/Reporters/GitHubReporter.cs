@@ -73,6 +73,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     public string Description => extension.Description;
 
     private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
+    // Last-write-wins; not atomic with _updates.Enqueue but test state transitions are
+    // monotonic (InProgress → terminal), so a stale read is harmless at report time.
     private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _latestUpdates = [];
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
@@ -122,7 +124,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         foreach (var kvp in last)
         {
-            var state = kvp.Value.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+            var state = kvp.Value.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
             switch (state)
             {
                 case PassedTestNodeStateProperty:

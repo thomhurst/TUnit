@@ -321,7 +321,9 @@ internal sealed class TestDiscoveryService : IDataProducer
             }
         }
 
-        // Cycle-break fallback: yield any remaining tests that were not reached
+        // Cycle-break fallback: if some tests remain, their dependency graph has a cycle.
+        // Yield them without respecting order — CircularDependencyDetector will report
+        // the cycle with a proper error during scheduling.
         if (yieldedCount < dependentTests.Count)
         {
             foreach (var test in dependentTests)

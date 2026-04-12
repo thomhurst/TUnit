@@ -74,14 +74,10 @@ internal class ConstraintKeysCollection(IReadOnlyList<string> constraintKeys)
 
     public override int GetHashCode()
     {
-        var hash = 0;
-
-        foreach (var key in _constraintKeys)
-        {
-            hash ^= StringComparer.Ordinal.GetHashCode(key);
-        }
-
-        return hash;
+        // Intentionally constant: Equals uses intersection semantics (shares any key),
+        // so two "equal" collections can have entirely different key sets.
+        // A content-based hash would violate the hash/equals contract.
+        return 0;
     }
 
     public int CompareTo(object? obj)
