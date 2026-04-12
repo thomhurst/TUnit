@@ -49,8 +49,6 @@ internal sealed class TestBuilderPipeline
         var testBuilderContext = new TestBuilderContext
         {
             TestMetadata = metadata.MethodMetadata,
-            Events = new TestContextEvents(),
-            StateBag = new ConcurrentDictionary<string, object?>()
         };
 
         // Check for ClassConstructor attribute and set it early if present
@@ -58,10 +56,15 @@ internal sealed class TestBuilderPipeline
 
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
-        var classConstructorAttribute = attributes
-            .Where(a => a is ClassConstructorAttribute)
-            .Cast<ClassConstructorAttribute>()
-            .FirstOrDefault();
+        ClassConstructorAttribute? classConstructorAttribute = null;
+        foreach (var attr in attributes)
+        {
+            if (attr is ClassConstructorAttribute cca)
+            {
+                classConstructorAttribute = cca;
+                break;
+            }
+        }
 
         if (classConstructorAttribute != null)
         {

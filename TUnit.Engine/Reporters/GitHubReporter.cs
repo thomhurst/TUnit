@@ -82,7 +82,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var uid = testNodeUpdateMessage.TestNode.Uid.Value;
 
-        var state = testNodeUpdateMessage.TestNode.Properties.OfType<TestNodeStateProperty>().FirstOrDefault();
+        var state = testNodeUpdateMessage.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
         if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
         {
             _terminalStateCounts.AddOrUpdate(uid, 1, static (_, count) => count + 1);
@@ -460,7 +460,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         }
 
         const int maxAttempts = EngineDefaults.FileWriteMaxAttempts;
-        var random = new Random();
+        var random = Random.Shared;
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {

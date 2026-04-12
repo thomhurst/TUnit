@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -27,11 +28,12 @@ public class ClassHookContext : Context
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
 
+    private readonly HashSet<TestContext> _testSet = new(ReferenceEqualityComparer<TestContext>.Instance);
     private readonly List<TestContext> _tests = [];
 
     public void AddTest(TestContext testContext)
     {
-        if (_tests.Contains(testContext))
+        if (!_testSet.Add(testContext))
         {
             return; // Prevent duplicates
         }

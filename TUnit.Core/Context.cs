@@ -21,28 +21,43 @@ public abstract class Context : IContext, IDisposable
         ?? BeforeTestDiscoveryContext.Current as Context
         ?? GlobalContext.Current;
 
-    private readonly StringBuilder _outputBuilder = new();
-    private readonly StringBuilder _errorOutputBuilder = new();
-    private readonly ReaderWriterLockSlim _outputLock = new(LockRecursionPolicy.NoRecursion);
-    private readonly ReaderWriterLockSlim _errorOutputLock = new(LockRecursionPolicy.NoRecursion);
+    // Lazy output state: avoid allocating StringBuilder + RWLS + ConsoleLineBuffer
+    // for contexts that never receive output (the common case for most tests)
+    private StringBuilder? _outputBuilder;
+    private StringBuilder? _errorOutputBuilder;
+    private ReaderWriterLockSlim? _outputLock;
+    private ReaderWriterLockSlim? _errorOutputLock;
     private DefaultLogger? _defaultLogger;
 
     // Console interceptor line buffers for partial writes (Console.Write without newline)
     // These are stored per-context to prevent output mixing between parallel tests
     // ConsoleLineBuffer uses Lock internally for efficient synchronization
-    private readonly ConsoleLineBuffer _consoleStdOutLineBuffer = new();
-    private readonly ConsoleLineBuffer _consoleStdErrLineBuffer = new();
+    private ConsoleLineBuffer? _consoleStdOutLineBuffer;
+    private ConsoleLineBuffer? _consoleStdErrLineBuffer;
+
+    // Thread-safe lazy init via Interlocked.CompareExchange — console interceptors
+    // may access these from multiple threads for the same context.
+    private StringBuilder GetOutputBuilder() =>
+        LazyInitializer.EnsureInitialized(ref _outputBuilder)!;
+    private StringBuilder GetErrorOutputBuilder() =>
+        LazyInitializer.EnsureInitialized(ref _errorOutputBuilder)!;
+    private ReaderWriterLockSlim GetOutputLock() =>
+        LazyInitializer.EnsureInitialized(ref _outputLock, static () => new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion))!;
+    private ReaderWriterLockSlim GetErrorOutputLock() =>
+        LazyInitializer.EnsureInitialized(ref _errorOutputLock, static () => new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion))!;
 
     [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(_outputBuilder, _outputLock);
+    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(GetOutputBuilder(), GetOutputLock());
 
     [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(_errorOutputBuilder, _errorOutputLock);
+    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(GetErrorOutputBuilder(), GetErrorOutputLock());
 
     // Internal accessors for console interceptor line buffers
-    internal ConsoleLineBuffer ConsoleStdOutLineBuffer => _consoleStdOutLineBuffer;
+    internal ConsoleLineBuffer ConsoleStdOutLineBuffer =>
+        LazyInitializer.EnsureInitialized(ref _consoleStdOutLineBuffer)!;
 
-    internal ConsoleLineBuffer ConsoleStdErrLineBuffer => _consoleStdErrLineBuffer;
+    internal ConsoleLineBuffer ConsoleStdErrLineBuffer =>
+        LazyInitializer.EnsureInitialized(ref _consoleStdErrLineBuffer)!;
 
     internal Context(Context? parent)
     {
@@ -82,7 +97,13 @@ public abstract class Context : IContext, IDisposable
 
     public virtual string GetStandardOutput()
     {
-        _outputLock.EnterReadLock();
+        if (_outputBuilder == null)
+        {
+            return string.Empty;
+        }
+
+        var outputLock = GetOutputLock();
+        outputLock.EnterReadLock();
 
         try
         {
@@ -92,13 +113,19 @@ public abstract class Context : IContext, IDisposable
         }
         finally
         {
-            _outputLock.ExitReadLock();
+            outputLock.ExitReadLock();
         }
     }
 
     public virtual string GetErrorOutput()
     {
-        _errorOutputLock.EnterReadLock();
+        if (_errorOutputBuilder == null)
+        {
+            return string.Empty;
+        }
+
+        var errorOutputLock = GetErrorOutputLock();
+        errorOutputLock.EnterReadLock();
 
         try
         {
@@ -108,7 +135,7 @@ public abstract class Context : IContext, IDisposable
         }
         finally
         {
-            _errorOutputLock.ExitReadLock();
+            errorOutputLock.ExitReadLock();
         }
     }
 

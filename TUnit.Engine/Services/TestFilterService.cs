@@ -14,6 +14,7 @@ namespace TUnit.Engine.Services;
 internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegistrationService testArgumentRegistrationService)
 {
     private static readonly ConcurrentDictionary<Type, bool> _explicitClassCache = new();
+    private HashSet<string>? _uidFilterSet;
     public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
@@ -119,10 +120,22 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
-        foreach (var test in tests)
+        var testList = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
+
+        if (testList.Count < 8)
         {
-            await RegisterTest(test);
+            foreach (var test in testList)
+            {
+                await RegisterTest(test);
+            }
+            return;
         }
+
+        await Parallel.ForEachAsync(
+            testList,
+            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            async (test, _) => await RegisterTest(test).ConfigureAwait(false)
+        ).ConfigureAwait(false);
     }
 
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, AbstractExecutableTest executableTest)
@@ -132,13 +145,34 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             null => true,
             NopFilter => true,
-            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(executableTest.TestId)),
+            TestNodeUidListFilter testNodeUidListFilter => GetOrCreateUidFilterSet(testNodeUidListFilter).Contains(executableTest.TestId),
             TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, executableTest),
             _ => UnhandledFilter(testExecutionFilter)
         };
 
         return shouldRunTest;
 #pragma warning restore TPEXP
+    }
+
+    private HashSet<string> GetOrCreateUidFilterSet(
+#pragma warning disable TPEXP
+        TestNodeUidListFilter filter
+#pragma warning restore TPEXP
+    )
+    {
+        if (_uidFilterSet != null)
+        {
+            return _uidFilterSet;
+        }
+
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var uid in filter.TestNodeUids)
+        {
+            set.Add(uid.Value);
+        }
+
+        _uidFilterSet = set;
+        return set;
     }
 
     private string BuildPath(AbstractExecutableTest test)
@@ -257,6 +291,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
     /// <summary>
     /// Builds the nested class name from ClassMetadata by walking the Parent chain.
     /// Returns names joined with '+' (e.g., "OuterClass+InnerClass").
+    /// Fills array in root-to-leaf order to avoid List + Reverse allocation.
     /// </summary>
     internal static string GetNestedClassName(ClassMetadata classMetadata)
     {
@@ -265,15 +300,24 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             return classMetadata.Name;
         }
 
-        var hierarchy = new List<string>();
+        // Count depth first
+        var depth = 0;
         var current = classMetadata;
         while (current != null)
         {
-            hierarchy.Add(current.Name);
+            depth++;
             current = current.Parent;
         }
 
-        hierarchy.Reverse();
+        // Fill array in root-to-leaf order (avoids Reverse)
+        var hierarchy = new string[depth];
+        current = classMetadata;
+        for (var i = depth - 1; i >= 0; i--)
+        {
+            hierarchy[i] = current!.Name;
+            current = current.Parent;
+        }
+
         return string.Join('+', hierarchy);
     }
 }

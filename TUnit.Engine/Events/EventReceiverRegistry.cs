@@ -71,8 +71,6 @@ internal sealed class EventReceiverRegistry
         RegisterIfImplements<ILastTestInAssemblyEventReceiver>(receiver);
         RegisterIfImplements<IFirstTestInClassEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInClassEventReceiver>(receiver);
-
-        _cachedTypedReceivers.Clear();
     }
 
     private void RegisterIfImplements<T>(object receiver) where T : class
@@ -91,6 +89,9 @@ internal sealed class EventReceiverRegistry
             {
                 _receiversByType[interfaceType] = [receiver];
             }
+
+            // Invalidate only the changed type instead of clearing the entire cache
+            _cachedTypedReceivers.TryRemove(interfaceType, out _);
         }
     }
 

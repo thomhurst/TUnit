@@ -156,7 +156,7 @@ internal sealed class TestBuilder : ITestBuilder
             // Create and initialize attributes ONCE
             var attributes = await InitializeAttributesAsync(metadata.GetOrCreateAttributes(), cancellationToken);
 
-            if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+            if (HasInstanceDataAccessor(metadata.ClassDataSources))
             {
                 var failedTest = CreateFailedTestForClassDataSourceCircularDependency(metadata);
                 tests.Add(failedTest);
@@ -176,7 +176,15 @@ internal sealed class TestBuilder : ITestBuilder
             TestBuilderContext.Current = testBuilderContext;
 
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
-            var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+            ClassConstructorAttribute? classConstructorAttribute = null;
+            foreach (var attr in attributes)
+            {
+                if (attr is ClassConstructorAttribute cca)
+                {
+                    classConstructorAttribute = cca;
+                    break;
+                }
+            }
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
@@ -220,7 +228,7 @@ internal sealed class TestBuilder : ITestBuilder
                     // ObjectInitializer is phase-aware and will only initialize IAsyncDiscoveryInitializer during Discovery.
                     await InitializeClassDataAsync(classData);
 
-                    var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                    var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
                     object? instanceForMethodDataSources = null;
                     var discoveryInstanceUsed = false;
@@ -701,7 +709,7 @@ internal sealed class TestBuilder : ITestBuilder
             }
         }
 
-        if (metadata.DataSources.Any(ds => ds is IAccessesInstanceData))
+        if (HasInstanceDataAccessor(metadata.DataSources))
         {
             // Look at the test method parameters to find attributes that can help with generic type inference
             foreach (var param in metadata.MethodMetadata.Parameters)
@@ -1570,7 +1578,7 @@ internal sealed class TestBuilder : ITestBuilder
         var contextAccessor = new TestBuilderContextAccessor(baseContext);
 
         // Check for circular dependency
-        if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+        if (HasInstanceDataAccessor(metadata.ClassDataSources))
         {
             yield return CreateFailedTestForClassDataSourceCircularDependency(metadata);
             yield break;
@@ -1603,7 +1611,7 @@ internal sealed class TestBuilder : ITestBuilder
                 await InitializeClassDataAsync(classData);
 
                 // Handle instance creation for method data sources
-                var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
                 object? instanceForMethodDataSources = null;
 
                 if (needsInstanceForMethodDataSources)
@@ -1898,6 +1906,18 @@ internal sealed class TestBuilder : ITestBuilder
     internal bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
     {
         return _filterMatcher.CouldMatchFilter(metadata, filter);
+    }
+
+    private static bool HasInstanceDataAccessor(IDataSourceAttribute[] dataSources)
+    {
+        foreach (var ds in dataSources)
+        {
+            if (ds is IAccessesInstanceData)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

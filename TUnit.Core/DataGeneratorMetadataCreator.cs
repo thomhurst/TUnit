@@ -98,8 +98,6 @@ internal static class DataGeneratorMetadataCreator
             TestBuilderContext = new TestBuilderContextAccessor(new TestBuilderContext
             {
                 TestMetadata = null!, // Not available during discovery
-                Events = new TestContextEvents(),
-                StateBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = membersToGenerate,
             TestInformation = methodMetadata,
@@ -158,8 +156,6 @@ internal static class DataGeneratorMetadataCreator
             {
                 TestMetadata = discoveryMethodMetadata,
                 DataSourceAttribute = dataSource,
-                Events = new TestContextEvents(),
-                StateBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = [dummyParameter],
             TestInformation = discoveryMethodMetadata,
@@ -184,17 +180,28 @@ internal static class DataGeneratorMetadataCreator
         TestContextEvents? events = null,
         ConcurrentDictionary<string, object?>? objectBag = null)
     {
-        var testBuilderContext = testContext != null
-            ? TestBuilderContext.FromTestContext(testContext, dataSource)
-            : methodMetadata != null
-                ? new TestBuilderContext
-                {
-                    Events = events ?? new TestContextEvents(),
-                    TestMetadata = methodMetadata,
-                    DataSourceAttribute = dataSource,
-                    StateBag = objectBag ?? new ConcurrentDictionary<string, object?>()
-                }
-                : TestSessionContext.GlobalStaticPropertyContext;
+        TestBuilderContext testBuilderContext;
+        if (testContext != null)
+        {
+            testBuilderContext = TestBuilderContext.FromTestContext(testContext, dataSource);
+        }
+        else if (methodMetadata != null)
+        {
+            testBuilderContext = new TestBuilderContext
+            {
+                Events = events ?? new TestContextEvents(),
+                TestMetadata = methodMetadata,
+                DataSourceAttribute = dataSource,
+            };
+            if (objectBag != null)
+            {
+                testBuilderContext.StateBag = objectBag;
+            }
+        }
+        else
+        {
+            testBuilderContext = TestSessionContext.GlobalStaticPropertyContext;
+        }
 
         return new DataGeneratorMetadata
         {

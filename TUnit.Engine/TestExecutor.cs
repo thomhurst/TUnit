@@ -235,10 +235,19 @@ internal class TestExecutor
             // Late stage test end receivers run after instance-level hooks (default behavior)
             var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);
 
-            // Combine all exceptions from event receivers
-            var eventReceiverExceptions = new List<Exception>(earlyStageExceptions.Count + lateStageExceptions.Count);
-            eventReceiverExceptions.AddRange(earlyStageExceptions);
-            eventReceiverExceptions.AddRange(lateStageExceptions);
+            // Combine all exceptions from event receivers - defer allocation until needed
+            IReadOnlyList<Exception> eventReceiverExceptions;
+            if (earlyStageExceptions.Count > 0 || lateStageExceptions.Count > 0)
+            {
+                var combined = new List<Exception>(earlyStageExceptions.Count + lateStageExceptions.Count);
+                combined.AddRange(earlyStageExceptions);
+                combined.AddRange(lateStageExceptions);
+                eventReceiverExceptions = combined;
+            }
+            else
+            {
+                eventReceiverExceptions = [];
+            }
 
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {

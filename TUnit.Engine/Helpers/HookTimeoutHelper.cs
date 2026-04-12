@@ -20,6 +20,12 @@ internal static class HookTimeoutHelper
     {
         var timeout = hook.Timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
 
+        // Fast path: skip CTS allocation when timeout is effectively infinite
+        if (timeout == Timeout.InfiniteTimeSpan || timeout >= TimeSpan.FromDays(1))
+        {
+            return hook.ExecuteAsync(context, cancellationToken).AsTask();
+        }
+
         var timeoutMs = (int)timeout.TotalMilliseconds;
 
         return CreateTimeoutHookActionAsync(hook, context, timeoutMs, cancellationToken);
@@ -56,6 +62,13 @@ internal static class HookTimeoutHelper
         CancellationToken cancellationToken)
     {
         var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+
+        // Fast path: skip CTS allocation when timeout is effectively infinite
+        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= TimeSpan.FromDays(1))
+        {
+            return () => hookDelegate(context, cancellationToken);
+        }
+
         var timeoutMs = (int)effectiveTimeout.TotalMilliseconds;
 
         return async () =>
@@ -88,6 +101,13 @@ internal static class HookTimeoutHelper
         CancellationToken cancellationToken)
     {
         var effectiveTimeout = timeout ?? TUnitSettings.Default.Timeouts.DefaultHookTimeout;
+
+        // Fast path: skip CTS allocation when timeout is effectively infinite
+        if (effectiveTimeout == Timeout.InfiniteTimeSpan || effectiveTimeout >= TimeSpan.FromDays(1))
+        {
+            return () => hookDelegate(context, cancellationToken).AsTask();
+        }
+
         var timeoutMs = (int)effectiveTimeout.TotalMilliseconds;
 
         return async () =>
