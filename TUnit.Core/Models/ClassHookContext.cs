@@ -77,6 +77,7 @@ public class ClassHookContext : Context
 
     internal void RemoveTest(TestContext test)
     {
+        _testSet.Remove(test);
         _tests.Remove(test);
 
         if (_tests.Count is 0)

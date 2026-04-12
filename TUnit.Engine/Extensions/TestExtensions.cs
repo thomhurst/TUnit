@@ -143,9 +143,10 @@ internal static class TestExtensions
             }
         }
 
-        if (isFinalState && testContext.Output.Artifacts.Count > 0)
+        var artifacts = testContext.Artifacts;
+        if (isFinalState && artifacts.Count > 0)
         {
-            foreach (var artifact in testContext.Artifacts)
+            foreach (var artifact in artifacts)
             {
                 propertyBag.Add(new FileArtifactProperty(artifact.File, artifact.DisplayName, artifact.Description));
             }

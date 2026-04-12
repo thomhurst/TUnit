@@ -35,8 +35,7 @@ public abstract class Context : IContext, IDisposable
     private ConsoleLineBuffer? _consoleStdOutLineBuffer;
     private ConsoleLineBuffer? _consoleStdErrLineBuffer;
 
-    // Thread-safe lazy init via Interlocked.CompareExchange — console interceptors
-    // may access these from multiple threads for the same context.
+    // Thread-safe: console interceptors may access from multiple threads.
     private StringBuilder GetOutputBuilder() =>
         LazyInitializer.EnsureInitialized(ref _outputBuilder)!;
     private StringBuilder GetErrorOutputBuilder() =>
