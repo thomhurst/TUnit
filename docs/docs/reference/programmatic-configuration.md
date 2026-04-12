@@ -28,7 +28,6 @@ public class TestSetup
     public static Task Configure(BeforeTestDiscoveryContext context)
     {
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
-        context.Settings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         context.Settings.Execution.FailFast = true;
 
         return Task.CompletedTask;
