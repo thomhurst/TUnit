@@ -6,6 +6,12 @@ namespace TUnit.Core.Settings;
 /// <para>
 /// Precedence: CLI flag → environment variable → <see cref="TUnitSettings"/> → built-in default.
 /// </para>
+/// <para>
+/// <b>Threading:</b> All settings should be configured before test execution begins
+/// (typically in a <c>[Before(HookType.TestDiscovery)]</c> hook). The framework ensures
+/// hook completion happens-before test threads start, so no additional synchronization
+/// is required. Modifying settings during parallel test execution is not supported.
+/// </para>
 /// </summary>
 public static class TUnitSettings
 {
