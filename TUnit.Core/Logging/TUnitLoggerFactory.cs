@@ -61,6 +61,7 @@ public static class TUnitLoggerFactory
 {
     private static readonly List<ILogSink> _sinks = [];
     private static readonly Lock _lock = new();
+    private static volatile ILogSink[] _sinksCache = [];
 
     /// <summary>
     /// Registers a log sink instance to receive log messages from all tests.
@@ -90,6 +91,7 @@ public static class TUnitLoggerFactory
         lock (_lock)
         {
             _sinks.Add(sink);
+            _sinksCache = [.. _sinks];
         }
     }
 
@@ -120,13 +122,7 @@ public static class TUnitLoggerFactory
     /// <summary>
     /// Gets all registered sinks. For internal use.
     /// </summary>
-    internal static IReadOnlyList<ILogSink> GetSinks()
-    {
-        lock (_lock)
-        {
-            return _sinks.ToArray();
-        }
-    }
+    internal static ILogSink[] GetSinks() => _sinksCache;
 
     /// <summary>
     /// Disposes all sinks that implement IAsyncDisposable or IDisposable.
@@ -137,8 +133,9 @@ public static class TUnitLoggerFactory
         ILogSink[] sinksToDispose;
         lock (_lock)
         {
-            sinksToDispose = _sinks.ToArray();
+            sinksToDispose = _sinksCache;
             _sinks.Clear();
+            _sinksCache = [];
         }
 
         foreach (var sink in sinksToDispose)
@@ -169,6 +166,7 @@ public static class TUnitLoggerFactory
         lock (_lock)
         {
             _sinks.Clear();
+            _sinksCache = [];
         }
     }
 }

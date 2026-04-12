@@ -143,9 +143,10 @@ internal static class TestExtensions
             }
         }
 
-        if (isFinalState && testContext.Output.Artifacts.Count > 0)
+        var artifacts = testContext.Artifacts;
+        if (isFinalState && artifacts.Count > 0)
         {
-            foreach (var artifact in testContext.Artifacts)
+            foreach (var artifact in artifacts)
             {
                 propertyBag.Add(new FileArtifactProperty(artifact.File, artifact.DisplayName, artifact.Description));
             }
@@ -179,7 +180,8 @@ internal static class TestExtensions
                 propertyBag.Add(cachedProps.TrxCategories);
             }
 
-            if (GetTrxMessages(testContext, output, error).ToArray() is { Length: > 0 } trxMessages)
+            var trxMessages = GetTrxMessages(testContext, output, error);
+            if (trxMessages.Length > 0)
             {
                 propertyBag.Add(new TrxMessagesProperty(trxMessages));
             }
@@ -310,22 +312,24 @@ internal static class TestExtensions
         return new TimingProperty(new TimingInfo(overallStart, end, end - overallStart), stepTimings);
     }
 
-    private static IEnumerable<TrxMessage> GetTrxMessages(TestContext testContext, string? standardOutput, string? standardError)
+    private static TrxMessage[] GetTrxMessages(TestContext testContext, string? standardOutput, string? standardError)
     {
-        if (!string.IsNullOrEmpty(standardOutput))
+        var hasOutput = !string.IsNullOrEmpty(standardOutput);
+        var hasError = !string.IsNullOrEmpty(standardError);
+        var hasSkip = !string.IsNullOrEmpty(testContext.SkipReason);
+
+        var count = (hasOutput ? 1 : 0) + (hasError ? 1 : 0) + (hasSkip ? 1 : 0);
+        if (count == 0)
         {
-            yield return new StandardOutputTrxMessage(standardOutput);
+            return [];
         }
 
-        if (!string.IsNullOrEmpty(standardError))
-        {
-            yield return new StandardErrorTrxMessage(standardError);
-        }
-
-        if (!string.IsNullOrEmpty(testContext.SkipReason))
-        {
-            yield return new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
-        }
+        var result = new TrxMessage[count];
+        var i = 0;
+        if (hasOutput) result[i++] = new StandardOutputTrxMessage(standardOutput!);
+        if (hasError) result[i++] = new StandardErrorTrxMessage(standardError!);
+        if (hasSkip) result[i++] = new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
+        return result;
     }
 
     private static string[] CreateParameterTypeArray(ParameterMetadata[] parameters)

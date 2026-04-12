@@ -13,7 +13,7 @@ internal static class LogSinkRouter
     public static void RouteToSinks(LogLevel level, string message, Exception? exception, Context? context)
     {
         var sinks = TUnitLoggerFactory.GetSinks();
-        if (sinks.Count == 0)
+        if (sinks.Length == 0)
         {
             return;
         }
@@ -41,7 +41,7 @@ internal static class LogSinkRouter
     public static async ValueTask RouteToSinksAsync(LogLevel level, string message, Exception? exception, Context? context)
     {
         var sinks = TUnitLoggerFactory.GetSinks();
-        if (sinks.Count == 0)
+        if (sinks.Length == 0)
         {
             return;
         }

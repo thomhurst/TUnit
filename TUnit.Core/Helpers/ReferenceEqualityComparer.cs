@@ -41,3 +41,17 @@ public sealed class ReferenceEqualityComparer : IEqualityComparer<object>
         return RuntimeHelpers.GetHashCode(obj);
     }
 }
+
+/// <summary>
+/// Generic version of <see cref="ReferenceEqualityComparer"/> for strongly-typed collections.
+/// </summary>
+internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+{
+    public static readonly ReferenceEqualityComparer<T> Instance = new();
+
+    private ReferenceEqualityComparer() { }
+
+    public bool Equals(T? x, T? y) => ReferenceEquals(x, y);
+
+    public int GetHashCode(T obj) => RuntimeHelpers.GetHashCode(obj);
+}

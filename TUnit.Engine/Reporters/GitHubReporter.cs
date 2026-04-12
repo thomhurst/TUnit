@@ -460,7 +460,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         }
 
         const int maxAttempts = EngineDefaults.FileWriteMaxAttempts;
-        var random = new Random();
+        var random = Random.Shared;
 
         for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {

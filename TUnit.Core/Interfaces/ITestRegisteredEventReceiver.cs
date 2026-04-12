@@ -14,6 +14,10 @@ namespace TUnit.Core.Interfaces;
 /// identified but before it goes through the discovery pipeline.
 /// </para>
 /// <para>
+/// <b>Thread safety:</b> When many tests are registered, <see cref="OnTestRegistered"/>
+/// may be called concurrently from multiple threads. Implementations must be thread-safe.
+/// </para>
+/// <para>
 /// The <see cref="IEventReceiver.Order"/> property can be used to control the execution order
 /// when multiple implementations of this interface exist.
 /// </para>
