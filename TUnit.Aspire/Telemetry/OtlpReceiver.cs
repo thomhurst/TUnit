@@ -25,6 +25,7 @@ namespace TUnit.Aspire.Telemetry;
 internal sealed class OtlpReceiver : IAsyncDisposable
 {
     private const int MaxPortBindingAttempts = 10;
+    private const long MaxBodyBytes = 16 * 1024 * 1024; // 16 MB
 
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
@@ -112,6 +113,13 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             if (request.HttpMethod != "POST")
             {
                 response.StatusCode = 405;
+                response.Close();
+                return;
+            }
+
+            if (request.ContentLength64 > MaxBodyBytes)
+            {
+                response.StatusCode = 413;
                 response.Close();
                 return;
             }

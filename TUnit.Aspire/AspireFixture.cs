@@ -39,14 +39,21 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> for the named resource.
-    /// The returned client automatically propagates W3C <c>baggage</c> headers
+    /// When <see cref="EnableTelemetryCollection"/> is <c>true</c>, the returned client
+    /// automatically propagates W3C <c>traceparent</c> and <c>baggage</c> headers
     /// (including <c>tunit.test.id</c>) to the SUT for cross-process correlation.
+    /// Otherwise, delegates to Aspire's default <c>CreateHttpClient</c>.
     /// </summary>
     /// <param name="resourceName">The name of the resource to connect to.</param>
     /// <param name="endpointName">Optional endpoint name if the resource exposes multiple endpoints.</param>
-    /// <returns>An <see cref="HttpClient"/> configured to connect to the resource with baggage propagation.</returns>
+    /// <returns>An <see cref="HttpClient"/> configured to connect to the resource.</returns>
     public HttpClient CreateHttpClient(string resourceName, string? endpointName = null)
     {
+        if (!EnableTelemetryCollection)
+        {
+            return App.CreateHttpClient(resourceName, endpointName);
+        }
+
         _httpHandler ??= new Http.TUnitBaggagePropagationHandler
         {
             InnerHandler = new SocketsHttpHandler
