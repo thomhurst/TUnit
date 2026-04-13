@@ -114,9 +114,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 GenerateInheritedTestSources(context, classInfo);
             });
 
-        // AOT converter registrations are emitted inline in per-class and per-method test source files.
-        // No separate pipeline branch needed — conversions are scanned during GroupMethodsByClass
-        // (per-class) and GenerateTestMetadata (per-method generic/inherited).
+        // AOT converter registrations are emitted inline in generated test source files:
+        // - Non-generic methods: scanned in GroupMethodsByClass (per-class path)
+        // - Generic methods: scanned in GenerateTestMetadata (per-method path)
+        // These paths are mutually exclusive — no duplicate registrations are emitted.
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
@@ -537,12 +538,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             registrationIndex++;
         }
 
-        // AOT converter registrations for this test method
-        var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
-            testMethod.MethodSymbol, testMethod.TypeSymbol, compilation);
-        if (aotRegistrationCode != null)
+        // AOT converter registrations — only for generic tests.
+        // Non-generic methods (including inherited) are covered by the per-class path
+        // in GroupMethodsByClass, which scans all non-generic methods for conversions.
+        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
         {
-            EmitAotConverterRegistration(writer, uniqueClassName, aotRegistrationCode);
+            var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
+                testMethod.MethodSymbol, testMethod.TypeSymbol, compilation);
+            if (aotRegistrationCode != null)
+            {
+                EmitAotConverterRegistration(writer, uniqueClassName, aotRegistrationCode);
+            }
         }
     }
 
@@ -6579,7 +6585,12 @@ public class InheritsTestsClassMetadata : IEquatable<InheritsTestsClassMetadata>
     public GeneratorAttributeSyntaxContext Context { get; init; }
     public required CompilationContext CompilationContext { get; init; }
 
-    // Stable string identity for incremental caching
+    // Stable string identity for incremental caching.
+    // Only the class name is used for equality — attribute changes on base class methods
+    // won't invalidate this cache entry. This is acceptable because ForAttributeWithMetadataName
+    // on [InheritsTests] only fires when the class's own syntax changes, so upstream caching
+    // already prevents re-evaluation for base class attribute changes. A clean rebuild handles
+    // the rare case where a base class method's attributes change without touching the subclass.
     public required string TypeFullyQualifiedName { get; init; }
 
     public bool Equals(InheritsTestsClassMetadata? other)
