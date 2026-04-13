@@ -68,17 +68,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
                             }
                         case 4:
                             {
-                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]) });
+                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 5:
                             {
-                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
+                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 6:
                             {
-                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
+                                instance.Params(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -118,17 +118,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
                             }
                         case 4:
                             {
-                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]) });
+                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 5:
                             {
-                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
+                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 6:
                             {
-                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
+                                instance.ParamsEnumerable(new string[] { (string)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -168,17 +168,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Collect
                             }
                         case 5:
                             {
-                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
+                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], (string)args[4] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 6:
                             {
-                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
+                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 7:
                             {
-                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]) });
+                                instance.Following_Non_Params((int)args[0], new string[] { (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5], (string)args[6] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

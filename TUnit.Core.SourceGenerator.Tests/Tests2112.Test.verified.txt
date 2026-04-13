@@ -55,27 +55,27 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             }
                         case 3:
                             {
-                                instance.Test((int)args[0], new long[] { (long)args[1], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
+                                instance.Test((int)args[0], new long[] { (long)args[1], (long)args[2] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 4:
                             {
-                                instance.Test((int)args[0], new long[] { (long)args[1], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
+                                instance.Test((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 5:
                             {
-                                instance.Test((int)args[0], new long[] { (long)args[1], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
+                                instance.Test((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 6:
                             {
-                                instance.Test((int)args[0], new long[] { (long)args[1], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
+                                instance.Test((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4], (long)args[5] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 7:
                             {
-                                instance.Test((int)args[0], new long[] { (long)args[1], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
+                                instance.Test((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4], (long)args[5], (long)args[6] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -115,17 +115,17 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             }
                         case 5:
                             {
-                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
+                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 6:
                             {
-                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
+                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4], (long)args[5] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 7:
                             {
-                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
+                                instance.Test2((int)args[0], new long[] { (long)args[1], (long)args[2], (long)args[3], (long)args[4], (long)args[5], (long)args[6] });
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

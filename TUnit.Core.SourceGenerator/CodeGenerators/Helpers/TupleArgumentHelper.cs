@@ -194,7 +194,11 @@ public static class TupleArgumentHelper
         ITypeSymbol?[]? sourceTypes,
         CSharpCompilation? compilation)
     {
-        return CastExpressionHelper.GenerateCast(
-            CastExpressionHelper.GetSourceTypeAt(sourceTypes, argIndex), elementType, argExpression, compilation);
+        // Default to elementType when source type is unknown — for params overflow positions
+        // (beyond [Arguments] row length), the element type is statically known and a direct
+        // cast is sufficient. These positions are only reachable when all data sources are
+        // [Arguments], which SourceTypeAnalyzer has already verified.
+        var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, argIndex) ?? elementType;
+        return CastExpressionHelper.GenerateCast(sourceType, elementType, argExpression, compilation);
     }
 }
