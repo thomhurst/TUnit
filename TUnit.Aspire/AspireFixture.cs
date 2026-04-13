@@ -28,6 +28,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 {
     private DistributedApplication? _app;
     private Telemetry.OtlpReceiver? _otlpReceiver;
+    private HttpMessageHandler? _httpHandler;
 
     /// <summary>
     /// The running Aspire distributed application.
@@ -46,7 +47,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// <returns>An <see cref="HttpClient"/> configured to connect to the resource with baggage propagation.</returns>
     public HttpClient CreateHttpClient(string resourceName, string? endpointName = null)
     {
-        var handler = new Http.TUnitBaggagePropagationHandler
+        _httpHandler ??= new Http.TUnitBaggagePropagationHandler
         {
             InnerHandler = new SocketsHttpHandler
             {
@@ -55,7 +56,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             },
         };
 
-        return new HttpClient(handler)
+        return new HttpClient(_httpHandler, disposeHandler: false)
         {
             BaseAddress = App.GetEndpoint(resourceName, endpointName),
         };
@@ -345,6 +346,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             await _otlpReceiver.DisposeAsync();
             _otlpReceiver = null;
         }
+
+        _httpHandler?.Dispose();
+        _httpHandler = null;
 
         GC.SuppressFinalize(this);
     }

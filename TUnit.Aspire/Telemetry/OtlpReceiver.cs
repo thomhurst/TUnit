@@ -24,12 +24,15 @@ namespace TUnit.Aspire.Telemetry;
 /// </remarks>
 internal sealed class OtlpReceiver : IAsyncDisposable
 {
+    private const int MaxPortBindingAttempts = 10;
+
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
-    private readonly ConcurrentBag<Task> _inflightRequests = [];
+    private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
     private readonly HttpClient? _forwardingClient;
     private readonly string? _upstreamEndpoint;
     private Task? _listenTask;
+    private int _taskIdCounter;
 
     /// <summary>
     /// The port the receiver is listening on.
@@ -81,9 +84,15 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
 
             // Process each request without blocking the listen loop
-            var task = Task.Run(() => ProcessRequestAsync(context));
-            _inflightRequests.Add(task);
+            TrackTask(Task.Run(() => ProcessRequestAsync(context)));
         }
+    }
+
+    private void TrackTask(Task task)
+    {
+        var id = Interlocked.Increment(ref _taskIdCounter);
+        _inflightTasks[id] = task;
+        task.ContinueWith(_ => _inflightTasks.TryRemove(id, out Task? _), TaskContinuationOptions.ExecuteSynchronously);
     }
 
     private async Task ProcessRequestAsync(HttpListenerContext context)
@@ -122,10 +131,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 ProcessLogs(body);
             }
 
-            // Forward to upstream if configured (fire-and-forget)
+            // Forward to upstream if configured
             if (_upstreamEndpoint is not null && _forwardingClient is not null)
             {
-                _ = ForwardAsync(path, body, request.ContentType);
+                TrackTask(ForwardAsync(path, body, request.ContentType));
             }
 
             // Return 200 OK with empty protobuf response
@@ -238,11 +247,11 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
         }
 
-        // Wait for any in-flight request processing to complete so we don't
+        // Wait for any in-flight request/forwarding tasks to complete so we don't
         // access TraceRegistry or TestContext after they've been torn down.
         try
         {
-            await Task.WhenAll(_inflightRequests).ConfigureAwait(false);
+            await Task.WhenAll(_inflightTasks.Values).ConfigureAwait(false);
         }
         catch
         {
@@ -259,7 +268,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// </summary>
     private static (HttpListener Listener, int Port) CreateListener()
     {
-        for (var attempt = 0; attempt < 10; attempt++)
+        for (var attempt = 0; attempt < MaxPortBindingAttempts; attempt++)
         {
             var port = FindFreePort();
             var listener = new HttpListener();
@@ -276,7 +285,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
         }
 
-        throw new InvalidOperationException("Could not bind OTLP listener after 10 attempts.");
+        throw new InvalidOperationException($"Could not bind OTLP listener after {MaxPortBindingAttempts} attempts.");
     }
 
     private static int FindFreePort()

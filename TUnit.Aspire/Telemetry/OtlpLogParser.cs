@@ -144,10 +144,10 @@ internal static class OtlpLogParser
                     break;
 
                 case 9 when wireType == WireType.LengthDelimited:
-                    var bytes = reader.ReadBytes();
-                    if (bytes.Length == 16)
+                    var traceBytes = reader.ReadBytesAsSpan();
+                    if (traceBytes.Length == 16)
                     {
-                        traceId = Convert.ToHexString(bytes);
+                        traceId = Convert.ToHexString(traceBytes);
                     }
 
                     break;
@@ -285,7 +285,27 @@ internal ref struct ProtobufReader
         return result;
     }
 
+    public ReadOnlySpan<byte> ReadBytesAsSpan()
+    {
+        return ReadLengthDelimited();
+    }
+
     public byte[] ReadBytes()
+    {
+        return ReadLengthDelimited().ToArray();
+    }
+
+    public string ReadString()
+    {
+        return Encoding.UTF8.GetString(ReadLengthDelimited());
+    }
+
+    public ProtobufReader ReadEmbeddedMessage()
+    {
+        return new ProtobufReader(ReadLengthDelimited());
+    }
+
+    private ReadOnlySpan<byte> ReadLengthDelimited()
     {
         var length = (int)ReadVarint();
 
@@ -295,39 +315,9 @@ internal ref struct ProtobufReader
                 $"Protobuf length-delimited field declares {length} bytes but only {_data.Length} remain.");
         }
 
-        var result = _data[..length].ToArray();
+        var result = _data[..length];
         _data = _data[length..];
         return result;
-    }
-
-    public string ReadString()
-    {
-        var length = (int)ReadVarint();
-
-        if ((uint)length > (uint)_data.Length)
-        {
-            throw new InvalidOperationException(
-                $"Protobuf string field declares {length} bytes but only {_data.Length} remain.");
-        }
-
-        var result = Encoding.UTF8.GetString(_data[..length]);
-        _data = _data[length..];
-        return result;
-    }
-
-    public ProtobufReader ReadEmbeddedMessage()
-    {
-        var length = (int)ReadVarint();
-
-        if ((uint)length > (uint)_data.Length)
-        {
-            throw new InvalidOperationException(
-                $"Protobuf embedded message declares {length} bytes but only {_data.Length} remain.");
-        }
-
-        var embedded = new ProtobufReader(_data[..length]);
-        _data = _data[length..];
-        return embedded;
     }
 
     public void Skip(WireType wireType)
