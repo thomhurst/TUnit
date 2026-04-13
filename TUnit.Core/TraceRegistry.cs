@@ -54,16 +54,6 @@ internal static class TraceRegistry
     }
 
     /// <summary>
-    /// Gets all test node UIDs associated with the given trace ID.
-    /// </summary>
-    internal static string[] GetTestNodeUids(string traceId)
-    {
-        return TraceToTests.TryGetValue(traceId, out var set)
-            ? set.Keys.ToArray()
-            : [];
-    }
-
-    /// <summary>
     /// Gets the <see cref="TestContext.Id"/> (GUID) associated with the given trace ID,
     /// or <c>null</c> if the trace ID is not registered with a context.
     /// Used by the OTLP receiver to route logs to the correct test output.

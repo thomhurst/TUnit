@@ -6,6 +6,14 @@ namespace TUnit.Aspire.Telemetry;
 /// <summary>
 /// A parsed OTLP log record containing only the fields needed for test correlation.
 /// </summary>
+/// <param name="TraceId">The W3C trace ID (32 hex chars).</param>
+/// <param name="SeverityText">The severity text (e.g., "INFO", "ERROR").</param>
+/// <param name="SeverityNumber">The OTLP severity number (1-24).</param>
+/// <param name="Body">
+/// Body of the log record. Only populated when the OTLP body is a string value;
+/// other value types (int, bool, kvlist, array) are not currently extracted.
+/// </param>
+/// <param name="ResourceName">The <c>service.name</c> resource attribute, if present.</param>
 internal readonly record struct OtlpLogRecord(
     string TraceId,
     string SeverityText,

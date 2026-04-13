@@ -3,11 +3,13 @@ using System.Diagnostics;
 namespace TUnit.Aspire.Http;
 
 /// <summary>
-/// DelegatingHandler that serializes <see cref="Activity.Current"/> baggage items
-/// into the W3C <c>baggage</c> HTTP header. .NET's default
-/// <see cref="DistributedContextPropagator"/> injects <c>traceparent</c> and
-/// <c>tracestate</c> but does NOT inject <c>baggage</c>. This handler fills that gap
-/// so that <c>tunit.test.id</c> (and any other baggage) reaches the SUT process.
+/// DelegatingHandler that propagates <c>traceparent</c>, <c>tracestate</c>, and
+/// <c>baggage</c> W3C headers from <see cref="Activity.Current"/> onto outgoing
+/// HTTP requests. .NET's <c>DiagnosticsHandler</c> (which injects <c>traceparent</c>)
+/// is only present in the <see cref="HttpClient"/> pipeline when using
+/// <c>IHttpClientFactory</c> — it is NOT wired in when constructing
+/// <c>new HttpClient(handler)</c> directly. This handler fills that gap so that both
+/// trace context and <c>tunit.test.id</c> baggage reach the SUT process.
 /// </summary>
 internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 {
@@ -16,6 +18,21 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
     {
         if (Activity.Current is { } activity)
         {
+            // Inject traceparent and tracestate via the default propagator.
+            // This is necessary because DiagnosticsHandler is not in the pipeline
+            // when HttpClient is constructed with an explicit handler.
+            DistributedContextPropagator.Current.Inject(
+                activity,
+                request,
+                static (carrier, key, value) =>
+                {
+                    if (carrier is HttpRequestMessage req)
+                    {
+                        req.Headers.TryAddWithoutValidation(key, value);
+                    }
+                });
+
+            // Inject baggage header (not handled by the default propagator)
             var first = true;
             var sb = new System.Text.StringBuilder();
 

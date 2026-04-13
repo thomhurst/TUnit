@@ -48,7 +48,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     {
         var handler = new Http.TUnitBaggagePropagationHandler
         {
-            InnerHandler = new SocketsHttpHandler(),
+            InnerHandler = new SocketsHttpHandler
+            {
+                // Match Aspire's CreateHttpClient behavior: trust dev certs for HTTPS resources
+                SslOptions = { RemoteCertificateValidationCallback = (_, _, _, _) => true },
+            },
         };
 
         return new HttpClient(handler)

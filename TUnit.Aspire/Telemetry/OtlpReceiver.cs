@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -25,6 +26,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 {
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
+    private readonly ConcurrentBag<Task> _inflightRequests = [];
     private readonly HttpClient? _forwardingClient;
     private readonly string? _upstreamEndpoint;
     private Task? _listenTask;
@@ -43,11 +45,8 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// </param>
     public OtlpReceiver(string? upstreamEndpoint = null)
     {
-        Port = FindFreePort();
         _upstreamEndpoint = upstreamEndpoint?.TrimEnd('/');
-
-        _listener = new HttpListener();
-        _listener.Prefixes.Add($"http://127.0.0.1:{Port}/");
+        (_listener, Port) = CreateListener();
 
         if (_upstreamEndpoint is not null)
         {
@@ -60,7 +59,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// </summary>
     public void Start()
     {
-        _listener.Start();
         _listenTask = Task.Run(ListenLoop);
     }
 
@@ -83,12 +81,20 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
 
             // Process each request without blocking the listen loop
-            _ = Task.Run(() => ProcessRequestAsync(context));
+            var task = Task.Run(() => ProcessRequestAsync(context));
+            _inflightRequests.Add(task);
         }
     }
 
     private async Task ProcessRequestAsync(HttpListenerContext context)
     {
+        if (_cts.IsCancellationRequested)
+        {
+            context.Response.StatusCode = 503;
+            context.Response.Close();
+            return;
+        }
+
         try
         {
             var request = context.Request;
@@ -232,8 +238,45 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
         }
 
+        // Wait for any in-flight request processing to complete so we don't
+        // access TraceRegistry or TestContext after they've been torn down.
+        try
+        {
+            await Task.WhenAll(_inflightRequests).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Best effort — individual failures already logged via Trace.WriteLine
+        }
+
         _forwardingClient?.Dispose();
         _cts.Dispose();
+    }
+
+    /// <summary>
+    /// Creates an <see cref="HttpListener"/> bound to a free port. Uses a retry loop to
+    /// handle the TOCTOU window between discovering a free port and binding to it.
+    /// </summary>
+    private static (HttpListener Listener, int Port) CreateListener()
+    {
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            var port = FindFreePort();
+            var listener = new HttpListener();
+            listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+
+            try
+            {
+                listener.Start();
+                return (listener, port);
+            }
+            catch (HttpListenerException)
+            {
+                // Port was taken between FindFreePort and Start — retry
+            }
+        }
+
+        throw new InvalidOperationException("Could not bind OTLP listener after 10 attempts.");
     }
 
     private static int FindFreePort()
