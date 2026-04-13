@@ -42,7 +42,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
 });
     private static global::TUnit.TestProject.DataSourceGeneratorTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
-        return new global::TUnit.TestProject.DataSourceGeneratorTests((args[0] switch { int __s => __s, global::System.ValueTuple<int, string, bool> __s => global::TUnit.Core.Helpers.CastHelper.Cast<int>(__s), _ => (int)args[0] }), (string)args[1], (bool)args[2]);
+        return new global::TUnit.TestProject.DataSourceGeneratorTests((args[0] switch { global::System.ValueTuple<int, string, bool> __s => global::TUnit.Core.Helpers.CastHelper.Cast<int>(__s), int __s => __s, _ => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]) }), (string)args[1], (bool)args[2]);
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.DataSourceGeneratorTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -79,8 +80,7 @@ internal static class CastExpressionHelper
             }
         }
 
-        // Default arm handles unboxing/direct cast from Arguments or unexpected types
-        arms.Add($"_ => ({targetGQ}){argsExpression}");
+        arms.Add($"_ => global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>({argsExpression})");
 
         return $"({argsExpression} switch {{ {string.Join(", ", arms)} }})";
     }
@@ -106,7 +106,8 @@ internal static class CastExpressionHelper
                 return -1;
             }
 
-            return 0;
+            // Deterministic tiebreaker for unrelated types to satisfy Introsort's total-order requirement
+            return string.Compare(a.ToDisplayString(), b.ToDisplayString(), StringComparison.Ordinal);
         });
 
         return result;
