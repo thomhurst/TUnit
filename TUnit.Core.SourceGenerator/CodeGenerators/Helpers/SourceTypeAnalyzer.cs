@@ -94,16 +94,9 @@ internal static class SourceTypeAnalyzer
             return null;
         }
 
-        // Find constructor with most parameters
-        IMethodSymbol? constructor = null;
-        foreach (var member in classType.GetMembers())
-        {
-            if (member is IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: false, IsImplicitlyDeclared: false } ctor
-                && (constructor == null || ctor.Parameters.Length > constructor.Parameters.Length))
-            {
-                constructor = ctor;
-            }
-        }
+        // Use the same constructor selection as InstanceFactoryGenerator to ensure
+        // source type analysis targets the constructor that will actually be called.
+        var constructor = InstanceFactoryGenerator.GetPrimaryConstructor(classType);
 
         if (constructor == null || constructor.Parameters.Length == 0)
         {

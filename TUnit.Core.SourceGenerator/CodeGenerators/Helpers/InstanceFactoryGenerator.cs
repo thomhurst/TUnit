@@ -249,7 +249,7 @@ public static class InstanceFactoryGenerator
         return bodyWriter.ToString();
     }
 
-    private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
+    internal static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
     {
         // Materialize constructors once to avoid multiple enumerations
         var constructors = typeSymbol.GetMembers()
