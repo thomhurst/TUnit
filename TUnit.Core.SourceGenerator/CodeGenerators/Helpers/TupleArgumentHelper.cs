@@ -59,7 +59,7 @@ public static class TupleArgumentHelper
             // No params array - just cast each argument
             if (argCountExpression != null)
             {
-                // Dynamic count - use Math.Min
+                // Dynamic count — iterate all parameters
                 for (var i = 0; i < parameters.Count; i++)
                 {
                     var param = parameters[i];

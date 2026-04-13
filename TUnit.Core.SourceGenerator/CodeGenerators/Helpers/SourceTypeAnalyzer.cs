@@ -37,7 +37,9 @@ internal static class SourceTypeAnalyzer
             return null;
         }
 
-        // If ANY non-Arguments data source exists, we can't guarantee types
+        // The invoke lambda is shared across all data sources for this method.
+        // We can't emit per-source-type cast code, so if any source is dynamic
+        // we fall back to CastHelper.Cast for the entire method.
         if (argumentsAttributes.Count != dataSources.Count)
         {
             return null;
@@ -159,6 +161,11 @@ internal static class SourceTypeAnalyzer
 
             for (var i = 0; i < parameterCount && i < values.Value.Length; i++)
             {
+                if (!consistent[i])
+                {
+                    continue;
+                }
+
                 var tc = values.Value[i];
 
                 // Null literal or error → unknown source type for this position
@@ -168,7 +175,7 @@ internal static class SourceTypeAnalyzer
                     continue;
                 }
 
-                if (firstRow || sourceTypes[i] == null)
+                if (sourceTypes[i] == null)
                 {
                     sourceTypes[i] = tc.Type;
                 }
