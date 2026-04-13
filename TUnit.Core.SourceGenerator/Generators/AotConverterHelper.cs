@@ -5,7 +5,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
-public static class AotConverterHelper
+internal static class AotConverterHelper
 {
     /// <summary>
     /// Returns null if no conversions found; otherwise newline-separated Register calls.
@@ -248,6 +248,11 @@ public static class AotConverterHelper
                             return false;
                         }
                     }
+                }
+
+                if (namedType.ContainingType != null)
+                {
+                    return IsAccessibleType(namedType.ContainingType, compilation);
                 }
 
                 return true;
