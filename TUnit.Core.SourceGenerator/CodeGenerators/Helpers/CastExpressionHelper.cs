@@ -53,13 +53,16 @@ internal static class CastExpressionHelper
         var targetGQ = targetType.GloballyQualified();
         var arms = new List<string>();
 
+        // In switch arms the pattern match performs the unbox, so only a single cast
+        // to the target type is needed (unlike GenerateCast which needs a double-cast
+        // (TargetType)(SourceType)expr to first unbox then convert).
         foreach (var sourceType in sourceTypes)
         {
             var sourceGQ = sourceType.GloballyQualified();
 
             if (SymbolEqualityComparer.Default.Equals(sourceType, targetType))
             {
-                arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
+                arms.Add($"{sourceGQ} __s => __s");
             }
             else if (compilation != null && compilation.ClassifyConversion(sourceType, targetType) is { IsImplicit: true } or { IsExplicit: true })
             {

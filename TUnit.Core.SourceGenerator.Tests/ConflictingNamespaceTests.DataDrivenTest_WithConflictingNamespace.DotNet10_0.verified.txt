@@ -116,7 +116,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.EnumValue((args[0] switch { global::TUnit.TestProject.TestEnum __s => (global::TUnit.TestProject.TestEnum)__s, int __s => (global::TUnit.TestProject.TestEnum)__s, _ => (global::TUnit.TestProject.TestEnum)args[0] }));
+                                instance.EnumValue((args[0] switch { global::TUnit.TestProject.TestEnum __s => __s, int __s => (global::TUnit.TestProject.TestEnum)__s, _ => (global::TUnit.TestProject.TestEnum)args[0] }));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
