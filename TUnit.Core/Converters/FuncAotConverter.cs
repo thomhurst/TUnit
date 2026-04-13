@@ -4,5 +4,5 @@ public class FuncAotConverter<TSource, TTarget>(Func<TSource, TTarget> converter
 {
     public Type SourceType { get; } = typeof(TSource);
     public Type TargetType { get; } =  typeof(TTarget);
-    public object? Convert(object? value) => converter((TSource)value!);
+    public object? Convert(object? value) => value is null ? null : converter((TSource)value);
 }

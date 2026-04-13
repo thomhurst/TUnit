@@ -115,9 +115,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             });
 
         // AOT converter registrations are emitted inline in generated test source files:
-        // - Non-generic methods: scanned in GroupMethodsByClass (per-class path)
-        // - Generic methods: scanned in GenerateTestMetadata (per-method path)
-        // These paths are mutually exclusive — no duplicate registrations are emitted.
+        // - Non-generic, non-inherited methods: scanned in GroupMethodsByClass (per-class path)
+        // - Generic or inherited methods: scanned in GenerateTestMetadata (per-method path)
+        // AotConverterRegistry.Register uses TryAdd, so any overlap is a harmless no-op.
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
@@ -538,10 +538,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             registrationIndex++;
         }
 
-        // AOT converter registrations — only for generic tests.
-        // Non-generic methods (including inherited) are covered by the per-class path
+        // AOT converter registrations — only for generic or inherited tests.
+        // Non-generic, non-inherited methods are covered by the per-class path
         // in GroupMethodsByClass, which scans all non-generic methods for conversions.
-        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
+        // Inherited tests (InheritanceDepth > 0) need their own registration because
+        // the subclass's constructor parameters may require different converters.
+        if (testMethod.IsGenericType || testMethod.IsGenericMethod || testMethod.InheritanceDepth > 0)
         {
             var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
                 testMethod.MethodSymbol, testMethod.TypeSymbol, compilation);

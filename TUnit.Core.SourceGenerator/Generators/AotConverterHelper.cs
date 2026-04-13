@@ -209,7 +209,7 @@ public static class AotConverterHelper
                 ScanTypedConstantForTypes(element, typesToScan);
             }
         }
-        else if (constant.Kind != TypedConstantKind.Array && constant is { Value: not null, Type: not null })
+        else if (constant is { Value: not null, Type: not null })
         {
             typesToScan.Add(constant.Type);
         }
@@ -239,6 +239,17 @@ public static class AotConverterHelper
 
             if (namedType.DeclaredAccessibility == Accessibility.Public)
             {
+                if (namedType.IsGenericType)
+                {
+                    foreach (var typeArg in namedType.TypeArguments)
+                    {
+                        if (!IsAccessibleType(typeArg, compilation))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
                 return true;
             }
 
