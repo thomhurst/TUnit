@@ -147,8 +147,6 @@ internal static class SourceTypeAnalyzer
             consistent[i] = true;
         }
 
-        var firstRow = true;
-
         foreach (var attr in argumentsAttributes)
         {
             var values = GetArgumentValues(attr);
@@ -184,8 +182,6 @@ internal static class SourceTypeAnalyzer
                     consistent[i] = false;
                 }
             }
-
-            firstRow = false;
         }
 
         // Null out inconsistent positions

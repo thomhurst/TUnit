@@ -139,7 +139,9 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
                 return hash;
             }
 
-            return constant.Value?.ToString()?.GetHashCode() ?? 0;
+            var typeHash = constant.Type?.ToDisplayString()?.GetHashCode() ?? 0;
+            var valueHash = constant.Value?.ToString()?.GetHashCode() ?? 0;
+            return (typeHash * 31) ^ valueHash;
         }
     }
 }
