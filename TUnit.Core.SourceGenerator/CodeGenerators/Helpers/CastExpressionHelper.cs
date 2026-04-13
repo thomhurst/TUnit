@@ -37,7 +37,7 @@ internal static class CastExpressionHelper
         // Check if compiler can resolve conversion
         var conversion = compilation.ClassifyConversion(sourceType, targetType);
 
-        if (conversion.Exists && (conversion.IsImplicit || conversion.IsExplicit || conversion.IsNumeric))
+        if (conversion.Exists && (conversion.IsImplicit || conversion.IsExplicit))
         {
             var sourceGQ = sourceType.GloballyQualified();
             return $"({targetGQ})({sourceGQ}){argsExpression}";
