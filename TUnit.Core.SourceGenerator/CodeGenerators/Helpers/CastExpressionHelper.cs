@@ -37,8 +37,13 @@ internal static class CastExpressionHelper
         // Check if compiler can resolve conversion
         var conversion = compilation.ClassifyConversion(sourceType, targetType);
 
-        // Boxing: args[i] is already object — no cast needed
-        if (conversion.IsBoxing)
+        // Boxing to object/ValueType/Enum: args[i] is already typed correctly, no cast needed.
+        // Do NOT skip the cast for boxing-to-interface (e.g. int → IComparable) —
+        // args[i] is object?, which cannot be implicitly converted to an interface type.
+        if (conversion.IsBoxing
+            && targetType.SpecialType is SpecialType.System_Object
+                                      or SpecialType.System_ValueType
+                                      or SpecialType.System_Enum)
         {
             return argsExpression;
         }
