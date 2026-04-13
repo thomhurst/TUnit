@@ -176,7 +176,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// Aspire dashboard is enabled, received telemetry is forwarded to the dashboard's original
     /// OTLP endpoint so both TUnit and the dashboard receive data.
     /// </remarks>
-    protected virtual bool EnableTelemetryCollection => false;
+    protected virtual bool EnableTelemetryCollection => true;
 
     /// <summary>
     /// Resource wait timeout. Default: 60 seconds.
