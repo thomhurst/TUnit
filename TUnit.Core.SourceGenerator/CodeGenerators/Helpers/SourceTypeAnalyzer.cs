@@ -8,7 +8,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 /// Each position may have zero, one, or multiple possible source types.
 /// A null entry at a position means the type is unknown (falls back to CastHelper.Cast).
 /// </summary>
-public sealed class SourceTypeInfo
+internal sealed class SourceTypeInfo
 {
     private readonly IReadOnlyList<ITypeSymbol>?[] _typesPerPosition;
 
@@ -20,58 +20,11 @@ public sealed class SourceTypeInfo
     public int Length => _typesPerPosition.Length;
 
     /// <summary>
-    /// Returns true if the position has exactly one known source type.
-    /// </summary>
-    public bool HasSingleType(int index)
-    {
-        if (index < 0 || index >= _typesPerPosition.Length)
-        {
-            return false;
-        }
-
-        var types = _typesPerPosition[index];
-        return types != null && types.Count == 1;
-    }
-
-    /// <summary>
-    /// Returns true if the position has more than one known source type.
-    /// </summary>
-    public bool HasMultipleTypes(int index)
-    {
-        if (index < 0 || index >= _typesPerPosition.Length)
-        {
-            return false;
-        }
-
-        var types = _typesPerPosition[index];
-        return types != null && types.Count > 1;
-    }
-
-    /// <summary>
-    /// Returns the single source type at the given position, or null if unknown or multiple.
-    /// </summary>
-    public ITypeSymbol? GetSingleType(int index)
-    {
-        if (index < 0 || index >= _typesPerPosition.Length)
-        {
-            return null;
-        }
-
-        var types = _typesPerPosition[index];
-        return types != null && types.Count == 1 ? types[0] : null;
-    }
-
-    /// <summary>
-    /// Returns all known source types at the given position, or null if unknown.
+    /// Returns all known source types at the given position, or null if unknown/out-of-range.
     /// </summary>
     public IReadOnlyList<ITypeSymbol>? GetTypes(int index)
     {
-        if (index < 0 || index >= _typesPerPosition.Length)
-        {
-            return null;
-        }
-
-        return _typesPerPosition[index];
+        return (uint)index < (uint)_typesPerPosition.Length ? _typesPerPosition[index] : null;
     }
 }
 
@@ -123,8 +76,7 @@ internal static class SourceTypeAnalyzer
         }
 
         // For params methods with [Arguments], size the array to max argument count
-        var argumentsAttributes = dataSources.Where(IsArgumentsAttribute).ToList();
-        var arraySize = hasParams ? GetMaxArgumentCount(argumentsAttributes, parameterCount) : parameterCount;
+        var arraySize = hasParams ? GetMaxArgumentCount(dataSources, parameterCount) : parameterCount;
 
         return ExtractSourceTypesFromAllAttributes(dataSources, arraySize);
     }
@@ -167,8 +119,7 @@ internal static class SourceTypeAnalyzer
 
         var ctorParamCount = constructor.Parameters.Length;
         var ctorHasParams = constructor.Parameters[ctorParamCount - 1].IsParams;
-        var argumentsAttributes = dataSources.Where(IsArgumentsAttribute).ToList();
-        var ctorArraySize = ctorHasParams ? GetMaxArgumentCount(argumentsAttributes, ctorParamCount) : ctorParamCount;
+        var ctorArraySize = ctorHasParams ? GetMaxArgumentCount(dataSources, ctorParamCount) : ctorParamCount;
 
         return ExtractSourceTypesFromAllAttributes(dataSources, ctorArraySize);
     }
@@ -362,10 +313,15 @@ internal static class SourceTypeAnalyzer
         positionTypes[index]!.Add(type);
     }
 
-    private static int GetMaxArgumentCount(List<AttributeData> argumentsAttributes, int baseCount)
+    private static int GetMaxArgumentCount(List<AttributeData> dataSources, int baseCount)
     {
-        foreach (var attr in argumentsAttributes)
+        foreach (var attr in dataSources)
         {
+            if (!IsArgumentsAttribute(attr))
+            {
+                continue;
+            }
+
             var values = GetArgumentValues(attr);
             if (values != null && values.Value.Length > baseCount)
             {

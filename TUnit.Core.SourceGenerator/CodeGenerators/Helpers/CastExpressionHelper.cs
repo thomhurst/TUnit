@@ -7,41 +7,36 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class CastExpressionHelper
 {
-    public static ITypeSymbol? GetSourceTypeAt(ITypeSymbol?[]? sourceTypes, int index)
-    {
-        return sourceTypes != null && index < sourceTypes.Length ? sourceTypes[index] : null;
-    }
-
     /// <summary>
     /// Dispatches to the appropriate cast generation strategy based on the source type info at the given position.
-    /// - Single type: uses GenerateCast (existing single-cast path)
-    /// - Multiple types: uses GenerateMultiSourceCast (switch expression)
-    /// - Unknown/null: falls back to CastHelper.Cast
+    /// When <paramref name="fallbackSourceType"/> is provided, it is used as the source type for unknown positions
+    /// instead of falling back to CastHelper.Cast (useful for params elements where the element type is statically known).
     /// </summary>
     public static string GenerateCastForPosition(
         SourceTypeInfo? sourceTypeInfo,
         int position,
         ITypeSymbol targetType,
         string argsExpression,
-        CSharpCompilation? compilation)
+        CSharpCompilation? compilation,
+        ITypeSymbol? fallbackSourceType = null)
     {
-        if (sourceTypeInfo == null)
+        if (sourceTypeInfo != null)
         {
-            return GenerateCast(null, targetType, argsExpression, compilation);
-        }
+            var types = sourceTypeInfo.GetTypes(position);
 
-        if (sourceTypeInfo.HasSingleType(position))
-        {
-            return GenerateCast(sourceTypeInfo.GetSingleType(position), targetType, argsExpression, compilation);
-        }
+            if (types != null)
+            {
+                if (types.Count == 1)
+                {
+                    return GenerateCast(types[0], targetType, argsExpression, compilation);
+                }
 
-        if (sourceTypeInfo.HasMultipleTypes(position))
-        {
-            return GenerateMultiSourceCast(sourceTypeInfo.GetTypes(position)!, targetType, argsExpression, compilation);
+                return GenerateMultiSourceCast(types, targetType, argsExpression, compilation);
+            }
         }
 
         // Unknown type at this position
-        return GenerateCast(null, targetType, argsExpression, compilation);
+        return GenerateCast(fallbackSourceType, targetType, argsExpression, compilation);
     }
 
     /// <summary>
@@ -64,21 +59,11 @@ internal static class CastExpressionHelper
 
             if (SymbolEqualityComparer.Default.Equals(sourceType, targetType))
             {
-                // Same type — simple cast (unbox)
                 arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
             }
-            else if (compilation != null)
+            else if (compilation != null && compilation.ClassifyConversion(sourceType, targetType) is { IsImplicit: true } or { IsExplicit: true })
             {
-                var conversion = compilation.ClassifyConversion(sourceType, targetType);
-
-                if (conversion.IsImplicit || conversion.IsExplicit)
-                {
-                    arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
-                }
-                else
-                {
-                    arms.Add($"{sourceGQ} __s => global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>(__s)");
-                }
+                arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
             }
             else
             {

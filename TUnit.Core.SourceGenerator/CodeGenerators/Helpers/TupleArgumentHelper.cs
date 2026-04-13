@@ -4,7 +4,7 @@ using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
-public static class TupleArgumentHelper
+internal static class TupleArgumentHelper
 {
     public static string GenerateMethodInvocationArguments(
         IList<IParameterSymbol> parameters,
@@ -164,21 +164,10 @@ public static class TupleArgumentHelper
         SourceTypeInfo? sourceTypeInfo,
         CSharpCompilation? compilation)
     {
-        // Default to elementType when source type is unknown — for params overflow positions
-        // (beyond [Arguments] row length), the element type is statically known and a direct
-        // cast is sufficient. These positions are only reachable when all data sources are
-        // [Arguments], which SourceTypeAnalyzer has already verified.
-        if (sourceTypeInfo != null && sourceTypeInfo.HasSingleType(argIndex))
-        {
-            return CastExpressionHelper.GenerateCast(sourceTypeInfo.GetSingleType(argIndex), elementType, argExpression, compilation);
-        }
-
-        if (sourceTypeInfo != null && sourceTypeInfo.HasMultipleTypes(argIndex))
-        {
-            return CastExpressionHelper.GenerateMultiSourceCast(sourceTypeInfo.GetTypes(argIndex)!, elementType, argExpression, compilation);
-        }
-
-        // Unknown source type at this position — default to elementType for a direct cast
-        return CastExpressionHelper.GenerateCast(elementType, elementType, argExpression, compilation);
+        // For params overflow positions, the element type is statically known — pass it as
+        // fallbackSourceType so unknown positions get a direct cast instead of CastHelper.Cast.
+        return CastExpressionHelper.GenerateCastForPosition(
+            sourceTypeInfo, argIndex, elementType, argExpression, compilation,
+            fallbackSourceType: elementType);
     }
 }
