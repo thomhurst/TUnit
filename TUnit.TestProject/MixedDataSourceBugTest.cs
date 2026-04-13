@@ -1,7 +1,7 @@
 namespace TUnit.TestProject;
 
-[ClassDataSource(typeof(ClassData1))]
-[ClassDataSource(typeof(ClassData2))]
+[ClassDataSource<ClassData1>]
+[ClassDataSource<ClassData2>]
 public class MixedDataSourceBugTest(int classValue)
 {
     [Test]

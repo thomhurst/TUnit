@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace TUnit.TestProject;
 
-[ClassDataSource(typeof(ClassData))]
+[ClassDataSource<ClassData>]
 [Arguments("X")]
 [Arguments("Y")]
 public class ComprehensiveCountTest(string classValue)

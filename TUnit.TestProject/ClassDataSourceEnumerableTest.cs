@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace TUnit.TestProject;
 
-[ClassDataSource(typeof(EnumerableDataSource))]
+[ClassDataSource<EnumerableDataSource>]
 public class ClassDataSourceEnumerableTest(string value)
 {
     [Test]

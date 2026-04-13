@@ -6,9 +6,9 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments(2)]
-[ClassDataSource(typeof(DataSource1))]
-[ClassDataSource(typeof(DataSource2))]
-[ClassDataSource(typeof(DataSource3))]
+[ClassDataSource<DataSource1>]
+[ClassDataSource<DataSource2>]
+[ClassDataSource<DataSource3>]
 public class AllDataSourcesCombinedTests(int classValue)
 {
     private static readonly ConcurrentBag<string> ExecutedTests =
