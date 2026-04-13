@@ -19,6 +19,7 @@ namespace TUnit.Core.SourceGenerator.Generators;
 public sealed class TestMetadataGenerator : IIncrementalGenerator
 {
     private const string GeneratedNamespace = "TUnit.Generated";
+    public const string ParseTestMetadata = "ParseTestMetadata";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -54,7 +55,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .Combine(compilationContext)
             .Select(static (ctx, _) => GetTestMethodMetadata(ctx.Left, ctx.Right))
             .Where(static m => m is not null)
-            .Combine(enabledProvider);
+            .Combine(enabledProvider)
+            .WithTrackingName(ParseTestMetadata);
 
         var inheritsTestsClassesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
