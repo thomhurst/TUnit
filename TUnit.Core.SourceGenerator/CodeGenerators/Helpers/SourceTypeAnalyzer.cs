@@ -141,11 +141,7 @@ internal static class SourceTypeAnalyzer
     {
         var sourceTypes = new ITypeSymbol?[parameterCount];
         var consistent = new bool[parameterCount];
-
-        for (var i = 0; i < parameterCount; i++)
-        {
-            consistent[i] = true;
-        }
+        consistent.AsSpan().Fill(true);
 
         foreach (var attr in argumentsAttributes)
         {
@@ -224,6 +220,6 @@ internal static class SourceTypeAnalyzer
     private static bool IsArgumentsAttribute(AttributeData attr)
     {
         return attr.AttributeClass?.Name is "ArgumentsAttribute"
-            && attr.AttributeClass.ContainingNamespace?.ToString() == "TUnit.Core";
+            && attr.AttributeClass.ToDisplayString() == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithoutGlobalPrefix;
     }
 }

@@ -57,26 +57,13 @@ public static class TupleArgumentHelper
         if (!hasParams)
         {
             // No params array - just cast each argument
-            if (argCountExpression != null)
+            var upperBound = Math.Min(parameters.Count, argCount);
+            for (var i = 0; i < upperBound; i++)
             {
-                // Dynamic count — iterate all parameters
-                for (var i = 0; i < parameters.Count; i++)
-                {
-                    var param = parameters[i];
-                    var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                    var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
-                    argumentExpressions.Add(castExpression);
-                }
-            }
-            else
-            {
-                for (var i = 0; i < parameters.Count && i < argCount; i++)
-                {
-                    var param = parameters[i];
-                    var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                    var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
-                    argumentExpressions.Add(castExpression);
-                }
+                var param = parameters[i];
+                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
+                var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
+                argumentExpressions.Add(castExpression);
             }
         }
         else
@@ -85,26 +72,13 @@ public static class TupleArgumentHelper
             var regularParamCount = parameters.Count - 1;
 
             // Handle regular parameters
-            if (argCountExpression != null)
+            var upperBound = Math.Min(regularParamCount, argCount);
+            for (var i = 0; i < upperBound; i++)
             {
-                // Dynamic count
-                for (var i = 0; i < regularParamCount; i++)
-                {
-                    var param = parameters[i];
-                    var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                    var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
-                    argumentExpressions.Add(castExpression);
-                }
-            }
-            else
-            {
-                for (var i = 0; i < regularParamCount && i < argCount; i++)
-                {
-                    var param = parameters[i];
-                    var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                    var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
-                    argumentExpressions.Add(castExpression);
-                }
+                var param = parameters[i];
+                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
+                var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
+                argumentExpressions.Add(castExpression);
             }
 
             // Handle params array parameter
