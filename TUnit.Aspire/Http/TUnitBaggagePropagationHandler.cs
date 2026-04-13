@@ -32,31 +32,36 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
                     }
                 });
 
-            // Inject baggage header (not handled by the default propagator)
-            var first = true;
-            var sb = new System.Text.StringBuilder();
-
-            foreach (var (key, value) in activity.Baggage)
+            // Inject baggage header if the propagator hasn't already done so.
+            // When OTel SDK is configured with BaggagePropagator, the Inject call
+            // above may have already added a baggage header — avoid duplicates.
+            if (!request.Headers.Contains("baggage"))
             {
-                if (key is null)
+                var first = true;
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var (key, value) in activity.Baggage)
                 {
-                    continue;
+                    if (key is null)
+                    {
+                        continue;
+                    }
+
+                    if (!first)
+                    {
+                        sb.Append(',');
+                    }
+
+                    sb.Append(Uri.EscapeDataString(key));
+                    sb.Append('=');
+                    sb.Append(Uri.EscapeDataString(value ?? string.Empty));
+                    first = false;
                 }
 
                 if (!first)
                 {
-                    sb.Append(',');
+                    request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
                 }
-
-                sb.Append(Uri.EscapeDataString(key));
-                sb.Append('=');
-                sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-                first = false;
-            }
-
-            if (!first)
-            {
-                request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
             }
         }
 

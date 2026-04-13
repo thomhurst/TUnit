@@ -1,4 +1,3 @@
-using System.Buffers.Binary;
 using System.Text;
 
 namespace TUnit.Aspire.Telemetry;
@@ -270,6 +269,11 @@ internal ref struct ProtobufReader
 
         while (!_data.IsEmpty)
         {
+            if (shift >= 64)
+            {
+                throw new InvalidOperationException("Malformed varint: exceeds 64 bits.");
+            }
+
             var b = _data[0];
             _data = _data[1..];
             result |= (ulong)(b & 0x7F) << shift;
@@ -288,11 +292,6 @@ internal ref struct ProtobufReader
     public ReadOnlySpan<byte> ReadBytesAsSpan()
     {
         return ReadLengthDelimited();
-    }
-
-    public byte[] ReadBytes()
-    {
-        return ReadLengthDelimited().ToArray();
     }
 
     public string ReadString()
@@ -328,13 +327,24 @@ internal ref struct ProtobufReader
                 ReadVarint();
                 break;
             case WireType.Fixed64:
+                if (_data.Length < 8)
+                {
+                    throw new InvalidOperationException(
+                        $"Truncated fixed64 field: need 8 bytes but only {_data.Length} remain.");
+                }
+
                 _data = _data[8..];
                 break;
             case WireType.LengthDelimited:
-                var length = (int)ReadVarint();
-                _data = _data[length..];
+                ReadLengthDelimited();
                 break;
             case WireType.Fixed32:
+                if (_data.Length < 4)
+                {
+                    throw new InvalidOperationException(
+                        $"Truncated fixed32 field: need 4 bytes but only {_data.Length} remain.");
+                }
+
                 _data = _data[4..];
                 break;
             default:

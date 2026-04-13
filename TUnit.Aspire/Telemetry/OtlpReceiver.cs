@@ -13,9 +13,10 @@ namespace TUnit.Aspire.Telemetry;
 /// <remarks>
 /// <para>
 /// The receiver listens on a dynamic localhost port and accepts OTLP/HTTP protobuf
-/// exports at <c>/v1/logs</c> and <c>/v1/traces</c>. It extracts TraceId from
-/// incoming log records and looks up the corresponding test in
-/// <see cref="TraceRegistry"/> to route logs to the correct test output.
+/// exports at <c>/v1/logs</c> (parsed for correlation) and <c>/v1/traces</c>
+/// (accepted but only forwarded, not parsed). It extracts TraceId from incoming
+/// log records and looks up the corresponding test in <see cref="TraceRegistry"/>
+/// to route logs to the correct test output.
 /// </para>
 /// <para>
 /// Optionally forwards received telemetry to an upstream OTLP endpoint (e.g., the
@@ -124,11 +125,26 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 return;
             }
 
-            // Read the request body
+            // Read the request body with size enforcement (ContentLength64 is -1 for chunked)
             byte[] body;
             using (var ms = new MemoryStream())
             {
-                await request.InputStream.CopyToAsync(ms).ConfigureAwait(false);
+                var buffer = new byte[8192];
+                long totalRead = 0;
+                int bytesRead;
+                while ((bytesRead = await request.InputStream.ReadAsync(buffer, _cts.Token).ConfigureAwait(false)) > 0)
+                {
+                    totalRead += bytesRead;
+                    if (totalRead > MaxBodyBytes)
+                    {
+                        response.StatusCode = 413;
+                        response.Close();
+                        return;
+                    }
+
+                    ms.Write(buffer, 0, bytesRead);
+                }
+
                 body = ms.ToArray();
             }
 
