@@ -16,7 +16,6 @@ public class TestsBase
     }
 
     public TestsBase<TestMetadataGenerator> TestMetadataGenerator = new();
-    public TestsBase<AotConverterGenerator> AotConverterGenerator = new();
     public TestsBase<HookMetadataGenerator> HooksGenerator = new();
     public TestsBase<InfrastructureGenerator> InfrastructureGenerator = new();
     public TestsBase<DynamicTestsGenerator> DynamicTestsGenerator = new();

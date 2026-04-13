@@ -664,3 +664,15 @@ internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_MatrixTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.MatrixTests>(static () => TUnit_TestProject_MatrixTests__TestSource.Entries);
 }
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _aot_TUnit_TestProject_MatrixTests__TestSource = RegisterAot_TUnit_TestProject_MatrixTests__TestSource();
+    static int RegisterAot_TUnit_TestProject_MatrixTests__TestSource()
+    {
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<global::TUnit.TestProject.TestEnum, global::TUnit.TestProject.TestEnum?>(static source => (global::TUnit.TestProject.TestEnum?)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<global::TUnit.TestProject.TestEnum?, global::TUnit.TestProject.TestEnum>(static source => (global::TUnit.TestProject.TestEnum)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool, bool?>(static source => (bool?)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool?, bool>(static source => (bool)source);
+        return 0;
+    }
+}

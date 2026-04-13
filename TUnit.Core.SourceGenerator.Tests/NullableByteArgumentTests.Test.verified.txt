@@ -150,3 +150,13 @@ internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_NullableByteArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NullableByteArgumentTests>(static () => TUnit_TestProject_NullableByteArgumentTests__TestSource.Entries);
 }
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _aot_TUnit_TestProject_NullableByteArgumentTests__TestSource = RegisterAot_TUnit_TestProject_NullableByteArgumentTests__TestSource();
+    static int RegisterAot_TUnit_TestProject_NullableByteArgumentTests__TestSource()
+    {
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<byte, byte?>(static source => (byte?)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<byte?, byte>(static source => (byte)source);
+        return 0;
+    }
+}

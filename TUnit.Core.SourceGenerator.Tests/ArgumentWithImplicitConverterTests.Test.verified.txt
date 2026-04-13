@@ -151,3 +151,13 @@ internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(static () => TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource.Entries);
 }
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _aot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource = RegisterAot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource();
+    static int RegisterAot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource()
+    {
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, global::TUnit.TestProject.ExplicitInteger>(static source => (global::TUnit.TestProject.ExplicitInteger)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, global::TUnit.TestProject.ImplicitInteger>(static source => (global::TUnit.TestProject.ImplicitInteger)source);
+        return 0;
+    }
+}

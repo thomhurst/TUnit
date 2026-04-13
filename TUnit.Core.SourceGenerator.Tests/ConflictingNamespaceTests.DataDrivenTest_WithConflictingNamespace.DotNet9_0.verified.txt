@@ -524,3 +524,13 @@ internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_DataDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DataDrivenTests>(static () => TUnit_TestProject_DataDrivenTests__TestSource.Entries);
 }
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _aot_TUnit_TestProject_DataDrivenTests__TestSource = RegisterAot_TUnit_TestProject_DataDrivenTests__TestSource();
+    static int RegisterAot_TUnit_TestProject_DataDrivenTests__TestSource()
+    {
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool, bool?>(static source => (bool?)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool?, bool>(static source => (bool)source);
+        return 0;
+    }
+}

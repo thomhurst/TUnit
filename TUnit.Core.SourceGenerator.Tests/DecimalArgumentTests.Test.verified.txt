@@ -611,3 +611,33 @@ internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_DecimalArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DecimalArgumentTests>(static () => TUnit_TestProject_DecimalArgumentTests__TestSource.Entries);
 }
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _aot_TUnit_TestProject_DecimalArgumentTests__TestSource = RegisterAot_TUnit_TestProject_DecimalArgumentTests__TestSource();
+    static int RegisterAot_TUnit_TestProject_DecimalArgumentTests__TestSource()
+    {
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<byte, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<sbyte, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<short, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<ushort, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<char, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<uint, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<long, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<ulong, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<float, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<double, decimal>(static source => (decimal)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, byte>(static source => (byte)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, sbyte>(static source => (sbyte)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, char>(static source => (char)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, short>(static source => (short)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, ushort>(static source => (ushort)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, int>(static source => (int)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, uint>(static source => (uint)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, long>(static source => (long)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, ulong>(static source => (ulong)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, float>(static source => (float)source);
+        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, double>(static source => (double)source);
+        return 0;
+    }
+}

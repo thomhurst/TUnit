@@ -41,11 +41,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 );
             });
 
-        var testMethodsProvider = context.SyntaxProvider
+        // Single ForAttributeWithMetadataName call shared by all [Test]-triggered pipelines.
+        // Branching here avoids duplicate attribute index scans that would occur with
+        // separate [Generator] classes each calling ForAttributeWithMetadataName.
+        var rawTestMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, _) => ctx)
+                transform: static (ctx, _) => ctx);
+
+        var testMethodsProvider = rawTestMethods
             .Combine(compilationContext)
             .Select(static (ctx, _) => GetTestMethodMetadata(ctx.Left, ctx.Right))
             .Where(static m => m is not null)
@@ -106,6 +111,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 GenerateInheritedTestSources(context, classInfo);
             });
+
+        // AOT converter registrations are emitted inline in per-class and per-method test source files.
+        // No separate pipeline branch needed — conversions are scanned during GroupMethodsByClass
+        // (per-class) and GenerateTestMetadata (per-method generic/inherited).
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
@@ -125,6 +134,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return new InheritsTestsClassMetadata
         {
             TypeSymbol = classSymbol,
+            TypeFullyQualifiedName = classSymbol.ToDisplayString(),
             ClassSyntax = classSyntax,
             Context = context,
             CompilationContext = compilationContext
@@ -162,10 +172,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var (filePath, lineNumber) = GetTestMethodSourceLocation(methodSyntax, testAttribute);
 
+        var methodAttributes = methodSymbol.GetAttributes();
+
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
+            MethodFullyQualifiedName = methodSymbol!.ToDisplayString(),
+            TypeFullyQualifiedName = containingType.ToDisplayString(),
+            MethodAttributeHash = TestMethodMetadata.ComputeAttributeHash(methodAttributes),
             FilePath = filePath,
             LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
@@ -174,7 +189,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             MethodSyntax = methodSyntax,
             IsGenericType = isGenericType,
             IsGenericMethod = isGenericMethod,
-            MethodAttributes = methodSymbol.GetAttributes()
+            MethodAttributes = methodAttributes
         };
     }
 
@@ -242,10 +257,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
+            var effectiveMethod = concreteMethod ?? method;
+            var methodAttributes = effectiveMethod.GetAttributes();
+
             var testMethodMetadata = new TestMethodMetadata
             {
-                MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
+                MethodSymbol = effectiveMethod, // Use concrete method if found, otherwise base method
                 TypeSymbol = typeForMetadata, // Use constructed generic base if applicable
+                MethodFullyQualifiedName = effectiveMethod.ToDisplayString(),
+                TypeFullyQualifiedName = typeForMetadata.ToDisplayString(),
+                MethodAttributeHash = TestMethodMetadata.ComputeAttributeHash(methodAttributes),
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
@@ -253,8 +274,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 CompilationContext = classInfo.CompilationContext,
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = typeForMetadata.IsGenericType,
-                IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
-                MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
+                IsGenericMethod = effectiveMethod.IsGenericMethod,
+                MethodAttributes = methodAttributes, // Use concrete method attributes
                 InheritanceDepth = inheritanceDepth
             };
 
@@ -512,6 +533,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             EmitRegistrationField(writer, $"{uniqueClassName}_{registrationIndex}",
                 $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{concreteClassName}>(static () => {uniqueClassName}.Entries_{registrationIndex})");
             registrationIndex++;
+        }
+
+        // AOT converter registrations for this test method
+        var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
+            testMethod.MethodSymbol, testMethod.TypeSymbol, compilation);
+        if (aotRegistrationCode != null)
+        {
+            EmitAotConverterRegistration(writer, uniqueClassName, aotRegistrationCode);
         }
     }
 
@@ -2971,6 +3000,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
+    private static void EmitAotConverterRegistration(CodeWriter writer, string fieldName, string registrationCode)
+    {
+        writer.AppendLine();
+        writer.AppendLine("internal static partial class TUnit_TestRegistration");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"static readonly int _aot_{fieldName} = RegisterAot_{fieldName}();");
+        writer.AppendLine($"static int RegisterAot_{fieldName}()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendRaw(registrationCode);
+        writer.AppendLine();
+        writer.AppendLine("return 0;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+    }
+
     /// <summary>
     /// Pre-generates the attribute factory body for a test method.
     /// Returns the body (return [...];) without the method signature.
@@ -3414,6 +3462,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     });
                 }
 
+                // Scan all methods in this class for types with conversion operators
+                var methodSymbols = methodsList.Select(m => m.MethodSymbol).ToList();
+                var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
+                    methodSymbols, typeSymbol, first.CompilationContext.Compilation);
+
                 return new ClassTestGroup
                 {
                     ClassFullyQualified = className,
@@ -3424,6 +3477,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
                     SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
                     SharedFieldsCode = PreGenerateSharedFields(typeSymbol, className),
+                    AotConverterRegistrationCode = aotRegistrationCode,
                 };
             });
     }
@@ -3556,6 +3610,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             EmitRegistrationField(writer, classGroup.TestSourceName,
                 $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Entries)");
+
+            if (classGroup.AotConverterRegistrationCode != null)
+            {
+                EmitAotConverterRegistration(writer, classGroup.TestSourceName, classGroup.AotConverterRegistrationCode);
+            }
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }
@@ -6511,10 +6570,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 }
 
-public class InheritsTestsClassMetadata
+public class InheritsTestsClassMetadata : IEquatable<InheritsTestsClassMetadata>
 {
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
     public GeneratorAttributeSyntaxContext Context { get; init; }
     public required CompilationContext CompilationContext { get; init; }
+
+    // Stable string identity for incremental caching
+    public required string TypeFullyQualifiedName { get; init; }
+
+    public bool Equals(InheritsTestsClassMetadata? other)
+    {
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+
+        return TypeFullyQualifiedName == other.TypeFullyQualifiedName;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as InheritsTestsClassMetadata);
+
+    public override int GetHashCode() => TypeFullyQualifiedName.GetHashCode();
 }
