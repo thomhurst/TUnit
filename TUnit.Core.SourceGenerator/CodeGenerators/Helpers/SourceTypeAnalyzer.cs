@@ -45,11 +45,16 @@ internal static class SourceTypeAnalyzer
 
         // Filter to non-CancellationToken parameters
         var parameterCount = 0;
+        var hasParams = false;
         foreach (var p in method.Parameters)
         {
             if (p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
             {
                 parameterCount++;
+                if (p.IsParams)
+                {
+                    hasParams = true;
+                }
             }
         }
 
@@ -58,7 +63,11 @@ internal static class SourceTypeAnalyzer
             return null;
         }
 
-        return ExtractSourceTypesFromArguments(argumentsAttributes, parameterCount);
+        // For params methods, size the array to max argument count across all [Arguments]
+        // rows so that params elements beyond position 0 also get typed casts.
+        var arraySize = hasParams ? GetMaxArgumentCount(argumentsAttributes, parameterCount) : parameterCount;
+
+        return ExtractSourceTypesFromArguments(argumentsAttributes, arraySize);
     }
 
     /// <summary>
@@ -103,7 +112,25 @@ internal static class SourceTypeAnalyzer
             return null;
         }
 
-        return ExtractSourceTypesFromArguments(argumentsAttributes, constructor.Parameters.Length);
+        var ctorParamCount = constructor.Parameters.Length;
+        var ctorHasParams = constructor.Parameters[ctorParamCount - 1].IsParams;
+        var ctorArraySize = ctorHasParams ? GetMaxArgumentCount(argumentsAttributes, ctorParamCount) : ctorParamCount;
+
+        return ExtractSourceTypesFromArguments(argumentsAttributes, ctorArraySize);
+    }
+
+    private static int GetMaxArgumentCount(List<AttributeData> argumentsAttributes, int baseCount)
+    {
+        foreach (var attr in argumentsAttributes)
+        {
+            var values = GetArgumentValues(attr);
+            if (values != null && values.Value.Length > baseCount)
+            {
+                baseCount = values.Value.Length;
+            }
+        }
+
+        return baseCount;
     }
 
     private static ITypeSymbol?[]? ExtractSourceTypesFromArguments(
@@ -183,7 +210,7 @@ internal static class SourceTypeAnalyzer
         // Non-generic [Arguments(params object?[] args)] — the first arg is an array
         if (firstArg.Kind == TypedConstantKind.Array)
         {
-            return firstArg.Values;
+            return firstArg.Values.IsDefault ? null : firstArg.Values;
         }
 
         // Generic [Arguments<T>(T value)] — single typed value

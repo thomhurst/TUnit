@@ -109,7 +109,7 @@ public static class TupleArgumentHelper
 
             // Handle params array parameter
             var paramsParam = parameters[parameters.Count - 1];
-            var elementType = (paramsParam.Type as IArrayTypeSymbol)?.ElementType;
+            var elementType = GetParamsElementType(paramsParam.Type);
 
             if (elementType != null)
             {
@@ -165,6 +165,26 @@ public static class TupleArgumentHelper
         }
 
         return argumentExpressions;
+    }
+
+    /// <summary>
+    /// Extracts the element type from a params parameter type.
+    /// Handles T[] (IArrayTypeSymbol) and generic collection types like IEnumerable&lt;T&gt;, List&lt;T&gt;, etc.
+    /// </summary>
+    private static ITypeSymbol? GetParamsElementType(ITypeSymbol paramsType)
+    {
+        if (paramsType is IArrayTypeSymbol arrayType)
+        {
+            return arrayType.ElementType;
+        }
+
+        // C# 13 params collections: IEnumerable<T>, ReadOnlySpan<T>, List<T>, etc.
+        if (paramsType is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType)
+        {
+            return namedType.TypeArguments[0];
+        }
+
+        return null;
     }
 
     private static string GenerateElementCast(
