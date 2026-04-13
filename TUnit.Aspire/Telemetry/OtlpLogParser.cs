@@ -49,6 +49,8 @@ internal static class OtlpLogParser
         return results;
     }
 
+    // Assumes Resource (field 1) precedes ScopeLogs (field 2) in the wire format,
+    // which is true for all known OTel SDK implementations.
     private static void ParseResourceLogs(ProtobufReader reader, List<OtlpLogRecord> results)
     {
         var resourceName = "";
