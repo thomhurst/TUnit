@@ -46,7 +46,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                     {
                         case 2:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (global::System.Type)args[1]));
+                                return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments((args[0] switch { double __s => (object)__s, float __s => (object)__s, sbyte __s => (object)__s, byte __s => (object)__s, short __s => (object)__s, ushort __s => (object)__s, int __s => (object)__s, uint __s => (object)__s, long __s => (object)__s, ulong __s => (object)__s, _ => (object)args[0] }), (global::System.Type)args[1]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -65,7 +65,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                     {
                         case 3:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (global::System.Type)args[1], (global::System.Type)args[2]));
+                                return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes((args[0] switch { global::TUnit.TestProject.ByteEnum __s => (object)__s, global::TUnit.TestProject.SByteEnum __s => (object)__s, global::TUnit.TestProject.Int16Enum __s => (object)__s, global::TUnit.TestProject.UInt16Enum __s => (object)__s, global::TUnit.TestProject.Int32Enum __s => (object)__s, global::TUnit.TestProject.UInt32Enum __s => (object)__s, global::TUnit.TestProject.Int64Enum __s => (object)__s, global::TUnit.TestProject.UInt64Enum __s => (object)__s, _ => (object)args[0] }), (global::System.Type)args[1], (global::System.Type)args[2]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");

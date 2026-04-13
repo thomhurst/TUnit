@@ -6,8 +6,8 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 [Arguments(1)]
 [Arguments(2)]
-[ClassDataSource(typeof(IntDataSource1))]
-[ClassDataSource(typeof(IntDataSource2))]
+[ClassDataSource<IntDataSource1>]
+[ClassDataSource<IntDataSource2>]
 public class ArgumentsWithClassDataSourceTests(int classArg)
 {
     private static readonly ConcurrentBag<string> ExecutedTests =

@@ -289,7 +289,7 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor, SourceTypeInfo? sourceTypeInfo = null, CSharpCompilation? compilation = null)
     {
         // Check for required properties
         var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
@@ -315,8 +315,8 @@ public static class InstanceFactoryGenerator
                 var parameterType = parameterTypes[i];
                 var argAccess = $"args[{i}]";
 
-                writer.Append(CastExpressionHelper.GenerateCast(
-                    CastExpressionHelper.GetSourceTypeAt(sourceTypes, i), parameterType, argAccess, compilation));
+                writer.Append(CastExpressionHelper.GenerateCastForPosition(
+                    sourceTypeInfo, i, parameterType, argAccess, compilation));
             }
 
             writer.Append(")");

@@ -2548,18 +2548,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, SourceTypeInfo? sourceTypeInfo = null, CSharpCompilation? compilation = null)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypes, compilation);
+        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypeInfo, compilation);
         writer.Unindent();
         writer.AppendLine("},");
     }
 
-    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
+    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, SourceTypeInfo? sourceTypeInfo = null, CSharpCompilation? compilation = null)
     {
         // Wrap entire body in try-catch to handle synchronous exceptions
         writer.AppendLine("try");
@@ -2589,8 +2589,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
             {
-                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                return CastExpressionHelper.GenerateCast(sourceType, elem.Type, $"args[{i}]", compilation);
+                return CastExpressionHelper.GenerateCastForPosition(sourceTypeInfo, i, elem.Type, $"args[{i}]", compilation);
             });
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
@@ -2652,7 +2651,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Indent();
 
                 // Build the arguments to pass, handling params arrays correctly
-                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount, sourceTypes, compilation);
+                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount, sourceTypeInfo, compilation);
 
                 // Add CancellationToken if present
                 if (hasCancellationToken)

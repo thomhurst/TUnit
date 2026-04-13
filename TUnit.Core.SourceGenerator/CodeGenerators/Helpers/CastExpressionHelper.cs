@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -9,6 +10,86 @@ internal static class CastExpressionHelper
     public static ITypeSymbol? GetSourceTypeAt(ITypeSymbol?[]? sourceTypes, int index)
     {
         return sourceTypes != null && index < sourceTypes.Length ? sourceTypes[index] : null;
+    }
+
+    /// <summary>
+    /// Dispatches to the appropriate cast generation strategy based on the source type info at the given position.
+    /// - Single type: uses GenerateCast (existing single-cast path)
+    /// - Multiple types: uses GenerateMultiSourceCast (switch expression)
+    /// - Unknown/null: falls back to CastHelper.Cast
+    /// </summary>
+    public static string GenerateCastForPosition(
+        SourceTypeInfo? sourceTypeInfo,
+        int position,
+        ITypeSymbol targetType,
+        string argsExpression,
+        CSharpCompilation? compilation)
+    {
+        if (sourceTypeInfo == null)
+        {
+            return GenerateCast(null, targetType, argsExpression, compilation);
+        }
+
+        if (sourceTypeInfo.HasSingleType(position))
+        {
+            return GenerateCast(sourceTypeInfo.GetSingleType(position), targetType, argsExpression, compilation);
+        }
+
+        if (sourceTypeInfo.HasMultipleTypes(position))
+        {
+            return GenerateMultiSourceCast(sourceTypeInfo.GetTypes(position)!, targetType, argsExpression, compilation);
+        }
+
+        // Unknown type at this position
+        return GenerateCast(null, targetType, argsExpression, compilation);
+    }
+
+    /// <summary>
+    /// Generates a pattern-matching switch expression for positions with multiple known source types.
+    /// Each source type gets its own pattern match arm with the appropriate cast.
+    /// The default arm handles any unexpected types via direct cast.
+    /// </summary>
+    public static string GenerateMultiSourceCast(
+        IReadOnlyList<ITypeSymbol> sourceTypes,
+        ITypeSymbol targetType,
+        string argsExpression,
+        CSharpCompilation? compilation)
+    {
+        var targetGQ = targetType.GloballyQualified();
+        var arms = new List<string>();
+
+        foreach (var sourceType in sourceTypes)
+        {
+            var sourceGQ = sourceType.GloballyQualified();
+
+            if (SymbolEqualityComparer.Default.Equals(sourceType, targetType))
+            {
+                // Same type — simple cast (unbox)
+                arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
+            }
+            else if (compilation != null)
+            {
+                var conversion = compilation.ClassifyConversion(sourceType, targetType);
+
+                if (conversion.IsImplicit || conversion.IsExplicit)
+                {
+                    arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
+                }
+                else
+                {
+                    arms.Add($"{sourceGQ} __s => global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>(__s)");
+                }
+            }
+            else
+            {
+                arms.Add($"{sourceGQ} __s => global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>(__s)");
+            }
+        }
+
+        // Default arm handles unboxing/direct cast from Arguments or unexpected types
+        arms.Add($"_ => ({targetGQ}){argsExpression}");
+
+        return $"({argsExpression} switch {{ {string.Join(", ", arms)} }})";
     }
 
     /// <summary>

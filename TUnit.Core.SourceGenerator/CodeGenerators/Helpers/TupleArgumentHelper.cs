@@ -9,7 +9,7 @@ public static class TupleArgumentHelper
     public static string GenerateMethodInvocationArguments(
         IList<IParameterSymbol> parameters,
         string argumentsArrayName,
-        ITypeSymbol?[]? sourceTypes = null,
+        SourceTypeInfo? sourceTypeInfo = null,
         CSharpCompilation? compilation = null)
     {
         var allArguments = new List<string>();
@@ -17,8 +17,7 @@ public static class TupleArgumentHelper
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
-            var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-            var castExpression = CastExpressionHelper.GenerateCast(sourceType, parameter.Type, $"{argumentsArrayName}[{i}]", compilation);
+            var castExpression = CastExpressionHelper.GenerateCastForPosition(sourceTypeInfo, i, parameter.Type, $"{argumentsArrayName}[{i}]", compilation);
             allArguments.Add(castExpression);
         }
 
@@ -29,7 +28,7 @@ public static class TupleArgumentHelper
         IList<IParameterSymbol> parameters,
         string argumentsArrayName,
         object argumentCount,
-        ITypeSymbol?[]? sourceTypes = null,
+        SourceTypeInfo? sourceTypeInfo = null,
         CSharpCompilation? compilation = null)
     {
         var argumentExpressions = new List<string>();
@@ -61,8 +60,7 @@ public static class TupleArgumentHelper
             for (var i = 0; i < upperBound; i++)
             {
                 var param = parameters[i];
-                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
+                var castExpression = CastExpressionHelper.GenerateCastForPosition(sourceTypeInfo, i, param.Type, $"{argumentsArrayName}[{i}]", compilation);
                 argumentExpressions.Add(castExpression);
             }
         }
@@ -76,8 +74,7 @@ public static class TupleArgumentHelper
             for (var i = 0; i < upperBound; i++)
             {
                 var param = parameters[i];
-                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
-                var castExpression = CastExpressionHelper.GenerateCast(sourceType, param.Type, $"{argumentsArrayName}[{i}]", compilation);
+                var castExpression = CastExpressionHelper.GenerateCastForPosition(sourceTypeInfo, i, param.Type, $"{argumentsArrayName}[{i}]", compilation);
                 argumentExpressions.Add(castExpression);
             }
 
@@ -112,7 +109,7 @@ public static class TupleArgumentHelper
                         // Single argument for params - check if it's null or already the correct array type
                         var singleArg = $"{argumentsArrayName}[{regularParamCount}]";
                         var paramsTypeGQ = paramsParam.Type.GloballyQualified();
-                        var elementCast = GenerateElementCast(elementType, regularParamCount, singleArg, sourceTypes, compilation);
+                        var elementCast = GenerateElementCast(elementType, regularParamCount, singleArg, sourceTypeInfo, compilation);
                         var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsTypeGQ} arr ? arr : new {elementTargetGQ}[] {{ {elementCast} }})";
                         argumentExpressions.Add(checkAndCast);
                     }
@@ -122,7 +119,7 @@ public static class TupleArgumentHelper
                         var arrayElements = new List<string>();
                         for (var i = regularParamCount; i < argCount; i++)
                         {
-                            var elementCast = GenerateElementCast(elementType, i, $"{argumentsArrayName}[{i}]", sourceTypes, compilation);
+                            var elementCast = GenerateElementCast(elementType, i, $"{argumentsArrayName}[{i}]", sourceTypeInfo, compilation);
                             arrayElements.Add(elementCast);
                         }
                         argumentExpressions.Add($"new {elementTargetGQ}[] {{ {string.Join(", ", arrayElements)} }}");
@@ -132,8 +129,7 @@ public static class TupleArgumentHelper
             else
             {
                 // Fallback if we can't determine element type
-                var sourceType = sourceTypes != null && regularParamCount < sourceTypes.Length ? sourceTypes[regularParamCount] : null;
-                var castExpression = CastExpressionHelper.GenerateCast(sourceType, paramsParam.Type, $"{argumentsArrayName}[{regularParamCount}]", compilation);
+                var castExpression = CastExpressionHelper.GenerateCastForPosition(sourceTypeInfo, regularParamCount, paramsParam.Type, $"{argumentsArrayName}[{regularParamCount}]", compilation);
                 argumentExpressions.Add(castExpression);
             }
         }
@@ -165,14 +161,24 @@ public static class TupleArgumentHelper
         ITypeSymbol elementType,
         int argIndex,
         string argExpression,
-        ITypeSymbol?[]? sourceTypes,
+        SourceTypeInfo? sourceTypeInfo,
         CSharpCompilation? compilation)
     {
         // Default to elementType when source type is unknown — for params overflow positions
         // (beyond [Arguments] row length), the element type is statically known and a direct
         // cast is sufficient. These positions are only reachable when all data sources are
         // [Arguments], which SourceTypeAnalyzer has already verified.
-        var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, argIndex) ?? elementType;
-        return CastExpressionHelper.GenerateCast(sourceType, elementType, argExpression, compilation);
+        if (sourceTypeInfo != null && sourceTypeInfo.HasSingleType(argIndex))
+        {
+            return CastExpressionHelper.GenerateCast(sourceTypeInfo.GetSingleType(argIndex), elementType, argExpression, compilation);
+        }
+
+        if (sourceTypeInfo != null && sourceTypeInfo.HasMultipleTypes(argIndex))
+        {
+            return CastExpressionHelper.GenerateMultiSourceCast(sourceTypeInfo.GetTypes(argIndex)!, elementType, argExpression, compilation);
+        }
+
+        // Unknown source type at this position — default to elementType for a direct cast
+        return CastExpressionHelper.GenerateCast(elementType, elementType, argExpression, compilation);
     }
 }
