@@ -24,6 +24,4 @@ public sealed record ClassTestGroup
     /// Used to inline MethodMetadata construction into field initializers.
     /// </summary>
     public required string SharedFieldsCode { get; init; }
-
-    public string? AotConverterRegistrationCode { get; init; }
 }

@@ -205,7 +205,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
             {
                 case 1:
                     {
-                        instance.Test3(global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
+                        instance.Test3((bool)args[0]);
                         return default(global::System.Threading.Tasks.ValueTask);
                     }
                 default:

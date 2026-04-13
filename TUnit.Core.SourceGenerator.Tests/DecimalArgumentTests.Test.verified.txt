@@ -110,7 +110,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal((decimal)(double)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -129,7 +129,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal((decimal)(double)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -205,7 +205,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 3:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals((decimal)(double)args[0], (decimal)(double)args[1], (decimal)(double)args[2]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -244,7 +244,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 6:
                             {
-                                instance.TransactionDiscountCalculations(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
+                                instance.TransactionDiscountCalculations((decimal)(int)args[0], (decimal)(int)args[1], (decimal)(int)args[2], (decimal)(int)args[3], (decimal)(int)args[4], (bool)args[5]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -264,7 +264,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Equality3(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Equality3((decimal)(double)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -283,7 +283,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Equality4(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Equality4((decimal)(double)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -302,7 +302,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.TestMethod((decimal)(int)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -610,34 +610,4 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_DecimalArgumentTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DecimalArgumentTests>(static () => TUnit_TestProject_DecimalArgumentTests__TestSource.Entries);
-}
-internal static partial class TUnit_TestRegistration
-{
-    static readonly int _aot_TUnit_TestProject_DecimalArgumentTests__TestSource = RegisterAot_TUnit_TestProject_DecimalArgumentTests__TestSource();
-    static int RegisterAot_TUnit_TestProject_DecimalArgumentTests__TestSource()
-    {
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<byte, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<sbyte, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<short, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<ushort, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<char, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<uint, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<long, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<ulong, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<float, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<double, decimal>(static source => (decimal)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, byte>(static source => (byte)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, sbyte>(static source => (sbyte)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, char>(static source => (char)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, short>(static source => (short)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, ushort>(static source => (ushort)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, int>(static source => (int)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, uint>(static source => (uint)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, long>(static source => (long)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, ulong>(static source => (ulong)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, float>(static source => (float)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<decimal, double>(static source => (double)source);
-        return 0;
-    }
 }

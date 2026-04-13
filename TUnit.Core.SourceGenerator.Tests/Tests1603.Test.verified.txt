@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(short), "value", new g
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Casted_Integer_To_Short_Converts(global::TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Casted_Integer_To_Short_Converts((short)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -62,7 +62,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(short), "value", new g
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Integer_To_Short_Converts(global::TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Integer_To_Short_Converts((short)(int)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
 
@@ -198,7 +199,7 @@ public static class InstanceFactoryGenerator
     /// Used by the per-class helper pipeline where ISymbol is available during the transform step
     /// but not during source output.
     /// </summary>
-    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, CSharpCompilation? compilation = null)
     {
         var bodyWriter = new CodeWriter(includeHeader: false);
         var className = typeSymbol.GloballyQualified();
@@ -212,7 +213,8 @@ public static class InstanceFactoryGenerator
             var constructor = GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
-                GenerateTypedConstructorCallBody(bodyWriter, className, constructor);
+                var sourceTypes = SourceTypeAnalyzer.GetConstructorParameterSourceTypes(typeSymbol as INamedTypeSymbol);
+                GenerateTypedConstructorCallBody(bodyWriter, className, constructor, sourceTypes, compilation);
             }
             else
             {
@@ -287,7 +289,7 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
     {
         // Check for required properties
         var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
@@ -313,8 +315,8 @@ public static class InstanceFactoryGenerator
                 var parameterType = parameterTypes[i];
                 var argAccess = $"args[{i}]";
 
-                // Use CastHelper which now has AOT converter registry support
-                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+                writer.Append(CastExpressionHelper.GenerateCast(
+                    CastExpressionHelper.GetSourceTypeAt(sourceTypes, i), parameterType, argAccess, compilation));
             }
 
             writer.Append(")");

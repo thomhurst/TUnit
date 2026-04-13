@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                     {
                         case 1:
                             {
-                                instance.Explicit(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ExplicitInteger>(args[0]));
+                                instance.Explicit((global::TUnit.TestProject.ExplicitInteger)(int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -63,7 +63,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                     {
                         case 1:
                             {
-                                instance.Implicit(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ImplicitInteger>(args[0]));
+                                instance.Implicit((global::TUnit.TestProject.ImplicitInteger)(int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -150,14 +150,4 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(static () => TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource.Entries);
-}
-internal static partial class TUnit_TestRegistration
-{
-    static readonly int _aot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource = RegisterAot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource();
-    static int RegisterAot_TUnit_TestProject_ArgumentWithImplicitConverterTests__TestSource()
-    {
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, global::TUnit.TestProject.ExplicitInteger>(static source => (global::TUnit.TestProject.ExplicitInteger)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<int, global::TUnit.TestProject.ImplicitInteger>(static source => (global::TUnit.TestProject.ImplicitInteger)source);
-        return 0;
-    }
 }

@@ -46,7 +46,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                     {
                         case 2:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (global::System.Type)args[1]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -65,7 +65,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
                     {
                         case 3:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (global::System.Type)args[1], (global::System.Type)args[2]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");

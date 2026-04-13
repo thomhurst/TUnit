@@ -76,7 +76,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.DataSource_Method(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                instance.DataSource_Method((int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -96,7 +96,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 2:
                             {
-                                instance.DataSource_Method(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+                                instance.DataSource_Method((int)args[0], (string)args[1]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -156,7 +156,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.EmptyString(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                                instance.EmptyString((string)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -176,7 +176,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.NonEmptyString(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                                instance.NonEmptyString((string)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -216,7 +216,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.Type(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[0]));
+                                instance.Type((global::System.Type)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -236,7 +236,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.IntegerArray(global::TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]));
+                                instance.IntegerArray((int[])args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -256,7 +256,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                     {
                         case 1:
                             {
-                                instance.IntMaxValue(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                instance.IntMaxValue((int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -523,14 +523,4 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_DataDrivenTests__TestSource = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.DataDrivenTests>(static () => TUnit_TestProject_DataDrivenTests__TestSource.Entries);
-}
-internal static partial class TUnit_TestRegistration
-{
-    static readonly int _aot_TUnit_TestProject_DataDrivenTests__TestSource = RegisterAot_TUnit_TestProject_DataDrivenTests__TestSource();
-    static int RegisterAot_TUnit_TestProject_DataDrivenTests__TestSource()
-    {
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool, bool?>(static source => (bool?)source);
-        global::TUnit.Core.Converters.AotConverterRegistry.Register<bool?, bool>(static source => (bool)source);
-        return 0;
-    }
 }

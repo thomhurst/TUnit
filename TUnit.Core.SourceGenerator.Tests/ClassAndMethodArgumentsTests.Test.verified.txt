@@ -33,7 +33,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
 });
     private static global::TUnit.TestProject.ClassAndMethodArgumentsTests __CreateInstance(global::System.Type[] typeArgs, object?[] args)
     {
-        return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+        return new global::TUnit.TestProject.ClassAndMethodArgumentsTests((string)args[0]);
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke(global::TUnit.TestProject.ClassAndMethodArgumentsTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -58,7 +58,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.WithMethodLevel(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.WithMethodLevel((string)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -77,7 +77,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.IgnoreParameters(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.IgnoreParameters((string)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

@@ -114,10 +114,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 GenerateInheritedTestSources(context, classInfo);
             });
 
-        // AOT converter registrations are emitted inline in generated test source files:
-        // - Non-generic, non-inherited methods: scanned in GroupMethodsByClass (per-class path)
-        // - Generic or inherited methods: scanned in GenerateTestMetadata (per-method path)
-        // AotConverterRegistry.Register uses TryAdd, so any overlap is a harmless no-op.
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
@@ -538,20 +534,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             registrationIndex++;
         }
 
-        // AOT converter registrations — only for generic or inherited tests.
-        // Non-generic, non-inherited methods are covered by the per-class path
-        // in GroupMethodsByClass, which scans all non-generic methods for conversions.
-        // Inherited tests (InheritanceDepth > 0) need their own registration because
-        // the subclass's constructor parameters may require different converters.
-        if (testMethod.IsGenericType || testMethod.IsGenericMethod || testMethod.InheritanceDepth > 0)
-        {
-            var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
-                testMethod.MethodSymbol, testMethod.TypeSymbol, compilation);
-            if (aotRegistrationCode != null)
-            {
-                EmitAotConverterRegistration(writer, uniqueClassName, aotRegistrationCode);
-            }
-        }
     }
 
     /// <summary>
@@ -915,13 +897,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
         {
             // Non-generic (inherited) tests: use InstanceFactoryGenerator for proper required property handling
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol));
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol, testMethod.CompilationContext.Compilation));
         }
         else if (entry.ClassTypeArgs.Length > 0)
         {
             // Generic class with resolved type args: construct the concrete closed type
             var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType));
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, testMethod.CompilationContext.Compilation));
         }
         else
         {
@@ -1006,7 +988,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var parametersFromArgs = testMethod.MethodSymbol.Parameters
                 .Where(p => p.Type.Name != "CancellationToken" || p.Type.ContainingNamespace?.ToString() != "System.Threading")
                 .ToArray();
-            GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+            var sourceTypes = SourceTypeAnalyzer.GetMethodParameterSourceTypes(testMethod.MethodSymbol);
+            var comp = testMethod.CompilationContext.Compilation;
+            GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypes, comp);
         }
     }
 
@@ -2557,23 +2541,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
                 var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
-                GenerateConcreteTestInvoker(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+                var sourceTypes = SourceTypeAnalyzer.GetMethodParameterSourceTypes(testMethod.MethodSymbol);
+                var comp = testMethod.CompilationContext.Compilation;
+                GenerateConcreteTestInvoker(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypes, comp);
             }
         }
     }
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs);
+        GenerateConcreteTestInvokerBody(writer, methodName, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypes, compilation);
         writer.Unindent();
         writer.AppendLine("},");
     }
 
-    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvokerBody(CodeWriter writer, string methodName, TestReturnPattern returnPattern, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs, ITypeSymbol?[]? sourceTypes = null, CSharpCompilation? compilation = null)
     {
         // Wrap entire body in try-catch to handle synchronous exceptions
         writer.AppendLine("try");
@@ -2602,7 +2588,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Build tuple reconstruction with proper casting
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"global::TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])");
+            {
+                var sourceType = CastExpressionHelper.GetSourceTypeAt(sourceTypes, i);
+                return CastExpressionHelper.GenerateCast(sourceType, elem.Type, $"args[{i}]", compilation);
+            });
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = hasCancellationToken
@@ -2615,9 +2604,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
+            var wrappedTupleCast = CastExpressionHelper.GenerateCast(null, singleTupleParam, "args[0]", compilation);
             var methodCallDirect = hasCancellationToken
-                ? $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
-                : $"instance.{methodName}(global::TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
+                ? $"instance.{methodName}({wrappedTupleCast}, cancellationToken)"
+                : $"instance.{methodName}({wrappedTupleCast})";
             GenerateReturnHandling(writer, methodCallDirect, returnPattern);
             writer.Unindent();
             writer.AppendLine("}");
@@ -2662,7 +2652,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Indent();
 
                 // Build the arguments to pass, handling params arrays correctly
-                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
+                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount, sourceTypes, compilation);
 
                 // Add CancellationToken if present
                 if (hasCancellationToken)
@@ -3010,25 +3000,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("}");
     }
 
-    private static void EmitAotConverterRegistration(CodeWriter writer, string fieldName, string registrationCode)
-    {
-        writer.AppendLine();
-        writer.AppendLine("internal static partial class TUnit_TestRegistration");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"static readonly int _aot_{fieldName} = RegisterAot_{fieldName}();");
-        writer.AppendLine($"static int RegisterAot_{fieldName}()");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendRaw(registrationCode);
-        writer.AppendLine();
-        writer.AppendLine("return 0;");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.Unindent();
-        writer.AppendLine("}");
-    }
-
     /// <summary>
     /// Pre-generates the attribute factory body for a test method.
     /// Returns the body (return [...];) without the method signature.
@@ -3060,11 +3031,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var (hasCancellationToken, parametersFromArgs) = ParseInvokerParameters(testMethod.MethodSymbol);
         var returnPattern = GetReturnPattern(testMethod.MethodSymbol);
+        var sourceTypes = SourceTypeAnalyzer.GetMethodParameterSourceTypes(testMethod.MethodSymbol);
+        var compilation = testMethod.CompilationContext.Compilation;
 
         writer.AppendLine($"case {methodIndex}:");
         writer.AppendLine("{");
         writer.Indent();
-        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs);
+        GenerateConcreteTestInvokerBody(writer, testMethod.MethodSymbol.Name, returnPattern, hasCancellationToken, parametersFromArgs, sourceTypes, compilation);
         writer.Unindent();
         writer.AppendLine("}");
 
@@ -3472,22 +3445,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     });
                 }
 
-                // Scan all methods in this class for types with conversion operators
-                var methodSymbols = methodsList.Select(m => m.MethodSymbol).ToList();
-                var aotRegistrationCode = AotConverterHelper.GenerateRegistrationCode(
-                    methodSymbols, typeSymbol, first.CompilationContext.Compilation);
-
                 return new ClassTestGroup
                 {
                     ClassFullyQualified = className,
                     TestSourceName = testSourceName,
                     Methods = methodSourceCodes.ToEquatableArray(),
                     AttributeGroups = distinctBodies.ToEquatableArray(),
-                    InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol),
+                    InstanceFactoryBodyCode = InstanceFactoryGenerator.GenerateInstanceFactoryBody(typeSymbol, first.CompilationContext.Compilation),
                     ReflectionFieldAccessorsCode = PreGenerateReflectionFieldAccessors(typeSymbol),
                     SharedLocalsCode = PreGenerateSharedLocals(typeSymbol, className),
                     SharedFieldsCode = PreGenerateSharedFields(typeSymbol, className),
-                    AotConverterRegistrationCode = aotRegistrationCode,
                 };
             });
     }
@@ -3620,11 +3587,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             EmitRegistrationField(writer, classGroup.TestSourceName,
                 $"global::TUnit.Core.SourceRegistrar.RegisterEntries<{classGroup.ClassFullyQualified}>(static () => {classGroup.TestSourceName}.Entries)");
-
-            if (classGroup.AotConverterRegistrationCode != null)
-            {
-                EmitAotConverterRegistration(writer, classGroup.TestSourceName, classGroup.AotConverterRegistrationCode);
-            }
 
             context.AddSource($"{classGroup.TestSourceName}.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         }
