@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 
-namespace TUnit.AspNetCore.Logging;
+namespace TUnit.Logging.Microsoft;
 
 /// <summary>
 /// A logger provider that creates <see cref="CorrelatedTUnitLogger"/> instances.
 /// Each log call resolves the current test context dynamically via <see cref="TUnit.Core.TestContext.Current"/>,
-/// supporting shared web application scenarios where a single host serves multiple tests.
+/// supporting shared service scenarios where a single host serves multiple tests.
 /// </summary>
 public sealed class CorrelatedTUnitLoggerProvider : ILoggerProvider
 {

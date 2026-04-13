@@ -81,4 +81,41 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
         });
     }
 
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> with <see cref="ActivityPropagationHandler"/> and
+    /// <see cref="TUnitTestIdHandler"/> automatically prepended to the handler chain.
+    /// This ensures all HTTP requests made through clients created by this factory:
+    /// <list type="bullet">
+    ///   <item><description>Propagate W3C <c>traceparent</c> and <c>baggage</c> headers for Activity-based correlation</description></item>
+    ///   <item><description>Propagate the current test's context ID via the <c>X-TUnit-TestId</c> header</description></item>
+    /// </list>
+    /// </summary>
+    public new HttpClient CreateDefaultClient(params DelegatingHandler[] handlers)
+    {
+        var all = new DelegatingHandler[handlers.Length + 2];
+        all[0] = new ActivityPropagationHandler();
+        all[1] = new TUnitTestIdHandler();
+        Array.Copy(handlers, 0, all, 2, handlers.Length);
+        return base.CreateDefaultClient(all);
+    }
+
+    /// <inheritdoc cref="CreateDefaultClient(DelegatingHandler[])"/>
+    public new HttpClient CreateDefaultClient(Uri baseAddress, params DelegatingHandler[] handlers)
+    {
+        var client = CreateDefaultClient(handlers);
+        client.BaseAddress = baseAddress;
+        return client;
+    }
+
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> with automatic Activity tracing and test context propagation.
+    /// Equivalent to calling <see cref="CreateDefaultClient(DelegatingHandler[])"/> with no additional handlers.
+    /// </summary>
+    public new HttpClient CreateClient()
+    {
+        var client = CreateDefaultClient();
+        ConfigureClient(client);
+        return client;
+    }
+
 }

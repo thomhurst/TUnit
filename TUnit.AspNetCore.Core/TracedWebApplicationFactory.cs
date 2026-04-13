@@ -62,11 +62,9 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
     /// </summary>
     public HttpClient CreateDefaultClient(Uri baseAddress, params DelegatingHandler[] handlers)
     {
-        var all = new DelegatingHandler[handlers.Length + 2];
-        all[0] = new ActivityPropagationHandler();
-        all[1] = new TUnitTestIdHandler();
-        Array.Copy(handlers, 0, all, 2, handlers.Length);
-        return _inner.CreateDefaultClient(baseAddress, all);
+        var client = CreateDefaultClient(handlers);
+        client.BaseAddress = baseAddress;
+        return client;
     }
 
     /// <summary>

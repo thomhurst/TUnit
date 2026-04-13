@@ -2,11 +2,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TUnit.Logging.Microsoft;
 
 namespace TUnit.AspNetCore.Logging;
 
 /// <summary>
-/// Extension methods for adding correlated TUnit logging to a shared web application.
+/// Extension methods for adding correlated TUnit logging to a shared ASP.NET Core web application.
+/// Registers both the <see cref="CorrelatedTUnitLoggerProvider"/> (from <c>TUnit.Logging.Microsoft</c>)
+/// and the <see cref="TUnitTestContextMiddleware"/> for robust test context resolution via
+/// both Activity baggage and the <c>X-TUnit-TestId</c> HTTP header.
 /// </summary>
 public static class CorrelatedTUnitLoggingExtensions
 {
