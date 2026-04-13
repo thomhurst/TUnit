@@ -18,7 +18,7 @@ public class CorrelatedLoggingResolverTests
     public async Task InheritedAsyncLocal_ServerLog_CorrelatedToCorrectTest()
     {
         var marker = Guid.NewGuid().ToString("N");
-        using var client = Factory.CreateClientWithTestContext();
+        using var client = Factory.CreateClient();
 
         var response = await client.GetAsync($"/log/{marker}");
 
@@ -33,7 +33,7 @@ public class CorrelatedLoggingResolverTests
     {
         var marker1 = $"first_{Guid.NewGuid():N}";
         var marker2 = $"second_{Guid.NewGuid():N}";
-        using var client = Factory.CreateClientWithTestContext();
+        using var client = Factory.CreateClient();
 
         await client.GetAsync($"/log/{marker1}");
         await client.GetAsync($"/log/{marker2}");

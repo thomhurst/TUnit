@@ -14,6 +14,8 @@ public class TUnitTestIdHandler : DelegatingHandler
     /// </summary>
     public const string HeaderName = "X-TUnit-TestId";
 
+    private readonly TestContext? _testContext = TestContext.Current;
+
     /// <summary>
     /// Creates a new <see cref="TUnitTestIdHandler"/>.
     /// When used with <see cref="Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory{TEntryPoint}.CreateDefaultClient(DelegatingHandler[])"/>,
@@ -36,7 +38,7 @@ public class TUnitTestIdHandler : DelegatingHandler
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (TestContext.Current is { } ctx)
+        if ((_testContext ?? TestContext.Current) is { } ctx)
         {
             request.Headers.TryAddWithoutValidation(HeaderName, ctx.Id);
         }

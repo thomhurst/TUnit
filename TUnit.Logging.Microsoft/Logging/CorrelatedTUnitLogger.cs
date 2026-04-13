@@ -1,19 +1,19 @@
 using Microsoft.Extensions.Logging;
 using TUnit.Core;
-using TUnit.Logging.Microsoft;
 
-namespace TUnit.AspNetCore.Logging;
+namespace TUnit.Logging.Microsoft;
 
 /// <summary>
-/// A logger that resolves the current test context per log call, supporting shared web application scenarios.
+/// A logger that resolves the current test context per log call, supporting shared service scenarios.
 /// Writes via <see cref="Console"/> synchronously on the calling thread so TUnit's console interceptor
-/// can route the output to the correct test via <see cref="TestContext.Current"/> (set by
-/// <see cref="TUnitTestContextMiddleware"/> calling <see cref="TestContext.MakeCurrent"/>).
+/// can route the output to the correct test via <see cref="TestContext.Current"/>.
 /// </summary>
 /// <remarks>
-/// This logger is necessary because ASP.NET Core's built-in <c>ConsoleLogger</c> writes from a background
-/// queue thread that does not inherit the <c>AsyncLocal</c> set by <see cref="TestContext.MakeCurrent"/>.
-/// By writing synchronously on the request thread, the output is attributed to the correct test.
+/// This logger is necessary because ASP.NET Core's built-in <c>ConsoleLogger</c> (and similar background
+/// queue loggers) write from a thread that does not inherit the <c>AsyncLocal</c> set by
+/// <see cref="TestContext.MakeCurrent"/>. By writing synchronously on the calling thread, the output
+/// is attributed to the correct test — either via <c>AsyncLocal</c> or via
+/// <see cref="System.Diagnostics.Activity"/> baggage fallback.
 /// </remarks>
 public sealed class CorrelatedTUnitLogger : ILogger
 {

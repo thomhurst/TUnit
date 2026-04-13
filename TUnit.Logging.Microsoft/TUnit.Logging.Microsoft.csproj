@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="TUnit.AspNetCore.Core" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>
 

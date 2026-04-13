@@ -19,7 +19,7 @@ public class MinimalApiAutoRegistrationTests
     public async Task ServerLog_AutoCorrelated_OnMinimalApiHost_WithoutSubclassConfig()
     {
         var marker = Guid.NewGuid().ToString("N");
-        using var client = Factory.CreateClientWithTestContext();
+        using var client = Factory.CreateClient();
 
         var response = await client.GetAsync($"/log/{marker}");
 
