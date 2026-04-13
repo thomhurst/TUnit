@@ -140,6 +140,16 @@ internal class TestExecutor
 
                 // Same key as the span tag above — set as baggage for cross-boundary propagation via W3C headers
                 executableTest.Context.Activity?.SetBaggage(TUnitActivitySource.TagTestId, executableTest.Context.Id);
+
+                // Auto-register the test's TraceId so cross-process OTLP correlation can
+                // map incoming telemetry (which carries TraceId) back to this test.
+                if (executableTest.Context.Activity is { } testActivity)
+                {
+                    TraceRegistry.Register(
+                        testActivity.TraceId.ToString(),
+                        testDetails.TestId,
+                        executableTest.Context.Id);
+                }
             }
 #endif
 
