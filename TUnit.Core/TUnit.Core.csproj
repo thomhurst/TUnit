@@ -8,6 +8,7 @@
         <InternalsVisibleTo Include="TUnit.AspNetCore.Core" />
         <InternalsVisibleTo Include="TUnit.Logging.Microsoft" />
         <InternalsVisibleTo Include="TUnit.Aspire" />
+        <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
     </ItemGroup>
 
     <ItemGroup>

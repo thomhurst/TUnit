@@ -6,6 +6,10 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
+  </ItemGroup>
+
   <!-- Aspire is server-side only — remove browser platform support from Library.props -->
   <ItemGroup>
     <SupportedPlatform Remove="browser" />
