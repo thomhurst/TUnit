@@ -53,10 +53,15 @@ internal static class CastExpressionHelper
         var targetGQ = targetType.GloballyQualified();
         var arms = new List<string>();
 
+        // Sort source types so that derived types come before their base types.
+        // Without this, a base type pattern arm would catch derived instances first,
+        // causing CS8510 "unreachable pattern" errors.
+        var sorted = SortMostDerivedFirst(sourceTypes);
+
         // In switch arms the pattern match performs the unbox, so only a single cast
         // to the target type is needed (unlike GenerateCast which needs a double-cast
         // (TargetType)(SourceType)expr to first unbox then convert).
-        foreach (var sourceType in sourceTypes)
+        foreach (var sourceType in sorted)
         {
             var sourceGQ = sourceType.GloballyQualified();
 
@@ -78,6 +83,50 @@ internal static class CastExpressionHelper
         arms.Add($"_ => ({targetGQ}){argsExpression}");
 
         return $"({argsExpression} switch {{ {string.Join(", ", arms)} }})";
+    }
+
+    private static List<ITypeSymbol> SortMostDerivedFirst(IReadOnlyList<ITypeSymbol> types)
+    {
+        var result = new List<ITypeSymbol>(types);
+
+        result.Sort((a, b) =>
+        {
+            if (SymbolEqualityComparer.Default.Equals(a, b))
+            {
+                return 0;
+            }
+
+            if (IsBaseTypeOf(a, b))
+            {
+                return 1;
+            }
+
+            if (IsBaseTypeOf(b, a))
+            {
+                return -1;
+            }
+
+            return 0;
+        });
+
+        return result;
+    }
+
+    private static bool IsBaseTypeOf(ITypeSymbol potentialBase, ITypeSymbol derived)
+    {
+        var current = derived.BaseType;
+
+        while (current != null)
+        {
+            if (SymbolEqualityComparer.Default.Equals(current, potentialBase))
+            {
+                return true;
+            }
+
+            current = current.BaseType;
+        }
+
+        return false;
     }
 
     /// <summary>
