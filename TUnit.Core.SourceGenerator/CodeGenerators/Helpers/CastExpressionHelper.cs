@@ -37,6 +37,12 @@ internal static class CastExpressionHelper
         // Check if compiler can resolve conversion
         var conversion = compilation.ClassifyConversion(sourceType, targetType);
 
+        // Boxing: args[i] is already object — no cast needed
+        if (conversion.IsBoxing)
+        {
+            return argsExpression;
+        }
+
         if (conversion.IsImplicit || conversion.IsExplicit)
         {
             var sourceGQ = sourceType.GloballyQualified();

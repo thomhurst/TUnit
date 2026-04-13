@@ -220,6 +220,7 @@ internal static class SourceTypeAnalyzer
 
     private static bool IsArgumentsAttribute(AttributeData attr)
     {
-        return attr.AttributeClass?.Name is "ArgumentsAttribute";
+        return attr.AttributeClass?.Name is "ArgumentsAttribute"
+            && attr.AttributeClass.ContainingNamespace?.ToString() == "TUnit.Core";
     }
 }
