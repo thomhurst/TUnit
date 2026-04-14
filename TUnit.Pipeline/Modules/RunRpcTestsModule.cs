@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using ModularPipelines.Attributes;
+﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
@@ -13,7 +12,9 @@ namespace TUnit.Pipeline.Modules;
 public class RunRpcTestsModule : TestBaseModule
 {
     protected override IEnumerable<string> TestableFrameworks =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? [] : ["net8.0"];
+    [
+        "net8.0"
+    ];
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
