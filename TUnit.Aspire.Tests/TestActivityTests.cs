@@ -58,11 +58,11 @@ public class TestActivityTests
     {
         var testCase = Activity.Current!.Parent!;
 
-        var testCaseName = testCase.GetTagItem("test.case.name")?.ToString();
-        var testClass = testCase.GetTagItem("tunit.test.class")?.ToString();
-        var testMethod = testCase.GetTagItem("tunit.test.method")?.ToString();
-        var testId = testCase.GetTagItem("tunit.test.id")?.ToString();
-        var testNodeUid = testCase.GetTagItem("tunit.test.node_uid")?.ToString();
+        var testCaseName = testCase.GetTagItem(TUnitActivitySource.TagTestCaseName)?.ToString();
+        var testClass = testCase.GetTagItem(TUnitActivitySource.TagTestClass)?.ToString();
+        var testMethod = testCase.GetTagItem(TUnitActivitySource.TagTestMethod)?.ToString();
+        var testId = testCase.GetTagItem(TUnitActivitySource.TagTestId)?.ToString();
+        var testNodeUid = testCase.GetTagItem(TUnitActivitySource.TagTestNodeUid)?.ToString();
 
         await Assert.That(testCaseName).IsNotNull();
         await Assert.That(testClass).Contains(nameof(TestActivityTests));

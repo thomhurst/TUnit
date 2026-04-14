@@ -183,7 +183,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         finally
         {
 #if NET
-            discoveryActivity?.SetTag("tunit.test.count", allTests.Count);
+            discoveryActivity?.SetTag(TUnitActivitySource.TagTestCount, allTests.Count);
             TUnitActivitySource.StopActivity(discoveryActivity);
 #endif
         }

@@ -99,7 +99,7 @@ public class BaggagePropagationHandlerTests
         // Detach from engine activity to control baggage precisely
         Activity.Current = null;
         using var activity = new Activity("test-inject-baggage").Start();
-        activity.SetBaggage("tunit.test.id", "my-test-context-id");
+        activity.SetBaggage(TUnitActivitySource.TagTestId, "my-test-context-id");
         activity.SetBaggage("custom.key", "custom-value");
 
         var captured = new CaptureHandler();
@@ -111,7 +111,7 @@ public class BaggagePropagationHandlerTests
         await Assert.That(captured.LastRequest!.Headers.Contains("baggage")).IsTrue();
 
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
-        await Assert.That(baggageHeader).Contains("tunit.test.id");
+        await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
         await Assert.That(baggageHeader).Contains("my-test-context-id");
         await Assert.That(baggageHeader).Contains("custom.key");
         await Assert.That(baggageHeader).Contains("custom-value");

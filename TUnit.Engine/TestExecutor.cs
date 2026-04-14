@@ -136,12 +136,12 @@ internal class TestExecutor
                     ActivityKind.Internal,
                     classActivity?.Context ?? default,
                     [
-                        new("test.case.name", testDetails.TestName),
-                        new("tunit.test.class", testDetails.ClassType.FullName),
-                        new("tunit.test.method", testDetails.MethodName),
-                        new("tunit.test.id", executableTest.Context.Id),
-                        new("tunit.test.node_uid", testDetails.TestId),
-                        new("tunit.test.categories", testDetails.Categories.ToArray())
+                        new(TUnitActivitySource.TagTestCaseName, testDetails.TestName),
+                        new(TUnitActivitySource.TagTestClass, testDetails.ClassType.FullName),
+                        new(TUnitActivitySource.TagTestMethod, testDetails.MethodName),
+                        new(TUnitActivitySource.TagTestId, executableTest.Context.Id),
+                        new(TUnitActivitySource.TagTestNodeUid, testDetails.TestId),
+                        new(TUnitActivitySource.TagTestCategories, testDetails.Categories.ToArray())
                     ]);
 
                 // Same key as the span tag above — set as baggage for cross-boundary propagation via W3C headers
@@ -314,17 +314,17 @@ internal class TestExecutor
             TestState.Skipped => "skipped",
             _ => "unknown"
         };
-        activity.SetTag("test.case.result.status", statusValue);
+        activity.SetTag(TUnitActivitySource.TagTestCaseResultStatus, statusValue);
 
         if (executableTest.Context.CurrentRetryAttempt > 0)
         {
-            activity.SetTag("tunit.test.retry_attempt", executableTest.Context.CurrentRetryAttempt);
+            activity.SetTag(TUnitActivitySource.TagTestRetryAttempt, executableTest.Context.CurrentRetryAttempt);
         }
 
         if (capturedException is SkipTestException skipEx)
         {
             // Skipped tests are not errors — leave status as Unset
-            activity.SetTag("tunit.test.skip_reason", skipEx.Reason);
+            activity.SetTag(TUnitActivitySource.TagTestSkipReason, skipEx.Reason);
         }
         else if (capturedException is not null)
         {

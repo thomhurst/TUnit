@@ -27,6 +27,16 @@ public static class TUnitActivitySource
     /// </summary>
     public const string TagTestId = "tunit.test.id";
     internal const string TagTestClass = "tunit.test.class";
+    internal const string TagTestMethod = "tunit.test.method";
+    internal const string TagTestNodeUid = "tunit.test.node_uid";
+    internal const string TagTestCategories = "tunit.test.categories";
+    internal const string TagTestCount = "tunit.test.count";
+    internal const string TagTestCaseName = "test.case.name";
+    internal const string TagTestSuiteName = "test.suite.name";
+    internal const string TagAssemblyName = "tunit.assembly.name";
+    internal const string TagTestCaseResultStatus = "test.case.result.status";
+    internal const string TagTestRetryAttempt = "tunit.test.retry_attempt";
+    internal const string TagTestSkipReason = "tunit.test.skip_reason";
     internal const string TagTraceScope = "tunit.trace.scope";
 
     /// <summary>
