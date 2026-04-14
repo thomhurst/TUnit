@@ -35,11 +35,17 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly string? _upstreamEndpoint;
     private Task? _listenTask;
     private int _taskIdCounter;
+    private int _requestCount;
 
     /// <summary>
     /// The port the receiver is listening on.
     /// </summary>
     public int Port { get; }
+
+    /// <summary>
+    /// The number of POST requests successfully processed.
+    /// </summary>
+    internal int RequestCount => _requestCount;
 
     /// <summary>
     /// Creates a new OTLP receiver.
@@ -89,6 +95,11 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             TrackTask(Task.Run(() => ProcessRequestAsync(context)));
         }
     }
+
+    /// <summary>
+    /// Returns a task that completes when all in-flight request processing has finished.
+    /// </summary>
+    internal Task WhenIdle() => Task.WhenAll(_inflightTasks.Values);
 
     private void TrackTask(Task task)
     {
@@ -160,6 +171,8 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             {
                 TrackTask(ForwardAsync(path, body, request.ContentType));
             }
+
+            Interlocked.Increment(ref _requestCount);
 
             // Return 200 OK with empty protobuf response
             response.StatusCode = 200;

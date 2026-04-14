@@ -150,9 +150,8 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
+        await receiver.WhenIdle();
 
-        // No matching trace ID — give a short window then verify nothing appeared
-        await Task.Delay(200);
         var output = testContext.GetStandardOutput();
         await Assert.That(output).DoesNotContain("This should not appear in test output");
     }
@@ -280,11 +279,12 @@ public class OtlpReceiverTests
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
-        // Allow forwarding to complete
-        await Task.Delay(500);
+        // Wait for the main receiver to finish processing (including forwarding dispatch)
+        await receiver.WhenIdle();
+        // Wait for the upstream to finish processing the forwarded request
+        await upstream.WhenIdle();
 
-        // We can't easily check the upstream received it without more infrastructure,
-        // but we verify the main receiver doesn't fail when forwarding is configured.
+        await Assert.That(upstream.RequestCount).IsEqualTo(1);
     }
 
     [Test]

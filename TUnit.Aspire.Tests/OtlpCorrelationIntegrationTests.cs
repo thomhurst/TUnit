@@ -164,9 +164,13 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             response.Dispose();
         }
 
-        // All logs from this burst must appear in this test's output
-        var output = await PollForOutput(markers.Last());
+        // Poll for each marker individually — concurrent requests may arrive in any order
+        foreach (var marker in markers)
+        {
+            await PollForOutput(marker);
+        }
 
+        var output = TestContext.Current!.GetStandardOutput();
         foreach (var marker in markers)
         {
             await Assert.That(output).Contains(marker);

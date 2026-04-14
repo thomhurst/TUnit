@@ -178,7 +178,10 @@ internal class TestExecutor
                 // becomes a natural child (with Activity.Parent set). This enables
                 // baggage traversal from the test body to the test case — required for
                 // cross-process correlation via Activity.GetBaggageItem("tunit.test.id").
-                Activity.Current = executableTest.Context.Activity;
+                if (executableTest.Context.Activity is { } testCaseActivity)
+                {
+                    Activity.Current = testCaseActivity;
+                }
 
                 testBodyActivity = TUnitActivitySource.StartActivity(
                     TUnitActivitySource.SpanTestBody);
