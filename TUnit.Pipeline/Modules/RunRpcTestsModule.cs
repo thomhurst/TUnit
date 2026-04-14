@@ -12,8 +12,8 @@ namespace TUnit.Pipeline.Modules;
 [NotInParallel("NetworkTests")]
 public class RunRpcTestsModule : TestBaseModule
 {
-    protected override IEnumerable<string> TestableFrameworks =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? [] : ["net8.0"];
+    // Skipped globally — see https://github.com/thomhurst/TUnit/issues/5540
+    protected override IEnumerable<string> TestableFrameworks => [];
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
