@@ -21,8 +21,6 @@ concurrency:
 jobs:
   modularpipeline:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    env:
-      NUGET_PACKAGES: ~/.nuget/packages
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -91,7 +89,7 @@ jobs:
         continue-on-error: true
         with:
           path: |
-            ${{ env.NUGET_PACKAGES }}
+            ${{ env.NUGET_PACKAGES || '~/.nuget/packages' }}
             ~/.local/share/NuGet
             %LocalAppData%\NuGet\v3-cache
           key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
