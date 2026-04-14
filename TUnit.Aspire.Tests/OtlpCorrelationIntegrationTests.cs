@@ -19,11 +19,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     private const string ServiceName = "api-service";
     private const int ConcurrentInstanceCount = 10;
 
-    // Each test needs its own TraceId for correlation. The engine creates test
-    // activities as children of the class activity (shared TraceId), so we create
-    // a dedicated root activity per test to get a unique TraceId for HTTP requests.
-    private static readonly ActivitySource TestActivitySource = new("TUnit.Aspire.IntegrationTests");
-
     /// <summary>
     /// Verifies the core end-to-end flow: a test makes an HTTP request to a real
     /// Aspire-hosted API service, the service logs a message, and that log is
@@ -34,7 +29,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     {
         var marker = $"integration-marker-{Guid.NewGuid():N}";
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
         using var response = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
@@ -53,7 +47,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     {
         var marker = $"svc-prefix-{Guid.NewGuid():N}";
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
         using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
@@ -70,7 +63,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     {
         var marker = $"severity-{Guid.NewGuid():N}";
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
         using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
@@ -91,7 +83,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var warnMarker = $"warn-level-{Guid.NewGuid():N}";
         var errorMarker = $"error-level-{Guid.NewGuid():N}";
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
         using var _ = await client.GetAsync($"/log-level?message={Uri.EscapeDataString(warnMarker)}&level=Warning");
         using var __ = await client.GetAsync($"/log-level?message={Uri.EscapeDataString(errorMarker)}&level=Error");
@@ -125,7 +116,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .Select(i => $"concurrent-{instanceId}-req{i}-{Guid.NewGuid():N}")
             .ToList();
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
 
         foreach (var marker in markers)
@@ -163,7 +153,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .Select(i => $"burst-{i}-{Guid.NewGuid():N}")
             .ToList();
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
 
         // Fire all requests concurrently and dispose responses
@@ -195,7 +184,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .Select(i => $"multi-req-{i}-{Guid.NewGuid():N}")
             .ToList();
 
-        using var activity = StartCorrelatedActivity();
         var client = fixture.CreateHttpClient(ServiceName);
 
         foreach (var marker in markers)
@@ -225,42 +213,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var traceId = activity.TraceId.ToString();
         var isRegistered = TraceRegistry.IsRegistered(traceId);
         await Assert.That(isRegistered).IsTrue();
-    }
-
-    /// <summary>
-    /// Creates a new root <see cref="Activity"/> with a unique TraceId, registers it
-    /// in the <see cref="TraceRegistry"/>, and sets it as <see cref="Activity.Current"/>
-    /// so the <see cref="TUnitBaggagePropagationHandler"/> propagates it to the SUT.
-    /// </summary>
-    /// <remarks>
-    /// This is necessary because the TUnit engine creates test activities as children of
-    /// the class activity, meaning all tests in a class share the same TraceId. For OTLP
-    /// correlation to work correctly, each test needs a unique TraceId for its HTTP requests.
-    /// </remarks>
-    private Activity StartCorrelatedActivity()
-    {
-        var testContext = TestContext.Current!;
-
-        // Clear Activity.Current so the new activity does NOT inherit the class
-        // activity's TraceId. This is async-local so it only affects this test's context.
-        Activity.Current = null;
-
-        var activity = TestActivitySource.StartActivity(
-            "integration-test-request",
-            ActivityKind.Client)
-            ?? throw new InvalidOperationException(
-                "StartActivity returned null — no ActivityListener is registered. " +
-                "Ensure the TUnit engine is creating test activities.");
-
-        activity.SetBaggage(TUnitActivitySource.TagTestId, testContext.Id);
-
-        // Register this new TraceId so the OTLP receiver can correlate logs back to this test
-        TraceRegistry.Register(
-            activity.TraceId.ToString(),
-            testContext.TestDetails.TestId,
-            testContext.Id);
-
-        return activity;
     }
 
     /// <summary>

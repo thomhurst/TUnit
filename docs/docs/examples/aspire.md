@@ -359,30 +359,6 @@ When disabled, `CreateHttpClient` delegates directly to Aspire's default impleme
 
 ### Limitations
 
-- **Shared TraceId within a test class**: TUnit creates test activities as children of the class activity, so all tests in a class share the same TraceId by default. This means logs from one test's request may appear in another test's output within the same class. If you need per-test isolation (e.g., for concurrent tests), create a dedicated root activity per test:
-
-    ```csharp
-    private static readonly ActivitySource TestSource = new("MyTests");
-
-    private Activity StartIsolatedActivity()
-    {
-        var ctx = TestContext.Current!;
-        Activity.Current = null; // Detach from class activity
-        var activity = TestSource.StartActivity("test-request", ActivityKind.Client)!;
-        activity.SetBaggage(TUnitActivitySource.TagTestId, ctx.Id);
-        TraceRegistry.Register(activity.TraceId.ToString(), ctx.TestDetails.TestId, ctx.Id);
-        return activity;
-    }
-
-    [Test]
-    public async Task My_Test()
-    {
-        using var activity = StartIsolatedActivity();
-        var client = fixture.CreateHttpClient("apiservice");
-        // Logs from this request will only appear in THIS test's output
-    }
-    ```
-
 - **Startup logs**: Logs emitted during app startup have no active trace context and cannot be correlated to a test. Use `WatchResourceLogs` for these.
 - **Non-HTTP triggers**: Background jobs, timers, and message queue consumers that generate logs without an incoming HTTP request won't carry the test's TraceId.
 - **Container resources**: Infrastructure resources like Redis and PostgreSQL don't have an OpenTelemetry SDK and can't export OTLP. Use `WatchResourceLogs` for their logs.

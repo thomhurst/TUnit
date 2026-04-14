@@ -1,67 +1,63 @@
 using System.Diagnostics;
+using TUnit.Core;
 
 namespace TUnit.Aspire.Http;
 
 /// <summary>
-/// DelegatingHandler that propagates <c>traceparent</c>, <c>tracestate</c>, and
-/// <c>baggage</c> W3C headers from <see cref="Activity.Current"/> onto outgoing
-/// HTTP requests. .NET's <c>DiagnosticsHandler</c> (which injects <c>traceparent</c>)
-/// is only present in the <see cref="HttpClient"/> pipeline when using
-/// <c>IHttpClientFactory</c> — it is NOT wired in when constructing
-/// <c>new HttpClient(handler)</c> directly. This handler fills that gap so that both
-/// trace context and <c>tunit.test.id</c> baggage reach the SUT process.
+/// DelegatingHandler that injects W3C <c>traceparent</c> and <c>baggage</c> headers
+/// into outgoing HTTP requests for cross-process OTLP correlation. Each request gets
+/// a unique TraceId so the SUT's logs can be routed back to the specific test, even
+/// when the engine's test activities share a class-level TraceId.
 /// </summary>
 internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (Activity.Current is { } activity)
+        // Generate a unique TraceId per request. The engine creates test activities
+        // as children of the class activity, so all tests in a class share the same
+        // TraceId. Using a fresh TraceId here ensures the OTLP receiver can map each
+        // request's logs back to the originating test, not just the class.
+        var traceId = ActivityTraceId.CreateRandom();
+        var spanId = ActivitySpanId.CreateRandom();
+        request.Headers.TryAddWithoutValidation("traceparent", $"00-{traceId}-{spanId}-01");
+
+        // Register the unique TraceId so the OTLP receiver can correlate logs
+        if (TestContext.Current is { } testContext)
         {
-            // Inject traceparent and tracestate via the default propagator.
-            // This is necessary because DiagnosticsHandler is not in the pipeline
-            // when HttpClient is constructed with an explicit handler.
-            DistributedContextPropagator.Current.Inject(
-                activity,
-                request,
-                static (carrier, key, value) =>
-                {
-                    if (carrier is HttpRequestMessage req)
-                    {
-                        req.Headers.TryAddWithoutValidation(key, value);
-                    }
-                });
+            TraceRegistry.Register(
+                traceId.ToString(),
+                testContext.TestDetails.TestId,
+                testContext.Id);
+        }
 
-            // Inject baggage header if the propagator hasn't already done so.
-            // When OTel SDK is configured with BaggagePropagator, the Inject call
-            // above may have already added a baggage header — avoid duplicates.
-            if (!request.Headers.Contains("baggage"))
+        // Propagate baggage (including tunit.test.id) from the current activity
+        if (Activity.Current is { } activity && !request.Headers.Contains("baggage"))
+        {
+            var first = true;
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var (key, value) in activity.Baggage)
             {
-                var first = true;
-                var sb = new System.Text.StringBuilder();
-
-                foreach (var (key, value) in activity.Baggage)
+                if (key is null)
                 {
-                    if (key is null)
-                    {
-                        continue;
-                    }
-
-                    if (!first)
-                    {
-                        sb.Append(',');
-                    }
-
-                    sb.Append(Uri.EscapeDataString(key));
-                    sb.Append('=');
-                    sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-                    first = false;
+                    continue;
                 }
 
                 if (!first)
                 {
-                    request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
+                    sb.Append(',');
                 }
+
+                sb.Append(Uri.EscapeDataString(key));
+                sb.Append('=');
+                sb.Append(Uri.EscapeDataString(value ?? string.Empty));
+                first = false;
+            }
+
+            if (!first)
+            {
+                request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
             }
         }
 
