@@ -62,10 +62,9 @@ public static class TUnitActivitySource
         string name,
         ActivityKind kind = ActivityKind.Internal,
         ActivityContext parentContext = default,
-        IEnumerable<KeyValuePair<string, object?>>? tags = null,
-        IEnumerable<ActivityLink>? links = null)
+        IEnumerable<KeyValuePair<string, object?>>? tags = null)
     {
-        return Source.StartActivity(name, kind, parentContext, tags, links);
+        return Source.StartActivity(name, kind, parentContext, tags);
     }
 
     /// <summary>

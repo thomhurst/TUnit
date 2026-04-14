@@ -122,23 +122,19 @@ internal class TestExecutor
             // (PerSession/PerAssembly/PerClass) are parented under their respective
             // scope activities via explicit parentContext in ObjectLifecycleService.
             //
-            // Each test gets its own TraceId (root activity) so that HTTP requests
-            // to distributed SUTs carry a unique, per-test TraceId for OTLP log
-            // correlation. An ActivityLink back to the class activity preserves the
-            // logical hierarchy without sharing the class's TraceId.
+            // Test activities are children of the class activity (parent-child, shared
+            // TraceId). This produces proper waterfall visualisation in trace backends:
+            // Session → Assembly → Class → Test₁, Test₂, ...
+            // Per-request OTLP correlation uses unique TraceIds generated at the HTTP
+            // handler layer, not the engine — see TUnitBaggagePropagationHandler.
             if (TUnitActivitySource.Source.HasListeners())
             {
                 var classActivity = executableTest.Context.ClassContext.Activity;
                 var testDetails = executableTest.Context.Metadata.TestDetails;
-
-                ActivityLink[]? links = classActivity is not null
-                    ? [new ActivityLink(classActivity.Context)]
-                    : null;
-
                 executableTest.Context.Activity = TUnitActivitySource.StartActivity(
                     TUnitActivitySource.SpanTestCase,
                     ActivityKind.Internal,
-                    parentContext: default,
+                    classActivity?.Context ?? default,
                     [
                         new("test.case.name", testDetails.TestName),
                         new("tunit.test.class", testDetails.ClassType.FullName),
@@ -146,21 +142,10 @@ internal class TestExecutor
                         new("tunit.test.id", executableTest.Context.Id),
                         new("tunit.test.node_uid", testDetails.TestId),
                         new("tunit.test.categories", testDetails.Categories.ToArray())
-                    ],
-                    links);
+                    ]);
 
                 // Same key as the span tag above — set as baggage for cross-boundary propagation via W3C headers
                 executableTest.Context.Activity?.SetBaggage(TUnitActivitySource.TagTestId, executableTest.Context.Id);
-
-                // Register the test's unique TraceId so cross-process OTLP correlation
-                // can map incoming telemetry back to this test.
-                if (executableTest.Context.Activity is { } testActivity)
-                {
-                    TraceRegistry.Register(
-                        testActivity.TraceId.ToString(),
-                        testDetails.TestId,
-                        executableTest.Context.Id);
-                }
             }
 #endif
 

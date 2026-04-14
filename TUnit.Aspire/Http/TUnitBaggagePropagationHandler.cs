@@ -1,65 +1,71 @@
 using System.Diagnostics;
+using TUnit.Core;
 
 namespace TUnit.Aspire.Http;
 
 /// <summary>
-/// DelegatingHandler that propagates W3C <c>traceparent</c> and <c>baggage</c> headers
-/// from <see cref="Activity.Current"/> onto outgoing HTTP requests. The TUnit engine gives
-/// each test its own unique TraceId, so propagating the current activity's context is
-/// sufficient for per-test OTLP log correlation.
+/// DelegatingHandler that injects W3C <c>traceparent</c> and <c>baggage</c> headers
+/// into outgoing HTTP requests for cross-process OTLP correlation. Each request gets
+/// a unique TraceId so the SUT's logs can be routed back to the specific test, even
+/// though all tests in a class share the class activity's TraceId.
 /// </summary>
 /// <remarks>
-/// .NET's built-in <c>DiagnosticsHandler</c> (which injects <c>traceparent</c>) is only
-/// present in the <see cref="HttpClient"/> pipeline when using <c>IHttpClientFactory</c>.
-/// This handler fills that gap for <c>new HttpClient(handler)</c> scenarios.
+/// The engine keeps test activities as children of the class activity (parent-child,
+/// shared TraceId) so trace backends display proper waterfalls:
+/// Session → Assembly → Class → Test₁, Test₂, ...
+/// This handler generates a fresh TraceId per outbound request and registers it in
+/// <see cref="TraceRegistry"/> so the OTLP receiver can correlate SUT logs back to
+/// the originating test.
 /// </remarks>
 internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (Activity.Current is { } activity)
+        // Generate a unique TraceId per request so the OTLP receiver can map each
+        // request's logs back to the originating test. The engine's test activities
+        // share the class-level TraceId (for proper trace-backend waterfall display),
+        // so we need a distinct TraceId here for per-test correlation.
+        var traceId = ActivityTraceId.CreateRandom();
+        var spanId = ActivitySpanId.CreateRandom();
+        request.Headers.TryAddWithoutValidation("traceparent", $"00-{traceId}-{spanId}-01");
+
+        // Register the unique TraceId so the OTLP receiver can correlate logs
+        if (TestContext.Current is { } testContext)
         {
-            // Inject traceparent and tracestate via the default propagator.
-            DistributedContextPropagator.Current.Inject(
-                activity,
-                request,
-                static (carrier, key, value) =>
-                {
-                    if (carrier is HttpRequestMessage req)
-                    {
-                        req.Headers.TryAddWithoutValidation(key, value);
-                    }
-                });
+            TraceRegistry.Register(
+                traceId.ToString(),
+                testContext.TestDetails.TestId,
+                testContext.Id);
+        }
 
-            // Inject baggage if the propagator hasn't already done so.
-            if (!request.Headers.Contains("baggage"))
+        // Propagate baggage (including tunit.test.id) from the current activity
+        if (Activity.Current is { } activity && !request.Headers.Contains("baggage"))
+        {
+            var first = true;
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var (key, value) in activity.Baggage)
             {
-                var first = true;
-                var sb = new System.Text.StringBuilder();
-
-                foreach (var (key, value) in activity.Baggage)
+                if (key is null)
                 {
-                    if (key is null)
-                    {
-                        continue;
-                    }
-
-                    if (!first)
-                    {
-                        sb.Append(',');
-                    }
-
-                    sb.Append(Uri.EscapeDataString(key));
-                    sb.Append('=');
-                    sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-                    first = false;
+                    continue;
                 }
 
                 if (!first)
                 {
-                    request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
+                    sb.Append(',');
                 }
+
+                sb.Append(Uri.EscapeDataString(key));
+                sb.Append('=');
+                sb.Append(Uri.EscapeDataString(value ?? string.Empty));
+                first = false;
+            }
+
+            if (!first)
+            {
+                request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
             }
         }
 

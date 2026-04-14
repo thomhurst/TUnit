@@ -6,9 +6,9 @@ using TUnit.Core;
 namespace TUnit.Aspire.Tests;
 
 /// <summary>
-/// Tests that verify the TUnit engine creates per-test activities correctly:
-/// each test gets a unique TraceId (root activity), an ActivityLink back to
-/// the class activity, registered baggage, and TraceRegistry entries.
+/// Tests that verify the TUnit engine creates test activities correctly:
+/// parent-child hierarchy (test → class → assembly → session), proper tags,
+/// baggage for cross-boundary propagation, and TraceId shared within a class.
 /// </summary>
 public class TestActivityTests
 {
@@ -16,15 +16,6 @@ public class TestActivityTests
     public async Task ActivityCurrent_IsNotNull_DuringTestExecution()
     {
         await Assert.That(Activity.Current).IsNotNull();
-    }
-
-    [Test]
-    public async Task ActivityCurrent_TraceId_IsRegisteredInTraceRegistry()
-    {
-        var activity = Activity.Current!;
-        var traceId = activity.TraceId.ToString();
-
-        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
     }
 
     [Test]
@@ -51,28 +42,15 @@ public class TestActivityTests
     }
 
     [Test]
-    public async Task TestCaseActivity_IsRoot_WithUniqueTraceId()
+    public async Task TestCaseActivity_SharesTraceId_WithTestBody()
     {
-        var testCase = Activity.Current!.Parent!;
+        var testBody = Activity.Current!;
+        var testCase = testBody.Parent!;
 
-        // The test case activity should be a root (no parent sharing its TraceId),
-        // giving each test a unique TraceId for distributed tracing.
-        if (testCase.Parent is not null)
-        {
-            // If there's a parent, it should have a DIFFERENT TraceId (the class's)
-            await Assert.That(testCase.Parent.TraceId.ToString())
-                .IsNotEqualTo(testCase.TraceId.ToString());
-        }
-    }
-
-    [Test]
-    public async Task TestCaseActivity_HasLinks_ToClassActivity()
-    {
-        var testCase = Activity.Current!.Parent!;
-        var links = testCase.Links.ToList();
-
-        // The engine creates an ActivityLink from test case → class activity
-        await Assert.That(links.Count).IsGreaterThanOrEqualTo(1);
+        // Parent-child spans share the same TraceId (W3C spec).
+        // The test body is a child of the test case.
+        await Assert.That(testBody.TraceId.ToString())
+            .IsEqualTo(testCase.TraceId.ToString());
     }
 
     [Test]
@@ -93,51 +71,23 @@ public class TestActivityTests
         await Assert.That(testNodeUid).IsNotNull();
     }
 
-    /// <summary>
-    /// Two tests in the same class must have different TraceIds. This is the core property
-    /// that enables per-test distributed tracing correlation.
-    /// </summary>
     [Test]
-    [Arguments(0)]
-    [Arguments(1)]
-    [Arguments(2)]
-    [Arguments(3)]
-    [Arguments(4)]
-    public async Task ParallelTests_EachGetUniqueTraceId(int instanceId)
+    public async Task TestCaseActivity_HasParentSpanId_FromClassActivity()
+    {
+        var testCase = Activity.Current!.Parent!;
+
+        // The test case has a ParentSpanId linking it to the class activity.
+        // Activity.Parent (object reference) may be null when explicit parentContext
+        // is used, but ParentSpanId is always set for child activities.
+        await Assert.That(testCase.ParentSpanId).IsNotEqualTo(default(ActivitySpanId));
+    }
+
+    [Test]
+    public async Task TraceId_IsNonEmpty()
     {
         var traceId = Activity.Current!.TraceId.ToString();
 
-        // Store this test's TraceId
-        UniqueTraceIdCollector.RecordTraceId(instanceId, traceId);
-
         await Assert.That(traceId.Length).IsEqualTo(32);
-        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
-    }
-
-    [Test, DependsOn(nameof(ParallelTests_EachGetUniqueTraceId), [typeof(int)])]
-    public async Task ParallelTests_AllTraceIdsAreDistinct()
-    {
-        var traceIds = UniqueTraceIdCollector.GetAllTraceIds();
-
-        // Should have 5 entries (one per instance)
-        await Assert.That(traceIds.Count).IsEqualTo(5);
-
-        // All should be distinct — the whole point of per-test root activities
-        var distinctCount = traceIds.Values.Distinct().Count();
-        await Assert.That(distinctCount).IsEqualTo(5);
-    }
-
-    /// <summary>
-    /// Thread-safe collector for verifying TraceId uniqueness across parameterized test instances.
-    /// </summary>
-    private static class UniqueTraceIdCollector
-    {
-        private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> TraceIds = new();
-
-        public static void RecordTraceId(int instanceId, string traceId)
-            => TraceIds[instanceId] = traceId;
-
-        public static System.Collections.Concurrent.ConcurrentDictionary<int, string> GetAllTraceIds()
-            => TraceIds;
+        await Assert.That(traceId).IsNotEqualTo(new string('0', 32));
     }
 }
