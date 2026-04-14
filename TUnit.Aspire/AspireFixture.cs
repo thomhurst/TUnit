@@ -365,6 +365,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
     private const string OtelExporterEndpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT";
     private const string OtelExporterProtocolEnvVar = "OTEL_EXPORTER_OTLP_PROTOCOL";
+    private const string OtelServiceNameEnvVar = "OTEL_SERVICE_NAME";
+    private const string OtelBlrpScheduleDelayEnvVar = "OTEL_BLRP_SCHEDULE_DELAY";
+    private const string OtelBspScheduleDelayEnvVar = "OTEL_BSP_SCHEDULE_DELAY";
 
     private void StartOtlpReceiver()
     {
@@ -383,11 +386,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         {
             if (resource is ProjectResource projectResource)
             {
+                var resourceName = projectResource.Name;
+
                 projectResource.Annotations.Add(
                     new EnvironmentCallbackAnnotation(context =>
                     {
                         context.EnvironmentVariables[OtelExporterEndpointEnvVar] = otlpEndpoint;
                         context.EnvironmentVariables[OtelExporterProtocolEnvVar] = "http/protobuf";
+
+                        // Set the service name from the Aspire resource name so
+                        // the SUT doesn't need .ConfigureResource(r => r.AddService(...)).
+                        // Code-level configuration in the SUT takes precedence.
+                        context.EnvironmentVariables.TryAdd(OtelServiceNameEnvVar, resourceName);
+
+                        // Reduce batch export delays for faster test feedback.
+                        // Default SDK value is 5000ms which adds unnecessary latency in tests.
+                        context.EnvironmentVariables.TryAdd(OtelBlrpScheduleDelayEnvVar, "1000");
+                        context.EnvironmentVariables.TryAdd(OtelBspScheduleDelayEnvVar, "1000");
                     }));
             }
         }
