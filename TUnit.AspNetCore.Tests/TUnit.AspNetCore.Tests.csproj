@@ -16,11 +16,11 @@
 
     <!-- Version attr is required by CPM (Directory.Packages.props); VersionOverride selects the TFM-compatible version -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" VersionOverride="8.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.6" VersionOverride="8.0.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" VersionOverride="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.6" VersionOverride="9.0.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
