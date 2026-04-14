@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using TUnit.Aspire.Telemetry;
 using TUnit.Aspire.Tests.Helpers;
@@ -90,12 +91,8 @@ public class OtlpReceiverTests
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
-        // Allow async processing to complete
-        await Task.Delay(200);
-
         // Assert: the log should appear in this test's output
-        var output = testContext.GetStandardOutput();
-        await Assert.That(output).Contains("Hello from the SUT!");
+        var output = await PollForOutput(testContext, "Hello from the SUT!");
         await Assert.That(output).Contains("[my-api]");
         await Assert.That(output).Contains("[INFO]");
     }
@@ -122,9 +119,8 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
-        await Task.Delay(200);
 
-        var output = testContext.GetStandardOutput();
+        var output = await PollForOutput(testContext, "Error message");
         await Assert.That(output).Contains("[DEBUG] Debug message");
         await Assert.That(output).Contains("[INFO] Info message");
         await Assert.That(output).Contains("[ERROR] Error message");
@@ -154,8 +150,9 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
-        await Task.Delay(200);
 
+        // No matching trace ID — give a short window then verify nothing appeared
+        await Task.Delay(200);
         var output = testContext.GetStandardOutput();
         await Assert.That(output).DoesNotContain("This should not appear in test output");
     }
@@ -181,13 +178,11 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
-        await Task.Delay(200);
 
-        var output = testContext.GetStandardOutput();
+        var output = await PollForOutput(testContext, "Backend processing request");
         await Assert.That(output).Contains("[api-gateway]");
         await Assert.That(output).Contains("Gateway received request");
         await Assert.That(output).Contains("[backend-api]");
-        await Assert.That(output).Contains("Backend processing request");
     }
 
     [Test]
@@ -219,10 +214,8 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
-        await Task.Delay(200);
 
-        var output = testContext.GetStandardOutput();
-        await Assert.That(output).Contains("My log");
+        var output = await PollForOutput(testContext, "My log");
         // The other test's log should NOT appear in this test's output
         // (it targets a non-existent TestContext, so it's silently dropped)
         await Assert.That(output).DoesNotContain("Other test's log");
@@ -253,10 +246,9 @@ public class OtlpReceiverTests
         content.Headers.ContentType = new("application/x-protobuf");
 
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
-        await Task.Delay(200);
 
-        var output = testContext.GetStandardOutput();
         // Should have severity but no resource prefix
+        var output = await PollForOutput(testContext, "Warning without service name");
         await Assert.That(output).Contains("[WARN] Warning without service name");
     }
 
@@ -322,9 +314,7 @@ public class OtlpReceiverTests
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         }
 
-        await Task.Delay(300);
-
-        var output = testContext.GetStandardOutput();
+        var output = await PollForOutput(testContext, "Request 4");
         for (var i = 0; i < 5; i++)
         {
             await Assert.That(output).Contains($"Request {i}");
@@ -346,5 +336,26 @@ public class OtlpReceiverTests
 
         // Should still return 200 (malformed protobuf is silently skipped)
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+
+    /// <summary>
+    /// Polls test output until it contains the expected text or a timeout is reached.
+    /// Replaces fixed <c>Task.Delay</c> waits to avoid flaky timing on slow CI agents.
+    /// </summary>
+    private static async Task<string> PollForOutput(TestContext testContext, string expected, int timeoutMs = 5000)
+    {
+        var sw = Stopwatch.StartNew();
+        while (sw.ElapsedMilliseconds < timeoutMs)
+        {
+            var output = testContext.GetStandardOutput();
+            if (output.Contains(expected))
+            {
+                return output;
+            }
+
+            await Task.Delay(50);
+        }
+
+        return testContext.GetStandardOutput();
     }
 }

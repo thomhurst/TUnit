@@ -7,8 +7,6 @@ namespace TUnit.Aspire.Tests;
 /// </summary>
 public class IntegrationTestFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
 {
-    protected override bool EnableTelemetryCollection => true;
-
     protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(120);
 
     protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.AllRunning;
