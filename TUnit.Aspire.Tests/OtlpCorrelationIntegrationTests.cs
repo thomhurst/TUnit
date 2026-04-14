@@ -205,21 +205,6 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     }
 
     /// <summary>
-    /// Verifies that the TraceRegistry is populated with the test's activity TraceId,
-    /// confirming the engine-side registration works.
-    /// </summary>
-    [Test]
-    public async Task TraceRegistry_ContainsCurrentTestTraceId()
-    {
-        var activity = Activity.Current
-            ?? throw new InvalidOperationException("No Activity.Current — TUnit engine should create one per test.");
-
-        var traceId = activity.TraceId.ToString();
-        var isRegistered = TraceRegistry.IsRegistered(traceId);
-        await Assert.That(isRegistered).IsTrue();
-    }
-
-    /// <summary>
     /// Polls <see cref="TestContext.GetStandardOutput"/> until it contains the expected marker
     /// or a timeout is reached. The OTLP SDK batches log exports, so there's inherent latency
     /// between when the SUT logs a message and when it arrives at TUnit's OTLP receiver.

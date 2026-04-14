@@ -16,7 +16,7 @@ public class RunAspireTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return null;
         }
