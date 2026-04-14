@@ -21,6 +21,8 @@ concurrency:
 jobs:
   modularpipeline:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
+    env:
+      NUGET_PACKAGES: ~/.nuget/packages
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -52,6 +54,8 @@ jobs:
           trusted-dev-drive: true
           env-mapping: |
             NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+            TEMP,{{ DEV_DRIVE }}/tmp
+            TMP,{{ DEV_DRIVE }}/tmp
 
       - name: Check for .received.txt files
         shell: bash
@@ -86,7 +90,10 @@ jobs:
         uses: actions/cache@v5
         continue-on-error: true
         with:
-          path: ${{ env.NUGET_PACKAGES || '~/.nuget/packages' }}
+          path: |
+            ${{ env.NUGET_PACKAGES }}
+            ~/.local/share/NuGet
+            %LocalAppData%\NuGet\v3-cache
           key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
           restore-keys: |
             nuget-${{ runner.os }}-
