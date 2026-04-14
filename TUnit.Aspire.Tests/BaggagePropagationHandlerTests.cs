@@ -64,6 +64,8 @@ public class BaggagePropagationHandlerTests
     [Test]
     public async Task SendAsync_NoBaggage_DoesNotAddBaggageHeader()
     {
+        // Detach from engine's activity to prevent inheriting tunit.test.id baggage
+        Activity.Current = null;
         using var activity = new Activity("test-no-baggage").Start();
 
         var captured = new CaptureHandler();
@@ -94,6 +96,8 @@ public class BaggagePropagationHandlerTests
     [Test]
     public async Task SendAsync_BaggageValues_AreUriEncoded()
     {
+        // Detach from engine's activity to test encoding in isolation
+        Activity.Current = null;
         using var activity = new Activity("test-encoding").Start();
         activity.SetBaggage("key with spaces", "value=with&special");
 
@@ -127,10 +131,46 @@ public class BaggagePropagationHandlerTests
         await Assert.That(baggageHeader).Contains(",");
     }
 
+    [Test]
+    public async Task SendAsync_ExistingBaggageHeader_IsPreserved()
+    {
+        using var activity = new Activity("test-existing-baggage").Start();
+        activity.SetBaggage("should.not.appear", "true");
+
+        var captured = new CaptureHandler();
+        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
+        using var client = new HttpClient(handler);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/test");
+        request.Headers.TryAddWithoutValidation("baggage", "existing=value");
+
+        await client.SendAsync(request);
+
+        // The existing baggage value must still be present regardless of propagator behavior
+        var allBaggageValues = string.Join(",",
+            captured.LastRequest!.Headers.GetValues("baggage"));
+        await Assert.That(allBaggageValues).Contains("existing=value");
+    }
+
+    [Test]
+    public async Task SendAsync_InnerHandlerResponse_IsPassedThrough()
+    {
+        using var activity = new Activity("test-passthrough").Start();
+
+        var captured = new CaptureHandler(System.Net.HttpStatusCode.NotFound);
+        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
+        using var client = new HttpClient(handler);
+
+        using var response = await client.GetAsync("http://localhost/test");
+
+        await Assert.That((int)response.StatusCode).IsEqualTo(404);
+    }
+
     /// <summary>
     /// A handler that captures the outgoing request instead of sending it over the network.
     /// </summary>
-    private sealed class CaptureHandler : HttpMessageHandler
+    private sealed class CaptureHandler(
+        System.Net.HttpStatusCode statusCode = System.Net.HttpStatusCode.OK) : HttpMessageHandler
     {
         public HttpRequestMessage? LastRequest { get; private set; }
 
@@ -138,7 +178,7 @@ public class BaggagePropagationHandlerTests
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
             LastRequest = request;
-            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK));
+            return Task.FromResult(new HttpResponseMessage(statusCode));
         }
     }
 }

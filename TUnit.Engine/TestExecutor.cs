@@ -189,10 +189,14 @@ internal class TestExecutor
             Activity? testBodyActivity = null;
             if (TUnitActivitySource.Source.HasListeners())
             {
+                // Restore Activity.Current to the test case activity so the test body
+                // becomes a natural child (with Activity.Parent set). This enables
+                // baggage traversal from the test body to the test case — required for
+                // cross-process correlation via Activity.GetBaggageItem("tunit.test.id").
+                Activity.Current = executableTest.Context.Activity;
+
                 testBodyActivity = TUnitActivitySource.StartActivity(
-                    TUnitActivitySource.SpanTestBody,
-                    ActivityKind.Internal,
-                    executableTest.Context.Activity?.Context ?? default);
+                    TUnitActivitySource.SpanTestBody);
             }
 #endif
             try
