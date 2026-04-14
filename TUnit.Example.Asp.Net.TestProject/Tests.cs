@@ -96,25 +96,25 @@ public class Tests : TestsBase
     }
 
     [Test]
-    [DisplayName("ConfigureWebHostBuilder runs after ConfigureTestConfiguration")]
-    public async Task ConfigureWebHostBuilder_Runs_After_ConfigureTestConfiguration()
+    [DisplayName("ConfigureTestConfiguration runs after ConfigureWebHostBuilder")]
+    public async Task ConfigureTestConfiguration_Runs_After_ConfigureWebHostBuilder()
     {
         _ = Factory.CreateClient();
 
-        await Assert.That(ConfigureWebHostBuilderCalledOrder)
-            .IsGreaterThan(ConfigureTestConfigurationCalledOrder)
-            .Because("ConfigureWebHostBuilder is an escape hatch called after ConfigureTestConfiguration");
+        await Assert.That(ConfigureTestConfigurationCalledOrder)
+            .IsGreaterThan(ConfigureWebHostBuilderCalledOrder)
+            .Because("ConfigureWebHostBuilder runs during factory creation, ConfigureTestConfiguration runs during host build");
     }
 
     [Test]
-    [DisplayName("ConfigureTestServices runs after ConfigureWebHostBuilder")]
-    public async Task ConfigureTestServices_Runs_After_ConfigureWebHostBuilder()
+    [DisplayName("ConfigureTestServices runs after ConfigureTestConfiguration")]
+    public async Task ConfigureTestServices_Runs_After_ConfigureTestConfiguration()
     {
         _ = Factory.CreateClient();
 
         await Assert.That(ConfigureTestServicesCalledOrder)
-            .IsGreaterThan(ConfigureWebHostBuilderCalledOrder)
-            .Because("ConfigureTestServices should run after ConfigureWebHostBuilder");
+            .IsGreaterThan(ConfigureTestConfigurationCalledOrder)
+            .Because("ConfigureTestServices should run after ConfigureTestConfiguration");
     }
 
     [Test]
@@ -140,16 +140,16 @@ public class Tests : TestsBase
             .Because("ConfigureTestOptions runs before SetupAsync");
 
         await Assert.That(SetupCalledOrder)
-            .IsLessThan(ConfigureTestConfigurationCalledOrder)
-            .Because("SetupAsync runs before ConfigureTestConfiguration");
-
-        await Assert.That(ConfigureTestConfigurationCalledOrder)
             .IsLessThan(ConfigureWebHostBuilderCalledOrder)
-            .Because("ConfigureTestConfiguration runs before ConfigureWebHostBuilder");
+            .Because("SetupAsync runs before ConfigureWebHostBuilder");
 
         await Assert.That(ConfigureWebHostBuilderCalledOrder)
+            .IsLessThan(ConfigureTestConfigurationCalledOrder)
+            .Because("ConfigureWebHostBuilder runs before ConfigureTestConfiguration");
+
+        await Assert.That(ConfigureTestConfigurationCalledOrder)
             .IsLessThan(ConfigureTestServicesCalledOrder)
-            .Because("ConfigureWebHostBuilder runs before ConfigureTestServices");
+            .Because("ConfigureTestConfiguration runs before ConfigureTestServices");
 
         await Assert.That(ConfigureTestServicesCalledOrder)
             .IsLessThan(StartupCalledOrder)
