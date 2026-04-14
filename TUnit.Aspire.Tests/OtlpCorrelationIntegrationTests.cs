@@ -66,11 +66,13 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var client = fixture.CreateHttpClient(ServiceName);
         using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
-        var output = await PollForOutput(marker);
+        // Poll for the application log format specifically — the raw marker also
+        // appears in ASP.NET request-start logs (in the URL), which arrive earlier
+        // than the application's own log message.
+        var expected = $"] {marker}";
+        var output = await PollForOutput(expected);
 
-        // The service logs at Information level. OpenTelemetry maps this to severity
-        // number 9 or text "Information". The receiver formats as [SeverityText] or [INFO].
-        await Assert.That(output).Contains($"] {marker}");
+        await Assert.That(output).Contains(expected);
     }
 
     /// <summary>
