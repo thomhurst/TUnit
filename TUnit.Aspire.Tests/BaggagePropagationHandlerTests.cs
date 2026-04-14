@@ -11,6 +11,8 @@ public class BaggagePropagationHandlerTests
     [Test]
     public async Task SendAsync_InjectsTraceparentHeader()
     {
+        using var activity = new Activity("test-inject-traceparent").Start();
+
         var captured = new CaptureHandler();
         var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
         using var client = new HttpClient(handler);
@@ -21,9 +23,9 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_TraceparentUsesUniqueTraceId_NotActivityCurrent()
+    public async Task SendAsync_TraceparentContainsActivityTraceId()
     {
-        using var activity = new Activity("test-unique-traceid").Start();
+        using var activity = new Activity("test-traceid-match").Start();
         var activityTraceId = activity.TraceId.ToString();
 
         var captured = new CaptureHandler();
@@ -33,64 +35,8 @@ public class BaggagePropagationHandlerTests
         await client.GetAsync("http://localhost/test");
 
         var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
-        var parts = traceparent.Split('-');
-        var requestTraceId = parts[1];
-
-        // The handler generates its own TraceId, distinct from Activity.Current's
-        await Assert.That(requestTraceId).IsNotEqualTo(activityTraceId);
-    }
-
-    [Test]
-    public async Task SendAsync_EachRequestGetsUniqueTraceId()
-    {
-        var captured = new CaptureHandler();
-        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
-        using var client = new HttpClient(handler);
-
-        await client.GetAsync("http://localhost/test1");
-        var traceparent1 = captured.LastRequest!.Headers.GetValues("traceparent").First();
-
-        await client.GetAsync("http://localhost/test2");
-        var traceparent2 = captured.LastRequest!.Headers.GetValues("traceparent").First();
-
-        var traceId1 = traceparent1.Split('-')[1];
-        var traceId2 = traceparent2.Split('-')[1];
-
-        await Assert.That(traceId1).IsNotEqualTo(traceId2);
-    }
-
-    [Test]
-    public async Task SendAsync_TraceparentFormat_IsValidW3C()
-    {
-        var captured = new CaptureHandler();
-        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
-        using var client = new HttpClient(handler);
-
-        await client.GetAsync("http://localhost/test");
-
-        var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
-        var parts = traceparent.Split('-');
-
-        await Assert.That(parts.Length).IsEqualTo(4);
-        await Assert.That(parts[0]).IsEqualTo("00");           // version
-        await Assert.That(parts[1].Length).IsEqualTo(32);      // trace-id (16 bytes hex)
-        await Assert.That(parts[2].Length).IsEqualTo(16);      // parent-id (8 bytes hex)
-        await Assert.That(parts[3]).IsEqualTo("01");           // flags (sampled)
-    }
-
-    [Test]
-    public async Task SendAsync_RegistersTraceIdInTraceRegistry()
-    {
-        var captured = new CaptureHandler();
-        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
-        using var client = new HttpClient(handler);
-
-        await client.GetAsync("http://localhost/test");
-
-        var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
-        var traceId = traceparent.Split('-')[1];
-
-        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
+        // traceparent format: 00-{traceId}-{spanId}-{flags}
+        await Assert.That(traceparent).Contains(activityTraceId);
     }
 
     [Test]
@@ -130,7 +76,7 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_NoActivity_StillInjectsTraceparent()
+    public async Task SendAsync_NoActivity_DoesNotInjectHeaders()
     {
         Activity.Current = null;
 
@@ -141,7 +87,7 @@ public class BaggagePropagationHandlerTests
         await client.GetAsync("http://localhost/test");
 
         await Assert.That(captured.LastRequest).IsNotNull();
-        await Assert.That(captured.LastRequest!.Headers.Contains("traceparent")).IsTrue();
+        await Assert.That(captured.LastRequest!.Headers.Contains("traceparent")).IsFalse();
         await Assert.That(captured.LastRequest.Headers.Contains("baggage")).IsFalse();
     }
 
