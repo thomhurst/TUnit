@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-13T03:23:34.678Z",
+  "timestamp": "2026-04-14T03:22:19.526Z",
   "category": "Setup",
   "description": "Mock behavior configuration (returns, matchers)",
   "environment": {
@@ -10,110 +10,110 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "565.9 ns",
-      "Error": "7.34 ns",
-      "StdDev": "6.87 ns",
+      "Mean": "537.4 ns",
+      "Error": "5.93 ns",
+      "StdDev": "5.55 ns",
       "Gen0": "0.1421",
       "Gen1": "0.0010",
       "Allocated": "2.34 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "762.3 ns",
-      "Error": "3.81 ns",
-      "StdDev": "3.38 ns",
+      "Mean": "778.6 ns",
+      "Error": "14.40 ns",
+      "StdDev": "13.47 ns",
       "Gen0": "0.3738",
       "Gen1": "0.0076",
       "Allocated": "6.12 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "459.5 ns",
-      "Error": "4.26 ns",
-      "StdDev": "3.98 ns",
+      "Mean": "434.5 ns",
+      "Error": "7.28 ns",
+      "StdDev": "6.81 ns",
       "Gen0": "0.1240",
       "Gen1": "0.0010",
       "Allocated": "2.03 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "300,222.8 ns",
-      "Error": "1,498.93 ns",
-      "StdDev": "1,170.27 ns",
+      "Mean": "416,271.5 ns",
+      "Error": "1,124.65 ns",
+      "StdDev": "939.14 ns",
       "Gen0": "0.9766",
       "Gen1": "-",
-      "Allocated": "28.52 KB"
+      "Allocated": "28.76 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "5,070.1 ns",
-      "Error": "15.40 ns",
-      "StdDev": "12.86 ns",
+      "Mean": "5,555.9 ns",
+      "Error": "25.83 ns",
+      "StdDev": "24.16 ns",
       "Gen0": "0.5493",
       "Gen1": "0.0076",
       "Allocated": "9.01 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "6,881.7 ns",
-      "Error": "28.24 ns",
-      "StdDev": "23.58 ns",
-      "Gen0": "0.6256",
-      "Gen1": "0.0153",
+      "Mean": "7,968.6 ns",
+      "Error": "44.46 ns",
+      "StdDev": "34.71 ns",
+      "Gen0": "0.6104",
+      "Gen1": "0.0305",
       "Allocated": "10.45 KB"
     },
     {
       "Method": "'TUnit.Mocks (Multiple)'",
-      "Mean": "737.1 ns",
-      "Error": "2.89 ns",
-      "StdDev": "2.70 ns",
+      "Mean": "738.8 ns",
+      "Error": "14.28 ns",
+      "StdDev": "15.28 ns",
       "Gen0": "0.1793",
       "Gen1": "0.0010",
       "Allocated": "2.93 KB"
     },
     {
       "Method": "'Imposter (Multiple)'",
-      "Mean": "1,349.9 ns",
-      "Error": "3.86 ns",
-      "StdDev": "3.01 ns",
+      "Mean": "1,583.2 ns",
+      "Error": "11.70 ns",
+      "StdDev": "10.94 ns",
       "Gen0": "0.6485",
       "Gen1": "0.0248",
       "Allocated": "10.59 KB"
     },
     {
       "Method": "'Mockolate (Multiple)'",
-      "Mean": "728.1 ns",
-      "Error": "2.23 ns",
-      "StdDev": "1.97 ns",
+      "Mean": "674.4 ns",
+      "Error": "6.20 ns",
+      "StdDev": "5.18 ns",
       "Gen0": "0.1879",
       "Gen1": "0.0019",
       "Allocated": "3.07 KB"
     },
     {
       "Method": "'Moq (Multiple)'",
-      "Mean": "88,121.1 ns",
-      "Error": "1,125.07 ns",
-      "StdDev": "1,052.39 ns",
+      "Mean": "111,427.5 ns",
+      "Error": "469.64 ns",
+      "StdDev": "439.30 ns",
       "Gen0": "0.9766",
       "Gen1": "0.7324",
       "Allocated": "16.53 KB"
     },
     {
       "Method": "'NSubstitute (Multiple)'",
-      "Mean": "10,766.7 ns",
-      "Error": "36.78 ns",
-      "StdDev": "34.40 ns",
-      "Gen0": "1.2512",
-      "Gen1": "0.0458",
-      "Allocated": "20.5 KB"
+      "Mean": "12,198.4 ns",
+      "Error": "83.42 ns",
+      "StdDev": "73.95 ns",
+      "Gen0": "1.2207",
+      "Gen1": "-",
+      "Allocated": "20.31 KB"
     },
     {
       "Method": "'FakeItEasy (Multiple)'",
-      "Mean": "6,719.9 ns",
-      "Error": "38.64 ns",
-      "StdDev": "32.27 ns",
-      "Gen0": "0.7095",
-      "Gen1": "0.0153",
+      "Mean": "7,506.3 ns",
+      "Error": "110.46 ns",
+      "StdDev": "103.32 ns",
+      "Gen0": "0.6714",
+      "Gen1": "0.0610",
       "Allocated": "11.71 KB"
     }
   ]
