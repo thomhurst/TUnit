@@ -40,32 +40,18 @@ jobs:
           docker-images: false
           swap-storage: false
 
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Setup Dev Drive (Windows)
         if: matrix.os == 'windows-latest'
         uses: samypr100/setup-dev-drive@v4
         with:
           drive-size: 10GB
-          drive-type: Dynamic
           trusted-dev-drive: true
           env-mapping: |
             NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
-
-      - name: Redirect workspace to Dev Drive (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          $devDrive = $env:DEV_DRIVE
-          $refsBuildDir = "$devDrive\workspace"
-          New-Item -Path $refsBuildDir -ItemType Directory -Force | Out-Null
-          # Move CWD away from workspace so the directory handle is released
-          Set-Location $devDrive
-          Remove-Item -Path $env:GITHUB_WORKSPACE -Force -Recurse
-          cmd /c "mklink /J `"$env:GITHUB_WORKSPACE`" `"$refsBuildDir`""
-          Write-Host "Redirected $env:GITHUB_WORKSPACE -> $refsBuildDir"
-
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Check for .received.txt files
         shell: bash
@@ -100,10 +86,7 @@ jobs:
         uses: actions/cache@v5
         continue-on-error: true
         with:
-          path: |
-            ~/.nuget/packages
-            ~/.local/share/NuGet
-            %LocalAppData%\NuGet\v3-cache
+          path: ${{ env.NUGET_PACKAGES || '~/.nuget/packages' }}
           key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
           restore-keys: |
             nuget-${{ runner.os }}-
