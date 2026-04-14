@@ -16,6 +16,9 @@ namespace TUnit.Aspire.Tests;
 [Category("Integration")]
 public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
 {
+    private const string ServiceName = "api-service";
+    private const int ConcurrentInstanceCount = 10;
+
     // Each test needs its own TraceId for correlation. The engine creates test
     // activities as children of the class activity (shared TraceId), so we create
     // a dedicated root activity per test to get a unique TraceId for HTTP requests.
@@ -32,8 +35,8 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var marker = $"integration-marker-{Guid.NewGuid():N}";
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
-        var response = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var response = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
         await Assert.That((int)response.StatusCode).IsEqualTo(200);
 
@@ -51,11 +54,11 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var marker = $"svc-prefix-{Guid.NewGuid():N}";
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
-        await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
         var output = await PollForOutput(marker);
-        await Assert.That(output).Contains("[api-service]");
+        await Assert.That(output).Contains($"[{ServiceName}]");
     }
 
     /// <summary>
@@ -68,8 +71,8 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var marker = $"severity-{Guid.NewGuid():N}";
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
-        await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
 
         var output = await PollForOutput(marker);
 
@@ -89,15 +92,14 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         var errorMarker = $"error-level-{Guid.NewGuid():N}";
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
-        await client.GetAsync($"/log-level?message={Uri.EscapeDataString(warnMarker)}&level=Warning");
-        await client.GetAsync($"/log-level?message={Uri.EscapeDataString(errorMarker)}&level=Error");
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var _ = await client.GetAsync($"/log-level?message={Uri.EscapeDataString(warnMarker)}&level=Warning");
+        using var __ = await client.GetAsync($"/log-level?message={Uri.EscapeDataString(errorMarker)}&level=Error");
 
-        var warnOutput = await PollForOutput(warnMarker);
-        await Assert.That(warnOutput).Contains(warnMarker);
-
-        var errorOutput = await PollForOutput(errorMarker);
-        await Assert.That(errorOutput).Contains(errorMarker);
+        // Poll once for the later marker — both will have arrived by then
+        var output = await PollForOutput(errorMarker);
+        await Assert.That(output).Contains(warnMarker);
+        await Assert.That(output).Contains(errorMarker);
     }
 
     /// <summary>
@@ -124,11 +126,11 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .ToList();
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
+        var client = fixture.CreateHttpClient(ServiceName);
 
         foreach (var marker in markers)
         {
-            await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
+            using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
         }
 
         var output = await PollForOutput(markers.Last());
@@ -140,7 +142,7 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
         }
 
         // No markers from any other instance should appear in this test's output
-        for (var other = 0; other < 10; other++)
+        for (var other = 0; other < ConcurrentInstanceCount; other++)
         {
             if (other != instanceId)
             {
@@ -162,11 +164,16 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .ToList();
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
+        var client = fixture.CreateHttpClient(ServiceName);
 
-        // Fire all requests concurrently
-        await Task.WhenAll(markers.Select(marker =>
+        // Fire all requests concurrently and dispose responses
+        var responses = await Task.WhenAll(markers.Select(marker =>
             client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}")));
+
+        foreach (var response in responses)
+        {
+            response.Dispose();
+        }
 
         // All logs from this burst must appear in this test's output
         var output = await PollForOutput(markers.Last());
@@ -189,11 +196,11 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
             .ToList();
 
         using var activity = StartCorrelatedActivity();
-        var client = fixture.CreateHttpClient("api-service");
+        var client = fixture.CreateHttpClient(ServiceName);
 
         foreach (var marker in markers)
         {
-            await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
+            using var _ = await client.GetAsync($"/log?message={Uri.EscapeDataString(marker)}");
         }
 
         // Wait for all logs to arrive
@@ -212,14 +219,12 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     [Test]
     public async Task TraceRegistry_ContainsCurrentTestTraceId()
     {
-        // The engine registers the test's TraceId with TraceRegistry automatically.
-        var activity = Activity.Current;
-        if (activity is not null)
-        {
-            var traceId = activity.TraceId.ToString();
-            var isRegistered = TraceRegistry.IsRegistered(traceId);
-            await Assert.That(isRegistered).IsTrue();
-        }
+        var activity = Activity.Current
+            ?? throw new InvalidOperationException("No Activity.Current — TUnit engine should create one per test.");
+
+        var traceId = activity.TraceId.ToString();
+        var isRegistered = TraceRegistry.IsRegistered(traceId);
+        await Assert.That(isRegistered).IsTrue();
     }
 
     /// <summary>
@@ -242,10 +247,12 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
 
         var activity = TestActivitySource.StartActivity(
             "integration-test-request",
-            ActivityKind.Client)!;
+            ActivityKind.Client)
+            ?? throw new InvalidOperationException(
+                "StartActivity returned null — no ActivityListener is registered. " +
+                "Ensure the TUnit engine is creating test activities.");
 
-        // Copy the test baggage so the SUT receives tunit.test.id
-        activity.SetBaggage("tunit.test.id", testContext.Id);
+        activity.SetBaggage(TUnitActivitySource.TagTestId, testContext.Id);
 
         // Register this new TraceId so the OTLP receiver can correlate logs back to this test
         TraceRegistry.Register(
@@ -264,9 +271,10 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     private static async Task<string> PollForOutput(string expectedMarker, int timeoutSeconds = 30)
     {
         var testContext = TestContext.Current!;
-        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+        var sw = Stopwatch.StartNew();
+        var timeout = TimeSpan.FromSeconds(timeoutSeconds);
 
-        while (DateTime.UtcNow < deadline)
+        while (sw.Elapsed < timeout)
         {
             var output = testContext.GetStandardOutput();
             if (output.Contains(expectedMarker))
