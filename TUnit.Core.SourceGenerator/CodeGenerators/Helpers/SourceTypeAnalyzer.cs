@@ -78,7 +78,7 @@ internal static class SourceTypeAnalyzer
         // For params methods with [Arguments], size the array to max argument count
         var arraySize = hasParams ? GetMaxArgumentCount(dataSources, parameterCount) : parameterCount;
 
-        return ExtractSourceTypesFromAllAttributes(dataSources, arraySize);
+        return ExtractSourceTypesFromAllAttributes(dataSources, arraySize, method.Parameters);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ internal static class SourceTypeAnalyzer
         var ctorHasParams = constructor.Parameters[ctorParamCount - 1].IsParams;
         var ctorArraySize = ctorHasParams ? GetMaxArgumentCount(dataSources, ctorParamCount) : ctorParamCount;
 
-        return ExtractSourceTypesFromAllAttributes(dataSources, ctorArraySize);
+        return ExtractSourceTypesFromAllAttributes(dataSources, ctorArraySize, constructor.Parameters);
     }
 
     /// <summary>
@@ -129,7 +129,8 @@ internal static class SourceTypeAnalyzer
     /// </summary>
     private static SourceTypeInfo ExtractSourceTypesFromAllAttributes(
         List<AttributeData> dataSources,
-        int parameterCount)
+        int parameterCount,
+        ImmutableArray<IParameterSymbol> parameters)
     {
         // Each position accumulates a set of possible source types.
         // null = unknown (some attribute couldn't determine the type for this position).
@@ -145,6 +146,10 @@ internal static class SourceTypeAnalyzer
             else if (attr.AttributeClass != null && DataSourceAttributeHelper.IsTypedDataSourceAttribute(attr.AttributeClass))
             {
                 ProcessTypedDataSource(attr, positionTypes, positionUnknown, parameterCount);
+            }
+            else if (IsMatrixDataSourceAttribute(attr))
+            {
+                ProcessMatrixDataSource(parameters, positionTypes, positionUnknown, parameterCount);
             }
             else
             {
@@ -361,5 +366,117 @@ internal static class SourceTypeAnalyzer
     {
         return attr.AttributeClass?.Name is "ArgumentsAttribute"
             && attr.AttributeClass.ToDisplayString() == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithoutGlobalPrefix;
+    }
+
+    /// <summary>
+    /// Returns true if the type is an enum or Nullable&lt;TEnum&gt;.
+    /// MatrixDataSource boxes auto-generated enum values as their underlying type (via
+    /// Enum.GetValuesAsUnderlyingType), so direct casts from object to enum type would fail.
+    /// </summary>
+    private static bool IsEnumLike(ITypeSymbol type)
+    {
+        if (type.TypeKind == TypeKind.Enum)
+        {
+            return true;
+        }
+
+        // Check for Nullable<TEnum>
+        if (type is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } nullable)
+        {
+            return nullable.TypeArguments[0].TypeKind == TypeKind.Enum;
+        }
+
+        return false;
+    }
+
+    private static bool IsMatrixDataSourceAttribute(AttributeData attr)
+    {
+        return attr.AttributeClass?.Name is "MatrixDataSourceAttribute";
+    }
+
+    /// <summary>
+    /// Processes a MatrixDataSource by examining per-parameter [Matrix] attributes
+    /// to extract the compile-time source types for each position.
+    /// </summary>
+    private static void ProcessMatrixDataSource(
+        ImmutableArray<IParameterSymbol> parameters,
+        List<ITypeSymbol>?[] positionTypes,
+        bool[] positionUnknown,
+        int parameterCount)
+    {
+        var paramIndex = 0;
+
+        foreach (var param in parameters)
+        {
+            if (paramIndex >= parameterCount)
+            {
+                break;
+            }
+
+            // Skip CancellationToken parameters (same filter as caller)
+            if (param.Type.Name == "CancellationToken" && param.Type.ContainingNamespace?.ToString() == "System.Threading")
+            {
+                continue;
+            }
+
+            if (positionUnknown[paramIndex])
+            {
+                paramIndex++;
+                continue;
+            }
+
+            var hasMatrixAttr = false;
+
+            foreach (var paramAttr in param.GetAttributes())
+            {
+                if (paramAttr.AttributeClass?.Name is not ("MatrixAttribute" or "MatrixMethodAttribute" or "MatrixRangeAttribute"))
+                {
+                    continue;
+                }
+
+                hasMatrixAttr = true;
+
+                // MatrixMethod and MatrixRange don't have compile-time values we can extract
+                if (paramAttr.AttributeClass.Name is "MatrixMethodAttribute" or "MatrixRangeAttribute")
+                {
+                    positionUnknown[paramIndex] = true;
+                    break;
+                }
+
+                // Extract value types from [Matrix(val1, val2, ...)] constructor args
+                if (paramAttr.ConstructorArguments.Length == 0)
+                {
+                    continue;
+                }
+
+                var firstArg = paramAttr.ConstructorArguments[0];
+
+                if (firstArg.Kind == TypedConstantKind.Array && !firstArg.Values.IsDefault)
+                {
+                    foreach (var val in firstArg.Values)
+                    {
+                        if (val.IsNull || val.Kind == TypedConstantKind.Error || val.Type == null)
+                        {
+                            positionUnknown[paramIndex] = true;
+                            break;
+                        }
+
+                        AddTypeToPosition(positionTypes, paramIndex, val.Type);
+                    }
+                }
+            }
+
+            // No [Matrix] attribute on this parameter -> auto-generated (bool/enum).
+            // For bool: runtime type is bool, so direct cast works.
+            // For enum: MatrixDataSource uses Enum.GetValuesAsUnderlyingType which boxes as the
+            // underlying type (e.g., int), NOT the enum type. Direct cast (EnumType)args[n]
+            // would fail at runtime, so we must fall back to CastHelper for enums.
+            if (!hasMatrixAttr && !positionUnknown[paramIndex] && !IsEnumLike(param.Type))
+            {
+                AddTypeToPosition(positionTypes, paramIndex, param.Type);
+            }
+
+            paramIndex++;
+        }
     }
 }
