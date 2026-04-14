@@ -57,6 +57,14 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
+#if NET
+        // Start session activity early so discovery spans can parent under it.
+        if (isForExecution)
+        {
+            _testExecutor.TryStartSessionActivity();
+        }
+#endif
+
         var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 

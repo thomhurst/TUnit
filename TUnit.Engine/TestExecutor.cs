@@ -424,6 +424,11 @@ internal class TestExecutor
         return _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
     }
 
+#if NET
+    /// <inheritdoc cref="HookExecutor.TryStartSessionActivity"/>
+    internal void TryStartSessionActivity() => _hookExecutor.TryStartSessionActivity();
+#endif
+
     /// <summary>
     /// Get the context provider for accessing test contexts.
     /// </summary>

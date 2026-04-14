@@ -59,24 +59,13 @@ internal sealed class HookExecutor
             }
         }
 
-        // Start the session activity AFTER hooks have run, because user hooks
-        // typically set up the TracerProvider / ActivityListener. If we started
-        // the activity before hooks, the ActivitySource would have no listeners
-        // and StartActivity would return null - producing no root span.
+        // Try to start the session activity now.  When the user sets up their
+        // TracerProvider in Before(TestSession), this is the first opportunity
+        // where HasListeners() returns true.  When they set it up earlier (e.g.
+        // in Before(TestDiscovery)), the activity was already started by
+        // TryStartSessionActivity() before discovery — this call is a no-op.
 #if NET
-        var sessionContext = _contextProvider.TestSessionContext;
-
-        if (TUnitActivitySource.Source.HasListeners())
-        {
-            sessionContext.Activity = TUnitActivitySource.StartActivity(
-                TUnitActivitySource.SpanTestSession,
-                System.Diagnostics.ActivityKind.Internal,
-                default,
-                [
-                    new("tunit.session.id", sessionContext.Id),
-                    new("tunit.filter", sessionContext.TestFilter)
-                ]);
-        }
+        TryStartSessionActivity();
 #endif
     }
 
@@ -122,6 +111,32 @@ internal sealed class HookExecutor
     }
 
 #if NET
+    /// <summary>
+    /// Lazily starts the session activity once an ActivityListener is registered,
+    /// so discovery and execution spans can parent under it.
+    /// </summary>
+    internal void TryStartSessionActivity()
+    {
+        var sessionContext = _contextProvider.TestSessionContext;
+
+        if (sessionContext.Activity is not null)
+        {
+            return;
+        }
+
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            sessionContext.Activity = TUnitActivitySource.StartActivity(
+                TUnitActivitySource.SpanTestSession,
+                System.Diagnostics.ActivityKind.Internal,
+                default,
+                [
+                    new("tunit.session.id", sessionContext.Id),
+                    new("tunit.filter", sessionContext.TestFilter)
+                ]);
+        }
+    }
+
     private void FinishSessionActivity(bool hasErrors)
     {
         var sessionContext = _contextProvider.TestSessionContext;
