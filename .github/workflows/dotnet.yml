@@ -40,44 +40,26 @@ jobs:
           docker-images: false
           swap-storage: false
 
-      - name: Create Dev Drive (Windows)
+      - name: Setup Dev Drive (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: samypr100/setup-dev-drive@v4
+        with:
+          drive-size: 10GB
+          drive-type: Dynamic
+          trusted-dev-drive: true
+          env-mapping: |
+            NUGET_PACKAGES,{{ DEV_DRIVE }}/.nuget/packages
+
+      - name: Redirect workspace to Dev Drive (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          $vhdPath = 'C:\dev_drive.vhdx'
-
-          # Create and mount VHDX via Hyper-V PowerShell cmdlets (available on GH runners)
-          New-VHD -Path $vhdPath -SizeBytes 10GB -Dynamic | Out-Null
-          $disk = Mount-VHD -Path $vhdPath -PassThru | Get-Disk
-          $disk | Initialize-Disk -PassThru | Out-Null
-          $part = $disk | New-Partition -AssignDriveLetter -UseMaximumSize
-          $driveLetter = $part.DriveLetter
-
-          # Try native Dev Drive first (Windows Server 2025+ / 24H2+)
-          # Gives Defender performance mode, filter optimizations, and CoW block cloning
-          try {
-            $part | Format-Volume -DevDrive -Confirm:$false -Force | Out-Null
-            fsutil devdrv trust "${driveLetter}:"
-            Write-Host "Formatted ${driveLetter}: as Dev Drive (native)"
-          } catch {
-            # Fall back to plain ReFS on older Windows (e.g. Server 2022)
-            $part | Format-Volume -FileSystem ReFS -NewFileSystemLabel 'Build' -Confirm:$false -Force | Out-Null
-            Write-Host "Formatted ${driveLetter}: as ReFS (fallback)"
-          }
-
-          $refsBuildDir = "${driveLetter}:\workspace"
+          $devDrive = $env:DEV_DRIVE
+          $refsBuildDir = "$devDrive\workspace"
           New-Item -Path $refsBuildDir -ItemType Directory -Force | Out-Null
-
-          # Junction the workspace so all subsequent steps transparently use the Dev Drive
           Remove-Item -Path $env:GITHUB_WORKSPACE -Force -Recurse
           cmd /c "mklink /J `"$env:GITHUB_WORKSPACE`" `"$refsBuildDir`""
           Write-Host "Redirected $env:GITHUB_WORKSPACE -> $refsBuildDir"
-
-          # Redirect NuGet package cache to Dev Drive for faster restore/build
-          $nugetDir = "${driveLetter}:\.nuget\packages"
-          New-Item -Path $nugetDir -ItemType Directory -Force | Out-Null
-          "NUGET_PACKAGES=$nugetDir" >> $env:GITHUB_ENV
 
       - uses: actions/checkout@v6
         with:
