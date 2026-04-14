@@ -57,6 +57,8 @@ jobs:
           $devDrive = $env:DEV_DRIVE
           $refsBuildDir = "$devDrive\workspace"
           New-Item -Path $refsBuildDir -ItemType Directory -Force | Out-Null
+          # Move CWD away from workspace so the directory handle is released
+          Set-Location $devDrive
           Remove-Item -Path $env:GITHUB_WORKSPACE -Force -Recurse
           cmd /c "mklink /J `"$env:GITHUB_WORKSPACE`" `"$refsBuildDir`""
           Write-Host "Redirected $env:GITHUB_WORKSPACE -> $refsBuildDir"
