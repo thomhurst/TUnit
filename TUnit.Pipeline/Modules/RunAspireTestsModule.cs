@@ -11,7 +11,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("NetworkTests")]
+[NotInParallel]
 public class RunAspireTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
