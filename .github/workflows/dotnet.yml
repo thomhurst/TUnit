@@ -97,14 +97,6 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
 
-      - name: Docker Setup Docker
-        if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v5.0.0
-
-      - name: Restart Docker to initialize iptables chains
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo systemctl restart docker
-
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
         run: |
