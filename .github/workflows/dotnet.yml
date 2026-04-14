@@ -98,7 +98,7 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Docker Setup Docker
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v5.0.0
 
       - name: Enable Long Paths on Windows
