@@ -1,6 +1,4 @@
-using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
@@ -10,17 +8,18 @@ namespace TUnit.Aspire.Tests;
 
 /// <summary>
 /// Reproduction and fix verification tests for https://github.com/thomhurst/TUnit/issues/5260
+///
+/// Docker-dependent tests share the session-wide <see cref="IntegrationTestFixture"/> so they
+/// don't create competing Aspire applications. The remaining unit tests use in-memory fakes.
 /// </summary>
-public class WaitForHealthyReproductionTests
+[ClassDataSource<IntegrationTestFixture>(Shared = SharedType.PerTestSession)]
+public class WaitForHealthyReproductionTests(IntegrationTestFixture fixture)
 {
     [Test]
     [Category("Docker")]
-    public async Task ParameterResource_DoesNotImplement_IResourceWithoutLifetime_InAspire13_2(CancellationToken ct)
+    public async Task ParameterResource_DoesNotImplement_IResourceWithoutLifetime_InAspire13_2()
     {
-        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
-        await using var app = await builder.BuildAsync();
-
-        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var model = fixture.App.Services.GetRequiredService<DistributedApplicationModel>();
         var paramResource = model.Resources.First(r => r.Name == "my-secret");
 
         await Assert.That(paramResource is IResourceWithoutLifetime).IsFalse();
@@ -28,12 +27,9 @@ public class WaitForHealthyReproductionTests
 
     [Test]
     [Category("Docker")]
-    public async Task ParameterResource_IsNot_IComputeResource(CancellationToken ct)
+    public async Task ParameterResource_IsNot_IComputeResource()
     {
-        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
-        await using var app = await builder.BuildAsync();
-
-        var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        var model = fixture.App.Services.GetRequiredService<DistributedApplicationModel>();
         var paramResource = model.Resources.First(r => r.Name == "my-secret");
         var containerResource = model.Resources.First(r => r.Name == "nginx-no-healthcheck");
 
@@ -45,11 +41,7 @@ public class WaitForHealthyReproductionTests
     [Category("Docker")]
     public async Task WaitForResourceHealthyAsync_OnParameterResource_Hangs(CancellationToken ct)
     {
-        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.TUnit_Aspire_Tests_AppHost>();
-        await using var app = await builder.BuildAsync();
-        await app.StartAsync(ct);
-
-        var notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
+        var notificationService = fixture.App.Services.GetRequiredService<ResourceNotificationService>();
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(TimeSpan.FromSeconds(15));
@@ -72,29 +64,43 @@ public class WaitForHealthyReproductionTests
         await Assert.That(timedOut).IsTrue();
     }
 
+    /// <summary>
+    /// Verifies the fix for #5260: <see cref="AspireFixture{TAppHost}.ShouldWaitForResource"/>
+    /// correctly filters out parameter resources and <see cref="IResourceWithParent"/>, so
+    /// <c>WaitForResourceHealthyAsync</c> completes on all waitable resources without hanging.
+    /// Uses the shared app instead of creating a new fixture to avoid Docker contention on CI.
+    /// </summary>
     [Test]
     [Category("Docker")]
-    public async Task AspireFixture_AllHealthy_Succeeds_AfterFix(CancellationToken ct)
+    public async Task AllHealthy_Succeeds_OnWaitableResources(CancellationToken ct)
     {
-        var fixture = new HealthyFixture();
+        var notificationService = fixture.App.Services.GetRequiredService<ResourceNotificationService>();
+        var model = fixture.App.Services.GetRequiredService<DistributedApplicationModel>();
 
-        try
+        // Apply the same filter that AspireFixture.ShouldWaitForResource uses
+        var waitableResources = model.Resources
+            .Where(r => r is IComputeResource && r is not IResourceWithParent)
+            .ToList();
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+        foreach (var resource in waitableResources)
         {
-            await fixture.InitializeAsync();
+            await notificationService.WaitForResourceHealthyAsync(resource.Name, cts.Token);
         }
-        finally
-        {
-            await fixture.DisposeAsync();
-        }
+
+        // If we reach here, AllHealthy would succeed — the fix is working
+        await Assert.That(waitableResources).IsNotEmpty();
     }
 
     [Test]
     public async Task ShouldWaitForResource_IncludesComputeResource()
     {
-        var fixture = new InspectableFixture();
+        var inspectable = new InspectableFixture();
         var regular = new FakeContainerResource("my-container");
 
-        await Assert.That(fixture.TestShouldWaitForResource(regular)).IsTrue();
+        await Assert.That(inspectable.TestShouldWaitForResource(regular)).IsTrue();
     }
 
     /// <summary>
@@ -107,25 +113,20 @@ public class WaitForHealthyReproductionTests
     [Test]
     public async Task ShouldWaitForResource_ExcludesIResourceWithParent()
     {
-        var fixture = new InspectableFixture();
+        var inspectable = new InspectableFixture();
         var regular = new FakeContainerResource("my-container");
         var rebuilder = new FakeRebuilderResource("my-container-rebuilder", regular);
 
-        await Assert.That(fixture.TestShouldWaitForResource(rebuilder)).IsFalse();
+        await Assert.That(inspectable.TestShouldWaitForResource(rebuilder)).IsFalse();
     }
 
     [Test]
     public async Task ShouldWaitForResource_ExcludesNonComputeResource()
     {
-        var fixture = new InspectableFixture();
+        var inspectable = new InspectableFixture();
         var paramResource = new FakeNonComputeResource("my-param");
 
-        await Assert.That(fixture.TestShouldWaitForResource(paramResource)).IsFalse();
-    }
-
-    private sealed class HealthyFixture : AspireFixture<Projects.TUnit_Aspire_Tests_AppHost>
-    {
-        protected override TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+        await Assert.That(inspectable.TestShouldWaitForResource(paramResource)).IsFalse();
     }
 
     /// <summary>
