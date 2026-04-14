@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -41,7 +42,12 @@ public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicati
             .Options;
 
         await using var dbContext = new TodoDbContext(options) { SchemaName = SchemaName };
-        await dbContext.Database.EnsureCreatedAsync();
+
+        // Use CreateTablesAsync directly instead of EnsureCreatedAsync.
+        // EnsureCreatedAsync calls HasTablesAsync which checks ALL schemas — when parallel
+        // tests share the same database, it sees another schema's tables and skips creation.
+        var creator = dbContext.GetService<IRelationalDatabaseCreator>();
+        await creator.CreateTablesAsync();
     }
 
     protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
