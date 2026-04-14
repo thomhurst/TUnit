@@ -25,6 +25,8 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
     {
         var results = new List<CommandResult>();
 
+        var rootDir = context.Git().RootDirectory.AssertExists().Path;
+
         var testProject = context.Git()
             .RootDirectory
             .AssertExists()
@@ -40,7 +42,7 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
                     ProjectSolution = testProject.Path,
                     Runtime = GetRuntimeIdentifier(),
                     Configuration = "Release",
-                    Output = $"MOCKTESTS_AOT_{framework}",
+                    Output = Path.Combine(rootDir, $"MOCKTESTS_AOT_{framework}"),
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
