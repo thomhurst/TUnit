@@ -139,7 +139,7 @@ internal sealed class ActivityCollector : IDisposable
 
                 foreach (var tag in span.Tags)
                 {
-                    if (tag.Key == "tunit.test.node_uid" && !string.IsNullOrEmpty(tag.Value))
+                    if (tag.Key == TUnitActivitySource.TagTestNodeUid && !string.IsNullOrEmpty(tag.Value))
                     {
                         lookup[tag.Value] = (span.TraceId, span.SpanId);
                         break;
@@ -156,7 +156,7 @@ internal sealed class ActivityCollector : IDisposable
         // Register test case span IDs early so they're available for child span lookups.
         // Children stop before parents in Activity ordering, so we need this pre-registered.
         if (IsTUnitSource(activity.Source.Name) &&
-            activity.GetTagItem("tunit.test.node_uid") is not null)
+            activity.GetTagItem(TUnitActivitySource.TagTestNodeUid) is not null)
         {
             _testCaseSpanIds.TryAdd(activity.SpanId.ToString(), 0);
         }
@@ -169,7 +169,7 @@ internal sealed class ActivityCollector : IDisposable
         while (current is not null)
         {
             if (IsTUnitSource(current.Source.Name) &&
-                current.GetTagItem("tunit.test.node_uid") is not null)
+                current.GetTagItem(TUnitActivitySource.TagTestNodeUid) is not null)
             {
                 return current.SpanId.ToString();
             }
@@ -204,9 +204,9 @@ internal sealed class ActivityCollector : IDisposable
         // Look up the semantic name tag to produce a more descriptive label
         var tagKey = displayName switch
         {
-            TUnitActivitySource.SpanTestCase => "test.case.name",
-            TUnitActivitySource.SpanTestSuite => "test.suite.name",
-            TUnitActivitySource.SpanTestAssembly => "tunit.assembly.name",
+            TUnitActivitySource.SpanTestCase => TUnitActivitySource.TagTestCaseName,
+            TUnitActivitySource.SpanTestSuite => TUnitActivitySource.TagTestSuiteName,
+            TUnitActivitySource.SpanTestAssembly => TUnitActivitySource.TagAssemblyName,
             _ => null
         };
 
@@ -343,7 +343,7 @@ internal sealed class ActivityCollector : IDisposable
 
         // Cleanup: remove test case span from tracking sets once it stops.
         // All child spans will have already stopped by this point (children stop before parents).
-        if (isTUnit && activity.GetTagItem("tunit.test.node_uid") is not null)
+        if (isTUnit && activity.GetTagItem(TUnitActivitySource.TagTestNodeUid) is not null)
         {
             var spanId = activity.SpanId.ToString();
             _testCaseSpanIds.TryRemove(spanId, out _);

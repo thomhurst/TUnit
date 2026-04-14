@@ -187,7 +187,7 @@ When a timeout occurs, the error includes:
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `CreateHttpClient(resourceName, endpointName?)` | `HttpClient` | Creates an HTTP client connected to the named resource |
+| `CreateHttpClient(resourceName, endpointName?)` | `HttpClient` | Creates an HTTP client connected to the named resource. When telemetry collection is enabled, automatically propagates `traceparent` and `baggage` headers for cross-process correlation. |
 | `GetConnectionStringAsync(resourceName, ct?)` | `Task<string?>` | Gets the connection string for the named resource |
 | `WatchResourceLogs(resourceName)` | `IAsyncDisposable` | Streams resource logs to the current test's output |
 
@@ -200,6 +200,7 @@ When a timeout occurs, the error includes:
 | `Args` | Empty | Command-line arguments passed to the AppHost entry point |
 | `ConfigureAppHost(options, settings)` | No-op | Configure `DistributedApplicationOptions` and `HostApplicationBuilderSettings` during builder creation |
 | `ConfigureBuilder(builder)` | No-op | Customize the builder before building |
+| `EnableTelemetryCollection` | `true` | Starts an OTLP receiver that correlates SUT logs to the originating test |
 | `ResourceTimeout` | 60 seconds | How long to wait for startup and resources |
 | `WaitBehavior` | `AllHealthy` | Which resources to wait for |
 | `ResourcesToWaitFor()` | Empty | Resource names when `WaitBehavior` is `Named` |
@@ -273,6 +274,94 @@ public async Task Debug_Api_Behavior()
 ```
 
 Dispose the returned value (or use `await using`) to stop watching.
+
+## Per-Test Telemetry Correlation
+
+By default, `AspireFixture` runs a lightweight OTLP receiver that automatically correlates SUT logs back to the test that triggered them. When a test calls `CreateHttpClient`, the outgoing request carries W3C `traceparent` and `baggage` headers (including `tunit.test.id`). The SUT's OpenTelemetry SDK exports logs with the same TraceId, and TUnit's receiver routes them to the correct test's output.
+
+```csharp
+[Test]
+public async Task Create_Order_Returns_201()
+{
+    var client = fixture.CreateHttpClient("apiservice");
+    var response = await client.PostAsJsonAsync("/api/orders", new { Item = "Widget" });
+
+    await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+    // SUT logs for THIS request automatically appear in THIS test's output
+}
+```
+
+When multiple tests run concurrently against the same resource, each test only sees its own request's logs — correlation is based on TraceId, not the resource name.
+
+### SUT requirements
+
+The SUT must have OpenTelemetry configured to export logs and traces via OTLP. `AspireFixture` automatically injects the following environment variables into all project resources:
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://127.0.0.1:{port}` | Points to TUnit's OTLP receiver |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | Protocol for OTLP export |
+| `OTEL_SERVICE_NAME` | Aspire resource name | Shown as `[service-name]` prefix in test output |
+| `OTEL_BLRP_SCHEDULE_DELAY` | `1000` | Reduces log batch export delay for faster test feedback |
+| `OTEL_BSP_SCHEDULE_DELAY` | `1000` | Reduces span batch export delay for faster test feedback |
+
+The SUT only needs to register the OpenTelemetry exporters — TUnit handles everything else.
+
+**If your SUT uses Aspire `ServiceDefaults`** (the default for `dotnet new aspire` projects), telemetry correlation works out of the box. No additional configuration is needed — `AddServiceDefaults()` already configures OpenTelemetry with OTLP export, and TUnit injects the endpoint automatically.
+
+**If your SUT does not use `ServiceDefaults`**, add the OpenTelemetry packages and register the exporters:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+  <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+</ItemGroup>
+```
+
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddOtlpExporter())
+    .WithLogging(logging => logging.AddOtlpExporter());
+
+builder.Logging.AddOpenTelemetry(otel =>
+{
+    otel.IncludeFormattedMessage = true;
+    otel.IncludeScopes = true;
+});
+```
+
+Note that `OTEL_SERVICE_NAME` and `OTEL_EXPORTER_OTLP_ENDPOINT` are injected by TUnit, so the SUT does not need `.ConfigureResource()` or any endpoint configuration.
+
+The key pieces are:
+- **`AddAspNetCoreInstrumentation()`** — ensures incoming HTTP requests create spans that carry the test's TraceId, so logs within that request context inherit it.
+- **`AddOtlpExporter()`** on both tracing and logging — exports telemetry to TUnit's OTLP receiver (endpoint is injected automatically).
+- **`IncludeFormattedMessage = true`** — without this, log bodies are empty in the test output. Aspire `ServiceDefaults` sets this by default.
+
+### Dashboard coexistence
+
+If the Aspire dashboard is enabled, TUnit's receiver acts as a transparent proxy — it processes telemetry for correlation and forwards it to the dashboard's original OTLP endpoint. Both TUnit and the dashboard receive the data.
+
+### Disabling telemetry collection
+
+Override `EnableTelemetryCollection` to opt out:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>
+{
+    protected override bool EnableTelemetryCollection => false;
+}
+```
+
+When disabled, `CreateHttpClient` delegates directly to Aspire's default implementation without adding trace propagation headers.
+
+### Limitations
+
+- **Startup logs**: Logs emitted during app startup have no active trace context and cannot be correlated to a test. Use `WatchResourceLogs` for these.
+- **Non-HTTP triggers**: Background jobs, timers, and message queue consumers that generate logs without an incoming HTTP request won't carry the test's TraceId.
+- **Container resources**: Infrastructure resources like Redis and PostgreSQL don't have an OpenTelemetry SDK and can't export OTLP. Use `WatchResourceLogs` for their logs.
 
 ## Building Fixture Chains
 

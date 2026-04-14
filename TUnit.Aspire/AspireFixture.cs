@@ -27,6 +27,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     where TAppHost : class
 {
     private DistributedApplication? _app;
+    private Telemetry.OtlpReceiver? _otlpReceiver;
+    private HttpMessageHandler? _httpHandler;
 
     /// <summary>
     /// The running Aspire distributed application.
@@ -37,12 +39,38 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> for the named resource.
+    /// When <see cref="EnableTelemetryCollection"/> is <c>true</c>, the returned client
+    /// automatically propagates W3C <c>traceparent</c> and <c>baggage</c> headers
+    /// (including <c>tunit.test.id</c>) to the SUT for cross-process correlation.
+    /// Otherwise, delegates to Aspire's default <c>CreateHttpClient</c>.
     /// </summary>
     /// <param name="resourceName">The name of the resource to connect to.</param>
     /// <param name="endpointName">Optional endpoint name if the resource exposes multiple endpoints.</param>
     /// <returns>An <see cref="HttpClient"/> configured to connect to the resource.</returns>
     public HttpClient CreateHttpClient(string resourceName, string? endpointName = null)
-        => App.CreateHttpClient(resourceName, endpointName);
+    {
+        if (!EnableTelemetryCollection)
+        {
+            return App.CreateHttpClient(resourceName, endpointName);
+        }
+
+        // Share a single handler across all HttpClient instances. The handler is stateless
+        // (reads Activity.Current which is async-local/per-test), so sharing is safe for
+        // correctness while reusing the SocketsHttpHandler connection pool across tests.
+        _httpHandler ??= new Http.TUnitBaggagePropagationHandler
+        {
+            InnerHandler = new SocketsHttpHandler
+            {
+                // Match Aspire's CreateHttpClient behavior: trust dev certs for HTTPS resources
+                SslOptions = { RemoteCertificateValidationCallback = (_, _, _, _) => true },
+            },
+        };
+
+        return new HttpClient(_httpHandler, disposeHandler: false)
+        {
+            BaseAddress = App.GetEndpoint(resourceName, endpointName),
+        };
+    }
 
     /// <summary>
     /// Gets the connection string for the named resource.
@@ -141,6 +169,19 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     protected virtual void ConfigureBuilder(IDistributedApplicationTestingBuilder builder) { }
 
     /// <summary>
+    /// When <c>true</c>, starts an OTLP receiver that collects telemetry from SUT resources
+    /// and routes correlated logs to the originating test's output. SUT resources must have
+    /// OpenTelemetry configured (e.g., via Aspire's standard ServiceDefaults) — no TUnit-specific
+    /// code is needed in the SUT.
+    /// </summary>
+    /// <remarks>
+    /// The receiver overrides <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> on project resources. If the
+    /// Aspire dashboard is enabled, received telemetry is forwarded to the dashboard's original
+    /// OTLP endpoint so both TUnit and the dashboard receive data.
+    /// </remarks>
+    protected virtual bool EnableTelemetryCollection => true;
+
+    /// <summary>
     /// Resource wait timeout. Default: 60 seconds.
     /// </summary>
     protected virtual TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
@@ -211,9 +252,24 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     {
         var sw = Stopwatch.StartNew();
 
+        // Start OTLP receiver before building the app so we can inject the endpoint
+        if (EnableTelemetryCollection)
+        {
+            LogProgress("Starting OTLP telemetry receiver...");
+            StartOtlpReceiver();
+            LogProgress($"OTLP receiver listening on port {_otlpReceiver!.Port}");
+        }
+
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost);
         ConfigureBuilder(builder);
+
+        // Configure OTLP endpoint on project resources AFTER user's ConfigureBuilder
+        if (_otlpReceiver is not null)
+        {
+            ConfigureOtlpEndpoints(builder);
+        }
+
         LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 
         LogProgress("Building application...");
@@ -295,7 +351,64 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             LogProgress("Application disposed.");
         }
 
+        if (_otlpReceiver is not null)
+        {
+            await _otlpReceiver.DisposeAsync();
+            _otlpReceiver = null;
+        }
+
+        _httpHandler?.Dispose();
+        _httpHandler = null;
+
         GC.SuppressFinalize(this);
+    }
+
+    // --- OTLP Telemetry ---
+
+    private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string OtelExporterEndpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT";
+    private const string OtelExporterProtocolEnvVar = "OTEL_EXPORTER_OTLP_PROTOCOL";
+    private const string OtelServiceNameEnvVar = "OTEL_SERVICE_NAME";
+    private const string OtelBlrpScheduleDelayEnvVar = "OTEL_BLRP_SCHEDULE_DELAY";
+    private const string OtelBspScheduleDelayEnvVar = "OTEL_BSP_SCHEDULE_DELAY";
+
+    private void StartOtlpReceiver()
+    {
+        // Check if there's an existing upstream OTLP endpoint (e.g., Aspire dashboard)
+        // that we should forward to after processing.
+        var upstreamEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
+        _otlpReceiver = new Telemetry.OtlpReceiver(upstreamEndpoint);
+        _otlpReceiver.Start();
+    }
+
+    private void ConfigureOtlpEndpoints(IDistributedApplicationTestingBuilder builder)
+    {
+        var otlpEndpoint = $"http://127.0.0.1:{_otlpReceiver!.Port}";
+
+        foreach (var resource in builder.Resources)
+        {
+            if (resource is ProjectResource projectResource)
+            {
+                var resourceName = projectResource.Name;
+
+                projectResource.Annotations.Add(
+                    new EnvironmentCallbackAnnotation(context =>
+                    {
+                        context.EnvironmentVariables[OtelExporterEndpointEnvVar] = otlpEndpoint;
+                        context.EnvironmentVariables[OtelExporterProtocolEnvVar] = "http/protobuf";
+
+                        // Set the service name from the Aspire resource name so
+                        // the SUT doesn't need .ConfigureResource(r => r.AddService(...)).
+                        // Code-level configuration in the SUT takes precedence.
+                        context.EnvironmentVariables.TryAdd(OtelServiceNameEnvVar, resourceName);
+
+                        // Reduce batch export delays for faster test feedback.
+                        // Default SDK value is 5000ms which adds unnecessary latency in tests.
+                        context.EnvironmentVariables.TryAdd(OtelBlrpScheduleDelayEnvVar, "1000");
+                        context.EnvironmentVariables.TryAdd(OtelBspScheduleDelayEnvVar, "1000");
+                    }));
+            }
+        }
     }
 
     /// <summary>

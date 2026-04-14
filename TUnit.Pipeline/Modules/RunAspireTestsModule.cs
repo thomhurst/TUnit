@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
@@ -10,11 +11,16 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[NotInParallel("NetworkTests"), RunOnLinuxOnly, RunOnWindowsOnly]
+[NotInParallel]
 public class RunAspireTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return null;
+        }
+
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Aspire.Tests.csproj").AssertExists();
 
         return await context.DotNet().Run(new DotNetRunOptions

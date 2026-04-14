@@ -11,4 +11,8 @@
     <PackageReference Include="Aspire.Hosting.AppHost" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Aspire.Tests.ApiService\TUnit.Aspire.Tests.ApiService.csproj" />
+  </ItemGroup>
+
 </Project>

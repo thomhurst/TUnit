@@ -108,10 +108,6 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
 
-      - name: Docker Setup Docker
-        if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v5.0.0
-
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
         run: |
@@ -155,16 +151,6 @@ jobs:
           "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
           "-p:RepositoryBranch=${{ steps.gitversion.outputs.branchName }}"
           "-p:RepositoryCommit=${{ steps.gitversion.outputs.sha }}"
-
-      - name: Publish Mock Tests AOT
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          for fw in net8.0 net9.0 net10.0; do
-            dotnet publish TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj -c Release \
-              --use-current-runtime -p:Aot=true -o "MOCKTESTS_AOT_${fw}" --framework "${fw}" &
-          done
-          wait
 
       - name: Expose GitHub Actions Runtime
         uses: actions/github-script@v9

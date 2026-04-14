@@ -10,7 +10,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-[DependsOn<RunMockTestsModule>]
+[DependsOn<PublishMockTestsAOTModule>]
 public class RunMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
 {
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()

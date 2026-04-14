@@ -34,8 +34,8 @@ internal static class RetryHelper
                     var activity = testContext.Activity;
                     if (activity is not null)
                     {
-                        activity.SetTag("test.case.result.status", "fail");
-                        activity.SetTag("tunit.test.retry_attempt", attempt);
+                        activity.SetTag(TUnitActivitySource.TagTestCaseResultStatus, "fail");
+                        activity.SetTag(TUnitActivitySource.TagTestRetryAttempt, attempt);
                         TUnitActivitySource.RecordException(activity, ex);
                         TUnitActivitySource.StopActivity(activity);
                         testContext.Activity = null;

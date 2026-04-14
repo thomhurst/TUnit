@@ -147,7 +147,7 @@ internal sealed class HookExecutor
             return;
         }
 
-        activity.SetTag("tunit.test.count", sessionContext.AllTests.Count);
+        activity.SetTag(TUnitActivitySource.TagTestCount, sessionContext.AllTests.Count);
 
         if (hasErrors)
         {
@@ -172,7 +172,7 @@ internal sealed class HookExecutor
                 System.Diagnostics.ActivityKind.Internal,
                 sessionActivity?.Context ?? default,
                 [
-                    new("tunit.assembly.name", assembly.GetName().Name)
+                    new(TUnitActivitySource.TagAssemblyName, assembly.GetName().Name)
                 ]);
         }
 #endif
@@ -303,7 +303,7 @@ internal sealed class HookExecutor
             return;
         }
 
-        activity.SetTag("tunit.test.count", assemblyContext.TestCount);
+        activity.SetTag(TUnitActivitySource.TagTestCount, assemblyContext.TestCount);
 
         if (hasErrors)
         {
@@ -330,7 +330,7 @@ internal sealed class HookExecutor
                 System.Diagnostics.ActivityKind.Internal,
                 assemblyActivity?.Context ?? default,
                 [
-                    new("test.suite.name", testClass.Name),
+                    new(TUnitActivitySource.TagTestSuiteName, testClass.Name),
                     new("tunit.class.namespace", testClass.Namespace)
                 ]);
         }
@@ -466,7 +466,7 @@ internal sealed class HookExecutor
             return;
         }
 
-        activity.SetTag("tunit.test.count", classContext.TestCount);
+        activity.SetTag(TUnitActivitySource.TagTestCount, classContext.TestCount);
 
         if (hasErrors)
         {
