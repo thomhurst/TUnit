@@ -378,7 +378,15 @@ internal sealed class ConcurrentStringWriter : TextWriter
     {
         if (_builder.Length > MaxOutputLength)
         {
-            _builder.Remove(0, _builder.Length - TrimTarget);
+            var removeCount = _builder.Length - TrimTarget;
+
+            // Avoid splitting a surrogate pair at the trim boundary
+            if (removeCount > 0 && char.IsHighSurrogate(_builder[removeCount - 1]))
+            {
+                removeCount--;
+            }
+
+            _builder.Remove(0, removeCount);
             _truncated = true;
         }
     }
