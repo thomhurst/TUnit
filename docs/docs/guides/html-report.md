@@ -66,7 +66,7 @@ GitHub Actions does not expose `ACTIONS_RUNTIME_TOKEN` to shell `run:` steps by 
 #### Option A: `actions/github-script` (recommended, first-party)
 
 ```yaml
-- name: Expose GitHub Actions Runtime
+- name: Enable Automated Test Report Artifact Upload
   uses: actions/github-script@v7
   with:
     script: |
@@ -77,17 +77,7 @@ GitHub Actions does not expose `ACTIONS_RUNTIME_TOKEN` to shell `run:` steps by 
   run: dotnet run --project MyTests
 ```
 
-#### Option B: `crazy-max/ghaction-github-runtime`
-
-```yaml
-- name: Expose GitHub Actions Runtime
-  uses: crazy-max/ghaction-github-runtime@v3
-
-- name: Run Tests
-  run: dotnet run --project MyTests
-```
-
-#### Option C: Manual `upload-artifact` step
+#### Option B: Manual `upload-artifact` step
 
 If you prefer not to expose the runtime token, you can upload the report yourself:
 
@@ -108,7 +98,7 @@ If you prefer not to expose the runtime token, you can upload the report yoursel
 After the workflow run completes:
 
 1. Go to the workflow run page
-2. Look for the artifact link in the step summary (Options A/B), or
+2. Look for the artifact link in the step summary (Option A), or
 3. Find the report in the **Artifacts** section at the bottom of the page (all options)
 
 ## Distributed Tracing
