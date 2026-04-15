@@ -4,6 +4,11 @@
 
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!-- Suppress XML doc warnings — not all public APIs are documented yet,
+             and some existing comments have minor formatting issues -->
+        <NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1574;CS1584;CS1587;CS1658;CS1734;CS0419</NoWarn>
+
         <TrimmerSingleWarn>false</TrimmerSingleWarn>
 
         <!-- Suppress AD0001 analyzer crash in .NET 9 ILLink DynamicallyAccessedMembersAnalyzer.
