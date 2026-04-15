@@ -101,10 +101,6 @@ public partial class TestContext : Context,
     // Use ConcurrentDictionary for thread-safe access during parallel test discovery
     internal static readonly ConcurrentDictionary<string, List<string>> InternalParametersDictionary = new();
 
-    private StringWriter? _outputWriter;
-
-    private StringWriter? _errorWriter;
-
     private string? _buildTimeOutput;
     private string? _buildTimeErrorOutput;
 

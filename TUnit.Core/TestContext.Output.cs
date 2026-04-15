@@ -51,14 +51,12 @@ public partial class TestContext
 
     void ITestOutput.WriteLine(string message)
     {
-        _outputWriter ??= new StringWriter();
-        _outputWriter.WriteLine(message);
+        OutputWriter.WriteLine(message);
     }
 
     void ITestOutput.WriteError(string message)
     {
-        _errorWriter ??= new StringWriter();
-        _errorWriter.WriteLine(message);
+        ErrorOutputWriter.WriteLine(message);
     }
 
     /// <summary>
@@ -77,47 +75,27 @@ public partial class TestContext
         return GetOutputError();
     }
 
-    internal string GetOutput()
+    internal string GetOutput() => CombineOutputs(_buildTimeOutput, base.GetStandardOutput());
+
+    internal string GetOutputError() => CombineOutputs(_buildTimeErrorOutput, base.GetErrorOutput());
+
+    private static string CombineOutputs(string? buildTimeOutput, string runtimeOutput)
     {
+        if (string.IsNullOrEmpty(buildTimeOutput))
+        {
+            return runtimeOutput;
+        }
+
+        if (string.IsNullOrEmpty(runtimeOutput))
+        {
+            return buildTimeOutput!;
+        }
+
         var vsb = new ValueStringBuilder(stackalloc char[256]);
-
-        var buildOutput = _buildTimeOutput ?? string.Empty;
-        var baseOutput = base.GetStandardOutput();  // Get output from base class (Context)
-        var writerOutput = _outputWriter?.ToString() ?? string.Empty;
-
-        AppendIfNotNullOrEmpty(ref vsb, buildOutput);
-        AppendIfNotNullOrEmpty(ref vsb, baseOutput);
-        AppendIfNotNullOrEmpty(ref vsb, writerOutput);
-
+        vsb.Append(buildTimeOutput);
+        vsb.Append(Environment.NewLine);
+        vsb.Append(runtimeOutput);
         return vsb.ToString();
     }
 
-    internal string GetOutputError()
-    {
-        var vsb = new ValueStringBuilder(stackalloc char[256]);
-
-        var buildErrorOutput = _buildTimeErrorOutput ?? string.Empty;
-        var baseErrorOutput = base.GetErrorOutput();  // Get error output from base class (Context)
-        var writerErrorOutput = _errorWriter?.ToString() ?? string.Empty;
-
-        AppendIfNotNullOrEmpty(ref vsb, buildErrorOutput);
-        AppendIfNotNullOrEmpty(ref vsb, baseErrorOutput);
-        AppendIfNotNullOrEmpty(ref vsb, writerErrorOutput);
-
-        return vsb.ToString();
-    }
-
-    private static void AppendIfNotNullOrEmpty(ref ValueStringBuilder builder, string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return;
-        }
-
-        if (builder.Length > 0)
-        {
-            builder.Append(Environment.NewLine);
-        }
-        builder.Append(value);
-    }
 }
