@@ -78,16 +78,22 @@ internal static class MockWrapperTypeBuilder
         var argPassList = MockImplBuilder.GetArgPassList(method);
         var returnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
 
+        // When the method is an explicit interface impl on the underlying object,
+        // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
+        var target = method.ExplicitInterfaceName is not null
+            ? $"(({method.ExplicitInterfaceName})Object)"
+            : "Object";
+
         if (method.IsVoid && !method.IsAsync)
         {
             using (writer.Block($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
             {
-                writer.AppendLine($"Object.{method.Name}{typeParams}({argPassList});");
+                writer.AppendLine($"{target}.{method.Name}{typeParams}({argPassList});");
             }
         }
         else
         {
-            writer.AppendLine($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints} => Object.{method.Name}{typeParams}({argPassList});");
+            writer.AppendLine($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints} => {target}.{method.Name}{typeParams}({argPassList});");
         }
     }
 
@@ -96,8 +102,14 @@ internal static class MockWrapperTypeBuilder
         var interfaceName = prop.ExplicitInterfaceName ?? prop.DeclaringInterfaceName ?? model.FullyQualifiedName;
         var returnType = prop.ReturnType;
 
-        var getter = prop.HasGetter ? $"get => Object.{prop.Name}; " : "";
-        var setter = prop.HasSetter ? $"set => Object.{prop.Name} = value; " : "";
+        // When the property is an explicit interface impl on the underlying object,
+        // we must cast to access the correct property.
+        var target = prop.ExplicitInterfaceName is not null
+            ? $"(({prop.ExplicitInterfaceName})Object)"
+            : "Object";
+
+        var getter = prop.HasGetter ? $"get => {target}.{prop.Name}; " : "";
+        var setter = prop.HasSetter ? $"set => {target}.{prop.Name} = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.{prop.Name} {{ {getter}{setter}}}");
     }

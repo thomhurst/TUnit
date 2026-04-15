@@ -514,6 +514,26 @@ internal static class MockImplBuilder
         var typeParams = GetTypeParameterList(method);
         var constraints = GetConstraintClauses(method);
 
+        if (method.ExplicitInterfaceName is not null)
+        {
+            if (method.ExplicitInterfaceCanDelegate)
+            {
+                // Return type is compatible (e.g. IEnumerable.GetEnumerator → IEnumerable<T>.GetEnumerator)
+                // — delegate to the public method.
+                var argPassList = GetArgPassList(method);
+                writer.AppendLine($"{signatureReturnType} {method.ExplicitInterfaceName}.{method.Name}{typeParams}({paramList}){constraints} => {method.Name}({argPassList});");
+            }
+            else
+            {
+                // Return types are incompatible — dispatch through the engine with a dedicated member id.
+                using (writer.Block($"{signatureReturnType} {method.ExplicitInterfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
+                {
+                    GenerateEngineDispatchBody(writer, method);
+                }
+            }
+            return;
+        }
+
         using (writer.Block($"public {signatureReturnType} {method.Name}{typeParams}({paramList}){constraints}"))
         {
             GenerateEngineDispatchBody(writer, method);
@@ -805,6 +825,24 @@ internal static class MockImplBuilder
 
     private static void GenerateInterfaceProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
+        if (prop.ExplicitInterfaceName is not null)
+        {
+            // Explicit interface implementation — delegates to the public property
+            // with the same name (different return type from a different interface).
+            writer.AppendLine($"{prop.ReturnType} {prop.ExplicitInterfaceName}.{prop.Name}");
+            writer.OpenBrace();
+            if (prop.HasGetter)
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault});");
+            }
+            if (prop.HasSetter)
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
+            }
+            writer.CloseBrace();
+            return;
+        }
+
         writer.AppendLine($"public {prop.ReturnType} {prop.Name}");
         writer.OpenBrace();
 

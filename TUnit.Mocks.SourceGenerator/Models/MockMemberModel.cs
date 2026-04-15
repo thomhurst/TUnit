@@ -25,6 +25,13 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public EquatableArray<MockTypeParameterModel> TypeParameters { get; init; } = EquatableArray<MockTypeParameterModel>.Empty;
     public string? ExplicitInterfaceName { get; init; }
     /// <summary>
+    /// When true, the explicit interface impl can safely delegate to the public method
+    /// with the same name (return types are compatible, e.g. IEnumerable.GetEnumerator → IEnumerable&lt;T&gt;.GetEnumerator).
+    /// When false, the explicit impl needs its own engine dispatch (incompatible return types).
+    /// Only meaningful when <see cref="ExplicitInterfaceName"/> is not null.
+    /// </summary>
+    public bool ExplicitInterfaceCanDelegate { get; init; }
+    /// <summary>
     /// The fully qualified name of the interface that declares this member.
     /// Used by the wrapper type builder for correct explicit interface forwarding.
     /// </summary>
@@ -89,6 +96,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && Parameters.Equals(other.Parameters)
             && TypeParameters.Equals(other.TypeParameters)
             && ExplicitInterfaceName == other.ExplicitInterfaceName
+            && ExplicitInterfaceCanDelegate == other.ExplicitInterfaceCanDelegate
             && DeclaringInterfaceName == other.DeclaringInterfaceName
             && NullableAnnotation == other.NullableAnnotation
             && SmartDefault == other.SmartDefault
@@ -114,6 +122,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             return hash;
         }

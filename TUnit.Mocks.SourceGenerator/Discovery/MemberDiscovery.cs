@@ -15,6 +15,9 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </summary>
 internal static class MemberDiscovery
 {
+    /// <summary>Sentinel index for non-mockable members (sealed, non-virtual) that block the interface loop.</summary>
+    private const int NonMockableIndex = -1;
+
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
     {
@@ -22,7 +25,8 @@ internal static class MemberDiscovery
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
 
-        var seenMethods = new HashSet<string>();
+        var seenMethods = new Dictionary<string, int>(); // key → index in methods list
+        var seenFullMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
 
@@ -37,7 +41,7 @@ internal static class MemberDiscovery
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
             ProcessClassMembers(typeSymbol, compilationAssembly, methods, properties, events,
-                seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
         foreach (var iface in interfaces)
@@ -61,9 +65,25 @@ internal static class MemberDiscovery
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                     {
                         var key = GetMethodKey(method);
-                        if (!seenMethods.Add(key)) continue;
+                        if (seenMethods.TryGetValue(key, out var existingIdx))
+                        {
+                            // Same name+params already seen. Check if return type differs
+                            // (e.g. IEnumerable<T>.GetEnumerator vs IEnumerable.GetEnumerator).
+                            var fullKey = GetFullMethodKey(method);
+                            if (!seenFullMethods.Add(fullKey)) continue; // true duplicate
 
-                        methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
+                            // Signature collision with different return type → explicit interface impl.
+                            // If explicit return type is an interface, the public method's return type
+                            // likely implements it (e.g. IEnumerator<T> : IEnumerator) → safe to delegate.
+                            var canDelegate = IsReturnTypeConvertible(method.ReturnType);
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
+                        }
+                        else
+                        {
+                            seenMethods[key] = methods.Count;
+                            seenFullMethods.Add(GetFullMethodKey(method));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
+                        }
                         break;
                     }
 
@@ -74,7 +94,17 @@ internal static class MemberDiscovery
                         {
                             if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
+                                // Check if return type differs (e.g. IFoo.Tag:string vs IBar.Tag:int)
+                                var existingProp = properties[existingIndex.Value];
+                                if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
+                                {
+                                    // Signature collision with different return type → explicit interface impl
+                                    properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly));
+                                }
+                                else
+                                {
+                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
+                                }
                             }
                         }
                         else
@@ -134,7 +164,8 @@ internal static class MemberDiscovery
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
 
-        var seenMethods = new HashSet<string>();
+        var seenMethods = new Dictionary<string, int>(); // key → index in methods list
+        var seenFullMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
 
@@ -167,8 +198,22 @@ internal static class MemberDiscovery
                         case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                         {
                             var key = GetMethodKey(method);
-                            if (!seenMethods.Add(key)) continue;
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn));
+                            if (seenMethods.TryGetValue(key, out var existingIdx))
+                            {
+                                var fullKey = GetFullMethodKey(method);
+                                if (!seenFullMethods.Add(fullKey)) continue;
+
+                                var canDelegate = IsReturnTypeConvertible(method.ReturnType);
+                                methods.Add(CreateMethodModel(method, ref memberIdCounter,
+                                    interfaceFqn, declaringInterfaceName: interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
+                            }
+                            else
+                            {
+                                seenMethods[key] = methods.Count;
+                                seenFullMethods.Add(GetFullMethodKey(method));
+                                methods.Add(CreateMethodModel(method, ref memberIdCounter,
+                                    null, declaringInterfaceName: interfaceFqn));
+                            }
                             break;
                         }
 
@@ -179,7 +224,15 @@ internal static class MemberDiscovery
                             {
                                 if (existingIndex.HasValue)
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
+                                    var existingProp = properties[existingIndex.Value];
+                                    if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
+                                    {
+                                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
+                                    }
+                                    else
+                                    {
+                                        MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
+                                    }
                                 }
                             }
                             else
@@ -234,7 +287,8 @@ internal static class MemberDiscovery
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
-        HashSet<string> seenMethods,
+        Dictionary<string, int> seenMethods,
+        HashSet<string> seenFullMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
@@ -255,10 +309,23 @@ internal static class MemberDiscovery
             {
                 if (member.IsStatic) continue;
 
-                // Skip private members and sealed overrides (can't override them)
+                // Skip private members
                 if (member.DeclaredAccessibility == Accessibility.Private) continue;
-                if (member is IMethodSymbol { IsSealed: true }) continue;
-                if (member is IPropertySymbol { IsSealed: true }) continue;
+
+                // Sealed overrides can't be re-overridden, but must still be registered
+                // in the seen sets to block the base virtual from being collected.
+                if (member is IMethodSymbol { IsSealed: true } sealedMethod)
+                {
+                    var sealedKey = GetMethodKey(sealedMethod);
+                    seenMethods.TryAdd(sealedKey, NonMockableIndex);
+                    seenFullMethods.Add(GetFullMethodKey(sealedMethod));
+                    continue;
+                }
+                if (member is IPropertySymbol { IsSealed: true } sealedProp)
+                {
+                    seenProperties.TryAdd($"P:{sealedProp.Name}", null);
+                    continue;
+                }
 
                 // Skip members inaccessible from the compilation assembly
                 // (e.g., internal virtual methods from external assemblies like Azure SDK)
@@ -271,14 +338,17 @@ internal static class MemberDiscovery
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                     {
                         var key = GetMethodKey(method);
+                        // Seed both seen sets so the interface loop doesn't re-add class members
+                        seenFullMethods.Add(GetFullMethodKey(method));
                         if (method.IsAbstract || method.IsVirtual || method.IsOverride)
                         {
-                            if (!seenMethods.Add(key)) continue;
+                            if (seenMethods.ContainsKey(key)) continue;
+                            seenMethods[key] = methods.Count;
                             methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
                         }
                         else
                         {
-                            seenMethods.Add(key);
+                            seenMethods.TryAdd(key, NonMockableIndex);
                         }
                         break;
                     }
@@ -470,7 +540,7 @@ internal static class MemberDiscovery
         return CreateMethodModel(invokeMethod, ref memberIdCounter, null);
     }
 
-    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null)
+    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false)
     {
         var returnType = method.ReturnType;
         var isAsync = returnType.IsAsyncReturnType();
@@ -519,6 +589,7 @@ internal static class MemberDiscovery
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,
+            ExplicitInterfaceCanDelegate = explicitInterfaceCanDelegate,
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = returnType.NullableAnnotation.ToString(),
             SmartDefault = isVoid ? "" : returnType.GetSmartDefault(returnType.IsNullableAnnotated()),
@@ -766,6 +837,29 @@ internal static class MemberDiscovery
         return $"M:{method.Name}{typeParams}({paramTypes})";
     }
 
+    /// <summary>
+    /// Full method key INCLUDING return type — used to distinguish interface methods that share
+    /// name+params but differ in return type (e.g. IEnumerable&lt;T&gt;.GetEnumerator vs
+    /// IEnumerable.GetEnumerator). The second one needs explicit interface implementation.
+    /// </summary>
+    private static string GetFullMethodKey(IMethodSymbol method)
+    {
+        return $"{GetMethodKey(method)}:{method.ReturnType.GetFullyQualifiedName()}";
+    }
+
+    /// <summary>
+    /// Heuristic: can the explicit impl delegate to the public method?
+    /// We lack both ITypeSymbols for a proper assignability check, so we use TypeKind:
+    /// if the explicit return type is an interface, the public type likely implements it
+    /// (e.g. IEnumerator&lt;T&gt; : IEnumerator). Class/struct mismatches (int vs string) cannot delegate.
+    /// </summary>
+    private static bool IsReturnTypeConvertible(ITypeSymbol explicitReturnType)
+    {
+        // Callers already confirmed the return types differ (via full-key mismatch),
+        // so identity is unreachable — go straight to the heuristic.
+        return explicitReturnType.TypeKind == TypeKind.Interface;
+    }
+
     private static string? FormatDefaultValue(IParameterSymbol param)
     {
         if (!param.HasExplicitDefaultValue) return null;
@@ -837,7 +931,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
-        HashSet<string> seenMethods,
+        Dictionary<string, int> seenMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
@@ -847,7 +941,8 @@ internal static class MemberDiscovery
             case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
             {
                 var key = GetMethodKey(method);
-                if (!seenMethods.Add(key)) break;
+                if (seenMethods.ContainsKey(key)) break;
+                seenMethods[key] = methods.Count;
 
                 var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn) with
                 {

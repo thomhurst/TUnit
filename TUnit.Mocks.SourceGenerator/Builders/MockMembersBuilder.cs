@@ -45,7 +45,13 @@ internal static class MockMembersBuilder
                 // signature to avoid CS0111 collisions. A method needs disambiguation when
                 // some other method on the model shares the same name AND the same
                 // matchable-parameter signature (i.e. parameters excluding out).
-                var methodsWithDisambiguation = ApplyOutDisambiguation(model.Methods);
+                // Exclude non-static-abstract explicit interface implementations — they are
+                // forwarding shims (e.g. IEnumerable.GetEnumerator) with no independent
+                // setup/verify. Static abstract methods legitimately use ExplicitInterfaceName
+                // for bridge interface generation and still need setup extensions.
+                var instanceMethods = new EquatableArray<MockMemberModel>(
+                    model.Methods.Where(m => m.ExplicitInterfaceName is null || m.IsStaticAbstract).ToImmutableArray());
+                var methodsWithDisambiguation = ApplyOutDisambiguation(instanceMethods);
 
                 // Methods
                 foreach (var method in methodsWithDisambiguation)
@@ -58,7 +64,7 @@ internal static class MockMembersBuilder
                 // Properties -- extension properties via C# 14 extension blocks
                 // (skip ref struct properties — can't use PropertyMockCall<RefStruct>)
                 var memberProps = model.Properties
-                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && !p.IsReturnTypeStaticAbstractInterface && (p.HasGetter || p.HasSetter))
+                    .Where(p => !p.IsIndexer && !p.IsRefStructReturn && !p.IsReturnTypeStaticAbstractInterface && (p.HasGetter || p.HasSetter) && (p.ExplicitInterfaceName is null || p.IsStaticAbstract))
                     .ToList();
                 if (memberProps.Count > 0)
                 {
@@ -81,6 +87,7 @@ internal static class MockMembersBuilder
                 instanceEvents.ToImmutableArray());
             foreach (var method in model.Methods)
             {
+                if (method.ExplicitInterfaceName is not null && !method.IsStaticAbstract) continue;
                 if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
                 writer.AppendLine();
                 GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility);
