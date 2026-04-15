@@ -1104,4 +1104,83 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public Task Interface_Inheriting_IEnumerable_Generic()
+    {
+        var source = """
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+
+            public interface ITestEnum<T> : IEnumerable<T>
+            {
+            }
+
+            public interface ITest
+            {
+                ITestEnum<string> TestEnum { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITestEnum<string>>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_Directly_Inheriting_IEnumerable()
+    {
+        var source = """
+            using System.Collections;
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+
+            public interface ICustomCollection : IEnumerable<int>
+            {
+                int Count { get; }
+                void Add(int item);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ICustomCollection>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_Inheriting_Nested_Generic_IEnumerable()
+    {
+        var source = """
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+
+            public interface IPagedResult<T> : IEnumerable<T>
+            {
+                int TotalCount { get; }
+                int PageSize { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IPagedResult<string>>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
