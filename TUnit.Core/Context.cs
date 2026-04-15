@@ -47,10 +47,14 @@ public abstract class Context : IContext, IDisposable
 
     private ConcurrentStringWriter? _outputWriter;
     private ConcurrentStringWriter? _errorOutputWriter;
+    private ConcurrentStringWriter GetOutputWriter() =>
+        LazyInitializer.EnsureInitialized(ref _outputWriter, () => new ConcurrentStringWriter(GetOutputBuilder(), GetOutputLock()))!;
+    private ConcurrentStringWriter GetErrorOutputWriter() =>
+        LazyInitializer.EnsureInitialized(ref _errorOutputWriter, () => new ConcurrentStringWriter(GetErrorOutputBuilder(), GetErrorOutputLock()))!;
 
-    public TextWriter OutputWriter => _outputWriter ??= new ConcurrentStringWriter(GetOutputBuilder(), GetOutputLock());
+    public TextWriter OutputWriter => GetOutputWriter();
 
-    public TextWriter ErrorOutputWriter => _errorOutputWriter ??= new ConcurrentStringWriter(GetErrorOutputBuilder(), GetErrorOutputLock());
+    public TextWriter ErrorOutputWriter => GetErrorOutputWriter();
 
     // Internal accessors for console interceptor line buffers
     internal ConsoleLineBuffer ConsoleStdOutLineBuffer =>
