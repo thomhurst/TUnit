@@ -59,17 +59,21 @@ public class TestSessionContext : Context
 
     public required string? TestFilter { get; init; }
 
+    private readonly Lock _lock = new();
     private readonly List<AssemblyHookContext> _assemblies = [];
     private ClassHookContext[]? _cachedTestClasses;
     private TestContext[]? _cachedAllTests;
 
     public void AddAssembly(AssemblyHookContext assemblyHookContext)
     {
-        _assemblies.Add(assemblyHookContext);
-        InvalidateCaches();
+        lock (_lock)
+        {
+            _assemblies.Add(assemblyHookContext);
+            InvalidateCaches();
+        }
     }
 
-    public IReadOnlyList<AssemblyHookContext> Assemblies => _assemblies;
+    public IReadOnlyList<AssemblyHookContext> Assemblies { get { lock (_lock) return [.. _assemblies]; } }
 
     public IReadOnlyList<ClassHookContext> TestClasses => _cachedTestClasses ??= Assemblies.SelectMany(x => x.TestClasses).ToArray();
 
@@ -92,8 +96,11 @@ public class TestSessionContext : Context
 
     internal void RemoveAssembly(AssemblyHookContext assemblyContext)
     {
-        _assemblies.Remove(assemblyContext);
-        InvalidateCaches();
+        lock (_lock)
+        {
+            _assemblies.Remove(assemblyContext);
+            InvalidateCaches();
+        }
     }
 
     internal override void SetAsyncLocalContext()

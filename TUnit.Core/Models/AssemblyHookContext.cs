@@ -26,16 +26,20 @@ public class AssemblyHookContext : Context
 
     public required Assembly Assembly { get; init; }
 
+    private readonly Lock _lock = new();
     private readonly List<ClassHookContext> _testClasses = [];
     private TestContext[]? _cachedAllTests;
 
     public void AddClass(ClassHookContext classHookContext)
     {
-        _testClasses.Add(classHookContext);
-        InvalidateCache();
+        lock (_lock)
+        {
+            _testClasses.Add(classHookContext);
+            InvalidateCache();
+        }
     }
 
-    public IReadOnlyList<ClassHookContext> TestClasses => _testClasses;
+    public IReadOnlyList<ClassHookContext> TestClasses { get { lock (_lock) return [.. _testClasses]; } }
 
     public IReadOnlyList<TestContext> AllTests => _cachedAllTests ??= TestClasses.SelectMany(x => x.Tests).ToArray();
 
@@ -50,10 +54,15 @@ public class AssemblyHookContext : Context
 
     internal void RemoveClass(ClassHookContext classContext)
     {
-        _testClasses.Remove(classContext);
-        InvalidateCache();
+        bool empty;
+        lock (_lock)
+        {
+            _testClasses.Remove(classContext);
+            InvalidateCache();
+            empty = _testClasses.Count == 0;
+        }
 
-        if (_testClasses.Count == 0)
+        if (empty)
         {
             TestSessionContext.RemoveAssembly(this);
         }
