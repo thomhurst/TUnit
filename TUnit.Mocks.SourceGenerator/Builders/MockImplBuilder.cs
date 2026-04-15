@@ -827,8 +827,8 @@ internal static class MockImplBuilder
     {
         if (prop.ExplicitInterfaceName is not null)
         {
-            // Explicit interface implementation — delegates to the public property
-            // with the same name (different return type from a different interface).
+            // Explicit interface property with incompatible return type.
+            // Dispatches independently through the engine with a dedicated MemberId.
             writer.AppendLine($"{prop.ReturnType} {prop.ExplicitInterfaceName}.{prop.Name}");
             writer.OpenBrace();
             if (prop.HasGetter)

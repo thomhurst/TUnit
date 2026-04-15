@@ -15,8 +15,8 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </summary>
 internal static class MemberDiscovery
 {
-    /// <summary>Sentinel index for non-mockable members (sealed, non-virtual) that block the interface loop.</summary>
-    private const int NonMockableIndex = -1;
+    /// <summary>Sentinel entry for non-mockable members (sealed, non-virtual) that block the interface loop.</summary>
+    private static readonly (int Index, ITypeSymbol? ReturnType) NonMockableEntry = (-1, null);
 
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
@@ -25,7 +25,7 @@ internal static class MemberDiscovery
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
 
-        var seenMethods = new Dictionary<string, int>(); // key → index in methods list
+        var seenMethods = new Dictionary<string, (int Index, ITypeSymbol? ReturnType)>();
         var seenFullMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
@@ -65,7 +65,7 @@ internal static class MemberDiscovery
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                     {
                         var key = GetMethodKey(method);
-                        if (seenMethods.TryGetValue(key, out var existingIdx))
+                        if (seenMethods.TryGetValue(key, out var existing))
                         {
                             // Same name+params already seen. Check if return type differs
                             // (e.g. IEnumerable<T>.GetEnumerator vs IEnumerable.GetEnumerator).
@@ -73,14 +73,15 @@ internal static class MemberDiscovery
                             if (!seenFullMethods.Add(fullKey)) continue; // true duplicate
 
                             // Signature collision with different return type → explicit interface impl.
-                            // If explicit return type is an interface, the public method's return type
-                            // likely implements it (e.g. IEnumerator<T> : IEnumerator) → safe to delegate.
-                            var canDelegate = IsReturnTypeConvertible(method.ReturnType);
+                            // Delegation is safe only if the public method's return type implements
+                            // the explicit impl's return type (e.g. IEnumerator<T> : IEnumerator).
+                            var canDelegate = existing.ReturnType is not null
+                                && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
                             methods.Add(CreateMethodModel(method, ref memberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
                         }
                         else
                         {
-                            seenMethods[key] = methods.Count;
+                            seenMethods[key] = (methods.Count, method.ReturnType);
                             seenFullMethods.Add(GetFullMethodKey(method));
                             methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
                         }
@@ -164,7 +165,7 @@ internal static class MemberDiscovery
         var properties = new List<MockMemberModel>();
         var events = new List<MockEventModel>();
 
-        var seenMethods = new Dictionary<string, int>(); // key → index in methods list
+        var seenMethods = new Dictionary<string, (int Index, ITypeSymbol? ReturnType)>();
         var seenFullMethods = new HashSet<string>();
         var seenProperties = new Dictionary<string, int?>();
         var seenEvents = new HashSet<string>();
@@ -198,18 +199,19 @@ internal static class MemberDiscovery
                         case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                         {
                             var key = GetMethodKey(method);
-                            if (seenMethods.TryGetValue(key, out var existingIdx))
+                            if (seenMethods.TryGetValue(key, out var existing))
                             {
                                 var fullKey = GetFullMethodKey(method);
                                 if (!seenFullMethods.Add(fullKey)) continue;
 
-                                var canDelegate = IsReturnTypeConvertible(method.ReturnType);
+                                var canDelegate = existing.ReturnType is not null
+                                    && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
                                 methods.Add(CreateMethodModel(method, ref memberIdCounter,
                                     interfaceFqn, declaringInterfaceName: interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
                             }
                             else
                             {
-                                seenMethods[key] = methods.Count;
+                                seenMethods[key] = (methods.Count, method.ReturnType);
                                 seenFullMethods.Add(GetFullMethodKey(method));
                                 methods.Add(CreateMethodModel(method, ref memberIdCounter,
                                     null, declaringInterfaceName: interfaceFqn));
@@ -287,7 +289,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
-        Dictionary<string, int> seenMethods,
+        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
         HashSet<string> seenFullMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
@@ -317,7 +319,7 @@ internal static class MemberDiscovery
                 if (member is IMethodSymbol { IsSealed: true } sealedMethod)
                 {
                     var sealedKey = GetMethodKey(sealedMethod);
-                    seenMethods.TryAdd(sealedKey, NonMockableIndex);
+                    seenMethods.TryAdd(sealedKey, NonMockableEntry);
                     seenFullMethods.Add(GetFullMethodKey(sealedMethod));
                     continue;
                 }
@@ -343,12 +345,12 @@ internal static class MemberDiscovery
                         if (method.IsAbstract || method.IsVirtual || method.IsOverride)
                         {
                             if (seenMethods.ContainsKey(key)) continue;
-                            seenMethods[key] = methods.Count;
+                            seenMethods[key] = (methods.Count, method.ReturnType);
                             methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
                         }
                         else
                         {
-                            seenMethods.TryAdd(key, NonMockableIndex);
+                            seenMethods.TryAdd(key, NonMockableEntry);
                         }
                         break;
                     }
@@ -848,16 +850,16 @@ internal static class MemberDiscovery
     }
 
     /// <summary>
-    /// Heuristic: can the explicit impl delegate to the public method?
-    /// We lack both ITypeSymbols for a proper assignability check, so we use TypeKind:
-    /// if the explicit return type is an interface, the public type likely implements it
-    /// (e.g. IEnumerator&lt;T&gt; : IEnumerator). Class/struct mismatches (int vs string) cannot delegate.
+    /// Returns true if <paramref name="publicReturnType"/> is assignable to
+    /// <paramref name="explicitReturnType"/>, meaning the explicit impl can safely
+    /// delegate to the public method (e.g. IEnumerator&lt;T&gt; → IEnumerator).
     /// </summary>
-    private static bool IsReturnTypeConvertible(ITypeSymbol explicitReturnType)
+    private static bool CanDelegateReturnType(ITypeSymbol publicReturnType, ITypeSymbol explicitReturnType)
     {
-        // Callers already confirmed the return types differ (via full-key mismatch),
-        // so identity is unreachable — go straight to the heuristic.
-        return explicitReturnType.TypeKind == TypeKind.Interface;
+        if (explicitReturnType.TypeKind != TypeKind.Interface) return false;
+        if (SymbolEqualityComparer.Default.Equals(publicReturnType, explicitReturnType)) return true;
+        return publicReturnType.AllInterfaces.Any(i =>
+            SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, explicitReturnType.OriginalDefinition));
     }
 
     private static string? FormatDefaultValue(IParameterSymbol param)
@@ -931,7 +933,7 @@ internal static class MemberDiscovery
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
-        Dictionary<string, int> seenMethods,
+        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
         ref int memberIdCounter)
@@ -942,7 +944,7 @@ internal static class MemberDiscovery
             {
                 var key = GetMethodKey(method);
                 if (seenMethods.ContainsKey(key)) break;
-                seenMethods[key] = methods.Count;
+                seenMethods[key] = (methods.Count, method.ReturnType);
 
                 var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn) with
                 {
