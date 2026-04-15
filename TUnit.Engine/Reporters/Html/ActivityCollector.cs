@@ -153,12 +153,20 @@ internal sealed class ActivityCollector : IDisposable
 
     private void OnActivityStarted(Activity activity)
     {
-        // Register test case span IDs early so they're available for child span lookups.
-        // Children stop before parents in Activity ordering, so we need this pre-registered.
-        if (IsTUnitSource(activity.Source.Name) &&
-            activity.GetTagItem(TUnitActivitySource.TagTestNodeUid) is not null)
+        // Register TUnit activities' trace IDs early so child spans from other sources
+        // (HttpClient, EF Core, etc.) can be sampled correctly. This is especially
+        // important for test case activities that start their own trace (parentContext: default),
+        // since their traceId is only assigned by the runtime after StartActivity returns.
+        if (IsTUnitSource(activity.Source.Name))
         {
-            _testCaseSpanIds.TryAdd(activity.SpanId.ToString(), 0);
+            _knownTraceIds.TryAdd(activity.TraceId.ToString(), 0);
+
+            // Register test case span IDs early so they're available for child span lookups.
+            // Children stop before parents in Activity ordering, so we need this pre-registered.
+            if (activity.GetTagItem(TUnitActivitySource.TagTestNodeUid) is not null)
+            {
+                _testCaseSpanIds.TryAdd(activity.SpanId.ToString(), 0);
+            }
         }
     }
 
@@ -315,6 +323,21 @@ internal sealed class ActivityCollector : IDisposable
 
         var parentSpanId = activity.ParentSpanId != default ? activity.ParentSpanId.ToString() : null;
 
+        SpanLink[]? links = null;
+        var activityLinks = activity.Links.ToArray();
+        if (activityLinks.Length > 0)
+        {
+            links = new SpanLink[activityLinks.Length];
+            for (var i = 0; i < activityLinks.Length; i++)
+            {
+                links[i] = new SpanLink
+                {
+                    TraceId = activityLinks[i].Context.TraceId.ToString(),
+                    SpanId = activityLinks[i].Context.SpanId.ToString()
+                };
+            }
+        }
+
         var statusStr = activity.Status switch
         {
             ActivityStatusCode.Ok => "Ok",
@@ -336,7 +359,8 @@ internal sealed class ActivityCollector : IDisposable
             Status = statusStr,
             StatusMessage = activity.StatusDescription,
             Tags = tags,
-            Events = events
+            Events = events,
+            Links = links
         };
 
         queue.Enqueue(spanData);

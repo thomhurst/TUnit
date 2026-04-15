@@ -7,8 +7,9 @@ namespace TUnit.Aspire.Tests;
 
 /// <summary>
 /// Tests that verify the TUnit engine creates test activities correctly:
-/// parent-child hierarchy (test → class → assembly → session), proper tags,
-/// baggage for cross-boundary propagation, and TraceId shared within a class.
+/// parent-child hierarchy (test body → test case), proper tags,
+/// baggage for cross-boundary propagation, Activity Links to the class activity,
+/// and unique TraceIds per test case.
 /// </summary>
 public class TestActivityTests
 {
@@ -72,14 +73,18 @@ public class TestActivityTests
     }
 
     [Test]
-    public async Task TestCaseActivity_HasParentSpanId_FromClassActivity()
+    public async Task TestCaseActivity_HasActivityLink_ToClassActivity()
     {
         var testCase = Activity.Current!.Parent!;
 
-        // The test case has a ParentSpanId linking it to the class activity.
-        // Activity.Parent (object reference) may be null when explicit parentContext
-        // is used, but ParentSpanId is always set for child activities.
-        await Assert.That(testCase.ParentSpanId).IsNotEqualTo(default(ActivitySpanId));
+        // Each test case starts its own W3C trace (so ParentSpanId is default).
+        // Instead, an Activity Link references the class activity for correlation.
+        // This prevents all tests in a class from sharing one giant trace in backends
+        // like Seq/Jaeger while still preserving the logical hierarchy.
+        var link = await Assert.That(testCase.Links.ToList()).HasSingleItem();
+
+        await Assert.That(link.Context.TraceId).IsNotEqualTo(default(ActivityTraceId));
+        await Assert.That(link.Context.SpanId).IsNotEqualTo(default(ActivitySpanId));
     }
 
     [Test]
@@ -89,5 +94,17 @@ public class TestActivityTests
 
         await Assert.That(traceId.Length).IsEqualTo(32);
         await Assert.That(traceId).IsNotEqualTo(new string('0', 32));
+    }
+
+    [Test]
+    public async Task TraceId_IsRegisteredInTraceRegistry()
+    {
+        var traceId = Activity.Current!.TraceId.ToString();
+
+        // The engine registers the test's TraceId in TraceRegistry at activity creation.
+        // This enables the OTLP receiver to correlate SUT logs back to this test
+        // without synthetic TraceId generation — pure natural OTEL propagation.
+        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
+        await Assert.That(TraceRegistry.GetContextId(traceId)).IsEqualTo(TestContext.Current!.Id);
     }
 }

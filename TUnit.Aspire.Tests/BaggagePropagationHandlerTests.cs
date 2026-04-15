@@ -9,8 +9,11 @@ namespace TUnit.Aspire.Tests;
 public class BaggagePropagationHandlerTests
 {
     [Test]
-    public async Task SendAsync_InjectsTraceparentHeader()
+    public async Task SendAsync_InjectsTraceparentHeader_WhenActivityExists()
     {
+        Activity.Current = null;
+        using var activity = new Activity("test-traceparent").Start();
+
         var captured = new CaptureHandler();
         var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
         using var client = new HttpClient(handler);
@@ -21,9 +24,10 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_TraceparentUsesUniqueTraceId_NotActivityCurrent()
+    public async Task SendAsync_TraceparentUsesActivityCurrentTraceId()
     {
-        using var activity = new Activity("test-unique-traceid").Start();
+        Activity.Current = null;
+        using var activity = new Activity("test-uses-current").Start();
         var activityTraceId = activity.TraceId.ToString();
 
         var captured = new CaptureHandler();
@@ -33,16 +37,18 @@ public class BaggagePropagationHandlerTests
         await client.GetAsync("http://localhost/test");
 
         var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
-        var parts = traceparent.Split('-');
-        var requestTraceId = parts[1];
+        var requestTraceId = traceparent.Split('-')[1];
 
-        // The handler generates its own TraceId, distinct from Activity.Current's
-        await Assert.That(requestTraceId).IsNotEqualTo(activityTraceId);
+        // Handler propagates Activity.Current's TraceId — natural OTEL propagation
+        await Assert.That(requestTraceId).IsEqualTo(activityTraceId);
     }
 
     [Test]
-    public async Task SendAsync_EachRequestGetsUniqueTraceId()
+    public async Task SendAsync_SameActivity_SharesTraceId()
     {
+        Activity.Current = null;
+        using var activity = new Activity("test-same-traceid").Start();
+
         var captured = new CaptureHandler();
         var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
         using var client = new HttpClient(handler);
@@ -56,12 +62,65 @@ public class BaggagePropagationHandlerTests
         var traceId1 = traceparent1.Split('-')[1];
         var traceId2 = traceparent2.Split('-')[1];
 
+        // Same Activity.Current → same TraceId (all requests belong to same trace)
+        await Assert.That(traceId1).IsEqualTo(traceId2);
+    }
+
+    [Test]
+    public async Task SendAsync_SameActivity_UsesDifferentSpanIds()
+    {
+        Activity.Current = null;
+        using var activity = new Activity("test-unique-spanids").Start();
+
+        var captured = new CaptureHandler();
+        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
+        using var client = new HttpClient(handler);
+
+        await client.GetAsync("http://localhost/test1");
+        var traceparent1 = captured.LastRequest!.Headers.GetValues("traceparent").First();
+
+        await client.GetAsync("http://localhost/test2");
+        var traceparent2 = captured.LastRequest!.Headers.GetValues("traceparent").First();
+
+        var spanId1 = traceparent1.Split('-')[2];
+        var spanId2 = traceparent2.Split('-')[2];
+
+        // Each request gets a unique SpanId within the same trace
+        await Assert.That(spanId1).IsNotEqualTo(spanId2);
+    }
+
+    [Test]
+    public async Task SendAsync_DifferentActivities_UseDifferentTraceIds()
+    {
+        Activity.Current = null;
+
+        var captured = new CaptureHandler();
+        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
+        using var client = new HttpClient(handler);
+
+        using var activity1 = new Activity("test-trace-1").Start();
+        await client.GetAsync("http://localhost/test1");
+        var traceparent1 = captured.LastRequest!.Headers.GetValues("traceparent").First();
+        activity1.Stop();
+
+        using var activity2 = new Activity("test-trace-2").Start();
+        await client.GetAsync("http://localhost/test2");
+        var traceparent2 = captured.LastRequest!.Headers.GetValues("traceparent").First();
+        activity2.Stop();
+
+        var traceId1 = traceparent1.Split('-')[1];
+        var traceId2 = traceparent2.Split('-')[1];
+
+        // Different activities → different TraceIds (separate tests = separate traces)
         await Assert.That(traceId1).IsNotEqualTo(traceId2);
     }
 
     [Test]
     public async Task SendAsync_TraceparentFormat_IsValidW3C()
     {
+        Activity.Current = null;
+        using var activity = new Activity("test-w3c-format").Start();
+
         var captured = new CaptureHandler();
         var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
         using var client = new HttpClient(handler);
@@ -75,28 +134,13 @@ public class BaggagePropagationHandlerTests
         await Assert.That(parts[0]).IsEqualTo("00");           // version
         await Assert.That(parts[1].Length).IsEqualTo(32);      // trace-id (16 bytes hex)
         await Assert.That(parts[2].Length).IsEqualTo(16);      // parent-id (8 bytes hex)
-        await Assert.That(parts[3]).IsEqualTo("01");           // flags (sampled)
-    }
-
-    [Test]
-    public async Task SendAsync_RegistersTraceIdInTraceRegistry()
-    {
-        var captured = new CaptureHandler();
-        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
-        using var client = new HttpClient(handler);
-
-        await client.GetAsync("http://localhost/test");
-
-        var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
-        var traceId = traceparent.Split('-')[1];
-
-        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
+        // flags: "00" or "01" depending on sampling
+        await Assert.That(parts[3].Length).IsEqualTo(2);
     }
 
     [Test]
     public async Task SendAsync_InjectsBaggageHeader_WithActivityBaggage()
     {
-        // Detach from engine activity to control baggage precisely
         Activity.Current = null;
         using var activity = new Activity("test-inject-baggage").Start();
         activity.SetBaggage(TUnitActivitySource.TagTestId, "my-test-context-id");
@@ -120,7 +164,6 @@ public class BaggagePropagationHandlerTests
     [Test]
     public async Task SendAsync_NoBaggage_DoesNotAddBaggageHeader()
     {
-        // Detach from engine activity to prevent inheriting tunit.test.id baggage
         Activity.Current = null;
         using var activity = new Activity("test-no-baggage").Start();
 
@@ -134,7 +177,7 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_NoActivity_StillInjectsTraceparent()
+    public async Task SendAsync_NoActivity_DoesNotInjectTraceparent()
     {
         Activity.Current = null;
 
@@ -145,9 +188,8 @@ public class BaggagePropagationHandlerTests
         await client.GetAsync("http://localhost/test");
 
         await Assert.That(captured.LastRequest).IsNotNull();
-        // traceparent is always injected (handler generates its own TraceId)
-        await Assert.That(captured.LastRequest!.Headers.Contains("traceparent")).IsTrue();
-        // No Activity means no baggage to propagate
+        // No Activity.Current → no trace context to propagate
+        await Assert.That(captured.LastRequest!.Headers.Contains("traceparent")).IsFalse();
         await Assert.That(captured.LastRequest.Headers.Contains("baggage")).IsFalse();
     }
 

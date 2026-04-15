@@ -642,6 +642,9 @@ internal sealed class HookExecutor
     {
         System.Diagnostics.Activity? hookActivity = null;
 
+        // RestoreExecutionContext() can corrupt Activity.Stop()'s parent chain
+        var previousActivity = System.Diagnostics.Activity.Current;
+
         if (TUnitActivitySource.Source.HasListeners())
         {
             hookActivity = TUnitActivitySource.StartActivity(
@@ -662,6 +665,7 @@ internal sealed class HookExecutor
         finally
         {
             TUnitActivitySource.StopActivity(hookActivity);
+            System.Diagnostics.Activity.Current = previousActivity;
         }
     }
 #else
