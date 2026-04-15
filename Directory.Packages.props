@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.202" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.202" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.2" />

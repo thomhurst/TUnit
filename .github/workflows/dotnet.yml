@@ -69,20 +69,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: microsoft/setup-msbuild@v3
 
-      - name: Setup .NET 8
+      - name: Setup .NET
         uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 9.0.x
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v5
@@ -136,8 +124,6 @@ jobs:
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
           "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
           "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
-          "-p:RepositoryBranch=${{ steps.gitversion.outputs.branchName }}"
-          "-p:RepositoryCommit=${{ steps.gitversion.outputs.sha }}"
 
       - name: Publish AOT
         shell: bash
@@ -149,8 +135,6 @@ jobs:
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
           "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
           "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
-          "-p:RepositoryBranch=${{ steps.gitversion.outputs.branchName }}"
-          "-p:RepositoryCommit=${{ steps.gitversion.outputs.sha }}"
 
       - name: Expose GitHub Actions Runtime
         uses: actions/github-script@v9
