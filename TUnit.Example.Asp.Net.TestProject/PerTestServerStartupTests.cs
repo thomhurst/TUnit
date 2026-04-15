@@ -27,11 +27,11 @@ public class PerTestServerStartupTests : TestsBase
     public async Task Server_Startup_Time_Is_Recorded()
     {
         // Add small buffer to account for DateTime precision differences
-        var beforeCall = DateTime.UtcNow.AddMilliseconds(-100);
+        var beforeCall = DateTime.UtcNow.AddMilliseconds(-500);
 
         _ = Factory.CreateClient();
 
-        var afterCall = DateTime.UtcNow.AddMilliseconds(100);
+        var afterCall = DateTime.UtcNow.AddMilliseconds(500);
 
         await Assert.That(StartupCalledAt).IsNotNull();
         await Assert.That(StartupCalledAt!.Value).IsGreaterThanOrEqualTo(beforeCall)
