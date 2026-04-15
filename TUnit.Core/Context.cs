@@ -45,11 +45,12 @@ public abstract class Context : IContext, IDisposable
     private ReaderWriterLockSlim GetErrorOutputLock() =>
         LazyInitializer.EnsureInitialized(ref _errorOutputLock, static () => new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion))!;
 
-    [field: AllowNull, MaybeNull]
-    public TextWriter OutputWriter => field ??= new ConcurrentStringWriter(GetOutputBuilder(), GetOutputLock());
+    private ConcurrentStringWriter? _outputWriter;
+    private ConcurrentStringWriter? _errorOutputWriter;
 
-    [field: AllowNull, MaybeNull]
-    public TextWriter ErrorOutputWriter => field ??= new ConcurrentStringWriter(GetErrorOutputBuilder(), GetErrorOutputLock());
+    public TextWriter OutputWriter => _outputWriter ??= new ConcurrentStringWriter(GetOutputBuilder(), GetOutputLock());
+
+    public TextWriter ErrorOutputWriter => _errorOutputWriter ??= new ConcurrentStringWriter(GetErrorOutputBuilder(), GetErrorOutputLock());
 
     // Internal accessors for console interceptor line buffers
     internal ConsoleLineBuffer ConsoleStdOutLineBuffer =>
@@ -101,49 +102,9 @@ public abstract class Context : IContext, IDisposable
 #endif
     }
 
-    public virtual string GetStandardOutput()
-    {
-        if (_outputBuilder == null)
-        {
-            return string.Empty;
-        }
+    public virtual string GetStandardOutput() => _outputWriter?.GetContent() ?? string.Empty;
 
-        var outputLock = GetOutputLock();
-        outputLock.EnterReadLock();
-
-        try
-        {
-            return _outputBuilder.Length == 0
-                ? string.Empty
-                : _outputBuilder.ToString();
-        }
-        finally
-        {
-            outputLock.ExitReadLock();
-        }
-    }
-
-    public virtual string GetErrorOutput()
-    {
-        if (_errorOutputBuilder == null)
-        {
-            return string.Empty;
-        }
-
-        var errorOutputLock = GetErrorOutputLock();
-        errorOutputLock.EnterReadLock();
-
-        try
-        {
-            return _errorOutputBuilder.Length == 0
-                ? string.Empty
-                : _errorOutputBuilder.ToString();
-        }
-        finally
-        {
-            errorOutputLock.ExitReadLock();
-        }
-    }
+    public virtual string GetErrorOutput() => _errorOutputWriter?.GetContent() ?? string.Empty;
 
     public DefaultLogger GetDefaultLogger()
     {
@@ -167,8 +128,17 @@ public abstract class Context : IContext, IDisposable
 /// </summary>
 internal sealed class ConcurrentStringWriter : TextWriter
 {
+    private const int MaxOutputLength = 1_048_576; // 1M chars (~2MB)
+
+    // Trim to 75% of max to avoid re-trimming on every subsequent write
+    private const int TrimTarget = MaxOutputLength * 3 / 4;
+
+    private static readonly string TruncationNotice =
+        $"[... output truncated — exceeded {MaxOutputLength:N0} character limit, showing most recent output ...]{Environment.NewLine}";
+
     private readonly StringBuilder _builder;
     private readonly ReaderWriterLockSlim _lock;
+    private bool _truncated;
 
     public ConcurrentStringWriter(StringBuilder builder, ReaderWriterLockSlim lockSlim)
     {
@@ -184,6 +154,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -199,6 +170,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
             try
             {
                 _builder.Append(value);
+                TrimIfNeeded();
             }
             finally
             {
@@ -215,6 +187,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
             try
             {
                 _builder.Append(buffer, index, count);
+                TrimIfNeeded();
             }
             finally
             {
@@ -229,6 +202,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.AppendLine();
+            TrimIfNeeded();
         }
         finally
         {
@@ -242,6 +216,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.AppendLine(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -257,6 +232,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
             try
             {
                 _builder.Append(buffer);
+                TrimIfNeeded();
             }
             finally
             {
@@ -271,6 +247,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -284,6 +261,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -297,6 +275,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -310,6 +289,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -323,6 +303,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -336,6 +317,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -349,6 +331,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -362,6 +345,7 @@ internal sealed class ConcurrentStringWriter : TextWriter
         try
         {
             _builder.Append(value);
+            TrimIfNeeded();
         }
         finally
         {
@@ -377,11 +361,40 @@ internal sealed class ConcurrentStringWriter : TextWriter
             try
             {
                 _builder.Append(value);
+                TrimIfNeeded();
             }
             finally
             {
                 _lock.ExitWriteLock();
             }
+        }
+    }
+
+    private void TrimIfNeeded()
+    {
+        if (_builder.Length > MaxOutputLength)
+        {
+            _builder.Remove(0, _builder.Length - TrimTarget);
+            _truncated = true;
+        }
+    }
+
+    internal string GetContent()
+    {
+        _lock.EnterReadLock();
+        try
+        {
+            if (_builder.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var content = _builder.ToString();
+            return _truncated ? string.Concat(TruncationNotice, content) : content;
+        }
+        finally
+        {
+            _lock.ExitReadLock();
         }
     }
 
