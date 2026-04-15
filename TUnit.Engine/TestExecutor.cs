@@ -131,7 +131,8 @@ internal class TestExecutor
                     ? [new ActivityLink(classActivity.Context)]
                     : null;
 
-                // Clear ambient activity so StartActivity creates a root (new TraceId)
+                // Clear ambient activity so StartActivity creates a root (new TraceId).
+                // Safe: Activity.Current is AsyncLocal, so this only affects this async context.
                 Activity.Current = null;
 
                 executableTest.Context.Activity = TUnitActivitySource.StartActivity(

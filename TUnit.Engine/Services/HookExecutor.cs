@@ -642,7 +642,11 @@ internal sealed class HookExecutor
     {
         System.Diagnostics.Activity? hookActivity = null;
 
-        // RestoreExecutionContext() can corrupt Activity.Stop()'s parent chain
+        // Capture the pre-hook Activity.Current as the known-good restore target.
+        // StopActivity internally restores to hookActivity._previousActiveActivity,
+        // but that chain can be corrupted when RestoreExecutionContext() overwrites
+        // Activity.Current during the hook. We overwrite StopActivity's restore
+        // with this known-good value to guarantee a correct Activity.Current after.
         var previousActivity = System.Diagnostics.Activity.Current;
 
         if (TUnitActivitySource.Source.HasListeners())

@@ -134,8 +134,8 @@ public class BaggagePropagationHandlerTests
         await Assert.That(parts[0]).IsEqualTo("00");           // version
         await Assert.That(parts[1].Length).IsEqualTo(32);      // trace-id (16 bytes hex)
         await Assert.That(parts[2].Length).IsEqualTo(16);      // parent-id (8 bytes hex)
-        // flags: "00" or "01" depending on sampling
-        await Assert.That(parts[3].Length).IsEqualTo(2);
+        // W3C trace-flags: "00" (not sampled) or "01" (sampled)
+        await Assert.That(parts[3]).IsEqualTo("00").Or.IsEqualTo("01");
     }
 
     [Test]
