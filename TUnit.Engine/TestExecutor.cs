@@ -117,24 +117,28 @@ internal class TestExecutor
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
 #if NET
-            // Start the test case activity BEFORE initialization so that per-test
-            // object init spans can be parented under the test case. Shared objects
-            // (PerSession/PerAssembly/PerClass) are parented under their respective
-            // scope activities via explicit parentContext in ObjectLifecycleService.
-            //
-            // Test activities are children of the class activity (parent-child, shared
-            // TraceId). This produces proper waterfall visualisation in trace backends:
-            // Session → Assembly → Class → Test₁, Test₂, ...
-            // Per-request OTLP correlation uses unique TraceIds generated at the HTTP
-            // handler layer, not the engine — see TUnitBaggagePropagationHandler.
+            // Each test case starts its own trace so each test gets a unique W3C TraceId
+            // for natural OTEL distributed tracing correlation. We must clear Activity.Current
+            // because StartActivity with parentContext: default falls back to Activity.Current
+            // when it's non-null, which would make all tests in a class share the class TraceId.
+            // An ActivityLink references the class activity for grouping in the HTML report.
             if (TUnitActivitySource.Source.HasListeners())
             {
                 var classActivity = executableTest.Context.ClassContext.Activity;
                 var testDetails = executableTest.Context.Metadata.TestDetails;
+
+                ActivityLink[]? links = classActivity is not null
+                    ? [new ActivityLink(classActivity.Context)]
+                    : null;
+
+                // Clear ambient activity so StartActivity creates a root (new TraceId).
+                // Safe: Activity.Current is AsyncLocal, so this only affects this async context.
+                Activity.Current = null;
+
                 executableTest.Context.Activity = TUnitActivitySource.StartActivity(
                     TUnitActivitySource.SpanTestCase,
                     ActivityKind.Internal,
-                    classActivity?.Context ?? default,
+                    parentContext: default,
                     [
                         new(TUnitActivitySource.TagTestCaseName, testDetails.TestName),
                         new(TUnitActivitySource.TagTestClass, testDetails.ClassType.FullName),
@@ -142,10 +146,19 @@ internal class TestExecutor
                         new(TUnitActivitySource.TagTestId, executableTest.Context.Id),
                         new(TUnitActivitySource.TagTestNodeUid, testDetails.TestId),
                         new(TUnitActivitySource.TagTestCategories, testDetails.Categories.ToArray())
-                    ]);
+                    ],
+                    links);
 
-                // Same key as the span tag above — set as baggage for cross-boundary propagation via W3C headers
                 executableTest.Context.Activity?.SetBaggage(TUnitActivitySource.TagTestId, executableTest.Context.Id);
+
+                // Register for OTLP receiver cross-process log correlation
+                if (executableTest.Context.Activity is { } testActivity)
+                {
+                    TraceRegistry.Register(
+                        testActivity.TraceId.ToString(),
+                        testDetails.TestId,
+                        executableTest.Context.Id);
+                }
             }
 #endif
 

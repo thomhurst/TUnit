@@ -73,7 +73,14 @@ public abstract class Context : IContext, IDisposable
 #if NET
         if (ExecutionContext is not null)
         {
+            // ExecutionContext.Restore() restores ALL AsyncLocal values — including
+            // Activity.Current. The captured ExecutionContext may contain a stale
+            // (already-stopped) Activity from a previous hook/event receiver.
+            // Save the current Activity and restore it after the EC restore to
+            // prevent Activity chain corruption across parallel tests.
+            var currentActivity = System.Diagnostics.Activity.Current;
             ExecutionContext.Restore(ExecutionContext);
+            System.Diagnostics.Activity.Current = currentActivity;
         }
 
         SetAsyncLocalContext();

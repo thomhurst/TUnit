@@ -222,6 +222,18 @@ internal sealed class SpanData
 
     [JsonPropertyName("events")]
     public SpanEvent[]? Events { get; init; }
+
+    [JsonPropertyName("links")]
+    public SpanLink[]? Links { get; init; }
+}
+
+internal sealed class SpanLink
+{
+    [JsonPropertyName("traceId")]
+    public required string TraceId { get; init; }
+
+    [JsonPropertyName("spanId")]
+    public required string SpanId { get; init; }
 }
 
 internal sealed class SpanEvent
