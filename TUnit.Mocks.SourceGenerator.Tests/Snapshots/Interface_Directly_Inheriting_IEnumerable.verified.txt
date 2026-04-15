@@ -203,7 +203,7 @@ namespace TUnit.Mocks
 {
     public static class ICustomCollection_MockStaticExtension
     {
-        extension(global::ICustomCollection)
+        extension(global::ICustomCollection _)
         {
             public static global::TUnit.Mocks.Generated.ICustomCollectionMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

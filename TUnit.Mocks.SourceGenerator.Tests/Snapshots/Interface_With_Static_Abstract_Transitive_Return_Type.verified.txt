@@ -199,7 +199,7 @@ namespace TUnit.Mocks
 {
     public static class IMyService_MockStaticExtension
     {
-        extension(global::IMyService)
+        extension(global::IMyService _)
         {
             public static global::TUnit.Mocks.Generated.IMyServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

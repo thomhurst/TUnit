@@ -114,7 +114,7 @@ namespace TUnit.Mocks
 {
     public static class IRepository_MockStaticExtension
     {
-        extension(global::IRepository)
+        extension(global::IRepository _)
         {
             public static global::TUnit.Mocks.Generated.IRepositoryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

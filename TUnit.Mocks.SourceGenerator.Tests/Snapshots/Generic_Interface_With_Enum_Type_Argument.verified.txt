@@ -3,13 +3,13 @@
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    public sealed class IFoo_SomeEnum_Mock : global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.SomeEnum>>, global::Sandbox.IFoo<global::Sandbox.SomeEnum>
+    public sealed class IFoo_T_Mock<T> : global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>>, global::Sandbox.IFoo<T>
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IFoo_SomeEnum_Mock(global::Sandbox.IFoo<global::Sandbox.SomeEnum> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.SomeEnum>> engine)
+        internal IFoo_T_Mock(global::Sandbox.IFoo<T> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> engine)
             : base(mockObject, engine) { }
 
-        global::Sandbox.SomeEnum global::Sandbox.IFoo<global::Sandbox.SomeEnum>.Value { get => Object.Value; }
+        T global::Sandbox.IFoo<T>.Value { get => Object.Value; }
     }
 }
 
@@ -21,21 +21,21 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    file sealed class IFoo_SomeEnum_MockImpl : global::Sandbox.IFoo<global::Sandbox.SomeEnum>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    file sealed class IFoo_T_MockImpl<T> : global::Sandbox.IFoo<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.SomeEnum>> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IFoo_SomeEnum_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.SomeEnum>> engine)
+        internal IFoo_T_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> engine)
         {
             _engine = engine;
         }
 
-        public global::Sandbox.SomeEnum Value
+        public T Value
         {
-            get => _engine.HandleCallWithReturn<global::Sandbox.SomeEnum>(0, "get_Value", global::System.Array.Empty<object?>(), default);
+            get => _engine.HandleCallWithReturn<T>(0, "get_Value", global::System.Array.Empty<object?>(), default!);
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -45,23 +45,17 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IFoo_SomeEnum_MockFactory
+    file static class IFoo_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::Sandbox.IFoo<global::Sandbox.SomeEnum>>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
+                typeof(global::Sandbox.IFoo<>),
+                typeof(IFoo_T_MockImpl<>),
+                typeof(IFoo_T_Mock<>));
         }
 
-        internal static global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.SomeEnum>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
-        {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::Sandbox.IFoo<global::Sandbox.SomeEnum>' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.SomeEnum>>(behavior);
-            var impl = new IFoo_SomeEnum_MockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new IFoo_SomeEnum_Mock(impl, engine);
-            return mock;
-        }
     }
 }
 
@@ -73,11 +67,11 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated
 {
-    public static class Sandbox_IFoo_Sandbox_SomeEnum__MockMemberExtensions
+    public static class Sandbox_IFoo_T__MockMemberExtensions
     {
-        extension(global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.SomeEnum>> mock)
+        extension<T>(global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock)
         {
-            public global::TUnit.Mocks.PropertyMockCall<global::Sandbox.SomeEnum> Value
+            public global::TUnit.Mocks.PropertyMockCall<T> Value
                 => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, 0, "Value", true, false);
         }
     }
@@ -91,13 +85,13 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks
 {
-    public static class Sandbox_IFoo_Sandbox_SomeEnum__MockStaticExtension
+    public static class Sandbox_IFoo_T__MockStaticExtension
     {
-        extension(global::Sandbox.IFoo<global::Sandbox.SomeEnum>)
+        extension<T>(global::Sandbox.IFoo<T> _)
         {
-            public static global::TUnit.Mocks.Generated.Sandbox.IFoo_SomeEnum_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.Sandbox.IFoo_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IFoo_SomeEnum_Mock)global::TUnit.Mocks.Mock.Of<global::Sandbox.IFoo<global::Sandbox.SomeEnum>>(behavior);
+                return (global::TUnit.Mocks.Generated.Sandbox.IFoo_T_Mock<T>)global::TUnit.Mocks.Mock.Of<global::Sandbox.IFoo<T>>(behavior);
             }
         }
     }

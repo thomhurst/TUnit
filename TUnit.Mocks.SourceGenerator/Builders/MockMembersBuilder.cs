@@ -90,7 +90,7 @@ internal static class MockMembersBuilder
                 if (method.ExplicitInterfaceName is not null && !method.IsStaticAbstract) continue;
                 if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
                 writer.AppendLine();
-                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility);
+                GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility, model);
             }
         }
 
@@ -139,14 +139,38 @@ internal static class MockMembersBuilder
     private static string GetSafeMemberName(string name)
         => MockMemberNames.Contains(name) ? name + "_" : name;
 
+    private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)
+    {
+        if (model.TypeParameters.Length == 0)
+            return MockImplBuilder.GetTypeParameterList(method);
+
+        if (method.TypeParameters.Length == 0)
+            return MockImplBuilder.GetTypeParameterList(model);
+
+        return "<" + string.Join(", ",
+            model.TypeParameters.Select(tp => tp.Name)
+                .Concat(method.TypeParameters.Select(tp => tp.Name))) + ">";
+    }
+
+    private static string GetCombinedConstraintClauses(MockTypeModel model, MockMemberModel method)
+    {
+        var modelConstraints = MockImplBuilder.GetConstraintClauses(model);
+        var methodConstraints = MockImplBuilder.GetConstraintClauses(method);
+        if (string.IsNullOrEmpty(modelConstraints)) return methodConstraints;
+        if (string.IsNullOrEmpty(methodConstraints)) return modelConstraints;
+        return modelConstraints + methodConstraints;
+    }
+
     private static void GenerateUnifiedSealedClass(CodeWriter writer, MockMemberModel method, string safeName,
-        EquatableArray<MockEventModel> events, string visibility)
+        EquatableArray<MockEventModel> events, string visibility, MockTypeModel model)
     {
         var setupReturnType = method.IsAsync && !method.IsVoid
             ? method.UnwrappedReturnType
             : method.ReturnType;
 
         var wrapperName = GetWrapperName(safeName, method);
+        var wrapperTypeName = MockImplBuilder.GetGeneratedTypeName(wrapperName, model);
+        var typeConstraints = MockImplBuilder.GetConstraintClauses(model);
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         var hasRefStructParams = method.HasRefStructParams;
         var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
@@ -154,23 +178,23 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, visibility, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
+            GenerateVoidUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, visibility, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask);
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
             // Static-abstract interface returns can't be used as generic type args (CS8920)
             // Use object? to preserve .Returns() capability
-            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams, visibility);
+            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams, visibility);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams, visibility,
+            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams, visibility,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask, fullReturnType: method.ReturnType);
         }
     }
 
-    private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperName,
+    private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperCtorName, string wrapperTypeName, string typeConstraints,
         List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
         string visibility,
@@ -180,7 +204,7 @@ internal static class MockMembersBuilder
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"{visibility} sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
+        using (writer.Block($"{visibility} sealed class {wrapperTypeName} : global::TUnit.Mocks.Verification.ICallVerification{typeConstraints}"))
         {
             // Fields
             writer.AppendLine("private readonly global::TUnit.Mocks.IMockEngineAccess _engine;");
@@ -193,7 +217,7 @@ internal static class MockMembersBuilder
             writer.AppendLine();
 
             // Constructor
-            writer.AppendLine($"internal {wrapperName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
+            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
             using (writer.Block())
             {
                 writer.AppendLine("_engine = engine;");
@@ -211,25 +235,25 @@ internal static class MockMembersBuilder
 
             // Public self-returning setup methods
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Returns({returnType} value) {{ EnsureSetup().Returns(value); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Returns({returnType} value) {{ EnsureSetup().Returns(value); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{returnType}> factory) {{ EnsureSetup().Returns(factory); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Returns(global::System.Func<{returnType}> factory) {{ EnsureSetup().Returns(factory); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} ReturnsSequentially(params {returnType}[] values) {{ EnsureSetup().ReturnsSequentially(values); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} ReturnsSequentially(params {returnType}[] values) {{ EnsureSetup().ReturnsSequentially(values); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws<TException>() where TException : global::System.Exception, new() {{ EnsureSetup().Throws<TException>(); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Throws<TException>() where TException : global::System.Exception, new() {{ EnsureSetup().Throws<TException>(); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Then() {{ EnsureSetup().Then(); return this; }}");
 
             if (isAsync && fullReturnType is not null)
             {
-                EmitReturnsAsyncOverloads(writer, wrapperName, fullReturnType, isValueTask);
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask);
             }
 
             // Typed parameter overloads (only for methods with typed params)
@@ -239,14 +263,14 @@ internal static class MockMembersBuilder
                 if (hasRefStructParams)
                 {
                     writer.AppendLine("#if NET9_0_OR_GREATER");
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType, allNonOutParams);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType, allNonOutParams);
                     writer.AppendLine("#else");
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType);
                     writer.AppendLine("#endif");
                 }
                 else
                 {
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperName, isAsync, fullReturnType);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType);
                 }
             }
 
@@ -254,14 +278,14 @@ internal static class MockMembersBuilder
             if (hasOutRef)
             {
                 writer.AppendLine();
-                GenerateTypedOutRefMethods(writer, allParameters, wrapperName);
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName);
             }
 
             // Typed event raises
             if (events.Length > 0)
             {
                 writer.AppendLine();
-                GenerateTypedEventRaises(writer, events, wrapperName);
+                GenerateTypedEventRaises(writer, events, wrapperTypeName);
             }
 
             // Verify methods (ICallVerification implementation)
@@ -282,7 +306,7 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperName, string visibility,
+    private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperCtorName, string wrapperTypeName, string typeConstraints, string visibility,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
         string? spanReturnElementType = null, string? spanReturnType = null,
@@ -292,7 +316,7 @@ internal static class MockMembersBuilder
         var hasOutRef = allParameters.Any(p => p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
 
         writer.AppendLine($"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
-        using (writer.Block($"{visibility} sealed class {wrapperName} : global::TUnit.Mocks.Verification.ICallVerification"))
+        using (writer.Block($"{visibility} sealed class {wrapperTypeName} : global::TUnit.Mocks.Verification.ICallVerification{typeConstraints}"))
         {
             // Fields
             writer.AppendLine("private readonly global::TUnit.Mocks.IMockEngineAccess _engine;");
@@ -306,7 +330,7 @@ internal static class MockMembersBuilder
 
             // Constructor — eagerly registers because void methods
             // are commonly used without chaining (e.g., mock.Log(Arg.Any<string>()) in strict mode).
-            writer.AppendLine($"internal {wrapperName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
+            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
             using (writer.Block())
             {
                 writer.AppendLine("_engine = engine;");
@@ -325,24 +349,24 @@ internal static class MockMembersBuilder
 
             // Public self-returning setup methods
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Returns() {{ EnsureSetup().Returns(); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Returns() {{ EnsureSetup().Returns(); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws<TException>() where TException : global::System.Exception, new() {{ EnsureSetup().Throws<TException>(); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Throws<TException>() where TException : global::System.Exception, new() {{ EnsureSetup().Throws<TException>(); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Throws(global::System.Exception exception) {{ EnsureSetup().Throws(exception); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Callback(global::System.Action callback) {{ EnsureSetup().Callback(callback); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} TransitionsTo(string stateName) {{ EnsureSetup().TransitionsTo(stateName); return this; }}");
             writer.AppendLine($"/// <inheritdoc />");
-            writer.AppendLine($"public {wrapperName} Then() {{ EnsureSetup().Then(); return this; }}");
+            writer.AppendLine($"public {wrapperTypeName} Then() {{ EnsureSetup().Then(); return this; }}");
 
             // Span return support: generate Returns(SpanType) that stores via SetsOutParameter(-1, ...)
             if (spanReturnElementType is not null && spanReturnType is not null)
             {
                 writer.AppendLine();
                 writer.AppendLine($"/// <summary>Configure the return value for this span-returning method.</summary>");
-                writer.AppendLine($"public {wrapperName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
+                writer.AppendLine($"public {wrapperTypeName} Returns({spanReturnType} value) {{ EnsureSetup().SetsOutParameter(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, value.ToArray()); return this; }}");
             }
 
             if (isAsync)
@@ -350,7 +374,7 @@ internal static class MockMembersBuilder
                 var taskType = isValueTask
                     ? "global::System.Threading.Tasks.ValueTask"
                     : "global::System.Threading.Tasks.Task";
-                EmitReturnsAsyncOverloads(writer, wrapperName, taskType, isValueTask);
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask);
             }
 
             // Typed parameter overloads (only for methods with typed params)
@@ -360,20 +384,20 @@ internal static class MockMembersBuilder
                 if (hasRefStructParams)
                 {
                     writer.AppendLine("#if NET9_0_OR_GREATER");
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName, allNonOutParams);
                     writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName, allNonOutParams);
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName, allNonOutParams);
                     writer.AppendLine("#else");
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName);
                     writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName);
                     writer.AppendLine("#endif");
                 }
                 else
                 {
-                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName);
+                    GenerateTypedCallbackOverload(writer, nonOutParams, wrapperTypeName);
                     writer.AppendLine();
-                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperName);
+                    GenerateTypedThrowsOverload(writer, nonOutParams, wrapperTypeName);
                 }
             }
 
@@ -381,14 +405,14 @@ internal static class MockMembersBuilder
             if (hasOutRef)
             {
                 writer.AppendLine();
-                GenerateTypedOutRefMethods(writer, allParameters, wrapperName);
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName);
             }
 
             // Typed event raises
             if (events.Length > 0)
             {
                 writer.AppendLine();
-                GenerateTypedEventRaises(writer, events, wrapperName);
+                GenerateTypedEventRaises(writer, events, wrapperTypeName);
             }
 
             // Verify methods (ICallVerification implementation)
@@ -666,7 +690,7 @@ internal static class MockMembersBuilder
         string returnType;
         if (useTypedWrapper)
         {
-            returnType = GetWrapperName(safeName, method);
+            returnType = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
@@ -689,8 +713,8 @@ internal static class MockMembersBuilder
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
         var paramList = GetArgParameterList(method, includeRefStructArgs);
-        var typeParams = MockImplBuilder.GetTypeParameterList(method);
-        var constraints = MockImplBuilder.GetConstraintClauses(method);
+        var typeParams = GetCombinedTypeParameterList(model, method);
+        var constraints = GetCombinedConstraintClauses(model, method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
@@ -728,7 +752,7 @@ internal static class MockMembersBuilder
 
             if (useTypedWrapper)
             {
-                var wrapperName = GetWrapperName(safeName, method);
+                var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsVoid || method.IsRefStructReturn)
@@ -824,8 +848,8 @@ internal static class MockMembersBuilder
         }
 
         var paramList = string.Join(", ", paramParts);
-        var typeParams = MockImplBuilder.GetTypeParameterList(method);
-        var constraints = MockImplBuilder.GetConstraintClauses(method);
+        var typeParams = GetCombinedTypeParameterList(model, method);
+        var constraints = GetCombinedConstraintClauses(model, method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
@@ -878,7 +902,7 @@ internal static class MockMembersBuilder
             // Return statement
             if (useTypedWrapper)
             {
-                var wrapperName = GetWrapperName(safeName, method);
+                var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
                 writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
             }
             else if (method.IsVoid || method.IsRefStructReturn)
@@ -899,7 +923,9 @@ internal static class MockMembersBuilder
     private static void GeneratePropertyExtensionBlock(CodeWriter writer, List<MockMemberModel> props, MockTypeModel model, string safeName)
     {
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        using (writer.Block($"extension(global::TUnit.Mocks.Mock<{mockableType}> mock)"))
+        var typeParams = MockImplBuilder.GetTypeParameterList(model);
+        var constraints = MockImplBuilder.GetConstraintClauses(model);
+        using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> mock){constraints}"))
         {
             bool first = true;
             foreach (var prop in props)
@@ -923,6 +949,8 @@ internal static class MockMembersBuilder
     private static void GenerateRaiseExtensionMethods(CodeWriter writer, MockTypeModel model)
     {
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
+        var typeParams = MockImplBuilder.GetTypeParameterList(model);
+        var constraints = MockImplBuilder.GetConstraintClauses(model);
         bool first = true;
         foreach (var evt in model.Events.Where(e => !e.IsStaticAbstract))
         {
@@ -953,7 +981,7 @@ internal static class MockMembersBuilder
                 argsExpr = $"(object?)new object?[] {{ {paramNames} }}";
             }
 
-            using (writer.Block($"public static void Raise{evt.Name}({raiseParams})"))
+            using (writer.Block($"public static void Raise{evt.Name}{typeParams}({raiseParams}){constraints}"))
             {
                 writer.AppendLine($"((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent(\"{evt.Name}\", {argsExpr});");
             }

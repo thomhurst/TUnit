@@ -165,7 +165,7 @@ namespace TUnit.Mocks
 {
     public static class IConstrained_MockStaticExtension
     {
-        extension(global::IConstrained)
+        extension(global::IConstrained _)
         {
             public static global::TUnit.Mocks.Generated.IConstrainedMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

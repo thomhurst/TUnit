@@ -9,6 +9,7 @@ namespace TUnit.Mocks.SourceGenerator.Models;
 internal sealed record MockTypeModel : IEquatable<MockTypeModel>
 {
     public string FullyQualifiedName { get; init; } = "";
+    public string OpenGenericTypeOfExpression { get; init; } = "";
     public string Name { get; init; } = "";
     public string Namespace { get; init; } = "";
     public bool IsInterface { get; init; }
@@ -16,6 +17,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public bool IsPartialMock { get; init; }
     public bool IsDelegateType { get; init; }
     public bool IsWrapMock { get; init; }
+    public EquatableArray<MockTypeParameterModel> TypeParameters { get; init; } = EquatableArray<MockTypeParameterModel>.Empty;
     public EquatableArray<MockMemberModel> Methods { get; init; } = EquatableArray<MockMemberModel>.Empty;
     public EquatableArray<MockMemberModel> Properties { get; init; } = EquatableArray<MockMemberModel>.Empty;
     public EquatableArray<MockEventModel> Events { get; init; } = EquatableArray<MockEventModel>.Empty;
@@ -38,6 +40,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     {
         if (other is null) return false;
         return FullyQualifiedName == other.FullyQualifiedName
+            && OpenGenericTypeOfExpression == other.OpenGenericTypeOfExpression
             && Name == other.Name
             && Namespace == other.Namespace
             && IsInterface == other.IsInterface
@@ -46,6 +49,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && IsDelegateType == other.IsDelegateType
             && IsWrapMock == other.IsWrapMock
             && IsPublic == other.IsPublic
+            && TypeParameters.Equals(other.TypeParameters)
             && Methods.Equals(other.Methods)
             && Properties.Equals(other.Properties)
             && Events.Equals(other.Events)
@@ -61,10 +65,12 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
         {
             int hash = 17;
             hash = hash * 31 + FullyQualifiedName.GetHashCode();
+            hash = hash * 31 + OpenGenericTypeOfExpression.GetHashCode();
             hash = hash * 31 + IsPartialMock.GetHashCode();
             hash = hash * 31 + IsDelegateType.GetHashCode();
             hash = hash * 31 + IsWrapMock.GetHashCode();
             hash = hash * 31 + IsPublic.GetHashCode();
+            hash = hash * 31 + TypeParameters.GetHashCode();
             hash = hash * 31 + Methods.GetHashCode();
             hash = hash * 31 + Properties.GetHashCode();
             hash = hash * 31 + Events.GetHashCode();

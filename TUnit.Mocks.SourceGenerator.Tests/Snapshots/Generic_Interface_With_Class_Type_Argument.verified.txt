@@ -3,18 +3,18 @@
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    public sealed class IFoo_Bar_Mock : global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.Bar>>, global::Sandbox.IFoo<global::Sandbox.Bar>
+    public sealed class IFoo_T_Mock<T> : global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>>, global::Sandbox.IFoo<T>
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IFoo_Bar_Mock(global::Sandbox.IFoo<global::Sandbox.Bar> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.Bar>> engine)
+        internal IFoo_T_Mock(global::Sandbox.IFoo<T> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> engine)
             : base(mockObject, engine) { }
 
-        void global::Sandbox.IFoo<global::Sandbox.Bar>.Process(global::Sandbox.Bar item)
+        void global::Sandbox.IFoo<T>.Process(T item)
         {
             Object.Process(item);
         }
 
-        global::Sandbox.Bar global::Sandbox.IFoo<global::Sandbox.Bar>.Value { get => Object.Value; }
+        T global::Sandbox.IFoo<T>.Value { get => Object.Value; }
     }
 }
 
@@ -26,26 +26,26 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    file sealed class IFoo_Bar_MockImpl : global::Sandbox.IFoo<global::Sandbox.Bar>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    file sealed class IFoo_T_MockImpl<T> : global::Sandbox.IFoo<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.Bar>> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IFoo_Bar_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.Bar>> engine)
+        internal IFoo_T_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>> engine)
         {
             _engine = engine;
         }
 
-        public void Process(global::Sandbox.Bar item)
+        public void Process(T item)
         {
-            _engine.HandleCall<global::Sandbox.Bar>(1, "Process", item);
+            _engine.HandleCall<T>(1, "Process", item);
         }
 
-        public global::Sandbox.Bar Value
+        public T Value
         {
-            get => _engine.HandleCallWithReturn<global::Sandbox.Bar>(0, "get_Value", global::System.Array.Empty<object?>(), default!);
+            get => _engine.HandleCallWithReturn<T>(0, "get_Value", global::System.Array.Empty<object?>(), default!);
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -55,23 +55,17 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IFoo_Bar_MockFactory
+    file static class IFoo_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::Sandbox.IFoo<global::Sandbox.Bar>>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
+                typeof(global::Sandbox.IFoo<>),
+                typeof(IFoo_T_MockImpl<>),
+                typeof(IFoo_T_Mock<>));
         }
 
-        internal static global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.Bar>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
-        {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::Sandbox.IFoo<global::Sandbox.Bar>' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<global::Sandbox.Bar>>(behavior);
-            var impl = new IFoo_Bar_MockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new IFoo_Bar_Mock(impl, engine);
-            return mock;
-        }
     }
 }
 
@@ -83,30 +77,30 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated
 {
-    public static class Sandbox_IFoo_Sandbox_Bar__MockMemberExtensions
+    public static class Sandbox_IFoo_T__MockMemberExtensions
     {
-        public static Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Process(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.Bar>> mock, global::TUnit.Mocks.Arguments.Arg<global::Sandbox.Bar> item)
+        public static Sandbox_IFoo_T__Process_M1_MockCall<T> Process<T>(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock, global::TUnit.Mocks.Arguments.Arg<T> item)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { item.Matcher };
-            return new Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
+            return new Sandbox_IFoo_T__Process_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
         }
 
-        public static Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Process(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.Bar>> mock, global::System.Func<global::Sandbox.Bar, bool> item)
+        public static Sandbox_IFoo_T__Process_M1_MockCall<T> Process<T>(this global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock, global::System.Func<T, bool> item)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::Sandbox.Bar> __fa_item = item;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_item = item;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_item.Matcher };
-            return new Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
+            return new Sandbox_IFoo_T__Process_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Process", matchers);
         }
 
-        extension(global::TUnit.Mocks.Mock<global::Sandbox.IFoo<global::Sandbox.Bar>> mock)
+        extension<T>(global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> mock)
         {
-            public global::TUnit.Mocks.PropertyMockCall<global::Sandbox.Bar> Value
+            public global::TUnit.Mocks.PropertyMockCall<T> Value
                 => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, 0, "Value", true, false);
         }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class Sandbox_IFoo_T__Process_M1_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
     {
         private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
         private readonly int _memberId;
@@ -116,7 +110,7 @@ namespace TUnit.Mocks.Generated
         private bool _builderInitialized;
         private object? _builderLock;
 
-        internal Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+        internal Sandbox_IFoo_T__Process_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
             _engine = engine;
             _memberId = memberId;
@@ -134,29 +128,29 @@ namespace TUnit.Mocks.Generated
             })!;
 
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Returns() { EnsureSetup().Returns(); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Returns() { EnsureSetup().Returns(); return this; }
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Then() { EnsureSetup().Then(); return this; }
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Then() { EnsureSetup().Then(); return this; }
 
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Callback(global::System.Action<global::Sandbox.Bar> callback)
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Callback(global::System.Action<T> callback)
         {
             EnsureSetup().Callback(callback);
             return this;
         }
 
         /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public Sandbox_IFoo_Sandbox_Bar__Process_M1_MockCall Throws(global::System.Func<global::Sandbox.Bar, global::System.Exception> exceptionFactory)
+        public Sandbox_IFoo_T__Process_M1_MockCall<T> Throws(global::System.Func<T, global::System.Exception> exceptionFactory)
         {
-            EnsureSetup().Throws(args => exceptionFactory((global::Sandbox.Bar)args[0]!));
+            EnsureSetup().Throws(args => exceptionFactory((T)args[0]!));
             return this;
         }
 
@@ -184,13 +178,13 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks
 {
-    public static class Sandbox_IFoo_Sandbox_Bar__MockStaticExtension
+    public static class Sandbox_IFoo_T__MockStaticExtension
     {
-        extension(global::Sandbox.IFoo<global::Sandbox.Bar>)
+        extension<T>(global::Sandbox.IFoo<T> _)
         {
-            public static global::TUnit.Mocks.Generated.Sandbox.IFoo_Bar_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.Sandbox.IFoo_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IFoo_Bar_Mock)global::TUnit.Mocks.Mock.Of<global::Sandbox.IFoo<global::Sandbox.Bar>>(behavior);
+                return (global::TUnit.Mocks.Generated.Sandbox.IFoo_T_Mock<T>)global::TUnit.Mocks.Mock.Of<global::Sandbox.IFoo<T>>(behavior);
             }
         }
     }

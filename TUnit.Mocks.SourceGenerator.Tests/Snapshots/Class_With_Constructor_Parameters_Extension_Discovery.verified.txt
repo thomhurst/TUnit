@@ -116,7 +116,7 @@ namespace TUnit.Mocks
 {
     public static class MyService_MockStaticExtension
     {
-        extension(global::MyService)
+        extension(global::MyService _)
         {
             public static global::TUnit.Mocks.Mock<global::MyService> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

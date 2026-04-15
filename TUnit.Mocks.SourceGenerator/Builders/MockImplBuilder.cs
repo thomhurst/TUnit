@@ -26,6 +26,8 @@ internal static class MockImplBuilder
     private static void BuildInterfaceMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
     {
         var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
 
         var baseTypes = model.HasStaticAbstractMembers
             ? mockableType  // inherit bridge interface (which : original interface)
@@ -35,7 +37,7 @@ internal static class MockImplBuilder
             baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
         }
 
-        using (writer.Block($"file sealed class {safeName}MockImpl : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
@@ -48,7 +50,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
                 {
-                    EmitStaticEngineAssignment(writer, safeName);
+                    EmitStaticEngineAssignment(writer, model, safeName);
                 }
             }
 
@@ -86,8 +88,10 @@ internal static class MockImplBuilder
     private static void BuildWrapMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
     {
         var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
 
-        using (writer.Block($"file sealed class {safeName}WrapMockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
+        using (writer.Block($"file sealed class {safeName}WrapMockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine($"private readonly {model.FullyQualifiedName} _wrappedInstance;");
@@ -141,7 +145,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("_wrappedInstance = wrappedInstance;");
                 if (model.HasStaticAbstractMembers)
                 {
-                    EmitStaticEngineAssignment(writer, safeName);
+                    EmitStaticEngineAssignment(writer, model, safeName);
                 }
             }
             return;
@@ -157,7 +161,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
                     {
-                        EmitStaticEngineAssignment(writer, safeName);
+                        EmitStaticEngineAssignment(writer, model, safeName);
                     }
                 }
             }
@@ -171,7 +175,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_wrappedInstance = wrappedInstance;");
                     if (model.HasStaticAbstractMembers)
                     {
-                        EmitStaticEngineAssignment(writer, safeName);
+                        EmitStaticEngineAssignment(writer, model, safeName);
                     }
                 }
             }
@@ -416,8 +420,10 @@ internal static class MockImplBuilder
     private static void BuildPartialMockImpl(CodeWriter writer, MockTypeModel model, string safeName)
     {
         var mockableType = GetMockableTypeName(model);
+        var typeParams = GetTypeParameterList(model);
+        var constraints = GetConstraintClauses(model);
 
-        using (writer.Block($"file sealed class {safeName}MockImpl : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject"))
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
@@ -470,7 +476,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("_engine = engine;");
                 if (model.HasStaticAbstractMembers)
                 {
-                    EmitStaticEngineAssignment(writer, safeName);
+                    EmitStaticEngineAssignment(writer, model, safeName);
                 }
             }
             return;
@@ -486,7 +492,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
                     {
-                        EmitStaticEngineAssignment(writer, safeName);
+                        EmitStaticEngineAssignment(writer, model, safeName);
                     }
                 }
             }
@@ -500,7 +506,7 @@ internal static class MockImplBuilder
                     writer.AppendLine("_engine = engine;");
                     if (model.HasStaticAbstractMembers)
                     {
-                        EmitStaticEngineAssignment(writer, safeName);
+                        EmitStaticEngineAssignment(writer, model, safeName);
                     }
                 }
             }
@@ -1140,6 +1146,12 @@ internal static class MockImplBuilder
     internal static string GetTypeParameterList(MockMemberModel method) =>
         FormatTypeParameterList(method.TypeParameters);
 
+    internal static string GetTypeParameterList(MockTypeModel model) =>
+        FormatTypeParameterList(model.TypeParameters);
+
+    internal static string GetGeneratedTypeName(string baseName, MockTypeModel model) =>
+        baseName + GetTypeParameterList(model);
+
     private static string FormatTypeParameterList(EquatableArray<MockTypeParameterModel> typeParameters)
     {
         if (typeParameters.Length == 0) return "";
@@ -1150,6 +1162,9 @@ internal static class MockImplBuilder
     // C# prohibits restating constraints on override methods (CS0460).
     internal static string GetConstraintClauses(MockMemberModel method, bool forExplicitImplementation = false) =>
         FormatConstraintClauses(method.TypeParameters, forExplicitImplementation);
+
+    internal static string GetConstraintClauses(MockTypeModel model) =>
+        FormatConstraintClauses(model.TypeParameters);
 
     private static string FormatConstraintClauses(EquatableArray<MockTypeParameterModel> typeParameters, bool forExplicitImplementation = false)
     {
@@ -1179,6 +1194,11 @@ internal static class MockImplBuilder
         }
         return clauses.Count > 0 ? " " + string.Join(' ', clauses) : "";
     }
+
+    internal static string GetOpenGenericTypeOfExpression(MockTypeModel model) =>
+        string.IsNullOrEmpty(model.OpenGenericTypeOfExpression)
+            ? model.FullyQualifiedName
+            : model.OpenGenericTypeOfExpression;
 
     /// <summary>
     /// Computes dispatch strategy for a method: typed (arity 1-8, no ref structs) or fallback (object?[]).
@@ -1489,7 +1509,7 @@ internal static class MockImplBuilder
         if (!model.HasStaticAbstractMembers) return model.FullyQualifiedName;
         var shortName = GetCompositeShortSafeName(model);
         var ns = GetMockNamespace(model);
-        return $"global::{ns}.{shortName}Mockable";
+        return $"global::{ns}.{GetGeneratedTypeName($"{shortName}Mockable", model)}";
     }
 
     /// <summary>
@@ -1503,15 +1523,16 @@ internal static class MockImplBuilder
         writer.AppendLine();
     }
 
-    internal static void EmitStaticEngineAssignment(CodeWriter writer, string safeName)
+    internal static void EmitStaticEngineAssignment(CodeWriter writer, MockTypeModel model, string safeName)
     {
-        writer.AppendLine($"if ({safeName}StaticEngine.Engine is not null)");
+        var staticEngineTypeName = GetGeneratedTypeName($"{safeName}StaticEngine", model);
+        writer.AppendLine($"if ({staticEngineTypeName}.Engine is not null)");
         writer.OpenBrace();
         writer.AppendLine($"throw new global::System.InvalidOperationException(");
         writer.AppendLine($"    \"Multiple mocks of an interface with static abstract members cannot be created in the same test context. \" +");
         writer.AppendLine($"    \"Static member calls are routed via a shared AsyncLocal engine, so only one mock instance per type is supported per test.\");");
         writer.CloseBrace();
-        writer.AppendLine($"{safeName}StaticEngine.Engine = engine;");
+        writer.AppendLine($"{staticEngineTypeName}.Engine = engine;");
     }
 
 }

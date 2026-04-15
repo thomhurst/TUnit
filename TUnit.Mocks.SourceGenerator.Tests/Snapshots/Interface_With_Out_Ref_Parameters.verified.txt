@@ -287,7 +287,7 @@ namespace TUnit.Mocks
 {
     public static class IDictionary_MockStaticExtension
     {
-        extension(global::IDictionary)
+        extension(global::IDictionary _)
         {
             public static global::TUnit.Mocks.Generated.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

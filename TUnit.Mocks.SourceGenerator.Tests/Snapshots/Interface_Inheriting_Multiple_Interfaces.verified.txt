@@ -202,7 +202,7 @@ namespace TUnit.Mocks
 {
     public static class IReadWriter_MockStaticExtension
     {
-        extension(global::IReadWriter)
+        extension(global::IReadWriter _)
         {
             public static global::TUnit.Mocks.Generated.IReadWriterMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

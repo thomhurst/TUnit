@@ -220,6 +220,50 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public void Generic_Interface_Inheriting_IEnumerable_In_Transitive_AutoMock_Generates_Open_Generic_Mock()
+    {
+        // Regression for #5567: transitive auto-mock generation for a generic
+        // interface should emit a reusable open-generic mock shape, not duplicate
+        // closed/open artifacts that break the user's build.
+        var source = """
+            #nullable enable
+            using System.Collections.Generic;
+            using TUnit.Mocks;
+
+            public interface ITest
+            {
+                ITestEnum<string> TestEnum { get; }
+                ITestEnum<T> Create<T>();
+            }
+
+            public interface ITestEnum<T> : IEnumerable<T>
+            {
+                T? GetTest();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITest>();
+                }
+            }
+            """;
+
+        var generated = RunGenerator(source);
+        var combined = string.Join(Environment.NewLine, generated);
+
+        if (!combined.Contains("class ITestEnum_T_MockImpl<T>", StringComparison.Ordinal)
+            || !combined.Contains("class ITestEnum_T_Mock<T>", StringComparison.Ordinal)
+            || !combined.Contains("RegisterOpenGenericFactory(", StringComparison.Ordinal)
+            || !combined.Contains("typeof(global::ITestEnum<>)", StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "Expected open-generic transitive mock generation artifacts were not produced.");
+        }
+    }
+
+    [Test]
     public Task Interface_Inheriting_Multiple_Interfaces()
     {
         var source = """

@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace TUnit.Mocks.SourceGenerator.Extensions;
 
@@ -34,6 +35,55 @@ internal static class TypeSymbolExtensions
     {
         var fqn = type.GetFullyQualifiedName();
         return fqn.StartsWith("global::") ? fqn.Substring("global::".Length) : fqn;
+    }
+
+    public static string GetOpenGenericTypeOfExpression(this INamedTypeSymbol type)
+    {
+        var definitionDisplay = type.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        if (!type.OriginalDefinition.IsGenericType)
+            return definitionDisplay;
+
+        var builder = new StringBuilder(definitionDisplay.Length);
+        for (int i = 0; i < definitionDisplay.Length; i++)
+        {
+            var c = definitionDisplay[i];
+            if (c != '<')
+            {
+                builder.Append(c);
+                continue;
+            }
+
+            var depth = 1;
+            var commaCount = 0;
+            i++;
+            while (i < definitionDisplay.Length && depth > 0)
+            {
+                c = definitionDisplay[i];
+                if (c == '<')
+                {
+                    depth++;
+                }
+                else if (c == '>')
+                {
+                    depth--;
+                }
+                else if (c == ',' && depth == 1)
+                {
+                    commaCount++;
+                }
+
+                if (depth > 0)
+                {
+                    i++;
+                }
+            }
+
+            builder.Append('<');
+            builder.Append(',', commaCount);
+            builder.Append('>');
+        }
+
+        return builder.ToString();
     }
 
     public static bool IsNullableAnnotated(this ITypeSymbol type)

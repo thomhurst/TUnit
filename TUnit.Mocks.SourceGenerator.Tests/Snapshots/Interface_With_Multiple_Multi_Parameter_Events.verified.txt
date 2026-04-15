@@ -184,7 +184,7 @@ namespace TUnit.Mocks
 {
     public static class IDualEvents_MockStaticExtension
     {
-        extension(global::IDualEvents)
+        extension(global::IDualEvents _)
         {
             public static global::TUnit.Mocks.Generated.IDualEventsMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

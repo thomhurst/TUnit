@@ -288,7 +288,7 @@ namespace TUnit.Mocks
 {
     public static class ITest_MockStaticExtension
     {
-        extension(global::ITest)
+        extension(global::ITest _)
         {
             public static global::TUnit.Mocks.Generated.ITestMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {

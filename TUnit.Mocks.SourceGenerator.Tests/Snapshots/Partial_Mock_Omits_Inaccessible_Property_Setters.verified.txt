@@ -118,7 +118,7 @@ namespace TUnit.Mocks
 {
     public static class ExternalLib_ExternalResponse_MockStaticExtension
     {
-        extension(global::ExternalLib.ExternalResponse)
+        extension(global::ExternalLib.ExternalResponse _)
         {
             public static global::TUnit.Mocks.Mock<global::ExternalLib.ExternalResponse> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
