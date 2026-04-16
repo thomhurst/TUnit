@@ -9,7 +9,11 @@ public static class TUnitActivitySource
     private static readonly string Version =
         typeof(TUnitActivitySource).Assembly.GetName().Version?.ToString() ?? "0.0.0";
 
-    internal static readonly ActivitySource Source = new("TUnit", Version);
+    internal const string SourceName = "TUnit";
+    internal const string LifecycleSourceName = "TUnit.Lifecycle";
+
+    internal static readonly ActivitySource Source = new(SourceName, Version);
+    internal static readonly ActivitySource LifecycleSource = new(LifecycleSourceName, Version);
 
     // Span names used across the engine and HTML report.
     internal const string SpanTestSession = "test session";
@@ -26,11 +30,14 @@ public static class TUnitActivitySource
     /// <see cref="TestContext.Current"/> resolution when OpenTelemetry propagation is configured.
     /// </summary>
     public const string TagTestId = "tunit.test.id";
+    internal const string TagSessionId = "tunit.session.id";
+    internal const string TagTestFilter = "tunit.filter";
     internal const string TagTestClass = "tunit.test.class";
     internal const string TagTestMethod = "tunit.test.method";
     internal const string TagTestNodeUid = "tunit.test.node_uid";
     internal const string TagTestCategories = "tunit.test.categories";
     internal const string TagTestCount = "tunit.test.count";
+    internal const string TagClassNamespace = "tunit.class.namespace";
     internal const string TagTestCaseName = "test.case.name";
     internal const string TagTestSuiteName = "test.suite.name";
     internal const string TagAssemblyName = "tunit.assembly.name";
@@ -78,11 +85,41 @@ public static class TUnitActivitySource
         return Source.StartActivity(name, kind, parentContext, tags, links);
     }
 
+    internal static Activity? StartLifecycleActivity(
+        string name,
+        ActivityKind kind = ActivityKind.Internal,
+        ActivityContext parentContext = default,
+        IEnumerable<KeyValuePair<string, object?>>? tags = null,
+        IEnumerable<ActivityLink>? links = null)
+    {
+        return LifecycleSource.StartActivity(name, kind, parentContext, tags, links);
+    }
+
+    internal static ActivitySource GetSourceForSharedType(SharedType? sharedType) =>
+        sharedType is not null and not SharedType.None
+            ? LifecycleSource
+            : Source;
+
     /// <summary>
     /// Runs <paramref name="action"/> inside an OpenTelemetry span, handling
     /// Activity.Current save/restore, error recording, and span stop/dispose.
     /// </summary>
+    internal static Task RunWithSpanAsync(
+        string name,
+        ActivityContext parentContext,
+        IEnumerable<KeyValuePair<string, object?>> tags,
+        Func<Task> action)
+    {
+        return RunWithSpanAsync(Source, name, parentContext, tags, action);
+    }
+
+    /// <summary>
+    /// Runs <paramref name="action"/> inside an OpenTelemetry span emitted by
+    /// <paramref name="activitySource"/>, handling Activity.Current save/restore,
+    /// error recording, and span stop/dispose.
+    /// </summary>
     internal static async Task RunWithSpanAsync(
+        ActivitySource activitySource,
         string name,
         ActivityContext parentContext,
         IEnumerable<KeyValuePair<string, object?>> tags,
@@ -91,9 +128,9 @@ public static class TUnitActivitySource
         Activity? activity = null;
         var previousActivity = Activity.Current;
 
-        if (Source.HasListeners())
+        if (activitySource.HasListeners())
         {
-            activity = Source.StartActivity(name, ActivityKind.Internal, parentContext, tags);
+            activity = activitySource.StartActivity(name, ActivityKind.Internal, parentContext, tags);
             if (activity is not null)
             {
                 Activity.Current = activity;

@@ -8,7 +8,7 @@ namespace TUnit.Aspire.Tests;
 /// <summary>
 /// Tests that verify the TUnit engine creates test activities correctly:
 /// parent-child hierarchy (test body → test case), proper tags,
-/// baggage for cross-boundary propagation, Activity Links to the class activity,
+/// baggage for cross-boundary propagation, root-per-test traces,
 /// and unique TraceIds per test case.
 /// </summary>
 public class TestActivityTests
@@ -60,31 +60,34 @@ public class TestActivityTests
         var testCase = Activity.Current!.Parent!;
 
         var testCaseName = testCase.GetTagItem(TUnitActivitySource.TagTestCaseName)?.ToString();
+        var testSuiteName = testCase.GetTagItem(TUnitActivitySource.TagTestSuiteName)?.ToString();
         var testClass = testCase.GetTagItem(TUnitActivitySource.TagTestClass)?.ToString();
+        var testClassNamespace = testCase.GetTagItem(TUnitActivitySource.TagClassNamespace)?.ToString();
         var testMethod = testCase.GetTagItem(TUnitActivitySource.TagTestMethod)?.ToString();
+        var assemblyName = testCase.GetTagItem(TUnitActivitySource.TagAssemblyName)?.ToString();
+        var sessionId = testCase.GetTagItem(TUnitActivitySource.TagSessionId)?.ToString();
         var testId = testCase.GetTagItem(TUnitActivitySource.TagTestId)?.ToString();
         var testNodeUid = testCase.GetTagItem(TUnitActivitySource.TagTestNodeUid)?.ToString();
 
         await Assert.That(testCaseName).IsNotNull();
+        await Assert.That(testSuiteName).IsEqualTo(nameof(TestActivityTests));
         await Assert.That(testClass).Contains(nameof(TestActivityTests));
+        await Assert.That(testClassNamespace).IsEqualTo(typeof(TestActivityTests).Namespace);
         await Assert.That(testMethod).IsEqualTo(nameof(TestCaseActivity_HasExpectedTags));
+        await Assert.That(assemblyName).IsEqualTo(typeof(TestActivityTests).Assembly.GetName().Name);
+        await Assert.That(sessionId).IsNotNull();
         await Assert.That(testId).IsEqualTo(TestContext.Current!.Id);
         await Assert.That(testNodeUid).IsNotNull();
     }
 
     [Test]
-    public async Task TestCaseActivity_HasActivityLink_ToClassActivity()
+    public async Task TestCaseActivity_IsRootSpan()
     {
         var testCase = Activity.Current!.Parent!;
 
-        // Each test case starts its own W3C trace (so ParentSpanId is default).
-        // Instead, an Activity Link references the class activity for correlation.
-        // This prevents all tests in a class from sharing one giant trace in backends
-        // like Seq/Jaeger while still preserving the logical hierarchy.
-        var link = await Assert.That(testCase.Links.ToList()).HasSingleItem();
-
-        await Assert.That(link.Context.TraceId).IsNotEqualTo(default(ActivityTraceId));
-        await Assert.That(link.Context.SpanId).IsNotEqualTo(default(ActivitySpanId));
+        await Assert.That(testCase.Parent).IsNull();
+        await Assert.That(testCase.ParentSpanId).IsEqualTo(default(ActivitySpanId));
+        await Assert.That(testCase.Links.ToList()).IsEmpty();
     }
 
     [Test]

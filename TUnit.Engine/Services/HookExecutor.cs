@@ -124,15 +124,15 @@ internal sealed class HookExecutor
             return;
         }
 
-        if (TUnitActivitySource.Source.HasListeners())
+        if (TUnitActivitySource.LifecycleSource.HasListeners())
         {
-            sessionContext.Activity = TUnitActivitySource.StartActivity(
+            sessionContext.Activity = TUnitActivitySource.StartLifecycleActivity(
                 TUnitActivitySource.SpanTestSession,
                 System.Diagnostics.ActivityKind.Internal,
                 default,
                 [
-                    new("tunit.session.id", sessionContext.Id),
-                    new("tunit.filter", sessionContext.TestFilter)
+                    new(TUnitActivitySource.TagSessionId, sessionContext.Id),
+                    new(TUnitActivitySource.TagTestFilter, sessionContext.TestFilter)
                 ]);
         }
     }
@@ -164,10 +164,10 @@ internal sealed class HookExecutor
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
 
 #if NET
-        if (TUnitActivitySource.Source.HasListeners())
+        if (TUnitActivitySource.LifecycleSource.HasListeners())
         {
             var sessionActivity = _contextProvider.TestSessionContext.Activity;
-            assemblyContext.Activity = TUnitActivitySource.StartActivity(
+            assemblyContext.Activity = TUnitActivitySource.StartLifecycleActivity(
                 TUnitActivitySource.SpanTestAssembly,
                 System.Diagnostics.ActivityKind.Internal,
                 sessionActivity?.Context ?? default,
@@ -322,16 +322,16 @@ internal sealed class HookExecutor
         var classContext = _contextProvider.GetOrCreateClassContext(testClass);
 
 #if NET
-        if (TUnitActivitySource.Source.HasListeners())
+        if (TUnitActivitySource.LifecycleSource.HasListeners())
         {
             var assemblyActivity = classContext.AssemblyContext.Activity;
-            classContext.Activity = TUnitActivitySource.StartActivity(
+            classContext.Activity = TUnitActivitySource.StartLifecycleActivity(
                 TUnitActivitySource.SpanTestSuite,
                 System.Diagnostics.ActivityKind.Internal,
                 assemblyActivity?.Context ?? default,
                 [
                     new(TUnitActivitySource.TagTestSuiteName, testClass.Name),
-                    new("tunit.class.namespace", testClass.Namespace)
+                    new(TUnitActivitySource.TagClassNamespace, testClass.Namespace)
                 ]);
         }
 #endif
@@ -641,6 +641,9 @@ internal sealed class HookExecutor
         where TContext : Context
     {
         System.Diagnostics.Activity? hookActivity = null;
+        var activitySource = context is TestContext
+            ? TUnitActivitySource.Source
+            : TUnitActivitySource.LifecycleSource;
 
         // Capture the pre-hook Activity.Current as the known-good restore target.
         // StopActivity internally restores to hookActivity._previousActiveActivity,
@@ -649,9 +652,9 @@ internal sealed class HookExecutor
         // with this known-good value to guarantee a correct Activity.Current after.
         var previousActivity = System.Diagnostics.Activity.Current;
 
-        if (TUnitActivitySource.Source.HasListeners())
+        if (activitySource.HasListeners())
         {
-            hookActivity = TUnitActivitySource.StartActivity(
+            hookActivity = activitySource.StartActivity(
                 hook.ActivityName,
                 System.Diagnostics.ActivityKind.Internal,
                 context.Activity?.Context ?? default);
