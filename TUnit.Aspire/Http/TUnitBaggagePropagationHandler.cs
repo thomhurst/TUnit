@@ -27,11 +27,12 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
     {
         if (Activity.Current is { } activity)
         {
-            // New SpanId per request so the SUT's spans parent correctly within this trace
-            var spanId = ActivitySpanId.CreateRandom();
+            // Aspire's CreateHttpClient doesn't create an outgoing client span. Propagate the
+            // current test span itself so downstream server spans parent to a real exported span
+            // instead of a synthetic parent ID that backends can't render.
             var sampled = activity.Recorded ? "01" : "00";
             request.Headers.TryAddWithoutValidation("traceparent",
-                $"00-{activity.TraceId}-{spanId}-{sampled}");
+                $"00-{activity.TraceId}-{activity.SpanId}-{sampled}");
 
             if (!request.Headers.Contains("baggage"))
             {
