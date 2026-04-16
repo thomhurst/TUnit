@@ -76,7 +76,7 @@ public class BecauseTests
     {
         var expectedMessage = """
                               Expected to be true, because we only apply it to previous assertions
-                              and to be false
+                              	and to be false
                               but found True
 
                               at Assert.That(variable).IsTrue().Because("we only apply it to previous assertions").And.IsFalse()
