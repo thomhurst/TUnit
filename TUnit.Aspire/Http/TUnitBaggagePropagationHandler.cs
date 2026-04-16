@@ -30,9 +30,13 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
             // Aspire's CreateHttpClient doesn't create an outgoing client span. Propagate the
             // current test span itself so downstream server spans parent to a real exported span
             // instead of a synthetic parent ID that backends can't render.
-            var sampled = activity.Recorded ? "01" : "00";
-            request.Headers.TryAddWithoutValidation("traceparent",
-                $"00-{activity.TraceId}-{activity.SpanId}-{sampled}");
+            DistributedContextPropagator.Current.Inject(activity, request, static (carrier, key, value) =>
+            {
+                if (carrier is HttpRequestMessage httpRequest && key is not null && !httpRequest.Headers.Contains(key))
+                {
+                    httpRequest.Headers.TryAddWithoutValidation(key, value);
+                }
+            });
 
             if (!request.Headers.Contains("baggage"))
             {
@@ -59,6 +63,8 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 
                 if (!first)
                 {
+                    // Older target frameworks still default to Correlation-Context for baggage.
+                    // Emit W3C baggage explicitly so backend correlation is stable everywhere.
                     request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
                 }
             }

@@ -48,7 +48,9 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
         // Propagate the current distributed trace even when the helper span is not
         // created (for example, when no listener is attached to TUnit.AspNetCore.Http).
-        InjectTraceContext(activity ?? ambientActivity, request.Headers);
+        var propagationActivity = activity ?? ambientActivity;
+        InjectTraceContext(propagationActivity, request.Headers);
+        InjectBaggage(propagationActivity, request.Headers);
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -108,5 +110,45 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
             destination.SetBaggage(key, value);
         }
+    }
+
+    private static void InjectBaggage(Activity? activity, HttpRequestHeaders headers)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        var first = true;
+        var sb = new System.Text.StringBuilder();
+
+        foreach (var (key, value) in activity.Baggage)
+        {
+            if (key is null)
+            {
+                continue;
+            }
+
+            if (!first)
+            {
+                sb.Append(',');
+            }
+
+            sb.Append(Uri.EscapeDataString(key));
+            sb.Append('=');
+            sb.Append(Uri.EscapeDataString(value ?? string.Empty));
+            first = false;
+        }
+
+        if (first)
+        {
+            return;
+        }
+
+        // .NET 8's default propagator still uses Correlation-Context baggage semantics.
+        // Emit the W3C baggage header explicitly so test correlation is consistent across
+        // target frameworks and matches the headers our servers already understand.
+        headers.Remove("baggage");
+        headers.TryAddWithoutValidation("baggage", sb.ToString());
     }
 }
