@@ -34,7 +34,10 @@ internal static class TestTraceExporter
 
     internal static void TryStart(TestSessionContext context)
     {
-        if (TryGetDashboardEndpoint() is not { } endpoint)
+        var endpoint = TryParseDashboardEndpoint(
+            Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar));
+
+        if (endpoint is null)
         {
             return;
         }
@@ -46,19 +49,30 @@ internal static class TestTraceExporter
                 return;
             }
 
-            _tracerProvider = Sdk.CreateTracerProviderBuilder()
-                .SetResourceBuilder(CreateResourceBuilder(context))
-                .AddSource(TUnitSourceName)
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = GetTracesEndpoint(endpoint);
-                    options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                })
-                .Build();
+            _tracerProvider = CreateTracerProvider(endpoint, context, TUnitSourceName);
         }
     }
 
-    internal static void Dispose()
+    /// <summary>
+    /// Builds a standalone <see cref="TracerProvider"/> for the given endpoint and session.
+    /// Caller owns disposal. Used by <see cref="TryStart"/> for the singleton case and by
+    /// tests that need an isolated provider (parallel-safe — no static state touched).
+    /// </summary>
+    internal static TracerProvider CreateTracerProvider(
+        Uri endpoint, TestSessionContext context, string sourceName)
+    {
+        return Sdk.CreateTracerProviderBuilder()
+            .SetResourceBuilder(CreateResourceBuilder(context))
+            .AddSource(sourceName)
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint = GetTracesEndpoint(endpoint);
+                options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            })
+            .Build();
+    }
+
+    internal static void Stop()
     {
         TracerProvider? providerToDispose = null;
 
@@ -76,16 +90,14 @@ internal static class TestTraceExporter
         providerToDispose.Dispose();
     }
 
-    internal static Uri? TryGetDashboardEndpoint()
+    internal static Uri? TryParseDashboardEndpoint(string? value)
     {
-        var endpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
-
-        if (string.IsNullOrWhiteSpace(endpoint))
+        if (string.IsNullOrWhiteSpace(value))
         {
             return null;
         }
 
-        return Uri.TryCreate(endpoint, UriKind.Absolute, out var uri)
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri)
             ? uri
             : null;
     }

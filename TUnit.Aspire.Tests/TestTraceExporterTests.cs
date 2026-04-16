@@ -8,47 +8,43 @@ using TUnit.Core;
 
 namespace TUnit.Aspire.Tests;
 
+// Tests use unique per-test ActivitySource names + locally-owned TracerProviders so they
+// can run in parallel without env-var or static-state interference.
 public class TestTraceExporterTests
 {
-    private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
-
     [Test]
-    public async Task TryStart_DashboardEndpointMissing_DoesNotStartExporter()
+    [Arguments(null)]
+    [Arguments("")]
+    [Arguments("   ")]
+    [Arguments("not-a-uri")]
+    public async Task TryParseDashboardEndpoint_InvalidValue_ReturnsNull(string? value)
     {
-        var previousEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
-        Environment.SetEnvironmentVariable(DashboardOtlpEndpointEnvVar, null);
-        TestTraceExporter.Dispose();
-
-        try
-        {
-            TestTraceExporter.TryStart(GetCurrentSessionContext());
-
-            await Assert.That(TestTraceExporter.IsStarted).IsFalse();
-        }
-        finally
-        {
-            TestTraceExporter.Dispose();
-            Environment.SetEnvironmentVariable(DashboardOtlpEndpointEnvVar, previousEndpoint);
-        }
+        await Assert.That(TestTraceExporter.TryParseDashboardEndpoint(value)).IsNull();
     }
 
     [Test]
-    public async Task TryStart_ConfiguredDashboardEndpoint_ExportsTestTrace()
+    public async Task TryParseDashboardEndpoint_ValidUri_ReturnsParsed()
     {
-        var previousEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
+        await Assert.That(TestTraceExporter.TryParseDashboardEndpoint("http://127.0.0.1:4317"))
+            .IsEqualTo(new Uri("http://127.0.0.1:4317"));
+    }
+
+    [Test]
+    public async Task CreateTracerProvider_ExportsTracesForRegisteredSource()
+    {
         await using var server = new OtlpTraceCaptureServer();
         server.Start();
 
-        Environment.SetEnvironmentVariable(DashboardOtlpEndpointEnvVar, $"http://127.0.0.1:{server.Port}");
-        TestTraceExporter.Dispose();
+        // Per-test ActivitySource name keeps spans isolated from any other test or production
+        // listener, so this test stays parallel-safe even though OpenTelemetry exporters are
+        // process-wide.
+        var sourceName = $"TUnit.Tests.{Guid.NewGuid():N}";
+        var endpoint = new Uri($"http://127.0.0.1:{server.Port}");
 
-        try
+        using (var activitySource = new ActivitySource(sourceName))
+        using (var provider = TestTraceExporter.CreateTracerProvider(
+            endpoint, GetCurrentSessionContext(), sourceName))
         {
-            TestTraceExporter.TryStart(GetCurrentSessionContext());
-
-            await Assert.That(TestTraceExporter.IsStarted).IsTrue();
-
-            using var activitySource = new ActivitySource("TUnit");
             using var testCase = activitySource.StartActivity("test case", ActivityKind.Internal);
             using var testBody = activitySource.StartActivity("test body", ActivityKind.Internal);
 
@@ -57,20 +53,15 @@ public class TestTraceExporterTests
 
             testBody?.Stop();
             testCase?.Stop();
-            TestTraceExporter.Dispose();
-
-            var request = await server.WaitForRequestAsync("/v1/traces");
-            var body = request.Body;
-
-            await Assert.That(Encoding.UTF8.GetString(body)).Contains("test case");
-            await Assert.That(Encoding.UTF8.GetString(body)).Contains("test body");
-            await Assert.That(Encoding.UTF8.GetString(body)).Contains(typeof(TestTraceExporterTests).Assembly.GetName().Name!);
         }
-        finally
-        {
-            TestTraceExporter.Dispose();
-            Environment.SetEnvironmentVariable(DashboardOtlpEndpointEnvVar, previousEndpoint);
-        }
+        // Disposing the provider flushes pending spans to the exporter.
+
+        var request = await server.WaitForRequestAsync("/v1/traces");
+        var body = Encoding.UTF8.GetString(request.Body);
+
+        await Assert.That(body).Contains("test case");
+        await Assert.That(body).Contains("test body");
+        await Assert.That(body).Contains(typeof(TestTraceExporterTests).Assembly.GetName().Name!);
     }
 
     [Test]

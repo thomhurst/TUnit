@@ -18,6 +18,6 @@ public static class AspireTelemetryHooks
     [After(HookType.TestSession, Order = int.MaxValue)]
     public static void StopRunnerTraceExport()
     {
-        TestTraceExporter.Dispose();
+        TestTraceExporter.Stop();
     }
 }

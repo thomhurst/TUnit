@@ -38,35 +38,12 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
                 }
             });
 
-            if (!request.Headers.Contains("baggage"))
+            if (!request.Headers.Contains("baggage")
+                && TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
             {
-                var first = true;
-                var sb = new System.Text.StringBuilder();
-
-                foreach (var (key, value) in activity.Baggage)
-                {
-                    if (key is null)
-                    {
-                        continue;
-                    }
-
-                    if (!first)
-                    {
-                        sb.Append(',');
-                    }
-
-                    sb.Append(Uri.EscapeDataString(key));
-                    sb.Append('=');
-                    sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-                    first = false;
-                }
-
-                if (!first)
-                {
-                    // Older target frameworks still default to Correlation-Context for baggage.
-                    // Emit W3C baggage explicitly so backend correlation is stable everywhere.
-                    request.Headers.TryAddWithoutValidation("baggage", sb.ToString());
-                }
+                // Older target frameworks still default to Correlation-Context for baggage.
+                // Emit W3C baggage explicitly so backend correlation is stable everywhere.
+                request.Headers.TryAddWithoutValidation("baggage", baggage);
             }
         }
 

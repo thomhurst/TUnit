@@ -197,6 +197,40 @@ public static class TUnitActivitySource
     }
 
     /// <summary>
+    /// Builds a W3C <c>baggage</c> header value from <paramref name="activity"/>'s baggage,
+    /// or returns <c>null</c> if there is nothing to emit. Used by HTTP propagation handlers
+    /// when the configured <see cref="DistributedContextPropagator"/> does not emit baggage
+    /// itself (e.g. .NET's default LegacyPropagator emits Correlation-Context instead).
+    /// </summary>
+    internal static string? TryBuildBaggageHeader(Activity activity)
+    {
+        System.Text.StringBuilder? sb = null;
+
+        foreach (var (key, value) in activity.Baggage)
+        {
+            if (key is null)
+            {
+                continue;
+            }
+
+            if (sb is null)
+            {
+                sb = new System.Text.StringBuilder();
+            }
+            else
+            {
+                sb.Append(',');
+            }
+
+            sb.Append(Uri.EscapeDataString(key));
+            sb.Append('=');
+            sb.Append(Uri.EscapeDataString(value ?? string.Empty));
+        }
+
+        return sb?.ToString();
+    }
+
+    /// <summary>
     /// Maps a <see cref="SharedType"/> to its trace scope tag value.
     /// Keyed objects map to "session" because their lifetime is session-scoped
     /// (shared across classes and assemblies via matching keys).

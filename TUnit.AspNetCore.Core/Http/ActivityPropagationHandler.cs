@@ -114,41 +114,17 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
     private static void InjectBaggage(Activity? activity, HttpRequestHeaders headers)
     {
+        // If a propagator already emitted W3C baggage (e.g. OTel SDK's BaggagePropagator),
+        // preserve it; otherwise emit our own so LegacyPropagator-based stacks still
+        // propagate test correlation baggage.
         if (activity is null || headers.Contains("baggage"))
         {
-            // If a propagator already emitted W3C baggage (e.g., OTel SDK's BaggagePropagator),
-            // do not override it. This preserves any user-configured propagator output.
             return;
         }
 
-        var first = true;
-        var sb = new System.Text.StringBuilder();
-
-        foreach (var (key, value) in activity.Baggage)
+        if (TUnit.Core.TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
         {
-            if (key is null)
-            {
-                continue;
-            }
-
-            if (!first)
-            {
-                sb.Append(',');
-            }
-
-            sb.Append(Uri.EscapeDataString(key));
-            sb.Append('=');
-            sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-            first = false;
+            headers.TryAddWithoutValidation("baggage", baggage);
         }
-
-        if (first)
-        {
-            return;
-        }
-
-        // Fallback when no baggage header was emitted by the configured propagator
-        // (e.g., .NET default LegacyPropagator uses Correlation-Context, not baggage).
-        headers.TryAddWithoutValidation("baggage", sb.ToString());
     }
 }
