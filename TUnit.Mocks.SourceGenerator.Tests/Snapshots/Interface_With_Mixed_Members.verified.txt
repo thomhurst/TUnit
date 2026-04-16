@@ -402,7 +402,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.IServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IServiceMock)global::TUnit.Mocks.Mock.Of<global::IService>(behavior);
+                return (global::TUnit.Mocks.Generated.IServiceMock)global::TUnit.Mocks.Generated.IServiceMockFactory.CreateAutoMock(behavior);
             }
         }
     }

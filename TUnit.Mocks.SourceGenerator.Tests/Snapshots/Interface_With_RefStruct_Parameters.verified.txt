@@ -161,7 +161,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.IBufferProcessorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IBufferProcessorMock)global::TUnit.Mocks.Mock.Of<global::IBufferProcessor>(behavior);
+                return (global::TUnit.Mocks.Generated.IBufferProcessorMock)global::TUnit.Mocks.Generated.IBufferProcessorMockFactory.CreateAutoMock(behavior);
             }
         }
     }

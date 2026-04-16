@@ -300,7 +300,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IDictionaryMock)global::TUnit.Mocks.Mock.Of<global::IDictionary>(behavior);
+                return (global::TUnit.Mocks.Generated.IDictionaryMock)global::TUnit.Mocks.Generated.IDictionaryMockFactory.CreateAutoMock(behavior);
             }
         }
     }

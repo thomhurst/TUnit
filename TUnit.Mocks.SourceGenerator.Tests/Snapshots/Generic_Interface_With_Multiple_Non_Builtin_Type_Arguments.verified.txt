@@ -187,7 +187,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut>)global::TUnit.Mocks.Mock.Of<global::Sandbox.IMapper<TIn, TOut>>(behavior);
+                return (global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut>)global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_MockFactory.CreateAutoMock<TIn, TOut>(behavior);
             }
         }
     }

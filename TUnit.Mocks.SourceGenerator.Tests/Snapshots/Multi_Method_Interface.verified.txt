@@ -339,7 +339,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.ICalculatorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ICalculatorMock)global::TUnit.Mocks.Mock.Of<global::ICalculator>(behavior);
+                return (global::TUnit.Mocks.Generated.ICalculatorMock)global::TUnit.Mocks.Generated.ICalculatorMockFactory.CreateAutoMock(behavior);
             }
         }
     }

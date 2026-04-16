@@ -18,7 +18,11 @@ internal static class MockStaticExtensionBuilder
         {
             using (writer.Block($"{visibility} static global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)} Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
             {
-                writer.AppendLine($"return (global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)})global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
+                var generatedMockType = $"global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
+                var factoryType = $"global::{mockNamespace}.{shortName}MockFactory";
+                var typeArguments = MockImplBuilder.GetTypeParameterList(model);
+
+                writer.AppendLine($"return ({generatedMockType}){factoryType}.CreateAutoMock{typeArguments}(behavior);");
             }
         });
     }

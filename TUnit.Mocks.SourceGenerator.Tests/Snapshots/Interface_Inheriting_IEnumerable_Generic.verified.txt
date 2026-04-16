@@ -104,7 +104,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.ITestEnum_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ITestEnum_T_Mock<T>)global::TUnit.Mocks.Mock.Of<global::ITestEnum<T>>(behavior);
+                return (global::TUnit.Mocks.Generated.ITestEnum_T_Mock<T>)global::TUnit.Mocks.Generated.ITestEnum_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

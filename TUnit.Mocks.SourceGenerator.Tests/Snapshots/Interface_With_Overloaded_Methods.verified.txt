@@ -555,7 +555,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.IFormatterMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IFormatterMock)global::TUnit.Mocks.Mock.Of<global::IFormatter>(behavior);
+                return (global::TUnit.Mocks.Generated.IFormatterMock)global::TUnit.Mocks.Generated.IFormatterMockFactory.CreateAutoMock(behavior);
             }
         }
     }

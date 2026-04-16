@@ -216,7 +216,7 @@ namespace TUnit.Mocks
         {
             public static global::TUnit.Mocks.Generated.ICustomCollectionMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ICustomCollectionMock)global::TUnit.Mocks.Mock.Of<global::ICustomCollection>(behavior);
+                return (global::TUnit.Mocks.Generated.ICustomCollectionMock)global::TUnit.Mocks.Generated.ICustomCollectionMockFactory.CreateAutoMock(behavior);
             }
         }
     }
