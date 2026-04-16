@@ -49,7 +49,7 @@ namespace TUnit.Mocks.Generated
         }
     }
 
-    file static class ITestEnum_T_MockFactory
+    internal static class ITestEnum_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -58,6 +58,15 @@ namespace TUnit.Mocks.Generated
                 typeof(global::ITestEnum<>),
                 typeof(ITestEnum_T_MockImpl<>),
                 typeof(ITestEnum_T_Mock<>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::ITestEnum<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::ITestEnum<T>>(behavior);
+            var impl = new ITestEnum_T_MockImpl<T>(engine);
+            engine.Raisable = impl;
+            var mock = new ITestEnum_T_Mock<T>(impl, engine);
+            return mock;
         }
 
     }

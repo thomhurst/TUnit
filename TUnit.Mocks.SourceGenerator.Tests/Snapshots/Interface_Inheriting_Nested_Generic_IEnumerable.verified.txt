@@ -63,7 +63,7 @@ namespace TUnit.Mocks.Generated
         }
     }
 
-    file static class IPagedResult_T_MockFactory
+    internal static class IPagedResult_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -72,6 +72,15 @@ namespace TUnit.Mocks.Generated
                 typeof(global::IPagedResult<>),
                 typeof(IPagedResult_T_MockImpl<>),
                 typeof(IPagedResult_T_Mock<>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::IPagedResult<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::IPagedResult<T>>(behavior);
+            var impl = new IPagedResult_T_MockImpl<T>(engine);
+            engine.Raisable = impl;
+            var mock = new IPagedResult_T_Mock<T>(impl, engine);
+            return mock;
         }
 
     }

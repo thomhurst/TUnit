@@ -45,7 +45,7 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IMapper_TIn_TOut_MockFactory
+    internal static class IMapper_TIn_TOut_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -54,6 +54,15 @@ namespace TUnit.Mocks.Generated.Sandbox
                 typeof(global::Sandbox.IMapper<,>),
                 typeof(IMapper_TIn_TOut_MockImpl<,>),
                 typeof(IMapper_TIn_TOut_Mock<,>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>> CreateAutoMock<TIn, TOut>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<TIn, TOut>>(behavior);
+            var impl = new IMapper_TIn_TOut_MockImpl<TIn, TOut>(engine);
+            engine.Raisable = impl;
+            var mock = new IMapper_TIn_TOut_Mock<TIn, TOut>(impl, engine);
+            return mock;
         }
 
     }

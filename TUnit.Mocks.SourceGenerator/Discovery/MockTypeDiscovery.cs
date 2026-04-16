@@ -575,11 +575,10 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            var model = BuildSingleTypeModel(NormalizeSingleMockType(namedType), isPartialMock: namedType.TypeKind == TypeKind.Class, compilationAssembly);
-            if (model is null)
-                continue;
-
-            return ImmutableArray.Create(model);
+            return BuildModelWithTransitiveDependencies(
+                NormalizeSingleMockType(namedType),
+                isPartialMock: namedType.TypeKind == TypeKind.Class,
+                compilationAssembly);
         }
 
         return ImmutableArray<MockTypeModel>.Empty;

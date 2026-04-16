@@ -44,6 +44,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public bool IsProtected { get; init; }
     public bool IsRefStructReturn { get; init; }
     public bool IsStaticAbstract { get; init; }
+    public string? AutoMockFactoryMethod { get; init; }
 
     /// <summary>
     /// True when the (unwrapped) return type is an interface that has static abstract members
@@ -106,6 +107,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsProtected == other.IsProtected
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
+            && AutoMockFactoryMethod == other.AutoMockFactoryMethod
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
             && SpanReturnElementType == other.SpanReturnElementType;
     }
@@ -120,6 +122,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
+            hash = hash * 31 + (AutoMockFactoryMethod?.GetHashCode() ?? 0);
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();

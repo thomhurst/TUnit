@@ -55,7 +55,7 @@ namespace TUnit.Mocks.Generated
         }
     }
 
-    file static class IRepository_T_MockFactory
+    internal static class IRepository_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -64,6 +64,15 @@ namespace TUnit.Mocks.Generated
                 typeof(global::IRepository<>),
                 typeof(IRepository_T_MockImpl<>),
                 typeof(IRepository_T_Mock<>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::IRepository<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::IRepository<T>>(behavior);
+            var impl = new IRepository_T_MockImpl<T>(engine);
+            engine.Raisable = impl;
+            var mock = new IRepository_T_Mock<T>(impl, engine);
+            return mock;
         }
 
     }

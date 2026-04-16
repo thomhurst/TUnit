@@ -45,7 +45,7 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IProvider_T_MockFactory
+    internal static class IProvider_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -54,6 +54,15 @@ namespace TUnit.Mocks.Generated.Sandbox
                 typeof(global::Sandbox.IProvider<>),
                 typeof(IProvider_T_MockImpl<>),
                 typeof(IProvider_T_Mock<>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::Sandbox.IProvider<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IProvider<T>>(behavior);
+            var impl = new IProvider_T_MockImpl<T>(engine);
+            engine.Raisable = impl;
+            var mock = new IProvider_T_Mock<T>(impl, engine);
+            return mock;
         }
 
     }

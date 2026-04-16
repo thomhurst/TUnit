@@ -55,7 +55,7 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IFoo_T_MockFactory
+    internal static class IFoo_T_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
@@ -64,6 +64,15 @@ namespace TUnit.Mocks.Generated.Sandbox
                 typeof(global::Sandbox.IFoo<>),
                 typeof(IFoo_T_MockImpl<>),
                 typeof(IFoo_T_Mock<>));
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::Sandbox.IFoo<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IFoo<T>>(behavior);
+            var impl = new IFoo_T_MockImpl<T>(engine);
+            engine.Raisable = impl;
+            var mock = new IFoo_T_Mock<T>(impl, engine);
+            return mock;
         }
 
     }

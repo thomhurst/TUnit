@@ -86,6 +86,34 @@ internal static class TypeSymbolExtensions
         return builder.ToString();
     }
 
+    public static string GetGeneratedMockNamespace(this INamedTypeSymbol type)
+    {
+        var namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
+        return string.IsNullOrEmpty(namespaceName) || namespaceName == "<global namespace>"
+            ? "TUnit.Mocks.Generated"
+            : $"TUnit.Mocks.Generated.{namespaceName}";
+    }
+
+    public static string GetGeneratedMockBaseName(this INamedTypeSymbol type)
+    {
+        var originalDefinition = type.OriginalDefinition;
+        var name = StripGlobalPrefix(originalDefinition.GetFullyQualifiedName());
+        var namespaceName = originalDefinition.ContainingNamespace?.ToDisplayString() ?? "";
+
+        if (!string.IsNullOrEmpty(namespaceName) && namespaceName != "<global namespace>")
+        {
+            var prefix = namespaceName + ".";
+            if (name.StartsWith(prefix))
+            {
+                name = name.Substring(prefix.Length);
+            }
+
+            name = name.Replace("global::" + prefix, "");
+        }
+
+        return SanitizeIdentifier(name);
+    }
+
     public static bool IsNullableAnnotated(this ITypeSymbol type)
     {
         return type.NullableAnnotation == NullableAnnotation.Annotated;
@@ -270,5 +298,46 @@ internal static class TypeSymbolExtensions
             }
         }
         return (type.GetFullyQualifiedNameWithNullability(), false);
+    }
+
+    private static string StripGlobalPrefix(string name)
+        => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
+
+    private static string SanitizeIdentifier(string name)
+    {
+        name = name.Replace("global::", "");
+
+        var sb = new StringBuilder(name.Length);
+        var lastWasUnderscore = false;
+
+        foreach (var c in name)
+        {
+            if (c == ' ')
+                continue;
+
+            if (char.IsLetterOrDigit(c) || c == '_')
+            {
+                if (c == '_')
+                {
+                    if (lastWasUnderscore)
+                        continue;
+
+                    lastWasUnderscore = true;
+                }
+                else
+                {
+                    lastWasUnderscore = false;
+                }
+
+                sb.Append(c);
+            }
+            else if (!lastWasUnderscore)
+            {
+                sb.Append('_');
+                lastWasUnderscore = true;
+            }
+        }
+
+        return sb.ToString();
     }
 }

@@ -67,12 +67,21 @@ namespace TUnit.Mocks.Generated
         }
     }
 
-    file static class IMyServiceMockFactory
+    internal static class IMyServiceMockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
             global::TUnit.Mocks.MockRegistry.RegisterFactory<global::TUnit.Mocks.Generated.IMyServiceMockable>(Create);
+        }
+
+        internal static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
+        {
+            var engine = new global::TUnit.Mocks.MockEngine<global::TUnit.Mocks.Generated.IMyServiceMockable>(behavior);
+            var impl = new IMyServiceMockImpl(engine);
+            engine.Raisable = impl;
+            var mock = new global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable>(impl, engine);
+            return mock;
         }
 
         internal static global::TUnit.Mocks.Mock<global::TUnit.Mocks.Generated.IMyServiceMockable> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
