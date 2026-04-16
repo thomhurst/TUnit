@@ -11220,6 +11220,17 @@ Dispose the returned value (or use `await using`) to stop watching.
 
 By default, `AspireFixture` runs a lightweight OTLP receiver that automatically correlates SUT logs back to the test that triggered them. When a test calls `CreateHttpClient`, the outgoing request carries W3C `traceparent` and `baggage` headers (including `tunit.test.id`). The SUT's OpenTelemetry SDK exports logs with the same TraceId, and TUnit's receiver routes them to the correct test's output.
 
+When the Aspire dashboard (or another OTLP backend wired through `DOTNET_DASHBOARD_OTLP_ENDPOINT_URL`) is enabled, `TUnit.Aspire` also exports the runner's own `"TUnit"` spans automatically. That means external backends see the full parent-child request trace out of the box:
+
+```text
+test case
+  └── test body
+        └── GET /your-endpoint
+              └── downstream HTTP / DB / custom spans
+```
+
+Only the per-test `"TUnit"` source is auto-exported this way. Session, discovery, assembly, and suite spans stay on the separate `"TUnit.Lifecycle"` source unless you opt in manually with your own tracer provider.
+
 ```csharp
 [Test]
 public async Task Create_Order_Returns_201()
@@ -11283,7 +11294,7 @@ The key pieces are:
 
 ### Dashboard coexistence
 
-If the Aspire dashboard is enabled, TUnit's receiver acts as a transparent proxy — it processes telemetry for correlation and forwards it to the dashboard's original OTLP endpoint. Both TUnit and the dashboard receive the data.
+If the Aspire dashboard is enabled, TUnit's receiver acts as a transparent proxy — it processes telemetry for correlation and forwards SUT telemetry to the dashboard's original OTLP endpoint. At the same time, `TUnit.Aspire` exports the runner's per-test `"TUnit"` spans directly to that same OTLP backend. The result is a complete backend trace tree with the runner root spans and the SUT request spans in one trace, without extra test-project setup.
 
 ### Disabling telemetry collection
 
@@ -12117,7 +12128,7 @@ public class MyTests : TestsBase
 
 ### Automatic Logging (Shared Factory)
 
-When a single `WebApplicationFactory` is shared across all tests, server-side logs are automatically correlated with the originating test. Use `CreateClientWithTestContext()` to create an `HttpClient` that propagates the test context:
+When a single `WebApplicationFactory` is shared across all tests, server-side logs are automatically correlated with the originating test. Use `CreateClient()` (or `CreateDefaultClient()`) to create an `HttpClient` that propagates the test context automatically:
 
 ```csharp
 public class SharedAppTests
@@ -12128,7 +12139,7 @@ public class SharedAppTests
     [Test]
     public async Task GetTodos_LogsRouteToThisTest()
     {
-        var client = Factory.CreateClientWithTestContext();
+        var client = Factory.CreateClient();
 
         var response = await client.GetAsync("/todos");
 
@@ -12139,7 +12150,7 @@ public class SharedAppTests
 ```
 
 :::tip How it works
-Under the hood, `TestWebApplicationFactory` automatically registers a `CorrelatedTUnitLoggerProvider` and `TUnitTestContextMiddleware`. The `CreateClientWithTestContext()` method creates an `HttpClient` with a `TUnitTestIdHandler` that propagates the test context ID via an HTTP header. The middleware resolves the test context on the server side, and the correlated logger routes each log entry to the correct test's output.
+Under the hood, `TestWebApplicationFactory` automatically registers a `CorrelatedTUnitLoggerProvider` and `TUnitTestContextMiddleware`. `CreateClient()` and `CreateDefaultClient()` prepend both `ActivityPropagationHandler` and `TUnitTestIdHandler`, so requests propagate the current trace context and the TUnit test ID automatically. The middleware resolves the test context on the server side, and the correlated logger routes each log entry to the correct test's output.
 :::
 
 ### Duplicate Prevention
@@ -12691,7 +12702,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
 | Method | Description |
 |--------|-------------|
-| `CreateClientWithTestContext()` | Creates an `HttpClient` that propagates the current test context ID |
+| `CreateClientWithTestContext()` | Obsolete compatibility helper. Prefer `CreateClient()` or `CreateDefaultClient()`, which already inject test context and trace propagation. |
 
 ### Logging Types (Auto-Registered)
 
@@ -13530,6 +13541,12 @@ public class TraceSetup
         _tracerProvider = Sdk.CreateTracerProviderBuilder()
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyTests"))
             .AddSource("TUnit")
+            // Optional: export runner lifecycle traces (discovery, session,
+            // assembly, suite, and shared setup/teardown) as a separate source.
+            .AddSource("TUnit.Lifecycle")
+            // Optional: export the synthetic HTTP client spans created by
+            // TestWebApplicationFactory / TracedWebApplicationFactory too.
+            .AddSource("TUnit.AspNetCore.Http")
             .AddConsoleExporter()
             .Build();
     }
@@ -13543,6 +13560,9 @@ public class TraceSetup
 ```
 
 Replace `AddConsoleExporter()` with your preferred exporter (Jaeger, Zipkin, OTLP, etc.).
+Use one stable service name for the test runner (for example, `MyTests`) rather than a different
+`service.name` per test. Individual tests are already distinguished by their own trace IDs and
+TUnit tags such as `tunit.test.id`.
 
 ### Option B: Raw `ActivityListener` (no SDK dependency)
 
@@ -13560,7 +13580,7 @@ public class TraceSetup
     {
         _listener = new ActivityListener
         {
-            ShouldListenTo = source => source.Name == "TUnit",
+            ShouldListenTo = source => source.Name is "TUnit" or "TUnit.Lifecycle" or "TUnit.AspNetCore.Http",
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStarted = activity => Console.WriteLine($"▶ {activity.OperationName}"),
             ActivityStopped = activity => Console.WriteLine($"■ {activity.OperationName} ({activity.Duration.TotalMilliseconds:F1}ms)")
@@ -13588,19 +13608,37 @@ The listener **must** be registered in a `[Before(TestDiscovery)]` hook so it is
 
 If you register the listener later (e.g., in `[Before(Assembly)]`), the discovery span will not be captured.
 
-## Span Hierarchy
+## Activity Sources
 
-TUnit creates a nested span tree that mirrors the test lifecycle:
+TUnit emits two sources:
 
+- `"TUnit"` — per-test traces intended for exporters, log correlation, and backend navigation
+- `"TUnit.Lifecycle"` — optional runner lifecycle traces for discovery, session/assembly/suite spans, and shared setup/teardown
+
+The default backend-friendly trace shape is:
+
+```text
+TUnit
+test case (root span per test invocation)
+  └── test body
+        └── HttpClient / ASP.NET Core / EF Core / custom spans
 ```
+
+Optional lifecycle spans are emitted separately:
+
+```text
+TUnit.Lifecycle
 test session
   ├── test discovery
   └── test assembly
         └── test suite (one per test class)
-              └── test case (one per test method invocation)
+              └── shared setup / teardown / hooks
 ```
 
-The **test discovery** span captures the time spent finding, building, and resolving dependencies for all tests. It appears as a sibling of the assembly spans, giving you a clear view of discovery vs execution time.
+Each `test case` starts its own trace on purpose, so every test invocation gets a unique W3C
+TraceId. That keeps downstream service spans and logs correlated to a single test in Seq, Jaeger,
+Aspire, and similar backends. Parent-child relationships stay within the per-test trace; runner
+lifecycle spans are separate because they describe the whole session/class rather than one test.
 
 ## Attributes
 
@@ -13612,7 +13650,7 @@ Each span carries tags that follow [OpenTelemetry semantic conventions](https://
 |-----------|------|-------------|
 | `test.case.name` | test case | Test method name |
 | `test.case.result.status` | test case | `pass`, `fail`, or `skipped` |
-| `test.suite.name` | test suite | Test class name |
+| `test.suite.name` | test suite / test case | Test class name |
 | `error.type` | test case | Exception type (on failure) |
 | `exception.type` | test case | Exception type (on exception event) |
 | `exception.message` | test case | Exception message (on exception event) |
@@ -13622,10 +13660,10 @@ Each span carries tags that follow [OpenTelemetry semantic conventions](https://
 
 | Attribute | Span | Description |
 |-----------|------|-------------|
-| `tunit.session.id` | test session | Unique session identifier |
+| `tunit.session.id` | test session / test case | Unique session identifier |
 | `tunit.filter` | test session | Active test filter expression |
-| `tunit.assembly.name` | test assembly | Assembly name |
-| `tunit.class.namespace` | test suite | Class namespace |
+| `tunit.assembly.name` | test assembly / test case | Assembly name |
+| `tunit.class.namespace` | test suite / test case | Class namespace |
 | `tunit.test.class` | test case | Fully qualified class name |
 | `tunit.test.method` | test case | Method name |
 | `tunit.test.id` | test case | Unique test instance ID |
@@ -13669,6 +13707,14 @@ dotnet add package OpenTelemetry.Exporter.Zipkin
 ```csharp
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
+
+### ASP.NET Core Integration Tests
+
+If you use `TestWebApplicationFactory` or `TracedWebApplicationFactory`, outgoing requests
+automatically propagate the current test trace via W3C `traceparent` and `baggage` headers.
+
+Add `"TUnit.AspNetCore.Http"` as a source only if you also want TUnit's synthetic client spans
+to appear in your exporter. Header propagation works either way.
 
 ## Test Context Correlation via Activity Baggage
 
@@ -18047,11 +18093,11 @@ After the workflow run completes:
 Distributed tracing requires .NET 8 or later.
 :::
 
-The HTML report automatically captures trace spans from **all** instrumented .NET libraries — not just TUnit's own spans. When your test code calls HttpClient, ASP.NET Core, EF Core, or any library that emits `System.Diagnostics.Activity` spans, those spans appear as children in the test's trace timeline with no extra configuration.
+The HTML report automatically captures trace spans from **all** instrumented .NET libraries — not just TUnit's own spans. TUnit collects both per-test traces (`"TUnit"`) and runner lifecycle traces (`"TUnit.Lifecycle"`). When your test code calls HttpClient, ASP.NET Core, EF Core, or any library that emits `System.Diagnostics.Activity` spans, those spans appear as children in the test's trace timeline with no extra configuration.
 
 ### How It Works
 
-TUnit's test body runs under a `System.Diagnostics.Activity`. Because `Activity.Current` flows through async calls via `AsyncLocal`, any instrumented library automatically creates child spans under the **same trace**. The HTML report collects these and renders them in the test's timeline.
+TUnit's test body runs under a per-test `System.Diagnostics.Activity`. Because `Activity.Current` flows through async calls via `AsyncLocal`, any instrumented library automatically creates child spans under the **same trace**. The HTML report renders that per-test trace in each test's detail view, and separately uses TUnit's lifecycle spans for the class and execution timelines.
 
 For example, an integration test using `WebApplicationFactory`:
 
@@ -18113,7 +18159,7 @@ This is useful when calling libraries that don't automatically propagate `Activi
 
 | Source | Captured Automatically? | Notes |
 |--------|------------------------|-------|
-| TUnit spans (test lifecycle) | Yes | Always captured |
+| TUnit spans (test + lifecycle) | Yes | Per-test traces plus session/assembly/suite timelines |
 | HttpClient (`System.Net.Http`) | Yes | When called from test context |
 | ASP.NET Core (`Microsoft.AspNetCore`) | Yes | Including via `WebApplicationFactory` |
 | EF Core (`Microsoft.EntityFrameworkCore`) | Yes | Database query spans |
