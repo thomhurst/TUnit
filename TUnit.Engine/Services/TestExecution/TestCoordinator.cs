@@ -152,9 +152,9 @@ internal sealed class TestCoordinator : ITestCoordinator
 
 #if NET
             // Per-test cleanup has completed. Keep the test activity open for final status
-            // and export, but clear the ambient current activity so shared class/assembly/session
-            // cleanup does not accidentally inherit the test trace.
-            System.Diagnostics.Activity.Current = null;
+            // and export, but detach it from the ambient async-local context so shared
+            // class/assembly/session cleanup does not accidentally inherit the test trace.
+            TUnitActivitySource.DetachTestActivityFromAmbientContext();
 #endif
 
             var testClass = test.Metadata.TestClassType;

@@ -349,6 +349,14 @@ internal class TestExecutor
             // RecordException sets Error status and error.type tag
             TUnitActivitySource.RecordException(activity, exception);
         }
+        else if (result?.State is TestState.Failed or TestState.Timeout or TestState.Cancelled)
+        {
+            // Failing state with no captured exception (e.g. overridden result, cancellation
+            // that did not surface as an exception). Still surface status/error.type so
+            // backends render this as a failed span instead of a silent OK.
+            activity.SetStatus(ActivityStatusCode.Error);
+            activity.SetTag("error.type", result.State.ToString());
+        }
         // Success: leave status as Unset per OTel instrumentation library conventions
 
         TUnitActivitySource.StopActivity(activity);

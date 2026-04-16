@@ -5,6 +5,9 @@
     <PropertyGroup>
         <!-- ASP.NET Core testing only supports .NET 8.0+ -->
         <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <!-- Strong-named to access internals of TUnit.AspNetCore.Core via InternalsVisibleTo -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\strongname.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <ItemGroup>

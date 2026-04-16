@@ -82,13 +82,13 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         }
 
         // Inject trace context headers (traceparent + tracestate) so the server
-        // creates child activities under the same trace.
+        // creates child activities under the same trace. Respect pre-existing headers
+        // so callers who explicitly set their own context win.
         DistributedContextPropagator.Current.Inject(activity, headers,
             static (targetHeaders, key, value) =>
             {
-                if (targetHeaders is HttpRequestHeaders h)
+                if (targetHeaders is HttpRequestHeaders h && key is not null && !h.Contains(key))
                 {
-                    h.Remove(key);
                     h.TryAddWithoutValidation(key, value);
                 }
             });
@@ -114,8 +114,10 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
     private static void InjectBaggage(Activity? activity, HttpRequestHeaders headers)
     {
-        if (activity is null)
+        if (activity is null || headers.Contains("baggage"))
         {
+            // If a propagator already emitted W3C baggage (e.g., OTel SDK's BaggagePropagator),
+            // do not override it. This preserves any user-configured propagator output.
             return;
         }
 
@@ -145,10 +147,8 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
             return;
         }
 
-        // .NET 8's default propagator still uses Correlation-Context baggage semantics.
-        // Emit the W3C baggage header explicitly so test correlation is consistent across
-        // target frameworks and matches the headers our servers already understand.
-        headers.Remove("baggage");
+        // Fallback when no baggage header was emitted by the configured propagator
+        // (e.g., .NET default LegacyPropagator uses Correlation-Context, not baggage).
         headers.TryAddWithoutValidation("baggage", sb.ToString());
     }
 }

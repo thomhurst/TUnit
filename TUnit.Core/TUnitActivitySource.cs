@@ -186,6 +186,17 @@ public static class TUnitActivitySource
     }
 
     /// <summary>
+    /// Detaches the per-test activity from the ambient async-local context so that
+    /// subsequent shared (class/assembly/session) cleanup and hook execution do not
+    /// inherit the test trace. The test activity itself is kept alive so it can be
+    /// finished with its final status and exported.
+    /// </summary>
+    internal static void DetachTestActivityFromAmbientContext()
+    {
+        Activity.Current = null;
+    }
+
+    /// <summary>
     /// Maps a <see cref="SharedType"/> to its trace scope tag value.
     /// Keyed objects map to "session" because their lifetime is session-scoped
     /// (shared across classes and assemblies via matching keys).

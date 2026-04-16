@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reflection;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
@@ -75,19 +74,9 @@ public class ActivityPropagationHandlerTests
 
     private static DelegatingHandler CreateHandler(Func<HttpRequestMessage, Activity?>? startActivity = null)
     {
-        var activityPropagationHandlerType = typeof(TUnitTestIdHandler).Assembly
-            .GetType("TUnit.AspNetCore.ActivityPropagationHandler", throwOnError: true)!;
-
-        var instance = startActivity is null
-            ? Activator.CreateInstance(activityPropagationHandlerType, nonPublic: true)
-            : Activator.CreateInstance(
-                activityPropagationHandlerType,
-                BindingFlags.Instance | BindingFlags.NonPublic,
-                binder: null,
-                args: [startActivity],
-                culture: null);
-
-        return (DelegatingHandler)instance!;
+        return startActivity is null
+            ? new ActivityPropagationHandler()
+            : new ActivityPropagationHandler(startActivity);
     }
 
     private sealed class ActivityListenerScope : IDisposable
