@@ -50,6 +50,12 @@ internal static class MockWrapperTypeBuilder
                     if (method.IsStaticAbstract) continue;
                     writer.AppendLine();
                     GenerateMethodForwarding(writer, method, model);
+
+                    if (model.TypeParameters.Length > 0 && method.TypeParameters.Length > 0)
+                    {
+                        writer.AppendLine();
+                        MockMembersBuilder.GenerateGenericMethodMembersForWrapper(writer, method, model, safeName);
+                    }
                 }
 
                 foreach (var prop in model.Properties)

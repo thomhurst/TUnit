@@ -148,8 +148,8 @@ internal static class MockMembersBuilder
             return MockImplBuilder.GetTypeParameterList(model);
 
         return "<" + string.Join(", ",
-            model.TypeParameters.Select(tp => tp.Name)
-                .Concat(method.TypeParameters.Select(tp => tp.Name))) + ">";
+            method.TypeParameters.Select(tp => tp.Name)
+                .Concat(model.TypeParameters.Select(tp => tp.Name))) + ">";
     }
 
     private static string GetCombinedConstraintClauses(MockTypeModel model, MockMemberModel method)
@@ -158,7 +158,7 @@ internal static class MockMembersBuilder
         var methodConstraints = MockImplBuilder.GetConstraintClauses(method);
         if (string.IsNullOrEmpty(modelConstraints)) return methodConstraints;
         if (string.IsNullOrEmpty(methodConstraints)) return modelConstraints;
-        return modelConstraints + methodConstraints;
+        return methodConstraints + modelConstraints;
     }
 
     private static void GenerateUnifiedSealedClass(CodeWriter writer, MockMemberModel method, string safeName,
@@ -612,20 +612,85 @@ internal static class MockMembersBuilder
 
     private static void GenerateMemberMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {
+        if (model.TypeParameters.Length > 0 && method.TypeParameters.Length > 0)
+        {
+            GenerateGenericMethodExtensionBlock(writer, method, model, safeName);
+            return;
+        }
+
         if (method.HasRefStructParams)
         {
             writer.AppendLine("#if NET9_0_OR_GREATER");
-            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true);
-            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true);
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: false, receiverIsThis: false);
             writer.AppendLine("#else");
-            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false);
-            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false);
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
             writer.AppendLine("#endif");
         }
         else
         {
-            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false);
-            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false);
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
+        }
+    }
+
+    private static void GenerateGenericMethodExtensionBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+    {
+        var modelTypeParams = MockImplBuilder.GetTypeParameterList(model);
+        var modelConstraints = MockImplBuilder.GetConstraintClauses(model);
+
+        using (writer.Block($"extension{modelTypeParams}(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> mock){modelConstraints}"))
+        {
+            GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
+        }
+
+        if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
+        {
+            var wrapperSafeName = MockImplBuilder.GetCompositeShortSafeName(model);
+            var wrapperTypeName = $"global::{MockImplBuilder.GetMockNamespace(model)}.{MockImplBuilder.GetGeneratedTypeName($"{wrapperSafeName}Mock", model)}";
+            using (writer.Block($"extension{modelTypeParams}({wrapperTypeName} mock){modelConstraints}"))
+            {
+                GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
+            }
+        }
+    }
+
+    private static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+    {
+        if (method.HasRefStructParams)
+        {
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
+            writer.AppendLine("#else");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+            writer.AppendLine("#endif");
+        }
+        else
+        {
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+        }
+    }
+
+    internal static void GenerateGenericMethodMembersForWrapper(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+    {
+        if (method.HasRefStructParams)
+        {
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: true);
+            writer.AppendLine("#else");
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
+            writer.AppendLine("#endif");
+        }
+        else
+        {
+            EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
         }
     }
 
@@ -708,18 +773,22 @@ internal static class MockMembersBuilder
         return (useTypedWrapper, returnType, setupReturnType);
     }
 
-    private static void EmitMemberMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeRefStructArgs)
+    private static void EmitMemberMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
     {
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
         var paramList = GetArgParameterList(method, includeRefStructArgs);
-        var typeParams = GetCombinedTypeParameterList(model, method);
-        var constraints = GetCombinedConstraintClauses(model, method);
+        var typeParams = captureModelTypeParameters
+            ? MockImplBuilder.GetTypeParameterList(method)
+            : GetCombinedTypeParameterList(model, method);
+        var constraints = captureModelTypeParameters
+            ? MockImplBuilder.GetConstraintClauses(method)
+            : GetCombinedConstraintClauses(model, method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
-        var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
-        var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+        var fullParamList = captureModelTypeParameters
+            ? paramList
+            : BuildExtensionMethodParameterList(model, paramList);
 
         if (method.IsReturnTypeStaticAbstractInterface)
         {
@@ -731,8 +800,15 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// </returns>");
         }
 
-        using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        var methodDeclarationPrefix = captureModelTypeParameters ? "public" : "public static";
+
+        using (writer.Block($"{methodDeclarationPrefix} {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
+            if (receiverIsThis)
+            {
+                writer.AppendLine("var mock = this;");
+            }
+
             EmitOutParamDefaults(writer, method);
 
             // Build matchers array
@@ -786,7 +862,7 @@ internal static class MockMembersBuilder
     }
 
     private static void EmitFuncOverloads(CodeWriter writer, MockMemberModel method, MockTypeModel model,
-        string safeName, bool includeRefStructArgs)
+        string safeName, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
     {
         var eligible = GetFuncEligibleParamIndices(method);
         if (eligible.Count == 0 || eligible.Count > MaxFuncOverloadParams) return;
@@ -795,12 +871,12 @@ internal static class MockMembersBuilder
         for (int mask = 1; mask <= totalMasks; mask++)
         {
             writer.AppendLine();
-            EmitSingleFuncOverload(writer, method, model, safeName, eligible, mask, includeRefStructArgs);
+            EmitSingleFuncOverload(writer, method, model, safeName, eligible, mask, includeRefStructArgs, captureModelTypeParameters, receiverIsThis);
         }
     }
 
     private static void EmitSingleFuncOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
-        string safeName, List<int> eligibleIndices, int funcMask, bool includeRefStructArgs)
+        string safeName, List<int> eligibleIndices, int funcMask, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
     {
         // Determine which parameter indices use Func<T, bool>
         var funcIndices = new HashSet<int>();
@@ -848,13 +924,17 @@ internal static class MockMembersBuilder
         }
 
         var paramList = string.Join(", ", paramParts);
-        var typeParams = GetCombinedTypeParameterList(model, method);
-        var constraints = GetCombinedConstraintClauses(model, method);
+        var typeParams = captureModelTypeParameters
+            ? MockImplBuilder.GetTypeParameterList(method)
+            : GetCombinedTypeParameterList(model, method);
+        var constraints = captureModelTypeParameters
+            ? MockImplBuilder.GetConstraintClauses(method)
+            : GetCombinedConstraintClauses(model, method);
 
         var safeMemberName = GetSafeMemberName(method.Name);
-        var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
-        var fullParamList = string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
+        var fullParamList = captureModelTypeParameters
+            ? paramList
+            : BuildExtensionMethodParameterList(model, paramList);
 
         if (method.IsReturnTypeStaticAbstractInterface)
         {
@@ -866,8 +946,15 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// </returns>");
         }
 
-        using (writer.Block($"public static {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        var methodDeclarationPrefix = captureModelTypeParameters ? "public" : "public static";
+
+        using (writer.Block($"{methodDeclarationPrefix} {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
         {
+            if (receiverIsThis)
+            {
+                writer.AppendLine("var mock = this;");
+            }
+
             EmitOutParamDefaults(writer, method);
 
             // Convert Func params to Arg<T> via implicit conversion
@@ -1019,6 +1106,13 @@ internal static class MockMembersBuilder
             }
         }
         return string.Join(", ", parts);
+    }
+
+    private static string BuildExtensionMethodParameterList(MockTypeModel model, string paramList)
+    {
+        var mockableType = MockImplBuilder.GetMockableTypeName(model);
+        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
+        return string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
     }
 
     private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask)
