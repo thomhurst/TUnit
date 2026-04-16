@@ -25,10 +25,12 @@ public class ActivityPropagationHandlerTests
 
         var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
         var parts = traceparent.Split('-');
+        var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
 
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
-        await Assert.That(captured.LastRequest.Headers.Contains("baggage")).IsTrue();
+        await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
+        await Assert.That(baggageHeader).Contains("my-test-context-id");
     }
 
     [Test]

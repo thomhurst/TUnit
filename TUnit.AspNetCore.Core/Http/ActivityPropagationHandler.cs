@@ -30,6 +30,7 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        var ambientActivity = Activity.Current;
         using var activity = _startActivity(request);
 
         if (activity is not null)
@@ -37,11 +38,17 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
             activity.SetTag("http.request.method", request.Method.Method);
             activity.SetTag("url.full", request.RequestUri?.ToString());
             activity.SetTag("server.address", request.RequestUri?.Host);
+
+            // WebApplicationFactory bypasses DiagnosticsHandler, so when we synthesize
+            // a client span we also need to flow the ambient baggage onto it explicitly.
+            // Child Activities do not reliably surface parent baggage across all target
+            // frameworks, but correlation relies on the test's baggage being propagated.
+            CopyBaggage(ambientActivity, activity);
         }
 
         // Propagate the current distributed trace even when the helper span is not
         // created (for example, when no listener is attached to TUnit.AspNetCore.Http).
-        InjectTraceContext(activity ?? Activity.Current, request.Headers);
+        InjectTraceContext(activity ?? ambientActivity, request.Headers);
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -83,5 +90,23 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
                     h.TryAddWithoutValidation(key, value);
                 }
             });
+    }
+
+    private static void CopyBaggage(Activity? source, Activity destination)
+    {
+        if (source is null || ReferenceEquals(source, destination))
+        {
+            return;
+        }
+
+        foreach (var (key, value) in source.Baggage)
+        {
+            if (key is null || destination.GetBaggageItem(key) is not null)
+            {
+                continue;
+            }
+
+            destination.SetBaggage(key, value);
+        }
     }
 }
