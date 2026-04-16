@@ -279,6 +279,17 @@ Dispose the returned value (or use `await using`) to stop watching.
 
 By default, `AspireFixture` runs a lightweight OTLP receiver that automatically correlates SUT logs back to the test that triggered them. When a test calls `CreateHttpClient`, the outgoing request carries W3C `traceparent` and `baggage` headers (including `tunit.test.id`). The SUT's OpenTelemetry SDK exports logs with the same TraceId, and TUnit's receiver routes them to the correct test's output.
 
+When the Aspire dashboard (or another OTLP backend wired through `DOTNET_DASHBOARD_OTLP_ENDPOINT_URL`) is enabled, `TUnit.Aspire` also exports the runner's own `"TUnit"` spans automatically. That means external backends see the full parent-child request trace out of the box:
+
+```text
+test case
+  └── test body
+        └── GET /your-endpoint
+              └── downstream HTTP / DB / custom spans
+```
+
+Only the per-test `"TUnit"` source is auto-exported this way. Session, discovery, assembly, and suite spans stay on the separate `"TUnit.Lifecycle"` source unless you opt in manually with your own tracer provider.
+
 ```csharp
 [Test]
 public async Task Create_Order_Returns_201()
@@ -342,7 +353,7 @@ The key pieces are:
 
 ### Dashboard coexistence
 
-If the Aspire dashboard is enabled, TUnit's receiver acts as a transparent proxy — it processes telemetry for correlation and forwards it to the dashboard's original OTLP endpoint. Both TUnit and the dashboard receive the data.
+If the Aspire dashboard is enabled, TUnit's receiver acts as a transparent proxy — it processes telemetry for correlation and forwards SUT telemetry to the dashboard's original OTLP endpoint. At the same time, `TUnit.Aspire` exports the runner's per-test `"TUnit"` spans directly to that same OTLP backend. The result is a complete backend trace tree with the runner root spans and the SUT request spans in one trace, without extra test-project setup.
 
 ### Disabling telemetry collection
 

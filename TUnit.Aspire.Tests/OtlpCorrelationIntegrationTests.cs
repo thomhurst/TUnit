@@ -207,6 +207,26 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     }
 
     /// <summary>
+    /// Verifies a richer request path that creates nested internal spans and downstream
+    /// self-HTTP calls. This is used to validate backend waterfall views end to end.
+    /// </summary>
+    [Test]
+    public async Task TraceDemo_Request_ProducesNestedCorrelatedLogs()
+    {
+        var marker = $"trace-demo-{Guid.NewGuid():N}";
+        var nestedMarker = $"nested-{marker}";
+
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var response = await client.GetAsync($"/trace-demo?message={Uri.EscapeDataString(marker)}");
+
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+
+        var output = await PollForOutput(nestedMarker);
+        await Assert.That(output).Contains(marker);
+        await Assert.That(output).Contains(nestedMarker);
+    }
+
+    /// <summary>
     /// Polls <see cref="TestContext.GetStandardOutput"/> until it contains the expected marker
     /// or a timeout is reached. The OTLP SDK batches log exports, so there's inherent latency
     /// between when the SUT logs a message and when it arrives at TUnit's OTLP receiver.
