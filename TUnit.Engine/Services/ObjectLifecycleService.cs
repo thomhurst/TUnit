@@ -275,12 +275,15 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
 
 #if NET
+        var sharedType = TraceScopeRegistry.GetSharedType(obj);
+        var activitySource = TUnitActivitySource.GetSourceForSharedType(sharedType);
+
         // Only the first caller for a given object creates a trace span.
         // GetValue is atomic — exactly one concurrent caller's factory runs.
         // Interlocked.Exchange ensures exactly one caller wins the gate even if
         // multiple threads pass the TryGetValue fast-path simultaneously.
         var isFirstCaller = false;
-        if (obj is IAsyncInitializer && TUnitActivitySource.Source.HasListeners()
+        if (obj is IAsyncInitializer && activitySource.HasListeners()
             && !_spannedObjects.TryGetValue(obj, out _))
         {
             var box = _spannedObjects.GetValue(obj, _ => new StrongBox<int>(1));
@@ -289,8 +292,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
         if (isFirstCaller)
         {
-            var sharedType = TraceScopeRegistry.GetSharedType(obj);
-            await InitializeWithSpanAsync(obj, testContext, sharedType, cancellationToken);
+            await InitializeWithSpanAsync(obj, testContext, sharedType, activitySource, cancellationToken);
         }
         else
         {
@@ -309,6 +311,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         object obj,
         TestContext testContext,
         SharedType? sharedType,
+        ActivitySource activitySource,
         CancellationToken cancellationToken)
     {
         var parentContext = GetParentActivityContext(testContext, sharedType);
@@ -330,6 +333,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             ];
 
         await TUnitActivitySource.RunWithSpanAsync(
+            activitySource,
             $"initialize {TUnitActivitySource.GetReadableTypeName(obj.GetType())}",
             parentContext,
             tags,

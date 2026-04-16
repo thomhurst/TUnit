@@ -117,10 +117,10 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
 #if NET
         Activity? discoveryActivity = null;
-        if (TUnitActivitySource.Source.HasListeners())
+        if (TUnitActivitySource.LifecycleSource.HasListeners())
         {
             var sessionActivity = _testExecutor.GetContextProvider().TestSessionContext.Activity;
-            discoveryActivity = TUnitActivitySource.StartActivity(
+            discoveryActivity = TUnitActivitySource.StartLifecycleActivity(
                 "test discovery",
                 ActivityKind.Internal,
                 sessionActivity?.Context ?? default);

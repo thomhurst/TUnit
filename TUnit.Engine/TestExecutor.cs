@@ -121,15 +121,10 @@ internal class TestExecutor
             // for natural OTEL distributed tracing correlation. We must clear Activity.Current
             // because StartActivity with parentContext: default falls back to Activity.Current
             // when it's non-null, which would make all tests in a class share the class TraceId.
-            // An ActivityLink references the class activity for grouping in the HTML report.
+            // Class/session lifecycle spans stay on the separate TUnit.Lifecycle source.
             if (TUnitActivitySource.Source.HasListeners())
             {
-                var classActivity = executableTest.Context.ClassContext.Activity;
                 var testDetails = executableTest.Context.Metadata.TestDetails;
-
-                ActivityLink[]? links = classActivity is not null
-                    ? [new ActivityLink(classActivity.Context)]
-                    : null;
 
                 // Clear ambient activity so StartActivity creates a root (new TraceId).
                 // Safe: Activity.Current is AsyncLocal, so this only affects this async context.
@@ -141,13 +136,16 @@ internal class TestExecutor
                     parentContext: default,
                     [
                         new(TUnitActivitySource.TagTestCaseName, testDetails.TestName),
+                        new(TUnitActivitySource.TagTestSuiteName, testDetails.ClassType.Name),
                         new(TUnitActivitySource.TagTestClass, testDetails.ClassType.FullName),
+                        new(TUnitActivitySource.TagClassNamespace, testDetails.ClassType.Namespace),
                         new(TUnitActivitySource.TagTestMethod, testDetails.MethodName),
+                        new(TUnitActivitySource.TagAssemblyName, testAssembly.GetName().Name),
+                        new(TUnitActivitySource.TagSessionId, executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.Id),
                         new(TUnitActivitySource.TagTestId, executableTest.Context.Id),
                         new(TUnitActivitySource.TagTestNodeUid, testDetails.TestId),
                         new(TUnitActivitySource.TagTestCategories, testDetails.Categories.ToArray())
-                    ],
-                    links);
+                    ]);
 
                 executableTest.Context.Activity?.SetBaggage(TUnitActivitySource.TagTestId, executableTest.Context.Id);
 
@@ -241,6 +239,9 @@ internal class TestExecutor
         catch (SkipTestException ex)
         {
             executableTest.SetResult(TestState.Skipped);
+            // Surface the skip reason on the context so FinishTestActivity (now invoked from
+            // TestCoordinator after the local capturedException is out of scope) can tag the span.
+            executableTest.Context.SkipReason ??= ex.Reason;
             capturedException = ex;
         }
         catch (Exception ex)
@@ -281,7 +282,6 @@ internal class TestExecutor
             }
 
 #if NET
-            FinishTestActivity(executableTest, capturedException);
 #endif
         }
 
@@ -311,7 +311,7 @@ internal class TestExecutor
     }
 
 #if NET
-    private static void FinishTestActivity(AbstractExecutableTest executableTest, Exception? capturedException)
+    internal static void FinishTestActivity(AbstractExecutableTest executableTest)
     {
         var activity = executableTest.Context.Activity;
 
@@ -326,6 +326,8 @@ internal class TestExecutor
         var statusValue = result?.State switch
         {
             TestState.Passed => "pass",
+            TestState.Timeout => "fail",
+            TestState.Cancelled => "fail",
             TestState.Failed => "fail",
             TestState.Skipped => "skipped",
             _ => "unknown"
@@ -337,15 +339,26 @@ internal class TestExecutor
             activity.SetTag(TUnitActivitySource.TagTestRetryAttempt, executableTest.Context.CurrentRetryAttempt);
         }
 
-        if (capturedException is SkipTestException skipEx)
+        var skipReason = executableTest.Context.SkipReason
+            ?? (result?.State == TestState.Skipped ? result.OverrideReason : null);
+
+        if (!string.IsNullOrEmpty(skipReason))
         {
             // Skipped tests are not errors — leave status as Unset
-            activity.SetTag(TUnitActivitySource.TagTestSkipReason, skipEx.Reason);
+            activity.SetTag(TUnitActivitySource.TagTestSkipReason, skipReason);
         }
-        else if (capturedException is not null)
+        else if (result?.Exception is { } exception)
         {
             // RecordException sets Error status and error.type tag
-            TUnitActivitySource.RecordException(activity, capturedException);
+            TUnitActivitySource.RecordException(activity, exception);
+        }
+        else if (result?.State is TestState.Failed or TestState.Timeout or TestState.Cancelled)
+        {
+            // Failing state with no captured exception (e.g. overridden result, cancellation
+            // that did not surface as an exception). Still surface status/error.type so
+            // backends render this as a failed span instead of a silent OK.
+            activity.SetStatus(ActivityStatusCode.Error);
+            activity.SetTag("error.type", result.State.ToString());
         }
         // Success: leave status as Unset per OTel instrumentation library conventions
 

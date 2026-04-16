@@ -107,11 +107,11 @@ After the workflow run completes:
 Distributed tracing requires .NET 8 or later.
 :::
 
-The HTML report automatically captures trace spans from **all** instrumented .NET libraries — not just TUnit's own spans. When your test code calls HttpClient, ASP.NET Core, EF Core, or any library that emits `System.Diagnostics.Activity` spans, those spans appear as children in the test's trace timeline with no extra configuration.
+The HTML report automatically captures trace spans from **all** instrumented .NET libraries — not just TUnit's own spans. TUnit collects both per-test traces (`"TUnit"`) and runner lifecycle traces (`"TUnit.Lifecycle"`). When your test code calls HttpClient, ASP.NET Core, EF Core, or any library that emits `System.Diagnostics.Activity` spans, those spans appear as children in the test's trace timeline with no extra configuration.
 
 ### How It Works
 
-TUnit's test body runs under a `System.Diagnostics.Activity`. Because `Activity.Current` flows through async calls via `AsyncLocal`, any instrumented library automatically creates child spans under the **same trace**. The HTML report collects these and renders them in the test's timeline.
+TUnit's test body runs under a per-test `System.Diagnostics.Activity`. Because `Activity.Current` flows through async calls via `AsyncLocal`, any instrumented library automatically creates child spans under the **same trace**. The HTML report renders that per-test trace in each test's detail view, and separately uses TUnit's lifecycle spans for the class and execution timelines.
 
 For example, an integration test using `WebApplicationFactory`:
 
@@ -173,7 +173,7 @@ This is useful when calling libraries that don't automatically propagate `Activi
 
 | Source | Captured Automatically? | Notes |
 |--------|------------------------|-------|
-| TUnit spans (test lifecycle) | Yes | Always captured |
+| TUnit spans (test + lifecycle) | Yes | Per-test traces plus session/assembly/suite timelines |
 | HttpClient (`System.Net.Http`) | Yes | When called from test context |
 | ASP.NET Core (`Microsoft.AspNetCore`) | Yes | Including via `WebApplicationFactory` |
 | EF Core (`Microsoft.EntityFrameworkCore`) | Yes | Database query spans |

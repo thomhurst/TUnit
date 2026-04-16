@@ -74,7 +74,7 @@ public class SessionActivityLifecycleTests
         executor.TryStartSessionActivity();
 
         await Assert.That(sessionContext.Activity).IsNotNull();
-        await Assert.That(sessionContext.Activity!.Source.Name).IsEqualTo("TUnit");
+        await Assert.That(sessionContext.Activity!.Source.Name).IsEqualTo(TUnitActivitySource.LifecycleSourceName);
     }
 
     [Test]
@@ -105,7 +105,7 @@ public class SessionActivityLifecycleTests
 
         var tags = sessionContext.Activity!.Tags.ToList();
         await Assert.That(tags).Contains(
-            new KeyValuePair<string, string?>("tunit.session.id", sessionContext.Id));
+            new KeyValuePair<string, string?>(TUnitActivitySource.TagSessionId, sessionContext.Id));
     }
 
     [Test]
@@ -119,7 +119,7 @@ public class SessionActivityLifecycleTests
 
         var tags = sessionContext.Activity!.Tags.ToList();
         await Assert.That(tags).Contains(
-            new KeyValuePair<string, string?>("tunit.filter", "/*/*/MyClass/*"));
+            new KeyValuePair<string, string?>(TUnitActivitySource.TagTestFilter, "/*/*/MyClass/*"));
     }
 
     [Test]
@@ -133,16 +133,16 @@ public class SessionActivityLifecycleTests
         var sessionActivity = sessionContext.Activity!;
 
         // Discovery and assembly spans both parent under the session activity
-        using var discoveryActivity = TUnitActivitySource.StartActivity(
+        using var discoveryActivity = TUnitActivitySource.StartLifecycleActivity(
             "test discovery",
             ActivityKind.Internal,
             sessionActivity.Context);
 
-        using var assemblyActivity = TUnitActivitySource.StartActivity(
+        using var assemblyActivity = TUnitActivitySource.StartLifecycleActivity(
             TUnitActivitySource.SpanTestAssembly,
             ActivityKind.Internal,
             sessionActivity.Context,
-            [new("tunit.assembly.name", "TestAssembly")]);
+            [new(TUnitActivitySource.TagAssemblyName, "TestAssembly")]);
 
         // Both should be in the same trace (single unified trace — the fix for #5244)
         await Assert.That(discoveryActivity).IsNotNull();
@@ -156,7 +156,7 @@ public class SessionActivityLifecycleTests
     }
 
     [Test]
-    public async Task FullSpanHierarchy_SessionParentsAllChildren()
+    public async Task LifecycleHierarchy_UsesSessionTrace_AndTestStartsSeparateTrace()
     {
         var (executor, sessionContext) = CreateHookExecutor();
 
@@ -166,7 +166,7 @@ public class SessionActivityLifecycleTests
         var sessionActivity = sessionContext.Activity!;
 
         // Discovery span
-        var discoveryActivity = TUnitActivitySource.StartActivity(
+        var discoveryActivity = TUnitActivitySource.StartLifecycleActivity(
             "test discovery",
             ActivityKind.Internal,
             sessionActivity.Context);
@@ -175,39 +175,43 @@ public class SessionActivityLifecycleTests
         TUnitActivitySource.StopActivity(discoveryActivity);
 
         // Assembly span
-        var assemblyActivity = TUnitActivitySource.StartActivity(
+        var assemblyActivity = TUnitActivitySource.StartLifecycleActivity(
             TUnitActivitySource.SpanTestAssembly,
             ActivityKind.Internal,
             sessionActivity.Context,
-            [new("tunit.assembly.name", "TestAssembly")]);
+            [new(TUnitActivitySource.TagAssemblyName, "TestAssembly")]);
 
         // Class span
-        var classActivity = TUnitActivitySource.StartActivity(
+        var classActivity = TUnitActivitySource.StartLifecycleActivity(
             TUnitActivitySource.SpanTestSuite,
             ActivityKind.Internal,
             assemblyActivity?.Context ?? default,
-            [new("test.suite.name", "TestClass")]);
+            [new(TUnitActivitySource.TagTestSuiteName, "TestClass")]);
 
-        // Test span
+        // Test spans run on the separate TUnit source and start a new trace per test.
+        Activity.Current = null;
         var testActivity = TUnitActivitySource.StartActivity(
             TUnitActivitySource.SpanTestCase,
             ActivityKind.Internal,
-            classActivity?.Context ?? default,
-            [new("test.case.name", "TestMethod")]);
+            default,
+            [new(TUnitActivitySource.TagTestCaseName, "TestMethod")]);
 
         // Verify hierarchy: session → discovery
         await Assert.That(discoveryActivity).IsNotNull();
         await Assert.That(discoveryActivity!.ParentId).IsEqualTo(sessionActivity.Id);
 
-        // Verify hierarchy: session → assembly → class → test
+        // Verify lifecycle hierarchy: session → assembly → class
         await Assert.That(assemblyActivity).IsNotNull();
         await Assert.That(assemblyActivity!.ParentId).IsEqualTo(sessionActivity.Id);
 
         await Assert.That(classActivity).IsNotNull();
         await Assert.That(classActivity!.ParentId).IsEqualTo(assemblyActivity.Id);
 
+        // Test trace is separate so downstream spans/logs stay isolated per test.
         await Assert.That(testActivity).IsNotNull();
-        await Assert.That(testActivity!.ParentId).IsEqualTo(classActivity.Id);
+        await Assert.That(testActivity!.Parent).IsNull();
+        await Assert.That(testActivity.ParentSpanId).IsEqualTo(default(ActivitySpanId));
+        await Assert.That(testActivity.TraceId).IsNotEqualTo(classActivity!.TraceId);
 
         // Cleanup
         TUnitActivitySource.StopActivity(testActivity);
@@ -226,7 +230,7 @@ public class SessionActivityLifecycleTests
         var sessionActivity = sessionContext.Activity!;
 
         // Create a discovery span parented under session
-        using var discoveryActivity = TUnitActivitySource.StartActivity(
+        using var discoveryActivity = TUnitActivitySource.StartLifecycleActivity(
             "test discovery",
             ActivityKind.Internal,
             sessionActivity.Context);
@@ -374,7 +378,7 @@ public class SessionActivityLifecycleTests
         {
             _listener = new ActivityListener
             {
-                ShouldListenTo = static source => source.Name == "TUnit",
+                ShouldListenTo = static source => source.Name is TUnitActivitySource.SourceName or TUnitActivitySource.LifecycleSourceName,
                 Sample = static (ref ActivityCreationOptions<ActivityContext> _) =>
                     ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStarted = activity => _activities.Add(activity),

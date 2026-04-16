@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TUnit.AspNetCore" />
+    <InternalsVisibleTo Include="TUnit.AspNetCore.Tests" />
   </ItemGroup>
 
   <ItemGroup>

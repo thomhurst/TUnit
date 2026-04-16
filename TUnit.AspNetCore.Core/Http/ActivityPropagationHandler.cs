@@ -16,13 +16,22 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
     // cleaned up on process exit. Not disposed explicitly because multiple handler
     // instances share this source across concurrent tests.
     private static readonly ActivitySource HttpActivitySource = new("TUnit.AspNetCore.Http");
+    private readonly Func<HttpRequestMessage, Activity?> _startActivity;
+
+    public ActivityPropagationHandler()
+    {
+        _startActivity = StartHttpActivity;
+    }
+
+    internal ActivityPropagationHandler(Func<HttpRequestMessage, Activity?> startActivity)
+    {
+        _startActivity = startActivity;
+    }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
-        using var activity = HttpActivitySource.StartActivity(
-            $"HTTP {request.Method} {path}",
-            ActivityKind.Client);
+        var ambientActivity = Activity.Current;
+        using var activity = _startActivity(request);
 
         if (activity is not null)
         {
@@ -30,18 +39,18 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
             activity.SetTag("url.full", request.RequestUri?.ToString());
             activity.SetTag("server.address", request.RequestUri?.Host);
 
-            // Inject trace context headers (traceparent + tracestate) so the server
-            // creates child activities under the same trace
-            DistributedContextPropagator.Current.Inject(activity, request.Headers,
-                static (headers, key, value) =>
-                {
-                    if (headers is HttpRequestHeaders h)
-                    {
-                        h.Remove(key);
-                        h.TryAddWithoutValidation(key, value);
-                    }
-                });
+            // WebApplicationFactory bypasses DiagnosticsHandler, so when we synthesize
+            // a client span we also need to flow the ambient baggage onto it explicitly.
+            // Child Activities do not reliably surface parent baggage across all target
+            // frameworks, but correlation relies on the test's baggage being propagated.
+            CopyBaggage(ambientActivity, activity);
         }
+
+        // Propagate the current distributed trace even when the helper span is not
+        // created (for example, when no listener is attached to TUnit.AspNetCore.Http).
+        var propagationActivity = activity ?? ambientActivity;
+        InjectTraceContext(propagationActivity, request.Headers);
+        InjectBaggage(propagationActivity, request.Headers);
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -55,5 +64,67 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         }
 
         return response;
+    }
+
+    private static Activity? StartHttpActivity(HttpRequestMessage request)
+    {
+        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
+        return HttpActivitySource.StartActivity(
+            $"HTTP {request.Method} {path}",
+            ActivityKind.Client);
+    }
+
+    private static void InjectTraceContext(Activity? activity, HttpRequestHeaders headers)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        // Inject trace context headers (traceparent + tracestate) so the server
+        // creates child activities under the same trace. Respect pre-existing headers
+        // so callers who explicitly set their own context win.
+        DistributedContextPropagator.Current.Inject(activity, headers,
+            static (targetHeaders, key, value) =>
+            {
+                if (targetHeaders is HttpRequestHeaders h && key is not null && !h.Contains(key))
+                {
+                    h.TryAddWithoutValidation(key, value);
+                }
+            });
+    }
+
+    private static void CopyBaggage(Activity? source, Activity destination)
+    {
+        if (source is null || ReferenceEquals(source, destination))
+        {
+            return;
+        }
+
+        foreach (var (key, value) in source.Baggage)
+        {
+            if (key is null || destination.GetBaggageItem(key) is not null)
+            {
+                continue;
+            }
+
+            destination.SetBaggage(key, value);
+        }
+    }
+
+    private static void InjectBaggage(Activity? activity, HttpRequestHeaders headers)
+    {
+        // If a propagator already emitted W3C baggage (e.g. OTel SDK's BaggagePropagator),
+        // preserve it; otherwise emit our own so LegacyPropagator-based stacks still
+        // propagate test correlation baggage.
+        if (activity is null || headers.Contains("baggage"))
+        {
+            return;
+        }
+
+        if (TUnit.Core.TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
+        {
+            headers.TryAddWithoutValidation("baggage", baggage);
+        }
     }
 }

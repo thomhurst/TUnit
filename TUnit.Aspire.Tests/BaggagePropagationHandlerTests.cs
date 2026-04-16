@@ -67,10 +67,29 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_SameActivity_UsesDifferentSpanIds()
+    public async Task SendAsync_TraceparentUsesActivityCurrentSpanId()
     {
         Activity.Current = null;
-        using var activity = new Activity("test-unique-spanids").Start();
+        using var activity = new Activity("test-current-spanid").Start();
+
+        var captured = new CaptureHandler();
+        var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
+        using var client = new HttpClient(handler);
+
+        await client.GetAsync("http://localhost/test");
+
+        var traceparent = captured.LastRequest!.Headers.GetValues("traceparent").First();
+        var propagatedParentId = traceparent.Split('-')[2];
+
+        // Without an outgoing client span, the current Activity itself is the parent span.
+        await Assert.That(propagatedParentId).IsEqualTo(activity.SpanId.ToString());
+    }
+
+    [Test]
+    public async Task SendAsync_SameActivity_ReusesCurrentSpanId()
+    {
+        Activity.Current = null;
+        using var activity = new Activity("test-reuse-spanid").Start();
 
         var captured = new CaptureHandler();
         var handler = new TUnitBaggagePropagationHandler { InnerHandler = captured };
@@ -85,8 +104,8 @@ public class BaggagePropagationHandlerTests
         var spanId1 = traceparent1.Split('-')[2];
         var spanId2 = traceparent2.Split('-')[2];
 
-        // Each request gets a unique SpanId within the same trace
-        await Assert.That(spanId1).IsNotEqualTo(spanId2);
+        await Assert.That(spanId1).IsEqualTo(activity.SpanId.ToString());
+        await Assert.That(spanId2).IsEqualTo(activity.SpanId.ToString());
     }
 
     [Test]

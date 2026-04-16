@@ -150,6 +150,13 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             await _objectTracker.UntrackObjects(test.Context, cleanupExceptions ??= []).ConfigureAwait(false);
 
+#if NET
+            // Per-test cleanup has completed. Keep the test activity open for final status
+            // and export, but detach it from the ambient async-local context so shared
+            // class/assembly/session cleanup does not accidentally inherit the test trace.
+            TUnitActivitySource.DetachTestActivityFromAmbientContext();
+#endif
+
             var testClass = test.Metadata.TestClassType;
             var testAssembly = testClass.Assembly;
             var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None).ConfigureAwait(false);
@@ -212,6 +219,10 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                 _stateManager.MarkFailed(test, aggregatedException);
             }
+
+#if NET
+            TestExecutor.FinishTestActivity(test);
+#endif
 
             switch (test.State)
             {
@@ -304,8 +315,8 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// <summary>
     /// Disposes the test instance and fires OnDispose callbacks, wrapped in an OpenTelemetry
     /// activity span for trace timeline visibility.
-    /// Parented under the class activity because the test case activity has already been stopped
-    /// by this point (disposal runs after TestExecutor.ExecuteAsync completes).
+    /// Parented under the test case activity when available so cleanup stays in the same
+    /// per-test trace seen by external backends and the HTML report.
     /// </summary>
     private async ValueTask DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
     {

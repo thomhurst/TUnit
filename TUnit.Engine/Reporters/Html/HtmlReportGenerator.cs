@@ -1649,7 +1649,7 @@ function renderSpanRows(sp, uid) {
     return h;
 }
 
-// Per-test trace: include parent suite span for context, then test case span + its descendants
+// Per-test trace: test case span + its descendants
 function renderTrace(tid, rootSpanId) {
     const allSpans = spansByTrace[tid];
     if (!allSpans || !allSpans.length) return '';
@@ -1662,26 +1662,6 @@ function renderTrace(tid, rootSpanId) {
         sp = sp.filter(s => s.spanId !== tbId).map(s => s.parentSpanId === tbId ? {...s, parentSpanId: rootSpanId} : s);
     }
     if (sp.length <= 1) return '';
-    // Include the parent suite span so the test bar is shown relative to the class duration.
-    // Test cases now start their own trace and reference the suite via Activity Links,
-    // so check links first, then fall back to parentSpanId for backward compatibility.
-    const root = bySpanId[rootSpanId];
-    if (root) {
-        let parentSpan = null;
-        if (root.links && root.links.length) {
-            parentSpan = bySpanId[root.links[0].spanId];
-        }
-        if (!parentSpan && root.parentSpanId) {
-            parentSpan = bySpanId[root.parentSpanId];
-        }
-        if (parentSpan && !sp.some(s => s.spanId === parentSpan.spanId)) {
-            sp.unshift(parentSpan);
-            // Set a virtual parentSpanId so the depth calculation nests the test
-            // case under the suite span in the waterfall view
-            sp = sp.map(s => s.spanId === rootSpanId && !s.parentSpanId
-                ? {...s, parentSpanId: parentSpan.spanId} : s);
-        }
-    }
     return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
 }
 
