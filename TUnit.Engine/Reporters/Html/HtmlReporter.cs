@@ -268,7 +268,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
 
 #if NET
-            var additionalTraceIds = TraceRegistry.GetTraceIds(kvp.Key);
+            var additionalTraceIds = FilterAdditionalTraceIds(TraceRegistry.GetTraceIds(kvp.Key), traceId);
             string[]? additionalTraceIdsForResult = additionalTraceIds.Length > 0 ? additionalTraceIds : null;
 #else
             string[]? additionalTraceIdsForResult = null;
@@ -439,6 +439,30 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 break;
         }
     }
+
+#if NET
+    // The engine auto-registers the test's own traceId in TraceRegistry for OTLP correlation,
+    // so it shows up in GetTraceIds alongside any user-added traces. Strip it here so the
+    // primary trace (rendered as "Trace Timeline") isn't also rendered as a "Linked Trace".
+    internal static string[] FilterAdditionalTraceIds(string[] allTraceIds, string? primaryTraceId)
+    {
+        if (allTraceIds.Length == 0 || primaryTraceId is null)
+        {
+            return allTraceIds;
+        }
+
+        var filtered = new List<string>(allTraceIds.Length);
+        foreach (var tid in allTraceIds)
+        {
+            if (!string.Equals(tid, primaryTraceId, StringComparison.OrdinalIgnoreCase))
+            {
+                filtered.Add(tid);
+            }
+        }
+
+        return filtered.Count == allTraceIds.Length ? allTraceIds : filtered.ToArray();
+    }
+#endif
 
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
     {
