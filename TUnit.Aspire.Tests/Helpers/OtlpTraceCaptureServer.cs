@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 
@@ -8,8 +7,12 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
 {
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
-    private readonly ConcurrentQueue<CapturedRequest> _requests = new();
-    private readonly object _waitersLock = new();
+    // Single lock guards both _requests and _waiters so that ProcessRequestAsync's
+    // enqueue-and-signal happens atomically with WaitForRequestAsync's check-and-register.
+    // Without this, a request that arrives between the check and registration would be
+    // silently dropped (signalled to an empty waiter list).
+    private readonly object _stateLock = new();
+    private readonly List<CapturedRequest> _requests = new();
     private readonly List<PendingWait> _waiters = new();
     private Task? _listenTask;
 
@@ -27,16 +30,19 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
 
     public async Task<CapturedRequest> WaitForRequestAsync(string path, int timeoutMs = 5000)
     {
-        if (_requests.FirstOrDefault(request => request.Path == path) is { } existing)
-        {
-            return existing;
-        }
-
         var tcs = new TaskCompletionSource<CapturedRequest>(TaskCreationOptions.RunContinuationsAsynchronously);
         var waiter = new PendingWait(path, tcs);
 
-        lock (_waitersLock)
+        lock (_stateLock)
         {
+            foreach (var existing in _requests)
+            {
+                if (existing.Path == path)
+                {
+                    return existing;
+                }
+            }
+
             _waiters.Add(waiter);
         }
 
@@ -54,7 +60,7 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
         }
         finally
         {
-            lock (_waitersLock)
+            lock (_stateLock)
             {
                 _waiters.Remove(waiter);
             }
@@ -122,8 +128,7 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
             var captured = new CapturedRequest(
                 context.Request.Url?.AbsolutePath ?? string.Empty,
                 ms.ToArray());
-            _requests.Enqueue(captured);
-            SignalWaiters(captured);
+            EnqueueAndSignal(captured);
 
             context.Response.StatusCode = 200;
             context.Response.ContentLength64 = 0;
@@ -143,20 +148,22 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
         }
     }
 
-    private void SignalWaiters(CapturedRequest captured)
+    private void EnqueueAndSignal(CapturedRequest captured)
     {
-        PendingWait[] snapshot;
-        lock (_waitersLock)
+        PendingWait[] matched;
+        lock (_stateLock)
         {
-            snapshot = _waiters.ToArray();
+            _requests.Add(captured);
+            matched = _waiters
+                .Where(w => w.Path == captured.Path)
+                .ToArray();
         }
 
-        foreach (var waiter in snapshot)
+        // Signal outside the lock — TrySetResult can run continuations synchronously
+        // when the awaiter has not yet suspended, which would otherwise re-enter our lock.
+        foreach (var waiter in matched)
         {
-            if (waiter.Path == captured.Path)
-            {
-                waiter.Completion.TrySetResult(captured);
-            }
+            waiter.Completion.TrySetResult(captured);
         }
     }
 
