@@ -239,6 +239,9 @@ internal class TestExecutor
         catch (SkipTestException ex)
         {
             executableTest.SetResult(TestState.Skipped);
+            // Surface the skip reason on the context so FinishTestActivity (now invoked from
+            // TestCoordinator after the local capturedException is out of scope) can tag the span.
+            executableTest.Context.SkipReason ??= ex.Reason;
             capturedException = ex;
         }
         catch (Exception ex)

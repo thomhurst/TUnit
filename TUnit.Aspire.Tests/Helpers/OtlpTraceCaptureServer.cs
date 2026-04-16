@@ -167,8 +167,9 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
         }
     }
 
-    // HttpListener has no port-0 bind; probe TcpListener for a free port and retry on the
-    // unavoidable TOCTOU race against another process binding it before HttpListener starts.
+    // HttpListener has no port-0 bind; probe TcpListener for a free port and retry to
+    // mitigate (cannot fully eliminate) the TOCTOU race against another process binding
+    // the same port before HttpListener.Start completes.
     private static (HttpListener Listener, int Port) CreateListener()
     {
         const int maxAttempts = 10;
