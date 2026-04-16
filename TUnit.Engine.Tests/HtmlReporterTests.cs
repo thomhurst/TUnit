@@ -71,6 +71,48 @@ public class HtmlReporterTests
 
 
     [Test]
+    public void FilterAdditionalTraceIds_Removes_Primary_Trace_CaseInsensitive()
+    {
+        var primary = "abcdef0123456789abcdef0123456789";
+        var linked = "1111111111111111aaaaaaaaaaaaaaaa";
+        var all = new[] { primary.ToUpperInvariant(), linked };
+
+        var result = HtmlReporter.FilterAdditionalTraceIds(all, primary);
+
+        result.ShouldBe(new[] { linked });
+    }
+
+    [Test]
+    public void FilterAdditionalTraceIds_Returns_Input_When_Primary_Null()
+    {
+        var all = new[] { "aaaa", "bbbb" };
+
+        var result = HtmlReporter.FilterAdditionalTraceIds(all, primaryTraceId: null);
+
+        result.ShouldBeSameAs(all);
+    }
+
+    [Test]
+    public void FilterAdditionalTraceIds_Returns_Input_When_No_Match()
+    {
+        var all = new[] { "aaaa", "bbbb" };
+
+        var result = HtmlReporter.FilterAdditionalTraceIds(all, "cccc");
+
+        result.ShouldBeSameAs(all);
+    }
+
+    [Test]
+    public void FilterAdditionalTraceIds_Returns_Empty_When_Only_Primary()
+    {
+        var primary = "abcdef0123456789abcdef0123456789";
+
+        var result = HtmlReporter.FilterAdditionalTraceIds(new[] { primary }, primary);
+
+        result.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task PublishArtifactAsync_Publishes_With_Correct_SessionUid()
     {
         var reporter = new HtmlReporter(new MockExtension());
