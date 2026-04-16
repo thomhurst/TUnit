@@ -143,7 +143,7 @@ public partial class Throws
 
             var expectedPrefix = """
                 Expected to throw exactly CustomException
-                and to have message equal to "Foo bar message!"
+                	and to have message equal to "Foo bar message!"
                 """;
 
             await Assert.That(assertionException.Message.NormalizeLineEndings()).StartsWith(expectedPrefix.NormalizeLineEndings());

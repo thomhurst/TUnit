@@ -89,7 +89,7 @@ public class AssertMultipleTests
 
         await TUnitAssert.That(exception1.Message.NormalizeLineEndings()).IsEqualTo("""
                                                         Expected to be 2
-                                                        or to be 3
+                                                        	or to be 3
                                                         but found 1
 
                                                         at Assert.That(1).IsEqualTo(2).Or.IsEqualTo(3)
@@ -97,7 +97,7 @@ public class AssertMultipleTests
 
         await TUnitAssert.That(exception2.Message.NormalizeLineEndings()).IsEqualTo("""
                                                         Expected to be 3
-                                                        and to be 4
+                                                        	and to be 4
                                                         but found 2
 
                                                         at Assert.That(2).IsEqualTo(3).And.IsEqualTo(4)
@@ -105,7 +105,7 @@ public class AssertMultipleTests
 
         await TUnitAssert.That(exception3.Message.NormalizeLineEndings()).IsEqualTo("""
                                                         Expected to be 4
-                                                        or to be 5
+                                                        	or to be 5
                                                         but found 3
 
                                                         at Assert.That(3).IsEqualTo(4).Or.IsEqualTo(5)
@@ -113,7 +113,7 @@ public class AssertMultipleTests
 
         await TUnitAssert.That(exception4.Message.NormalizeLineEndings()).IsEqualTo("""
                                                         Expected to be 5
-                                                        and to be 6
+                                                        	and to be 6
                                                         but found 4
 
                                                         at Assert.That(4).IsEqualTo(5).And.IsEqualTo(6)
@@ -121,7 +121,7 @@ public class AssertMultipleTests
 
         await TUnitAssert.That(exception5.Message.NormalizeLineEndings()).IsEqualTo("""
                                                         Expected to be 6
-                                                        or to be 7
+                                                        	or to be 7
                                                         but found 5
 
                                                         at Assert.That(5).IsEqualTo(6).Or.IsEqualTo(7)

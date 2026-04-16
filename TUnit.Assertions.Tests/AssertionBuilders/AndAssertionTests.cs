@@ -307,4 +307,51 @@ public sealed class AndAssertionTests
             .And
             .Length().IsEqualTo(11);
     }
+
+    [Test]
+    public async Task Three_Way_And_Chain_Error_Message_Expands_All_Expectations()
+    {
+        var numbers = new[] { 1, 2, 3, 4, 1 };
+
+        var action = async () => await Assert.That(numbers)
+            .Count().IsEqualTo(5)
+            .And.Contains(3)
+            .And.IsInOrder();
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message)
+            .Contains("count equal to 5")
+            .And
+            .Contains("to contain 3")
+            .And
+            .Contains("to be in ascending order");
+
+        await Assert.That(exception.Message).DoesNotContain("both conditions");
+    }
+
+    [Test]
+    public async Task Four_Way_And_Chain_Error_Message_Expands_All_Expectations()
+    {
+        var value = 5;
+
+        var action = async () => await Assert.That(value)
+            .IsGreaterThan(3)
+            .And.IsLessThan(100)
+            .And.IsNotEqualTo(7)
+            .And.IsEqualTo(99);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message)
+            .Contains("to be greater than 3")
+            .And
+            .Contains("to be less than 100")
+            .And
+            .Contains("to not be equal to 7")
+            .And
+            .Contains("to be 99");
+
+        await Assert.That(exception.Message).DoesNotContain("both conditions");
+    }
 }
