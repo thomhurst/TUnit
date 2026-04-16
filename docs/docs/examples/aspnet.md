@@ -534,7 +534,7 @@ public class MyTests : TestsBase
 
 ### Automatic Logging (Shared Factory)
 
-When a single `WebApplicationFactory` is shared across all tests, server-side logs are automatically correlated with the originating test. Use `CreateClientWithTestContext()` to create an `HttpClient` that propagates the test context:
+When a single `WebApplicationFactory` is shared across all tests, server-side logs are automatically correlated with the originating test. Use `CreateClient()` (or `CreateDefaultClient()`) to create an `HttpClient` that propagates the test context automatically:
 
 ```csharp
 public class SharedAppTests
@@ -545,7 +545,7 @@ public class SharedAppTests
     [Test]
     public async Task GetTodos_LogsRouteToThisTest()
     {
-        var client = Factory.CreateClientWithTestContext();
+        var client = Factory.CreateClient();
 
         var response = await client.GetAsync("/todos");
 
@@ -556,7 +556,7 @@ public class SharedAppTests
 ```
 
 :::tip How it works
-Under the hood, `TestWebApplicationFactory` automatically registers a `CorrelatedTUnitLoggerProvider` and `TUnitTestContextMiddleware`. The `CreateClientWithTestContext()` method creates an `HttpClient` with a `TUnitTestIdHandler` that propagates the test context ID via an HTTP header. The middleware resolves the test context on the server side, and the correlated logger routes each log entry to the correct test's output.
+Under the hood, `TestWebApplicationFactory` automatically registers a `CorrelatedTUnitLoggerProvider` and `TUnitTestContextMiddleware`. `CreateClient()` and `CreateDefaultClient()` prepend both `ActivityPropagationHandler` and `TUnitTestIdHandler`, so requests propagate the current trace context and the TUnit test ID automatically. The middleware resolves the test context on the server side, and the correlated logger routes each log entry to the correct test's output.
 :::
 
 ### Duplicate Prevention
@@ -1108,7 +1108,7 @@ public class WebApplicationFactory : TestWebApplicationFactory<Program>
 
 | Method | Description |
 |--------|-------------|
-| `CreateClientWithTestContext()` | Creates an `HttpClient` that propagates the current test context ID |
+| `CreateClientWithTestContext()` | Obsolete compatibility helper. Prefer `CreateClient()` or `CreateDefaultClient()`, which already inject test context and trace propagation. |
 
 ### Logging Types (Auto-Registered)
 

@@ -35,6 +35,9 @@ public class TraceSetup
         _tracerProvider = Sdk.CreateTracerProviderBuilder()
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("MyTests"))
             .AddSource("TUnit")
+            // Optional: export the synthetic HTTP client spans created by
+            // TestWebApplicationFactory / TracedWebApplicationFactory too.
+            .AddSource("TUnit.AspNetCore.Http")
             .AddConsoleExporter()
             .Build();
     }
@@ -48,6 +51,9 @@ public class TraceSetup
 ```
 
 Replace `AddConsoleExporter()` with your preferred exporter (Jaeger, Zipkin, OTLP, etc.).
+Use one stable service name for the test runner (for example, `MyTests`) rather than a different
+`service.name` per test. Individual tests are already distinguished by their own trace IDs and
+TUnit tags such as `tunit.test.id`.
 
 ### Option B: Raw `ActivityListener` (no SDK dependency)
 
@@ -65,7 +71,7 @@ public class TraceSetup
     {
         _listener = new ActivityListener
         {
-            ShouldListenTo = source => source.Name == "TUnit",
+            ShouldListenTo = source => source.Name is "TUnit" or "TUnit.AspNetCore.Http",
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStarted = activity => Console.WriteLine($"▶ {activity.OperationName}"),
             ActivityStopped = activity => Console.WriteLine($"■ {activity.OperationName} ({activity.Duration.TotalMilliseconds:F1}ms)")
@@ -95,17 +101,29 @@ If you register the listener later (e.g., in `[Before(Assembly)]`), the discover
 
 ## Span Hierarchy
 
-TUnit creates a nested span tree that mirrors the test lifecycle:
+TUnit uses two complementary shapes:
 
-```
+```text
 test session
   ├── test discovery
   └── test assembly
         └── test suite (one per test class)
-              └── test case (one per test method invocation)
 ```
 
-The **test discovery** span captures the time spent finding, building, and resolving dependencies for all tests. It appears as a sibling of the assembly spans, giving you a clear view of discovery vs execution time.
+```text
+test case (root span per test invocation)
+  └── test body
+        └── HttpClient / ASP.NET Core / EF Core / custom spans
+```
+
+Each `test case` starts its own trace on purpose, so every test invocation gets a unique W3C
+TraceId. The test case also carries an `ActivityLink` back to the class (`test suite`) span for
+logical grouping. In tools like Seq or Jaeger, that means the test case often appears as a root
+span with no parent ID. That is expected.
+
+The **test discovery** span captures the time spent finding, building, and resolving dependencies
+for all tests. It appears as a sibling of the assembly spans, giving you a clear view of discovery
+vs execution time.
 
 ## Attributes
 
@@ -174,6 +192,14 @@ dotnet add package OpenTelemetry.Exporter.Zipkin
 ```csharp
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
+
+### ASP.NET Core Integration Tests
+
+If you use `TestWebApplicationFactory` or `TracedWebApplicationFactory`, outgoing requests
+automatically propagate the current test trace via W3C `traceparent` and `baggage` headers.
+
+Add `"TUnit.AspNetCore.Http"` as a source only if you also want TUnit's synthetic client spans
+to appear in your exporter. Header propagation works either way.
 
 ## Test Context Correlation via Activity Baggage
 

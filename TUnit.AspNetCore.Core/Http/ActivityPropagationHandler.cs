@@ -16,32 +16,32 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
     // cleaned up on process exit. Not disposed explicitly because multiple handler
     // instances share this source across concurrent tests.
     private static readonly ActivitySource HttpActivitySource = new("TUnit.AspNetCore.Http");
+    private readonly Func<HttpRequestMessage, Activity?> _startActivity;
+
+    public ActivityPropagationHandler()
+    {
+        _startActivity = StartHttpActivity;
+    }
+
+    internal ActivityPropagationHandler(Func<HttpRequestMessage, Activity?> startActivity)
+    {
+        _startActivity = startActivity;
+    }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
-        using var activity = HttpActivitySource.StartActivity(
-            $"HTTP {request.Method} {path}",
-            ActivityKind.Client);
+        using var activity = _startActivity(request);
 
         if (activity is not null)
         {
             activity.SetTag("http.request.method", request.Method.Method);
             activity.SetTag("url.full", request.RequestUri?.ToString());
             activity.SetTag("server.address", request.RequestUri?.Host);
-
-            // Inject trace context headers (traceparent + tracestate) so the server
-            // creates child activities under the same trace
-            DistributedContextPropagator.Current.Inject(activity, request.Headers,
-                static (headers, key, value) =>
-                {
-                    if (headers is HttpRequestHeaders h)
-                    {
-                        h.Remove(key);
-                        h.TryAddWithoutValidation(key, value);
-                    }
-                });
         }
+
+        // Propagate the current distributed trace even when the helper span is not
+        // created (for example, when no listener is attached to TUnit.AspNetCore.Http).
+        InjectTraceContext(activity ?? Activity.Current, request.Headers);
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -55,5 +55,33 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         }
 
         return response;
+    }
+
+    private static Activity? StartHttpActivity(HttpRequestMessage request)
+    {
+        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
+        return HttpActivitySource.StartActivity(
+            $"HTTP {request.Method} {path}",
+            ActivityKind.Client);
+    }
+
+    private static void InjectTraceContext(Activity? activity, HttpRequestHeaders headers)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        // Inject trace context headers (traceparent + tracestate) so the server
+        // creates child activities under the same trace.
+        DistributedContextPropagator.Current.Inject(activity, headers,
+            static (targetHeaders, key, value) =>
+            {
+                if (targetHeaders is HttpRequestHeaders h)
+                {
+                    h.Remove(key);
+                    h.TryAddWithoutValidation(key, value);
+                }
+            });
     }
 }
