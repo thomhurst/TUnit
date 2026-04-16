@@ -3,13 +3,13 @@
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    public sealed class IMapper_Entity_Status_Mock : global::TUnit.Mocks.Mock<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>>, global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>
+    public sealed class IMapper_TIn_TOut_Mock<TIn, TOut> : global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>>, global::Sandbox.IMapper<TIn, TOut>
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IMapper_Entity_Status_Mock(global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> engine)
+        internal IMapper_TIn_TOut_Mock(global::Sandbox.IMapper<TIn, TOut> mockObject, global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<TIn, TOut>> engine)
             : base(mockObject, engine) { }
 
-        global::Sandbox.Status global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>.Map(global::Sandbox.Entity input) => Object.Map(input);
+        TOut global::Sandbox.IMapper<TIn, TOut>.Map(TIn input) => Object.Map(input);
     }
 }
 
@@ -21,21 +21,21 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated.Sandbox
 {
-    file sealed class IMapper_Entity_Status_MockImpl : global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    file sealed class IMapper_TIn_TOut_MockImpl<TIn, TOut> : global::Sandbox.IMapper<TIn, TOut>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<TIn, TOut>> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IMapper_Entity_Status_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> engine)
+        internal IMapper_TIn_TOut_MockImpl(global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<TIn, TOut>> engine)
         {
             _engine = engine;
         }
 
-        public global::Sandbox.Status Map(global::Sandbox.Entity input)
+        public TOut Map(TIn input)
         {
-            return _engine.HandleCallWithReturn<global::Sandbox.Status, global::Sandbox.Entity>(0, "Map", input, default);
+            return _engine.HandleCallWithReturn<TOut, TIn>(0, "Map", input, default!);
         }
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -45,23 +45,26 @@ namespace TUnit.Mocks.Generated.Sandbox
         }
     }
 
-    file static class IMapper_Entity_Status_MockFactory
+    internal static class IMapper_TIn_TOut_MockFactory
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
+                typeof(global::Sandbox.IMapper<,>),
+                typeof(IMapper_TIn_TOut_MockImpl<,>),
+                typeof(IMapper_TIn_TOut_Mock<,>));
         }
 
-        internal static global::TUnit.Mocks.Mock<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+        internal static global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>> CreateAutoMock<TIn, TOut>(global::TUnit.Mocks.MockBehavior behavior)
         {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>>(behavior);
-            var impl = new IMapper_Entity_Status_MockImpl(engine);
+            var engine = new global::TUnit.Mocks.MockEngine<global::Sandbox.IMapper<TIn, TOut>>(behavior);
+            var impl = new IMapper_TIn_TOut_MockImpl<TIn, TOut>(engine);
             engine.Raisable = impl;
-            var mock = new IMapper_Entity_Status_Mock(impl, engine);
+            var mock = new IMapper_TIn_TOut_Mock<TIn, TOut>(impl, engine);
             return mock;
         }
+
     }
 }
 
@@ -73,34 +76,34 @@ namespace TUnit.Mocks.Generated.Sandbox
 
 namespace TUnit.Mocks.Generated
 {
-    public static class Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__MockMemberExtensions
+    public static class Sandbox_IMapper_TIn_TOut__MockMemberExtensions
     {
-        public static Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Map(this global::TUnit.Mocks.Mock<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> mock, global::TUnit.Mocks.Arguments.Arg<global::Sandbox.Entity> input)
+        public static Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Map<TIn, TOut>(this global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>> mock, global::TUnit.Mocks.Arguments.Arg<TIn> input)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { input.Matcher };
-            return new Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Map", matchers);
+            return new Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Map", matchers);
         }
 
-        public static Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Map(this global::TUnit.Mocks.Mock<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>> mock, global::System.Func<global::Sandbox.Entity, bool> input)
+        public static Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Map<TIn, TOut>(this global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>> mock, global::System.Func<TIn, bool> input)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::Sandbox.Entity> __fa_input = input;
+            global::TUnit.Mocks.Arguments.Arg<TIn> __fa_input = input;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
-            return new Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Map", matchers);
+            return new Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Map", matchers);
         }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public sealed class Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> : global::TUnit.Mocks.Verification.ICallVerification
     {
         private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
         private readonly int _memberId;
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Sandbox.Status>? _builder;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<TOut>? _builder;
         private bool _builderInitialized;
         private object? _builderLock;
 
-        internal Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+        internal Sandbox_IMapper_TIn_TOut__Map_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
             _engine = engine;
             _memberId = memberId;
@@ -108,49 +111,49 @@ namespace TUnit.Mocks.Generated
             _matchers = matchers;
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Sandbox.Status> EnsureSetup() =>
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<TOut> EnsureSetup() =>
             global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
             {
                 var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
                 _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<global::Sandbox.Status>(setup);
+                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<TOut>(setup);
             })!;
 
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Returns(global::Sandbox.Status value) { EnsureSetup().Returns(value); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Returns(TOut value) { EnsureSetup().Returns(value); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Returns(global::System.Func<global::Sandbox.Status> factory) { EnsureSetup().Returns(factory); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Returns(global::System.Func<TOut> factory) { EnsureSetup().Returns(factory); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall ReturnsSequentially(params global::Sandbox.Status[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> ReturnsSequentially(params TOut[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
         /// <inheritdoc />
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Then() { EnsureSetup().Then(); return this; }
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Returns(global::System.Func<global::Sandbox.Entity, global::Sandbox.Status> factory)
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Returns(global::System.Func<TIn, TOut> factory)
         {
-            EnsureSetup().Returns(args => factory((global::Sandbox.Entity)args[0]!));
+            EnsureSetup().Returns(args => factory((TIn)args[0]!));
             return this;
         }
 
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Callback(global::System.Action<global::Sandbox.Entity> callback)
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Callback(global::System.Action<TIn> callback)
         {
             EnsureSetup().Callback(callback);
             return this;
         }
 
         /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__Map_M0_MockCall Throws(global::System.Func<global::Sandbox.Entity, global::System.Exception> exceptionFactory)
+        public Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Throws(global::System.Func<TIn, global::System.Exception> exceptionFactory)
         {
-            EnsureSetup().Throws(args => exceptionFactory((global::Sandbox.Entity)args[0]!));
+            EnsureSetup().Throws(args => exceptionFactory((TIn)args[0]!));
             return this;
         }
 
@@ -178,13 +181,13 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks
 {
-    public static class Sandbox_IMapper_Sandbox_Entity_Sandbox_Status__MockStaticExtension
+    public static class Sandbox_IMapper_TIn_TOut__MockStaticExtension
     {
-        extension(global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>)
+        extension<TIn, TOut>(global::Sandbox.IMapper<TIn, TOut> _)
         {
-            public static global::TUnit.Mocks.Generated.Sandbox.IMapper_Entity_Status_Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IMapper_Entity_Status_Mock)global::TUnit.Mocks.Mock.Of<global::Sandbox.IMapper<global::Sandbox.Entity, global::Sandbox.Status>>(behavior);
+                return (global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut>)global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_MockFactory.CreateAutoMock<TIn, TOut>(behavior);
             }
         }
     }

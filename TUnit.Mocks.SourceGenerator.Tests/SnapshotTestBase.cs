@@ -12,6 +12,7 @@ namespace TUnit.Mocks.SourceGenerator.Tests;
 public abstract class SnapshotTestBase
 {
     private static readonly Lazy<List<PortableExecutableReference>> _references = new(LoadReferences);
+    private static readonly UTF8Encoding SnapshotEncoding = new(encoderShouldEmitUTF8Identifier: false);
 
     private static List<PortableExecutableReference> LoadReferences()
     {
@@ -125,12 +126,60 @@ public abstract class SnapshotTestBase
         return VerifySnapshot(RunGeneratorAndFormat(source), testName, filePath);
     }
 
+    protected static void AssertGeneratedCodeCompiles(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
+    {
+        var compileErrors = GetGeneratedCompilationErrors(source, additionalReferences, parseOptions);
+
+        if (compileErrors.Count > 0)
+        {
+            var errorMessages = string.Join(Environment.NewLine, compileErrors.Select(e => e.ToString()));
+            throw new InvalidOperationException($"Generated compilation failed:{Environment.NewLine}{errorMessages}");
+        }
+    }
+
+    protected static IReadOnlyList<Diagnostic> GetGeneratedCompilationErrors(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
+    {
+        parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
+
+        IEnumerable<MetadataReference> refs = additionalReferences is null
+            ? _references.Value
+            : _references.Value.Concat(additionalReferences);
+
+        var inputCompilation = CSharpCompilation.Create(
+            "TestAssembly",
+            [syntaxTree],
+            refs,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var generator = new MockGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var generatorDiagnostics);
+
+        var generatorErrors = generatorDiagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+        if (generatorErrors.Count > 0)
+        {
+            var errorMessages = string.Join(Environment.NewLine, generatorErrors.Select(e => e.ToString()));
+            throw new InvalidOperationException($"Generator produced errors:{Environment.NewLine}{errorMessages}");
+        }
+
+        return outputCompilation.GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error)
+            .ToList();
+    }
+
     private static async Task VerifySnapshot(
         string generatedOutput,
         string testName,
         string filePath)
     {
-        generatedOutput = NormalizeNewlines(generatedOutput);
+        generatedOutput = NormalizeNewlines(generatedOutput).TrimStart('\uFEFF');
 
         var testDir = Path.GetDirectoryName(filePath)!;
         var receivedPath = Path.Combine(testDir, "Snapshots", $"{testName}.received.txt");
@@ -142,18 +191,18 @@ public abstract class SnapshotTestBase
         if (!File.Exists(verifiedPath))
         {
             // Write .received.txt for review and fail — never auto-accept
-            await File.WriteAllTextAsync(receivedPath, generatedOutput);
+            await File.WriteAllTextAsync(receivedPath, generatedOutput, SnapshotEncoding);
             throw new InvalidOperationException(
                 $"No verified snapshot found for '{testName}'.\n" +
                 $"Review: {receivedPath}\n" +
                 $"Accept by renaming to '.verified.txt'.");
         }
 
-        var verified = NormalizeNewlines(await File.ReadAllTextAsync(verifiedPath));
+        var verified = NormalizeNewlines(await File.ReadAllTextAsync(verifiedPath)).TrimStart('\uFEFF');
 
         if (!string.Equals(generatedOutput, verified, StringComparison.Ordinal))
         {
-            await File.WriteAllTextAsync(receivedPath, generatedOutput);
+            await File.WriteAllTextAsync(receivedPath, generatedOutput, SnapshotEncoding);
             throw new InvalidOperationException(
                 $"Snapshot mismatch for '{testName}'.\n" +
                 $"Received: {receivedPath}\n" +

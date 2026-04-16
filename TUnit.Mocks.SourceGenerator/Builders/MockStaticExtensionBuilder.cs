@@ -16,9 +16,13 @@ internal static class MockStaticExtensionBuilder
 
         return BuildCore(model, (writer, mockableType, visibility) =>
         {
-            using (writer.Block($"{visibility} static global::{mockNamespace}.{shortName}Mock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
+            using (writer.Block($"{visibility} static global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)} Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
             {
-                writer.AppendLine($"return (global::{mockNamespace}.{shortName}Mock)global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
+                var generatedMockType = $"global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
+                var factoryType = $"global::{mockNamespace}.{shortName}MockFactory";
+                var typeArguments = MockImplBuilder.GetTypeParameterList(model);
+
+                writer.AppendLine($"return ({generatedMockType}){factoryType}.CreateAutoMock{typeArguments}(behavior);");
             }
         });
     }
@@ -75,7 +79,9 @@ internal static class MockStaticExtensionBuilder
         {
             using (writer.Block($"{model.Visibility} static class {extensionClassName}_MockStaticExtension"))
             {
-                using (writer.Block($"extension({model.FullyQualifiedName})"))
+                var typeParams = MockImplBuilder.GetTypeParameterList(model);
+                var constraints = MockImplBuilder.GetConstraintClauses(model);
+                using (writer.Block($"extension{typeParams}({model.FullyQualifiedName} _){constraints}"))
                 {
                     writeBody(writer, mockableType, model.Visibility);
                 }

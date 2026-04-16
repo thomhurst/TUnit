@@ -125,6 +125,34 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     private ConcurrentDictionary<string, IMock?> AutoMockCache
         => LazyInitializer.EnsureInitialized(ref _autoMockCache)!;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool TryGetLooseAutoMockResult<TReturn>(string memberName, Func<MockBehavior, IMock>? autoMockFactory, out TReturn result)
+    {
+        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        {
+            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
+            {
+                if (autoMockFactory is not null)
+                {
+                    return autoMockFactory(Behavior);
+                }
+
+                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var mock);
+                return mock;
+            });
+
+            if (autoMock is not null)
+            {
+                result = (TReturn)autoMock.ObjectInstance;
+                return true;
+            }
+        }
+
+        result = default!;
+        return false;
+    }
+
     /// <summary>
     /// Transitions the engine to the specified state. Null clears the state.
     /// </summary>
@@ -254,6 +282,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// or returns default/throws for strict mode.
     /// </summary>
     public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue)
+        => HandleCallWithReturn(memberId, memberName, args, defaultValue, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);
@@ -320,18 +352,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
 #pragma warning restore IL3050, IL2026
 
         // Auto-mock: for interface return types in Loose mode, create a functional mock
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null)
-            {
-                return (TReturn)autoMock.ObjectInstance;
-            }
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -400,6 +423,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryHandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, out TReturn result)
+        => TryHandleCallWithReturn(memberId, memberName, args, defaultValue, out result, null);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryHandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, out TReturn result, Func<MockBehavior, IMock>? autoMockFactory)
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args);

@@ -25,11 +25,11 @@ internal static class MockFactoryBuilder
     private static void BuildInterfaceFactory(CodeWriter writer, MockTypeModel model, string safeName)
     {
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        var factoryClassName = model.AdditionalInterfaceNames.Length > 0
-            ? $"{safeName}MultiMockFactory"
-            : $"{safeName}MockFactory";
+        var factoryClassName = $"{safeName}MockFactory";
+        var implTypeName = MockImplBuilder.GetGeneratedTypeName($"{safeName}MockImpl", model);
+        var wrapperTypeName = MockImplBuilder.GetGeneratedTypeName($"{safeName}Mock", model);
 
-        using (writer.Block($"file static class {factoryClassName}"))
+        using (writer.Block($"internal static class {factoryClassName}"))
         {
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (writer.Block("internal static void Register()"))
@@ -43,6 +43,17 @@ internal static class MockFactoryBuilder
                     var keyExpr = "string.Join(\"|\", new[] { " + string.Join(", ", allTypes) + " })";
                     writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterMultiFactory({keyExpr}, Create);");
                 }
+                else if (model.TypeParameters.Length > 0)
+                {
+                    var wrapperTypeExpr = MockWrapperTypeBuilder.CanGenerateWrapper(model)
+                        ? GetOpenGeneratedTypeOfExpression($"{safeName}Mock", model)
+                        : "null";
+
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(");
+                    writer.AppendLine($"    typeof({MockImplBuilder.GetOpenGenericTypeOfExpression(model)}),");
+                    writer.AppendLine($"    {GetOpenGeneratedTypeOfExpression($"{safeName}MockImpl", model)},");
+                    writer.AppendLine($"    {wrapperTypeExpr});");
+                }
                 else
                 {
                     writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterFactory<{mockableType}>(Create);");
@@ -50,23 +61,49 @@ internal static class MockFactoryBuilder
             }
             writer.AppendLine();
 
-            using (writer.Block($"internal static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
             {
-                writer.AppendLine($"if (constructorArgs.Length > 0) throw new global::System.ArgumentException($\"Interface mock '{mockableType}' does not support constructor arguments, but {{constructorArgs.Length}} were provided.\");");
-                writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
-                writer.AppendLine($"var impl = new {safeName}MockImpl(engine);");
-                writer.AppendLine("engine.Raisable = impl;");
-                if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
+                var typeParams = MockImplBuilder.GetTypeParameterList(model);
+                var constraints = MockImplBuilder.GetConstraintClauses(model);
+                using (writer.Block($"internal static global::TUnit.Mocks.Mock<{mockableType}> CreateAutoMock{typeParams}(global::TUnit.Mocks.MockBehavior behavior){constraints}"))
                 {
-                    writer.AppendLine($"var mock = new {safeName}Mock(impl, engine);");
+                    EmitCreateInterfaceMockBody(writer, model, mockableType, implTypeName, wrapperTypeName);
                 }
-                else
+                writer.AppendLine();
+            }
+
+            if (model.TypeParameters.Length == 0 || model.AdditionalInterfaceNames.Length > 0)
+            {
+                using (writer.Block($"internal static global::TUnit.Mocks.Mock<{mockableType}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
                 {
-                    writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+                    writer.AppendLine($"if (constructorArgs.Length > 0) throw new global::System.ArgumentException($\"Interface mock '{mockableType}' does not support constructor arguments, but {{constructorArgs.Length}} were provided.\");");
+                    EmitCreateInterfaceMockBody(writer, model, mockableType, implTypeName, wrapperTypeName);
                 }
-                writer.AppendLine("return mock;");
             }
         }
+    }
+
+    private static string GetOpenGeneratedTypeOfExpression(string baseName, MockTypeModel model)
+    {
+        if (model.TypeParameters.Length == 0)
+            return $"typeof({baseName})";
+
+        return $"typeof({baseName}<{new string(',', model.TypeParameters.Length - 1)}>)";
+    }
+
+    private static void EmitCreateInterfaceMockBody(CodeWriter writer, MockTypeModel model, string mockableType, string implTypeName, string wrapperTypeName)
+    {
+        writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
+        writer.AppendLine($"var impl = new {implTypeName}(engine);");
+        writer.AppendLine("engine.Raisable = impl;");
+        if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
+        {
+            writer.AppendLine($"var mock = new {wrapperTypeName}(impl, engine);");
+        }
+        else
+        {
+            writer.AppendLine($"var mock = new global::TUnit.Mocks.Mock<{mockableType}>(impl, engine);");
+        }
+        writer.AppendLine("return mock;");
     }
 
     private static void BuildWrapFactory(CodeWriter writer, MockTypeModel model, string safeName)

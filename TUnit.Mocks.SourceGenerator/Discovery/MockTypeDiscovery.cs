@@ -127,7 +127,7 @@ internal static class MockTypeDiscovery
 
         if (method.TypeArguments.Length == 1)
         {
-            return BuildModelWithTransitiveDependencies(namedType, isPartialMock, compilationAssembly);
+            return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly);
         }
 
         // Multi-type mock: validate additional type args are all interfaces
@@ -191,7 +191,8 @@ internal static class MockTypeDiscovery
         var results = new List<MockTypeModel>();
         if (maxDepth <= 0) return results;
 
-        var fqn = type.GetFullyQualifiedName();
+        var canonicalType = NormalizeTransitiveInterfaceReturnType(type);
+        var fqn = canonicalType.GetFullyQualifiedName();
         visited.Add(fqn);
 
         // Collect all members from the type and its interfaces
@@ -220,6 +221,10 @@ internal static class MockTypeDiscovery
 
             if (returnType is not INamedTypeSymbol namedReturn) continue;
             if (namedReturn.TypeKind != TypeKind.Interface) continue;
+
+            namedReturn = NormalizeTransitiveInterfaceReturnType(namedReturn);
+            if (namedReturn.TypeKind != TypeKind.Interface)
+                continue;
 
             // Skip BCL/system interfaces — they have members (indexers, explicit implementations)
             // that the mock generator cannot handle, and auto-mocking them is rarely useful.
@@ -310,12 +315,14 @@ internal static class MockTypeDiscovery
         return new MockTypeModel
         {
             FullyQualifiedName = delegateType.GetFullyQualifiedName(),
+            OpenGenericTypeOfExpression = delegateType.GetOpenGenericTypeOfExpression(),
             Name = delegateType.Name,
             Namespace = delegateType.ContainingNamespace?.ToDisplayString() ?? "",
             IsInterface = false,
             IsAbstract = false,
             IsPartialMock = false,
             IsDelegateType = true,
+            TypeParameters = new EquatableArray<MockTypeParameterModel>(GetTypeParameterModels(delegateType)),
             Methods = new EquatableArray<MockMemberModel>(ImmutableArray.Create(methodModel)),
             Properties = EquatableArray<MockMemberModel>.Empty,
             Events = EquatableArray<MockEventModel>.Empty,
@@ -355,11 +362,13 @@ internal static class MockTypeDiscovery
         return new MockTypeModel
         {
             FullyQualifiedName = namedType.GetFullyQualifiedName(),
+            OpenGenericTypeOfExpression = namedType.GetOpenGenericTypeOfExpression(),
             Name = namedType.Name,
             Namespace = namedType.ContainingNamespace?.ToDisplayString() ?? "",
             IsInterface = namedType.TypeKind == TypeKind.Interface,
             IsAbstract = namedType.IsAbstract,
             IsPartialMock = isPartialMock,
+            TypeParameters = new EquatableArray<MockTypeParameterModel>(GetTypeParameterModels(namedType)),
             Methods = methods,
             Properties = properties,
             Events = events,
@@ -371,6 +380,65 @@ internal static class MockTypeDiscovery
             Constructors = constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
             IsPublic = IsEffectivelyPublic(namedType)
+        };
+    }
+
+    private static INamedTypeSymbol NormalizeSingleMockType(INamedTypeSymbol namedType)
+    {
+        return namedType.TypeKind == TypeKind.Interface && namedType.IsGenericType
+            ? namedType.OriginalDefinition
+            : namedType;
+    }
+
+    private static INamedTypeSymbol NormalizeTransitiveInterfaceReturnType(INamedTypeSymbol namedType)
+    {
+        return namedType.TypeKind == TypeKind.Interface && namedType.IsGenericType
+            ? namedType.OriginalDefinition
+            : namedType;
+    }
+
+    private static ImmutableArray<MockTypeParameterModel> GetTypeParameterModels(INamedTypeSymbol namedType)
+    {
+        if (!ContainsTypeParameters(namedType))
+            return ImmutableArray<MockTypeParameterModel>.Empty;
+
+        return GetAllTypeParameters(namedType)
+            .Select(tp => new MockTypeParameterModel
+            {
+                Name = tp.Name,
+                Constraints = tp.GetGenericConstraints(),
+                HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
+                HasValueTypeConstraint = tp.HasValueTypeConstraint,
+                HasAnnotatedNullableUsage = false
+            })
+            .ToImmutableArray();
+    }
+
+    private static IEnumerable<ITypeParameterSymbol> GetAllTypeParameters(INamedTypeSymbol namedType)
+    {
+        if (namedType.ContainingType is { } containingType)
+        {
+            foreach (var typeParameter in GetAllTypeParameters(containingType))
+            {
+                yield return typeParameter;
+            }
+        }
+
+        foreach (var typeParameter in namedType.TypeParameters)
+        {
+            yield return typeParameter;
+        }
+    }
+
+    private static bool ContainsTypeParameters(ITypeSymbol type)
+    {
+        return type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => ContainsTypeParameters(array.ElementType),
+            INamedTypeSymbol named => named.TypeArguments.Any(ContainsTypeParameters),
+            IPointerTypeSymbol pointer => ContainsTypeParameters(pointer.PointedAtType),
+            _ => false
         };
     }
 
@@ -472,7 +540,7 @@ internal static class MockTypeDiscovery
 
         var isPartialMock = namedType.TypeKind == TypeKind.Class;
         var compilationAssembly = context.SemanticModel.Compilation.Assembly;
-        return BuildModelWithTransitiveDependencies(namedType, isPartialMock, compilationAssembly);
+        return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly);
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
@@ -507,11 +575,10 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            var model = BuildSingleTypeModel(namedType, isPartialMock: namedType.TypeKind == TypeKind.Class, compilationAssembly);
-            if (model is null)
-                continue;
-
-            return ImmutableArray.Create(model);
+            return BuildModelWithTransitiveDependencies(
+                NormalizeSingleMockType(namedType),
+                isPartialMock: namedType.TypeKind == TypeKind.Class,
+                compilationAssembly);
         }
 
         return ImmutableArray<MockTypeModel>.Empty;

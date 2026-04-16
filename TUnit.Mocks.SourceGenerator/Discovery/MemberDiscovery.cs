@@ -554,6 +554,9 @@ internal static class MemberDiscovery
         // static abstract members. Such types cannot be used as generic type arguments (CS8920).
         var effectiveReturnTypeSymbol = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
         var returnTypeHasStaticAbstract = !isVoid && IsInterfaceWithStaticAbstractMembers(effectiveReturnTypeSymbol);
+        var autoMockFactoryMethod = !isVoid
+            ? GetAutoMockFactoryMethod(effectiveReturnTypeSymbol)
+            : null;
 
         return new MockMemberModel
         {
@@ -601,6 +604,7 @@ internal static class MemberDiscovery
             IsProtected = method.DeclaredAccessibility == Accessibility.Protected
                        || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = returnType.IsRefLikeType,
+            AutoMockFactoryMethod = autoMockFactoryMethod,
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
             SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
         };
@@ -665,6 +669,7 @@ internal static class MemberDiscovery
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
                        || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = property.Type.IsRefLikeType,
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
         };
@@ -735,8 +740,41 @@ internal static class MemberDiscovery
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
-            SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated())
+            SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type)
         };
+    }
+
+    private static string? GetAutoMockFactoryMethod(ITypeSymbol returnType)
+    {
+        var effectiveReturnType = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
+        if (effectiveReturnType is not INamedTypeSymbol namedType)
+            return null;
+
+        if (namedType.TypeKind != TypeKind.Interface)
+            return null;
+
+        var namespaceName = namedType.ContainingNamespace?.ToDisplayString() ?? "";
+        if (namespaceName == "System" || namespaceName.StartsWith("System.")
+            || namespaceName == "Microsoft" || namespaceName.StartsWith("Microsoft.")
+            || namespaceName == "Windows" || namespaceName.StartsWith("Windows."))
+        {
+            return null;
+        }
+
+        if (IsInterfaceWithStaticAbstractMembers(effectiveReturnType))
+            return null;
+
+        var baseName = namedType.OriginalDefinition.GetGeneratedMockBaseName();
+        var factoryNamespace = namedType.OriginalDefinition.GetGeneratedMockNamespace();
+
+        if (!namedType.IsGenericType)
+        {
+            return $"global::{factoryNamespace}.{baseName}MockFactory.CreateAutoMock";
+        }
+
+        var typeArguments = string.Join(", ", namedType.TypeArguments.Select(x => x.GetFullyQualifiedNameWithNullability()));
+        return $"global::{factoryNamespace}.{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
     }
 
     private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)
