@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
@@ -21,7 +22,7 @@ public class KeyAwareFixture : IKeyedDataSource, IAsyncInitializer
 [UnconditionalSuppressMessage("Usage", "TUnit0018:Test methods should not assign instance data")]
 public class KeyedDataSourceTests
 {
-    private static readonly List<KeyAwareFixture> AlphaInstances = [];
+    private static readonly ConcurrentBag<KeyAwareFixture> AlphaInstances = [];
 
     [Test]
     [ClassDataSource<KeyAwareFixture>(Shared = SharedType.Keyed, Key = "alpha")]
@@ -51,7 +52,8 @@ public class KeyedDataSourceTests
     [DependsOn(nameof(Key_IsAvailableDuringInitializeAsync))]
     public async Task SameKey_ReturnsSameInstance()
     {
-        await Assert.That(AlphaInstances).Count().IsEqualTo(2);
-        await Assert.That(AlphaInstances[0]).IsSameReferenceAs(AlphaInstances[1]);
+        var snapshot = AlphaInstances.ToArray();
+        await Assert.That(snapshot.Length).IsEqualTo(2);
+        await Assert.That(snapshot[0]).IsSameReferenceAs(snapshot[1]);
     }
 }

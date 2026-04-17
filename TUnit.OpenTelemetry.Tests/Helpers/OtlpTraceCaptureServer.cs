@@ -24,6 +24,21 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
         _listenTask = Task.Run(ListenLoopAsync);
     }
 
+    public bool HasRequest(string path)
+    {
+        lock (_stateLock)
+        {
+            foreach (var existing in _requests)
+            {
+                if (existing.Path == path)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     public async Task<CapturedRequest> WaitForRequestAsync(string path, int timeoutMs = 5000)
     {
         var tcs = new TaskCompletionSource<CapturedRequest>(TaskCreationOptions.RunContinuationsAsynchronously);

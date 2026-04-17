@@ -67,6 +67,7 @@ public sealed class RecordingHookExecutor_F3Inherits : GenericAbstractExecutor
 
 [EngineTest(ExpectedResult.Pass)]
 [HookExecutor<RecordingHookExecutor_F1ClassLevel>]
+[NotInParallel(nameof(HookExecutorHookTests_ClassLevel))]
 public class HookExecutorHookTests_ClassLevel
 {
     [Before(Class)]

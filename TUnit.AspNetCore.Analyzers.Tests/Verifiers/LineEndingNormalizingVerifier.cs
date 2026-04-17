@@ -79,7 +79,7 @@ public class LineEndingNormalizingVerifier : IVerifier
         return new LineEndingNormalizingVerifierWithContext(_defaultVerifier.PushContext(context));
     }
 
-    private static string NormalizeLineEndings(string value)
+    internal static string NormalizeLineEndings(string value)
     {
         // Normalize all line endings to LF (Unix) for cross-platform consistent comparison
         // LF is the universal standard and prevents Windows/Linux test mismatches

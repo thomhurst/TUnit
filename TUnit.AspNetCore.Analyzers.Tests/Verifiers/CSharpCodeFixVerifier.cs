@@ -30,15 +30,16 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>
         {
-            TestCode = source,
-            FixedCode = fixedSource,
+            TestCode = LineEndingNormalizingVerifier.NormalizeLineEndings(source),
+            FixedCode = LineEndingNormalizingVerifier.NormalizeLineEndings(fixedSource),
             ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
         };
 
         if (stubsSource is not null)
         {
-            test.TestState.Sources.Add(stubsSource);
-            test.FixedState.Sources.Add(stubsSource);
+            var normalizedStubs = LineEndingNormalizingVerifier.NormalizeLineEndings(stubsSource);
+            test.TestState.Sources.Add(normalizedStubs);
+            test.FixedState.Sources.Add(normalizedStubs);
         }
 
         test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
