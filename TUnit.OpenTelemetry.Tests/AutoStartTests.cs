@@ -108,4 +108,32 @@ public class AutoStartTests
             AutoStart.StartForTesting(resetFirst: true);
         }
     }
+
+    [Test]
+    public async Task Start_SetsDefaultServiceName()
+    {
+        var autostartOriginal = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
+        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "1");
+        TUnitOpenTelemetry.ResetForTests();
+        TUnitOpenTelemetry.Configure(b => b.AddInMemoryExporter(new List<Activity>()));
+        try
+        {
+            AutoStart.StartForTesting(resetFirst: true);
+
+            var resource = AutoStart.GetResourceForTesting();
+            await Assert.That(resource).IsNotNull();
+            var serviceNameAttr = resource!.Attributes.FirstOrDefault(a => a.Key == "service.name");
+            await Assert.That(serviceNameAttr.Key).IsEqualTo("service.name");
+            var serviceName = serviceNameAttr.Value?.ToString();
+            // Not the OTel default placeholder ("unknown_service" or "unknown_service:<process>")
+            await Assert.That(serviceName).IsNotNull();
+            await Assert.That(serviceName!.StartsWith("unknown_service", StringComparison.Ordinal)).IsFalse();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", autostartOriginal);
+            TUnitOpenTelemetry.ResetForTests();
+            AutoStart.StartForTesting(resetFirst: true);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using OpenTelemetry;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using TUnit.Core;
 
@@ -63,6 +64,12 @@ public static class AutoStart
                 builder.AddOtlpExporter();
             }
 
+            builder.SetResourceBuilder(
+                ResourceBuilder.CreateDefault().AddService(
+                    serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
+                        ?? System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
+                        ?? "TUnit.Tests"));
+
             TUnitOpenTelemetry.ApplyConfiguration(builder);
             _provider = builder.Build();
         }
@@ -101,6 +108,15 @@ public static class AutoStart
             {
                 return _provider is not null;
             }
+        }
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal static Resource? GetResourceForTesting()
+    {
+        lock (_lock)
+        {
+            return _provider?.GetResource();
         }
     }
 }
