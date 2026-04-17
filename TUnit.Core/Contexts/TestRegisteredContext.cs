@@ -25,9 +25,7 @@ public class TestRegisteredContext
     /// </summary>
     public ConcurrentDictionary<string, object?> StateBag => TestContext.StateBag.Items;
 
-    /// <summary>
-    /// Gets the object bag from the underlying TestContext
-    /// </summary>
+    /// <inheritdoc cref="StateBag"/>
     [Obsolete("Use StateBag property instead.")]
     public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
 

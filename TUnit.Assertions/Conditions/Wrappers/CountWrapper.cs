@@ -24,6 +24,13 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
 
     AssertionContext<TCollection> IAssertionSource<TCollection>.Context => _context;
 
+    private static int GetCount(TCollection? value) =>
+        value is null ? 0
+        : value is ICollection collection ? collection.Count
+        : value.Cast<object>().Count();
+
+    private AssertionContext<int> MapToCount() => _context.Map<int>(GetCount);
+
     /// <summary>
     /// Not supported on CountWrapper - use IsTypeOf on the assertion source before calling HasCount().
     /// </summary>
@@ -103,22 +110,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".GreaterThanOrEqualTo({expression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<int>(countContext, expected);
+        return new TValue_IsGreaterThanOrEqualTo_TValue_Assertion<int>(MapToCount(), expected);
     }
 
     /// <summary>
@@ -127,22 +119,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     public TValue_IsGreaterThan_TValue_Assertion<int> Positive()
     {
         _context.ExpressionBuilder.Append(".Positive()");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new TValue_IsGreaterThan_TValue_Assertion<int>(countContext, 0);
+        return new TValue_IsGreaterThan_TValue_Assertion<int>(MapToCount(), 0);
     }
 
     /// <summary>
@@ -153,22 +130,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".GreaterThan({expression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new TValue_IsGreaterThan_TValue_Assertion<int>(countContext, expected);
+        return new TValue_IsGreaterThan_TValue_Assertion<int>(MapToCount(), expected);
     }
 
     /// <summary>
@@ -179,22 +141,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".LessThan({expression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new TValue_IsLessThan_TValue_Assertion<int>(countContext, expected);
+        return new TValue_IsLessThan_TValue_Assertion<int>(MapToCount(), expected);
     }
 
     /// <summary>
@@ -205,22 +152,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".LessThanOrEqualTo({expression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<int>(countContext, expected);
+        return new TValue_IsLessThanOrEqualTo_TValue_Assertion<int>(MapToCount(), expected);
     }
 
     /// <summary>
@@ -233,22 +165,7 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(maximum))] string? maxExpression = null)
     {
         _context.ExpressionBuilder.Append($".Between({minExpression}, {maxExpression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new BetweenAssertion<int>(countContext, minimum, maximum);
+        return new BetweenAssertion<int>(MapToCount(), minimum, maximum);
     }
 
     /// <summary>
@@ -268,21 +185,6 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".NotEqualTo({expression})");
-        // Map context to get the count
-        var countContext = _context.Map<int>(value =>
-        {
-            if (value == null)
-            {
-                return 0;
-            }
-
-            if (value is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            return value.Cast<object>().Count();
-        });
-        return new NotEqualsAssertion<int>(countContext, expected);
+        return new NotEqualsAssertion<int>(MapToCount(), expected);
     }
 }

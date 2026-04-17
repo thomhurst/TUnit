@@ -14,8 +14,10 @@ internal record TimingEntry(string StepName, DateTimeOffset Start, DateTimeOffse
 /// </summary>
 public partial class TestContext
 {
-    // Internal backing fields and properties
-    // Timings are written sequentially by the framework during test execution, never by user code.
+    // Internal backing fields and properties.
+    // Engine writes are sequential per-test (lifecycle-ordered).
+    // User-facing writes via the obsolete ITestOutput.RecordTiming API may be concurrent,
+    // so all access through the obsolete bridge takes _timingsLock.
     internal List<TimingEntry> Timings { get; } = [];
     private readonly Lock _timingsLock = new();
     // Artifacts use a lock because AttachArtifact is user-facing and can be called
