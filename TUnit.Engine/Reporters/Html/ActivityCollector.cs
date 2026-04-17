@@ -15,7 +15,7 @@ internal sealed class ActivityCollector : IDisposable
     // be slightly exceeded under high concurrency. Override via
     // EnvironmentConstants.MaxOtelExternalSpans for users with busy SUTs.
     private const int DefaultMaxExternalSpans = 100;
-    private static readonly int MaxExternalSpans = ResolveExternalSpanCap();
+    internal static readonly int MaxExternalSpans = ResolveExternalSpanCap();
 
     private static int _capWarningEmitted;
 

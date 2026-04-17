@@ -44,13 +44,15 @@ public class ActivityCollectorIngestionTests
         var traceId = UniqueTraceId();
         collector.RegisterExternalTrace(traceId);
 
-        for (var i = 0; i < 150; i++)
+        var cap = ActivityCollector.MaxExternalSpans;
+        var attempts = cap + 50;
+        for (var i = 0; i < attempts; i++)
         {
             collector.IngestExternalSpan(MakeSpan(traceId, $"{i:X16}", $"op-{i}"));
         }
 
         var ours = collector.GetAllSpans().Where(s => s.TraceId == traceId).ToList();
-        await Assert.That(ours.Count).IsEqualTo(100);
+        await Assert.That(ours.Count).IsEqualTo(cap);
     }
 
     [Test]

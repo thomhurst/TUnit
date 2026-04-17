@@ -215,8 +215,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         {
             spans = OtlpTraceParser.Parse(body);
         }
-        catch
+        catch (Exception ex)
         {
+            Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/traces body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 
@@ -332,9 +333,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         {
             records = OtlpLogParser.Parse(body);
         }
-        catch
+        catch (Exception ex)
         {
-            // Malformed protobuf -- skip silently
+            Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/logs body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 

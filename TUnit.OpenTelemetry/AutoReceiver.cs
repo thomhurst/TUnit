@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using TUnit.Core;
 using TUnit.OpenTelemetry.Receiver;
 
@@ -75,7 +74,6 @@ public static class AutoReceiver
         }
     }
 
-    [EditorBrowsable(EditorBrowsableState.Never)]
     internal static bool HasReceiverForTesting
     {
         get
