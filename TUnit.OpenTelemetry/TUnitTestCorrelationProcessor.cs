@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using OpenTelemetry;
+using TUnit.Core;
 
 namespace TUnit.OpenTelemetry;
 
@@ -10,19 +11,17 @@ namespace TUnit.OpenTelemetry;
 /// </summary>
 public sealed class TUnitTestCorrelationProcessor : BaseProcessor<Activity>
 {
-    private const string TestIdTag = "tunit.test.id";
-
     public override void OnStart(Activity activity)
     {
-        if (activity.GetTagItem(TestIdTag) is not null)
+        if (activity.GetTagItem(TUnitActivitySource.TagTestId) is not null)
         {
             return;
         }
 
-        var testId = Activity.Current?.GetBaggageItem(TestIdTag);
+        var testId = Activity.Current?.GetBaggageItem(TUnitActivitySource.TagTestId);
         if (testId is not null)
         {
-            activity.SetTag(TestIdTag, testId);
+            activity.SetTag(TUnitActivitySource.TagTestId, testId);
         }
     }
 }

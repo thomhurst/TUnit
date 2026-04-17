@@ -12,10 +12,10 @@ public class EndToEndTests
     [Test]
     public async Task TUnitSource_Spans_AreExported()
     {
-        var autostartOriginal = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
+        var autostartOriginal = Environment.GetEnvironmentVariable(AutoStart.AutoStartEnvVar);
         // Force-build the provider even if a prior listener is still attached so the
         // InMemory exporter is guaranteed to receive our spans.
-        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "1");
+        Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, "1");
 
         var spans = new List<Activity>();
         TUnitOpenTelemetry.ResetForTests();
@@ -43,7 +43,7 @@ public class EndToEndTests
         finally
         {
             Activity.Current = previous;
-            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", autostartOriginal);
+            Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, autostartOriginal);
             // Re-arm for subsequent tests in this class and the runner at large.
             TUnitOpenTelemetry.ResetForTests();
             AutoStart.StartForTesting(resetFirst: true);

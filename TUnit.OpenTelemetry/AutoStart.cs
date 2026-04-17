@@ -18,6 +18,10 @@ public static class AutoStart
     /// <summary>Hook order for <see cref="Start"/>. Runs last so user hooks register first.</summary>
     public const int AutoStartOrder = int.MaxValue;
 
+    internal const string AutoStartEnvVar = "TUNIT_OTEL_AUTOSTART";
+    internal const string OtlpEndpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT";
+    internal const string ServiceNameEnvVar = "OTEL_SERVICE_NAME";
+
     private static readonly ActivitySource ProbeSource = new("TUnit");
     private static TracerProvider? _provider;
     private static readonly Lock _lock = new();
@@ -25,17 +29,18 @@ public static class AutoStart
     [Before(HookType.TestDiscovery, Order = AutoStartOrder)]
     public static void Start()
     {
-        var autostart = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
+        var autostart = Environment.GetEnvironmentVariable(AutoStartEnvVar);
         if (autostart == "0")
         {
             return;
         }
 
         var force = autostart == "1";
+        var otlpEndpoint = Environment.GetEnvironmentVariable(OtlpEndpointEnvVar);
+
         if (!force)
         {
-            var hasEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") is not null;
-            if (!hasEndpoint && !TUnitOpenTelemetry.HasConfiguration)
+            if (otlpEndpoint is null && !TUnitOpenTelemetry.HasConfiguration)
             {
                 return;
             }
@@ -52,26 +57,37 @@ public static class AutoStart
             {
                 return;
             }
+        }
 
-            var builder = Sdk.CreateTracerProviderBuilder()
-                .AddSource("TUnit")
-                .AddSource("TUnit.Lifecycle")
-                .AddSource("TUnit.AspNetCore.Http")
-                .AddProcessor(new TUnitTestCorrelationProcessor());
+        var builder = Sdk.CreateTracerProviderBuilder()
+            .AddSource("TUnit")
+            .AddSource("TUnit.Lifecycle")
+            .AddSource("TUnit.AspNetCore.Http")
+            .AddProcessor(new TUnitTestCorrelationProcessor());
 
-            if (Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") is not null)
+        if (otlpEndpoint is not null)
+        {
+            builder.AddOtlpExporter();
+        }
+
+        builder.SetResourceBuilder(
+            ResourceBuilder.CreateDefault().AddService(
+                serviceName: Environment.GetEnvironmentVariable(ServiceNameEnvVar)
+                    ?? System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
+                    ?? "TUnit.Tests"));
+
+        TUnitOpenTelemetry.ApplyConfiguration(builder);
+        var provider = builder.Build();
+
+        lock (_lock)
+        {
+            if (_provider is not null)
             {
-                builder.AddOtlpExporter();
+                // Lost the race — another Start call built first. Dispose ours.
+                provider?.Dispose();
+                return;
             }
-
-            builder.SetResourceBuilder(
-                ResourceBuilder.CreateDefault().AddService(
-                    serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME")
-                        ?? System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
-                        ?? "TUnit.Tests"));
-
-            TUnitOpenTelemetry.ApplyConfiguration(builder);
-            _provider = builder.Build();
+            _provider = provider;
         }
     }
 

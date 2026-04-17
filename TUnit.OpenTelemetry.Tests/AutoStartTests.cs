@@ -45,8 +45,8 @@ public class AutoStartTests
     [Test]
     public async Task AutoStart_ForceOn_BuildsEvenWhenListenerPresent()
     {
-        var original = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
-        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "1");
+        var original = Environment.GetEnvironmentVariable(AutoStart.AutoStartEnvVar);
+        Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, "1");
         try
         {
             using var userListener = new ActivityListener
@@ -64,7 +64,7 @@ public class AutoStartTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", original);
+            Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, original);
             TUnitOpenTelemetry.ResetForTests();
             AutoStart.StartForTesting(resetFirst: true);
         }
@@ -73,10 +73,10 @@ public class AutoStartTests
     [Test]
     public async Task Start_NoEndpointNoConfig_DoesNotBuildProvider()
     {
-        var endpointOriginal = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
-        var autostartOriginal = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", null);
-        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", null);
+        var endpointOriginal = Environment.GetEnvironmentVariable(AutoStart.OtlpEndpointEnvVar);
+        var autostartOriginal = Environment.GetEnvironmentVariable(AutoStart.AutoStartEnvVar);
+        Environment.SetEnvironmentVariable(AutoStart.OtlpEndpointEnvVar, null);
+        Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, null);
         TUnitOpenTelemetry.ResetForTests();
         try
         {
@@ -85,8 +85,8 @@ public class AutoStartTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", endpointOriginal);
-            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", autostartOriginal);
+            Environment.SetEnvironmentVariable(AutoStart.OtlpEndpointEnvVar, endpointOriginal);
+            Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, autostartOriginal);
             AutoStart.StartForTesting(resetFirst: true);
         }
     }
@@ -94,8 +94,8 @@ public class AutoStartTests
     [Test]
     public async Task Start_WithOptOutEnv_DoesNotBuildProvider()
     {
-        var original = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
-        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "0");
+        var original = Environment.GetEnvironmentVariable(AutoStart.AutoStartEnvVar);
+        Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, "0");
         try
         {
             AutoStart.StartForTesting(resetFirst: true);
@@ -103,7 +103,7 @@ public class AutoStartTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", original);
+            Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, original);
             // Re-arm for subsequent tests in the runner
             AutoStart.StartForTesting(resetFirst: true);
         }
@@ -112,8 +112,8 @@ public class AutoStartTests
     [Test]
     public async Task Start_SetsDefaultServiceName()
     {
-        var autostartOriginal = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
-        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "1");
+        var autostartOriginal = Environment.GetEnvironmentVariable(AutoStart.AutoStartEnvVar);
+        Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, "1");
         TUnitOpenTelemetry.ResetForTests();
         TUnitOpenTelemetry.Configure(b => b.AddInMemoryExporter(new List<Activity>()));
         try
@@ -131,7 +131,7 @@ public class AutoStartTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", autostartOriginal);
+            Environment.SetEnvironmentVariable(AutoStart.AutoStartEnvVar, autostartOriginal);
             TUnitOpenTelemetry.ResetForTests();
             AutoStart.StartForTesting(resetFirst: true);
         }

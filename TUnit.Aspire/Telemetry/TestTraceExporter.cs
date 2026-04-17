@@ -31,8 +31,8 @@ internal static class TestTraceExporter
     }
 
     /// <summary>
-    /// Kept for tests that need a standalone provider bound to a captured OTLP endpoint.
-    /// Not used by the production code path — <see cref="AddToBuilder"/> is.
+    /// Builds a standalone <see cref="TracerProvider"/> bound to the captured OTLP endpoint.
+    /// Used by test-only code paths that need an owned provider; production uses <see cref="AddToBuilder"/>.
     /// </summary>
     internal static TracerProvider CreateTracerProvider(
         Uri endpoint, TestSessionContext context, string sourceName)
