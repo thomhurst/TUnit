@@ -2,27 +2,26 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using TUnit.Core;
+using TUnit.Engine.Configuration;
 
 namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class ActivityCollector : IDisposable
 {
-    // Cap external (non-TUnit) spans per test to keep the report manageable.
-    // TUnit's own spans are always captured regardless of caps.
-    // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
-    // Default overridable via TUNIT_OTEL_MAX_EXTERNAL_SPANS for users with busy SUTs.
+    // Cap external (non-TUnit) spans to keep the report manageable. Applied per test,
+    // or per trace when the test-case association can't be determined (e.g. broken
+    // Activity.Parent chains from async connection pooling). TUnit's own spans are
+    // always captured regardless. Soft cap — intentionally racy for performance; may
+    // be slightly exceeded under high concurrency. Override via
+    // EnvironmentConstants.MaxOtelExternalSpans for users with busy SUTs.
     private const int DefaultMaxExternalSpans = 100;
-    private static readonly int MaxExternalSpansPerTest = ResolveExternalSpanCap();
-    // Fallback cap applied per trace when the test case association cannot be determined
-    // (e.g. broken Activity.Parent chains from async connection pooling).
-    private static readonly int MaxExternalSpansPerTrace = MaxExternalSpansPerTest;
+    private static readonly int MaxExternalSpans = ResolveExternalSpanCap();
 
-    // Emits a one-time warning when the cap is first hit, so users can discover the override.
     private static int _capWarningEmitted;
 
     private static int ResolveExternalSpanCap()
     {
-        var raw = Environment.GetEnvironmentVariable("TUNIT_OTEL_MAX_EXTERNAL_SPANS");
+        var raw = Environment.GetEnvironmentVariable(EnvironmentConstants.MaxOtelExternalSpans);
         if (!string.IsNullOrEmpty(raw)
             && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
             && parsed > 0)
@@ -35,11 +34,13 @@ internal sealed class ActivityCollector : IDisposable
 
     private static void WarnCapHitOnce()
     {
-        if (Interlocked.Exchange(ref _capWarningEmitted, 1) == 0)
+        // CompareExchange avoids re-writing the flag on every overflow span once the
+        // cap has been breached — on busy SUTs this runs at every dropped span.
+        if (Interlocked.CompareExchange(ref _capWarningEmitted, 1, 0) == 0)
         {
             Console.Error.WriteLine(
-                $"[TUnit] External span cap of {MaxExternalSpansPerTest} reached; subsequent spans will be dropped. " +
-                "Set TUNIT_OTEL_MAX_EXTERNAL_SPANS to raise the limit.");
+                $"[TUnit] External span cap of {MaxExternalSpans} reached; subsequent spans will be dropped. " +
+                $"Set {EnvironmentConstants.MaxOtelExternalSpans} to raise the limit.");
         }
     }
 
@@ -181,14 +182,14 @@ internal sealed class ActivityCollector : IDisposable
         // Falls back to per-trace cap otherwise, mirroring OnActivityStopped's logic.
         if (span.ParentSpanId is { } parentSpanId && _testCaseSpanIds.ContainsKey(parentSpanId))
         {
-            if (_externalSpanCountsByTest.TryGetValue(parentSpanId, out var existing) && existing >= MaxExternalSpansPerTest)
+            if (_externalSpanCountsByTest.TryGetValue(parentSpanId, out var existing) && existing >= MaxExternalSpans)
             {
                 WarnCapHitOnce();
                 return;
             }
 
             var count = _externalSpanCountsByTest.AddOrUpdate(parentSpanId, 1, static (_, c) => c + 1);
-            if (count > MaxExternalSpansPerTest)
+            if (count > MaxExternalSpans)
             {
                 WarnCapHitOnce();
                 return;
@@ -196,14 +197,14 @@ internal sealed class ActivityCollector : IDisposable
         }
         else
         {
-            if (_externalSpanCountsByTrace.TryGetValue(span.TraceId, out var existing) && existing >= MaxExternalSpansPerTrace)
+            if (_externalSpanCountsByTrace.TryGetValue(span.TraceId, out var existing) && existing >= MaxExternalSpans)
             {
                 WarnCapHitOnce();
                 return;
             }
 
             var count = _externalSpanCountsByTrace.AddOrUpdate(span.TraceId, 1, static (_, c) => c + 1);
-            if (count > MaxExternalSpansPerTrace)
+            if (count > MaxExternalSpans)
             {
                 WarnCapHitOnce();
                 return;
@@ -354,7 +355,7 @@ internal sealed class ActivityCollector : IDisposable
             if (testSpanId is not null)
             {
                 var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
-                if (count > MaxExternalSpansPerTest)
+                if (count > MaxExternalSpans)
                 {
                     WarnCapHitOnce();
                     return;
@@ -365,7 +366,7 @@ internal sealed class ActivityCollector : IDisposable
                 // Fallback cap by trace ID to prevent unbounded growth for spans
                 // with broken parent chains (e.g., Npgsql async connection pooling).
                 var count = _externalSpanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-                if (count > MaxExternalSpansPerTrace)
+                if (count > MaxExternalSpans)
                 {
                     WarnCapHitOnce();
                     return;
