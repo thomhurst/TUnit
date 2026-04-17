@@ -17,6 +17,7 @@
   <!-- Extension libraries and integrations -->
   <Folder Name="/Libraries/">
     <Project Path="TUnit.Aspire/TUnit.Aspire.csproj" />
+    <Project Path="TUnit.OpenTelemetry/TUnit.OpenTelemetry.csproj" />
     <Project Path="TUnit.AspNetCore/TUnit.AspNetCore.csproj" />
     <Project Path="TUnit.AspNetCore.Core/TUnit.AspNetCore.Core.csproj" />
     <Project Path="TUnit.FsCheck/TUnit.FsCheck.csproj" />
