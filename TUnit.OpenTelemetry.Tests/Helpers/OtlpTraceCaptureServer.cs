@@ -1,16 +1,12 @@
 using System.Net;
 using TUnit.OpenTelemetry.Receiver;
 
-namespace TUnit.Aspire.Tests.Helpers;
+namespace TUnit.OpenTelemetry.Tests.Helpers;
 
 internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
 {
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
-    // Single lock guards both _requests and _waiters so that ProcessRequestAsync's
-    // enqueue-and-signal happens atomically with WaitForRequestAsync's check-and-register.
-    // Without this, a request that arrives between the check and registration would be
-    // silently dropped (signalled to an empty waiter list).
     private readonly object _stateLock = new();
     private readonly List<CapturedRequest> _requests = new();
     private readonly List<PendingWait> _waiters = new();
@@ -78,7 +74,6 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
         }
         catch
         {
-            // Best effort
         }
 
         if (_listenTask is not null)
@@ -89,7 +84,6 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
             }
             catch (OperationCanceledException)
             {
-                // Expected
             }
         }
 
@@ -143,7 +137,6 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
             }
             catch
             {
-                // Best effort
             }
         }
     }
@@ -159,8 +152,6 @@ internal sealed class OtlpTraceCaptureServer : IAsyncDisposable
                 .ToArray();
         }
 
-        // Signal outside the lock — TrySetResult can run continuations synchronously
-        // when the awaiter has not yet suspended, which would otherwise re-enter our lock.
         foreach (var waiter in matched)
         {
             waiter.Completion.TrySetResult(captured);

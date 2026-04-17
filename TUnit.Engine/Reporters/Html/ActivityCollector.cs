@@ -15,6 +15,13 @@ internal sealed class ActivityCollector : IDisposable
     // (e.g. broken Activity.Parent chains from async connection pooling).
     private const int MaxExternalSpansPerTrace = 100;
 
+    // Process-wide pointer to the currently-running collector, used by the OTLP receiver
+    // (in TUnit.OpenTelemetry) to feed external spans without an explicit wiring step.
+    // Only one HtmlReporter runs per session, so a static slot is sufficient.
+    private static ActivityCollector? _current;
+
+    public static ActivityCollector? Current => _current;
+
     private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
     // Track external span count per test case (keyed by test case span ID)
     private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new();
@@ -31,6 +38,10 @@ internal sealed class ActivityCollector : IDisposable
 
     public void Start()
     {
+        // First-started-wins: HtmlReporter creates one collector per session before any
+        // test runs, so this slot is claimed for the rest of the session. Later ad-hoc
+        // collectors (e.g. created from a test) don't race-steal the global pointer.
+        Interlocked.CompareExchange(ref _current, this, null);
         // Listen to ALL sources so we can capture child spans from HttpClient, ASP.NET Core,
         // EF Core, etc. The Sample callback uses smart filtering to avoid overhead: only spans
         // belonging to known test traces are fully recorded; everything else gets PropagationData
@@ -111,8 +122,64 @@ internal sealed class ActivityCollector : IDisposable
 
     public void Stop()
     {
+        Interlocked.CompareExchange(ref _current, null, this);
         _listener?.Dispose();
         _listener = null;
+    }
+
+    /// <summary>
+    /// Marks a trace ID as eligible for external span ingestion. Called by the OTLP
+    /// receiver when the test process has started or observed a trace that external
+    /// processes (e.g. a WebApplicationFactory SUT) may report spans against.
+    /// </summary>
+    internal void RegisterExternalTrace(string traceId)
+    {
+        _knownTraceIds.TryAdd(traceId, 0);
+    }
+
+    /// <summary>
+    /// Enqueues an externally-sourced span (typically from an OTLP receiver) into
+    /// the report. Dropped if the trace is not known, or if per-test/per-trace caps
+    /// for external spans have been exceeded.
+    /// </summary>
+    internal void IngestExternalSpan(SpanData span)
+    {
+        if (!_knownTraceIds.ContainsKey(span.TraceId))
+        {
+            return;
+        }
+
+        // Prefer per-test cap when the span's direct parent is a known test case span.
+        // Falls back to per-trace cap otherwise, mirroring OnActivityStopped's logic.
+        if (span.ParentSpanId is { } parentSpanId && _testCaseSpanIds.ContainsKey(parentSpanId))
+        {
+            if (_externalSpanCountsByTest.TryGetValue(parentSpanId, out var existing) && existing >= MaxExternalSpansPerTest)
+            {
+                return;
+            }
+
+            var count = _externalSpanCountsByTest.AddOrUpdate(parentSpanId, 1, static (_, c) => c + 1);
+            if (count > MaxExternalSpansPerTest)
+            {
+                return;
+            }
+        }
+        else
+        {
+            if (_externalSpanCountsByTrace.TryGetValue(span.TraceId, out var existing) && existing >= MaxExternalSpansPerTrace)
+            {
+                return;
+            }
+
+            var count = _externalSpanCountsByTrace.AddOrUpdate(span.TraceId, 1, static (_, c) => c + 1);
+            if (count > MaxExternalSpansPerTrace)
+            {
+                return;
+            }
+        }
+
+        var queue = _spansByTrace.GetOrAdd(span.TraceId, static _ => new ConcurrentQueue<SpanData>());
+        queue.Enqueue(span);
     }
 
     public SpanData[] GetAllSpans()

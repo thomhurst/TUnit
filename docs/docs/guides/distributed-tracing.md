@@ -154,6 +154,32 @@ protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 
 `new HttpClient()` can't be intercepted. Either route through `IHttpClientFactory` or set the `traceparent` header manually.
 
+## Capturing spans from out-of-process SUTs
+
+Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-config-tunitopentelemetry) and an OTLP/HTTP receiver starts automatically at test discovery. Spawned child processes, testcontainers, or any SUT reachable from the test host can push spans into TUnit's HTML report by exporting OTLP to that receiver.
+
+Read the endpoint from `AutoReceiver.Endpoint` and plumb it into the SUT:
+
+```csharp
+using TUnit.OpenTelemetry;
+
+var endpoint = AutoReceiver.Endpoint;    // e.g. "http://127.0.0.1:41234"
+process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = endpoint;
+process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf";
+```
+
+For the receiver to associate incoming spans with the right test, register the SUT's trace ID before it runs:
+
+```csharp
+using TUnit.Engine.Reporters.Html;
+
+ActivityCollector.Current?.RegisterExternalTrace(Activity.Current!.TraceId.ToString().ToUpperInvariant());
+```
+
+Spans arriving on a trace ID that wasn't registered are dropped (protects the report from unrelated traffic on shared runners). Each registered trace is capped at 100 external spans.
+
+Opt out with `TUNIT_OTEL_RECEIVER=0`.
+
 ## HTML report vs OpenTelemetry backends
 
 TUnit's HTML report and a backend like Seq render the same data differently:
@@ -162,7 +188,7 @@ TUnit's HTML report and a backend like Seq render the same data differently:
 |--|-------------|------------------------|
 | Hierarchy | Folds each test under its class using span links | Each test is a separate trace |
 | Filtering | Built-in UI controls | Backend query language |
-| Cross-service spans | Only what the engine sees in-process | Everything every exporter sends in |
+| Cross-service spans | In-process by default; out-of-process SUTs can push spans via the [OTLP receiver](#capturing-spans-from-out-of-process-suts) | Everything every exporter sends in |
 | Persistence | One file per run | Long-term, queryable across runs |
 
 Use the HTML report for debugging a single run. Use a backend for run-over-run analysis and cross-service correlation.

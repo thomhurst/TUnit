@@ -7,8 +7,15 @@
     <Description>Auto-wires an OpenTelemetry TracerProvider for TUnit test processes. Install to get distributed tracing with zero configuration.</Description>
   </PropertyGroup>
 
+  <!-- Receiver uses server-side APIs (HttpListener, TcpListener) — remove browser platform support -->
+  <ItemGroup>
+    <SupportedPlatform Remove="browser" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="TUnit.OpenTelemetry.Tests" />
+    <InternalsVisibleTo Include="TUnit.Aspire" />
+    <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
   </ItemGroup>
 
   <ItemGroup>
