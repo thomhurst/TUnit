@@ -36,6 +36,7 @@
     <Project Path="TUnit.Analyzers.Roslyn44/TUnit.Analyzers.Roslyn44.csproj" />
     <Project Path="TUnit.Analyzers.Roslyn47/TUnit.Analyzers.Roslyn47.csproj" />
     <Project Path="TUnit.AspNetCore.Analyzers/TUnit.AspNetCore.Analyzers.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.CodeFixers/TUnit.AspNetCore.Analyzers.CodeFixers.csproj" />
     <Project Path="TUnit.AspNetCore.Analyzers.Roslyn414/TUnit.AspNetCore.Analyzers.Roslyn414.csproj" />
     <Project Path="TUnit.AspNetCore.Analyzers.Roslyn44/TUnit.AspNetCore.Analyzers.Roslyn44.csproj" />
     <Project Path="TUnit.AspNetCore.Analyzers.Roslyn47/TUnit.AspNetCore.Analyzers.Roslyn47.csproj" />

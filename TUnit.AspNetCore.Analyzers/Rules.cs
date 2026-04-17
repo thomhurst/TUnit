@@ -12,7 +12,18 @@ public static class Rules
     public static readonly DiagnosticDescriptor GlobalFactoryMemberAccess =
         CreateDescriptor("TUnit0063", UsageCategory, DiagnosticSeverity.Error);
 
-    private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
+    public static readonly DiagnosticDescriptor DirectWebApplicationFactoryInheritance =
+        CreateDescriptor(
+            "TUnit0064",
+            UsageCategory,
+            DiagnosticSeverity.Warning,
+            helpLinkUri: "https://tunit.dev/docs/guides/distributed-tracing");
+
+    private static DiagnosticDescriptor CreateDescriptor(
+        string diagnosticId,
+        string category,
+        DiagnosticSeverity severity,
+        string? helpLinkUri = null)
     {
         return new DiagnosticDescriptor(
             id: diagnosticId,
@@ -24,7 +35,8 @@ public static class Rules
             defaultSeverity: severity,
             isEnabledByDefault: true,
             description: new LocalizableResourceString(diagnosticId + "Description", Resources.ResourceManager,
-                typeof(Resources))
+                typeof(Resources)),
+            helpLinkUri: helpLinkUri
         );
     }
 }
