@@ -23,11 +23,19 @@ internal sealed class AfterHookPairTracker
     // Ensure only the first call to RegisterAfterTestSessionHook registers a callback.
     // Subsequent calls (e.g. from per-test timeout tokens) are ignored so that
     // a test timeout cannot prematurely trigger session-level After hooks.
-    private volatile bool _sessionHookRegistered;
+    // Use Interlocked.CompareExchange to avoid TOCTOU race where two threads both
+    // observe 0 and both proceed to register.
+    private int _sessionHookRegistered;
 
     // Per-test callers would otherwise register one CancellationTokenRegistration per test
     // for every assembly/class — 10k tests across 5 assemblies = 50k redundant registrations.
     // First registration wins; subsequent calls short-circuit.
+    //
+    // Safety of single registration: The CancellationToken passed in is always the session-scoped
+    // token (or a derivative from Parallel.ForEachAsync which is itself linked to the session CT).
+    // Per-test timeout tokens are applied inside TestExecutor via TimeoutHelper.CreateLinkedTokenSource
+    // scoped to the test body only — they never reach this method. Therefore when the session cancels,
+    // the first test's registered CT still fires regardless of whether that test has completed.
     private readonly ConcurrentHashSet<Assembly> _assemblyHookRegistered = new();
     private readonly ConcurrentHashSet<Type> _classHookRegistered = new();
 
@@ -43,12 +51,10 @@ internal sealed class AfterHookPairTracker
         CancellationToken cancellationToken,
         Func<ValueTask<List<Exception>>> afterHookExecutor)
     {
-        if (_sessionHookRegistered)
+        if (Interlocked.CompareExchange(ref _sessionHookRegistered, 1, 0) != 0)
         {
             return;
         }
-
-        _sessionHookRegistered = true;
 
         // Register callback to run After hook on cancellation
         var registration = cancellationToken.Register(static state =>
