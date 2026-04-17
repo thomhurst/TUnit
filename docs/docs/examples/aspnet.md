@@ -82,6 +82,13 @@ public class TodoApiTests : TestsBase
 }
 ```
 
+`TestWebApplicationFactory<T>` wires up these behaviors automatically:
+
+- **Client-side tracing**: `CreateClient()` / `CreateDefaultClient()` return an `HttpClient` that propagates `traceparent`, `baggage`, and `X-TUnit-TestId` headers to the SUT.
+- **SUT `IHttpClientFactory` tracing**: Every pipeline built inside the SUT via `AddHttpClient<T>()`, named clients, or typed clients also gets those headers prepended — outbound calls from your app to downstream services correlate with the originating test. Opt out per-test with `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`.
+- **Correlated logging**: Server-side `ILogger` output is routed to the test that triggered the request.
+- **Hosted-service context hygiene**: `IHostedService.StartAsync` runs under `ExecutionContext.SuppressFlow()` so background work doesn't inherit the first test's `Activity.Current`.
+
 ## Core Concepts
 
 ### Why Test Isolation Matters

@@ -333,7 +333,7 @@ var client = traced.CreateClient();
 
 Both attach the trace propagation handler automatically. See [ASP.NET Core integration](./aspnet.md) for full setup.
 
-For HTTP calls the SUT itself makes through `IHttpClientFactory`, today you have to add the handler manually (`.AddHttpMessageHandler<ActivityPropagationHandler>()`). Tracking automation: [#5590](https://github.com/thomhurst/TUnit/issues/5590).
+Outbound HTTP calls the SUT itself makes through `IHttpClientFactory` (`AddHttpClient<T>()`, named clients, typed clients) are also auto-instrumented by `TestWebApplicationFactory<T>`. Opt out per-test via `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false` when the SUT already owns its outbound tracing.
 
 ### "No spans show up in my exporter at all"
 

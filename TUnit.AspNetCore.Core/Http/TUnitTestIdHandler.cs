@@ -38,7 +38,7 @@ public class TUnitTestIdHandler : DelegatingHandler
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if ((_testContext ?? TestContext.Current) is { } ctx)
+        if ((_testContext ?? TestContext.Current) is { } ctx && !request.Headers.Contains(HeaderName))
         {
             request.Headers.TryAddWithoutValidation(HeaderName, ctx.Id);
         }

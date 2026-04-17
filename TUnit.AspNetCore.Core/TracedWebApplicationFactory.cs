@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using TUnit.AspNetCore.Http;
 
 namespace TUnit.AspNetCore;
 
@@ -41,7 +42,7 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
     /// Creates an <see cref="HttpClient"/> with activity tracing and test context propagation.
     /// </summary>
     public HttpClient CreateClient() =>
-        _inner.CreateDefaultClient(new ActivityPropagationHandler(), new TUnitTestIdHandler());
+        _inner.CreateDefaultClient(TUnitHttpClientFilter.PrependPropagationHandlers([]));
 
     /// <summary>
     /// Creates an <see cref="HttpClient"/> with the specified delegating handlers, plus
@@ -49,11 +50,7 @@ public sealed class TracedWebApplicationFactory<TEntryPoint> : IAsyncDisposable,
     /// </summary>
     public HttpClient CreateDefaultClient(params DelegatingHandler[] handlers)
     {
-        var all = new DelegatingHandler[handlers.Length + 2];
-        all[0] = new ActivityPropagationHandler();
-        all[1] = new TUnitTestIdHandler();
-        Array.Copy(handlers, 0, all, 2, handlers.Length);
-        return _inner.CreateDefaultClient(all);
+        return _inner.CreateDefaultClient(TUnitHttpClientFilter.PrependPropagationHandlers(handlers));
     }
 
     /// <summary>
