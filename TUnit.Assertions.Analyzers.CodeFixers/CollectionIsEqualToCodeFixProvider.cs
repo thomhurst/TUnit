@@ -26,13 +26,9 @@ public class CollectionIsEqualToCodeFixProvider : CodeFixProvider
 
         foreach (var diagnostic in context.Diagnostics)
         {
-            var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
-
-            var identifier = node as IdentifierNameSyntax
-                ?? node.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>()
-                    .FirstOrDefault(id => id.Identifier.ValueText == "IsEqualTo");
-
-            if (identifier is null)
+            // Analyzer reports a span covering `IsEqualTo(...)`; FindNode returns the enclosing invocation.
+            if (root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true)
+                    is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Name: IdentifierNameSyntax identifier } })
             {
                 continue;
             }

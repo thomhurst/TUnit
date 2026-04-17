@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
@@ -20,19 +20,33 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
 
     public override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation);
+        context.RegisterCompilationStartAction(compilationStart =>
+        {
+            var ienumerable = compilationStart.Compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
+            if (ienumerable is null)
+            {
+                return;
+            }
+
+            compilationStart.RegisterOperationAction(
+                ctx => AnalyzeOperation(ctx, ienumerable),
+                OperationKind.Invocation);
+        });
     }
 
-    private void AnalyzeOperation(OperationAnalysisContext context)
+    private static void AnalyzeOperation(OperationAnalysisContext context, INamedTypeSymbol ienumerable)
     {
-        if (context.Operation is not IInvocationOperation invocation)
+        var invocation = (IInvocationOperation)context.Operation;
+        var method = invocation.TargetMethod;
+
+        if (method.Name != "IsEqualTo")
         {
             return;
         }
 
-        var method = invocation.TargetMethod;
-
-        if (method.Name != "IsEqualTo")
+        // Only the generic EqualsAssertion-returning overload uses default (reference) equality.
+        // Specialized overloads (CollectionCountEqualsAssertion, DateTimeEqualsAssertion, ...) are fine.
+        if (method.ReturnType is not INamedTypeSymbol { Name: "EqualsAssertion" })
         {
             return;
         }
@@ -43,28 +57,11 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Only the generic EqualsAssertion-returning overload uses default (reference) equality.
-        // Specialized overloads (CollectionCountEqualsAssertion, DateTimeEqualsAssertion, ...) are fine.
-        if (method.ReturnType is not INamedTypeSymbol returnType
-            || returnType.Name != "EqualsAssertion")
-        {
-            return;
-        }
-
-        // Determine the type of the source being asserted on. For extension methods,
-        // the `this` argument is the first entry in Arguments (even though method.Parameters excludes it).
-        // Instance.Type is null for extension methods; Arguments[0].Value.Type gives the actual source type.
-        ITypeSymbol? sourceParamType;
-        if (method.IsExtensionMethod)
-        {
-            sourceParamType = invocation.Arguments.Length > 0
-                ? invocation.Arguments[0].Value.Type
-                : null;
-        }
-        else
-        {
-            sourceParamType = invocation.Instance?.Type ?? method.ReceiverType;
-        }
+        // For extension methods, Instance.Type is null; the `this` argument is Arguments[0]
+        // even though method.Parameters excludes it.
+        var sourceParamType = method.IsExtensionMethod
+            ? (invocation.Arguments.Length > 0 ? invocation.Arguments[0].Value.Type : null)
+            : invocation.Instance?.Type ?? method.ReceiverType;
 
         if (sourceParamType is not INamedTypeSymbol sourceType)
         {
@@ -77,25 +74,20 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (!IsCollectionWithoutStructuralEquality(assertedType, context.Compilation))
+        if (!IsCollectionWithoutStructuralEquality(assertedType, ienumerable))
         {
             return;
         }
 
         var syntax = invocation.Syntax;
-        Location reportLocation;
-        if (syntax is Microsoft.CodeAnalysis.CSharp.Syntax.InvocationExpressionSyntax
+        var reportLocation = syntax is InvocationExpressionSyntax
             {
-                Expression: Microsoft.CodeAnalysis.CSharp.Syntax.MemberAccessExpressionSyntax memberAccess,
-            } invocationSyntax)
-        {
-            var span = TextSpan.FromBounds(memberAccess.Name.SpanStart, invocationSyntax.Span.End);
-            reportLocation = Location.Create(syntax.SyntaxTree, span);
-        }
-        else
-        {
-            reportLocation = syntax.GetLocation();
-        }
+                Expression: MemberAccessExpressionSyntax memberAccess,
+            } invocationSyntax
+            ? Location.Create(
+                syntax.SyntaxTree,
+                TextSpan.FromBounds(memberAccess.Name.SpanStart, invocationSyntax.Span.End))
+            : syntax.GetLocation();
 
         context.ReportDiagnostic(
             Diagnostic.Create(Rules.CollectionIsEqualToUsesReferenceEquality, reportLocation)
@@ -104,20 +96,37 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static ITypeSymbol? ExtractAssertionSourceTypeArgument(INamedTypeSymbol sourceType)
     {
-        // Walk the type + its interfaces looking for IAssertionSource<T>.
-        foreach (var iface in sourceType.AllInterfaces.Concat(new[] { sourceType }))
+        if (TryGetAssertionSourceArg(sourceType, out var arg))
         {
-            if (iface.Name == "IAssertionSource"
-                && iface.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core"
-                && iface.TypeArguments.Length == 1)
+            return arg;
+        }
+
+        foreach (var iface in sourceType.AllInterfaces)
+        {
+            if (TryGetAssertionSourceArg(iface, out arg))
             {
-                return iface.TypeArguments[0];
+                return arg;
             }
         }
+
         return null;
     }
 
-    private static bool IsCollectionWithoutStructuralEquality(ITypeSymbol type, Compilation compilation)
+    private static bool TryGetAssertionSourceArg(INamedTypeSymbol type, out ITypeSymbol? arg)
+    {
+        if (type.Name == "IAssertionSource"
+            && type.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core"
+            && type.TypeArguments.Length == 1)
+        {
+            arg = type.TypeArguments[0];
+            return true;
+        }
+
+        arg = null;
+        return false;
+    }
+
+    private static bool IsCollectionWithoutStructuralEquality(ITypeSymbol type, INamedTypeSymbol ienumerable)
     {
         if (type.SpecialType == SpecialType.System_String)
         {
@@ -129,12 +138,6 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             or "System.ReadOnlyMemory<T>"
             or "System.Span<T>"
             or "System.ReadOnlySpan<T>")
-        {
-            return false;
-        }
-
-        var ienumerable = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
-        if (ienumerable is null)
         {
             return false;
         }
