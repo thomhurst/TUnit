@@ -22,4 +22,22 @@ public record WebApplicationTestOptions
     /// </para>
     /// </summary>
     public bool AutoPropagateHttpClientFactory { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SUT's <see cref="OpenTelemetry.Trace.TracerProvider"/>
+    /// should be automatically augmented with the TUnit HTTP activity source, the
+    /// <c>TUnitTestCorrelationProcessor</c>, and ASP.NET Core + HttpClient instrumentation.
+    /// Default is <c>true</c>.
+    /// <para>
+    /// When enabled, test spans emitted inside the SUT are tagged with the ambient
+    /// <c>tunit.test.id</c> baggage so they remain queryable per-test in backends like
+    /// Seq or Jaeger, even when third-party libraries break the parent-chain.
+    /// </para>
+    /// <para>
+    /// Set to <c>false</c> to leave the SUT's OpenTelemetry configuration untouched —
+    /// useful if the SUT configures its own processors and you do not want TUnit's
+    /// defaults layered on top.
+    /// </para>
+    /// </summary>
+    public bool AutoConfigureOpenTelemetry { get; set; } = true;
 }

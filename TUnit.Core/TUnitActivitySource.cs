@@ -12,6 +12,13 @@ public static class TUnitActivitySource
     internal const string SourceName = "TUnit";
     internal const string LifecycleSourceName = "TUnit.Lifecycle";
 
+    /// <summary>
+    /// Activity source emitted by TUnit's ASP.NET Core HTTP propagation handlers.
+    /// Registered automatically on the SUT's <see cref="System.Diagnostics.ActivitySource"/>
+    /// listeners by <c>TestWebApplicationFactory</c>.
+    /// </summary>
+    public const string AspNetCoreHttpSourceName = "TUnit.AspNetCore.Http";
+
     /// <summary>W3C baggage HTTP header name.</summary>
     internal const string BaggageHeader = "baggage";
 

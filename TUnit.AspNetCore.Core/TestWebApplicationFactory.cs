@@ -6,11 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
+using OpenTelemetry.Trace;
 using TUnit.AspNetCore.Extensions;
 using TUnit.AspNetCore.Http;
 using TUnit.AspNetCore.Interception;
 using TUnit.AspNetCore.Logging;
 using TUnit.Core;
+using TUnit.OpenTelemetry;
 
 namespace TUnit.AspNetCore;
 
@@ -49,6 +51,11 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
                     {
                         services.TryAddEnumerable(
                             ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, TUnitHttpClientFilter>());
+                    }
+
+                    if (options.AutoConfigureOpenTelemetry)
+                    {
+                        AddTUnitOpenTelemetry(services);
                     }
                 });
 
@@ -92,6 +99,24 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
             services.AddSingleton<IStartupFilter, PropagatorAlignmentStartupFilter>();
             services.AddCorrelatedTUnitLogging();
         });
+    }
+
+    /// <summary>
+    /// Adds TUnit's default OpenTelemetry tracing configuration to <paramref name="services"/>:
+    /// the <c>TUnit.AspNetCore.Http</c> activity source, the
+    /// <see cref="TUnitTestCorrelationProcessor"/>, and ASP.NET Core + HttpClient instrumentation.
+    /// Safe to call even if the SUT already registers these — OpenTelemetry de-duplicates them.
+    /// Also safe when combined with the <c>TUnit.OpenTelemetry</c> zero-config package: the
+    /// SUT and test-runner <c>TracerProvider</c>s each carry their own processor, but the
+    /// processor's idempotent <c>OnStart</c> guard prevents duplicate <c>tunit.test.id</c> tags.
+    /// </summary>
+    private static void AddTUnitOpenTelemetry(IServiceCollection services)
+    {
+        services.AddOpenTelemetry().WithTracing(tracing => tracing
+            .AddSource(TUnitActivitySource.AspNetCoreHttpSourceName)
+            .AddProcessor(new TUnitTestCorrelationProcessor())
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation());
     }
 
     /// <summary>

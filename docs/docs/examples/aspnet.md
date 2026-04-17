@@ -86,6 +86,7 @@ public class TodoApiTests : TestsBase
 
 - **Client-side tracing**: `CreateClient()` / `CreateDefaultClient()` return an `HttpClient` that propagates `traceparent`, `baggage`, and `X-TUnit-TestId` headers to the SUT.
 - **SUT `IHttpClientFactory` tracing**: Every pipeline built inside the SUT via `AddHttpClient<T>()`, named clients, or typed clients also gets those headers prepended — outbound calls from your app to downstream services correlate with the originating test. Opt out per-test with `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`.
+- **SUT-side OpenTelemetry**: The SUT's `TracerProvider` is augmented with the `TUnit.AspNetCore.Http` activity source, the `TUnitTestCorrelationProcessor` (stamps the `tunit.test.id` baggage item onto every span as a tag), and ASP.NET Core + HttpClient instrumentation. Spans emitted inside the SUT stay queryable per-test in backends like Jaeger or Seq, even when third-party libraries break the parent-chain. Opt out per-test with `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false`.
 - **Correlated logging**: Server-side `ILogger` output is routed to the test that triggered the request.
 - **Hosted-service context hygiene**: `IHostedService.StartAsync` runs under `ExecutionContext.SuppressFlow()` so background work doesn't inherit the first test's `Activity.Current`.
 

@@ -30,6 +30,10 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+    </ItemGroup>
+
     <Import Project="..\TestProject.targets" />
 
 </Project>
