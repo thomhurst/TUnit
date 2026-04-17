@@ -173,7 +173,7 @@ For the receiver to associate incoming spans with the right test, register the S
 ```csharp
 using TUnit.Engine.Reporters.Html;
 
-ActivityCollector.Current?.RegisterExternalTrace(Activity.Current!.TraceId.ToString().ToUpperInvariant());
+ActivityCollector.Current?.RegisterExternalTrace(Activity.Current!.TraceId.ToString());
 ```
 
 Spans arriving on a trace ID that wasn't registered are dropped (protects the report from unrelated traffic on shared runners). Each registered trace is capped at 100 external spans.

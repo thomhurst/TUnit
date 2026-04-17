@@ -295,7 +295,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             SpanId = span.SpanId,
             ParentSpanId = span.ParentSpanId,
             Name = span.Name,
-            SpanType = span.Name,
+            // SpanType classifies TUnit's own spans ("test_case", "test_suite", etc.)
+            // and stays null for external spans — no analogue exists in OTLP.
+            SpanType = null,
             Source = string.IsNullOrEmpty(span.ScopeName) ? span.ResourceName : span.ScopeName,
             Kind = MapSpanKind(span.Kind),
             StartTimeMs = startMs,

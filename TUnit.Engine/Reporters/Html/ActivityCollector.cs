@@ -51,15 +51,18 @@ internal sealed class ActivityCollector : IDisposable
 
     public static ActivityCollector? Current => _current;
 
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
-    // Track external span count per test case (keyed by test case span ID)
-    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new();
-    // Fallback: per-trace cap for external spans whose parent chain is broken
-    // (e.g. Npgsql async pooling where Activity.Parent is null but traceId is correct)
-    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTrace = new();
+    // All trace/span ID dictionaries use OrdinalIgnoreCase because external spans
+    // arrive hex-encoded as uppercase (Convert.ToHexString) while in-process Activity
+    // IDs serialize lowercase. Without case-insensitive keys the two would split into
+    // separate buckets for the same logical trace.
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new(StringComparer.OrdinalIgnoreCase);
+    // Fallback per-trace cap for external spans whose parent chain is broken
+    // (e.g. Npgsql async pooling where Activity.Parent is null but traceId is correct).
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTrace = new(StringComparer.OrdinalIgnoreCase);
     // Known test case span IDs, populated at activity start time so they're available
     // before child spans stop (children stop before parents in Activity ordering).
-    private readonly ConcurrentDictionary<string, byte> _testCaseSpanIds = new();
+    private readonly ConcurrentDictionary<string, byte> _testCaseSpanIds = new(StringComparer.OrdinalIgnoreCase);
     // Fast-path cache of trace IDs that should be collected. Subsumes TraceRegistry lookups
     // so that subsequent activities on the same trace avoid cross-class dictionary checks.
     private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);

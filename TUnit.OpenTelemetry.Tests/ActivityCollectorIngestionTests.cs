@@ -63,6 +63,26 @@ public class ActivityCollectorIngestionTests
     }
 
     [Test]
+    public async Task IngestExternalSpan_TraceIdCaseMismatch_StillCorrelates()
+    {
+        using var collector = new ActivityCollector();
+        collector.Start();
+
+        // Activity.TraceId.ToString() produces lowercase; the OTLP parser produces uppercase.
+        // Registration and ingestion must correlate across that case boundary.
+        var registeredLower = UniqueTraceId().ToLowerInvariant();
+        var ingestedUpper = registeredLower.ToUpperInvariant();
+        collector.RegisterExternalTrace(registeredLower);
+
+        collector.IngestExternalSpan(MakeSpan(ingestedUpper, "ABCD567812345678", "op"));
+
+        var spans = collector.GetAllSpans()
+            .Where(s => string.Equals(s.TraceId, registeredLower, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        await Assert.That(spans.Count).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task IngestExternalSpan_UnknownParent_FallsBackToPerTraceCap()
     {
         using var collector = new ActivityCollector();

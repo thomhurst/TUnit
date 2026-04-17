@@ -35,7 +35,7 @@ public class OtlpReceiverIngestionTests
         using (var activity = source.StartActivity("sut-external-op"))
         {
             await Assert.That(activity).IsNotNull();
-            traceId = activity!.TraceId.ToString().ToUpperInvariant();
+            traceId = activity!.TraceId.ToString();
             collector!.RegisterExternalTrace(traceId);
         }
 

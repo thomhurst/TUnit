@@ -184,7 +184,7 @@ internal static class OtlpTraceParser
                     var traceBytes = reader.ReadBytesAsSpan();
                     if (traceBytes.Length == 16)
                     {
-                        traceId = Convert.ToHexString(traceBytes);
+                        traceId = HexLower(traceBytes);
                     }
 
                     break;
@@ -193,7 +193,7 @@ internal static class OtlpTraceParser
                     var spanBytes = reader.ReadBytesAsSpan();
                     if (spanBytes.Length == 8)
                     {
-                        spanId = Convert.ToHexString(spanBytes);
+                        spanId = HexLower(spanBytes);
                     }
 
                     break;
@@ -202,7 +202,7 @@ internal static class OtlpTraceParser
                     var parentBytes = reader.ReadBytesAsSpan();
                     if (parentBytes.Length == 8)
                     {
-                        parentSpanId = Convert.ToHexString(parentBytes);
+                        parentSpanId = HexLower(parentBytes);
                     }
 
                     break;
@@ -333,7 +333,7 @@ internal static class OtlpTraceParser
                     var traceBytes = reader.ReadBytesAsSpan();
                     if (traceBytes.Length == 16)
                     {
-                        traceId = Convert.ToHexString(traceBytes);
+                        traceId = HexLower(traceBytes);
                     }
 
                     break;
@@ -342,7 +342,7 @@ internal static class OtlpTraceParser
                     var spanBytes = reader.ReadBytesAsSpan();
                     if (spanBytes.Length == 8)
                     {
-                        spanId = Convert.ToHexString(spanBytes);
+                        spanId = HexLower(spanBytes);
                     }
 
                     break;
@@ -413,6 +413,16 @@ internal static class OtlpTraceParser
 
         return (key, value);
     }
+
+    // Lowercase hex matches System.Diagnostics.Activity's TraceId/SpanId formatting,
+    // so external spans flowing into ActivityCollector share dictionary keys with
+    // in-process spans without needing case-insensitive comparers downstream.
+    private static string HexLower(ReadOnlySpan<byte> bytes) =>
+#if NET9_0_OR_GREATER
+        Convert.ToHexStringLower(bytes);
+#else
+        Convert.ToHexString(bytes).ToLowerInvariant();
+#endif
 
     private static string ParseAnyValue(ProtobufReader reader)
     {

@@ -48,8 +48,9 @@ public class OtlpTraceParserTests
         await Assert.That(spans).Count().IsEqualTo(1);
 
         var span = spans[0];
-        await Assert.That(span.TraceId).IsEqualTo(expectedTraceId.ToUpperInvariant());
-        await Assert.That(span.SpanId).IsEqualTo(expectedSpanId.ToUpperInvariant());
+        // Parser emits lowercase to match Activity.TraceId/SpanId serialization.
+        await Assert.That(span.TraceId).IsEqualTo(expectedTraceId);
+        await Assert.That(span.SpanId).IsEqualTo(expectedSpanId);
         await Assert.That(span.Name).IsEqualTo("parse-me");
         await Assert.That(span.Kind).IsEqualTo(2); // SERVER
         await Assert.That(span.ResourceName).IsEqualTo("parser-test-svc");
@@ -86,7 +87,7 @@ public class OtlpTraceParserTests
         var spans = OtlpTraceParser.Parse(request.Body);
 
         var childSpan = spans.Single(s => s.Name == "child");
-        await Assert.That(childSpan.ParentSpanId).IsEqualTo(parentSpanId.ToUpperInvariant());
+        await Assert.That(childSpan.ParentSpanId).IsEqualTo(parentSpanId);
     }
 
     [Test]
