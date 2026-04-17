@@ -58,12 +58,8 @@ public class OtlpReceiverForwardingTests
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
         await receiver.WhenIdle();
 
-        // Upstream never told about the receiver — but we assert nothing arrived there.
-        // Poll briefly to allow any stray forwarding to surface.
-        var timeout = Task.Delay(200);
-        var waited = await Task.WhenAny(upstream.WaitForRequestAsync("/v1/traces", timeoutMs: 200), timeout);
+        await Task.Delay(500);
 
-        // Either the wait timed out (expected) or the request faulted; both prove no forwarding.
-        await Assert.That(waited).IsEqualTo(timeout);
+        await Assert.That(upstream.HasRequest("/v1/traces")).IsFalse();
     }
 }
