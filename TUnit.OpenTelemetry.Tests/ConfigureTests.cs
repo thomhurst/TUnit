@@ -5,6 +5,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.OpenTelemetry.Tests;
 
+[NotInParallel("TUnitOpenTelemetryGlobalState")] // mutates TUnitOpenTelemetry._configurators, which AutoStartTests also touches
 public class ConfigureTests
 {
     [Test]
