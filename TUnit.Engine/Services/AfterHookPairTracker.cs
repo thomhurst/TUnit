@@ -25,6 +25,12 @@ internal sealed class AfterHookPairTracker
     // a test timeout cannot prematurely trigger session-level After hooks.
     private volatile bool _sessionHookRegistered;
 
+    // Per-test callers would otherwise register one CancellationTokenRegistration per test
+    // for every assembly/class — 10k tests across 5 assemblies = 50k redundant registrations.
+    // First registration wins; subsequent calls short-circuit.
+    private readonly ConcurrentHashSet<Assembly> _assemblyHookRegistered = new();
+    private readonly ConcurrentHashSet<Type> _classHookRegistered = new();
+
     // Track cancellation registrations for cleanup
     private readonly ConcurrentBag<CancellationTokenRegistration> _registrations = [];
 
@@ -65,6 +71,11 @@ internal sealed class AfterHookPairTracker
         CancellationToken cancellationToken,
         Func<Assembly, ValueTask<List<Exception>>> afterHookExecutor)
     {
+        if (!_assemblyHookRegistered.Add(assembly))
+        {
+            return;
+        }
+
         var registration = cancellationToken.Register(static state =>
         {
             var (pairTracker, assembly, afterHookExecutor) = ((AfterHookPairTracker, Assembly, Func<Assembly, ValueTask<List<Exception>>>))state!;
@@ -86,6 +97,11 @@ internal sealed class AfterHookPairTracker
         HookExecutor hookExecutor,
         CancellationToken cancellationToken)
     {
+        if (!_classHookRegistered.Add(testClass))
+        {
+            return;
+        }
+
         var registration = cancellationToken.Register(static state =>
         {
             var (pairTracker, testClass, hookExecutor) = ((AfterHookPairTracker, Type, HookExecutor))state!;
