@@ -53,12 +53,7 @@ public class KeyedDataSourceTests
     public async Task SameKey_ReturnsSameInstance()
     {
         var snapshot = AlphaInstances.ToArray();
-        await Assert.That(snapshot.Length).IsGreaterThanOrEqualTo(2);
-
-        var first = snapshot[0];
-        foreach (var instance in snapshot)
-        {
-            await Assert.That(instance).IsSameReferenceAs(first);
-        }
+        await Assert.That(snapshot.Length).IsEqualTo(2);
+        await Assert.That(snapshot[0]).IsSameReferenceAs(snapshot[1]);
     }
 }

@@ -58,8 +58,6 @@ public class OtlpReceiverForwardingTests
         await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
         await receiver.WhenIdle();
 
-        await Task.Delay(500);
-
         await Assert.That(upstream.HasRequest("/v1/traces")).IsFalse();
     }
 }
