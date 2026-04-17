@@ -151,11 +151,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                 }
                 catch
                 {
-                    cleanupExceptions ??= [];
-                    foreach (var e in whenAllTask.Exception!.InnerExceptions)
-                    {
-                        cleanupExceptions.Add(e);
-                    }
+                    (cleanupExceptions ??= []).AddRange(whenAllTask.Exception!.InnerExceptions);
                 }
             }
         }
