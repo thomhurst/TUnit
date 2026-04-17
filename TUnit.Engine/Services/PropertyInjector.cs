@@ -299,8 +299,7 @@ internal sealed class PropertyInjector
         // SetCachedPropertiesOnInstance can use the value directly without re-converting.
         if (testContext != null)
         {
-            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
-                [cacheKey] = resolvedValue;
+            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments()[cacheKey] = resolvedValue;
         }
     }
 
@@ -459,9 +458,7 @@ internal sealed class PropertyInjector
 
         if (resolvedValue != null)
         {
-            // Cache the resolved value
-            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
-                .TryAdd(cacheKey, resolvedValue);
+            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments().TryAdd(cacheKey, resolvedValue);
         }
     }
 
@@ -504,9 +501,7 @@ internal sealed class PropertyInjector
 
         if (resolvedValue != null)
         {
-            // Cache the resolved value
-            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
-                .TryAdd(cacheKey, resolvedValue);
+            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments().TryAdd(cacheKey, resolvedValue);
         }
     }
 

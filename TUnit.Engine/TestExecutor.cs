@@ -393,19 +393,28 @@ internal class TestExecutor
         }
     }
 
-    internal async Task<List<Exception>> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
+    internal async Task<List<Exception>?> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
+
+        if (!flags.ShouldExecuteAfterClass && !flags.ShouldExecuteAfterAssembly)
+        {
+            return null;
+        }
+
+        List<Exception>? exceptions = null;
 
         if (flags.ShouldExecuteAfterClass)
         {
             // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
             var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
-            exceptions.AddRange(classExceptions);
+            if (classExceptions.Count > 0)
+            {
+                (exceptions ??= []).AddRange(classExceptions);
+            }
         }
 
         if (flags.ShouldExecuteAfterAssembly)
@@ -414,7 +423,10 @@ internal class TestExecutor
             var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
                 testAssembly,
                 (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
-            exceptions.AddRange(assemblyExceptions);
+            if (assemblyExceptions.Count > 0)
+            {
+                (exceptions ??= []).AddRange(assemblyExceptions);
+            }
         }
 
         return exceptions;

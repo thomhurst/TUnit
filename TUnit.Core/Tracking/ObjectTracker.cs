@@ -99,23 +99,24 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
     }
 
-    public ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
+    public ValueTask<List<Exception>?> UntrackObjects(TestContext testContext)
     {
         var trackedObjects = testContext.TrackedObjects;
 
         if (CountTrackedObjects(trackedObjects) == 0)
         {
-            return ValueTask.CompletedTask;
+            return new ValueTask<List<Exception>?>((List<Exception>?)null);
         }
 
-        return UntrackObjectsAsync(cleanupExceptions, trackedObjects);
+        return UntrackObjectsAsync(trackedObjects);
     }
 
-    private async ValueTask UntrackObjectsAsync(List<Exception> cleanupExceptions, SortedList<int, HashSet<object>> trackedObjects)
+    private async ValueTask<List<Exception>?> UntrackObjectsAsync(SortedList<int, HashSet<object>> trackedObjects)
     {
         // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
         // This ensures disposal happens in reverse order of initialization (which goes deepest first).
         // Dependents (shallow) are disposed before their dependencies (deep).
+        List<Exception>? cleanupExceptions = null;
         var values = trackedObjects.Values;
 
         for (var i = 0; i < values.Count; i++)
@@ -137,7 +138,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                 }
                 catch (Exception e)
                 {
-                    cleanupExceptions.Add(e);
+                    (cleanupExceptions ??= []).Add(e);
                 }
             }
 
@@ -150,13 +151,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                 }
                 catch
                 {
-                    foreach (var e in whenAllTask.Exception!.InnerExceptions)
-                    {
-                        cleanupExceptions.Add(e);
-                    }
+                    (cleanupExceptions ??= []).AddRange(whenAllTask.Exception!.InnerExceptions);
                 }
             }
         }
+
+        return cleanupExceptions;
     }
 
     /// <summary>

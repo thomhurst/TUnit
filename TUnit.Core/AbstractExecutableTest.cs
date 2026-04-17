@@ -72,14 +72,18 @@ public abstract class AbstractExecutableTest
     {
         State = state;
 
-        // Lazy output building - avoid string allocation when there's no output
-        var output = Context.GetOutput();
-        var errorOutput = Context.GetErrorOutput();
+        // Skip the reader/writer lock + StringBuilder dance entirely when nothing
+        // was ever written — the common passing-test case.
         var combinedOutput = string.Empty;
-
-        if (output.Length > 0 || errorOutput.Length > 0)
+        if (Context.HasCapturedOutput)
         {
-            combinedOutput = string.Concat(output, Environment.NewLine, Environment.NewLine, errorOutput);
+            var output = Context.GetOutput();
+            var errorOutput = Context.GetErrorOutput();
+
+            if (output.Length > 0 || errorOutput.Length > 0)
+            {
+                combinedOutput = string.Concat(output, Environment.NewLine, Environment.NewLine, errorOutput);
+            }
         }
 
         Context.Execution.Result ??= new TestResult
