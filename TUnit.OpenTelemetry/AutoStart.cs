@@ -31,9 +31,18 @@ public static class AutoStart
         }
 
         var force = autostart == "1";
-        if (!force && ProbeSource.HasListeners())
+        if (!force)
         {
-            return;
+            var hasEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") is not null;
+            if (!hasEndpoint && !TUnitOpenTelemetry.HasConfiguration)
+            {
+                return;
+            }
+
+            if (ProbeSource.HasListeners())
+            {
+                return;
+            }
         }
 
         lock (_lock)

@@ -71,6 +71,27 @@ public class AutoStartTests
     }
 
     [Test]
+    public async Task Start_NoEndpointNoConfig_DoesNotBuildProvider()
+    {
+        var endpointOriginal = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+        var autostartOriginal = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
+        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", null);
+        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", null);
+        TUnitOpenTelemetry.ResetForTests();
+        try
+        {
+            AutoStart.StartForTesting(resetFirst: true);
+            await Assert.That(AutoStart.HasProviderForTesting).IsFalse();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", endpointOriginal);
+            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", autostartOriginal);
+            AutoStart.StartForTesting(resetFirst: true);
+        }
+    }
+
+    [Test]
     public async Task Start_WithOptOutEnv_DoesNotBuildProvider()
     {
         var original = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
