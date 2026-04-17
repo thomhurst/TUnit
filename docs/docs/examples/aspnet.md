@@ -2,6 +2,23 @@
 
 TUnit provides first-class support for ASP.NET Core integration testing through the `TUnit.AspNetCore` package. This package enables per-test isolation with shared infrastructure, making it easy to write fast, parallel integration tests.
 
+:::warning Use `TestWebApplicationFactory<T>`, not the vanilla `WebApplicationFactory<T>`
+If you inherit from `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>` directly, you'll lose three things you almost certainly want:
+
+- **Trace correlation** — server-side spans won't link back to the test that triggered them.
+- **Per-test logging** — `ILogger` output from inside your app won't appear under the right test.
+- **Test context** — `TestContext.Current` won't resolve inside request handlers.
+
+`TestWebApplicationFactory<T>` sets all of this up for you. If you can't change the inheritance (e.g. you're migrating from an existing setup), wrap your factory instead:
+
+```csharp
+var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
+var client = traced.CreateClient(); // tracing + logging now wired up
+```
+
+See [Distributed Tracing](/docs/guides/distributed-tracing) for what happens under the hood.
+:::
+
 ## Installation
 
 ```bash
