@@ -289,7 +289,7 @@ using (ExecutionContext.SuppressFlow())
 }
 ```
 
-Around `IHostedService` registrations the same idea applies. (Tracking automation: [#5589](https://github.com/thomhurst/TUnit/issues/5589).)
+For `IHostedService` registrations inside ASP.NET Core integration tests, `TestWebApplicationFactory<T>` does this automatically — every registered hosted service has its `StartAsync` wrapped in `ExecutionContext.SuppressFlow()`, so background tasks it spawns capture a clean context. Override `SuppressHostedServiceExecutionContextFlow` and return `false` to opt out if you intentionally rely on `Activity.Current` flowing into a hosted service.
 
 **Last resort**: run affected tests one at a time with `[NotInParallel]`.
 

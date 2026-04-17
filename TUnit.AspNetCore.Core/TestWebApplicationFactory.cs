@@ -82,6 +82,81 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     }
 
     /// <summary>
+    /// Controls whether every registered <see cref="Microsoft.Extensions.Hosting.IHostedService"/>
+    /// has its <c>StartAsync</c> wrapped in <see cref="ExecutionContext.SuppressFlow"/>.
+    /// <para>
+    /// When enabled (the default), background work spawned inside a hosted service's
+    /// <c>StartAsync</c> captures a clean <see cref="ExecutionContext"/>. Activities
+    /// emitted later on background threads become orphan roots rather than inheriting
+    /// the first test's <see cref="System.Diagnostics.Activity.Current"/>. Without this,
+    /// spans from hosted-service work done during test B are attributed to test A's
+    /// <c>TraceId</c>.
+    /// </para>
+    /// <para>
+    /// Override and return <c>false</c> to preserve ambient context flow into hosted
+    /// services — only needed if the hosted service intentionally relies on
+    /// <c>Activity.Current</c> or other <see cref="System.Threading.AsyncLocal{T}"/>
+    /// values captured at factory-build time.
+    /// </para>
+    /// </summary>
+    protected virtual bool SuppressHostedServiceExecutionContextFlow => true;
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        if (SuppressHostedServiceExecutionContextFlow)
+        {
+            builder.ConfigureServices(DecorateHostedServicesWithFlowSuppression);
+        }
+
+        return base.CreateHost(builder);
+    }
+
+    private static void DecorateHostedServicesWithFlowSuppression(IServiceCollection services)
+    {
+        for (var i = 0; i < services.Count; i++)
+        {
+            var descriptor = services[i];
+
+            if (descriptor.ServiceType != typeof(IHostedService))
+            {
+                continue;
+            }
+
+            services[i] = WrapHostedServiceDescriptor(descriptor);
+        }
+    }
+
+    private static ServiceDescriptor WrapHostedServiceDescriptor(ServiceDescriptor descriptor)
+    {
+        if (descriptor.ImplementationInstance is IHostedService instance)
+        {
+            return new ServiceDescriptor(
+                typeof(IHostedService),
+                _ => new FlowSuppressingHostedService(instance),
+                descriptor.Lifetime);
+        }
+
+        if (descriptor.ImplementationFactory is { } factory)
+        {
+            return new ServiceDescriptor(
+                typeof(IHostedService),
+                sp => new FlowSuppressingHostedService((IHostedService)factory(sp)),
+                descriptor.Lifetime);
+        }
+
+        if (descriptor.ImplementationType is { } implType)
+        {
+            return new ServiceDescriptor(
+                typeof(IHostedService),
+                sp => new FlowSuppressingHostedService(
+                    (IHostedService)ActivatorUtilities.CreateInstance(sp, implType)),
+                descriptor.Lifetime);
+        }
+
+        return descriptor;
+    }
+
+    /// <summary>
     /// Creates an <see cref="HttpClient"/> with <see cref="ActivityPropagationHandler"/> and
     /// <see cref="TUnitTestIdHandler"/> automatically prepended to the handler chain.
     /// This ensures all HTTP requests made through clients created by this factory:
