@@ -16,17 +16,17 @@ These benchmarks were automatically generated on **2026-04-17** from the latest 
 
 Click on any benchmark to view detailed results:
 
-- [AsyncTests](AsyncTests) - Detailed performance analysis
-- [DataDrivenTests](DataDrivenTests) - Detailed performance analysis
-- [MassiveParallelTests](MassiveParallelTests) - Detailed performance analysis
-- [MatrixTests](MatrixTests) - Detailed performance analysis
-- [ScaleTests](ScaleTests) - Detailed performance analysis
-- [SetupTeardownTests](SetupTeardownTests) - Detailed performance analysis
+- [AsyncTests](./AsyncTests.md) - Detailed performance analysis
+- [DataDrivenTests](./DataDrivenTests.md) - Detailed performance analysis
+- [MassiveParallelTests](./MassiveParallelTests.md) - Detailed performance analysis
+- [MatrixTests](./MatrixTests.md) - Detailed performance analysis
+- [ScaleTests](./ScaleTests.md) - Detailed performance analysis
+- [SetupTeardownTests](./SetupTeardownTests.md) - Detailed performance analysis
 
 
 ## 🔨 Build Benchmarks
 
-- [Build Performance](BuildTime) - Compilation time comparison
+- [Build Performance](./BuildTime.md) - Compilation time comparison
 
 
 ---

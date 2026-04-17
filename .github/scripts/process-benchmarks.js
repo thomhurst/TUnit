@@ -371,13 +371,13 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 Click on any benchmark to view detailed results:
 
 ${Object.keys(categories.runtime).map(testClass =>
-  `- [${testClass}](${testClass}) - Detailed performance analysis`
+  `- [${testClass}](./${testClass}.md) - Detailed performance analysis`
 ).join('\n')}
 
 ${Object.keys(categories.build).length > 0 ? `
 ## 🔨 Build Benchmarks
 
-- [Build Performance](BuildTime) - Compilation time comparison
+- [Build Performance](./BuildTime.md) - Compilation time comparison
 ` : ''}
 
 ---

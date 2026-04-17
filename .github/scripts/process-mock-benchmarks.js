@@ -384,7 +384,7 @@ ${libraryTableRows}
 Click on any benchmark to view detailed results:
 
 ${Object.keys(categories).map(category =>
-  `- [${category}](${category}) - ${categoryDescriptions[category] || category}`
+  `- [${category}](./${category}.md) - ${categoryDescriptions[category] || category}`
 ).join('\n')}
 
 ## 📈 What's Measured

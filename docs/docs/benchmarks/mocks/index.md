@@ -29,12 +29,12 @@ These benchmarks compare source-generated, AOT-compatible mocking libraries agai
 
 Click on any benchmark to view detailed results:
 
-- [Callback](Callback) - Callback registration and execution
-- [CombinedWorkflow](CombinedWorkflow) - Full workflow: create → setup → invoke → verify
-- [Invocation](Invocation) - Calling methods on mock objects
-- [MockCreation](MockCreation) - Mock instance creation performance
-- [Setup](Setup) - Mock behavior configuration (returns, matchers)
-- [Verification](Verification) - Verifying mock method calls
+- [Callback](./Callback.md) - Callback registration and execution
+- [CombinedWorkflow](./CombinedWorkflow.md) - Full workflow: create → setup → invoke → verify
+- [Invocation](./Invocation.md) - Calling methods on mock objects
+- [MockCreation](./MockCreation.md) - Mock instance creation performance
+- [Setup](./Setup.md) - Mock behavior configuration (returns, matchers)
+- [Verification](./Verification.md) - Verifying mock method calls
 
 ## 📈 What's Measured
 
