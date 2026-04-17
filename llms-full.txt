@@ -13822,7 +13822,9 @@ Two common causes.
 
 **1. The parent span isn't exported to the same backend.** The test-side `test case` span lives in the test process. If you only export from the SUT, the backend sees a child whose parent it has never seen. Either export the `"TUnit"` source from the test process too, or rely on the `tunit.test.id` tag (above) instead of trace hierarchy.
 
-**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. The two don't speak to each other. Use the same propagator on both sides:
+**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. TUnit auto-aligns `DistributedContextPropagator.Current` to W3C on module load, and `TestWebApplicationFactory<T>` re-applies this for in-process SUTs via an `IStartupFilter` — no manual wiring needed. Set `TUNIT_KEEP_LEGACY_PROPAGATOR=1` to opt out.
+
+For an **out-of-process** SUT that doesn't reference `TUnit.Core`, you still need to align it yourself:
 
 ```csharp
 using OpenTelemetry;
@@ -18208,7 +18210,11 @@ For cross-process correlation (your test calling your SUT), use `tunit.test.id`.
 
 ## When tracing across processes
 
-If your test process and your SUT are different processes (or you're using `WebApplicationFactory` heavily), make sure both sides agree on the propagator:
+Cross-process baggage propagation (e.g. `tunit.test.id` reaching your SUT) depends on both sides using the W3C `baggage` header rather than .NET's default `Correlation-Context`.
+
+TUnit handles this automatically: a module initializer in `TUnit.Core` replaces the default `DistributedContextPropagator.LegacyPropagator` with `DistributedContextPropagator.CreateW3CPropagator()`. Any custom propagator you set yourself is left alone. If you want to retain the legacy behavior, set `TUNIT_KEEP_LEGACY_PROPAGATOR=1`.
+
+For the SUT side, if it shares the test process (e.g. `TestWebApplicationFactory<T>`), alignment flows automatically. For out-of-process SUTs that don't reference `TUnit.Core`, align the propagator yourself on startup — either match `DistributedContextPropagator.Current` or, if you use the OpenTelemetry SDK:
 
 ```csharp
 using OpenTelemetry;
@@ -18220,8 +18226,6 @@ Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(
     new BaggagePropagator(),
 ]));
 ```
-
-Without this, .NET's default propagator emits `Correlation-Context`, but the OpenTelemetry SDK only reads W3C `baggage`. The mismatch silently drops baggage and you lose `tunit.test.id` on the SUT side.
 
 ## Limitations
 
