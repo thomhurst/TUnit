@@ -20,6 +20,12 @@
       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+  </ItemGroup>
+
   <!-- Framework-specific package versions for Microsoft.AspNetCore.Mvc.Testing -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.6" VersionOverride="8.0.0" />

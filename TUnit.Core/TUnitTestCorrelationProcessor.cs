@@ -1,3 +1,5 @@
+#if NET
+
 using System.Diagnostics;
 using OpenTelemetry;
 using TUnit.Core;
@@ -25,3 +27,5 @@ public sealed class TUnitTestCorrelationProcessor : BaseProcessor<Activity>
         }
     }
 }
+
+#endif

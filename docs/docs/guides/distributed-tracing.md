@@ -150,6 +150,12 @@ protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 }
 ```
 
+### SUT-side OpenTelemetry wiring
+
+`TestWebApplicationFactory<T>` also augments the SUT's `TracerProvider` automatically — the `TUnit.AspNetCore.Http` activity source, the `TUnitTestCorrelationProcessor`, and ASP.NET Core + HttpClient instrumentation are layered on top of whatever `AddOpenTelemetry().WithTracing(...)` wiring the SUT already has. That means spans emitted inside the SUT stay queryable per-test (`tunit.test.id` tag) even when third-party libraries break the parent chain.
+
+Opt out per-test with `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false` when the SUT owns its own processors and you don't want TUnit's defaults layered on top.
+
 ### Raw `HttpClient`
 
 `new HttpClient()` can't be intercepted. Either route through `IHttpClientFactory` or set the `traceparent` header manually.

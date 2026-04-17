@@ -66,6 +66,9 @@
         <PackageReference Include="System.Text.Json" />
         <PackageReference Include="System.Collections.Immutable" />
     </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+        <PackageReference Include="OpenTelemetry" />
+    </ItemGroup>
     <ItemGroup>
       <Compile Remove="IClassDataSourceAttribute.cs" />
       <Compile Remove="Interfaces\INestedClassDataSourceInitializer.cs" />
