@@ -91,7 +91,8 @@ public class UseTestWebApplicationFactoryCodeFixProvider : CodeFixProvider
 
     private static CompilationUnitSyntax AddUsingIfMissing(CompilationUnitSyntax compilationUnit, string namespaceName)
     {
-        if (compilationUnit.Usings.Any(u => u.Name?.ToString() == namespaceName))
+        if (ContainsUsing(compilationUnit.Usings, namespaceName) ||
+            compilationUnit.Members.Any(m => ContainsUsingInNamespace(m, namespaceName)))
         {
             return compilationUnit;
         }
@@ -100,5 +101,28 @@ public class UseTestWebApplicationFactoryCodeFixProvider : CodeFixProvider
             .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
 
         return compilationUnit.AddUsings(newUsing);
+    }
+
+    private static bool ContainsUsingInNamespace(MemberDeclarationSyntax member, string namespaceName) => member switch
+    {
+        BaseNamespaceDeclarationSyntax ns =>
+            ContainsUsing(ns.Usings, namespaceName) ||
+            ns.Members.Any(m => ContainsUsingInNamespace(m, namespaceName)),
+        _ => false,
+    };
+
+    private static bool ContainsUsing(SyntaxList<UsingDirectiveSyntax> usings, string namespaceName)
+    {
+        foreach (var directive in usings)
+        {
+            if (directive.Alias is null &&
+                directive.StaticKeyword.IsKind(SyntaxKind.None) &&
+                directive.Name?.ToString() == namespaceName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
