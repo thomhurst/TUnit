@@ -69,4 +69,22 @@ public class AutoStartTests
             AutoStart.StartForTesting(resetFirst: true);
         }
     }
+
+    [Test]
+    public async Task Start_WithOptOutEnv_DoesNotBuildProvider()
+    {
+        var original = Environment.GetEnvironmentVariable("TUNIT_OTEL_AUTOSTART");
+        Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", "0");
+        try
+        {
+            AutoStart.StartForTesting(resetFirst: true);
+            await Assert.That(AutoStart.HasProviderForTesting).IsFalse();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TUNIT_OTEL_AUTOSTART", original);
+            // Re-arm for subsequent tests in the runner
+            AutoStart.StartForTesting(resetFirst: true);
+        }
+    }
 }
