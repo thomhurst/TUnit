@@ -9641,12 +9641,12 @@ These benchmarks were automatically generated on **2026-04-17** from the latest 
 
 Click on any benchmark to view detailed results:
 
-- [AsyncTests](./AsyncTests.md) - Detailed performance analysis
-- [DataDrivenTests](./DataDrivenTests.md) - Detailed performance analysis
-- [MassiveParallelTests](./MassiveParallelTests.md) - Detailed performance analysis
-- [MatrixTests](./MatrixTests.md) - Detailed performance analysis
-- [ScaleTests](./ScaleTests.md) - Detailed performance analysis
-- [SetupTeardownTests](./SetupTeardownTests.md) - Detailed performance analysis
+- [AsyncTests](./AsyncTests.md) — Realistic async/await patterns with I/O simulation
+- [DataDrivenTests](./DataDrivenTests.md) — Parameterized tests with multiple data sources
+- [MassiveParallelTests](./MassiveParallelTests.md) — Parallel execution stress tests
+- [MatrixTests](./MatrixTests.md) — Combinatorial test generation and execution
+- [ScaleTests](./ScaleTests.md) — Large test suites (150+ tests) measuring scalability
+- [SetupTeardownTests](./SetupTeardownTests.md) — Expensive test fixtures with setup/teardown overhead
 
 ## 🔨 Build Benchmarks
 
