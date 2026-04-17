@@ -11596,6 +11596,23 @@ They can be used together — for example, using Aspire to manage infrastructure
 
 TUnit provides first-class support for ASP.NET Core integration testing through the `TUnit.AspNetCore` package. This package enables per-test isolation with shared infrastructure, making it easy to write fast, parallel integration tests.
 
+:::warning Use `TestWebApplicationFactory<T>`, not the vanilla `WebApplicationFactory<T>`
+If you inherit from `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>` directly, you'll lose three things you almost certainly want:
+
+- **Trace correlation** — server-side spans won't link back to the test that triggered them.
+- **Per-test logging** — `ILogger` output from inside your app won't appear under the right test.
+- **Test context** — `TestContext.Current` won't resolve inside request handlers.
+
+`TestWebApplicationFactory<T>` sets all of this up for you. If you can't change the inheritance (e.g. you're migrating from an existing setup), wrap your factory instead:
+
+```csharp
+var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
+var client = traced.CreateClient(); // tracing + logging now wired up
+```
+
+See [Distributed Tracing](/docs/guides/distributed-tracing) for what happens under the hood.
+:::
+
 ## Installation
 
 ```bash
@@ -13740,6 +13757,112 @@ public async Task Api_Returns_Expected_Result()
 ```
 
 For scenarios without OpenTelemetry, see [Cross-Thread Output Correlation](/docs/extending/logging#cross-thread-output-correlation) for the manual `TestContext.MakeCurrent()` approach.
+
+## Troubleshooting
+
+Find your symptom below.
+
+### "I see one trace per test instead of one trace per class"
+
+That's expected. Each test gets its own trace ID so spans, logs, and exports stay tied to a single test run. To group across tests, search by tag in your backend:
+
+| Want to see... | Search for |
+|----------------|-----------|
+| One specific test run | `tunit.test.id = "<id>"` |
+| All retries of one test | `tunit.test.node_uid = "<uid>"` |
+| Everything from one test session | `tunit.session.id = "<id>"` |
+| All tests in a class | `tunit.test.class = "MyNamespace.MyTests"` |
+
+In Seq use `tunit.session.id = '<id>'`. In Jaeger or Tempo use the tag filter box.
+
+### "Spans from test A are showing up under test B"
+
+Usually a background worker (a hosted service, a message broker like DotPulsar, or a connection pool) started during one test and kept running. Anything it produces inherits whichever test was current when it started.
+
+**Quickest fix**: tag every span with the current test's ID so you can still filter even when the parent is wrong. Add this processor to your OpenTelemetry setup:
+
+```csharp
+using System.Diagnostics;
+using OpenTelemetry;
+
+public sealed class TUnitTagProcessor : BaseProcessor<Activity>
+{
+    public override void OnStart(Activity activity)
+    {
+        var testId = Activity.Current?.GetBaggageItem("tunit.test.id");
+        if (testId is not null)
+        {
+            activity.SetTag("tunit.test.id", testId);
+        }
+    }
+}
+
+// then in your tracer builder:
+.AddProcessor(new TUnitTagProcessor())
+```
+
+Now you can filter by `tunit.test.id` in your backend even when the trace hierarchy is wrong. (Tracking automation: [#5591](https://github.com/thomhurst/TUnit/issues/5591).)
+
+**Better fix** if you control the worker: stop it from capturing the test's context in the first place.
+
+```csharp
+using (ExecutionContext.SuppressFlow())
+{
+    _ = Task.Run(BackgroundLoopAsync);
+}
+```
+
+Around `IHostedService` registrations the same idea applies. (Tracking automation: [#5589](https://github.com/thomhurst/TUnit/issues/5589).)
+
+**Last resort**: run affected tests one at a time with `[NotInParallel]`.
+
+### "My SUT spans show no parent / appear orphaned"
+
+Two common causes.
+
+**1. The parent span isn't exported to the same backend.** The test-side `test case` span lives in the test process. If you only export from the SUT, the backend sees a child whose parent it has never seen. Either export the `"TUnit"` source from the test process too, or rely on the `tunit.test.id` tag (above) instead of trace hierarchy.
+
+**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. The two don't speak to each other. Use the same propagator on both sides:
+
+```csharp
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+
+Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(
+[
+    new TraceContextPropagator(),
+    new BaggagePropagator(),
+]));
+```
+
+### "My HTTP calls don't carry the test trace"
+
+If you inherit from `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>` directly, the `HttpClient` it returns skips .NET's normal HTTP tracing. No `traceparent` header is sent, so the server starts a fresh trace.
+
+Switch your factory to `TestWebApplicationFactory<T>`:
+
+```csharp
+public class MyFactory : TestWebApplicationFactory<Program> { }
+```
+
+Or, if you can't change the inheritance, wrap your existing factory:
+
+```csharp
+var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
+var client = traced.CreateClient();
+```
+
+Both attach the trace propagation handler automatically. See [ASP.NET Core integration](./aspnet.md) for full setup.
+
+For HTTP calls the SUT itself makes through `IHttpClientFactory`, today you have to add the handler manually (`.AddHttpMessageHandler<ActivityPropagationHandler>()`). Tracking automation: [#5590](https://github.com/thomhurst/TUnit/issues/5590).
+
+### "No spans show up in my exporter at all"
+
+Check in order:
+
+1. Did you register the listener in `[Before(TestDiscovery)]`? `[Before(Test)]` or `[Before(Class)]` is too late.
+2. Did you call `.AddSource("TUnit")` (and `"TUnit.Lifecycle"` if you want runner spans)? Each source has to be added explicitly.
+3. Did you dispose the `TracerProvider` in `[After(TestSession)]`? Without disposal, buffered spans never get flushed.
 
 ## HTML Report Integration
 
@@ -17987,6 +18110,173 @@ For shared resources, prefer `[ClassDataSource<>]` over class/assembly hooks —
 
 ---
 
+## Distributed Tracing
+
+
+This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Tempo, or the Aspire dashboard. If you just want a working setup, start with [OpenTelemetry Tracing](/docs/examples/opentelemetry). If you're hitting problems, jump straight to its [Troubleshooting](/docs/examples/opentelemetry#troubleshooting) section.
+
+:::note
+Distributed tracing requires .NET 8 or later.
+:::
+
+## What TUnit emits
+
+Every test produces:
+
+- A **test case** span (the root of the test's trace) — gets a fresh trace ID.
+- A **test body** span underneath it.
+- Any spans your code or libraries (HttpClient, ASP.NET Core, EF Core, etc.) create — automatically nested under the test body.
+
+Separately, TUnit also emits **lifecycle spans** for the run as a whole (test session, assembly, suite). These are on a different source so backends don't mix them with per-test data.
+
+```text
+test case (one per test, own trace ID)
+  └── test body
+        └── HttpClient / EF Core / your code
+```
+
+```text
+test session
+  ├── test discovery
+  └── test assembly
+        └── test suite (one per class)
+              └── shared setup / teardown / hooks
+```
+
+The two sources you usually subscribe to:
+
+| Source name | What's in it |
+|-------------|--------------|
+| `TUnit` | The test case + test body spans |
+| `TUnit.Lifecycle` | Session, discovery, assembly, suite, shared setup/teardown |
+
+## Backend setup
+
+The general setup in [OpenTelemetry Tracing](/docs/examples/opentelemetry#setup) works everywhere. Backend-specific notes follow.
+
+### Seq
+
+Point the OTLP exporter at Seq's ingestion endpoint:
+
+```csharp
+.AddOtlpExporter(opts =>
+{
+    opts.Endpoint = new Uri("http://localhost:5341/ingest/otlp/v1/traces");
+    opts.Protocol = OtlpExportProtocol.HttpProtobuf;
+    opts.Headers = "X-Seq-ApiKey=your-key";
+})
+```
+
+Useful Seq queries:
+
+```text
+tunit.session.id = '<id>'                  -- one full test run
+tunit.test.class = 'MyTests'               -- one class
+tunit.test.id = '<id>'                     -- one specific test invocation
+test.case.result.status = 'fail'           -- only failures
+```
+
+### Jaeger or Tempo
+
+```csharp
+.AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
+```
+
+Jaeger groups by trace ID, so each test appears as a separate trace. Use the tag search box (`tunit.session.id="<id>"`) to find all traces from one run.
+
+### Aspire dashboard
+
+Aspire is wired up automatically through `TUnit.Aspire`. See [Aspire integration](/docs/examples/aspire). The dashboard understands the link between `test case` and `test suite` spans, so it groups them naturally.
+
+### Other backends (Honeycomb, Datadog, etc.)
+
+Use the OTLP exporter pointed at your vendor endpoint and set `OTEL_EXPORTER_OTLP_HEADERS` for auth. No TUnit-specific config needed.
+
+## How to find spans for a test
+
+Every TUnit-emitted span carries these tags. Use them in your backend's search UI:
+
+| Tag | What it identifies |
+|-----|--------------------|
+| `tunit.test.id` | One specific test invocation (one retry attempt) |
+| `tunit.test.node_uid` | All retry attempts of the same logical test |
+| `tunit.session.id` | One whole test run |
+| `tunit.test.class` | All tests in a class |
+| `tunit.assembly.name` | All tests in an assembly |
+
+For cross-process correlation (your test calling your SUT), use `tunit.test.id`. It's the most reliable — see [Limitations](#limitations) below for why trace IDs alone aren't always enough.
+
+## When tracing across processes
+
+If your test process and your SUT are different processes (or you're using `WebApplicationFactory` heavily), make sure both sides agree on the propagator:
+
+```csharp
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+
+Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(
+[
+    new TraceContextPropagator(),
+    new BaggagePropagator(),
+]));
+```
+
+Without this, .NET's default propagator emits `Correlation-Context`, but the OpenTelemetry SDK only reads W3C `baggage`. The mismatch silently drops baggage and you lose `tunit.test.id` on the SUT side.
+
+## Limitations
+
+### Static `ActivitySource` in third-party libraries
+
+Some libraries (message brokers like DotPulsar, EF providers, connection pools) hold a `static` `ActivitySource` and emit spans from background threads. Those threads may have captured the wrong test's context, so the spans end up under the wrong trace.
+
+**You can't fix the parent chain after the fact.** What works:
+
+- Add the [`TUnitTagProcessor`](/docs/examples/opentelemetry#spans-from-test-a-are-showing-up-under-test-b) so spans always carry `tunit.test.id` even when the trace ID is wrong, then filter by tag.
+- Suppress `ExecutionContext` flow when starting hosted services so they capture a clean context — see the same troubleshooting section.
+
+### `WebApplicationFactory` without TUnit's wrapper
+
+The vanilla `WebApplicationFactory<T>` returns an `HttpClient` that skips .NET's HTTP tracing. No `traceparent` is injected and the server starts a fresh trace.
+
+Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `TracedWebApplicationFactory<T>`.
+
+### `IHttpClientFactory` clients in the SUT
+
+Outbound HTTP calls the SUT itself makes (e.g. to a downstream service) are not auto-instrumented yet. Add the handler manually:
+
+```csharp
+services.AddHttpClient<IDownstreamApi, DownstreamApi>()
+    .AddHttpMessageHandler<ActivityPropagationHandler>();
+```
+
+Tracking automation: [#5590](https://github.com/thomhurst/TUnit/issues/5590).
+
+### Raw `HttpClient`
+
+`new HttpClient()` can't be intercepted. Either route through `IHttpClientFactory` or set the `traceparent` header manually.
+
+## HTML report vs OpenTelemetry backends
+
+TUnit's HTML report and a backend like Seq render the same data differently:
+
+| | HTML report | OpenTelemetry backend |
+|--|-------------|------------------------|
+| Hierarchy | Folds each test under its class using span links | Each test is a separate trace |
+| Filtering | Built-in UI controls | Backend query language |
+| Cross-service spans | Only what the engine sees in-process | Everything every exporter sends in |
+| Persistence | One file per run | Long-term, queryable across runs |
+
+Use the HTML report for debugging a single run. Use a backend for run-over-run analysis and cross-service correlation.
+
+## Related pages
+
+- [OpenTelemetry Tracing](/docs/examples/opentelemetry) — first-time setup, full attribute reference, troubleshooting.
+- [ASP.NET Core Integration Testing](/docs/examples/aspnet) — `TestWebApplicationFactory<T>` setup.
+- [HTML Test Report — Distributed Tracing](/docs/guides/html-report#distributed-tracing) — how the HTML report renders the data.
+- [Aspire integration](/docs/examples/aspire) — Aspire dashboard and OTLP receiver.
+
+---
+
 ## HTML Test Report
 
 
@@ -18113,6 +18403,10 @@ public async Task GetUsers_ReturnsOk()
 ```
 
 The trace timeline for this test will show the HttpClient request span, ASP.NET Core hosting span, and any middleware or database spans — all nested under the test's root span.
+
+:::note Same data, different views
+The HTML report groups each test under its class. Backends like Seq, Jaeger, and the Aspire dashboard show every test as its own trace — that's by design. See [Distributed Tracing](./distributed-tracing.md#html-report-vs-opentelemetry-backends) for why, and how to group spans across tests in your backend.
+:::
 
 ### Linking External Traces
 

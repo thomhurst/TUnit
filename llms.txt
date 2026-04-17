@@ -80,6 +80,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Running your tests](https://tunit.dev/docs/getting-started/running-your-tests): As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your te...
 - [Writing your first test](https://tunit.dev/docs/getting-started/writing-your-first-test): Here's a complete TUnit test class with all necessary using statements:
 - [Tips & Pitfalls](https://tunit.dev/docs/guides/best-practices): TUnit-specific tips to avoid common mistakes.
+- [Distributed Tracing](https://tunit.dev/docs/guides/distributed-tracing): This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Tempo, or the Aspire dashboard. If you just want a working setup, sta...
 - [HTML Test Report](https://tunit.dev/docs/guides/html-report): TUnit automatically generates a rich HTML test report after every test run. No configuration is needed — the report is always on by default.
 - [Performance Best Practices](https://tunit.dev/docs/guides/performance): This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.
 - [Philosophy](https://tunit.dev/docs/guides/philosophy): TUnit does some things differently from other .NET testing frameworks. This page explains the thinking behind those choices.
