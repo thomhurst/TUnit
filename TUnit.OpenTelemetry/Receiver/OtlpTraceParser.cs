@@ -34,6 +34,11 @@ internal readonly record struct OtlpSpanLink(
 /// Extracts only the fields needed to forward spans into TUnit's HTML report.
 /// Uses the same hand-rolled <see cref="ProtobufReader"/> as <see cref="OtlpLogParser"/> —
 /// no external protobuf dependency.
+///
+/// Field numbers below are from the OTLP proto definitions:
+///   ExportTraceServiceRequest: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/collector/trace/v1/trace_service.proto
+///   ResourceSpans/ScopeSpans/Span/Status/Event/Link: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto
+///   Resource/KeyValue/AnyValue: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/common/v1/common.proto
 /// </summary>
 internal static class OtlpTraceParser
 {
@@ -65,6 +70,7 @@ internal static class OtlpTraceParser
 
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
+            // ResourceSpans: 1 = resource, 2 = scope_spans
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
             {
                 var embedded = reader.ReadEmbeddedMessage();
@@ -86,6 +92,7 @@ internal static class OtlpTraceParser
     {
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
+            // Resource: 1 = attributes (repeated KeyValue)
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
             {
                 var embedded = reader.ReadEmbeddedMessage();
@@ -113,6 +120,7 @@ internal static class OtlpTraceParser
 
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
+            // ScopeSpans: 1 = scope (InstrumentationScope), 2 = spans
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
             {
                 var embedded = reader.ReadEmbeddedMessage();
@@ -138,6 +146,7 @@ internal static class OtlpTraceParser
     {
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
+            // InstrumentationScope: 1 = name
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
             {
                 return reader.ReadString();
@@ -164,6 +173,9 @@ internal static class OtlpTraceParser
         List<OtlpSpanEvent>? events = null;
         List<OtlpSpanLink>? links = null;
 
+        // Span fields: 1=trace_id, 2=span_id, 4=parent_span_id, 5=name, 6=kind,
+        // 7=start_time_unix_nano, 8=end_time_unix_nano, 9=attributes, 11=events,
+        // 13=links, 15=status. (3=trace_state, 10/12/14=dropped counts — skipped.)
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             switch (fieldNumber)
@@ -274,6 +286,7 @@ internal static class OtlpTraceParser
         var name = "";
         List<KeyValuePair<string, string>>? attributes = null;
 
+        // Span.Event: 1 = time_unix_nano, 2 = name, 3 = attributes
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             switch (fieldNumber)
@@ -311,6 +324,7 @@ internal static class OtlpTraceParser
         var traceId = "";
         var spanId = "";
 
+        // Span.Link: 1 = trace_id, 2 = span_id
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             switch (fieldNumber)
@@ -352,6 +366,7 @@ internal static class OtlpTraceParser
         var code = 0;
         var message = "";
 
+        // Status: 2 = message, 3 = code. (Field 1 = deprecated.)
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             switch (fieldNumber)
@@ -378,6 +393,7 @@ internal static class OtlpTraceParser
         var key = "";
         var value = "";
 
+        // KeyValue: 1 = key, 2 = value (AnyValue)
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
@@ -400,6 +416,7 @@ internal static class OtlpTraceParser
 
     private static string ParseAnyValue(ProtobufReader reader)
     {
+        // AnyValue (oneof value): 1=string, 2=bool, 3=int, 4=double. (5=array, 6=kvlist, 7=bytes — not rendered.)
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             switch (fieldNumber)

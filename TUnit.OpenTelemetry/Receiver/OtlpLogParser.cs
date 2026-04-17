@@ -24,6 +24,11 @@ internal readonly record struct OtlpLogRecord(
 /// Minimal parser for OTLP ExportLogsServiceRequest protobuf messages.
 /// Extracts only the fields needed for test correlation (TraceId, severity, body)
 /// without requiring any external protobuf library.
+///
+/// Field numbers below are from the OTLP proto definitions:
+///   ExportLogsServiceRequest: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/collector/logs/v1/logs_service.proto
+///   ResourceLogs/ScopeLogs/LogRecord: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/logs/v1/logs.proto
+///   Resource/KeyValue/AnyValue: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/common/v1/common.proto
 /// </summary>
 internal static class OtlpLogParser
 {

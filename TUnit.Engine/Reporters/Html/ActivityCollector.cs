@@ -10,10 +10,38 @@ internal sealed class ActivityCollector : IDisposable
     // Cap external (non-TUnit) spans per test to keep the report manageable.
     // TUnit's own spans are always captured regardless of caps.
     // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
-    private const int MaxExternalSpansPerTest = 100;
+    // Default overridable via TUNIT_OTEL_MAX_EXTERNAL_SPANS for users with busy SUTs.
+    private const int DefaultMaxExternalSpans = 100;
+    private static readonly int MaxExternalSpansPerTest = ResolveExternalSpanCap();
     // Fallback cap applied per trace when the test case association cannot be determined
     // (e.g. broken Activity.Parent chains from async connection pooling).
-    private const int MaxExternalSpansPerTrace = 100;
+    private static readonly int MaxExternalSpansPerTrace = MaxExternalSpansPerTest;
+
+    // Emits a one-time warning when the cap is first hit, so users can discover the override.
+    private static int _capWarningEmitted;
+
+    private static int ResolveExternalSpanCap()
+    {
+        var raw = Environment.GetEnvironmentVariable("TUNIT_OTEL_MAX_EXTERNAL_SPANS");
+        if (!string.IsNullOrEmpty(raw)
+            && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
+            && parsed > 0)
+        {
+            return parsed;
+        }
+
+        return DefaultMaxExternalSpans;
+    }
+
+    private static void WarnCapHitOnce()
+    {
+        if (Interlocked.Exchange(ref _capWarningEmitted, 1) == 0)
+        {
+            Console.Error.WriteLine(
+                $"[TUnit] External span cap of {MaxExternalSpansPerTest} reached; subsequent spans will be dropped. " +
+                "Set TUNIT_OTEL_MAX_EXTERNAL_SPANS to raise the limit.");
+        }
+    }
 
     // Process-wide pointer to the currently-running collector, used by the OTLP receiver
     // (in TUnit.OpenTelemetry) to feed external spans without an explicit wiring step.
@@ -155,12 +183,14 @@ internal sealed class ActivityCollector : IDisposable
         {
             if (_externalSpanCountsByTest.TryGetValue(parentSpanId, out var existing) && existing >= MaxExternalSpansPerTest)
             {
+                WarnCapHitOnce();
                 return;
             }
 
             var count = _externalSpanCountsByTest.AddOrUpdate(parentSpanId, 1, static (_, c) => c + 1);
             if (count > MaxExternalSpansPerTest)
             {
+                WarnCapHitOnce();
                 return;
             }
         }
@@ -168,12 +198,14 @@ internal sealed class ActivityCollector : IDisposable
         {
             if (_externalSpanCountsByTrace.TryGetValue(span.TraceId, out var existing) && existing >= MaxExternalSpansPerTrace)
             {
+                WarnCapHitOnce();
                 return;
             }
 
             var count = _externalSpanCountsByTrace.AddOrUpdate(span.TraceId, 1, static (_, c) => c + 1);
             if (count > MaxExternalSpansPerTrace)
             {
+                WarnCapHitOnce();
                 return;
             }
         }
@@ -324,6 +356,7 @@ internal sealed class ActivityCollector : IDisposable
                 var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
                 if (count > MaxExternalSpansPerTest)
                 {
+                    WarnCapHitOnce();
                     return;
                 }
             }
@@ -334,6 +367,7 @@ internal sealed class ActivityCollector : IDisposable
                 var count = _externalSpanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
                 if (count > MaxExternalSpansPerTrace)
                 {
+                    WarnCapHitOnce();
                     return;
                 }
             }
