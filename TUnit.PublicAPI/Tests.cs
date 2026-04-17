@@ -19,6 +19,12 @@ public partial class Tests
     public Task Playwright_Library_Has_No_API_Changes()
         => VerifyPublicApi(typeof(Playwright.PageTest).Assembly);
 
+#if NET
+    [Test]
+    public Task OpenTelemetry_Library_Has_No_API_Changes()
+        => VerifyPublicApi(typeof(TUnit.OpenTelemetry.TUnitOpenTelemetry).Assembly);
+#endif
+
     private async Task VerifyPublicApi(Assembly assembly)
     {
         var publicApi = assembly.GeneratePublicApi(new ApiGeneratorOptions
