@@ -11680,6 +11680,7 @@ public class TodoApiTests : TestsBase
 
 - **Client-side tracing**: `CreateClient()` / `CreateDefaultClient()` return an `HttpClient` that propagates `traceparent`, `baggage`, and `X-TUnit-TestId` headers to the SUT.
 - **SUT `IHttpClientFactory` tracing**: Every pipeline built inside the SUT via `AddHttpClient<T>()`, named clients, or typed clients also gets those headers prepended — outbound calls from your app to downstream services correlate with the originating test. Opt out per-test with `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`.
+- **SUT-side OpenTelemetry**: The SUT's `TracerProvider` is augmented with the `TUnit.AspNetCore.Http` activity source, the `TUnitTestCorrelationProcessor` (stamps the `tunit.test.id` baggage item onto every span as a tag), and ASP.NET Core + HttpClient instrumentation. Spans emitted inside the SUT stay queryable per-test in backends like Jaeger or Seq, even when third-party libraries break the parent-chain. Opt out per-test with `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false`.
 - **Correlated logging**: Server-side `ILogger` output is routed to the test that triggered the request.
 - **Hosted-service context hygiene**: `IHostedService.StartAsync` runs under `ExecutionContext.SuppressFlow()` so background work doesn't inherit the first test's `Activity.Current`.
 
@@ -13790,8 +13791,15 @@ dotnet add package OpenTelemetry.Exporter.Zipkin
 If you use `TestWebApplicationFactory` or `TracedWebApplicationFactory`, outgoing requests
 automatically propagate the current test trace via W3C `traceparent` and `baggage` headers.
 
-Add `"TUnit.AspNetCore.Http"` as a source only if you also want TUnit's synthetic client spans
-to appear in your exporter. Header propagation works either way.
+The factory also augments the SUT's `TracerProvider` automatically — no manual `services.AddOpenTelemetry().WithTracing(...)` wiring is needed for the basics:
+
+- Registers the `TUnit.AspNetCore.Http` activity source.
+- Adds the `TUnitTestCorrelationProcessor` so spans from libraries with broken parent chains are still tagged with `tunit.test.id`.
+- Adds ASP.NET Core and HttpClient instrumentation.
+
+Your own `WithTracing` callback on the SUT is preserved; TUnit's defaults are layered on top. If you configure your own exporter (OTLP, Jaeger, Zipkin, in-memory), test spans flow straight through it.
+
+Set `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false` per-test to opt out — useful if the SUT owns its own processors and you don't want TUnit's defaults layered on top.
 
 ## Test Context Correlation via Activity Baggage
 
@@ -18324,6 +18332,12 @@ protected override void ConfigureTestOptions(WebApplicationTestOptions options)
     options.AutoPropagateHttpClientFactory = false;
 }
 ```
+
+### SUT-side OpenTelemetry wiring
+
+`TestWebApplicationFactory<T>` also augments the SUT's `TracerProvider` automatically — the `TUnit.AspNetCore.Http` activity source, the `TUnitTestCorrelationProcessor`, and ASP.NET Core + HttpClient instrumentation are layered on top of whatever `AddOpenTelemetry().WithTracing(...)` wiring the SUT already has. That means spans emitted inside the SUT stay queryable per-test (`tunit.test.id` tag) even when third-party libraries break the parent chain.
+
+Opt out per-test with `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false` when the SUT owns its own processors and you don't want TUnit's defaults layered on top.
 
 ### Raw `HttpClient`
 
