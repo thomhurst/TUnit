@@ -1330,6 +1330,7 @@ namespace
     }
     public static class TUnitActivitySource
     {
+        public const string AspNetCoreHttpSourceName = ".Http";
         public const string TagTestId = ".id";
     }
     public class TUnitAttribute :  { }
