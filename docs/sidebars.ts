@@ -177,6 +177,7 @@ const sidebars: SidebarsConfig = {
         'examples/complex-test-infrastructure',
         'examples/fscheck',
         'examples/opentelemetry',
+        'guides/distributed-tracing',
         'examples/filebased-csharp',
         'examples/fsharp-interactive',
         'examples/tunit-ci-pipeline',

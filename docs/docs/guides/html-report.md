@@ -128,6 +128,10 @@ public async Task GetUsers_ReturnsOk()
 
 The trace timeline for this test will show the HttpClient request span, ASP.NET Core hosting span, and any middleware or database spans — all nested under the test's root span.
 
+:::note Same data, different views
+The HTML report groups each test under its class. Backends like Seq, Jaeger, and the Aspire dashboard show every test as its own trace — that's by design. See [Distributed Tracing](./distributed-tracing.md#html-report-vs-opentelemetry-backends) for why, and how to group spans across tests in your backend.
+:::
+
 ### Linking External Traces
 
 If your test communicates with an external service that runs in a **separate process** (and therefore has a different trace context), you can manually link its trace to the test:

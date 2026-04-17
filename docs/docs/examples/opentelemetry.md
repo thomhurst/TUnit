@@ -235,6 +235,112 @@ public async Task Api_Returns_Expected_Result()
 
 For scenarios without OpenTelemetry, see [Cross-Thread Output Correlation](/docs/extending/logging#cross-thread-output-correlation) for the manual `TestContext.MakeCurrent()` approach.
 
+## Troubleshooting
+
+Find your symptom below.
+
+### "I see one trace per test instead of one trace per class"
+
+That's expected. Each test gets its own trace ID so spans, logs, and exports stay tied to a single test run. To group across tests, search by tag in your backend:
+
+| Want to see... | Search for |
+|----------------|-----------|
+| One specific test run | `tunit.test.id = "<id>"` |
+| All retries of one test | `tunit.test.node_uid = "<uid>"` |
+| Everything from one test session | `tunit.session.id = "<id>"` |
+| All tests in a class | `tunit.test.class = "MyNamespace.MyTests"` |
+
+In Seq use `tunit.session.id = '<id>'`. In Jaeger or Tempo use the tag filter box.
+
+### "Spans from test A are showing up under test B"
+
+Usually a background worker (a hosted service, a message broker like DotPulsar, or a connection pool) started during one test and kept running. Anything it produces inherits whichever test was current when it started.
+
+**Quickest fix**: tag every span with the current test's ID so you can still filter even when the parent is wrong. Add this processor to your OpenTelemetry setup:
+
+```csharp
+using System.Diagnostics;
+using OpenTelemetry;
+
+public sealed class TUnitTagProcessor : BaseProcessor<Activity>
+{
+    public override void OnStart(Activity activity)
+    {
+        var testId = Activity.Current?.GetBaggageItem("tunit.test.id");
+        if (testId is not null)
+        {
+            activity.SetTag("tunit.test.id", testId);
+        }
+    }
+}
+
+// then in your tracer builder:
+.AddProcessor(new TUnitTagProcessor())
+```
+
+Now you can filter by `tunit.test.id` in your backend even when the trace hierarchy is wrong. (Tracking automation: [#5591](https://github.com/thomhurst/TUnit/issues/5591).)
+
+**Better fix** if you control the worker: stop it from capturing the test's context in the first place.
+
+```csharp
+using (ExecutionContext.SuppressFlow())
+{
+    _ = Task.Run(BackgroundLoopAsync);
+}
+```
+
+Around `IHostedService` registrations the same idea applies. (Tracking automation: [#5589](https://github.com/thomhurst/TUnit/issues/5589).)
+
+**Last resort**: run affected tests one at a time with `[NotInParallel]`.
+
+### "My SUT spans show no parent / appear orphaned"
+
+Two common causes.
+
+**1. The parent span isn't exported to the same backend.** The test-side `test case` span lives in the test process. If you only export from the SUT, the backend sees a child whose parent it has never seen. Either export the `"TUnit"` source from the test process too, or rely on the `tunit.test.id` tag (above) instead of trace hierarchy.
+
+**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. The two don't speak to each other. Use the same propagator on both sides:
+
+```csharp
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+
+Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(
+[
+    new TraceContextPropagator(),
+    new BaggagePropagator(),
+]));
+```
+
+### "My HTTP calls don't carry the test trace"
+
+If you inherit from `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>` directly, the `HttpClient` it returns skips .NET's normal HTTP tracing. No `traceparent` header is sent, so the server starts a fresh trace.
+
+Switch your factory to `TestWebApplicationFactory<T>`:
+
+```csharp
+public class MyFactory : TestWebApplicationFactory<Program> { }
+```
+
+Or, if you can't change the inheritance, wrap your existing factory:
+
+```csharp
+var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
+var client = traced.CreateClient();
+```
+
+Both attach the trace propagation handler automatically. See [ASP.NET Core integration](./aspnet.md) for full setup.
+
+For HTTP calls the SUT itself makes through `IHttpClientFactory`, today you have to add the handler manually (`.AddHttpMessageHandler<ActivityPropagationHandler>()`). Tracking automation: [#5590](https://github.com/thomhurst/TUnit/issues/5590).
+
+### "No spans show up in my exporter at all"
+
+Check in order:
+
+1. Did you register the listener in `[Before(TestDiscovery)]`? `[Before(Test)]` or `[Before(Class)]` is too late.
+2. Did you call `.AddSource("TUnit")` (and `"TUnit.Lifecycle"` if you want runner spans)? Each source has to be added explicitly.
+3. Did you dispose the `TracerProvider` in `[After(TestSession)]`? Without disposal, buffered spans never get flushed.
+
 ## HTML Report Integration
 
 TUnit's built-in [HTML test report](/docs/guides/html-report) automatically captures activity spans and renders them as trace timelines — no OpenTelemetry SDK required. The report also captures spans from instrumented libraries like HttpClient, ASP.NET Core, and EF Core when they execute within a test's context.
