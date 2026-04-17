@@ -45,6 +45,10 @@ The two sources you usually subscribe to:
 
 The general setup in [OpenTelemetry Tracing](/docs/examples/opentelemetry#setup) works everywhere. Backend-specific notes follow.
 
+:::tip Zero-config setup
+Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-config-tunitopentelemetry) and set `OTEL_EXPORTER_OTLP_ENDPOINT`. The package auto-wires a `TracerProvider` at test discovery, pre-registers `TUnitTestCorrelationProcessor`, and flushes at session end. Call `TUnitOpenTelemetry.Configure(...)` to add exporters or processors.
+:::
+
 ### Seq
 
 Point the OTLP exporter at Seq's ingestion endpoint:
