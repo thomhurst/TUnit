@@ -38,24 +38,24 @@ public static class AutoStart
         var force = autostart == "1";
         var otlpEndpoint = Environment.GetEnvironmentVariable(OtlpEndpointEnvVar);
 
-        if (!force)
-        {
-            if (otlpEndpoint is null && !TUnitOpenTelemetry.HasConfiguration)
-            {
-                return;
-            }
-
-            if (ProbeSource.HasListeners())
-            {
-                return;
-            }
-        }
-
         lock (_lock)
         {
             if (_provider is not null)
             {
                 return;
+            }
+
+            if (!force)
+            {
+                if (otlpEndpoint is null && !TUnitOpenTelemetry.HasConfiguration)
+                {
+                    return;
+                }
+
+                if (ProbeSource.HasListeners())
+                {
+                    return;
+                }
             }
         }
 
@@ -84,7 +84,7 @@ public static class AutoStart
             if (_provider is not null)
             {
                 // Lost the race — another Start call built first. Dispose ours.
-                provider?.Dispose();
+                provider.Dispose();
                 return;
             }
             _provider = provider;

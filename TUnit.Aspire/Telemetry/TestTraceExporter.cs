@@ -30,18 +30,6 @@ internal static class TestTraceExporter
             });
     }
 
-    /// <summary>
-    /// Builds a standalone <see cref="TracerProvider"/> bound to the captured OTLP endpoint.
-    /// Used by test-only code paths that need an owned provider; production uses <see cref="AddToBuilder"/>.
-    /// </summary>
-    internal static TracerProvider CreateTracerProvider(
-        Uri endpoint, TestSessionContext context, string sourceName)
-    {
-        var builder = Sdk.CreateTracerProviderBuilder().AddSource(sourceName);
-        AddToBuilder(builder, context, endpoint);
-        return builder.Build();
-    }
-
     internal static Uri? TryParseDashboardEndpoint(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
