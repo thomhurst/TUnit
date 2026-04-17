@@ -51,6 +51,26 @@ public class DirectWebApplicationFactoryInheritanceAnalyzerTests
     }
 
     [Test]
+    public async Task Warning_Fires_Once_For_Partial_Class()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            {{WebApplicationFactoryStubs.Source}}
+
+            public partial class MyFactory : {|#0:Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>|}
+            {
+            }
+
+            public partial class MyFactory
+            {
+            }
+            """,
+            Verifier.Diagnostic(Rules.DirectWebApplicationFactoryInheritance)
+                .WithLocation(0)
+                .WithArguments("MyFactory"));
+    }
+
+    [Test]
     public async Task Warning_On_Base_Type_Location()
     {
         await Verifier.VerifyAnalyzerAsync(

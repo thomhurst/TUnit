@@ -31,6 +31,11 @@ public class DirectWebApplicationFactoryInheritanceAnalyzer : ConcurrentDiagnost
             var testWebApplicationFactory = compilationContext.Compilation
                 .GetTypeByMetadataName(TestWebApplicationFactoryMetadataName);
 
+            if (testWebApplicationFactory is null)
+            {
+                return;
+            }
+
             compilationContext.RegisterSymbolAction(
                 symbolContext => AnalyzeNamedType(symbolContext, webApplicationFactory, testWebApplicationFactory),
                 SymbolKind.NamedType);
@@ -40,7 +45,7 @@ public class DirectWebApplicationFactoryInheritanceAnalyzer : ConcurrentDiagnost
     private static void AnalyzeNamedType(
         SymbolAnalysisContext context,
         INamedTypeSymbol webApplicationFactory,
-        INamedTypeSymbol? testWebApplicationFactory)
+        INamedTypeSymbol testWebApplicationFactory)
     {
         if (context.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Class, BaseType: { } baseType } type)
         {
@@ -52,8 +57,7 @@ public class DirectWebApplicationFactoryInheritanceAnalyzer : ConcurrentDiagnost
             return;
         }
 
-        if (testWebApplicationFactory is not null &&
-            SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, testWebApplicationFactory))
+        if (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, testWebApplicationFactory))
         {
             return;
         }

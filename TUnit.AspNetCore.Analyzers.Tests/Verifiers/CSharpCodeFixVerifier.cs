@@ -16,9 +16,16 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor)
         => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>.Diagnostic(descriptor);
 
+    public static Task VerifyCodeFixAsync(
+        [StringSyntax("c#")] string source,
+        [StringSyntax("c#")] string fixedSource,
+        params DiagnosticResult[] expected)
+        => VerifyCodeFixAsync(source, fixedSource, stubsSource: null, expected);
+
     public static async Task VerifyCodeFixAsync(
         [StringSyntax("c#")] string source,
         [StringSyntax("c#")] string fixedSource,
+        [StringSyntax("c#")] string? stubsSource,
         params DiagnosticResult[] expected)
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>
@@ -27,6 +34,12 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             FixedCode = fixedSource,
             ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
         };
+
+        if (stubsSource is not null)
+        {
+            test.TestState.Sources.Add(stubsSource);
+            test.FixedState.Sources.Add(stubsSource);
+        }
 
         test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From("""
             is_global = true
