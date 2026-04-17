@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
-using TUnit.Aspire.Telemetry;
 using TUnit.Aspire.Tests.Helpers;
+using TUnit.OpenTelemetry.Receiver;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;

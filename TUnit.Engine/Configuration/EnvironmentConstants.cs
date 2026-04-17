@@ -17,6 +17,7 @@ internal static class EnvironmentConstants
     public const string DisableLogo = "TUNIT_DISABLE_LOGO";
     public const string EnableIdeStreaming = "TUNIT_ENABLE_IDE_STREAMING";
     public const string DiscoveryDiagnostics = "TUNIT_DISCOVERY_DIAGNOSTICS";
+    public const string MaxOtelExternalSpans = "TUNIT_OTEL_MAX_EXTERNAL_SPANS";
 
     // TUnit-specific: JUnit output
     public const string JUnitXmlOutputPath = "JUNIT_XML_OUTPUT_PATH";

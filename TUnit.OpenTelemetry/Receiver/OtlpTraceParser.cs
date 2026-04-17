@@ -1,0 +1,456 @@
+namespace TUnit.OpenTelemetry.Receiver;
+
+/// <summary>
+/// A parsed OTLP span record. Only the fields needed to render a TUnit HTML report
+/// span row are extracted; dropped_*_count fields are ignored.
+/// </summary>
+internal sealed record OtlpSpanRecord(
+    string TraceId,
+    string SpanId,
+    string? ParentSpanId,
+    string Name,
+    int Kind,
+    long StartTimeUnixNano,
+    long EndTimeUnixNano,
+    int StatusCode,
+    string StatusMessage,
+    IReadOnlyList<KeyValuePair<string, string>> Attributes,
+    IReadOnlyList<OtlpSpanEvent> Events,
+    IReadOnlyList<OtlpSpanLink> Links,
+    string ResourceName,
+    string ScopeName);
+
+internal readonly record struct OtlpSpanEvent(
+    long TimeUnixNano,
+    string Name,
+    IReadOnlyList<KeyValuePair<string, string>> Attributes);
+
+internal readonly record struct OtlpSpanLink(
+    string TraceId,
+    string SpanId);
+
+/// <summary>
+/// Minimal parser for OTLP ExportTraceServiceRequest protobuf messages.
+/// Extracts only the fields needed to forward spans into TUnit's HTML report.
+/// Uses the same hand-rolled <see cref="ProtobufReader"/> as <see cref="OtlpLogParser"/> —
+/// no external protobuf dependency.
+///
+/// Field numbers below are from the OTLP proto definitions:
+///   ExportTraceServiceRequest: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/collector/trace/v1/trace_service.proto
+///   ResourceSpans/ScopeSpans/Span/Status/Event/Link: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto
+///   Resource/KeyValue/AnyValue: https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/common/v1/common.proto
+/// </summary>
+internal static class OtlpTraceParser
+{
+    public static IReadOnlyList<OtlpSpanRecord> Parse(ReadOnlySpan<byte> data)
+    {
+        var results = new List<OtlpSpanRecord>();
+        var reader = new ProtobufReader(data);
+
+        // ExportTraceServiceRequest: field 1 = repeated ResourceSpans
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                ParseResourceSpans(embedded, results);
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+
+        return results;
+    }
+
+    private static void ParseResourceSpans(ProtobufReader reader, List<OtlpSpanRecord> results)
+    {
+        var resourceName = "";
+
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            // ResourceSpans: 1 = resource, 2 = scope_spans
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                resourceName = ParseResourceServiceName(embedded);
+            }
+            else if (fieldNumber == 2 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                ParseScopeSpans(embedded, resourceName, results);
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+    }
+
+    private static string ParseResourceServiceName(ProtobufReader reader)
+    {
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            // Resource: 1 = attributes (repeated KeyValue)
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                var (key, value) = ParseKeyValue(embedded);
+                if (key == "service.name")
+                {
+                    return value;
+                }
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+
+        return "";
+    }
+
+    private static void ParseScopeSpans(
+        ProtobufReader reader,
+        string resourceName,
+        List<OtlpSpanRecord> results)
+    {
+        var scopeName = "";
+
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            // ScopeSpans: 1 = scope (InstrumentationScope), 2 = spans
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                scopeName = ParseInstrumentationScopeName(embedded);
+            }
+            else if (fieldNumber == 2 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                var span = ParseSpan(embedded, resourceName, scopeName);
+                if (span is not null)
+                {
+                    results.Add(span);
+                }
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+    }
+
+    private static string ParseInstrumentationScopeName(ProtobufReader reader)
+    {
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            // InstrumentationScope: 1 = name
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                return reader.ReadString();
+            }
+
+            reader.Skip(wireType);
+        }
+
+        return "";
+    }
+
+    private static OtlpSpanRecord? ParseSpan(ProtobufReader reader, string resourceName, string scopeName)
+    {
+        var traceId = "";
+        var spanId = "";
+        string? parentSpanId = null;
+        var name = "";
+        var kind = 0;
+        long startTimeUnixNano = 0;
+        long endTimeUnixNano = 0;
+        var statusCode = 0;
+        var statusMessage = "";
+        List<KeyValuePair<string, string>>? attributes = null;
+        List<OtlpSpanEvent>? events = null;
+        List<OtlpSpanLink>? links = null;
+
+        // Span fields: 1=trace_id, 2=span_id, 4=parent_span_id, 5=name, 6=kind,
+        // 7=start_time_unix_nano, 8=end_time_unix_nano, 9=attributes, 11=events,
+        // 13=links, 15=status. (3=trace_state, 10/12/14=dropped counts — skipped.)
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            switch (fieldNumber)
+            {
+                case 1 when wireType == WireType.LengthDelimited:
+                    var traceBytes = reader.ReadBytesAsSpan();
+                    if (traceBytes.Length == 16)
+                    {
+                        traceId = HexLower(traceBytes);
+                    }
+
+                    break;
+
+                case 2 when wireType == WireType.LengthDelimited:
+                    var spanBytes = reader.ReadBytesAsSpan();
+                    if (spanBytes.Length == 8)
+                    {
+                        spanId = HexLower(spanBytes);
+                    }
+
+                    break;
+
+                case 4 when wireType == WireType.LengthDelimited:
+                    var parentBytes = reader.ReadBytesAsSpan();
+                    if (parentBytes.Length == 8)
+                    {
+                        parentSpanId = HexLower(parentBytes);
+                    }
+
+                    break;
+
+                case 5 when wireType == WireType.LengthDelimited:
+                    name = reader.ReadString();
+                    break;
+
+                case 6 when wireType == WireType.Varint:
+                    kind = (int)reader.ReadVarint();
+                    break;
+
+                case 7 when wireType == WireType.Fixed64:
+                    startTimeUnixNano = reader.ReadFixed64();
+                    break;
+
+                case 8 when wireType == WireType.Fixed64:
+                    endTimeUnixNano = reader.ReadFixed64();
+                    break;
+
+                case 9 when wireType == WireType.LengthDelimited:
+                    attributes ??= new List<KeyValuePair<string, string>>();
+                    var attr = reader.ReadEmbeddedMessage();
+                    var (attrKey, attrValue) = ParseKeyValue(attr);
+                    attributes.Add(new KeyValuePair<string, string>(attrKey, attrValue));
+                    break;
+
+                case 11 when wireType == WireType.LengthDelimited:
+                    events ??= new List<OtlpSpanEvent>();
+                    var eventMsg = reader.ReadEmbeddedMessage();
+                    events.Add(ParseSpanEvent(eventMsg));
+                    break;
+
+                case 13 when wireType == WireType.LengthDelimited:
+                    links ??= new List<OtlpSpanLink>();
+                    var linkMsg = reader.ReadEmbeddedMessage();
+                    var link = ParseSpanLink(linkMsg);
+                    if (link is not null)
+                    {
+                        links.Add(link.Value);
+                    }
+
+                    break;
+
+                case 15 when wireType == WireType.LengthDelimited:
+                    var statusMsg = reader.ReadEmbeddedMessage();
+                    (statusCode, statusMessage) = ParseStatus(statusMsg);
+                    break;
+
+                default:
+                    reader.Skip(wireType);
+                    break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(traceId) || string.IsNullOrEmpty(spanId))
+        {
+            return null;
+        }
+
+        return new OtlpSpanRecord(
+            traceId,
+            spanId,
+            parentSpanId,
+            name,
+            kind,
+            startTimeUnixNano,
+            endTimeUnixNano,
+            statusCode,
+            statusMessage,
+            (IReadOnlyList<KeyValuePair<string, string>>?)attributes ?? Array.Empty<KeyValuePair<string, string>>(),
+            (IReadOnlyList<OtlpSpanEvent>?)events ?? Array.Empty<OtlpSpanEvent>(),
+            (IReadOnlyList<OtlpSpanLink>?)links ?? Array.Empty<OtlpSpanLink>(),
+            resourceName,
+            scopeName);
+    }
+
+    private static OtlpSpanEvent ParseSpanEvent(ProtobufReader reader)
+    {
+        long timeUnixNano = 0;
+        var name = "";
+        List<KeyValuePair<string, string>>? attributes = null;
+
+        // Span.Event: 1 = time_unix_nano, 2 = name, 3 = attributes
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            switch (fieldNumber)
+            {
+                case 1 when wireType == WireType.Fixed64:
+                    timeUnixNano = reader.ReadFixed64();
+                    break;
+
+                case 2 when wireType == WireType.LengthDelimited:
+                    name = reader.ReadString();
+                    break;
+
+                case 3 when wireType == WireType.LengthDelimited:
+                    attributes ??= new List<KeyValuePair<string, string>>();
+                    var attr = reader.ReadEmbeddedMessage();
+                    var (k, v) = ParseKeyValue(attr);
+                    attributes.Add(new KeyValuePair<string, string>(k, v));
+                    break;
+
+                default:
+                    reader.Skip(wireType);
+                    break;
+            }
+        }
+
+        return new OtlpSpanEvent(
+            timeUnixNano,
+            name,
+            (IReadOnlyList<KeyValuePair<string, string>>?)attributes
+                ?? Array.Empty<KeyValuePair<string, string>>());
+    }
+
+    private static OtlpSpanLink? ParseSpanLink(ProtobufReader reader)
+    {
+        var traceId = "";
+        var spanId = "";
+
+        // Span.Link: 1 = trace_id, 2 = span_id
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            switch (fieldNumber)
+            {
+                case 1 when wireType == WireType.LengthDelimited:
+                    var traceBytes = reader.ReadBytesAsSpan();
+                    if (traceBytes.Length == 16)
+                    {
+                        traceId = HexLower(traceBytes);
+                    }
+
+                    break;
+
+                case 2 when wireType == WireType.LengthDelimited:
+                    var spanBytes = reader.ReadBytesAsSpan();
+                    if (spanBytes.Length == 8)
+                    {
+                        spanId = HexLower(spanBytes);
+                    }
+
+                    break;
+
+                default:
+                    reader.Skip(wireType);
+                    break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(traceId) || string.IsNullOrEmpty(spanId))
+        {
+            return null;
+        }
+
+        return new OtlpSpanLink(traceId, spanId);
+    }
+
+    private static (int Code, string Message) ParseStatus(ProtobufReader reader)
+    {
+        var code = 0;
+        var message = "";
+
+        // Status: 2 = message, 3 = code. (Field 1 = deprecated.)
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            switch (fieldNumber)
+            {
+                case 2 when wireType == WireType.LengthDelimited:
+                    message = reader.ReadString();
+                    break;
+
+                case 3 when wireType == WireType.Varint:
+                    code = (int)reader.ReadVarint();
+                    break;
+
+                default:
+                    reader.Skip(wireType);
+                    break;
+            }
+        }
+
+        return (code, message);
+    }
+
+    private static (string Key, string Value) ParseKeyValue(ProtobufReader reader)
+    {
+        var key = "";
+        var value = "";
+
+        // KeyValue: 1 = key, 2 = value (AnyValue)
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                key = reader.ReadString();
+            }
+            else if (fieldNumber == 2 && wireType == WireType.LengthDelimited)
+            {
+                var embedded = reader.ReadEmbeddedMessage();
+                value = ParseAnyValue(embedded);
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+
+        return (key, value);
+    }
+
+    // Lowercase hex matches System.Diagnostics.Activity's TraceId/SpanId formatting,
+    // so external spans flowing into ActivityCollector share dictionary keys with
+    // in-process spans without needing case-insensitive comparers downstream.
+    private static string HexLower(ReadOnlySpan<byte> bytes) =>
+#if NET9_0_OR_GREATER
+        Convert.ToHexStringLower(bytes);
+#else
+        Convert.ToHexString(bytes).ToLowerInvariant();
+#endif
+
+    private static string ParseAnyValue(ProtobufReader reader)
+    {
+        // AnyValue (oneof value): 1=string, 2=bool, 3=int, 4=double. (5=array, 6=kvlist, 7=bytes — not rendered.)
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            switch (fieldNumber)
+            {
+                case 1 when wireType == WireType.LengthDelimited:
+                    return reader.ReadString();
+
+                case 2 when wireType == WireType.Varint:
+                    return reader.ReadVarint() != 0 ? "true" : "false";
+
+                case 3 when wireType == WireType.Varint:
+                    return ((long)reader.ReadVarint()).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                case 4 when wireType == WireType.Fixed64:
+                    var bits = reader.ReadFixed64();
+                    return BitConverter.Int64BitsToDouble(bits)
+                        .ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                default:
+                    reader.Skip(wireType);
+                    break;
+            }
+        }
+
+        return "";
+    }
+}

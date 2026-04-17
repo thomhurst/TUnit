@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using TUnit.Core;
+using TUnit.Engine.Reporters.Html;
 
-namespace TUnit.Aspire.Telemetry;
+namespace TUnit.OpenTelemetry.Receiver;
 
 /// <summary>
 /// A lightweight OTLP/HTTP receiver that accepts telemetry from SUT processes
@@ -25,7 +26,6 @@ namespace TUnit.Aspire.Telemetry;
 /// </remarks>
 internal sealed class OtlpReceiver : IAsyncDisposable
 {
-    private const int MaxPortBindingAttempts = 10;
     private const long MaxBodyBytes = 16 * 1024 * 1024; // 16 MB
 
     private readonly HttpListener _listener;
@@ -91,7 +91,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 break;
             }
 
-            // Process each request without blocking the listen loop
             TrackTask(Task.Run(() => ProcessRequestAsync(context)));
         }
     }
@@ -136,10 +135,16 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 return;
             }
 
-            // Read the request body with size enforcement (ContentLength64 is -1 for chunked)
+            // ContentLength64 is -1 for chunked; size-known path avoids MemoryStream growth copies.
             byte[] body;
-            using (var ms = new MemoryStream())
+            if (request.ContentLength64 >= 0)
             {
+                body = new byte[request.ContentLength64];
+                await request.InputStream.ReadExactlyAsync(body, _cts.Token).ConfigureAwait(false);
+            }
+            else
+            {
+                using var ms = new MemoryStream();
                 var buffer = new byte[8192];
                 long totalRead = 0;
                 int bytesRead;
@@ -165,8 +170,11 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             {
                 ProcessLogs(body);
             }
+            else if (path == "/v1/traces")
+            {
+                ProcessTraces(body);
+            }
 
-            // Forward to upstream if configured
             if (_upstreamEndpoint is not null && _forwardingClient is not null)
             {
                 TrackTask(ForwardAsync(path, body, request.ContentType));
@@ -174,7 +182,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
             Interlocked.Increment(ref _requestCount);
 
-            // Return 200 OK with empty protobuf response
             response.StatusCode = 200;
             response.ContentType = "application/x-protobuf";
             response.ContentLength64 = 0;
@@ -182,7 +189,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"[TUnit.Aspire] OTLP request processing failed: {ex.Message}");
+            Trace.WriteLine($"[TUnit.OpenTelemetry] OTLP request processing failed: {ex.Message}");
             try
             {
                 context.Response.StatusCode = 500;
@@ -195,6 +202,130 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
     }
 
+    private static void ProcessTraces(byte[] body)
+    {
+        var collector = ActivityCollector.Current;
+        if (collector is null)
+        {
+            return;
+        }
+
+        IReadOnlyList<OtlpSpanRecord> spans;
+        try
+        {
+            spans = OtlpTraceParser.Parse(body);
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/traces body: {ex.GetType().Name}: {ex.Message}");
+            return;
+        }
+
+        foreach (var span in spans)
+        {
+            collector.IngestExternalSpan(ToSpanData(span));
+        }
+    }
+
+    private static SpanData ToSpanData(OtlpSpanRecord span)
+    {
+        ReportKeyValue[]? tags = null;
+        if (span.Attributes.Count > 0)
+        {
+            tags = new ReportKeyValue[span.Attributes.Count];
+            for (var i = 0; i < span.Attributes.Count; i++)
+            {
+                tags[i] = new ReportKeyValue
+                {
+                    Key = span.Attributes[i].Key,
+                    Value = span.Attributes[i].Value,
+                };
+            }
+        }
+
+        SpanEvent[]? events = null;
+        if (span.Events.Count > 0)
+        {
+            events = new SpanEvent[span.Events.Count];
+            for (var i = 0; i < span.Events.Count; i++)
+            {
+                var evt = span.Events[i];
+                ReportKeyValue[]? evtTags = null;
+                if (evt.Attributes.Count > 0)
+                {
+                    evtTags = new ReportKeyValue[evt.Attributes.Count];
+                    for (var j = 0; j < evt.Attributes.Count; j++)
+                    {
+                        evtTags[j] = new ReportKeyValue
+                        {
+                            Key = evt.Attributes[j].Key,
+                            Value = evt.Attributes[j].Value,
+                        };
+                    }
+                }
+
+                events[i] = new SpanEvent
+                {
+                    Name = evt.Name,
+                    TimestampMs = evt.TimeUnixNano / 1_000_000.0,
+                    Tags = evtTags,
+                };
+            }
+        }
+
+        SpanLink[]? links = null;
+        if (span.Links.Count > 0)
+        {
+            links = new SpanLink[span.Links.Count];
+            for (var i = 0; i < span.Links.Count; i++)
+            {
+                links[i] = new SpanLink
+                {
+                    TraceId = span.Links[i].TraceId,
+                    SpanId = span.Links[i].SpanId,
+                };
+            }
+        }
+
+        var startMs = span.StartTimeUnixNano / 1_000_000.0;
+        var endMs = span.EndTimeUnixNano / 1_000_000.0;
+
+        return new SpanData
+        {
+            TraceId = span.TraceId,
+            SpanId = span.SpanId,
+            ParentSpanId = span.ParentSpanId,
+            Name = span.Name,
+            // SpanType classifies TUnit's own spans ("test_case", "test_suite", etc.)
+            // and stays null for external spans — no analogue exists in OTLP.
+            SpanType = null,
+            Source = string.IsNullOrEmpty(span.ScopeName) ? span.ResourceName : span.ScopeName,
+            Kind = MapSpanKind(span.Kind),
+            StartTimeMs = startMs,
+            DurationMs = endMs - startMs,
+            Status = MapStatusCode(span.StatusCode),
+            StatusMessage = string.IsNullOrEmpty(span.StatusMessage) ? null : span.StatusMessage,
+            Tags = tags,
+            Events = events,
+            Links = links,
+        };
+    }
+
+    private static string MapSpanKind(int kind) => kind switch
+    {
+        1 => "Internal",
+        2 => "Server",
+        3 => "Client",
+        4 => "Producer",
+        5 => "Consumer",
+        _ => "Internal",
+    };
+
+    private static string MapStatusCode(int code) =>
+        code is >= (int)ActivityStatusCode.Unset and <= (int)ActivityStatusCode.Error
+            ? ((ActivityStatusCode)code).ToString()
+            : nameof(ActivityStatusCode.Unset);
+
     private static void ProcessLogs(byte[] body)
     {
         List<OtlpLogRecord> records;
@@ -202,9 +333,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         {
             records = OtlpLogParser.Parse(body);
         }
-        catch
+        catch (Exception ex)
         {
-            // Malformed protobuf -- skip silently
+            Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/logs body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 
@@ -254,7 +385,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"[TUnit.Aspire] OTLP forwarding to upstream failed: {ex.Message}");
+            Trace.WriteLine($"[TUnit.OpenTelemetry] OTLP forwarding to upstream failed: {ex.Message}");
         }
     }
 
@@ -303,7 +434,18 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// Creates an <see cref="HttpListener"/> bound to a free port. Uses a retry loop to
     /// handle the TOCTOU window between discovering a free port and binding to it.
     /// </summary>
-    private static (HttpListener Listener, int Port) CreateListener()
+    private static (HttpListener Listener, int Port) CreateListener() => LoopbackHttpListenerFactory.Create();
+}
+
+/// <summary>
+/// Binds an <see cref="HttpListener"/> to a free loopback port, retrying if the
+/// port is taken between probing and binding (TOCTOU window).
+/// </summary>
+internal static class LoopbackHttpListenerFactory
+{
+    private const int MaxPortBindingAttempts = 10;
+
+    internal static (HttpListener Listener, int Port) Create()
     {
         for (var attempt = 0; attempt < MaxPortBindingAttempts; attempt++)
         {
@@ -322,7 +464,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             }
         }
 
-        throw new InvalidOperationException($"Could not bind OTLP listener after {MaxPortBindingAttempts} attempts.");
+        throw new InvalidOperationException($"Could not bind loopback HttpListener after {MaxPortBindingAttempts} attempts.");
     }
 
     private static int FindFreePort()

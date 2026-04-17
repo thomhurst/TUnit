@@ -2,28 +2,67 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using TUnit.Core;
+using TUnit.Engine.Configuration;
 
 namespace TUnit.Engine.Reporters.Html;
 
 internal sealed class ActivityCollector : IDisposable
 {
-    // Cap external (non-TUnit) spans per test to keep the report manageable.
-    // TUnit's own spans are always captured regardless of caps.
-    // Soft cap — intentionally racy for performance; may be slightly exceeded under high concurrency.
-    private const int MaxExternalSpansPerTest = 100;
-    // Fallback cap applied per trace when the test case association cannot be determined
-    // (e.g. broken Activity.Parent chains from async connection pooling).
-    private const int MaxExternalSpansPerTrace = 100;
+    // Cap external (non-TUnit) spans to keep the report manageable. Applied per test,
+    // or per trace when the test-case association can't be determined (e.g. broken
+    // Activity.Parent chains from async connection pooling). TUnit's own spans are
+    // always captured regardless. Soft cap — intentionally racy for performance; may
+    // be slightly exceeded under high concurrency. Override via
+    // EnvironmentConstants.MaxOtelExternalSpans for users with busy SUTs.
+    private const int DefaultMaxExternalSpans = 100;
+    internal static readonly int MaxExternalSpans = ResolveExternalSpanCap();
 
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new();
-    // Track external span count per test case (keyed by test case span ID)
-    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new();
-    // Fallback: per-trace cap for external spans whose parent chain is broken
-    // (e.g. Npgsql async pooling where Activity.Parent is null but traceId is correct)
-    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTrace = new();
+    private static int _capWarningEmitted;
+
+    private static int ResolveExternalSpanCap()
+    {
+        var raw = Environment.GetEnvironmentVariable(EnvironmentConstants.MaxOtelExternalSpans);
+        if (!string.IsNullOrEmpty(raw)
+            && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
+            && parsed > 0)
+        {
+            return parsed;
+        }
+
+        return DefaultMaxExternalSpans;
+    }
+
+    private static void WarnCapHitOnce()
+    {
+        // CompareExchange avoids re-writing the flag on every overflow span once the
+        // cap has been breached — on busy SUTs this runs at every dropped span.
+        if (Interlocked.CompareExchange(ref _capWarningEmitted, 1, 0) == 0)
+        {
+            Console.Error.WriteLine(
+                $"[TUnit] External span cap of {MaxExternalSpans} reached; subsequent spans will be dropped. " +
+                $"Set {EnvironmentConstants.MaxOtelExternalSpans} to raise the limit.");
+        }
+    }
+
+    // Process-wide pointer to the currently-running collector, used by the OTLP receiver
+    // (in TUnit.OpenTelemetry) to feed external spans without an explicit wiring step.
+    // Only one HtmlReporter runs per session, so a static slot is sufficient.
+    private static ActivityCollector? _current;
+
+    public static ActivityCollector? Current => _current;
+
+    // All trace/span ID dictionaries use OrdinalIgnoreCase because external spans
+    // arrive hex-encoded as uppercase (Convert.ToHexString) while in-process Activity
+    // IDs serialize lowercase. Without case-insensitive keys the two would split into
+    // separate buckets for the same logical trace.
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<SpanData>> _spansByTrace = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTest = new(StringComparer.OrdinalIgnoreCase);
+    // Fallback per-trace cap for external spans whose parent chain is broken
+    // (e.g. Npgsql async pooling where Activity.Parent is null but traceId is correct).
+    private readonly ConcurrentDictionary<string, int> _externalSpanCountsByTrace = new(StringComparer.OrdinalIgnoreCase);
     // Known test case span IDs, populated at activity start time so they're available
     // before child spans stop (children stop before parents in Activity ordering).
-    private readonly ConcurrentDictionary<string, byte> _testCaseSpanIds = new();
+    private readonly ConcurrentDictionary<string, byte> _testCaseSpanIds = new(StringComparer.OrdinalIgnoreCase);
     // Fast-path cache of trace IDs that should be collected. Subsumes TraceRegistry lookups
     // so that subsequent activities on the same trace avoid cross-class dictionary checks.
     private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);
@@ -31,6 +70,10 @@ internal sealed class ActivityCollector : IDisposable
 
     public void Start()
     {
+        // First-started-wins: HtmlReporter creates one collector per session before any
+        // test runs, so this slot is claimed for the rest of the session. Later ad-hoc
+        // collectors (e.g. created from a test) don't race-steal the global pointer.
+        Interlocked.CompareExchange(ref _current, this, null);
         // Listen to ALL sources so we can capture child spans from HttpClient, ASP.NET Core,
         // EF Core, etc. The Sample callback uses smart filtering to avoid overhead: only spans
         // belonging to known test traces are fully recorded; everything else gets PropagationData
@@ -111,8 +154,68 @@ internal sealed class ActivityCollector : IDisposable
 
     public void Stop()
     {
+        Interlocked.CompareExchange(ref _current, null, this);
         _listener?.Dispose();
         _listener = null;
+    }
+
+    /// <summary>
+    /// Marks a trace ID as eligible for external span ingestion. Called by the OTLP
+    /// receiver when the test process has started or observed a trace that external
+    /// processes (e.g. a WebApplicationFactory SUT) may report spans against.
+    /// </summary>
+    internal void RegisterExternalTrace(string traceId)
+    {
+        _knownTraceIds.TryAdd(traceId, 0);
+    }
+
+    /// <summary>
+    /// Enqueues an externally-sourced span (typically from an OTLP receiver) into
+    /// the report. Dropped if the trace is not known, or if per-test/per-trace caps
+    /// for external spans have been exceeded.
+    /// </summary>
+    internal void IngestExternalSpan(SpanData span)
+    {
+        if (!_knownTraceIds.ContainsKey(span.TraceId))
+        {
+            return;
+        }
+
+        // Prefer per-test cap when the span's direct parent is a known test case span.
+        // Falls back to per-trace cap otherwise, mirroring OnActivityStopped's logic.
+        if (span.ParentSpanId is { } parentSpanId && _testCaseSpanIds.ContainsKey(parentSpanId))
+        {
+            if (_externalSpanCountsByTest.TryGetValue(parentSpanId, out var existing) && existing >= MaxExternalSpans)
+            {
+                WarnCapHitOnce();
+                return;
+            }
+
+            var count = _externalSpanCountsByTest.AddOrUpdate(parentSpanId, 1, static (_, c) => c + 1);
+            if (count > MaxExternalSpans)
+            {
+                WarnCapHitOnce();
+                return;
+            }
+        }
+        else
+        {
+            if (_externalSpanCountsByTrace.TryGetValue(span.TraceId, out var existing) && existing >= MaxExternalSpans)
+            {
+                WarnCapHitOnce();
+                return;
+            }
+
+            var count = _externalSpanCountsByTrace.AddOrUpdate(span.TraceId, 1, static (_, c) => c + 1);
+            if (count > MaxExternalSpans)
+            {
+                WarnCapHitOnce();
+                return;
+            }
+        }
+
+        var queue = _spansByTrace.GetOrAdd(span.TraceId, static _ => new ConcurrentQueue<SpanData>());
+        queue.Enqueue(span);
     }
 
     public SpanData[] GetAllSpans()
@@ -255,8 +358,9 @@ internal sealed class ActivityCollector : IDisposable
             if (testSpanId is not null)
             {
                 var count = _externalSpanCountsByTest.AddOrUpdate(testSpanId, 1, (_, c) => c + 1);
-                if (count > MaxExternalSpansPerTest)
+                if (count > MaxExternalSpans)
                 {
+                    WarnCapHitOnce();
                     return;
                 }
             }
@@ -265,8 +369,9 @@ internal sealed class ActivityCollector : IDisposable
                 // Fallback cap by trace ID to prevent unbounded growth for spans
                 // with broken parent chains (e.g., Npgsql async connection pooling).
                 var count = _externalSpanCountsByTrace.AddOrUpdate(traceId, 1, (_, c) => c + 1);
-                if (count > MaxExternalSpansPerTrace)
+                if (count > MaxExternalSpans)
                 {
+                    WarnCapHitOnce();
                     return;
                 }
             }

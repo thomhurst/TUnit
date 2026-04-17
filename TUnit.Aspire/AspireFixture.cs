@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.OpenTelemetry.Receiver;
 
 namespace TUnit.Aspire;
 
@@ -27,7 +28,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     where TAppHost : class
 {
     private DistributedApplication? _app;
-    private Telemetry.OtlpReceiver? _otlpReceiver;
+    private OtlpReceiver? _otlpReceiver;
     private HttpMessageHandler? _httpHandler;
 
     /// <summary>
@@ -377,7 +378,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         // Check if there's an existing upstream OTLP endpoint (e.g., Aspire dashboard)
         // that we should forward to after processing.
         var upstreamEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
-        _otlpReceiver = new Telemetry.OtlpReceiver(upstreamEndpoint);
+        _otlpReceiver = new OtlpReceiver(upstreamEndpoint);
         _otlpReceiver.Start();
     }
 

@@ -9,6 +9,8 @@
         <InternalsVisibleTo Include="TUnit.Logging.Microsoft" />
         <InternalsVisibleTo Include="TUnit.Aspire" />
         <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
+        <InternalsVisibleTo Include="TUnit.OpenTelemetry" />
+        <InternalsVisibleTo Include="TUnit.OpenTelemetry.Tests" />
     </ItemGroup>
 
     <ItemGroup>
