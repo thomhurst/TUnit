@@ -6,6 +6,15 @@ const BUILD_DIR = 'benchmark-results/build';
 const OUTPUT_DIR = 'docs/docs/benchmarks';
 const STATIC_DIR = 'docs/static/benchmarks';
 
+const RUNTIME_DESCRIPTIONS = {
+  AsyncTests: 'Realistic async/await patterns with I/O simulation',
+  DataDrivenTests: 'Parameterized tests with multiple data sources',
+  MassiveParallelTests: 'Parallel execution stress tests',
+  MatrixTests: 'Combinatorial test generation and execution',
+  ScaleTests: 'Large test suites (150+ tests) measuring scalability',
+  SetupTeardownTests: 'Expensive test fixtures with setup/teardown overhead',
+};
+
 console.log('🚀 Processing benchmark results...\n');
 
 // Ensure output directories exist
@@ -371,7 +380,7 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 Click on any benchmark to view detailed results:
 
 ${Object.keys(categories.runtime).map(testClass =>
-  `- [${testClass}](./${testClass}.md) - Detailed performance analysis`
+  `- [${testClass}](./${testClass}.md)${RUNTIME_DESCRIPTIONS[testClass] ? ` — ${RUNTIME_DESCRIPTIONS[testClass]}` : ''}`
 ).join('\n')}
 
 ${Object.keys(categories.build).length > 0 ? `
