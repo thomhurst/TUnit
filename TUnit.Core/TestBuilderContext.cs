@@ -37,6 +37,12 @@ public record TestBuilderContext
         set => _stateBag = value;
     }
 
+    /// <summary>
+    /// Gets the state bag for storing arbitrary data during test building.
+    /// </summary>
+    [Obsolete("Use StateBag property instead.")]
+    public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
+
     internal void CopyStateBagTo(TestBuilderContext target)
     {
         if (_stateBag is { IsEmpty: false } bag)

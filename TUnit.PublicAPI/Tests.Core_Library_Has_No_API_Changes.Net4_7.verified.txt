@@ -1300,6 +1300,8 @@ namespace
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
         public string DefinitionId { get; }
         public .TestContextEvents Events { get; set; }
+        [("Use StateBag property instead.")]
+        public .<string, object?> ObjectBag { get; }
         public .<string, object?> StateBag { get; set; }
         public required .MethodMetadata TestMetadata { get; init; }
         public static .TestBuilderContext? Current { get; }
@@ -1589,6 +1591,8 @@ namespace
         public TestRegisteredContext(.TestContext testContext) { }
         public string? CustomDisplayName { get; }
         public .DiscoveredTest DiscoveredTest { get; set; }
+        [("Use StateBag property instead.")]
+        public .<string, object?> ObjectBag { get; }
         public .<string, object?> StateBag { get; }
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
@@ -1658,6 +1662,16 @@ namespace
         public  Timeout { get; }
         public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
+    }
+    [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+        "rded as OTel child spans of the test activity.")]
+    public class Timing : <.Timing>
+    {
+        public Timing(string StepName,  Start,  End) { }
+        public  Duration { get; }
+        public  End { get; init; }
+        public  Start { get; init; }
+        public string StepName { get; init; }
     }
     public sealed class TypeArrayComparer : .<[]>
     {
@@ -2578,10 +2592,16 @@ namespace .Interfaces
         .<.Artifact> Artifacts { get; }
         .TextWriter ErrorOutput { get; }
         .TextWriter StandardOutput { get; }
+        [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+            "rded as OTel child spans of the test activity.")]
+        .<.Timing> Timings { get; }
         void AttachArtifact(.Artifact artifact);
         void AttachArtifact(string filePath, string? displayName = null, string? description = null);
         string GetErrorOutput();
         string GetStandardOutput();
+        [("Use OpenTelemetry activity spans instead. Hook timings are now automatically reco" +
+            "rded as OTel child spans of the test activity.")]
+        void RecordTiming(.Timing timing);
         void WriteError(string message);
         void WriteLine(string message);
     }

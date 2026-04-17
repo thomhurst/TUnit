@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.Chaining;
 using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
@@ -879,6 +880,32 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".Length({expression})");
         return new StringLengthWithInlineAssertionAssertion(source.Context, lengthAssertion);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for string length assertions.
+    /// Example: await Assert.That(str).HasLength().EqualTo(5);
+    /// </summary>
+    [Obsolete("Use Length() instead, which provides all numeric assertion methods. Example: Assert.That(str).Length().IsGreaterThan(5)")]
+    public static LengthWrapper HasLength(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasLength()");
+        return new LengthWrapper(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string has the expected length.
+    /// Example: await Assert.That(str).HasLength(5);
+    /// </summary>
+    [Obsolete("Use Length().IsEqualTo(expectedLength) instead.")]
+    public static StringLengthAssertion HasLength(
+        this IAssertionSource<string> source,
+        int expectedLength,
+        [CallerArgumentExpression(nameof(expectedLength))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasLength({expression})");
+        return new StringLengthAssertion(source.Context, expectedLength);
     }
 
     /// <summary>

@@ -26,6 +26,12 @@ public class TestRegisteredContext
     public ConcurrentDictionary<string, object?> StateBag => TestContext.StateBag.Items;
 
     /// <summary>
+    /// Gets the object bag from the underlying TestContext
+    /// </summary>
+    [Obsolete("Use StateBag property instead.")]
+    public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
+
+    /// <summary>
     /// Gets the test details from the underlying TestContext
     /// </summary>
     public TestDetails TestDetails => TestContext.Metadata.TestDetails;
