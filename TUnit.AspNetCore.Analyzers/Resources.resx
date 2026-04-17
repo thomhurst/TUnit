@@ -36,4 +36,13 @@
     <data name="TUnit0063Title" xml:space="preserve">
         <value>GlobalFactory member access breaks test isolation</value>
     </data>
+    <data name="TUnit0064Description" xml:space="preserve">
+        <value>Classes inheriting directly from Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory&lt;T&gt; silently lose distributed tracing propagation, per-test logging correlation, and TestContext.Current resolution inside request handlers. Inherit from TUnit.AspNetCore.TestWebApplicationFactory&lt;T&gt; (or wrap an existing factory with TracedWebApplicationFactory&lt;T&gt;) to restore these behaviours.</value>
+    </data>
+    <data name="TUnit0064MessageFormat" xml:space="preserve">
+        <value>'{0}' inherits directly from WebApplicationFactory&lt;T&gt;. Inherit from TestWebApplicationFactory&lt;T&gt; to preserve tracing, log correlation, and TestContext.Current.</value>
+    </data>
+    <data name="TUnit0064Title" xml:space="preserve">
+        <value>Inherit from TestWebApplicationFactory&lt;T&gt; instead of WebApplicationFactory&lt;T&gt;</value>
+    </data>
 </root>

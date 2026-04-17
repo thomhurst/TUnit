@@ -129,7 +129,7 @@ Some libraries (message brokers like DotPulsar, EF providers, connection pools) 
 
 The vanilla `WebApplicationFactory<T>` returns an `HttpClient` that skips .NET's HTTP tracing. No `traceparent` is injected and the server starts a fresh trace.
 
-Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `TracedWebApplicationFactory<T>`.
+Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `TracedWebApplicationFactory<T>`. The `TUnit0064` analyzer raises a warning (with a code fix) when a class inherits directly from `WebApplicationFactory<T>`.
 
 ### `IHttpClientFactory` clients in the SUT
 

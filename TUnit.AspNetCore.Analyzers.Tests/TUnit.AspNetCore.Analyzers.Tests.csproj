@@ -8,12 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.AspNetCore.Analyzers.CodeFixers\TUnit.AspNetCore.Analyzers.CodeFixers.csproj" />
     <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>

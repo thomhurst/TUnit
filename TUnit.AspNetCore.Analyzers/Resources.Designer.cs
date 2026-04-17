@@ -108,5 +108,32 @@ namespace TUnit.AspNetCore.Analyzers {
                 return ResourceManager.GetString("TUnit0063Title", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Classes inheriting directly from Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory&lt;T&gt;...
+        /// </summary>
+        internal static string TUnit0064Description {
+            get {
+                return ResourceManager.GetString("TUnit0064Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' inherits directly from WebApplicationFactory&lt;T&gt;...
+        /// </summary>
+        internal static string TUnit0064MessageFormat {
+            get {
+                return ResourceManager.GetString("TUnit0064MessageFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Inherit from TestWebApplicationFactory&lt;T&gt; instead of WebApplicationFactory&lt;T&gt;.
+        /// </summary>
+        internal static string TUnit0064Title {
+            get {
+                return ResourceManager.GetString("TUnit0064Title", resourceCulture);
+            }
+        }
     }
 }

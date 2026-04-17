@@ -33,6 +33,7 @@
     <Project Path="TUnit.Analyzers/TUnit.Analyzers.csproj" />
     <Project Path="TUnit.Analyzers.CodeFixers/TUnit.Analyzers.CodeFixers.csproj" />
     <Project Path="TUnit.AspNetCore.Analyzers/TUnit.AspNetCore.Analyzers.csproj" />
+    <Project Path="TUnit.AspNetCore.Analyzers.CodeFixers/TUnit.AspNetCore.Analyzers.CodeFixers.csproj" />
     <Project Path="TUnit.Assertions.Analyzers/TUnit.Assertions.Analyzers.csproj" />
     <Project Path="TUnit.Assertions.Analyzers.CodeFixers/TUnit.Assertions.Analyzers.CodeFixers.csproj" />
     <Project Path="TUnit.Mocks.Analyzers/TUnit.Mocks.Analyzers.csproj" />

@@ -16,6 +16,8 @@ var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
 var client = traced.CreateClient(); // tracing + logging now wired up
 ```
 
+The `TUnit0064` analyzer (warning) flags direct `WebApplicationFactory<T>` inheritance and offers a code fix that rewrites the base type to `TestWebApplicationFactory<T>`.
+
 See [Distributed Tracing](/docs/guides/distributed-tracing) for what happens under the hood.
 :::
 
