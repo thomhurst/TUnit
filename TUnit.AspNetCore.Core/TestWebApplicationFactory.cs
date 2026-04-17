@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http;
 using TUnit.AspNetCore.Extensions;
+using TUnit.AspNetCore.Http;
 using TUnit.AspNetCore.Interception;
 using TUnit.AspNetCore.Logging;
 using TUnit.Core;
@@ -41,6 +44,12 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
                     configureIsolatedServices(services);
                     services.AddSingleton(testContext);
                     services.AddTUnitLogging(testContext);
+
+                    if (options.AutoPropagateHttpClientFactory)
+                    {
+                        services.TryAddEnumerable(
+                            ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, TUnitHttpClientFilter>());
+                    }
                 });
 
             if (options.EnableHttpExchangeCapture)
@@ -173,11 +182,7 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     /// </summary>
     public new HttpClient CreateDefaultClient(params DelegatingHandler[] handlers)
     {
-        var all = new DelegatingHandler[handlers.Length + 2];
-        all[0] = new ActivityPropagationHandler();
-        all[1] = new TUnitTestIdHandler();
-        Array.Copy(handlers, 0, all, 2, handlers.Length);
-        return base.CreateDefaultClient(all);
+        return base.CreateDefaultClient(TUnitHttpClientFilter.PrependPropagationHandlers(handlers));
     }
 
     /// <inheritdoc cref="CreateDefaultClient(DelegatingHandler[])"/>

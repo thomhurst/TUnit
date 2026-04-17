@@ -135,14 +135,16 @@ Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `Traced
 
 ### `IHttpClientFactory` clients in the SUT
 
-Outbound HTTP calls the SUT itself makes (e.g. to a downstream service) are not auto-instrumented yet. Add the handler manually:
+`TestWebApplicationFactory<T>` auto-registers an `IHttpMessageHandlerBuilderFilter` that prepends the TUnit tracing and test-id handlers to every `IHttpClientFactory` pipeline built in the SUT. Outbound calls from `AddHttpClient<T>()`, named clients, and typed clients all carry `traceparent`, `baggage`, and `X-TUnit-TestId` automatically — no manual `.AddHttpMessageHandler<>()` wiring required.
+
+Opt out per-test when the SUT already instruments its own outbound HTTP (for example via the OpenTelemetry HttpClient instrumentation) by setting `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`:
 
 ```csharp
-services.AddHttpClient<IDownstreamApi, DownstreamApi>()
-    .AddHttpMessageHandler<ActivityPropagationHandler>();
+protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+{
+    options.AutoPropagateHttpClientFactory = false;
+}
 ```
-
-Tracking automation: [#5590](https://github.com/thomhurst/TUnit/issues/5590).
 
 ### Raw `HttpClient`
 
