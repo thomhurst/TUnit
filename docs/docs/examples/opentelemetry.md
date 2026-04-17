@@ -299,7 +299,7 @@ Two common causes.
 
 **1. The parent span isn't exported to the same backend.** The test-side `test case` span lives in the test process. If you only export from the SUT, the backend sees a child whose parent it has never seen. Either export the `"TUnit"` source from the test process too, or rely on the `tunit.test.id` tag (above) instead of trace hierarchy.
 
-**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. Since TUnit 0.x (issue #5592), the test process auto-aligns `DistributedContextPropagator.Current` to W3C on module load, and `TestWebApplicationFactory<T>` re-applies this for in-process SUTs — no manual wiring needed. Set `TUNIT_KEEP_LEGACY_PROPAGATOR=1` to opt out.
+**2. The two processes use different baggage formats.** .NET defaults to `Correlation-Context`. The OpenTelemetry SDK reads W3C `baggage`. TUnit auto-aligns `DistributedContextPropagator.Current` to W3C on module load, and `TestWebApplicationFactory<T>` re-applies this for in-process SUTs via an `IStartupFilter` — no manual wiring needed. Set `TUNIT_KEEP_LEGACY_PROPAGATOR=1` to opt out.
 
 For an **out-of-process** SUT that doesn't reference `TUnit.Core`, you still need to align it yourself:
 
