@@ -21,10 +21,25 @@ public interface ITestOutput
     TextWriter ErrorOutput { get; }
 
     /// <summary>
+    /// Gets the collection of timing measurements recorded during test execution.
+    /// Useful for performance profiling and identifying bottlenecks.
+    /// </summary>
+    [Obsolete("Use OpenTelemetry activity spans instead. Hook timings are now automatically recorded as OTel child spans of the test activity.")]
+    IReadOnlyCollection<Timing> Timings { get; }
+
+    /// <summary>
     /// Gets the collection of artifacts (files, screenshots, logs) attached to this test.
     /// Artifacts are preserved after test execution for review and debugging.
     /// </summary>
     IReadOnlyCollection<Artifact> Artifacts { get; }
+
+    /// <summary>
+    /// Records a timing measurement for a specific operation or phase.
+    /// Thread-safe for concurrent calls.
+    /// </summary>
+    /// <param name="timing">The timing information to record</param>
+    [Obsolete("Use OpenTelemetry activity spans instead. Hook timings are now automatically recorded as OTel child spans of the test activity.")]
+    void RecordTiming(Timing timing);
 
     /// <summary>
     /// Attaches an artifact (file, screenshot, log, etc.) to this test.

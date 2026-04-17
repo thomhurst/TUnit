@@ -37,6 +37,10 @@ public record TestBuilderContext
         set => _stateBag = value;
     }
 
+    /// <inheritdoc cref="StateBag"/>
+    [Obsolete("Use StateBag property instead.")]
+    public ConcurrentDictionary<string, object?> ObjectBag => StateBag;
+
     internal void CopyStateBagTo(TestBuilderContext target)
     {
         if (_stateBag is { IsEmpty: false } bag)

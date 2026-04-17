@@ -14,9 +14,12 @@ internal record TimingEntry(string StepName, DateTimeOffset Start, DateTimeOffse
 /// </summary>
 public partial class TestContext
 {
-    // Internal backing fields and properties
-    // Timings are written sequentially by the framework during test execution, never by user code.
+    // Internal backing fields and properties.
+    // Engine writes are sequential per-test (lifecycle-ordered).
+    // User-facing writes via the obsolete ITestOutput.RecordTiming API may be concurrent,
+    // so all access through the obsolete bridge takes _timingsLock.
     internal List<TimingEntry> Timings { get; } = [];
+    private readonly Lock _timingsLock = new();
     // Artifacts use a lock because AttachArtifact is user-facing and can be called
     // from parallel Task.WhenAll branches within a single test.
     private readonly Lock _artifactsLock = new();
@@ -28,6 +31,24 @@ public partial class TestContext
     TextWriter ITestOutput.StandardOutput => OutputWriter;
     TextWriter ITestOutput.ErrorOutput => ErrorOutputWriter;
     IReadOnlyCollection<Artifact> ITestOutput.Artifacts => Artifacts;
+
+#pragma warning disable CS0618 // Obsolete Timing API — bridge to internal TimingEntry storage
+    IReadOnlyCollection<Timing> ITestOutput.Timings
+    {
+        get
+        {
+            lock (_timingsLock)
+            {
+                return Timings.ConvertAll(t => new Timing(t.StepName, t.Start, t.End));
+            }
+        }
+    }
+
+    void ITestOutput.RecordTiming(Timing timing)
+    {
+        lock (_timingsLock) Timings.Add(new TimingEntry(timing.StepName, timing.Start, timing.End));
+    }
+#pragma warning restore CS0618
 
     void ITestOutput.AttachArtifact(Artifact artifact)
     {

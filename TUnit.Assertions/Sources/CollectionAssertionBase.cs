@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Sources;
@@ -297,6 +298,32 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     {
         Context.ExpressionBuilder.Append($".HasAtMost({expression})");
         return new CollectionHasAtMostAssertion<TCollection, TItem>(Context, maxCount);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the specified number of items.
+    /// This instance method enables calling HasCount with proper type inference.
+    /// Example: await Assert.That(list).HasCount(5);
+    /// </summary>
+    [Obsolete("Use Count().IsEqualTo(expectedCount) instead.")]
+    public CollectionCountAssertion<TCollection, TItem> HasCount(
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<TCollection, TItem>(Context, expectedCount);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for fluent count assertions.
+    /// This enables the pattern: .HasCount().GreaterThan(5)
+    /// Example: await Assert.That(list).HasCount().EqualTo(5);
+    /// </summary>
+    [Obsolete("Use Count() instead, which provides all numeric assertion methods. Example: Assert.That(list).Count().IsGreaterThan(5)")]
+    public CountWrapper<TCollection, TItem> HasCount()
+    {
+        Context.ExpressionBuilder.Append(".HasCount()");
+        return new CountWrapper<TCollection, TItem>(Context);
     }
 
     /// <summary>
