@@ -51,5 +51,6 @@ public class IHttpClientFactoryPropagationOptOutTests : WebApplicationTest<TestW
 
         await Assert.That(echoed).DoesNotContain(TUnitTestIdHandler.HeaderName);
         await Assert.That(echoed).DoesNotContain("traceparent:");
+        await Assert.That(echoed).DoesNotContain("baggage:");
     }
 }
