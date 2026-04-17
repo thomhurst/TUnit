@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using TUnit.Aspire.Telemetry;
 using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
@@ -27,6 +29,31 @@ public class TestTraceExporterTests
     {
         await Assert.That(TestTraceExporter.TryParseDashboardEndpoint("http://127.0.0.1:4317"))
             .IsEqualTo(new Uri("http://127.0.0.1:4317"));
+    }
+
+    [Test]
+    public async Task AddToBuilder_ExportsTracesForRegisteredSource()
+    {
+        await using var server = new OtlpTraceCaptureServer();
+        server.Start();
+
+        var sourceName = $"TUnit.Tests.{Guid.NewGuid():N}";
+        var endpoint = new Uri($"http://127.0.0.1:{server.Port}");
+
+        var builder = Sdk.CreateTracerProviderBuilder().AddSource(sourceName);
+        TestTraceExporter.AddToBuilder(builder, GetCurrentSessionContext(), endpoint);
+
+        using (var activitySource = new ActivitySource(sourceName))
+        using (var provider = builder.Build())
+        {
+            using var testCase = activitySource.StartActivity("add-to-builder case", ActivityKind.Internal);
+            testCase?.Stop();
+        }
+
+        var request = await server.WaitForRequestAsync("/v1/traces");
+        var body = Encoding.UTF8.GetString(request.Body);
+
+        await Assert.That(body).Contains("add-to-builder case");
     }
 
     [Test]

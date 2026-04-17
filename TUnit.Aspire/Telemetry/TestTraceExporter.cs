@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
@@ -8,86 +7,39 @@ using TUnit.Core;
 namespace TUnit.Aspire.Telemetry;
 
 /// <summary>
-/// Exports TUnit's per-test spans to the same OTLP backend used by the Aspire dashboard.
-/// This keeps backend trace trees navigable without requiring users to configure a separate
-/// tracer provider in their test project.
+/// Helpers that wire the Aspire dashboard's OTLP endpoint into a
+/// <see cref="TracerProviderBuilder"/>. The provider itself is owned by
+/// <c>TUnit.OpenTelemetry.AutoStart</c>; this class only contributes configuration.
 /// </summary>
 internal static class TestTraceExporter
 {
     private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
-    private const string TUnitSourceName = "TUnit";
     private const string DefaultServiceName = "TUnit.Tests";
 
-    private static readonly Lock SyncLock = new();
-    private static TracerProvider? _tracerProvider;
+    internal static Uri? TryGetDashboardEndpoint()
+        => TryParseDashboardEndpoint(Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar));
 
-    internal static bool IsStarted
+    internal static void AddToBuilder(TracerProviderBuilder builder, TestSessionContext context, Uri endpoint)
     {
-        get
-        {
-            lock (SyncLock)
-            {
-                return _tracerProvider is not null;
-            }
-        }
-    }
-
-    internal static void TryStart(TestSessionContext context)
-    {
-        var endpoint = TryParseDashboardEndpoint(
-            Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar));
-
-        if (endpoint is null)
-        {
-            return;
-        }
-
-        lock (SyncLock)
-        {
-            if (_tracerProvider is not null)
-            {
-                return;
-            }
-
-            _tracerProvider = CreateTracerProvider(endpoint, context, TUnitSourceName);
-        }
-    }
-
-    /// <summary>
-    /// Builds a standalone <see cref="TracerProvider"/> for the given endpoint and session.
-    /// Caller owns disposal. Used by <see cref="TryStart"/> for the singleton case and by
-    /// tests that need an isolated provider (parallel-safe — no static state touched).
-    /// </summary>
-    internal static TracerProvider CreateTracerProvider(
-        Uri endpoint, TestSessionContext context, string sourceName)
-    {
-        return Sdk.CreateTracerProviderBuilder()
+        builder
             .SetResourceBuilder(CreateResourceBuilder(context))
-            .AddSource(sourceName)
             .AddOtlpExporter(options =>
             {
                 options.Endpoint = GetTracesEndpoint(endpoint);
                 options.Protocol = OtlpExportProtocol.HttpProtobuf;
-            })
-            .Build();
+            });
     }
 
-    internal static void Stop()
+    /// <summary>
+    /// Kept for tests that need a standalone provider bound to a captured OTLP endpoint.
+    /// Not used by the production code path — <see cref="AddToBuilder"/> is.
+    /// </summary>
+    internal static TracerProvider CreateTracerProvider(
+        Uri endpoint, TestSessionContext context, string sourceName)
     {
-        TracerProvider? providerToDispose = null;
-
-        lock (SyncLock)
-        {
-            if (_tracerProvider is null)
-            {
-                return;
-            }
-
-            providerToDispose = _tracerProvider;
-            _tracerProvider = null;
-        }
-
-        providerToDispose.Dispose();
+        var builder = Sdk.CreateTracerProviderBuilder().AddSource(sourceName);
+        AddToBuilder(builder, context, endpoint);
+        return builder.Build();
     }
 
     internal static Uri? TryParseDashboardEndpoint(string? value)
