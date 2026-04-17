@@ -2,7 +2,6 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace TUnit.Core;
 
@@ -44,11 +43,15 @@ internal static class PropagatorAlignment
 
         if (DistributedContextPropagator.Current.GetType().FullName == LegacyPropagatorTypeName)
         {
-            DistributedContextPropagator.Current = CreateW3CPropagator();
+            DistributedContextPropagator.Current = CreateAlignedPropagator();
         }
     }
 
-    internal static DistributedContextPropagator CreateW3CPropagator()
+    /// <summary>
+    /// Returns the propagator TUnit aligns to. On .NET 10+ this is the runtime's
+    /// built-in W3C propagator; on .NET 8/9 a minimal in-library equivalent.
+    /// </summary>
+    internal static DistributedContextPropagator CreateAlignedPropagator()
     {
 #if NET10_0_OR_GREATER
         return DistributedContextPropagator.CreateW3CPropagator();
@@ -65,11 +68,10 @@ internal static class PropagatorAlignment
     /// </summary>
     private sealed class W3CBaggagePropagator : DistributedContextPropagator
     {
-        private const string BaggageHeader = "baggage";
         private const string LegacyBaggageHeader = "Correlation-Context";
 
         private static readonly DistributedContextPropagator DefaultPropagator = CreateDefaultPropagator();
-        private static readonly IReadOnlyCollection<string> FieldNames = new[] { "traceparent", "tracestate", BaggageHeader };
+        private static readonly IReadOnlyCollection<string> FieldNames = new[] { "traceparent", "tracestate", TUnitActivitySource.BaggageHeader };
 
         public override IReadOnlyCollection<string> Fields => FieldNames;
 
@@ -80,8 +82,8 @@ internal static class PropagatorAlignment
                 return;
             }
 
-            // Delegate traceparent/tracestate to the default (W3C-compatible) propagator,
-            // filtering out its legacy baggage header — we emit W3C baggage ourselves below.
+            // Filter the legacy baggage header from the default propagator's output
+            // so we don't emit both Correlation-Context and W3C baggage for the same values.
             DefaultPropagator.Inject(activity, carrier, (c, key, value) =>
             {
                 if (!string.Equals(key, LegacyBaggageHeader, StringComparison.OrdinalIgnoreCase))
@@ -90,9 +92,9 @@ internal static class PropagatorAlignment
                 }
             });
 
-            if (BuildBaggageHeader(activity) is { } baggage)
+            if (TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
             {
-                setter(carrier, BaggageHeader, baggage);
+                setter(carrier, TUnitActivitySource.BaggageHeader, baggage);
             }
         }
 
@@ -106,7 +108,7 @@ internal static class PropagatorAlignment
                 return null;
             }
 
-            getter(carrier, BaggageHeader, out var header, out var headers);
+            getter(carrier, TUnitActivitySource.BaggageHeader, out var header, out var headers);
             if (string.IsNullOrEmpty(header) && headers is not null)
             {
                 foreach (var h in headers)
@@ -122,58 +124,47 @@ internal static class PropagatorAlignment
             return string.IsNullOrEmpty(header) ? null : ParseBaggage(header!);
         }
 
-        private static string? BuildBaggageHeader(Activity activity)
+        private static List<KeyValuePair<string, string?>>? ParseBaggage(string header)
         {
-            StringBuilder? sb = null;
-            foreach (var (key, value) in activity.Baggage)
-            {
-                if (string.IsNullOrEmpty(key))
-                {
-                    continue;
-                }
+            List<KeyValuePair<string, string?>>? result = null;
+            var remaining = header.AsSpan();
 
-                if (sb is null)
+            while (!remaining.IsEmpty)
+            {
+                ReadOnlySpan<char> entry;
+                var comma = remaining.IndexOf(',');
+                if (comma < 0)
                 {
-                    sb = new StringBuilder();
+                    entry = remaining;
+                    remaining = default;
                 }
                 else
                 {
-                    sb.Append(',');
+                    entry = remaining[..comma];
+                    remaining = remaining[(comma + 1)..];
                 }
 
-                sb.Append(Uri.EscapeDataString(key));
-                sb.Append('=');
-                sb.Append(Uri.EscapeDataString(value ?? string.Empty));
-            }
-
-            return sb?.ToString();
-        }
-
-        private static List<KeyValuePair<string, string?>> ParseBaggage(string header)
-        {
-            var result = new List<KeyValuePair<string, string?>>();
-            foreach (var entry in header.Split(','))
-            {
-                var span = entry.AsSpan().Trim();
-                // Strip W3C baggage metadata (anything after ';')
-                var semi = span.IndexOf(';');
+                entry = entry.Trim();
+                var semi = entry.IndexOf(';');
                 if (semi >= 0)
                 {
-                    span = span[..semi];
+                    entry = entry[..semi];
                 }
 
-                var eq = span.IndexOf('=');
+                var eq = entry.IndexOf('=');
                 if (eq <= 0)
                 {
                     continue;
                 }
 
-                var key = Uri.UnescapeDataString(span[..eq].Trim().ToString());
-                var value = Uri.UnescapeDataString(span[(eq + 1)..].Trim().ToString());
-                if (key.Length > 0)
+                var key = Uri.UnescapeDataString(entry[..eq].Trim().ToString());
+                if (key.Length == 0)
                 {
-                    result.Add(new KeyValuePair<string, string?>(key, value));
+                    continue;
                 }
+
+                var value = Uri.UnescapeDataString(entry[(eq + 1)..].Trim().ToString());
+                (result ??= new List<KeyValuePair<string, string?>>()).Add(new KeyValuePair<string, string?>(key, value));
             }
 
             return result;

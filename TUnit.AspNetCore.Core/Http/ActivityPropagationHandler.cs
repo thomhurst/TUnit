@@ -117,14 +117,14 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         // If a propagator already emitted W3C baggage (e.g. OTel SDK's BaggagePropagator),
         // preserve it; otherwise emit our own so LegacyPropagator-based stacks still
         // propagate test correlation baggage.
-        if (activity is null || headers.Contains("baggage"))
+        if (activity is null || headers.Contains(TUnit.Core.TUnitActivitySource.BaggageHeader))
         {
             return;
         }
 
         if (TUnit.Core.TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
         {
-            headers.TryAddWithoutValidation("baggage", baggage);
+            headers.TryAddWithoutValidation(TUnit.Core.TUnitActivitySource.BaggageHeader, baggage);
         }
     }
 }

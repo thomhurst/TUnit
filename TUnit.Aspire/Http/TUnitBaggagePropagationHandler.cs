@@ -38,12 +38,13 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
                 }
             });
 
-            if (!request.Headers.Contains("baggage")
+            if (!request.Headers.Contains(TUnitActivitySource.BaggageHeader)
                 && TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
             {
-                // Older target frameworks still default to Correlation-Context for baggage.
-                // Emit W3C baggage explicitly so backend correlation is stable everywhere.
-                request.Headers.TryAddWithoutValidation("baggage", baggage);
+                // Belt-and-braces for users who opt out of TUnit's W3C propagator alignment
+                // via TUNIT_KEEP_LEGACY_PROPAGATOR=1: LegacyPropagator emits Correlation-Context
+                // only, so still emit W3C baggage explicitly for backend correlation.
+                request.Headers.TryAddWithoutValidation(TUnitActivitySource.BaggageHeader, baggage);
             }
         }
 
