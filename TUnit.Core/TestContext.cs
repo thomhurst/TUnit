@@ -34,7 +34,12 @@ public partial class TestContext : Context,
     private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsByGuid = new();
     private readonly TestBuilderContext _testBuilderContext;
     private readonly Guid _idGuid;
-    private string? _idString;
+    // volatile: _idString is lazily materialized on first Id access. Without volatile,
+    // a reader on ARM/WASM (or AOT without JIT-inserted fences) could observe a stale
+    // null even after another thread wrote the string. Reference writes are atomic,
+    // so a benign double-ToString is possible but harmless — volatile only fixes the
+    // staleness, not the (acceptable) race on materialization.
+    private volatile string? _idString;
     private string? _cachedDisplayName;
 
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
