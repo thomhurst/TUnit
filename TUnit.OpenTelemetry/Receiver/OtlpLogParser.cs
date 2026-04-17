@@ -309,9 +309,9 @@ internal ref struct ProtobufReader
                 $"Truncated fixed64 field: need 8 bytes but only {_data.Length} remain.");
         }
 
-        var result = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(_data);
+        var result = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(_data);
         _data = _data[8..];
-        return result;
+        return (long)result;
     }
 
     public string ReadString()
