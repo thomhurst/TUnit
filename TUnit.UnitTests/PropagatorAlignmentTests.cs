@@ -39,7 +39,7 @@ public class PropagatorAlignmentTests
     public async Task AlignIfDefault_Does_Not_Replace_Existing_W3C_Propagator()
     {
         var original = DistributedContextPropagator.Current;
-        var w3c = DistributedContextPropagator.CreateW3CPropagator();
+        var w3c = PropagatorAlignment.CreateW3CPropagator();
 
         try
         {
