@@ -123,7 +123,7 @@ Some libraries (message brokers like DotPulsar, EF providers, connection pools) 
 **You can't fix the parent chain after the fact.** What works:
 
 - Add the [`TUnitTagProcessor`](/docs/examples/opentelemetry#spans-from-test-a-are-showing-up-under-test-b) so spans always carry `tunit.test.id` even when the trace ID is wrong, then filter by tag.
-- Suppress `ExecutionContext` flow when starting hosted services so they capture a clean context — see the same troubleshooting section.
+- For hosted services inside `TestWebApplicationFactory<T>`, this leak is auto-mitigated — each `IHostedService.StartAsync` runs under `ExecutionContext.SuppressFlow()`, so background tasks it spawns capture a clean context. Override `SuppressHostedServiceExecutionContextFlow` and return `false` to opt out. Third-party `ActivitySource` instances captured at class-load time remain a residual concern.
 
 ### `WebApplicationFactory` without TUnit's wrapper
 
