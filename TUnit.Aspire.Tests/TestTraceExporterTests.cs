@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using TUnit.Aspire.Telemetry;
 using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
@@ -30,38 +32,28 @@ public class TestTraceExporterTests
     }
 
     [Test]
-    public async Task CreateTracerProvider_ExportsTracesForRegisteredSource()
+    public async Task AddToBuilder_ExportsTracesForRegisteredSource()
     {
         await using var server = new OtlpTraceCaptureServer();
         server.Start();
 
-        // Per-test ActivitySource name keeps spans isolated from any other test or production
-        // listener, so this test stays parallel-safe even though OpenTelemetry exporters are
-        // process-wide.
         var sourceName = $"TUnit.Tests.{Guid.NewGuid():N}";
         var endpoint = new Uri($"http://127.0.0.1:{server.Port}");
 
+        var builder = Sdk.CreateTracerProviderBuilder().AddSource(sourceName);
+        TestTraceExporter.AddToBuilder(builder, GetCurrentSessionContext(), endpoint);
+
         using (var activitySource = new ActivitySource(sourceName))
-        using (var provider = TestTraceExporter.CreateTracerProvider(
-            endpoint, GetCurrentSessionContext(), sourceName))
+        using (var provider = builder.Build())
         {
-            using var testCase = activitySource.StartActivity("test case", ActivityKind.Internal);
-            using var testBody = activitySource.StartActivity("test body", ActivityKind.Internal);
-
-            await Assert.That(testCase).IsNotNull();
-            await Assert.That(testBody).IsNotNull();
-
-            testBody?.Stop();
+            using var testCase = activitySource.StartActivity("add-to-builder case", ActivityKind.Internal);
             testCase?.Stop();
         }
-        // Disposing the provider flushes pending spans to the exporter.
 
         var request = await server.WaitForRequestAsync("/v1/traces");
         var body = Encoding.UTF8.GetString(request.Body);
 
-        await Assert.That(body).Contains("test case");
-        await Assert.That(body).Contains("test body");
-        await Assert.That(body).Contains(typeof(TestTraceExporterTests).Assembly.GetName().Name!);
+        await Assert.That(body).Contains("add-to-builder case");
     }
 
     [Test]

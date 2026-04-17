@@ -8,7 +8,58 @@ Activity tracing requires .NET 8 or later. It is not available on .NET Framework
 
 ## Setup
 
-### Option A: OpenTelemetry SDK (recommended)
+### Option A: Zero-config (`TUnit.OpenTelemetry`)
+
+Install the meta-package. OTLP is already bundled — no other OpenTelemetry packages needed for the common case:
+
+```bash
+dotnet add package TUnit.OpenTelemetry
+```
+
+Point it at a backend:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+That's it. The package auto-wires a `TracerProvider` at `[Before(TestDiscovery)]` (subscribed to `TUnit`, `TUnit.Lifecycle`, and `TUnit.AspNetCore.Http`), includes a pre-registered `TUnitTestCorrelationProcessor`, and disposes the provider at `[After(TestSession)]`.
+
+#### Customizing (add exporters, processors, resources)
+
+Call `TUnitOpenTelemetry.Configure` from any `[Before(TestDiscovery)]` hook with `Order` less than `int.MaxValue`:
+
+```csharp
+using OpenTelemetry.Trace;
+using TUnit.OpenTelemetry;
+
+public static class TraceCustomization
+{
+    [Before(TestDiscovery)]
+    public static void Configure()
+    {
+        TUnitOpenTelemetry.Configure(builder => builder
+            .AddConsoleExporter()
+            .AddProcessor(new MyCustomProcessor()));
+    }
+}
+```
+
+Each callback is applied in registration order after the package's defaults, so you can override the resource or add additional exporters.
+
+#### Environment switches
+
+| Variable | Behavior |
+|----------|----------|
+| `TUNIT_OTEL_AUTOSTART=0` | Opt out — package does nothing, user hooks run as normal |
+| `TUNIT_OTEL_AUTOSTART=1` | Force on — build the provider even if another listener is already attached |
+| `OTEL_SERVICE_NAME` | Override `service.name` (defaults to the entry assembly name) |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Enables OTLP export when set; when unset, the package stays dormant unless `Configure` is called |
+
+#### Coexistence with hand-rolled setup
+
+If you already register your own `TracerProvider` or `ActivityListener` in a `[Before(TestDiscovery)]` hook, the package detects the attached listener and stays out of the way — no duplicate spans. `Configure(...)` applies only to the package's provider; do not mix it with a separately built `Sdk.CreateTracerProviderBuilder()` in the same project. Pick one.
+
+### Option B: Manual (full control)
 
 Add the OpenTelemetry packages to your test project:
 
@@ -58,7 +109,7 @@ Use one stable service name for the test runner (for example, `MyTests`) rather 
 `service.name` per test. Individual tests are already distinguished by their own trace IDs and
 TUnit tags such as `tunit.test.id`.
 
-### Option B: Raw `ActivityListener` (no SDK dependency)
+### Option C: Raw `ActivityListener` (no SDK dependency)
 
 If you don't want the OpenTelemetry SDK, you can subscribe directly with a `System.Diagnostics.ActivityListener`:
 
@@ -256,7 +307,11 @@ In Seq use `tunit.session.id = '<id>'`. In Jaeger or Tempo use the tag filter bo
 
 Usually a background worker (a hosted service, a message broker like DotPulsar, or a connection pool) started during one test and kept running. Anything it produces inherits whichever test was current when it started.
 
-**Quickest fix**: tag every span with the current test's ID so you can still filter even when the parent is wrong. Add this processor to your OpenTelemetry setup:
+**Quickest fix**: tag every span with the current test's ID so you can still filter even when the parent is wrong.
+
+If you installed `TUnit.OpenTelemetry` (Option A), `TUnitTestCorrelationProcessor` is already registered for you — no additional setup.
+
+For manual setups, add this processor to your tracer builder:
 
 ```csharp
 using System.Diagnostics;
@@ -278,7 +333,7 @@ public sealed class TUnitTagProcessor : BaseProcessor<Activity>
 .AddProcessor(new TUnitTagProcessor())
 ```
 
-Now you can filter by `tunit.test.id` in your backend even when the trace hierarchy is wrong. (Tracking automation: [#5591](https://github.com/thomhurst/TUnit/issues/5591).)
+Now you can filter by `tunit.test.id` in your backend even when the trace hierarchy is wrong.
 
 **Better fix** if you control the worker: stop it from capturing the test's context in the first place.
 

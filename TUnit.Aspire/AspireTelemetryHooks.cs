@@ -1,23 +1,26 @@
 using TUnit.Aspire.Telemetry;
 using TUnit.Core;
+using TUnit.OpenTelemetry;
 
 namespace TUnit.Aspire;
 
 /// <summary>
-/// Starts and stops the Aspire runner trace exporter for the current test session.
-/// This keeps per-test TUnit spans visible in external OTLP backends alongside SUT spans.
+/// Registers a Configure callback on <see cref="TUnitOpenTelemetry"/> so that the shared
+/// auto-wired TracerProvider exports spans to the Aspire dashboard's OTLP endpoint when
+/// <c>DOTNET_DASHBOARD_OTLP_ENDPOINT_URL</c> is present.
 /// </summary>
 public static class AspireTelemetryHooks
 {
-    [Before(HookType.TestSession, Order = int.MaxValue)]
-    public static void StartRunnerTraceExport(TestSessionContext context)
+    [Before(HookType.TestDiscovery, Order = AutoStart.AutoStartOrder - 1)]
+    public static void RegisterAspireExporter(TestSessionContext context)
     {
-        TestTraceExporter.TryStart(context);
-    }
+        var endpoint = TestTraceExporter.TryGetDashboardEndpoint();
+        if (endpoint is null)
+        {
+            return;
+        }
 
-    [After(HookType.TestSession, Order = int.MaxValue)]
-    public static void StopRunnerTraceExport()
-    {
-        TestTraceExporter.Stop();
+        TUnitOpenTelemetry.Configure(builder =>
+            TestTraceExporter.AddToBuilder(builder, context, endpoint));
     }
 }

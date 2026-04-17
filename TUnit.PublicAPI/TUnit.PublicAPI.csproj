@@ -21,6 +21,10 @@
       <ProjectReference Include="..\TUnit.Playwright\TUnit.Playwright.csproj" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+      <ProjectReference Include="..\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
+    </ItemGroup>
+
     <Import Project="..\TestProject.targets" />
 
 </Project>

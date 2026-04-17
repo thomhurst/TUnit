@@ -19,6 +19,12 @@ public partial class Tests
     public Task Playwright_Library_Has_No_API_Changes()
         => VerifyPublicApi(typeof(Playwright.PageTest).Assembly);
 
+#if NET
+    [Test]
+    public Task OpenTelemetry_Library_Has_No_API_Changes()
+        => VerifyPublicApi(typeof(TUnit.OpenTelemetry.TUnitOpenTelemetry).Assembly);
+#endif
+
     private async Task VerifyPublicApi(Assembly assembly)
     {
         var publicApi = assembly.GeneratePublicApi(new ApiGeneratorOptions
@@ -30,6 +36,18 @@ public partial class Tests
         });
 
         await VerifyTUnit.Verify(publicApi)
+            .AddScrubber(sb =>
+            {
+                // Scrub deterministic source paths (e.g. "/_/TUnit.OpenTelemetry/File.cs")
+                // before the URL regex mangles them into bare "/_/".
+                var replaced = System.Text.RegularExpressions.Regex.Replace(
+                    sb.ToString(),
+                    @"/_/[^""\s,)]*",
+                    "PATH_SCRUBBED");
+                sb.Clear();
+                sb.Append(replaced);
+                return sb;
+            })
             .AddScrubber(Scrub)
             .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\r\n", "\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
