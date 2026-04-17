@@ -61,6 +61,7 @@
     <Project Path="TUnit.Mocks.Logging.Tests/TUnit.Mocks.Logging.Tests.csproj" />
     <Project Path="TUnit.Mocks.SourceGenerator.Tests/TUnit.Mocks.SourceGenerator.Tests.csproj" />
     <Project Path="TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj" />
+    <Project Path="TUnit.OpenTelemetry.Tests/TUnit.OpenTelemetry.Tests.csproj" />
     <Project Path="TUnit.PublicAPI/TUnit.PublicAPI.csproj" />
     <Project Path="TUnit.RpcTests/TUnit.RpcTests.csproj" />
     <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />

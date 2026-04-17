@@ -80,6 +80,7 @@
     <Project Path="TUnit.Aspire.Tests/TUnit.Aspire.Tests.csproj" />
     <Project Path="TUnit.Aspire.Tests.AppHost/TUnit.Aspire.Tests.AppHost.csproj" />
     <Project Path="TUnit.Aspire.Tests.ApiService/TUnit.Aspire.Tests.ApiService.csproj" />
+    <Project Path="TUnit.OpenTelemetry.Tests/TUnit.OpenTelemetry.Tests.csproj" />
     <Project Path="TUnit.AspNetCore.Tests/TUnit.AspNetCore.Tests.csproj" />
     <Project Path="TUnit.AspNetCore.Tests.WebApp/TUnit.AspNetCore.Tests.WebApp.csproj" />
     <Project Path="TUnit.AspNetCore.Tests.MinimalApi/TUnit.AspNetCore.Tests.MinimalApi.csproj" />
