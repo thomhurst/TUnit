@@ -87,6 +87,17 @@ public class TestSessionContext : Context
 
     internal bool FirstTestStarted { get; set; }
 
+    private int _failureCount;
+
+    /// <summary>
+    /// True if any test in the session completed with Failed, Timeout, or Cancelled state.
+    /// Updated atomically by <see cref="MarkFailure"/>; avoids an O(N) AllTests traversal
+    /// in after-session hook paths.
+    /// </summary>
+    public bool HasFailures => Volatile.Read(ref _failureCount) > 0;
+
+    internal void MarkFailure() => Interlocked.Increment(ref _failureCount);
+
     internal readonly List<Artifact> Artifacts = [];
 
     public void AddArtifact(Artifact artifact)

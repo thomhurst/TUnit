@@ -1681,6 +1681,7 @@ namespace
     {
         public .<.TestContext> AllTests { get; }
         public .<.AssemblyHookContext> Assemblies { get; }
+        public bool HasFailures { get; }
         public required string Id { get; init; }
         public .<.ClassHookContext> TestClasses { get; }
         public .TestDiscoveryContext TestDiscoveryContext { get; }

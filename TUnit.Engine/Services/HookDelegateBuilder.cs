@@ -104,11 +104,24 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             await _logger.LogTraceAsync($"Built {hooks.Count} {hookTypeName} hook delegate(s)").ConfigureAwait(false);
         }
 
-        return hooks
-            .OrderBy(static h => h.order)
-            .ThenBy(static h => h.registrationIndex)
-            .Select(static h => h.hook)
-            .ToList();
+        return SortAndProject(hooks);
+    }
+
+    private static List<NamedHookDelegate<TContext>> SortAndProject<TContext>(
+        List<(int order, int registrationIndex, NamedHookDelegate<TContext> hook)> hooks)
+    {
+        hooks.Sort(static (a, b) =>
+        {
+            var orderCompare = a.order.CompareTo(b.order);
+            return orderCompare != 0 ? orderCompare : a.registrationIndex.CompareTo(b.registrationIndex);
+        });
+
+        var result = new List<NamedHookDelegate<TContext>>(hooks.Count);
+        for (var i = 0; i < hooks.Count; i++)
+        {
+            result.Add(hooks[i].hook);
+        }
+        return result;
     }
 
     private Task<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildGlobalBeforeEveryTestHooksAsync()
@@ -471,11 +484,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
 
-        return allHooks
-            .OrderBy(static h => h.order)
-            .ThenBy(static h => h.registrationIndex)
-            .Select(static h => h.hook)
-            .ToList();
+        return SortAndProject(allHooks);
     }
 
     public async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
@@ -505,11 +514,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
 
-        return allHooks
-            .OrderBy(static h => h.order)
-            .ThenBy(static h => h.registrationIndex)
-            .Select(static h => h.hook)
-            .ToList();
+        return SortAndProject(allHooks);
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<TestSessionContext>>> CollectBeforeTestSessionHooksAsync()

@@ -238,6 +238,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     break;
                 case TestState.Timeout:
                 case TestState.Failed:
+                    TestSessionContext.Current?.MarkFailure();
                     await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 case TestState.Skipped:
@@ -247,13 +248,14 @@ internal sealed class TestCoordinator : ITestCoordinator
                     await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
                     break;
                 case TestState.Cancelled:
+                    TestSessionContext.Current?.MarkFailure();
                     await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            TestContext.RemoveById(test.Context.Id);
+            test.Context.RemoveFromRegistry();
         }
     }
 
