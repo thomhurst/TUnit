@@ -110,6 +110,11 @@ public abstract class Context : IContext, IDisposable
 
     public virtual string GetErrorOutput() => _errorOutputWriter?.GetContent() ?? string.Empty;
 
+    // Fast path for callers that need to know whether anything was ever captured —
+    // lets the result-building code skip the reader/writer lock acquisition entirely
+    // for the (very common) case of a passing test with no output.
+    internal virtual bool HasCapturedOutput => _outputWriter != null || _errorOutputWriter != null;
+
     public DefaultLogger GetDefaultLogger()
     {
         return _defaultLogger ??= new DefaultLogger(this);

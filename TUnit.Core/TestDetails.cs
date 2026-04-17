@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 
@@ -49,7 +50,39 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }
     public required Type ReturnType { get; set; }
-    public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new ConcurrentDictionary<string, object?>();
+    // Lazy — the vast majority of tests use zero injected properties, so we skip the
+    // per-test ConcurrentDictionary allocation (~200+ bytes) until there's actually
+    // something to store.
+    private ConcurrentDictionary<string, object?>? _testClassInjectedPropertyArguments;
+
+    public IDictionary<string, object?> TestClassInjectedPropertyArguments
+    {
+        get => _testClassInjectedPropertyArguments ?? EmptyInjectedPropertyArguments.Instance;
+        init => _testClassInjectedPropertyArguments = value switch
+        {
+            null => null,
+            ConcurrentDictionary<string, object?> cd => cd,
+            _ => new ConcurrentDictionary<string, object?>(value)
+        };
+    }
+
+    internal ConcurrentDictionary<string, object?> GetOrCreateInjectedPropertyArguments()
+    {
+        var existing = _testClassInjectedPropertyArguments;
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var created = new ConcurrentDictionary<string, object?>();
+        return Interlocked.CompareExchange(ref _testClassInjectedPropertyArguments, created, null) ?? created;
+    }
+
+    private static class EmptyInjectedPropertyArguments
+    {
+        public static readonly IDictionary<string, object?> Instance =
+            new ReadOnlyDictionary<string, object?>(new Dictionary<string, object?>(0));
+    }
     public List<string> Categories { get; } = [];
     public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }

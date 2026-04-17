@@ -134,8 +134,6 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            List<Exception>? cleanupExceptions = null;
-
             // Flush console interceptors to ensure all buffered output is captured
             // This is critical for output from Console.Write() without newline
             try
@@ -148,7 +146,9 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
             }
 
-            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions ??= []).ConfigureAwait(false);
+            // Stay null on the success path — materializing the list only when something actually fails
+            // saves ~56 bytes per passing test (and passing is the overwhelming majority).
+            var cleanupExceptions = await _objectTracker.UntrackObjects(test.Context).ConfigureAwait(false);
 
 #if NET
             // Per-test cleanup has completed. Keep the test activity open for final status
@@ -161,13 +161,21 @@ internal sealed class TestCoordinator : ITestCoordinator
             var testAssembly = testClass.Assembly;
             var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None).ConfigureAwait(false);
 
-            if (hookExceptions.Count > 0)
+            if (hookExceptions is { Count: > 0 })
             {
                 foreach (var ex in hookExceptions)
                 {
                     await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}").ConfigureAwait(false);
                 }
-                (cleanupExceptions ??= []).AddRange(hookExceptions);
+
+                if (cleanupExceptions is null)
+                {
+                    cleanupExceptions = hookExceptions;
+                }
+                else
+                {
+                    cleanupExceptions.AddRange(hookExceptions);
+                }
             }
 
             // Invoke Last event receivers for class and assembly

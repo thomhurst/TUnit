@@ -552,9 +552,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Cleans up after test execution.
     /// Decrements reference counts and disposes objects when count reaches zero.
     /// </summary>
-    public Task CleanupTestAsync(TestContext testContext, List<Exception> cleanupExceptions)
+    public Task<List<Exception>?> CleanupTestAsync(TestContext testContext)
     {
-        return _objectTracker.UntrackObjects(testContext, cleanupExceptions).AsTask();
+        return _objectTracker.UntrackObjects(testContext).AsTask();
     }
 
     #endregion
