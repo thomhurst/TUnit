@@ -99,7 +99,11 @@ For cross-process correlation (your test calling your SUT), use `tunit.test.id`.
 
 ## When tracing across processes
 
-If your test process and your SUT are different processes (or you're using `WebApplicationFactory` heavily), make sure both sides agree on the propagator:
+Cross-process baggage propagation (e.g. `tunit.test.id` reaching your SUT) depends on both sides using the W3C `baggage` header rather than .NET's default `Correlation-Context`.
+
+TUnit handles this automatically: a module initializer in `TUnit.Core` replaces the default `DistributedContextPropagator.LegacyPropagator` with `DistributedContextPropagator.CreateW3CPropagator()`. Any custom propagator you set yourself is left alone. If you want to retain the legacy behavior, set `TUNIT_KEEP_LEGACY_PROPAGATOR=1`.
+
+For the SUT side, if it shares the test process (e.g. `TestWebApplicationFactory<T>`), alignment flows automatically. For out-of-process SUTs that don't reference `TUnit.Core`, align the propagator yourself on startup — either match `DistributedContextPropagator.Current` or, if you use the OpenTelemetry SDK:
 
 ```csharp
 using OpenTelemetry;
@@ -111,8 +115,6 @@ Sdk.SetDefaultTextMapPropagator(new CompositeTextMapPropagator(
     new BaggagePropagator(),
 ]));
 ```
-
-Without this, .NET's default propagator emits `Correlation-Context`, but the OpenTelemetry SDK only reads W3C `baggage`. The mismatch silently drops baggage and you lose `tunit.test.id` on the SUT side.
 
 ## Limitations
 

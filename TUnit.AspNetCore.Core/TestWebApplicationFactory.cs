@@ -69,11 +69,15 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     /// Registers <see cref="CorrelatedTUnitLoggingExtensions.AddCorrelatedTUnitLogging"/> here
     /// (rather than in <see cref="CreateHostBuilder"/>) so that minimal API hosts — where
     /// <see cref="CreateHostBuilder"/> returns <c>null</c> — also get correlated logging.
+    /// Also re-aligns <see cref="System.Diagnostics.DistributedContextPropagator.Current"/>
+    /// to the W3C propagator for the SUT, in case user startup code reset it to the default.
     /// Subclasses overriding this method must call <c>base.ConfigureWebHost(builder)</c>.
     /// </summary>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
+
+        PropagatorAlignment.AlignIfDefault();
 
         builder.ConfigureServices(services =>
         {
