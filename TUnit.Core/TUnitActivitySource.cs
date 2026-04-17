@@ -12,6 +12,9 @@ public static class TUnitActivitySource
     internal const string SourceName = "TUnit";
     internal const string LifecycleSourceName = "TUnit.Lifecycle";
 
+    /// <summary>W3C baggage HTTP header name.</summary>
+    internal const string BaggageHeader = "baggage";
+
     internal static readonly ActivitySource Source = new(SourceName, Version);
     internal static readonly ActivitySource LifecycleSource = new(LifecycleSourceName, Version);
 
