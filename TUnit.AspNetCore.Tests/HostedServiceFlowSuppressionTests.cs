@@ -29,6 +29,21 @@ public class HostedServiceFlowSuppressionTests
     }
 
     [Test]
+    public async Task StartAsync_SuppressesFlow_WhenSpawnIsAfterAwait()
+    {
+        using var outer = new Activity("outer-test").Start();
+
+        var probe = new DeepAsyncFlowProbeHostedService();
+        await using var factory = new DeepAsyncFlowSuppressTestFactory { Probe = probe };
+
+        _ = factory.Server;
+
+        await probe.SpawnedTaskCompleted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        await Assert.That(probe.ActivityInSpawnedTask).IsNull();
+    }
+
+    [Test]
     public async Task OptOut_PreservesFlow_IntoSpawnedTasks()
     {
         using var outer = new Activity("outer-test").Start();
@@ -112,6 +127,43 @@ internal sealed class FlowProbeHostedService : IHostedService
         });
 
         return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}
+
+internal class DeepAsyncFlowSuppressTestFactory : TestWebApplicationFactory<Program>
+{
+    public DeepAsyncFlowProbeHostedService? Probe { get; set; }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+
+        builder.ConfigureServices(services =>
+        {
+            if (Probe is not null)
+            {
+                services.AddSingleton<IHostedService>(Probe);
+            }
+        });
+    }
+}
+
+internal sealed class DeepAsyncFlowProbeHostedService : IHostedService
+{
+    public Activity? ActivityInSpawnedTask { get; private set; }
+    public TaskCompletionSource SpawnedTaskCompleted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await Task.Yield();
+
+        _ = Task.Run(() =>
+        {
+            ActivityInSpawnedTask = Activity.Current;
+            SpawnedTaskCompleted.TrySetResult();
+        });
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

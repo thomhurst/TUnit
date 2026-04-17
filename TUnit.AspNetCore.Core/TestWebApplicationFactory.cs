@@ -83,20 +83,22 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
     /// <summary>
     /// Controls whether every registered <see cref="Microsoft.Extensions.Hosting.IHostedService"/>
-    /// has its <c>StartAsync</c> wrapped in <see cref="ExecutionContext.SuppressFlow"/>.
+    /// has its <c>StartAsync</c> dispatched onto a thread-pool worker with a clean
+    /// <see cref="ExecutionContext"/>.
     /// <para>
     /// When enabled (the default), background work spawned inside a hosted service's
-    /// <c>StartAsync</c> captures a clean <see cref="ExecutionContext"/>. Activities
-    /// emitted later on background threads become orphan roots rather than inheriting
-    /// the first test's <see cref="System.Diagnostics.Activity.Current"/>. Without this,
-    /// spans from hosted-service work done during test B are attributed to test A's
-    /// <c>TraceId</c>.
+    /// <c>StartAsync</c> — synchronously or after an <c>await</c> — captures a clean
+    /// execution context. Activities emitted later on background threads become orphan
+    /// roots rather than inheriting the first test's <see cref="System.Diagnostics.Activity.Current"/>.
+    /// Without this, spans from hosted-service work done during test B are attributed to
+    /// test A's <c>TraceId</c>.
     /// </para>
     /// <para>
     /// Override and return <c>false</c> to preserve ambient context flow into hosted
     /// services — only needed if the hosted service intentionally relies on
     /// <c>Activity.Current</c> or other <see cref="System.Threading.AsyncLocal{T}"/>
-    /// values captured at factory-build time.
+    /// values captured at factory-build time, or requires <c>StartAsync</c> to run on
+    /// the calling thread.
     /// </para>
     /// </summary>
     protected virtual bool SuppressHostedServiceExecutionContextFlow => true;
