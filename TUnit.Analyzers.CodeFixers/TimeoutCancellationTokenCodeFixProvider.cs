@@ -99,7 +99,7 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
 
             statement = statement
                 .WithLeadingTrivia(SyntaxFactory.ElasticMarker)
-                .WithTrailingTrivia(SyntaxFactory.ElasticEndOfLine("\n"));
+                .WithTrailingTrivia(SyntaxFactory.ElasticLineFeed);
 
             var newStatements = body.Statements.Insert(0, statement);
             updated = updated.WithBody(body.WithStatements(newStatements));
@@ -109,13 +109,42 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
 
         var newRoot = root.ReplaceNode(method, updated);
 
-        if (newRoot is CompilationUnitSyntax compilationUnit)
+        if (newRoot is CompilationUnitSyntax compilationUnit
+            && !await IsSystemThreadingInScopeAsync(document, method, cancellationToken).ConfigureAwait(false))
         {
             newRoot = EnsureSystemThreadingUsing(compilationUnit);
         }
 
         var newDocument = document.WithSyntaxRoot(newRoot);
         return await Formatter.FormatAsync(newDocument, Formatter.Annotation, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    // Asks the semantic model whether `CancellationToken` already resolves to
+    // System.Threading.CancellationToken at the method's position. That covers file-level usings,
+    // same-file global usings, cross-file global usings, and SDK ImplicitUsings — so we skip
+    // adding a redundant `using System.Threading;` in every case where the compiler already sees it.
+    private static async Task<bool> IsSystemThreadingInScopeAsync(
+        Document document,
+        MethodDeclarationSyntax method,
+        CancellationToken cancellationToken)
+    {
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+        if (semanticModel is null)
+        {
+            return false;
+        }
+
+        var symbols = semanticModel.LookupSymbols(method.SpanStart, name: CancellationTokenTypeName);
+        foreach (var symbol in symbols)
+        {
+            if (symbol is INamedTypeSymbol type
+                && type.ContainingNamespace?.ToDisplayString() == SystemThreadingNamespace)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static CompilationUnitSyntax EnsureSystemThreadingUsing(CompilationUnitSyntax compilationUnit)

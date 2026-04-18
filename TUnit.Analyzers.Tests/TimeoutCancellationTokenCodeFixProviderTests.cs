@@ -197,6 +197,56 @@ public class TimeoutCancellationTokenCodeFixProviderTests
     }
 
     [Test]
+    public async Task Does_Not_Add_Using_When_System_Threading_Is_Global_Using_In_Other_File()
+    {
+        // A cross-file `global using System.Threading;` (e.g. auto-generated _GlobalUsings.g.cs from
+        // ImplicitUsings, or hand-rolled) already makes CancellationToken resolvable — adding
+        // `using System.Threading;` to the target file would be redundant.
+        const string globalUsings = "global using System.Threading;\n";
+
+        const string source = """
+            using TUnit.Core;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                [Test]
+                [Timeout(1000)]
+                public async Task {|#0:MyTest|}()
+                {
+                    await Task.Yield();
+                }
+            }
+            """;
+
+        const string fixedSource = """
+            using TUnit.Core;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                [Test]
+                [Timeout(1000)]
+                public async Task MyTest(CancellationToken cancellationToken)
+                {
+                    await Task.Yield();
+                }
+            }
+            """;
+
+        await Verifier.VerifyCodeFixAsync(
+            source,
+            Verifier.Diagnostic(Rules.MissingTimeoutCancellationTokenAttributes).WithLocation(0),
+            fixedSource,
+            test =>
+            {
+                test.CodeActionEquivalenceKey = "AddCancellationToken";
+                test.TestState.Sources.Add(globalUsings);
+                test.FixedState.Sources.Add(globalUsings);
+            });
+    }
+
+    [Test]
     public async Task Inserts_System_Threading_Grouped_With_Adjacent_System_Using_When_Non_System_Interspersed()
     {
         // Locks in behaviour for the contrived case where non-System usings are interspersed between
