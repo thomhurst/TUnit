@@ -35,7 +35,8 @@ public class TestDiscoveryContext : Context
 
     private AssemblyHookContext[] BuildUniqueAssemblies()
     {
-        // List+HashSet preserves first-occurrence insertion order (matches prior LINQ Distinct() contract).
+        // HashSet<T> iteration order is not contractually guaranteed; the parallel list
+        // preserves first-occurrence order so hook execution sequence stays deterministic.
         var seen = new HashSet<AssemblyHookContext>();
         var ordered = new List<AssemblyHookContext>();
         foreach (var cls in TestClasses)
