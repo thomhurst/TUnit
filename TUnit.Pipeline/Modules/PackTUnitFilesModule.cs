@@ -11,8 +11,8 @@ namespace TUnit.Pipeline.Modules;
 // Runs concurrently with PublishMockTestsAOTModule / PublishNugetTesterAOTModule by design.
 // Correctness depends on those modules using isolated BaseOutputPath/BaseIntermediateOutputPath
 // so their recompiles never touch bin/Release/{tfm}/*.dll — this module uses NoBuild=true and
-// packs whatever is on disk, so any rewrite of those DLLs (e.g. without -p:AssemblyVersion)
-// would ship strong-name-mismatched packages. See issue #5622.
+// packs whatever is on disk, so any rewrite of those DLLs would ship strong-name-mismatched
+// packages. See issue #5622.
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>

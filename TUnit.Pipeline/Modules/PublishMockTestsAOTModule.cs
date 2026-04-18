@@ -46,12 +46,8 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
-                        // Redirect build outputs into a per-framework tree so the AOT re-compile
-                        // of ProjectReferences (TUnit.Mocks, TUnit.Mocks.Assertions) never
-                        // overwrites the main bin/Release DLLs that PackTUnitFilesModule packages
-                        // with --no-build. Without this, the re-compile drops AssemblyVersion back
-                        // to 1.0.0.0 (CI passes AssemblyVersion only to the initial solution build),
-                        // shipping strong-name-mismatched NuGet packages (issue #5622).
+                        // Isolate bin/obj so the AOT recompile of ProjectReferences never
+                        // overwrites DLLs that PackTUnitFilesModule packages with --no-build.
                         new KeyValue("BaseOutputPath", $"bin/aot-{framework}/"),
                         new KeyValue("BaseIntermediateOutputPath", $"obj/aot-{framework}/"),
                     ],
