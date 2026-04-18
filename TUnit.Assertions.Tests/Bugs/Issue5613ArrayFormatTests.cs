@@ -67,6 +67,28 @@ public class Issue5613ArrayFormatTests
     }
 
     [Test]
+    public async Task NonReplayable_IEnumerable_IsEqualTo_Failure_Renders_Contents_Once()
+    {
+        // Regression: iterator-generated sequences (yield) are single-shot. Earlier revision
+        // enumerated value+expected twice (FormatValue then SequenceEquals) — the second
+        // pass saw an empty sequence and silently misreported "same contents, different ref".
+        static IEnumerable<int> Yield(params int[] values)
+        {
+            foreach (var v in values) yield return v;
+        }
+
+        IEnumerable<int> actual = Yield(1, 2, 3);
+        IEnumerable<int> expected = Yield(4, 5, 6);
+        var action = async () => await Assert.That(actual).IsEqualTo(expected);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).Contains("[1, 2, 3]");
+        await Assert.That(exception.Message).Contains("[4, 5, 6]");
+        await Assert.That(exception.Message).DoesNotContain("IsEquivalentTo");
+    }
+
+    [Test]
     public async Task LargeArray_IsEqualTo_Failure_Truncates_Contents()
     {
         var actual = Enumerable.Range(1, 15).ToArray();

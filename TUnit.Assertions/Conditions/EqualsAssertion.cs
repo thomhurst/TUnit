@@ -19,6 +19,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     private readonly TValue? _expected;
     private readonly IEqualityComparer<TValue>? _comparer;
     private readonly HashSet<Type> _ignoredTypes = new();
+    private string? _cachedExpectedFormat;
 
     // Cache reflection results for better performance in deep comparison
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
@@ -109,8 +110,14 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         // when references differ but contents match, surface IsEquivalentTo to the user.
         if (_comparer is null && IsFormattableCollection(value) && IsFormattableCollection(_expected))
         {
-            var actualPreview = FormatValue(value);
-            if (SequenceEqualsNonGeneric(value!, _expected!))
+            // Materialize both once — non-replayable sequences (yield, LINQ, File.ReadLines)
+            // would otherwise be exhausted by the first enumeration.
+            var actualItems = Materialize((IEnumerable)value!);
+            var expectedItems = Materialize((IEnumerable)_expected!);
+            var actualPreview = FormatItems(actualItems);
+            _cachedExpectedFormat = FormatItems(expectedItems);
+
+            if (SequenceEqualsLists(actualItems, expectedItems))
             {
                 return Task.FromResult(AssertionResult.Failed(
                     $"received {actualPreview} (same contents, different reference — use IsEquivalentTo to compare by contents)"));
@@ -141,60 +148,56 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
 
         if (value is IEnumerable enumerable)
         {
-            var items = new List<string>(CollectionPreviewMax);
-            var total = 0;
-            foreach (var item in enumerable)
-            {
-                if (total < CollectionPreviewMax)
-                {
-                    items.Add(item?.ToString() ?? "null");
-                }
-                total++;
-            }
-
-            var preview = string.Join(", ", items);
-            if (total > CollectionPreviewMax)
-            {
-                preview += $", and {total - CollectionPreviewMax} more...";
-            }
-
-            return $"[{preview}]";
+            return FormatItems(Materialize(enumerable));
         }
 
         return value.ToString() ?? "null";
     }
 
-    private static bool SequenceEqualsNonGeneric(object actual, object expected)
+    private static List<object?> Materialize(IEnumerable source)
     {
-        var enumActual = ((IEnumerable)actual).GetEnumerator();
-        var enumExpected = ((IEnumerable)expected).GetEnumerator();
-        try
+        var list = new List<object?>();
+        foreach (var item in source)
         {
-            while (true)
+            list.Add(item);
+        }
+        return list;
+    }
+
+    private static string FormatItems(List<object?> items)
+    {
+        var take = Math.Min(items.Count, CollectionPreviewMax);
+        var parts = new string[take];
+        for (var i = 0; i < take; i++)
+        {
+            parts[i] = items[i]?.ToString() ?? "null";
+        }
+
+        var preview = string.Join(", ", parts);
+        if (items.Count > CollectionPreviewMax)
+        {
+            preview += $", and {items.Count - CollectionPreviewMax} more...";
+        }
+
+        return $"[{preview}]";
+    }
+
+    private static bool SequenceEqualsLists(List<object?> actual, List<object?> expected)
+    {
+        if (actual.Count != expected.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < actual.Count; i++)
+        {
+            if (!Equals(actual[i], expected[i]))
             {
-                var hasActual = enumActual.MoveNext();
-                var hasExpected = enumExpected.MoveNext();
-                if (hasActual != hasExpected)
-                {
-                    return false;
-                }
-
-                if (!hasActual)
-                {
-                    return true;
-                }
-
-                if (!Equals(enumActual.Current, enumExpected.Current))
-                {
-                    return false;
-                }
+                return false;
             }
         }
-        finally
-        {
-            (enumActual as IDisposable)?.Dispose();
-            (enumExpected as IDisposable)?.Dispose();
-        }
+
+        return true;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
@@ -304,5 +307,5 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return (true, null);
     }
 
-    protected override string GetExpectation() => $"to be equal to {FormatValue(_expected)}";
+    protected override string GetExpectation() => $"to be equal to {_cachedExpectedFormat ?? FormatValue(_expected)}";
 }
