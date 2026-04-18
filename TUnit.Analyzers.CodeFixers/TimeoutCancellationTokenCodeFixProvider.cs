@@ -45,19 +45,24 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
                     equivalenceKey: "AddCancellationToken"),
                 diagnostic);
 
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: "Add CancellationToken parameter with ThrowIfCancellationRequested",
-                    createChangedDocument: c => AddCancellationTokenAsync(context.Document, method, BodyMode.ThrowIfCancellationRequested, c),
-                    equivalenceKey: "AddCancellationTokenWithThrow"),
-                diagnostic);
+            // Body-modifying actions only make sense when there's a block body to prepend to.
+            // For expression-bodied methods we'd silently no-op, which is worse than not offering.
+            if (method.Body is not null)
+            {
+                context.RegisterCodeFix(
+                    CodeAction.Create(
+                        title: "Add CancellationToken parameter with ThrowIfCancellationRequested",
+                        createChangedDocument: c => AddCancellationTokenAsync(context.Document, method, BodyMode.ThrowIfCancellationRequested, c),
+                        equivalenceKey: "AddCancellationTokenWithThrow"),
+                    diagnostic);
 
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: "Add CancellationToken parameter as discard",
-                    createChangedDocument: c => AddCancellationTokenAsync(context.Document, method, BodyMode.Discard, c),
-                    equivalenceKey: "AddCancellationTokenAsDiscard"),
-                diagnostic);
+                context.RegisterCodeFix(
+                    CodeAction.Create(
+                        title: "Add CancellationToken parameter as discard",
+                        createChangedDocument: c => AddCancellationTokenAsync(context.Document, method, BodyMode.Discard, c),
+                        equivalenceKey: "AddCancellationTokenAsDiscard"),
+                    diagnostic);
+            }
         }
     }
 
@@ -81,7 +86,7 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
         }
 
         var parameter = SyntaxFactory.Parameter(SyntaxFactory.Identifier(ParameterName))
-            .WithType(SyntaxFactory.ParseTypeName(CancellationTokenTypeName).WithTrailingTrivia(SyntaxFactory.Space));
+            .WithType(SyntaxFactory.IdentifierName(CancellationTokenTypeName).WithTrailingTrivia(SyntaxFactory.Space));
 
         MethodDeclarationSyntax updated = method
             .WithParameterList(method.ParameterList.AddParameters(parameter));
@@ -123,7 +128,34 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
             }
         }
 
-        var newUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(SystemThreadingNamespace));
-        return compilationUnit.AddUsings(newUsing);
+        var newUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(SystemThreadingNamespace))
+            .WithAdditionalAnnotations(Formatter.Annotation);
+
+        // Insert in sorted position within the System.* group, or append if no System.* group exists.
+        // Leaves non-System usings undisturbed to respect the file's existing organization.
+        var insertAt = -1;
+        for (var i = 0; i < compilationUnit.Usings.Count; i++)
+        {
+            var existing = compilationUnit.Usings[i].Name?.ToString();
+            if (existing is null || !existing.StartsWith("System", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (string.CompareOrdinal(existing, SystemThreadingNamespace) > 0)
+            {
+                insertAt = i;
+                break;
+            }
+
+            insertAt = i + 1;
+        }
+
+        if (insertAt == -1)
+        {
+            return compilationUnit.AddUsings(newUsing);
+        }
+
+        return compilationUnit.WithUsings(compilationUnit.Usings.Insert(insertAt, newUsing));
     }
 }
