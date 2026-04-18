@@ -170,6 +170,9 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                 if (cleanupExceptions is null)
                 {
+                    // Reuse the returned list rather than allocate + copy. Safe because
+                    // ExecuteAfterClassAssemblyHooks transfers ownership; subsequent catches
+                    // below will append to this same instance.
                     cleanupExceptions = hookExceptions;
                 }
                 else
