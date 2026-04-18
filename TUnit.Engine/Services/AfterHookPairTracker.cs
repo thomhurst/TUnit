@@ -48,7 +48,7 @@ internal sealed class AfterHookPairTracker
     /// This prevents per-test timeout tokens from prematurely firing session hooks.
     /// </summary>
     public void RegisterAfterTestSessionHook(
-        CancellationToken cancellationToken,
+        CancellationToken sessionCancellationToken,
         Func<ValueTask<List<Exception>>> afterHookExecutor)
     {
         if (Interlocked.CompareExchange(ref _sessionHookRegistered, 1, 0) != 0)
@@ -57,7 +57,7 @@ internal sealed class AfterHookPairTracker
         }
 
         // Register callback to run After hook on cancellation
-        var registration = cancellationToken.Register(static state =>
+        var registration = sessionCancellationToken.Register(static state =>
         {
             var (pairTracker, afterHookExecutor) = ((AfterHookPairTracker, Func<ValueTask<List<Exception>>>))state!;
             // Use sync-over-async here because CancellationToken.Register requires Action (not Func<Task>)
@@ -72,9 +72,14 @@ internal sealed class AfterHookPairTracker
     /// Registers Assembly After hooks to run on cancellation or normal completion.
     /// Ensures After hooks run exactly once even if called both ways.
     /// </summary>
+    /// <param name="sessionCancellationToken">
+    /// MUST be the session-scoped token (or a derivative linked to it). Only the first caller per
+    /// assembly registers a callback; subsequent calls short-circuit. Passing a narrower per-test
+    /// token would cause After hooks to miss cancellation when later tests' tokens fire.
+    /// </param>
     public void RegisterAfterAssemblyHook(
         Assembly assembly,
-        CancellationToken cancellationToken,
+        CancellationToken sessionCancellationToken,
         Func<Assembly, ValueTask<List<Exception>>> afterHookExecutor)
     {
         if (!_assemblyHookRegistered.Add(assembly))
@@ -82,7 +87,7 @@ internal sealed class AfterHookPairTracker
             return;
         }
 
-        var registration = cancellationToken.Register(static state =>
+        var registration = sessionCancellationToken.Register(static state =>
         {
             var (pairTracker, assembly, afterHookExecutor) = ((AfterHookPairTracker, Assembly, Func<Assembly, ValueTask<List<Exception>>>))state!;
             _ = pairTracker.GetOrCreateAfterAssemblyTask(assembly, afterHookExecutor);
@@ -95,20 +100,25 @@ internal sealed class AfterHookPairTracker
     /// Registers Class After hooks to run on cancellation or normal completion.
     /// Ensures After hooks run exactly once even if called both ways.
     /// </summary>
+    /// <param name="sessionCancellationToken">
+    /// MUST be the session-scoped token (or a derivative linked to it). Only the first caller per
+    /// class registers a callback; subsequent calls short-circuit. Passing a narrower per-test
+    /// token would cause After hooks to miss cancellation when later tests' tokens fire.
+    /// </param>
      [UnconditionalSuppressMessage("Trimming", "IL2077",
             Justification = "Type parameter is annotated at the method boundary.")]
     public void RegisterAfterClassHook(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         HookExecutor hookExecutor,
-        CancellationToken cancellationToken)
+        CancellationToken sessionCancellationToken)
     {
         if (!_classHookRegistered.Add(testClass))
         {
             return;
         }
 
-        var registration = cancellationToken.Register(static state =>
+        var registration = sessionCancellationToken.Register(static state =>
         {
             var (pairTracker, testClass, hookExecutor) = ((AfterHookPairTracker, Type, HookExecutor))state!;
             _ = pairTracker.GetOrCreateAfterClassTask(testClass, hookExecutor, CancellationToken.None);
