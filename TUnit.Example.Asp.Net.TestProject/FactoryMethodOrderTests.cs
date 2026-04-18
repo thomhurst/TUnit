@@ -56,13 +56,12 @@ public class FactoryMethodOrderTests : TestsBase
     {
         _ = Factory.CreateClient();
 
-        // Only verify relative order if factory methods were tracked by this test's counter
-        if (FactoryConfigureWebHostCalledOrder > 0 && FactoryConfigureStartupConfigurationCalledOrder > 0)
-        {
-            await Assert.That(FactoryConfigureStartupConfigurationCalledOrder)
-                .IsGreaterThan(FactoryConfigureWebHostCalledOrder)
-                .Because("ConfigureStartupConfiguration should run after ConfigureWebHost");
-        }
+        // Compare against the factory-owned counter rather than per-test counters — parallel tests
+        // racing on GlobalFactory.GetNextOrderCallback could otherwise interleave captures across
+        // different counters, making Startup appear to precede WebHost.
+        await Assert.That(GlobalFactory.ConfigureStartupConfigurationFactoryOrder)
+            .IsGreaterThan(GlobalFactory.ConfigureWebHostFactoryOrder)
+            .Because("ConfigureStartupConfiguration should run after ConfigureWebHost");
     }
 
     [Test]
