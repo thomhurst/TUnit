@@ -161,6 +161,39 @@ public class CollectionIsEqualToAnalyzerTests
     }
 
     [Test]
+    public async Task CustomEnumerable_With_IEquatable_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Assertions;
+                using TUnit.Assertions.Extensions;
+                using TUnit.Core;
+
+                public class MyBag : IEnumerable<int>, IEquatable<MyBag>
+                {
+                    public IEnumerator<int> GetEnumerator() => new List<int>().GetEnumerator();
+                    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                    public bool Equals(MyBag? other) => other is not null;
+                }
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task Test()
+                    {
+                        await Assert.That(new MyBag()).IsEqualTo(new MyBag());
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task Record_Collection_Not_Flagged()
     {
         await Verifier

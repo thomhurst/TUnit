@@ -148,8 +148,9 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Records synthesize an Equals(object) override; custom collections may too.
-        // In those cases IsEqualTo is semantically correct and should not be flagged.
-        return !OverridesObjectEquals(type);
+        // EqualityComparer<T>.Default also prefers IEquatable<T>.Equals when implemented.
+        // In either case IsEqualTo is semantically correct and should not be flagged.
+        return !OverridesObjectEquals(type) && !ImplementsIEquatableOfSelf(type);
     }
 
     private static bool ImplementsIEnumerable(ITypeSymbol type, INamedTypeSymbol ienumerable)
@@ -162,6 +163,22 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var iface in type.AllInterfaces)
         {
             if (SymbolEqualityComparer.Default.Equals(iface, ienumerable))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ImplementsIEquatableOfSelf(ITypeSymbol type)
+    {
+        foreach (var iface in type.AllInterfaces)
+        {
+            if (iface.Name == "IEquatable"
+                && iface.ContainingNamespace?.ToDisplayString() == "System"
+                && iface.TypeArguments.Length == 1
+                && SymbolEqualityComparer.Default.Equals(iface.TypeArguments[0], type))
             {
                 return true;
             }
