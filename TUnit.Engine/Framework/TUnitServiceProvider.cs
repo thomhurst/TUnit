@@ -179,7 +179,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, afterHookPairTracker, ContextProvider, EventReceiverOrchestrator));
 
-        var testExecutionGuard = Register(new TestExecutionGuard());
         var testStateManager = Register(new TestStateManager());
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
@@ -223,7 +222,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(
             new TestCoordinator(
-                testExecutionGuard,
                 testStateManager,
                 MessageBus,
                 testContextRestorer,

@@ -39,6 +39,9 @@ public sealed class TestRunner
         _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
+    // Dedup ledger for re-entrant ExecuteTestAsync calls (dependency recursion, scheduler races).
+    // Entries are intentionally retained for the session: a late dependency lookup must still
+    // observe the in-flight or completed TCS. Session-scoped lifetime bounds growth to O(test count).
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
     private Exception? _firstFailFastException;
 

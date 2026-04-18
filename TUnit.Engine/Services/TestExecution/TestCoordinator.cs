@@ -15,7 +15,6 @@ namespace TUnit.Engine.Services.TestExecution;
 /// </summary>
 internal sealed class TestCoordinator : ITestCoordinator
 {
-    private readonly TestExecutionGuard _executionGuard;
     private readonly TestStateManager _stateManager;
     private readonly ITUnitMessageBus _messageBus;
     private readonly TestContextRestorer _contextRestorer;
@@ -26,7 +25,6 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public TestCoordinator(
-        TestExecutionGuard executionGuard,
         TestStateManager stateManager,
         ITUnitMessageBus messageBus,
         TestContextRestorer contextRestorer,
@@ -36,7 +34,6 @@ internal sealed class TestCoordinator : ITestCoordinator
         TUnitFrameworkLogger logger,
         EventReceiverOrchestrator eventReceiverOrchestrator)
     {
-        _executionGuard = executionGuard;
         _stateManager = stateManager;
         _messageBus = messageBus;
         _contextRestorer = contextRestorer;
@@ -47,9 +44,11 @@ internal sealed class TestCoordinator : ITestCoordinator
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
+    // Dedup happens in TestRunner via its own ConcurrentDictionary<string, TCS<bool>> —
+    // it's the single entry point for both scheduler and dependency recursion, so a second
+    // guard here would just double the TCS/dict allocations per test.
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-        => _executionGuard.TryStartExecutionAsync(test.TestId,
-            () => ExecuteTestInternalAsync(test, cancellationToken));
+        => ExecuteTestInternalAsync(test, cancellationToken);
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
