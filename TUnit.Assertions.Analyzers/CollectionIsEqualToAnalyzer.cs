@@ -142,6 +142,18 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         }
 
+        if (!ImplementsIEnumerable(type, ienumerable))
+        {
+            return false;
+        }
+
+        // Records synthesize an Equals(object) override; custom collections may too.
+        // In those cases IsEqualTo is semantically correct and should not be flagged.
+        return !OverridesObjectEquals(type);
+    }
+
+    private static bool ImplementsIEnumerable(ITypeSymbol type, INamedTypeSymbol ienumerable)
+    {
         if (SymbolEqualityComparer.Default.Equals(type, ienumerable))
         {
             return true;
@@ -152,6 +164,25 @@ public class CollectionIsEqualToAnalyzer : ConcurrentDiagnosticAnalyzer
             if (SymbolEqualityComparer.Default.Equals(iface, ienumerable))
             {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool OverridesObjectEquals(ITypeSymbol type)
+    {
+        for (var current = type;
+             current is not null && current.SpecialType != SpecialType.System_Object;
+             current = current.BaseType)
+        {
+            foreach (var member in current.GetMembers("Equals"))
+            {
+                if (member is IMethodSymbol { IsOverride: true, Parameters.Length: 1 } m
+                    && m.Parameters[0].Type.SpecialType == SpecialType.System_Object)
+                {
+                    return true;
+                }
             }
         }
 

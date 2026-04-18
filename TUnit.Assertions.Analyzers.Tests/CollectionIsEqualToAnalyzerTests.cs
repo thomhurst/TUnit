@@ -126,4 +126,68 @@ public class CollectionIsEqualToAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task CustomEnumerable_With_EqualsOverride_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Assertions;
+                using TUnit.Assertions.Extensions;
+                using TUnit.Core;
+
+                public class MyBag : IEnumerable<int>
+                {
+                    public IEnumerator<int> GetEnumerator() => new List<int>().GetEnumerator();
+                    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                    public override bool Equals(object? obj) => obj is MyBag;
+                    public override int GetHashCode() => 0;
+                }
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task Test()
+                    {
+                        await Assert.That(new MyBag()).IsEqualTo(new MyBag());
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Record_Collection_Not_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Threading.Tasks;
+                using TUnit.Assertions;
+                using TUnit.Assertions.Extensions;
+                using TUnit.Core;
+
+                public record MyRecordBag(int X) : IEnumerable<int>
+                {
+                    public IEnumerator<int> GetEnumerator() => new List<int> { X }.GetEnumerator();
+                    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task Test()
+                    {
+                        await Assert.That(new MyRecordBag(1)).IsEqualTo(new MyRecordBag(1));
+                    }
+                }
+                """
+            );
+    }
 }
