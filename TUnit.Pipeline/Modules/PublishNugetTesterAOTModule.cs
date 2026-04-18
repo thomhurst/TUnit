@@ -48,7 +48,11 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
-                        new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!)
+                        new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!),
+                        // Isolate AOT publish outputs from the main bin/Release so packable
+                        // projects' DLLs are never rewritten by this publish (issue #5622).
+                        new KeyValue("BaseOutputPath", $"bin/aot-{framework}/"),
+                        new KeyValue("BaseIntermediateOutputPath", $"obj/aot-{framework}/"),
                     ],
                     Framework = framework,
                 }, new CommandExecutionOptions
