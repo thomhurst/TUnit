@@ -51,6 +51,9 @@ internal static class Rules
     public static readonly DiagnosticDescriptor PreferIsTrueOrIsFalseOverIsEqualToBool =
         CreateDescriptor("TUnitAssertions0015", UsageCategory, DiagnosticSeverity.Warning);
 
+    public static readonly DiagnosticDescriptor CollectionIsEqualToUsesReferenceEquality =
+        CreateDescriptor("TUnitAssertions0016", UsageCategory, DiagnosticSeverity.Info);
+
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {
         return new DiagnosticDescriptor(

@@ -316,5 +316,14 @@ namespace TUnit.Assertions.Analyzers {
                 return ResourceManager.GetString("TUnitAssertions0009Title", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Replace `.IsEqualTo(...)` with `.IsEquivalentTo(...)`.
+        /// </summary>
+        internal static string TUnitAssertions0016CodeFixTitle {
+            get {
+                return ResourceManager.GetString("TUnitAssertions0016CodeFixTitle", resourceCulture);
+            }
+        }
     }
 }
