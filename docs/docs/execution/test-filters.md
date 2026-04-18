@@ -2,6 +2,27 @@
 
 Running TUnit via `dotnet run` supports test filters.
 
+:::tip Coming from xUnit, NUnit, or MSTest?
+
+TUnit runs on Microsoft.Testing.Platform, not VSTest. The familiar
+`dotnet test --filter "Category=X"` is **not supported** — the flag is
+silently rejected, the MTP help is printed, and the run exits with
+`Zero tests ran`. This can look like a test failure when it's actually
+just an unrecognised flag.
+
+Use `--treenode-filter` instead:
+
+| VSTest (xUnit / NUnit / MSTest)            | TUnit                                                  |
+|--------------------------------------------|--------------------------------------------------------|
+| `--filter "Category=Integration"`          | `--treenode-filter "/*/*/*/*[Category=Integration]"`   |
+| `--filter "FullyQualifiedName~LoginTests"` | `--treenode-filter "/*/*/LoginTests/*"`                |
+| `--filter "Name=AcceptCookiesTest"`        | `--treenode-filter "/*/*/*/AcceptCookiesTest"`         |
+
+When using `dotnet test`, pass the flag as an application argument:
+`dotnet test -- --treenode-filter "..."`.
+
+:::
+
 TUnit can select tests by:
 
 - Assembly
