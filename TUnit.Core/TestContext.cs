@@ -34,12 +34,7 @@ public partial class TestContext : Context,
     private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsByGuid = new();
     private readonly TestBuilderContext _testBuilderContext;
     private readonly Guid _idGuid;
-    // volatile: _idString is lazily materialized on first Id access. Without volatile,
-    // a reader on ARM/WASM (or AOT without JIT-inserted fences) could observe a stale
-    // null even after another thread wrote the string. Reference writes are atomic,
-    // so a benign double-ToString is possible but harmless — volatile only fixes the
-    // staleness, not the (acceptable) race on materialization.
-    private volatile string? _idString;
+    private string? _idString;
     private string? _cachedDisplayName;
 
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
@@ -60,7 +55,20 @@ public partial class TestContext : Context,
     /// The string form is materialized lazily on first access — most tests never need it
     /// unless OTel is active or user code queries the context by Id.
     /// </summary>
-    public string Id => _idString ??= _idGuid.ToString();
+    public string Id
+    {
+        get
+        {
+            // Volatile read gives ARM/WASM acquire semantics without a volatile field.
+            if (Volatile.Read(ref _idString) is { } existing)
+            {
+                return existing;
+            }
+
+            var materialized = _idGuid.ToString();
+            return Interlocked.CompareExchange(ref _idString, materialized, null) ?? materialized;
+        }
+    }
 
     /// <summary>
     /// Gets access to test execution state, result management, cancellation, and retry information.
