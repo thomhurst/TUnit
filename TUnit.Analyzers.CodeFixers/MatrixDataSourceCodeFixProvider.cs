@@ -57,7 +57,7 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
         {
             MethodDeclarationSyntax method => method.AddAttributeLists(attributeList),
             TypeDeclarationSyntax type => type.AddAttributeLists(attributeList),
-            _ => target,
+            _ => throw new InvalidOperationException($"Unexpected node kind: {target.Kind()}"),
         };
 
         editor.ReplaceNode(target, updated);
