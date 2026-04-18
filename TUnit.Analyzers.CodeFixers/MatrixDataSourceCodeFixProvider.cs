@@ -12,6 +12,8 @@ namespace TUnit.Analyzers.CodeFixers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MatrixDataSourceCodeFixProvider)), Shared]
 public class MatrixDataSourceCodeFixProvider : CodeFixProvider
 {
+    private const string Title = "Add [MatrixDataSource]";
+
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
         ImmutableArray.Create(Rules.MatrixDataSourceAttributeRequired.Id);
 
@@ -37,9 +39,9 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
 
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: "Add [MatrixDataSource]",
+                    title: Title,
                     createChangedDocument: c => AddMatrixDataSourceAsync(context.Document, target, c),
-                    equivalenceKey: "AddMatrixDataSource"),
+                    equivalenceKey: Title),
                 diagnostic);
         }
     }
@@ -49,7 +51,7 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
         var attributeList = SyntaxFactory.AttributeList(
             SyntaxFactory.SingletonSeparatedList(
-                SyntaxFactory.Attribute(SyntaxFactory.ParseName("MatrixDataSource"))));
+                SyntaxFactory.Attribute(SyntaxFactory.IdentifierName("MatrixDataSource"))));
 
         SyntaxNode updated = target switch
         {
