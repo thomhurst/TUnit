@@ -127,9 +127,14 @@ jobs:
 
       - name: Publish AOT
         shell: bash
+        # BaseOutputPath/BaseIntermediateOutputPath isolate this AOT publish from the
+        # main bin/Release tree so PackTUnitFilesModule (--no-build) never packages a
+        # DLL rewritten by this step (issue #5622).
         run: >-
           dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release
           --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
+          -p:BaseOutputPath=bin/aot-testproject/
+          -p:BaseIntermediateOutputPath=obj/aot-testproject/
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
