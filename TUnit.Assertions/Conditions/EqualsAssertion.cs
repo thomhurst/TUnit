@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -18,6 +19,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     private readonly TValue? _expected;
     private readonly IEqualityComparer<TValue>? _comparer;
     private readonly HashSet<Type> _ignoredTypes = new();
+    private string? _cachedExpectedFormat;
 
     // Cache reflection results for better performance in deep comparison
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
@@ -103,7 +105,104 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
+        // Render collections with element contents so failure messages aren't "System.Int32[]".
+        // Arrays and most collections use reference equality via EqualityComparer<T>.Default —
+        // when references differ but contents match, surface IsEquivalentTo to the user.
+        if (_comparer is null && IsFormattableCollection(value) && IsFormattableCollection(_expected))
+        {
+            // Materialize both once — non-replayable sequences (yield, LINQ, File.ReadLines)
+            // would otherwise be exhausted by the first enumeration.
+            var actualItems = Materialize((IEnumerable)value!);
+            var expectedItems = Materialize((IEnumerable)_expected!);
+            var actualPreview = FormatItems(actualItems);
+            _cachedExpectedFormat = FormatItems(expectedItems);
+
+            if (SequenceEqualsLists(actualItems, expectedItems))
+            {
+                return Task.FromResult(AssertionResult.Failed(
+                    $"received {actualPreview} (same contents, different reference — use IsEquivalentTo to compare by contents)"));
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"received {actualPreview}"));
+        }
+
         return Task.FromResult(AssertionResult.Failed($"received {value}"));
+    }
+
+    private const int CollectionPreviewMax = 10;
+
+    private static bool IsFormattableCollection(object? value)
+        => value is IEnumerable && value is not string;
+
+    // Fallback formatter used by GetExpectation when the failure path did not run
+    // (e.g. when a custom comparer was supplied, or the receiver is not a collection).
+    // The hot collection path in CheckAsync materializes once and calls FormatItems directly.
+    private static string FormatValue(object? value) => FormatItem(value);
+
+    private static string FormatItem(object? value)
+    {
+        if (value is null)
+        {
+            return "null";
+        }
+
+        if (value is string s)
+        {
+            return $"\"{s}\"";
+        }
+
+        if (value is IEnumerable enumerable)
+        {
+            return FormatItems(Materialize(enumerable));
+        }
+
+        return value.ToString() ?? "null";
+    }
+
+    private static List<object?> Materialize(IEnumerable source)
+    {
+        var list = new List<object?>();
+        foreach (var item in source)
+        {
+            list.Add(item);
+        }
+        return list;
+    }
+
+    private static string FormatItems(List<object?> items)
+    {
+        var take = Math.Min(items.Count, CollectionPreviewMax);
+        var parts = new string[take];
+        for (var i = 0; i < take; i++)
+        {
+            parts[i] = FormatItem(items[i]);
+        }
+
+        var preview = string.Join(", ", parts);
+        if (items.Count > CollectionPreviewMax)
+        {
+            preview += $", and {items.Count - CollectionPreviewMax} more...";
+        }
+
+        return $"[{preview}]";
+    }
+
+    private static bool SequenceEqualsLists(List<object?> actual, List<object?> expected)
+    {
+        if (actual.Count != expected.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < actual.Count; i++)
+        {
+            if (!Equals(actual[i], expected[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
@@ -213,5 +312,5 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return (true, null);
     }
 
-    protected override string GetExpectation() => $"to be equal to {(_expected is string s ? $"\"{s}\"" : _expected)}";
+    protected override string GetExpectation() => $"to be equal to {_cachedExpectedFormat ?? FormatValue(_expected)}";
 }
