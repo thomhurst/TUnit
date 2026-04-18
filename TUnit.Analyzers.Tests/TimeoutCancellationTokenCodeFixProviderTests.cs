@@ -197,6 +197,55 @@ public class TimeoutCancellationTokenCodeFixProviderTests
     }
 
     [Test]
+    public async Task Inserts_System_Threading_Grouped_With_Adjacent_System_Using_When_Non_System_Interspersed()
+    {
+        // Locks in behaviour for the contrived case where non-System usings are interspersed between
+        // System.* usings: the new System.Threading sorts into the System group such that its nearer
+        // neighbour is also System.* (System.Threading.Tasks on the right), rather than being appended
+        // at the end of the file or landing with both neighbours non-System.
+        await Verifier.VerifyCodeFixAsync(
+            """
+            using System.Text;
+            using Xunit;
+            using TUnit.Core;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                [Test]
+                [Timeout(1000)]
+                public async Task {|#0:MyTest|}()
+                {
+                    await Task.Yield();
+                }
+            }
+
+            namespace Xunit { internal class Dummy {} }
+            """,
+            Verifier.Diagnostic(Rules.MissingTimeoutCancellationTokenAttributes).WithLocation(0),
+            """
+            using System.Text;
+            using Xunit;
+            using TUnit.Core;
+            using System.Threading;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                [Test]
+                [Timeout(1000)]
+                public async Task MyTest(CancellationToken cancellationToken)
+                {
+                    await Task.Yield();
+                }
+            }
+
+            namespace Xunit { internal class Dummy {} }
+            """,
+            test => test.CodeActionEquivalenceKey = "AddCancellationToken");
+    }
+
+    [Test]
     public async Task Expression_Bodied_Method_Only_Offers_Bare_Parameter_Action()
     {
         // Body-modifying variants would silently no-op on an expression-bodied method,
