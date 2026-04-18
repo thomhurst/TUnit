@@ -5997,7 +5997,11 @@ namespace .Sources
         public .<.> IsNotCompleted() { }
         public .<.> IsNotCompletedSuccessfully() { }
         public .<.> IsNotFaulted() { }
+        public .<.> IsNotNull() { }
+        public ._IsNotSameReferenceAs_Object_Assertion<.> IsNotSameReferenceAs(object? expected, [.("expected")] string? expectedExpression = null) { }
         public .<object?, TExpected> IsNotTypeOf<TExpected>() { }
+        public ._IsNull_Assertion<.> IsNull() { }
+        public ._IsSameReferenceAs_Object_Assertion<.> IsSameReferenceAs(object? expected, [.("expected")] string? expectedExpression = null) { }
         public .<object?, TExpected> IsTypeOf<TExpected>() { }
         public .<?> Throws( exceptionType) { }
         public .<TException> Throws<TException>()
