@@ -48,7 +48,7 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
-                        new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!)
+                        new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!),
                     ],
                     Framework = framework,
                 }, new CommandExecutionOptions

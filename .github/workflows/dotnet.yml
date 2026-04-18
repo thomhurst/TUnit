@@ -111,6 +111,23 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v4
 
+      # Export GitVersion outputs as env vars. MSBuild auto-binds env vars whose name
+      # matches a property to a global property, so every subsequent dotnet build/publish/
+      # pack/test in this job — including ones launched by TUnit.Pipeline — stamps the
+      # correct AssemblyVersion/FileVersion even on AOT recompiles. Without this, a
+      # publish that triggers a recompile drops AssemblyVersion to 1.0.0.0, and any
+      # following `pack --no-build` ships a strong-name-mismatched package (issue #5622).
+      - name: Export version env vars
+        shell: bash
+        run: |
+          {
+            echo "Version=${{ steps.gitversion.outputs.semVer }}"
+            echo "AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
+            echo "FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
+            echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
+            echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+          } >> "$GITHUB_ENV"
+
       - name: Restore
         shell: bash
         run: dotnet restore TUnit.CI.slnx
