@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
@@ -54,6 +55,45 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
 
     // Forwarding methods for Task state assertions
     // These allow calling task assertions directly on AsyncDelegateAssertion without type inference issues
+
+    /// <summary>
+    /// Asserts that the task reference is not null.
+    /// Without this instance method, <c>Assert.That(task).IsNotNull()</c> would fail generic inference
+    /// because <see cref="AsyncDelegateAssertion"/> implements both <c>IAssertionSource&lt;object?&gt;</c>
+    /// and <c>IAssertionSource&lt;Task&gt;</c>.
+    /// </summary>
+    public NotNullAssertion<Task> IsNotNull()
+    {
+        return ((IAssertionSource<Task>)this).IsNotNull();
+    }
+
+    /// <summary>
+    /// Asserts that the task reference is null.
+    /// </summary>
+    public TValue_IsNull_Assertion<Task> IsNull()
+    {
+        return ((IAssertionSource<Task>)this).IsNull();
+    }
+
+    /// <summary>
+    /// Asserts that the task is the same reference as <paramref name="expected"/>.
+    /// </summary>
+    public TValue_IsSameReferenceAs_Object_Assertion<Task> IsSameReferenceAs(
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+    {
+        return ((IAssertionSource<Task>)this).IsSameReferenceAs(expected, expectedExpression);
+    }
+
+    /// <summary>
+    /// Asserts that the task is not the same reference as <paramref name="expected"/>.
+    /// </summary>
+    public TValue_IsNotSameReferenceAs_Object_Assertion<Task> IsNotSameReferenceAs(
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+    {
+        return ((IAssertionSource<Task>)this).IsNotSameReferenceAs(expected, expectedExpression);
+    }
 
     /// <summary>
     /// Asserts that the task is completed.
