@@ -381,6 +381,11 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
-        return _cachedTests.Select(static t => t.Context);
+        var list = new List<TestContext>(_cachedTests.Count);
+        foreach (var test in _cachedTests)
+        {
+            list.Add(test.Context);
+        }
+        return list;
     }
 }

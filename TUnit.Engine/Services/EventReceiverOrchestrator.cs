@@ -291,10 +291,17 @@ internal sealed class EventReceiverOrchestrator
         // Pre-sort by Order before filtering so that FilterScopedAttributes (which uses TryAdd
         // and keeps the first encountered item per ScopeType) retains the lowest-Order attribute.
         // After filtering, sort the result in-place for final invocation order.
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
-            hookContext.HookMethod.Attributes
-                .OfType<IHookRegisteredEventReceiver>()
-                .OrderBy(static x => x.Order));
+        var sorted = new List<IHookRegisteredEventReceiver>();
+        foreach (var attr in hookContext.HookMethod.Attributes)
+        {
+            if (attr is IHookRegisteredEventReceiver receiver)
+            {
+                sorted.Add(receiver);
+            }
+        }
+        sorted.Sort(static (a, b) => a.Order.CompareTo(b.Order));
+
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes<IHookRegisteredEventReceiver>(sorted);
 
         Array.Sort(filteredReceivers, static (a, b) => a.Order.CompareTo(b.Order));
 
@@ -548,24 +555,22 @@ internal sealed class EventReceiverOrchestrator
     /// <summary>
     /// Initialize test counts for first/last event receivers
     /// </summary>
-    public void InitializeTestCounts(IEnumerable<TestContext> allTestContexts)
+    public void InitializeTestCounts(IReadOnlyList<AbstractExecutableTest> allTests)
     {
-        var contexts = allTestContexts as IList<TestContext> ?? allTestContexts.ToList();
-        Interlocked.Exchange(ref _sessionTestCount, contexts.Count);
+        Interlocked.Exchange(ref _sessionTestCount, allTests.Count);
 
         // Clear first-event tracking to ensure clean state for each test execution
         _firstTestInAssemblyTasks = new ThreadSafeDictionary<Assembly, Task>();
         _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
         _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
-        foreach (var context in contexts)
+        for (var i = 0; i < allTests.Count; i++)
         {
-            var assembly = context.ClassContext.AssemblyContext.Assembly;
-            var assemblyCounter = _assemblyTestCounts.GetOrAdd(assembly, static _ => new Counter());
+            var classContext = allTests[i].Context.ClassContext;
+            var assemblyCounter = _assemblyTestCounts.GetOrAdd(classContext.AssemblyContext.Assembly, static _ => new Counter());
             assemblyCounter.Add(1);
 
-            var classType = context.ClassContext.ClassType;
-            var classCounter = _classTestCounts.GetOrAdd(classType, static _ => new Counter());
+            var classCounter = _classTestCounts.GetOrAdd(classContext.ClassType, static _ => new Counter());
             classCounter.Add(1);
         }
     }

@@ -30,8 +30,31 @@ internal sealed class TestGroupingService : ITestGroupingService
         public int NotInParallelOrder { get; init; }
         public NotInParallelConstraint? NotInParallelConstraint { get; init; }
     }
-    
-    public async ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
+
+    public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
+    {
+        // Hot path: trace disabled → fully synchronous, no state machine, no allocation
+        // for a trace-message list. Only pay async cost when someone actually wants traces.
+        if (!_logger.IsTraceEnabled)
+        {
+            return new ValueTask<GroupedTests>(GroupTestsByConstraintsCore(tests, traceMessages: null));
+        }
+
+        return GroupTestsByConstraintsWithTracingAsync(tests);
+    }
+
+    private async ValueTask<GroupedTests> GroupTestsByConstraintsWithTracingAsync(IEnumerable<AbstractExecutableTest> tests)
+    {
+        var traceMessages = new List<string>();
+        var result = GroupTestsByConstraintsCore(tests, traceMessages);
+        foreach (var msg in traceMessages)
+        {
+            await _logger.LogTraceAsync(msg).ConfigureAwait(false);
+        }
+        return result;
+    }
+
+    private static GroupedTests GroupTestsByConstraintsCore(IEnumerable<AbstractExecutableTest> tests, List<string>? traceMessages)
     {
         var testCount = tests is ICollection<AbstractExecutableTest> collection ? collection.Count : 0;
         var testsWithKeys = new List<(AbstractExecutableTest Test, TestSortKey Key)>(testCount > 0 ? testCount : 16);
@@ -46,7 +69,7 @@ internal sealed class TestGroupingService : ITestGroupingService
                     break;
                 }
             }
-            
+
             var key = new TestSortKey
             {
                 ExecutionPriority = (int)test.Context.ExecutionPriority,
@@ -56,7 +79,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             };
             testsWithKeys.Add((test, key));
         }
-        
+
         testsWithKeys.Sort((a, b) =>
         {
             var priorityCompare = b.Key.ExecutionPriority.CompareTo(a.Key.ExecutionPriority);
@@ -91,29 +114,26 @@ internal sealed class TestGroupingService : ITestGroupingService
 
             if (parallelGroup != null && notInParallel != null)
             {
-                if (_logger.IsTraceEnabled)
-                    await _logger.LogTraceAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
+                traceMessages?.Add($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{FormatParallelLimiterInfo(test)}");
                 ProcessCombinedConstraints(test, sortKey.ClassFullName, parallelGroup, notInParallel, constrainedParallelGroups);
             }
             else if (parallelGroup != null)
             {
-                if (_logger.IsTraceEnabled)
-                    await _logger.LogTraceAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
+                traceMessages?.Add($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{FormatParallelLimiterInfo(test)}");
                 ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
             }
             else if (notInParallel != null)
             {
-                if (_logger.IsTraceEnabled)
+                if (traceMessages != null)
                 {
                     var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
-                    await _logger.LogTraceAsync($"Test '{test.TestId}': → NotInParallel{keys}{FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
+                    traceMessages.Add($"Test '{test.TestId}': → NotInParallel{keys}{FormatParallelLimiterInfo(test)}");
                 }
                 ProcessNotInParallelConstraint(test, sortKey.ClassFullName, notInParallel, notInParallelList, keyedNotInParallelList);
             }
             else
             {
-                if (_logger.IsTraceEnabled)
-                    await _logger.LogTraceAsync($"Test '{test.TestId}': → Parallel (no constraints){FormatParallelLimiterInfo(test)}").ConfigureAwait(false);
+                traceMessages?.Add($"Test '{test.TestId}': → Parallel (no constraints){FormatParallelLimiterInfo(test)}");
                 parallelTests.Add(test);
             }
         }
@@ -160,7 +180,7 @@ internal sealed class TestGroupingService : ITestGroupingService
             var groupName = kvp.Key;
             var unconstrained = kvp.Value.Unconstrained;
             var keyed = kvp.Value.Keyed;
-            
+
             keyed.Sort((a, b) =>
             {
                 var classCompare = string.CompareOrdinal(a.Item2, b.Item2);
@@ -178,14 +198,14 @@ internal sealed class TestGroupingService : ITestGroupingService
                 var item = keyed[i];
                 sortedKeyed[i] = (item.Item1, item.Item3, item.Item4.GetHashCode());
             }
-                
+
             finalConstrainedGroups[groupName] = new GroupedConstrainedTests
             {
                 UnconstrainedTests = unconstrained.ToArray(),
                 KeyedTests = sortedKeyed
             };
         }
-        
+
         var result = new GroupedTests
         {
             Parallel = parallelTests.ToArray(),
@@ -195,16 +215,15 @@ internal sealed class TestGroupingService : ITestGroupingService
             ConstrainedParallelGroups = finalConstrainedGroups
         };
 
-        // Log summary of test categorization
-        if (_logger.IsTraceEnabled)
+        if (traceMessages != null)
         {
-            await _logger.LogTraceAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
-            await _logger.LogTraceAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
-            await _logger.LogTraceAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
-            await _logger.LogTraceAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
-            await _logger.LogTraceAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
-            await _logger.LogTraceAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
-            await _logger.LogTraceAsync("════════════════════════════").ConfigureAwait(false);
+            traceMessages.Add("═══ Test Grouping Summary ═══");
+            traceMessages.Add($"  Parallel (no constraints): {parallelTests.Count} tests");
+            traceMessages.Add($"  ParallelGroups: {parallelGroups.Count} groups");
+            traceMessages.Add($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups");
+            traceMessages.Add($"  NotInParallel (global): {sortedNotInParallel.Length} tests");
+            traceMessages.Add($"  KeyedNotInParallel: {keyedArrays.Length} tests");
+            traceMessages.Add("════════════════════════════");
         }
 
         return result;
@@ -250,7 +269,7 @@ internal sealed class TestGroupingService : ITestGroupingService
 
         tests.Add(test);
     }
-    
+
     private static string FormatParallelLimiterInfo(AbstractExecutableTest test) =>
         test.Context.ParallelLimiter != null
             ? $" [ParallelLimiter: {test.Context.ParallelLimiter.GetType().Name} (limit: {test.Context.ParallelLimiter.Limit})]"

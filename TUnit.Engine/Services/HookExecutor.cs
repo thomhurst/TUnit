@@ -76,9 +76,7 @@ internal sealed class HookExecutor
         // stopped the activity after hooks, the exporter would already be
         // gone and the root span would never be exported.
 #if NET
-        var hasTestFailures = _contextProvider.TestSessionContext.AllTests
-            .Any(t => t.Result is { State: TestState.Failed or TestState.Timeout or TestState.Cancelled });
-        FinishSessionActivity(hasErrors: hasTestFailures);
+        FinishSessionActivity(hasErrors: _contextProvider.TestSessionContext.HasFailures);
 #endif
 
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);

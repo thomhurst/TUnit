@@ -68,8 +68,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
-        var testContexts = testList.Select(static t => t.Context);
-        _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
+        _eventReceiverOrchestrator.InitializeTestCounts(testList);
     }
 
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)

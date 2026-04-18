@@ -31,8 +31,10 @@ namespace TUnit.Core;
 public partial class TestContext : Context,
     ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents, ITestIsolation
 {
-    private static readonly ConcurrentDictionary<string, TestContext> _testContextsById = new();
+    private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsByGuid = new();
     private readonly TestBuilderContext _testBuilderContext;
+    private readonly Guid _idGuid;
+    private string? _idString;
     private string? _cachedDisplayName;
 
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
@@ -42,17 +44,31 @@ public partial class TestContext : Context,
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
 
-        // Generate unique ID for this test instance
-        Id = Guid.NewGuid().ToString();
+        _idGuid = Guid.NewGuid();
         IsolationUniqueId = Interlocked.Increment(ref _isolationIdCounter);
 
-        _testContextsById[Id] = this;
+        _testContextsByGuid[_idGuid] = this;
     }
 
     /// <summary>
     /// Gets the unique identifier for this test instance.
+    /// The string form is materialized lazily on first access — most tests never need it
+    /// unless OTel is active or user code queries the context by Id.
     /// </summary>
-    public string Id { get; }
+    public string Id
+    {
+        get
+        {
+            // Volatile read gives ARM/WASM acquire semantics without a volatile field.
+            if (Volatile.Read(ref _idString) is { } existing)
+            {
+                return existing;
+            }
+
+            var materialized = _idGuid.ToString();
+            return Interlocked.CompareExchange(ref _idString, materialized, null) ?? materialized;
+        }
+    }
 
     /// <summary>
     /// Gets access to test execution state, result management, cancellation, and retry information.
@@ -203,12 +219,10 @@ public partial class TestContext : Context,
     /// </summary>
     /// <param name="id">The unique identifier of the test context.</param>
     /// <returns>The matching <see cref="TestContext"/>, or <c>null</c>.</returns>
-    public static TestContext? GetById(string id) => _testContextsById.GetValueOrDefault(id);
+    public static TestContext? GetById(string id) =>
+        Guid.TryParse(id, out var guid) ? _testContextsByGuid.GetValueOrDefault(guid) : null;
 
-    /// <summary>
-    /// Removes a test context from the static registry. Called when test execution completes.
-    /// </summary>
-    internal static void RemoveById(string id) => _testContextsById.TryRemove(id, out _);
+    internal void RemoveFromRegistry() => _testContextsByGuid.TryRemove(_idGuid, out _);
 
     /// <summary>
     /// Gets the dictionary of test parameters indexed by parameter name.
