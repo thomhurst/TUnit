@@ -46,10 +46,6 @@ public class PublishMockTestsAOTModule : Module<IReadOnlyList<CommandResult>>
                     Properties =
                     [
                         new KeyValue("Aot", "true"),
-                        // Isolate bin/obj so the AOT recompile of ProjectReferences never
-                        // overwrites DLLs that PackTUnitFilesModule packages with --no-build.
-                        new KeyValue("BaseOutputPath", $"bin/aot-{framework}/"),
-                        new KeyValue("BaseIntermediateOutputPath", $"obj/aot-{framework}/"),
                     ],
                     Framework = framework,
                 }, new CommandExecutionOptions

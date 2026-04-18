@@ -49,9 +49,6 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
                     [
                         new KeyValue("Aot", "true"),
                         new KeyValue("TUnitVersion", version.ValueOrDefault!.SemVer!),
-                        // Isolate bin/obj — see PackTUnitFilesModule.
-                        new KeyValue("BaseOutputPath", $"bin/aot-{framework}/"),
-                        new KeyValue("BaseIntermediateOutputPath", $"obj/aot-{framework}/"),
                     ],
                     Framework = framework,
                 }, new CommandExecutionOptions

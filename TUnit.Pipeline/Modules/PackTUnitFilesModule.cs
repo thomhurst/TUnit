@@ -8,13 +8,14 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
-// Runs concurrently with PublishMockTestsAOTModule / PublishNugetTesterAOTModule by design.
-// Correctness depends on those modules using isolated BaseOutputPath/BaseIntermediateOutputPath
-// so their recompiles never touch bin/Release/{tfm}/*.dll — this module uses NoBuild=true and
-// packs whatever is on disk, so any rewrite of those DLLs would ship strong-name-mismatched
-// packages. See issue #5622.
+// Must run after any module that may recompile packable projects (TUnit.Mocks et al).
+// This module uses NoBuild=true and packs whatever bin/Release/{tfm}/*.dll is on disk, so
+// a racing recompile without version props would ship strong-name-mismatched packages.
+// Version props come from $GITHUB_ENV (see .github/workflows/dotnet.yml) so recompiles
+// also stamp the correct AssemblyVersion. See issue #5622.
 [DependsOn<GetPackageProjectsModule>]
 [DependsOn<GenerateVersionModule>]
+[DependsOn<PublishMockTestsAOTModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
     // Packages in beta get a "-beta" suffix appended to their version.
