@@ -222,17 +222,6 @@ public partial class TestContext : Context,
     public static TestContext? GetById(string id) =>
         Guid.TryParse(id, out var guid) ? _testContextsByGuid.GetValueOrDefault(guid) : null;
 
-    /// <summary>
-    /// Removes a test context from the static registry. Called when test execution completes.
-    /// </summary>
-    internal static void RemoveById(string id)
-    {
-        if (Guid.TryParse(id, out var guid))
-        {
-            _testContextsByGuid.TryRemove(guid, out _);
-        }
-    }
-
     internal void RemoveFromRegistry() => _testContextsByGuid.TryRemove(_idGuid, out _);
 
     /// <summary>

@@ -35,30 +35,32 @@ public class TestDiscoveryContext : Context
 
     private AssemblyHookContext[] BuildUniqueAssemblies()
     {
+        // List+HashSet preserves first-occurrence insertion order (matches prior LINQ Distinct() contract).
         var seen = new HashSet<AssemblyHookContext>();
+        var ordered = new List<AssemblyHookContext>();
         foreach (var cls in TestClasses)
         {
-            seen.Add(cls.AssemblyContext);
+            if (seen.Add(cls.AssemblyContext))
+            {
+                ordered.Add(cls.AssemblyContext);
+            }
         }
-        var result = new AssemblyHookContext[seen.Count];
-        seen.CopyTo(result);
-        return result;
+        return ordered.ToArray();
     }
 
     private ClassHookContext[] BuildUniqueTestClasses()
     {
         var seen = new HashSet<ClassHookContext>();
+        var ordered = new List<ClassHookContext>();
         foreach (var test in AllTests)
         {
             var cls = test.ClassContext;
-            if (cls != null)
+            if (cls != null && seen.Add(cls))
             {
-                seen.Add(cls);
+                ordered.Add(cls);
             }
         }
-        var result = new ClassHookContext[seen.Count];
-        seen.CopyTo(result);
-        return result;
+        return ordered.ToArray();
     }
 
     public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
