@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -103,7 +104,97 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return AssertionResult._passedTask;
         }
 
+        // Render collections with element contents so failure messages aren't "System.Int32[]".
+        // Arrays and most collections use reference equality via EqualityComparer<T>.Default —
+        // when references differ but contents match, surface IsEquivalentTo to the user.
+        if (_comparer is null && IsFormattableCollection(value) && IsFormattableCollection(_expected))
+        {
+            var actualPreview = FormatValue(value);
+            if (SequenceEqualsNonGeneric(value!, _expected!))
+            {
+                return Task.FromResult(AssertionResult.Failed(
+                    $"received {actualPreview} (same contents, different reference — use IsEquivalentTo to compare by contents)"));
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"received {actualPreview}"));
+        }
+
         return Task.FromResult(AssertionResult.Failed($"received {value}"));
+    }
+
+    private const int CollectionPreviewMax = 10;
+
+    private static bool IsFormattableCollection(object? value)
+        => value is IEnumerable && value is not string;
+
+    private static string FormatValue(object? value)
+    {
+        if (value is null)
+        {
+            return "null";
+        }
+
+        if (value is string s)
+        {
+            return $"\"{s}\"";
+        }
+
+        if (value is IEnumerable enumerable)
+        {
+            var items = new List<string>(CollectionPreviewMax);
+            var total = 0;
+            foreach (var item in enumerable)
+            {
+                if (total < CollectionPreviewMax)
+                {
+                    items.Add(item?.ToString() ?? "null");
+                }
+                total++;
+            }
+
+            var preview = string.Join(", ", items);
+            if (total > CollectionPreviewMax)
+            {
+                preview += $", and {total - CollectionPreviewMax} more...";
+            }
+
+            return $"[{preview}]";
+        }
+
+        return value.ToString() ?? "null";
+    }
+
+    private static bool SequenceEqualsNonGeneric(object actual, object expected)
+    {
+        var enumActual = ((IEnumerable)actual).GetEnumerator();
+        var enumExpected = ((IEnumerable)expected).GetEnumerator();
+        try
+        {
+            while (true)
+            {
+                var hasActual = enumActual.MoveNext();
+                var hasExpected = enumExpected.MoveNext();
+                if (hasActual != hasExpected)
+                {
+                    return false;
+                }
+
+                if (!hasActual)
+                {
+                    return true;
+                }
+
+                if (!Equals(enumActual.Current, enumExpected.Current))
+                {
+                    return false;
+                }
+            }
+        }
+        finally
+        {
+            (enumActual as IDisposable)?.Dispose();
+            (enumExpected as IDisposable)?.Dispose();
+        }
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
@@ -213,5 +304,5 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return (true, null);
     }
 
-    protected override string GetExpectation() => $"to be equal to {(_expected is string s ? $"\"{s}\"" : _expected)}";
+    protected override string GetExpectation() => $"to be equal to {FormatValue(_expected)}";
 }
