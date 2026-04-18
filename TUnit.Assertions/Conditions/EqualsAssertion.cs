@@ -134,7 +134,12 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     private static bool IsFormattableCollection(object? value)
         => value is IEnumerable && value is not string;
 
-    private static string FormatValue(object? value)
+    // Fallback formatter used by GetExpectation when the failure path did not run
+    // (e.g. when a custom comparer was supplied, or the receiver is not a collection).
+    // The hot collection path in CheckAsync materializes once and calls FormatItems directly.
+    private static string FormatValue(object? value) => FormatItem(value);
+
+    private static string FormatItem(object? value)
     {
         if (value is null)
         {
@@ -170,7 +175,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         var parts = new string[take];
         for (var i = 0; i < take; i++)
         {
-            parts[i] = items[i]?.ToString() ?? "null";
+            parts[i] = FormatItem(items[i]);
         }
 
         var preview = string.Join(", ", parts);

@@ -100,4 +100,32 @@ public class Issue5613ArrayFormatTests
         await Assert.That(exception.Message).DoesNotContain("System.Int32[]");
         await Assert.That(exception.Message).Contains("more...");
     }
+
+    [Test]
+    public async Task StringArray_IsEqualTo_Failure_Quotes_Items()
+    {
+        // Prevents ambiguity between null and the literal "null", and keeps whitespace visible.
+        string[] actual = ["hello", "world"];
+        string[] expected = ["foo", "bar"];
+        var action = async () => await Assert.That(actual).IsEqualTo(expected);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).Contains("[\"hello\", \"world\"]");
+        await Assert.That(exception.Message).Contains("[\"foo\", \"bar\"]");
+    }
+
+    [Test]
+    public async Task NestedCollection_IsEqualTo_Failure_Recurses_Into_Items()
+    {
+        int[][] actual = [[1, 2], [3, 4]];
+        int[][] expected = [[5, 6], [7, 8]];
+        var action = async () => await Assert.That(actual).IsEqualTo(expected);
+
+        var exception = await Assert.That(action).Throws<AssertionException>();
+
+        await Assert.That(exception.Message).DoesNotContain("System.Int32[]");
+        await Assert.That(exception.Message).Contains("[[1, 2], [3, 4]]");
+        await Assert.That(exception.Message).Contains("[[5, 6], [7, 8]]");
+    }
 }
