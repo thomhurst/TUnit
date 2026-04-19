@@ -95,10 +95,7 @@ internal static class MockWrapperTypeBuilder
         // Copy the source member's [Obsolete] attribute onto the forward so the call to
         // Object.{name}(...) inside this method is allowed by the compiler (a member
         // marked [Obsolete] may freely call other obsolete members, suppressing CS0618/CS0612).
-        if (method.ObsoleteAttribute.Length > 0)
-        {
-            writer.AppendLine(method.ObsoleteAttribute);
-        }
+        writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
 
         if (method.IsVoid && !method.IsAsync)
         {
@@ -124,10 +121,7 @@ internal static class MockWrapperTypeBuilder
             ? $"(({prop.ExplicitInterfaceName})Object)"
             : "Object";
 
-        if (prop.ObsoleteAttribute.Length > 0)
-        {
-            writer.AppendLine(prop.ObsoleteAttribute);
-        }
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
         // Per-accessor [Obsolete] is injected inline so the property line stays a one-liner.
         var getterAttr = prop.GetterObsoleteAttribute.Length > 0 ? prop.GetterObsoleteAttribute + " " : "";
@@ -142,11 +136,7 @@ internal static class MockWrapperTypeBuilder
     {
         var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
-        if (evt.ObsoleteAttribute.Length > 0)
-        {
-            writer.AppendLine(evt.ObsoleteAttribute);
-        }
-
+        writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
         writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
     }
 

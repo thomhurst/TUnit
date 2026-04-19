@@ -980,6 +980,11 @@ internal static class MemberDiscovery
             // C# 10+ named arguments. DiagnosticId lets consumers suppress the generated
             // obsolete warning using their custom ID instead of CS0618. UrlFormat surfaces
             // a documentation link in IDE tooltips.
+            //
+            // Only the string-valued named arguments DiagnosticId and UrlFormat are preserved.
+            // System.ObsoleteAttribute defines no others today. If .NET adds new ones, the
+            // generated attribute will still compile but won't carry the extra metadata.
+            // Extend this loop when a new named arg is added.
             var named = new List<string>();
             foreach (var na in attr.NamedArguments)
             {
