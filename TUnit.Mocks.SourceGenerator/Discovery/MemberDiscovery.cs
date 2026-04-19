@@ -684,8 +684,14 @@ internal static class MemberDiscovery
     /// property-level emission already covers the accessor and emitting both would duplicate.</summary>
     private static string GetAccessorObsoleteAttributeSyntax(IPropertySymbol property, IMethodSymbol? accessor)
     {
-        if (accessor is null) return "";
-        if (GetObsoleteAttributeSyntax(property).Length > 0) return "";
+        if (accessor is null)
+        {
+            return "";
+        }
+        if (GetObsoleteAttributeSyntax(property).Length > 0)
+        {
+            return "";
+        }
         return GetObsoleteAttributeSyntax(accessor);
     }
 
@@ -941,9 +947,18 @@ internal static class MemberDiscovery
         foreach (var attr in symbol.GetAttributes())
         {
             var attrClass = attr.AttributeClass;
-            if (attrClass is null) continue;
-            if (!string.Equals(attrClass.Name, "ObsoleteAttribute", StringComparison.Ordinal)) continue;
-            if (!string.Equals(attrClass.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal)) continue;
+            if (attrClass is null)
+            {
+                continue;
+            }
+            if (!string.Equals(attrClass.Name, "ObsoleteAttribute", StringComparison.Ordinal))
+            {
+                continue;
+            }
+            if (!string.Equals(attrClass.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal))
+            {
+                continue;
+            }
 
             var positional = new List<string>();
             var args = attr.ConstructorArguments;
@@ -958,13 +973,16 @@ internal static class MemberDiscovery
                 positional.Add(isError ? "true" : "false");
             }
 
-            // C# 10+ named arguments: DiagnosticId enables consumers to suppress the
-            // generated obsolete warning by their custom diagnostic ID rather than CS0618;
-            // UrlFormat surfaces a documentation link in IDE tooltips.
+            // C# 10+ named arguments. DiagnosticId lets consumers suppress the generated
+            // obsolete warning using their custom ID instead of CS0618. UrlFormat surfaces
+            // a documentation link in IDE tooltips.
             var named = new List<string>();
             foreach (var na in attr.NamedArguments)
             {
-                if (na.Value.Value is not string strValue) continue;
+                if (na.Value.Value is not string strValue)
+                {
+                    continue;
+                }
                 if (string.Equals(na.Key, "DiagnosticId", StringComparison.Ordinal)
                  || string.Equals(na.Key, "UrlFormat", StringComparison.Ordinal))
                 {
