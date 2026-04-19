@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using ModularPipelines.Attributes;
+﻿using ModularPipelines.Attributes;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
 using ModularPipelines.Extensions;
@@ -12,8 +11,10 @@ namespace TUnit.Pipeline.Modules;
 [NotInParallel("NetworkTests")]
 public class RunRpcTestsModule : TestBaseModule
 {
-    // Skipped globally — see https://github.com/thomhurst/TUnit/issues/5540
-    protected override IEnumerable<string> TestableFrameworks => [];
+    protected override IEnumerable<string> TestableFrameworks =>
+    [
+        "net10.0"
+    ];
 
     protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
