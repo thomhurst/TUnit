@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace TUnit.RpcTests.Models;
 
@@ -8,4 +8,4 @@ public sealed record TestNodeUpdate
     TestNode Node,
 
     [property: JsonPropertyName("parent")]
-    string ParentUid);
+    string? ParentUid);

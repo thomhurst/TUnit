@@ -1,17 +1,25 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TUnit.RpcTests.Models;
 
 public sealed record TestNode
-(
-    [property: JsonPropertyName("uid")]
-    string Uid,
+{
+    [JsonPropertyName("uid")]
+    public required string Uid { get; init; }
 
-    [property: JsonPropertyName("display-name")]
-    string DisplayName,
+    [JsonPropertyName("display-name")]
+    public required string DisplayName { get; init; }
 
-    [property: JsonPropertyName("node-type")]
-    string NodeType,
+    [JsonPropertyName("node-type")]
+    public string? NodeType { get; init; }
 
-    [property: JsonPropertyName("execution-state")]
-    string ExecutionState);
+    [JsonPropertyName("execution-state")]
+    public string? ExecutionState { get; init; }
+
+    // Captures every other server-sent field (traits, location.*, error.*, etc.)
+    // so that when we round-trip the node back in testCases, the server sees
+    // the full payload it originally produced.
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+}

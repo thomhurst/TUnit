@@ -1,37 +1,28 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using StreamJsonRpc;
 using TUnit.RpcTests.Models;
-// ReSharper disable All
 
 namespace TUnit.RpcTests.Clients;
 
 public sealed class TestingPlatformClient : IDisposable
 {
-    private readonly TcpClient _tcpClient = new();
-    private readonly IProcessHandle _processHandler;
+    private readonly TcpClient _tcpClient;
     private readonly TargetHandler _targetHandler = new();
     private readonly StringBuilder _disconnectionReason = new();
 
-    public TestingPlatformClient(JsonRpc jsonRpc, TcpClient tcpClient, IProcessHandle processHandler, bool enableDiagnostic = false)
+    public TestingPlatformClient(JsonRpc jsonRpc, TcpClient tcpClient)
     {
         JsonRpcClient = jsonRpc;
         _tcpClient = tcpClient;
-        _processHandler = processHandler;
         JsonRpcClient.AddLocalRpcTarget(
             _targetHandler,
             new JsonRpcTargetOptions
             {
                 MethodNameTransform = CommonMethodNameTransforms.CamelCase,
             });
-
-        if (enableDiagnostic)
-        {
-            JsonRpcClient.TraceSource.Switch.Level = SourceLevels.All;
-            JsonRpcClient.TraceSource.Listeners.Add(new ConsoleRpcListener());
-        }
 
         JsonRpcClient.Disconnected += JsonRpcClient_Disconnected;
         JsonRpcClient.StartListening();
@@ -45,53 +36,18 @@ public sealed class TestingPlatformClient : IDisposable
         _disconnectionReason.AppendLine(e.Exception?.ToString());
     }
 
-    public int ExitCode => _processHandler.ExitCode;
-
-    public async Task<int> WaitServerProcessExitAsync()
-    {
-        await _processHandler.WaitForExitAsync();
-        return _processHandler.ExitCode;
-    }
-
     public JsonRpc JsonRpcClient { get; }
 
-    private async Task CheckedInvokeAsync(Func<Task> func)
-    {
-        try
-        {
-            await func();
-        }
-        catch (Exception ex)
-        {
-            if (_disconnectionReason.Length > 0)
-            {
-                throw new InvalidOperationException($"{ex.Message}\n{_disconnectionReason}", ex);
-            }
-
-            throw;
-        }
-    }
-
-    private async Task<T> CheckedInvokeAsync<T>(Func<Task<T>> func, bool @checked = true)
+    private async Task<T> CheckedInvokeAsync<T>(Func<Task<T>> func)
     {
         try
         {
             return await func();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (_disconnectionReason.Length > 0)
         {
-            if (@checked)
-            {
-                if (_disconnectionReason.Length > 0)
-                {
-                    throw new InvalidOperationException($"{ex.Message}\n{_disconnectionReason}", ex);
-                }
-
-                throw;
-            }
+            throw new InvalidOperationException($"{ex.Message}\n{_disconnectionReason}", ex);
         }
-
-        return default!;
     }
 
     public void RegisterLogListener(LogsCollector listener)
@@ -100,47 +56,41 @@ public sealed class TestingPlatformClient : IDisposable
     public void RegisterTelemetryListener(TelemetryCollector listener)
         => _targetHandler.RegisterTelemetryListener(listener);
 
-    public async Task<InitializeResponse> InitializeAsync()
-    {
-        using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMinutes(3));
-        return await CheckedInvokeAsync(async () => await JsonRpcClient.InvokeWithParameterObjectAsync<InitializeResponse>(
+    public async Task<InitializeResponse> InitializeAsync(CancellationToken cancellationToken = default)
+        => await CheckedInvokeAsync(async () => await JsonRpcClient.InvokeWithParameterObjectAsync<InitializeResponse>(
             "initialize",
             new InitializeRequest(Environment.ProcessId, new ClientInfo("test-client"),
-                new ClientCapabilities(new ClientTestingCapabilities(DebuggerProvider: false))), cancellationToken: cancellationTokenSource.Token));
-    }
+                new ClientCapabilities(new ClientTestingCapabilities(DebuggerProvider: false))),
+            cancellationToken: cancellationToken));
 
-    public async Task ExitAsync(bool gracefully = true)
+    public async Task ExitAsync()
     {
-        if (gracefully)
+        try
         {
-            using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMinutes(3));
-            await CheckedInvokeAsync(async () => await JsonRpcClient.NotifyWithParameterObjectAsync("exit", new object()));
+            await JsonRpcClient.NotifyWithParameterObjectAsync("exit", new object());
         }
-        else
+        catch
         {
-            _tcpClient.Dispose();
+            // Best effort — connection may already be gone
         }
     }
 
-    public async Task<ResponseListener> DiscoverTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action, bool @checked = true)
-        => await CheckedInvokeAsync(
-            async () =>
-            {
-                using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMinutes(3));
-                var discoveryListener = new TestNodeUpdatesResponseListener(requestId, action);
-                _targetHandler.RegisterResponseListener(discoveryListener);
-                await JsonRpcClient.InvokeWithParameterObjectAsync("testing/discoverTests", new DiscoveryRequest(RunId: requestId), cancellationToken: cancellationTokenSource.Token);
-                return discoveryListener;
-            }, @checked);
-
-    public async Task<ResponseListener> RunTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action, TestNode[]? testNodes = null)
+    public async Task<ResponseListener> DiscoverTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action, CancellationToken cancellationToken = default)
         => await CheckedInvokeAsync(async () =>
         {
-            using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromMinutes(3));
+            var discoveryListener = new TestNodeUpdatesResponseListener(requestId, action);
+            _targetHandler.RegisterResponseListener(discoveryListener);
+            await JsonRpcClient.InvokeWithParameterObjectAsync("testing/discoverTests", new DiscoveryRequest(RunId: requestId), cancellationToken: cancellationToken);
+            return (ResponseListener)discoveryListener;
+        });
+
+    public async Task<ResponseListener> RunTestsAsync(Guid requestId, Func<TestNodeUpdate[], Task> action, TestNode[]? testNodes = null, CancellationToken cancellationToken = default)
+        => await CheckedInvokeAsync(async () =>
+        {
             var runListener = new TestNodeUpdatesResponseListener(requestId, action);
             _targetHandler.RegisterResponseListener(runListener);
-            await JsonRpcClient.InvokeWithParameterObjectAsync("testing/runTests", new RunTestsRequest(RunId: requestId, TestCases: testNodes), cancellationToken: cancellationTokenSource.Token);
-            return runListener;
+            await JsonRpcClient.InvokeWithParameterObjectAsync("testing/runTests", new RunTestsRequest(RunId: requestId, Tests: testNodes), cancellationToken: cancellationToken);
+            return (ResponseListener)runListener;
         });
 
     public void Dispose()
@@ -153,14 +103,9 @@ public sealed class TestingPlatformClient : IDisposable
 
     private sealed class TargetHandler
     {
-        private readonly ConcurrentDictionary<Guid, ResponseListener> _listeners
-            = new();
-
-        private readonly ConcurrentBag<LogsCollector> _logListeners
-            = new();
-
-        private readonly ConcurrentBag<TelemetryCollector> _telemetryPayloads
-            = new();
+        private readonly ConcurrentDictionary<Guid, ResponseListener> _listeners = new();
+        private readonly ConcurrentBag<LogsCollector> _logListeners = [];
+        private readonly ConcurrentBag<TelemetryCollector> _telemetryPayloads = [];
 
         public void RegisterTelemetryListener(TelemetryCollector listener)
             => _telemetryPayloads.Add(listener);
@@ -233,5 +178,5 @@ public sealed class TestNodeUpdatesResponseListener(Guid requestId, Func<TestNod
     : ResponseListener(requestId)
 {
     public override async Task OnMessageReceiveAsync(object message)
-        => await action((TestNodeUpdate[]) message);
+        => await action((TestNodeUpdate[])message);
 }
