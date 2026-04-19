@@ -146,6 +146,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + ObsoleteAttribute.GetHashCode();
+            hash = hash * 31 + GetterObsoleteAttribute.GetHashCode();
+            hash = hash * 31 + SetterObsoleteAttribute.GetHashCode();
             return hash;
         }
     }

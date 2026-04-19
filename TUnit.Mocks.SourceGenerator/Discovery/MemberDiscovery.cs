@@ -648,6 +648,7 @@ internal static class MemberDiscovery
         var hasSetter = IsAccessorAccessible(property.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
+        var propertyObsolete = GetObsoleteAttributeSyntax(property);
 
         return new MockMemberModel
         {
@@ -673,22 +674,24 @@ internal static class MemberDiscovery
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null,
-            ObsoleteAttribute = GetObsoleteAttributeSyntax(property),
-            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(property, property.GetMethod),
-            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(property, property.SetMethod)
+            ObsoleteAttribute = propertyObsolete,
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(propertyObsolete, property.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(propertyObsolete, property.SetMethod)
         };
     }
 
     /// <summary>Returns the [Obsolete] attribute for a single accessor, but only when the
     /// containing property is NOT itself marked obsolete. When the property is marked, the
-    /// property-level emission already covers the accessor and emitting both would duplicate.</summary>
-    private static string GetAccessorObsoleteAttributeSyntax(IPropertySymbol property, IMethodSymbol? accessor)
+    /// property-level emission already covers the accessor and emitting both would duplicate.
+    /// Takes the already-computed property-level attribute string to avoid re-iterating
+    /// <c>property.GetAttributes()</c> for each accessor.</summary>
+    private static string GetAccessorObsoleteAttributeSyntax(string propertyObsoleteAttribute, IMethodSymbol? accessor)
     {
         if (accessor is null)
         {
             return "";
         }
-        if (GetObsoleteAttributeSyntax(property).Length > 0)
+        if (propertyObsoleteAttribute.Length > 0)
         {
             return "";
         }
@@ -734,6 +737,7 @@ internal static class MemberDiscovery
         var hasSetter = IsAccessorAccessible(indexer.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
+        var indexerObsolete = GetObsoleteAttributeSyntax(indexer);
 
         return new MockMemberModel
         {
@@ -762,9 +766,9 @@ internal static class MemberDiscovery
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type),
-            ObsoleteAttribute = GetObsoleteAttributeSyntax(indexer),
-            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexer, indexer.GetMethod),
-            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexer, indexer.SetMethod)
+            ObsoleteAttribute = indexerObsolete,
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.SetMethod)
         };
     }
 
@@ -1000,9 +1004,17 @@ internal static class MemberDiscovery
         return "";
     }
 
-    /// <summary>Wraps a string in C# double-quoted literal syntax, escaping backslashes and quotes.</summary>
+    /// <summary>Wraps a string in C# double-quoted literal syntax, escaping backslashes,
+    /// quotes, and the newline/carriage-return/tab whitespace escapes that would otherwise
+    /// produce a syntactically invalid multi-line string literal.</summary>
     private static string EscapeStringLiteral(string value)
-        => "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+        => "\"" + value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t")
+            + "\"";
 
     /// <summary>
     /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.

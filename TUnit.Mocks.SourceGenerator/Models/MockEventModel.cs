@@ -71,6 +71,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + RaiseParameterList.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             return hash;
         }
     }
