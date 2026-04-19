@@ -1240,6 +1240,13 @@ public class MockGeneratorTests : SnapshotTestBase
                 // must round-trip through the generated attribute literal verbatim.
                 [Obsolete("Use \"NewMethod\" in C:\\New\\Path")]
                 string? WithTrickyChars();
+
+                // C# 10+ named arguments on [Obsolete] (DiagnosticId, UrlFormat) must be
+                // preserved on the generated forward so consumers using
+                // `#pragma warning disable CUSTOM001` continue to suppress the mock's
+                // call site, not just the source interface's.
+                [Obsolete("Replaced", DiagnosticId = "CUSTOM001", UrlFormat = "https://example.test/{0}")]
+                string? WithDiagnosticId();
             }
 
             public abstract class BaseDialog
@@ -1258,6 +1265,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoObsoleteWarnings(source);
         AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }

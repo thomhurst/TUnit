@@ -932,8 +932,9 @@ internal static class MemberDiscovery
     /// <summary>
     /// If <paramref name="symbol"/> carries <see cref="System.ObsoleteAttribute"/>, returns
     /// the C# attribute syntax to copy onto a generated forward/override (preserving the
-    /// message and IsError flag). Returns empty string when the member is not obsolete.
-    /// Suppresses CS0612/CS0618 inside the generated body and resolves CS0672 on overrides.
+    /// message, IsError flag, and the C# 10+ <c>DiagnosticId</c> / <c>UrlFormat</c> named
+    /// arguments). Returns empty string when the member is not obsolete. Suppresses
+    /// CS0612/CS0618 inside the generated body and resolves CS0672 on overrides.
     /// </summary>
     private static string GetObsoleteAttributeSyntax(ISymbol symbol)
     {
@@ -944,22 +945,46 @@ internal static class MemberDiscovery
             if (!string.Equals(attrClass.Name, "ObsoleteAttribute", StringComparison.Ordinal)) continue;
             if (!string.Equals(attrClass.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal)) continue;
 
+            var positional = new List<string>();
             var args = attr.ConstructorArguments;
-            if (args.Length == 0)
+            if (args.Length >= 1)
+            {
+                var message = args[0].Value as string;
+                positional.Add(message is null ? "null" : EscapeStringLiteral(message));
+            }
+            if (args.Length >= 2)
+            {
+                var isError = args[1].Value is bool b && b;
+                positional.Add(isError ? "true" : "false");
+            }
+
+            // C# 10+ named arguments: DiagnosticId enables consumers to suppress the
+            // generated obsolete warning by their custom diagnostic ID rather than CS0618;
+            // UrlFormat surfaces a documentation link in IDE tooltips.
+            var named = new List<string>();
+            foreach (var na in attr.NamedArguments)
+            {
+                if (na.Value.Value is not string strValue) continue;
+                if (string.Equals(na.Key, "DiagnosticId", StringComparison.Ordinal)
+                 || string.Equals(na.Key, "UrlFormat", StringComparison.Ordinal))
+                {
+                    named.Add($"{na.Key} = {EscapeStringLiteral(strValue)}");
+                }
+            }
+
+            if (positional.Count == 0 && named.Count == 0)
             {
                 return "[global::System.Obsolete]";
             }
-            var message = args[0].Value as string;
-            var messageLiteral = message is null ? "null" : "\"" + message.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
-            if (args.Length == 1)
-            {
-                return $"[global::System.Obsolete({messageLiteral})]";
-            }
-            var isError = args[1].Value is bool b && b;
-            return $"[global::System.Obsolete({messageLiteral}, {(isError ? "true" : "false")})]";
+            var allArgs = string.Join(", ", positional.Concat(named));
+            return $"[global::System.Obsolete({allArgs})]";
         }
         return "";
     }
+
+    /// <summary>Wraps a string in C# double-quoted literal syntax, escaping backslashes and quotes.</summary>
+    private static string EscapeStringLiteral(string value)
+        => "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
 
     /// <summary>
     /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.

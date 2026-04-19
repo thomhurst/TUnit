@@ -174,6 +174,33 @@ public abstract class SnapshotTestBase
         }
     }
 
+    /// <summary>
+    /// Compiles the generator output and asserts no CS0612 (obsolete, no message), CS0618
+    /// (obsolete with message), or CS0672 ('override missing Obsolete') warnings are emitted.
+    /// Direct compile-time guard for the [Obsolete]-propagation portion of #5626. Proves
+    /// the snapshot's [Obsolete] attribute placement actually suppresses the warnings, not
+    /// just appears in the generated text.
+    /// </summary>
+    protected static void AssertGeneratedCodeHasNoObsoleteWarnings(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
+    {
+        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(source, additionalReferences, parseOptions);
+        var obsoleteWarnings = diagnostics
+            .Where(d => d.Severity >= DiagnosticSeverity.Warning
+                     && (string.Equals(d.Id, "CS0612", StringComparison.Ordinal)
+                      || string.Equals(d.Id, "CS0618", StringComparison.Ordinal)
+                      || string.Equals(d.Id, "CS0672", StringComparison.Ordinal)))
+            .ToList();
+        if (obsoleteWarnings.Count > 0)
+        {
+            var messages = string.Join(Environment.NewLine, obsoleteWarnings.Select(d => d.ToString()));
+            throw new InvalidOperationException(
+                $"Generated code emits {obsoleteWarnings.Count} obsolete warning(s):{Environment.NewLine}{messages}");
+        }
+    }
+
     private static (Compilation Compilation, IReadOnlyList<Diagnostic> Diagnostics) RunGeneratorWithCompilationDiagnostics(
         string source,
         IEnumerable<MetadataReference>? additionalReferences,
