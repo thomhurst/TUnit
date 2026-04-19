@@ -145,6 +145,67 @@ public abstract class SnapshotTestBase
         IEnumerable<MetadataReference>? additionalReferences = null,
         CSharpParseOptions? parseOptions = null)
     {
+        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(source, additionalReferences, parseOptions);
+        return diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+    }
+
+    /// <summary>
+    /// Compiles the generator output under nullable-enabled context and asserts that no
+    /// CS86xx-family nullable warnings (CS8600, CS8602, CS8603, CS8604, CS8618, CS8625)
+    /// are emitted. Used as a regression guard for #5626 and #5424/#5425/#5251.
+    /// Other compiler diagnostics (e.g. CS1520 from C# 14 extension() blocks not parseable
+    /// by the test-pinned Roslyn) are intentionally not asserted because they're
+    /// limitations of the test infrastructure, not the generator output.
+    /// </summary>
+    protected static void AssertGeneratedCodeHasNoNullableWarnings(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
+    {
+        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(source, additionalReferences, parseOptions);
+        var nullableWarnings = diagnostics
+            .Where(d => d.Severity >= DiagnosticSeverity.Warning && d.Id.StartsWith("CS86", StringComparison.Ordinal))
+            .ToList();
+        if (nullableWarnings.Count > 0)
+        {
+            var messages = string.Join(Environment.NewLine, nullableWarnings.Select(d => d.ToString()));
+            throw new InvalidOperationException(
+                $"Generated code emits {nullableWarnings.Count} CS86xx nullable warning(s):{Environment.NewLine}{messages}");
+        }
+    }
+
+    /// <summary>
+    /// Compiles the generator output and asserts no CS0612 (obsolete, no message), CS0618
+    /// (obsolete with message), or CS0672 ('override missing Obsolete') warnings are emitted.
+    /// Direct compile-time guard for the [Obsolete]-propagation portion of #5626. Proves
+    /// the snapshot's [Obsolete] attribute placement actually suppresses the warnings, not
+    /// just appears in the generated text.
+    /// </summary>
+    protected static void AssertGeneratedCodeHasNoObsoleteWarnings(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        CSharpParseOptions? parseOptions = null)
+    {
+        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(source, additionalReferences, parseOptions);
+        var obsoleteWarnings = diagnostics
+            .Where(d => d.Severity >= DiagnosticSeverity.Warning
+                     && (string.Equals(d.Id, "CS0612", StringComparison.Ordinal)
+                      || string.Equals(d.Id, "CS0618", StringComparison.Ordinal)
+                      || string.Equals(d.Id, "CS0672", StringComparison.Ordinal)))
+            .ToList();
+        if (obsoleteWarnings.Count > 0)
+        {
+            var messages = string.Join(Environment.NewLine, obsoleteWarnings.Select(d => d.ToString()));
+            throw new InvalidOperationException(
+                $"Generated code emits {obsoleteWarnings.Count} obsolete warning(s):{Environment.NewLine}{messages}");
+        }
+    }
+
+    private static (Compilation Compilation, IReadOnlyList<Diagnostic> Diagnostics) RunGeneratorWithCompilationDiagnostics(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences,
+        CSharpParseOptions? parseOptions)
+    {
         parseOptions ??= CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
 
@@ -156,7 +217,8 @@ public abstract class SnapshotTestBase
             "TestAssembly",
             [syntaxTree],
             refs,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithNullableContextOptions(NullableContextOptions.Enable));
 
         var generator = new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
@@ -169,9 +231,7 @@ public abstract class SnapshotTestBase
             throw new InvalidOperationException($"Generator produced errors:{Environment.NewLine}{errorMessages}");
         }
 
-        return outputCompilation.GetDiagnostics()
-            .Where(d => d.Severity == DiagnosticSeverity.Error)
-            .ToList();
+        return (outputCompilation, outputCompilation.GetDiagnostics());
     }
 
     private static async Task VerifySnapshot(

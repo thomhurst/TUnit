@@ -30,6 +30,14 @@ internal sealed class CodeWriter
         _sb.Append(text);
     }
 
+    public void AppendLineIfNotEmpty(string line)
+    {
+        if (line.Length > 0)
+        {
+            AppendLine(line);
+        }
+    }
+
     public void OpenBrace()
     {
         AppendLine("{");

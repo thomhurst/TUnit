@@ -606,7 +606,8 @@ internal static class MemberDiscovery
             IsRefStructReturn = returnType.IsRefLikeType,
             AutoMockFactoryMethod = autoMockFactoryMethod,
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
-            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
+            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null,
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(method)
         };
     }
 
@@ -647,6 +648,7 @@ internal static class MemberDiscovery
         var hasSetter = IsAccessorAccessible(property.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
+        var propertyObsolete = GetObsoleteAttributeSyntax(property);
 
         return new MockMemberModel
         {
@@ -671,8 +673,29 @@ internal static class MemberDiscovery
             IsRefStructReturn = property.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
-            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
+            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null,
+            ObsoleteAttribute = propertyObsolete,
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(propertyObsolete, property.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(propertyObsolete, property.SetMethod)
         };
+    }
+
+    /// <summary>Returns the [Obsolete] attribute for a single accessor, but only when the
+    /// containing property is NOT itself marked obsolete. When the property is marked, the
+    /// property-level emission already covers the accessor and emitting both would duplicate.
+    /// Takes the already-computed property-level attribute string to avoid re-iterating
+    /// <c>property.GetAttributes()</c> for each accessor.</summary>
+    private static string GetAccessorObsoleteAttributeSyntax(string propertyObsoleteAttribute, IMethodSymbol? accessor)
+    {
+        if (accessor is null)
+        {
+            return "";
+        }
+        if (propertyObsoleteAttribute.Length > 0)
+        {
+            return "";
+        }
+        return GetObsoleteAttributeSyntax(accessor);
     }
 
     /// <summary>
@@ -714,6 +737,7 @@ internal static class MemberDiscovery
         var hasSetter = IsAccessorAccessible(indexer.SetMethod, compilationAssembly);
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
+        var indexerObsolete = GetObsoleteAttributeSyntax(indexer);
 
         return new MockMemberModel
         {
@@ -741,7 +765,10 @@ internal static class MemberDiscovery
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
-            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type)
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type),
+            ObsoleteAttribute = indexerObsolete,
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.SetMethod)
         };
     }
 
@@ -837,7 +864,8 @@ internal static class MemberDiscovery
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
-            RaiseParameterList = raiseParameterList
+            RaiseParameterList = raiseParameterList,
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(evt)
         };
     }
 
@@ -910,6 +938,88 @@ internal static class MemberDiscovery
         if (value is char c) return $"'{c}'";
         return value.ToString();
     }
+
+    /// <summary>
+    /// If <paramref name="symbol"/> carries <see cref="System.ObsoleteAttribute"/>, returns
+    /// the C# attribute syntax to copy onto a generated forward/override (preserving the
+    /// message, IsError flag, and the C# 10+ <c>DiagnosticId</c> / <c>UrlFormat</c> named
+    /// arguments). Returns empty string when the member is not obsolete. Suppresses
+    /// CS0612/CS0618 inside the generated body and resolves CS0672 on overrides.
+    /// </summary>
+    private static string GetObsoleteAttributeSyntax(ISymbol symbol)
+    {
+        foreach (var attr in symbol.GetAttributes())
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass is null)
+            {
+                continue;
+            }
+            if (!string.Equals(attrClass.Name, "ObsoleteAttribute", StringComparison.Ordinal))
+            {
+                continue;
+            }
+            if (!string.Equals(attrClass.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var positional = new List<string>();
+            var args = attr.ConstructorArguments;
+            if (args.Length >= 1)
+            {
+                var message = args[0].Value as string;
+                positional.Add(message is null ? "null" : EscapeStringLiteral(message));
+            }
+            if (args.Length >= 2)
+            {
+                var isError = args[1].Value is bool b && b;
+                positional.Add(isError ? "true" : "false");
+            }
+
+            // C# 10+ named arguments. DiagnosticId lets consumers suppress the generated
+            // obsolete warning using their custom ID instead of CS0618. UrlFormat surfaces
+            // a documentation link in IDE tooltips.
+            //
+            // Only the string-valued named arguments DiagnosticId and UrlFormat are preserved.
+            // System.ObsoleteAttribute defines no others today. If .NET adds new ones, the
+            // generated attribute will still compile but won't carry the extra metadata.
+            // Extend this loop when a new named arg is added.
+            var named = new List<string>();
+            foreach (var na in attr.NamedArguments)
+            {
+                if (na.Value.Value is not string strValue)
+                {
+                    continue;
+                }
+                if (string.Equals(na.Key, "DiagnosticId", StringComparison.Ordinal)
+                 || string.Equals(na.Key, "UrlFormat", StringComparison.Ordinal))
+                {
+                    named.Add($"{na.Key} = {EscapeStringLiteral(strValue)}");
+                }
+            }
+
+            if (positional.Count == 0 && named.Count == 0)
+            {
+                return "[global::System.Obsolete]";
+            }
+            var allArgs = string.Join(", ", positional.Concat(named));
+            return $"[global::System.Obsolete({allArgs})]";
+        }
+        return "";
+    }
+
+    /// <summary>Wraps a string in C# double-quoted literal syntax, escaping backslashes,
+    /// quotes, and the newline/carriage-return/tab whitespace escapes that would otherwise
+    /// produce a syntactically invalid multi-line string literal.</summary>
+    private static string EscapeStringLiteral(string value)
+        => "\"" + value
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t")
+            + "\"";
 
     /// <summary>
     /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.
