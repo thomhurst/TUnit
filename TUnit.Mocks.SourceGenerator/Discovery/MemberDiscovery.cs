@@ -606,7 +606,8 @@ internal static class MemberDiscovery
             IsRefStructReturn = returnType.IsRefLikeType,
             AutoMockFactoryMethod = autoMockFactoryMethod,
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
-            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null
+            SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null,
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(method)
         };
     }
 
@@ -671,8 +672,21 @@ internal static class MemberDiscovery
             IsRefStructReturn = property.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
-            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null
+            SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null,
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(property),
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(property, property.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(property, property.SetMethod)
         };
+    }
+
+    /// <summary>Returns the [Obsolete] attribute for a single accessor, but only when the
+    /// containing property is NOT itself marked obsolete. When the property is marked, the
+    /// property-level emission already covers the accessor and emitting both would duplicate.</summary>
+    private static string GetAccessorObsoleteAttributeSyntax(IPropertySymbol property, IMethodSymbol? accessor)
+    {
+        if (accessor is null) return "";
+        if (GetObsoleteAttributeSyntax(property).Length > 0) return "";
+        return GetObsoleteAttributeSyntax(accessor);
     }
 
     /// <summary>
@@ -741,7 +755,10 @@ internal static class MemberDiscovery
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
-            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type)
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type),
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(indexer),
+            GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexer, indexer.GetMethod),
+            SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexer, indexer.SetMethod)
         };
     }
 
@@ -837,7 +854,8 @@ internal static class MemberDiscovery
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
-            RaiseParameterList = raiseParameterList
+            RaiseParameterList = raiseParameterList,
+            ObsoleteAttribute = GetObsoleteAttributeSyntax(evt)
         };
     }
 
@@ -909,6 +927,38 @@ internal static class MemberDiscovery
         if (value is bool b) return b ? "true" : "false";
         if (value is char c) return $"'{c}'";
         return value.ToString();
+    }
+
+    /// <summary>
+    /// If <paramref name="symbol"/> carries <see cref="System.ObsoleteAttribute"/>, returns
+    /// the C# attribute syntax to copy onto a generated forward/override (preserving the
+    /// message and IsError flag). Returns empty string when the member is not obsolete.
+    /// Suppresses CS0612/CS0618 inside the generated body and resolves CS0672 on overrides.
+    /// </summary>
+    private static string GetObsoleteAttributeSyntax(ISymbol symbol)
+    {
+        foreach (var attr in symbol.GetAttributes())
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass is null) continue;
+            if (!string.Equals(attrClass.Name, "ObsoleteAttribute", StringComparison.Ordinal)) continue;
+            if (!string.Equals(attrClass.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal)) continue;
+
+            var args = attr.ConstructorArguments;
+            if (args.Length == 0)
+            {
+                return "[global::System.Obsolete]";
+            }
+            var message = args[0].Value as string;
+            var messageLiteral = message is null ? "null" : "\"" + message.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+            if (args.Length == 1)
+            {
+                return $"[global::System.Obsolete({messageLiteral})]";
+            }
+            var isError = args[1].Value is bool b && b;
+            return $"[global::System.Obsolete({messageLiteral}, {(isError ? "true" : "false")})]";
+        }
+        return "";
     }
 
     /// <summary>

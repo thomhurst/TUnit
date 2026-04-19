@@ -188,6 +188,8 @@ internal static class MockImplBuilder
         var paramList = GetParameterList(method);
         var typeParams = GetTypeParameterList(method);
 
+        EmitObsoleteAttribute(writer, method.ObsoleteAttribute);
+
         // C# prohibits restating generic constraints on override methods (CS0460)
         var accessModifier = method.IsProtected ? "protected" : "public";
         using (writer.Block($"{accessModifier} override {signatureReturnType} {method.Name}{typeParams}({paramList})"))
@@ -327,11 +329,13 @@ internal static class MockImplBuilder
     {
         var accessModifier = prop.IsProtected ? "protected" : "public";
         var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        EmitObsoleteAttribute(writer, prop.ObsoleteAttribute);
         writer.AppendLine($"{accessModifier} override {prop.ReturnType} {prop.Name}");
         writer.OpenBrace();
 
         if (prop.HasGetter)
         {
+            EmitObsoleteAttribute(writer, prop.GetterObsoleteAttribute);
             if (prop.IsRefStructReturn)
             {
                 if (prop.IsAbstractMember)
@@ -394,6 +398,7 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
+            EmitObsoleteAttribute(writer, prop.SetterObsoleteAttribute);
             var setterArgs = prop.IsRefStructReturn
                 ? "global::System.Array.Empty<object?>()"
                 : "new object?[] { value }";
@@ -522,6 +527,8 @@ internal static class MockImplBuilder
         var typeParams = GetTypeParameterList(method);
         var constraints = GetConstraintClauses(method);
 
+        EmitObsoleteAttribute(writer, method.ObsoleteAttribute);
+
         if (method.ExplicitInterfaceName is not null)
         {
             if (method.ExplicitInterfaceCanDelegate)
@@ -548,11 +555,24 @@ internal static class MockImplBuilder
         }
     }
 
+    /// <summary>Emit a copy of the source member's [Obsolete] attribute so the generated forward
+    /// inherits the deprecation marker. Resolves CS0612/CS0618 inside the generated body and
+    /// CS0672 ('override missing Obsolete') for partial mocks.</summary>
+    internal static void EmitObsoleteAttribute(CodeWriter writer, string obsoleteAttribute)
+    {
+        if (obsoleteAttribute.Length > 0)
+        {
+            writer.AppendLine(obsoleteAttribute);
+        }
+    }
+
     private static void GeneratePartialMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = GetParameterList(method);
         var typeParams = GetTypeParameterList(method);
+
+        EmitObsoleteAttribute(writer, method.ObsoleteAttribute);
 
         // C# prohibits restating generic constraints on override methods (CS0460)
         var accessModifier = method.IsProtected ? "protected" : "public";
@@ -836,6 +856,7 @@ internal static class MockImplBuilder
     private static void GenerateInterfaceProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        EmitObsoleteAttribute(writer, prop.ObsoleteAttribute);
         if (prop.ExplicitInterfaceName is not null)
         {
             // Explicit interface property with incompatible return type.
@@ -844,10 +865,12 @@ internal static class MockImplBuilder
             writer.OpenBrace();
             if (prop.HasGetter)
             {
+                EmitObsoleteAttribute(writer, prop.GetterObsoleteAttribute);
                 writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             if (prop.HasSetter)
             {
+                EmitObsoleteAttribute(writer, prop.SetterObsoleteAttribute);
                 writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", new object?[] {{ value }});");
             }
             writer.CloseBrace();
@@ -859,6 +882,7 @@ internal static class MockImplBuilder
 
         if (prop.HasGetter)
         {
+            EmitObsoleteAttribute(writer, prop.GetterObsoleteAttribute);
             if (prop.IsRefStructReturn)
             {
                 // ref struct property — can't use HandleCallWithReturn<T>, use void dispatch + return default
@@ -880,6 +904,7 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
+            EmitObsoleteAttribute(writer, prop.SetterObsoleteAttribute);
             if (prop.IsRefStructReturn)
             {
                 // ref struct property — can't box value, use empty args
@@ -898,11 +923,13 @@ internal static class MockImplBuilder
     {
         var accessModifier = prop.IsProtected ? "protected" : "public";
         var autoMockFactory = GetAutoMockFactoryLambda(prop);
+        EmitObsoleteAttribute(writer, prop.ObsoleteAttribute);
         writer.AppendLine($"{accessModifier} override {prop.ReturnType} {prop.Name}");
         writer.OpenBrace();
 
         if (prop.HasGetter)
         {
+            EmitObsoleteAttribute(writer, prop.GetterObsoleteAttribute);
             if (prop.IsRefStructReturn)
             {
                 if (prop.IsAbstractMember)
@@ -967,6 +994,7 @@ internal static class MockImplBuilder
 
         if (prop.HasSetter)
         {
+            EmitObsoleteAttribute(writer, prop.SetterObsoleteAttribute);
             var setterArgs = prop.IsRefStructReturn
                 ? "global::System.Array.Empty<object?>()"
                 : "new object?[] { value }";
@@ -1000,6 +1028,7 @@ internal static class MockImplBuilder
         writer.AppendLine();
 
         // Event add/remove accessors
+        EmitObsoleteAttribute(writer, evt.ObsoleteAttribute);
         writer.AppendLine($"public event {evt.EventHandlerTypeNonNullable}? {evt.Name}");
         writer.OpenBrace();
         writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
@@ -1033,6 +1062,7 @@ internal static class MockImplBuilder
         writer.AppendLine();
 
         // Event add/remove accessors with override
+        EmitObsoleteAttribute(writer, evt.ObsoleteAttribute);
         writer.AppendLine($"public override event {evt.EventHandlerTypeNonNullable}? {evt.Name}");
         writer.OpenBrace();
         writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
@@ -1098,7 +1128,10 @@ internal static class MockImplBuilder
                             var castArgs = new List<string>();
                             for (int i = 0; i < evt.RaiseParameterList.Length; i++)
                             {
-                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]");
+                                // The `!` suppresses CS8600/CS8604 when a delegate parameter type
+                                // is non-nullable (the cast from object? would otherwise warn). The
+                                // single-parameter dispatch path uses the same `args!` pattern.
+                                castArgs.Add($"({evt.RaiseParameterList[i].FullyQualifiedType})__argArray[{i}]!");
                             }
                             writer.AppendLine($"Raise_{evt.Name}({string.Join(", ", castArgs)});");
                             writer.DecreaseIndent();

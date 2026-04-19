@@ -97,6 +97,8 @@ internal static class MockBridgeBuilder
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
         var constraints = MockImplBuilder.GetConstraintClauses(method, forExplicitImplementation: true);
 
+        MockImplBuilder.EmitObsoleteAttribute(writer, method.ObsoleteAttribute);
+
         using (writer.Block($"static {signatureReturnType} {method.ExplicitInterfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
         {
             GenerateStaticEngineDispatchBody(writer, method, staticEngineTypeName);
@@ -105,11 +107,13 @@ internal static class MockBridgeBuilder
 
     private static void GenerateStaticPropertyDim(CodeWriter writer, MockMemberModel prop, string staticEngineTypeName)
     {
+        MockImplBuilder.EmitObsoleteAttribute(writer, prop.ObsoleteAttribute);
         writer.AppendLine($"static {prop.ReturnType} {prop.ExplicitInterfaceName}.{prop.Name}");
         writer.OpenBrace();
 
         if (prop.HasGetter)
         {
+            MockImplBuilder.EmitObsoleteAttribute(writer, prop.GetterObsoleteAttribute);
             writer.AppendLine("get");
             writer.OpenBrace();
             writer.AppendLine($"var __engine = {staticEngineTypeName}.Engine;");
@@ -127,6 +131,7 @@ internal static class MockBridgeBuilder
 
         if (prop.HasSetter)
         {
+            MockImplBuilder.EmitObsoleteAttribute(writer, prop.SetterObsoleteAttribute);
             writer.AppendLine("set");
             writer.OpenBrace();
             writer.AppendLine($"var __engine = {staticEngineTypeName}.Engine;");
@@ -140,6 +145,7 @@ internal static class MockBridgeBuilder
 
     private static void GenerateStaticEventDim(CodeWriter writer, MockEventModel evt)
     {
+        MockImplBuilder.EmitObsoleteAttribute(writer, evt.ObsoleteAttribute);
         writer.AppendLine($"static event {evt.EventHandlerType} {evt.ExplicitInterfaceName}.{evt.Name}");
         writer.OpenBrace();
         writer.AppendLine("add { }");

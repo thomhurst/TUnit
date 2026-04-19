@@ -1204,6 +1204,115 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Obsolete_Members()
+    {
+        // Regression for #5626: members marked [Obsolete] on the source interface or
+        // base class previously caused CS0612/CS0618/CS0672 warnings to leak from the
+        // generated mock into consumer builds (a blocker for TreatWarningsAsErrors).
+        // The fix copies the [Obsolete] attribute onto every generated forward and
+        // override, since a member marked [Obsolete] may freely call other obsolete
+        // members without warning.
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IDialogService
+            {
+                [Obsolete("Use ShowAsync(options) instead")]
+                string? Show(string? title, string? message);
+
+                [Obsolete]
+                Task<string?> ShowPanel<TData>(TData? data) where TData : class;
+
+                [Obsolete("Removed", true)]
+                event EventHandler<string?>? Opened;
+
+                string? Greeting { [Obsolete] get; [Obsolete] set; }
+
+                // Asymmetric accessor cases: only the marked accessor should carry [Obsolete]
+                // on the generated forward, otherwise the unmarked accessor would gain a
+                // spurious CS0618 warning at the consumer call site.
+                string? Headline { [Obsolete] get; set; }
+                string? Subtitle { get; [Obsolete] set; }
+
+                // Exercises the message-escape path: embedded quotes and backslashes
+                // must round-trip through the generated attribute literal verbatim.
+                [Obsolete("Use \"NewMethod\" in C:\\New\\Path")]
+                string? WithTrickyChars();
+            }
+
+            public abstract class BaseDialog
+            {
+                [Obsolete]
+                public virtual string? Compute(string? input) => input;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var dialog = Mock.Of<IDialogService>();
+                    var partial = Mock.Of<BaseDialog>();
+                }
+            }
+            """;
+
+        AssertGeneratedCodeHasNoNullableWarnings(source);
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_FluentUI_Shape_Nullable_Warnings()
+    {
+        // Investigation for the CS8600/CS8604 portion of #5626. The reporter claimed
+        // these warnings fire against Microsoft.FluentUI.AspNetCore.Components.IDialogService.
+        // These are the exact patterns from FluentUI that earlier synthetic repros missed:
+        // unconstrained Task<T?> returns, class-constrained generics with nullable returns,
+        // and events with mixed-nullability delegate type arguments.
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IDialogReference
+            {
+                // Unconstrained generic + Task<T?> return: classic CS8600 trigger.
+                Task<T?> GetReturnValueAsync<T>();
+            }
+
+            public interface IDialogContentComponent { }
+            public interface IDialogContentComponent<TContent> : IDialogContentComponent { TContent Content { get; set; } }
+            public class DialogParameters { }
+            public class DialogParameters<TContent> : DialogParameters where TContent : class { public TContent Content { get; set; } = default!; }
+
+            public partial interface IDialogService
+            {
+                // Nullable return + class-constrained generic
+                Task<IDialogReference?> UpdateDialogAsync<TData>(string id, DialogParameters<TData> parameters) where TData : class;
+
+                // Non-nullable return + different generic-constraint shape
+                Task<IDialogReference> ShowDialogAsync<TDialog>(object data, DialogParameters parameters) where TDialog : IDialogContentComponent;
+
+                // Event with mixed nullable/non-nullable delegate type arguments
+                event Action<IDialogReference, Type?, DialogParameters, object>? OnShow;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var dialog = Mock.Of<IDialogService>();
+                    var refs = Mock.Of<IDialogReference>();
+                }
+            }
+            """;
+
+        AssertGeneratedCodeHasNoNullableWarnings(source);
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_Inheriting_Nested_Generic_IEnumerable()
     {
         var source = """

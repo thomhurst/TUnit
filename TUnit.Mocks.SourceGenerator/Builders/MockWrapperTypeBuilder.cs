@@ -92,6 +92,14 @@ internal static class MockWrapperTypeBuilder
             ? $"(({method.ExplicitInterfaceName})Object)"
             : "Object";
 
+        // Copy the source member's [Obsolete] attribute onto the forward so the call to
+        // Object.{name}(...) inside this method is allowed by the compiler (a member
+        // marked [Obsolete] may freely call other obsolete members, suppressing CS0618/CS0612).
+        if (method.ObsoleteAttribute.Length > 0)
+        {
+            writer.AppendLine(method.ObsoleteAttribute);
+        }
+
         if (method.IsVoid && !method.IsAsync)
         {
             using (writer.Block($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
@@ -116,8 +124,16 @@ internal static class MockWrapperTypeBuilder
             ? $"(({prop.ExplicitInterfaceName})Object)"
             : "Object";
 
-        var getter = prop.HasGetter ? $"get => {target}.{prop.Name}; " : "";
-        var setter = prop.HasSetter ? $"set => {target}.{prop.Name} = value; " : "";
+        if (prop.ObsoleteAttribute.Length > 0)
+        {
+            writer.AppendLine(prop.ObsoleteAttribute);
+        }
+
+        // Per-accessor [Obsolete] is injected inline so the property line stays a one-liner.
+        var getterAttr = prop.GetterObsoleteAttribute.Length > 0 ? prop.GetterObsoleteAttribute + " " : "";
+        var setterAttr = prop.SetterObsoleteAttribute.Length > 0 ? prop.SetterObsoleteAttribute + " " : "";
+        var getter = prop.HasGetter ? $"{getterAttr}get => {target}.{prop.Name}; " : "";
+        var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{prop.Name} = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.{prop.Name} {{ {getter}{setter}}}");
     }
@@ -125,6 +141,11 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
     {
         var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
+
+        if (evt.ObsoleteAttribute.Length > 0)
+        {
+            writer.AppendLine(evt.ObsoleteAttribute);
+        }
 
         writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
     }

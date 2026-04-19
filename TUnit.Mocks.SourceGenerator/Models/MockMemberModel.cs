@@ -73,6 +73,22 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string? SpanReturnElementType { get; init; }
 
     /// <summary>
+    /// The C# attribute syntax to copy onto generated overrides/forwards when the source member
+    /// carries <see cref="System.ObsoleteAttribute"/>. Empty string when the member is not obsolete.
+    /// Example: <c>[global::System.Obsolete("Use V2", false)]</c>. Carrying the attribute through
+    /// silences CS0612/CS0618 warnings inside the generated body and resolves CS0672 on overrides.
+    /// </summary>
+    public string ObsoleteAttribute { get; init; } = "";
+
+    /// <summary>Per-accessor [Obsolete] attribute, only set when the property symbol itself
+    /// is not obsolete but the getter is. Lets the generator preserve asymmetric cases like
+    /// <c>{ [Obsolete] get; set; }</c> without forcing the whole property to be marked.</summary>
+    public string GetterObsoleteAttribute { get; init; } = "";
+
+    /// <summary>Per-accessor [Obsolete] attribute, set when only the setter is obsolete.</summary>
+    public string SetterObsoleteAttribute { get; init; } = "";
+
+    /// <summary>
     /// Returns true if the method has any non-out ref struct parameters.
     /// Computed from <see cref="Parameters"/> — does not participate in equality.
     /// </summary>
@@ -109,7 +125,10 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsStaticAbstract == other.IsStaticAbstract
             && AutoMockFactoryMethod == other.AutoMockFactoryMethod
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
-            && SpanReturnElementType == other.SpanReturnElementType;
+            && SpanReturnElementType == other.SpanReturnElementType
+            && ObsoleteAttribute == other.ObsoleteAttribute
+            && GetterObsoleteAttribute == other.GetterObsoleteAttribute
+            && SetterObsoleteAttribute == other.SetterObsoleteAttribute;
     }
 
     public override int GetHashCode()

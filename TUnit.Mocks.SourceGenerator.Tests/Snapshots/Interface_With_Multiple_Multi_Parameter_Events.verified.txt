@@ -106,7 +106,7 @@ namespace TUnit.Mocks.Generated
                     {
                         if (args is object?[] __argArray)
                         {
-                            Raise_First((object)__argArray[0], (string)__argArray[1]);
+                            Raise_First((object)__argArray[0]!, (string)__argArray[1]!);
                         }
                         else
                         {
@@ -118,7 +118,7 @@ namespace TUnit.Mocks.Generated
                     {
                         if (args is object?[] __argArray)
                         {
-                            Raise_Second((object)__argArray[0], (int)__argArray[1]);
+                            Raise_Second((object)__argArray[0]!, (int)__argArray[1]!);
                         }
                         else
                         {

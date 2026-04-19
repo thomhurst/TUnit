@@ -43,6 +43,10 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     /// </summary>
     public EquatableArray<MockParameterModel> RaiseParameterList { get; init; } = EquatableArray<MockParameterModel>.Empty;
 
+    /// <summary>The C# attribute syntax to copy onto generated event forwards when the
+    /// source event carries <see cref="System.ObsoleteAttribute"/>. Empty when not obsolete.</summary>
+    public string ObsoleteAttribute { get; init; } = "";
+
     public bool Equals(MockEventModel? other)
     {
         if (other is null) return false;
@@ -53,7 +57,8 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && ExplicitInterfaceName == other.ExplicitInterfaceName
             && DeclaringInterfaceName == other.DeclaringInterfaceName
             && IsStaticAbstract == other.IsStaticAbstract
-            && RaiseParameterList == other.RaiseParameterList;
+            && RaiseParameterList == other.RaiseParameterList
+            && ObsoleteAttribute == other.ObsoleteAttribute;
     }
 
     public override int GetHashCode()
