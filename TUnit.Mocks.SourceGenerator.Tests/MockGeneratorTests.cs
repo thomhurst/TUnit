@@ -1240,13 +1240,6 @@ public class MockGeneratorTests : SnapshotTestBase
                 // must round-trip through the generated attribute literal verbatim.
                 [Obsolete("Use \"NewMethod\" in C:\\New\\Path")]
                 string? WithTrickyChars();
-
-                // C# 10+ named arguments on [Obsolete] (DiagnosticId, UrlFormat) must be
-                // preserved on the generated forward so consumers using
-                // `#pragma warning disable CUSTOM001` continue to suppress the mock's
-                // call site, not just the source interface's.
-                [Obsolete("Replaced", DiagnosticId = "CUSTOM001", UrlFormat = "https://example.test/{0}")]
-                string? WithDiagnosticId();
             }
 
             public abstract class BaseDialog
@@ -1269,6 +1262,40 @@ public class MockGeneratorTests : SnapshotTestBase
         AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
+
+#if NET6_0_OR_GREATER
+    [Test]
+    public Task Interface_With_Obsolete_DiagnosticId_NamedArgs()
+    {
+        // C# 10+ DiagnosticId and UrlFormat named arguments on [Obsolete] were added in
+        // .NET 5; they don't exist on .NET Framework 4.7.2's mscorlib. This test is gated
+        // on net6+ so the test compilation can resolve the named arguments against a
+        // mscorlib that has them. The generator's named-arg preservation path is exercised
+        // here to keep the regression guard for the bot review #2 fix on supported TFMs.
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface IDeprecatedApi
+            {
+                [Obsolete("Replaced", DiagnosticId = "CUSTOM001", UrlFormat = "https://example.test/{0}")]
+                string? WithDiagnosticId();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IDeprecatedApi>();
+                }
+            }
+            """;
+
+        AssertGeneratedCodeHasNoObsoleteWarnings(source);
+        AssertGeneratedCodeHasNoNullableWarnings(source);
+        return VerifyGeneratorOutput(source);
+    }
+#endif
 
     [Test]
     public Task Interface_FluentUI_Shape_Nullable_Warnings()

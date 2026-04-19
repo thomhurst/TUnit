@@ -199,9 +199,6 @@ namespace TUnit.Mocks.Generated
         [global::System.Obsolete("Use \"NewMethod\" in C:\\New\\Path")]
         string? global::IDialogService.WithTrickyChars() => Object.WithTrickyChars();
 
-        [global::System.Obsolete("Replaced", DiagnosticId = "CUSTOM001", UrlFormat = "https://example.test/{0}")]
-        string? global::IDialogService.WithDiagnosticId() => Object.WithDiagnosticId();
-
         string? global::IDialogService.Greeting { [global::System.Obsolete] get => Object.Greeting; [global::System.Obsolete] set => Object.Greeting = value; }
 
         string? global::IDialogService.Headline { [global::System.Obsolete] get => Object.Headline; set => Object.Headline = value; }
@@ -293,12 +290,6 @@ namespace TUnit.Mocks.Generated
         public string? WithTrickyChars()
         {
             return _engine.HandleCallWithReturn<string?>(8, "WithTrickyChars", global::System.Array.Empty<object?>(), default);
-        }
-
-        [global::System.Obsolete("Replaced", DiagnosticId = "CUSTOM001", UrlFormat = "https://example.test/{0}")]
-        public string? WithDiagnosticId()
-        {
-            return _engine.HandleCallWithReturn<string?>(9, "WithDiagnosticId", global::System.Array.Empty<object?>(), default);
         }
 
         public string? Greeting
@@ -438,12 +429,6 @@ namespace TUnit.Mocks.Generated
         {
             var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
             return new IDialogService_WithTrickyChars_M8_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 8, "WithTrickyChars", matchers);
-        }
-
-        public static IDialogService_WithDiagnosticId_M9_MockCall WithDiagnosticId(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
-        {
-            var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new IDialogService_WithDiagnosticId_M9_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 9, "WithDiagnosticId", matchers);
         }
 
         extension(global::TUnit.Mocks.Mock<global::IDialogService> mock)
@@ -593,68 +578,6 @@ namespace TUnit.Mocks.Generated
 
         /// <summary>Auto-raise the Opened event when this method is called.</summary>
         public IDialogService_WithTrickyChars_M8_MockCall RaisesOpened(string? e) { EnsureSetup().Raises("Opened", (object?)e); return this; }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
-    }
-
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IDialogService_WithDiagnosticId_M9_MockCall : global::TUnit.Mocks.Verification.ICallVerification
-    {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string?>? _builder;
-        private bool _builderInitialized;
-        private object? _builderLock;
-
-        internal IDialogService_WithDiagnosticId_M9_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string?> EnsureSetup() =>
-            global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
-            {
-                var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-                _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<string?>(setup);
-            })!;
-
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Returns(string? value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Returns(global::System.Func<string?> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall ReturnsSequentially(params string?[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IDialogService_WithDiagnosticId_M9_MockCall Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Auto-raise the Opened event when this method is called.</summary>
-        public IDialogService_WithDiagnosticId_M9_MockCall RaisesOpened(string? e) { EnsureSetup().Raises("Opened", (object?)e); return this; }
 
         // ICallVerification
         /// <inheritdoc />
