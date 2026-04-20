@@ -71,18 +71,9 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v5
-        continue-on-error: true
         with:
-          path: |
-            ${{ env.NUGET_PACKAGES || '~/.nuget/packages' }}
-            ~/.local/share/NuGet
-            %LocalAppData%\NuGet\v3-cache
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
-          restore-keys: |
-            nuget-${{ runner.os }}-
+          cache: true
+          cache-dependency-path: Directory.Packages.props
 
       - name: Cache Playwright Browsers
         uses: actions/cache@v5
