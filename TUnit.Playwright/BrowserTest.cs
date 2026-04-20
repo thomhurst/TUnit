@@ -22,6 +22,10 @@ public class BrowserTest : PlaywrightTest
     /// <see cref="System.Diagnostics.Activity"/>. Override to <c>false</c> to avoid
     /// leaking trace ids to third-party domains the page contacts.
     /// </summary>
+    /// <remarks>
+    /// Has no effect on <c>netstandard2.0</c> targets — the engine's Activity plumbing
+    /// is .NET-only.
+    /// </remarks>
     public virtual bool PropagateTraceContext => true;
 
     private readonly List<IBrowserContext> _contexts = [];

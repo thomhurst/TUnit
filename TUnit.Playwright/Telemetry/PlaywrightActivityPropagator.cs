@@ -21,12 +21,15 @@ internal static class PlaywrightActivityPropagator
 
         DistributedContextPropagator.Current.Inject(activity, headers, static (carrier, key, value) =>
         {
-            if (carrier is IDictionary<string, string> dict && key is not null && value is not null)
+            if (key is not null && value is not null)
             {
-                dict.TryAdd(key, value);
+                ((IDictionary<string, string>)carrier!).TryAdd(key, value);
             }
         });
 
+        // Belt-and-braces for users who opt out of TUnit's W3C propagator alignment
+        // via TUNIT_KEEP_LEGACY_PROPAGATOR=1: LegacyPropagator emits Correlation-Context
+        // only, so still emit W3C baggage explicitly for backend correlation.
         if (TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
         {
             headers.TryAdd(TUnitActivitySource.BaggageHeader, baggage);
