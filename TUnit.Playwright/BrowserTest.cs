@@ -16,12 +16,25 @@ public class BrowserTest : PlaywrightTest
 
     public IBrowser Browser { get; internal set; } = null!;
 
+    /// <summary>
+    /// Seeds each <see cref="IBrowserContext"/> created via <see cref="NewContext"/>
+    /// with W3C <c>traceparent</c>/<c>baggage</c> headers from the current test's
+    /// <see cref="System.Diagnostics.Activity"/>. Override to <c>false</c> to avoid
+    /// leaking trace ids to third-party domains the page contacts.
+    /// </summary>
+    /// <remarks>
+    /// Has no effect on <c>netstandard2.0</c> targets — the engine's Activity plumbing
+    /// is .NET-only.
+    /// </remarks>
+    public virtual bool PropagateTraceContext => true;
+
     private readonly List<IBrowserContext> _contexts = [];
     private readonly Lock _contextsLock = new();
     private readonly BrowserTypeLaunchOptions _options;
 
     public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
     {
+        options = MergeTelemetryHeaders(options);
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
 
         lock (_contextsLock)
@@ -76,5 +89,36 @@ public class BrowserTest : PlaywrightTest
         {
             throw new AggregateException("One or more browser contexts failed to close.", exceptions);
         }
+    }
+
+    private BrowserNewContextOptions MergeTelemetryHeaders(BrowserNewContextOptions options)
+    {
+#if NET
+        if (!PropagateTraceContext || System.Diagnostics.Activity.Current is null)
+        {
+            return options;
+        }
+
+        // Seed user headers first so they win when the propagator tries to add the same key.
+        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (options.ExtraHTTPHeaders is not null)
+        {
+            foreach (var kvp in options.ExtraHTTPHeaders)
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+        }
+
+        var before = merged.Count;
+        Telemetry.PlaywrightActivityPropagator.InjectInto(merged);
+        if (merged.Count == before)
+        {
+            return options;
+        }
+
+        return new BrowserNewContextOptions(options) { ExtraHTTPHeaders = merged };
+#else
+        return options;
+#endif
     }
 }

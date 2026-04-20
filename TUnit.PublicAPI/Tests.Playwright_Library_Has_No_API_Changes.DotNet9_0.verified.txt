@@ -6,6 +6,7 @@ namespace
         public BrowserTest() { }
         public BrowserTest(.BrowserTypeLaunchOptions options) { }
         public .IBrowser Browser { get; }
+        public virtual bool PropagateTraceContext { get; }
         [.Before(., "", 0)]
         public . BrowserSetup() { }
         [.After(., "", 0)]
