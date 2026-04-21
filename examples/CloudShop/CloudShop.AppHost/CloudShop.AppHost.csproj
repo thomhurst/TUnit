@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.2.3">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.2.2" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="13.2.2" />
-    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.2.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.2.3" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.2.3" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.2.3" />
   </ItemGroup>
 
   <ItemGroup>
