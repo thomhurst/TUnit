@@ -65,6 +65,7 @@
     <Project Path="TUnit.OpenTelemetry.Tests/TUnit.OpenTelemetry.Tests.csproj" />
     <Project Path="TUnit.PublicAPI/TUnit.PublicAPI.csproj" />
     <Project Path="TUnit.RpcTests/TUnit.RpcTests.csproj" />
+    <Project Path="TUnit.TestProject.Library/TUnit.TestProject.Library.csproj" />
     <Project Path="TUnit.UnitTests/TUnit.UnitTests.csproj" />
   </Folder>
 </Solution>
