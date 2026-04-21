@@ -11,12 +11,20 @@ namespace TUnit.AspNetCore;
 /// as their parent.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Implements <see cref="IHostedLifecycleService"/> so the Host's lifecycle hooks keep
 /// firing for inner services that implement it — the Host uses an <c>is</c> check
 /// against the registered instance, so without passthrough wrapping would silently
 /// drop those hooks.
+/// </para>
+/// <para>
+/// Also implements <see cref="IAsyncDisposable"/> and <see cref="IDisposable"/> so the
+/// DI container forwards disposal to the inner service when the host is disposed.
+/// Without this, wrapped services that own unmanaged resources leak silently because
+/// the container only sees the non-disposable wrapper.
+/// </para>
 /// </remarks>
-internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHostedLifecycleService
+internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHostedLifecycleService, IAsyncDisposable, IDisposable
 {
     public Task StartAsync(CancellationToken cancellationToken) =>
         RunOnCleanContext(inner.StartAsync, cancellationToken);
@@ -46,6 +54,34 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
         inner is IHostedLifecycleService lifecycle
             ? lifecycle.StoppedAsync(cancellationToken)
             : Task.CompletedTask;
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        if (inner is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+        }
+        else if (inner is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Forwards to the inner service's <see cref="IDisposable.Dispose"/> when implemented.
+    /// Inner services that only implement <see cref="IAsyncDisposable"/> are not disposed on
+    /// this synchronous path. Callers should use <see cref="DisposeAsync"/> (or
+    /// <c>await using</c> on the owning factory) to release async-only resources.
+    /// </remarks>
+    public void Dispose()
+    {
+        if (inner is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
 
     // Dispatch onto a thread-pool worker with a clean captured ExecutionContext by
     // combining SuppressFlow + Task.Run. Unlike wrapping `using (SuppressFlow()) return op(ct);`
