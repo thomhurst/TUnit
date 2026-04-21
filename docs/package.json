@@ -54,7 +54,7 @@
     "serialize-javascript": "7.0.5",
     "brace-expansion": "5.0.5",
     "qs": "6.15.1",
-    "dompurify": "3.4.0",
+    "dompurify": "3.4.1",
     "node-forge": "1.4.0",
     "picomatch": "4.0.4",
     "svgo": "4.0.1",
