@@ -19,6 +19,10 @@ namespace TUnit.OpenTelemetry;
 ///   <see cref="ActivitySource.StartActivity(string, ActivityKind)"/> returns, so only OnEnd
 ///   can see it.</item>
 /// </list>
+/// Fallback lookup uses <see cref="TraceRegistry"/> keyed on the activity's own
+/// <see cref="Activity.TraceId"/>, not <see cref="Activity.Current"/> — this avoids
+/// cross-attribution when a span outlives its test's async context and is stopped on a
+/// thread where <see cref="Activity.Current"/> belongs to a different concurrent test.
 /// </remarks>
 public sealed class TUnitTestCorrelationProcessor : BaseProcessor<Activity>
 {
@@ -39,11 +43,8 @@ public sealed class TUnitTestCorrelationProcessor : BaseProcessor<Activity>
             return;
         }
 
-        var testId = activity.GetBaggageItem(TUnitActivitySource.TagTestId);
-        if (testId is null && !ReferenceEquals(Activity.Current, activity))
-        {
-            testId = Activity.Current?.GetBaggageItem(TUnitActivitySource.TagTestId);
-        }
+        var testId = activity.GetBaggageItem(TUnitActivitySource.TagTestId)
+            ?? TraceRegistry.GetContextId(activity.TraceId.ToString());
 
         if (testId is not null)
         {
