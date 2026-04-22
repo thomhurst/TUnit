@@ -28,11 +28,12 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 {
     private const long MaxBodyBytes = 16 * 1024 * 1024; // 16 MB
 
+    private static readonly HttpClient s_forwardingClient = new();
+
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
-    private readonly HttpClient? _forwardingClient;
-    private readonly string? _upstreamEndpoint;
+    private string? _upstreamEndpoint;
     private Task? _listenTask;
     private int _taskIdCounter;
     private int _requestCount;
@@ -56,13 +57,19 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// </param>
     public OtlpReceiver(string? upstreamEndpoint = null)
     {
-        _upstreamEndpoint = upstreamEndpoint?.TrimEnd('/');
         (_listener, Port) = CreateListener();
+        UpstreamEndpoint = upstreamEndpoint;
+    }
 
-        if (_upstreamEndpoint is not null)
-        {
-            _forwardingClient = new HttpClient();
-        }
+    /// <summary>
+    /// Optional upstream OTLP endpoint to forward telemetry to. May be assigned after
+    /// construction — Aspire env-var callbacks resolve at resource startup, not at
+    /// receiver-build time. Set to <c>null</c> to stop forwarding.
+    /// </summary>
+    public string? UpstreamEndpoint
+    {
+        get => Volatile.Read(ref _upstreamEndpoint);
+        set => Volatile.Write(ref _upstreamEndpoint, value?.TrimEnd('/'));
     }
 
     /// <summary>
@@ -175,9 +182,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 ProcessTraces(body);
             }
 
-            if (_upstreamEndpoint is not null && _forwardingClient is not null)
+            var upstream = Volatile.Read(ref _upstreamEndpoint);
+            if (upstream is not null)
             {
-                TrackTask(ForwardAsync(path, body, request.ContentType));
+                TrackTask(ForwardAsync(upstream, path, body, request.ContentType));
             }
 
             Interlocked.Increment(ref _requestCount);
@@ -369,7 +377,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
     }
 
-    private async Task ForwardAsync(string path, byte[] body, string? contentType)
+    private static async Task ForwardAsync(string upstream, string path, byte[] body, string? contentType)
     {
         try
         {
@@ -379,8 +387,8 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 content.Headers.TryAddWithoutValidation("Content-Type", contentType);
             }
 
-            await _forwardingClient!.PostAsync(
-                $"{_upstreamEndpoint}{path}",
+            await s_forwardingClient.PostAsync(
+                $"{upstream}{path}",
                 content).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -426,7 +434,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             // Best effort — individual failures already logged via Trace.WriteLine
         }
 
-        _forwardingClient?.Dispose();
         _cts.Dispose();
     }
 

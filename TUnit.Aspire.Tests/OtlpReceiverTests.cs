@@ -288,6 +288,46 @@ public class OtlpReceiverTests
     }
 
     [Test]
+    public async Task Receiver_ForwardsToUpstream_WhenSetAfterConstruction()
+    {
+        // Regression: AspireFixture must be able to discover the user's OTLP endpoint
+        // (e.g. an Aspire dashboard configured via WithEnvironment in ConfigureBuilder)
+        // AFTER the receiver is constructed, because environment callbacks resolve at
+        // resource startup — not when StartOtlpReceiver runs.
+        await using var upstream = new OtlpReceiver();
+        upstream.Start();
+
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        // Set forwarding target after construction (simulates the AspireFixture
+        // capturing the user-supplied OTEL_EXPORTER_OTLP_ENDPOINT inside its callback).
+        receiver.UpstreamEndpoint = $"http://127.0.0.1:{upstream.Port}";
+
+        var body = OtlpProtobufBuilder.BuildExportLogsServiceRequest(
+            "late-bound-svc",
+            new LogRecordSpec
+            {
+                TraceId = Guid.NewGuid().ToString("N"),
+                SeverityNumber = 9,
+                Body = "Forwarded after upstream was set",
+            });
+
+        using var client = new HttpClient();
+        var content = new ByteArrayContent(body);
+        content.Headers.ContentType = new("application/x-protobuf");
+
+        var response = await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        await receiver.WhenIdle();
+        await upstream.WhenIdle();
+
+        await Assert.That(upstream.RequestCount).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task Receiver_HandlesMultipleSequentialRequests()
     {
         var testContext = TestContext.Current!;
