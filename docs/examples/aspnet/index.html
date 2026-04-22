@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"blue",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.bd3cf430.css">
-<script src="/assets/js/runtime~main.a62ed3c6.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.e376cc67.js" defer="defer"></script>
 <script src="/assets/js/main.f200fc8a.js" defer="defer"></script>
 </head>
 <body>
@@ -37,7 +37,7 @@
 <ul>
 <li class=""><strong>Client-side tracing</strong>: <code>CreateClient()</code> / <code>CreateDefaultClient()</code> return an <code>HttpClient</code> that propagates <code>traceparent</code>, <code>baggage</code>, and <code>X-TUnit-TestId</code> headers to the SUT.</li>
 <li class=""><strong>SUT <code>IHttpClientFactory</code> tracing</strong>: Every pipeline built inside the SUT via <code>AddHttpClient&lt;T&gt;()</code>, named clients, or typed clients also gets those headers prepended — outbound calls from your app to downstream services correlate with the originating test. Opt out per-test with <code>WebApplicationTestOptions.AutoPropagateHttpClientFactory = false</code>.</li>
-<li class=""><strong>SUT-side OpenTelemetry</strong>: The SUT&#x27;s <code>TracerProvider</code> is augmented with the <code>TUnit.AspNetCore.Http</code> activity source, the <code>TUnitTestCorrelationProcessor</code> (stamps the <code>tunit.test.id</code> baggage item onto every span as a tag), and ASP.NET Core + HttpClient instrumentation. Spans emitted inside the SUT stay queryable per-test in backends like Jaeger or Seq, even when third-party libraries break the parent-chain. Opt out per-test with <code>WebApplicationTestOptions.AutoConfigureOpenTelemetry = false</code>.</li>
+<li class=""><strong>SUT-side OpenTelemetry</strong>: The SUT&#x27;s <code>TracerProvider</code> is augmented with the <code>TUnitTestCorrelationProcessor</code> (stamps the <code>tunit.test.id</code> baggage item onto every span as a tag) and ASP.NET Core + HttpClient instrumentation. Spans emitted inside the SUT stay queryable per-test in backends like Jaeger or Seq, even when third-party libraries break the parent-chain. Opt out per-test with <code>WebApplicationTestOptions.AutoConfigureOpenTelemetry = false</code>.</li>
 <li class=""><strong>Correlated logging</strong>: Server-side <code>ILogger</code> output is routed to the test that triggered the request.</li>
 <li class=""><strong>Hosted-service context hygiene</strong>: <code>IHostedService.StartAsync</code> runs under <code>ExecutionContext.SuppressFlow()</code> so background work doesn&#x27;t inherit the first test&#x27;s <code>Activity.Current</code>.</li>
 </ul>
