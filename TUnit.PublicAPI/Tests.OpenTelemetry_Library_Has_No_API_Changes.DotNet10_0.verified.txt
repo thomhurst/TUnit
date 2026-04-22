@@ -18,7 +18,7 @@ namespace
         public const int AutoStartOrder = 2147483647;
         [.Before(., "PATH_SCRUBBED", 29, Order=2147483647)]
         public static void Start() { }
-        [.After(., "PATH_SCRUBBED", 93, Order=2147483647)]
+        [.After(., "PATH_SCRUBBED", 96, Order=2147483647)]
         public static void Stop() { }
     }
     public static class TUnitOpenTelemetry
