@@ -56,14 +56,26 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
         InjectTraceContext(propagationActivity, request);
         InjectBaggage(propagationActivity, request);
 
-        var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        HttpResponseMessage response;
+        try
+        {
+            response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            RecordException(activity, ex);
+            throw;
+        }
 
         if (activity is not null)
         {
-            activity.SetTag("http.response.status_code", (int)response.StatusCode);
-            if (!response.IsSuccessStatusCode)
+            var statusCode = (int)response.StatusCode;
+            activity.SetTag("http.response.status_code", statusCode);
+
+            if (statusCode >= 400)
             {
                 activity.SetStatus(ActivityStatusCode.Error);
+                activity.SetTag("error.type", statusCode.ToString());
             }
         }
 
@@ -126,5 +138,24 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
             // only, so still emit W3C baggage explicitly for backend correlation.
             request.Headers.TryAddWithoutValidation(TUnitActivitySource.BaggageHeader, baggage);
         }
+    }
+
+    private static void RecordException(Activity? activity, Exception exception)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        var tags = new ActivityTagsCollection
+        {
+            { "exception.type", exception.GetType().FullName },
+            { "exception.message", exception.Message },
+            { "exception.stacktrace", exception.ToString() }
+        };
+
+        activity.AddEvent(new ActivityEvent("exception", tags: tags));
+        activity.SetTag("error.type", exception.GetType().FullName);
+        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 }

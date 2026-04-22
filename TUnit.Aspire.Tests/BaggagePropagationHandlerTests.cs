@@ -47,6 +47,7 @@ public class BaggagePropagationHandlerTests
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
         var clientSpan = await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
 
+        await Assert.That(parts.Length).IsEqualTo(4);
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(clientSpan.SpanId);
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
@@ -80,6 +81,7 @@ public class BaggagePropagationHandlerTests
         await Assert.That(spans.Length).IsEqualTo(2);
         await Assert.That(traceparent1.Split('-')[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(traceparent2.Split('-')[1]).IsEqualTo(activity.TraceId.ToString());
+        // Requests are awaited sequentially, so ActivityStopped fires in request order.
         await Assert.That(traceparent1.Split('-')[2]).IsEqualTo(spans[0].SpanId);
         await Assert.That(traceparent2.Split('-')[2]).IsEqualTo(spans[1].SpanId);
         await Assert.That(traceparent1.Split('-')[2]).IsNotEqualTo(traceparent2.Split('-')[2]);
@@ -110,7 +112,7 @@ public class BaggagePropagationHandlerTests
     }
 
     [Test]
-    public async Task SendAsync_ClientSpan_RecordsResponseMetadata()
+    public async Task SendAsync_ClientSpan_4xxStatus_SetsErrorStatus()
     {
         Activity.Current = null;
         using var listenerScope = new ActivityListenerScope();
@@ -131,6 +133,59 @@ public class BaggagePropagationHandlerTests
         await Assert.That(clientSpan.Tags.GetValueOrDefault("url.full")).IsEqualTo("http://localhost/test");
         await Assert.That(clientSpan.Tags.GetValueOrDefault("server.address")).IsEqualTo("localhost");
         await Assert.That(clientSpan.Tags.GetValueOrDefault("http.response.status_code")).IsEqualTo("404");
+        await Assert.That(clientSpan.Tags.GetValueOrDefault("error.type")).IsEqualTo("404");
+        await Assert.That(clientSpan.Status).IsEqualTo(ActivityStatusCode.Error);
+    }
+
+    [Test]
+    public async Task SendAsync_ClientSpan_3xxStatus_LeavesStatusUnset()
+    {
+        Activity.Current = null;
+        using var listenerScope = new ActivityListenerScope();
+        using var activity = new Activity("test-redirect-tags").Start();
+
+        var captured = new CaptureHandler(HttpStatusCode.Redirect);
+        var handler = CreateHandler();
+        handler.InnerHandler = captured;
+        using var client = new HttpClient(handler);
+
+        using var response = await client.GetAsync("http://localhost/test");
+
+        await Assert.That((int)response.StatusCode).IsEqualTo(302);
+
+        var clientSpan = await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
+
+        await Assert.That(clientSpan.Tags.GetValueOrDefault("http.response.status_code")).IsEqualTo("302");
+        await Assert.That(clientSpan.Tags.ContainsKey("error.type")).IsFalse();
+        await Assert.That(clientSpan.Status).IsEqualTo(ActivityStatusCode.Unset);
+    }
+
+    [Test]
+    public async Task SendAsync_ClientSpan_RecordsException_WhenInnerHandlerThrows()
+    {
+        Activity.Current = null;
+        using var listenerScope = new ActivityListenerScope();
+        using var activity = new Activity("test-transport-error").Start();
+
+        var handler = CreateHandler();
+        handler.InnerHandler = new ThrowingHandler(new HttpRequestException("boom"));
+        using var client = new HttpClient(handler);
+
+        HttpRequestException? thrown = null;
+        try
+        {
+            await client.GetAsync("http://localhost/test");
+        }
+        catch (HttpRequestException ex)
+        {
+            thrown = ex;
+        }
+
+        await Assert.That(thrown).IsNotNull();
+
+        var clientSpan = await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
+        await Assert.That(clientSpan.Tags.GetValueOrDefault("error.type")).Contains(nameof(HttpRequestException));
+        await Assert.That(clientSpan.EventNames).Contains("exception");
         await Assert.That(clientSpan.Status).IsEqualTo(ActivityStatusCode.Error);
     }
 
@@ -156,6 +211,26 @@ public class BaggagePropagationHandlerTests
         await Assert.That(baggageHeader).Contains("my-test-context-id");
         await Assert.That(baggageHeader).Contains("custom.key");
         await Assert.That(baggageHeader).Contains("custom-value");
+    }
+
+    [Test]
+    public async Task SendAsync_MultipleBaggageItems_CommaSeparated()
+    {
+        Activity.Current = null;
+        using var listenerScope = new ActivityListenerScope();
+        using var activity = new Activity("test-multi-baggage").Start();
+        activity.SetBaggage("key1", "val1");
+        activity.SetBaggage("key2", "val2");
+
+        var captured = new CaptureHandler();
+        var handler = CreateHandler();
+        handler.InnerHandler = captured;
+        using var client = new HttpClient(handler);
+
+        await client.GetAsync("http://localhost/test");
+
+        var baggageHeader = captured.LastRequest!.Headers.GetValues("baggage").First();
+        await Assert.That(baggageHeader).Contains(",");
     }
 
     [Test]
@@ -232,6 +307,7 @@ public class BaggagePropagationHandlerTests
         await Assert.That(allBaggageValues).DoesNotContain("should.not.appear");
     }
 
+    // Pass static _ => null to simulate no helper span; null uses the real StartHttpActivity default.
     private static TUnitBaggagePropagationHandler CreateHandler(
         Func<HttpRequestMessage, Activity?>? startActivity = null)
     {
@@ -259,7 +335,8 @@ public class BaggagePropagationHandlerTests
                     activity.DisplayName,
                     activity.Kind,
                     activity.Status,
-                    activity.TagObjects.ToDictionary(static t => t.Key, static t => t.Value?.ToString())))
+                    activity.TagObjects.ToDictionary(static t => t.Key, static t => t.Value?.ToString()),
+                    activity.Events.Select(static e => e.Name).ToArray()))
             };
 
             ActivitySource.AddActivityListener(_listener);
@@ -280,7 +357,8 @@ public class BaggagePropagationHandlerTests
         string DisplayName,
         ActivityKind Kind,
         ActivityStatusCode Status,
-        IReadOnlyDictionary<string, string?> Tags);
+        IReadOnlyDictionary<string, string?> Tags,
+        string[] EventNames);
 
     /// <summary>
     /// A handler that captures the outgoing request instead of sending it over the network.
@@ -295,6 +373,15 @@ public class BaggagePropagationHandlerTests
         {
             LastRequest = request;
             return Task.FromResult(new HttpResponseMessage(statusCode));
+        }
+    }
+
+    private sealed class ThrowingHandler(Exception exception) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromException<HttpResponseMessage>(exception);
         }
     }
 }
