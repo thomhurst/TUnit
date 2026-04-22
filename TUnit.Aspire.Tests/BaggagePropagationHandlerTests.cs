@@ -230,6 +230,7 @@ public class BaggagePropagationHandlerTests
         await client.GetAsync("http://localhost/test");
 
         var baggageHeader = captured.LastRequest!.Headers.GetValues("baggage").First();
+        await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
         await Assert.That(baggageHeader).Contains(",");
     }
 

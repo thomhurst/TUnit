@@ -63,6 +63,9 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
         }
         catch (Exception ex)
         {
+            // Only the synthesized client span gets exception metadata. When no listener is
+            // attached, propagation falls back to the ambient activity and there is no extra
+            // HTTP client span to annotate.
             TUnitActivitySource.RecordException(activity, ex);
             throw;
         }
