@@ -19,6 +19,13 @@ public static class TUnitActivitySource
     /// </summary>
     public const string AspNetCoreHttpSourceName = "TUnit.AspNetCore.Http";
 
+    /// <summary>
+    /// Activity source emitted by TUnit's Aspire HTTP propagation handler.
+    /// Registered automatically by <c>TUnit.OpenTelemetry.AutoStart</c> so outbound
+    /// requests made through <c>AspireFixture.CreateHttpClient</c> appear as client spans.
+    /// </summary>
+    public const string AspireHttpSourceName = "TUnit.Aspire.Http";
+
     /// <summary>W3C baggage HTTP header name.</summary>
     internal const string BaggageHeader = "baggage";
 
@@ -172,15 +179,16 @@ public static class TUnitActivitySource
             return;
         }
 
+        var exceptionType = exception.GetType().FullName ?? exception.GetType().Name;
         var tagsCollection = new ActivityTagsCollection
         {
-            { "exception.type", exception.GetType().FullName },
+            { "exception.type", exceptionType },
             { "exception.message", exception.Message },
             { "exception.stacktrace", exception.ToString() }
         };
 
         activity.AddEvent(new ActivityEvent("exception", tags: tagsCollection));
-        activity.SetTag("error.type", exception.GetType().FullName);
+        activity.SetTag("error.type", exceptionType);
         activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 

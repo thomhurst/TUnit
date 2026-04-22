@@ -4,10 +4,10 @@ using TUnit.Core;
 namespace TUnit.Aspire.Http;
 
 /// <summary>
-/// DelegatingHandler that propagates W3C <c>traceparent</c> and <c>baggage</c> headers
-/// from <see cref="Activity.Current"/> into outgoing HTTP requests. This enables natural
-/// OpenTelemetry distributed tracing: the SUT receives the test's TraceId and all its
-/// spans and logs can be correlated back to the originating test.
+/// DelegatingHandler that creates Aspire HTTP client spans and propagates W3C
+/// <c>traceparent</c> and <c>baggage</c> headers into outgoing HTTP requests.
+/// This restores normal OpenTelemetry client/server span topology for
+/// <c>AspireFixture.CreateHttpClient</c> requests.
 /// </summary>
 /// <remarks>
 /// Each test case starts its own W3C trace (unique TraceId) via a root activity in the
@@ -22,32 +22,129 @@ namespace TUnit.Aspire.Http;
 /// </remarks>
 internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(
+    private static readonly ActivitySource HttpActivitySource = new(TUnitActivitySource.AspireHttpSourceName);
+    private readonly Func<HttpRequestMessage, Activity?> _startActivity;
+
+    public TUnitBaggagePropagationHandler()
+    {
+        _startActivity = StartHttpActivity;
+    }
+
+    internal TUnitBaggagePropagationHandler(Func<HttpRequestMessage, Activity?> startActivity)
+    {
+        _startActivity = startActivity;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (Activity.Current is { } activity)
-        {
-            // Aspire's CreateHttpClient doesn't create an outgoing client span. Propagate the
-            // current test span itself so downstream server spans parent to a real exported span
-            // instead of a synthetic parent ID that backends can't render.
-            DistributedContextPropagator.Current.Inject(activity, request, static (carrier, key, value) =>
-            {
-                if (carrier is HttpRequestMessage httpRequest && key is not null && !httpRequest.Headers.Contains(key))
-                {
-                    httpRequest.Headers.TryAddWithoutValidation(key, value);
-                }
-            });
+        var ambientActivity = Activity.Current;
+        using var activity = _startActivity(request);
 
-            if (!request.Headers.Contains(TUnitActivitySource.BaggageHeader)
-                && TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
+        if (activity is not null)
+        {
+            activity.SetTag("http.request.method", request.Method.Method);
+            activity.SetTag("url.full", request.RequestUri?.ToString());
+            activity.SetTag("server.address", request.RequestUri?.Host);
+
+            // Aspire's CreateHttpClient bypasses DiagnosticsHandler, so when we synthesize
+            // a client span we also need to flow the ambient baggage onto it explicitly.
+            // Child Activities do not reliably surface parent baggage across all target
+            // frameworks, but correlation relies on the test's baggage being propagated.
+            CopyBaggage(ambientActivity, activity);
+        }
+
+        var propagationActivity = activity ?? ambientActivity;
+        InjectTraceContext(propagationActivity, request);
+        InjectBaggage(propagationActivity, request);
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Only the synthesized client span gets exception metadata. When no listener is
+            // attached, propagation falls back to the ambient activity and there is no extra
+            // HTTP client span to annotate.
+            TUnitActivitySource.RecordException(activity, ex);
+            throw;
+        }
+
+        if (activity is not null)
+        {
+            var statusCode = (int)response.StatusCode;
+            activity.SetTag("http.response.status_code", statusCode);
+
+            if (statusCode >= 400)
             {
-                // Belt-and-braces for users who opt out of TUnit's W3C propagator alignment
-                // via TUNIT_KEEP_LEGACY_PROPAGATOR=1: LegacyPropagator emits Correlation-Context
-                // only, so still emit W3C baggage explicitly for backend correlation.
-                request.Headers.TryAddWithoutValidation(TUnitActivitySource.BaggageHeader, baggage);
+                activity.SetStatus(ActivityStatusCode.Error);
+                activity.SetTag("error.type", statusCode.ToString());
             }
         }
 
-        return base.SendAsync(request, cancellationToken);
+        return response;
+    }
+
+    private static Activity? StartHttpActivity(HttpRequestMessage request)
+    {
+        var method = string.IsNullOrWhiteSpace(request.Method.Method)
+            ? "HTTP"
+            : request.Method.Method;
+        return HttpActivitySource.StartActivity(
+            method,
+            ActivityKind.Client);
+    }
+
+    private static void InjectTraceContext(Activity? activity, HttpRequestMessage request)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        DistributedContextPropagator.Current.Inject(activity, request, static (carrier, key, value) =>
+        {
+            if (carrier is HttpRequestMessage httpRequest && key is not null && !httpRequest.Headers.Contains(key))
+            {
+                httpRequest.Headers.TryAddWithoutValidation(key, value);
+            }
+        });
+    }
+
+    private static void CopyBaggage(Activity? source, Activity destination)
+    {
+        if (source is null || ReferenceEquals(source, destination))
+        {
+            return;
+        }
+
+        foreach (var (key, value) in source.Baggage)
+        {
+            // Preserve baggage already attached to the synthesized client span itself.
+            if (key is null || destination.GetBaggageItem(key) is not null)
+            {
+                continue;
+            }
+
+            destination.SetBaggage(key, value);
+        }
+    }
+
+    private static void InjectBaggage(Activity? activity, HttpRequestMessage request)
+    {
+        if (activity is null || request.Headers.Contains(TUnitActivitySource.BaggageHeader))
+        {
+            return;
+        }
+
+        if (TUnitActivitySource.TryBuildBaggageHeader(activity) is { } baggage)
+        {
+            // Belt-and-braces for users who opt out of TUnit's W3C propagator alignment
+            // via TUNIT_KEEP_LEGACY_PROPAGATOR=1: LegacyPropagator emits Correlation-Context
+            // only, so still emit W3C baggage explicitly for backend correlation.
+            request.Headers.TryAddWithoutValidation(TUnitActivitySource.BaggageHeader, baggage);
+        }
     }
 }

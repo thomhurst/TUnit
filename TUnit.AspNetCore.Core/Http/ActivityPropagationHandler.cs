@@ -52,14 +52,28 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         InjectTraceContext(propagationActivity, request.Headers);
         InjectBaggage(propagationActivity, request.Headers);
 
-        var response = await base.SendAsync(request, cancellationToken);
+        HttpResponseMessage response;
+        try
+        {
+            response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Only the synthesized client span gets exception metadata. When no listener is
+            // attached, propagation falls back to the ambient activity and there is no extra
+            // HTTP client span to annotate.
+            TUnit.Core.TUnitActivitySource.RecordException(activity, ex);
+            throw;
+        }
 
         if (activity is not null)
         {
-            activity.SetTag("http.response.status_code", (int)response.StatusCode);
-            if (!response.IsSuccessStatusCode)
+            var statusCode = (int)response.StatusCode;
+            activity.SetTag("http.response.status_code", statusCode);
+            if (statusCode >= 400)
             {
                 activity.SetStatus(ActivityStatusCode.Error);
+                activity.SetTag("error.type", statusCode.ToString());
             }
         }
 
@@ -68,9 +82,11 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
     private static Activity? StartHttpActivity(HttpRequestMessage request)
     {
-        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
+        var method = string.IsNullOrWhiteSpace(request.Method.Method)
+            ? "HTTP"
+            : request.Method.Method;
         return HttpActivitySource.StartActivity(
-            $"HTTP {request.Method} {path}",
+            method,
             ActivityKind.Client);
     }
 
@@ -103,6 +119,7 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
         foreach (var (key, value) in source.Baggage)
         {
+            // Preserve baggage already attached to the synthesized client span itself.
             if (key is null || destination.GetBaggageItem(key) is not null)
             {
                 continue;

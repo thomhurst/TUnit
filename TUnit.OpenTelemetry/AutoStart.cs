@@ -63,6 +63,7 @@ public static class AutoStart
             .AddSource("TUnit")
             .AddSource("TUnit.Lifecycle")
             .AddSource("TUnit.AspNetCore.Http")
+            .AddSource(TUnitActivitySource.AspireHttpSourceName)
             .AddProcessor(new TUnitTestCorrelationProcessor());
 
         if (otlpEndpoint is not null)
