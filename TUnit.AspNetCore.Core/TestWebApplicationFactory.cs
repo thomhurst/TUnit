@@ -103,17 +103,16 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
     /// <summary>
     /// Adds TUnit's default OpenTelemetry tracing configuration to <paramref name="services"/>:
-    /// the <c>TUnit.AspNetCore.Http</c> activity source, the
-    /// <see cref="TUnitTestCorrelationProcessor"/>, and ASP.NET Core + HttpClient instrumentation.
-    /// Safe to call even if the SUT already registers these — OpenTelemetry de-duplicates them.
-    /// Also safe when combined with the <c>TUnit.OpenTelemetry</c> zero-config package: the
-    /// SUT and test-runner <c>TracerProvider</c>s each carry their own processor, but the
-    /// processor's idempotent <c>OnStart</c> guard prevents duplicate <c>tunit.test.id</c> tags.
+    /// the <see cref="TUnitTestCorrelationProcessor"/> and ASP.NET Core + HttpClient
+    /// instrumentation. Safe to call even if the SUT already registers these — OpenTelemetry
+    /// de-duplicates them. Also safe when combined with the <c>TUnit.OpenTelemetry</c>
+    /// zero-config package: the SUT and test-runner <c>TracerProvider</c>s each carry their
+    /// own processor, and the processor's idempotent tagging guard prevents duplicate
+    /// <c>tunit.test.id</c> tags across its <c>OnStart</c>/<c>OnEnd</c> hooks.
     /// </summary>
     private static void AddTUnitOpenTelemetry(IServiceCollection services)
     {
         services.AddOpenTelemetry().WithTracing(tracing => tracing
-            .AddSource(TUnitActivitySource.AspNetCoreHttpSourceName)
             .AddProcessor(new TUnitTestCorrelationProcessor())
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation());

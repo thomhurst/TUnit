@@ -22,7 +22,7 @@ Point it at a backend:
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 ```
 
-That's it. The package auto-wires a `TracerProvider` at `[Before(TestDiscovery)]` (subscribed to `TUnit`, `TUnit.Lifecycle`, and `TUnit.AspNetCore.Http`), includes a pre-registered `TUnitTestCorrelationProcessor`, and disposes the provider at `[After(TestSession)]`.
+That's it. The package auto-wires a `TracerProvider` at `[Before(TestDiscovery)]` (subscribed to `TUnit` and `TUnit.Lifecycle`), includes a pre-registered `TUnitTestCorrelationProcessor`, and disposes the provider at `[After(TestSession)]`.
 
 #### Customizing (add exporters, processors, resources)
 
@@ -89,9 +89,6 @@ public class TraceSetup
             // Optional: export runner lifecycle traces (discovery, session,
             // assembly, suite, and shared setup/teardown) as a separate source.
             .AddSource("TUnit.Lifecycle")
-            // Optional: export the synthetic HTTP client spans created by
-            // TestWebApplicationFactory / TracedWebApplicationFactory too.
-            .AddSource("TUnit.AspNetCore.Http")
             .AddConsoleExporter()
             .Build();
     }
@@ -125,7 +122,7 @@ public class TraceSetup
     {
         _listener = new ActivityListener
         {
-            ShouldListenTo = source => source.Name is "TUnit" or "TUnit.Lifecycle" or "TUnit.AspNetCore.Http",
+            ShouldListenTo = source => source.Name is "TUnit" or "TUnit.Lifecycle",
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStarted = activity => Console.WriteLine($"▶ {activity.OperationName}"),
             ActivityStopped = activity => Console.WriteLine($"■ {activity.OperationName} ({activity.Duration.TotalMilliseconds:F1}ms)")
@@ -260,7 +257,6 @@ automatically propagate the current test trace via W3C `traceparent` and `baggag
 
 The factory also augments the SUT's `TracerProvider` automatically — no manual `services.AddOpenTelemetry().WithTracing(...)` wiring is needed for the basics:
 
-- Registers the `TUnit.AspNetCore.Http` activity source.
 - Adds the `TUnitTestCorrelationProcessor` so spans from libraries with broken parent chains are still tagged with `tunit.test.id`.
 - Adds ASP.NET Core and HttpClient instrumentation.
 

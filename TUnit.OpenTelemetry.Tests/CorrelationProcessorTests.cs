@@ -39,6 +39,33 @@ public class CorrelationProcessorTests
     }
 
     [Test]
+    public async Task Processor_TagsOnEnd_WhenBaggageAddedAfterStart()
+    {
+        using var listener = AttachPermissiveListener("CorrelationProcessorTests.DeferredBaggage");
+        var processor = new TUnitTestCorrelationProcessor();
+
+        // Simulates server activities whose baggage is populated by the propagator
+        // after ActivitySource.StartActivity returns (e.g. ASP.NET Core Hosting).
+        var previous = Activity.Current;
+        Activity.Current = null;
+        try
+        {
+            using var child = new ActivitySource("CorrelationProcessorTests.DeferredBaggage").StartActivity("child")!;
+            processor.OnStart(child);
+            await Assert.That(child.GetTagItem("tunit.test.id")).IsNull();
+
+            child.AddBaggage("tunit.test.id", "from-propagator");
+            processor.OnEnd(child);
+
+            await Assert.That(child.GetTagItem("tunit.test.id")).IsEqualTo("from-propagator");
+        }
+        finally
+        {
+            Activity.Current = previous;
+        }
+    }
+
+    [Test]
     public async Task Processor_NoOp_WhenNoBaggage()
     {
         using var listener = AttachPermissiveListener("CorrelationProcessorTests.NoBaggage");

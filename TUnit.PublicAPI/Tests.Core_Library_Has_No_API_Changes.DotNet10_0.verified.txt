@@ -1333,8 +1333,10 @@ namespace
     }
     public static class TUnitActivitySource
     {
+        [("TUnit no longer emits spans under this source name. See the property remarks for " +
+            "the current trace topology. This constant is kept for binary compatibility and w" +
+            "ill be removed in a future major release.")]
         public const string AspNetCoreHttpSourceName = ".Http";
-        public const string AspireHttpSourceName = ".Http";
         public const string TagTestId = ".id";
     }
     public class TUnitAttribute :  { }
