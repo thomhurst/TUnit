@@ -63,7 +63,7 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
         }
         catch (Exception ex)
         {
-            RecordException(activity, ex);
+            TUnitActivitySource.RecordException(activity, ex);
             throw;
         }
 
@@ -138,24 +138,5 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
             // only, so still emit W3C baggage explicitly for backend correlation.
             request.Headers.TryAddWithoutValidation(TUnitActivitySource.BaggageHeader, baggage);
         }
-    }
-
-    private static void RecordException(Activity? activity, Exception exception)
-    {
-        if (activity is null)
-        {
-            return;
-        }
-
-        var tags = new ActivityTagsCollection
-        {
-            { "exception.type", exception.GetType().FullName },
-            { "exception.message", exception.Message },
-            { "exception.stacktrace", exception.ToString() }
-        };
-
-        activity.AddEvent(new ActivityEvent("exception", tags: tags));
-        activity.SetTag("error.type", exception.GetType().FullName);
-        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 }

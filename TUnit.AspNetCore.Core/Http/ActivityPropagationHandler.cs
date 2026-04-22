@@ -59,7 +59,7 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         }
         catch (Exception ex)
         {
-            RecordException(activity, ex);
+            TUnit.Core.TUnitActivitySource.RecordException(activity, ex);
             throw;
         }
 
@@ -137,24 +137,5 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
         {
             headers.TryAddWithoutValidation(TUnit.Core.TUnitActivitySource.BaggageHeader, baggage);
         }
-    }
-
-    private static void RecordException(Activity? activity, Exception exception)
-    {
-        if (activity is null)
-        {
-            return;
-        }
-
-        var tags = new ActivityTagsCollection
-        {
-            { "exception.type", exception.GetType().FullName },
-            { "exception.message", exception.Message },
-            { "exception.stacktrace", exception.ToString() }
-        };
-
-        activity.AddEvent(new ActivityEvent("exception", tags: tags));
-        activity.SetTag("error.type", exception.GetType().FullName);
-        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 }

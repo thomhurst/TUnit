@@ -179,15 +179,16 @@ public static class TUnitActivitySource
             return;
         }
 
+        var exceptionType = exception.GetType().FullName ?? exception.GetType().Name;
         var tagsCollection = new ActivityTagsCollection
         {
-            { "exception.type", exception.GetType().FullName },
+            { "exception.type", exceptionType },
             { "exception.message", exception.Message },
             { "exception.stacktrace", exception.ToString() }
         };
 
         activity.AddEvent(new ActivityEvent("exception", tags: tagsCollection));
-        activity.SetTag("error.type", exception.GetType().FullName);
+        activity.SetTag("error.type", exceptionType);
         activity.SetStatus(ActivityStatusCode.Error, exception.Message);
     }
 

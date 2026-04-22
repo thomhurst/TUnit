@@ -55,9 +55,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return App.CreateHttpClient(resourceName, endpointName);
         }
 
-        // Share a single handler across all HttpClient instances. The handler is stateless
-        // (reads Activity.Current which is async-local/per-test), so sharing is safe for
-        // correctness while reusing the SocketsHttpHandler connection pool across tests.
+        // Share a single handler across all HttpClient instances. The handler is stateless:
+        // Activity.Current is async-local/per-test, and each SendAsync call creates and
+        // disposes its own client Activity span, so sharing stays safe while reusing the
+        // SocketsHttpHandler connection pool across tests.
         _httpHandler ??= new Http.TUnitBaggagePropagationHandler
         {
             InnerHandler = new SocketsHttpHandler
