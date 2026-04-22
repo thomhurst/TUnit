@@ -106,6 +106,8 @@ Use one stable service name for the test runner (for example, `MyTests`) rather 
 `service.name` per test. Individual tests are already distinguished by their own trace IDs and
 TUnit tags such as `tunit.test.id`.
 
+If you add `TUnitTestCorrelationProcessor` for cross-boundary tagging, register it **before** any synchronous exporter (`SimpleExportProcessor`-based). The built-in processor tags at both `OnStart` and `OnEnd`, so a `SimpleExport`-wrapped exporter that runs first would serialize the activity before the tag is applied. `BatchExportProcessor` (the default for OTLP/Jaeger/Zipkin) defers serialization, so order doesn't matter there.
+
 ### Option C: Raw `ActivityListener` (no SDK dependency)
 
 If you don't want the OpenTelemetry SDK, you can subscribe directly with a `System.Diagnostics.ActivityListener`:

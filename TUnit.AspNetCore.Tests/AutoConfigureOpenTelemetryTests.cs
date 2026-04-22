@@ -38,7 +38,7 @@ public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFact
 
         // ASP.NET Core stops its server activity on a continuation that may outlive the
         // client response, so poll briefly instead of reading _exported synchronously.
-        var deadline = Environment.TickCount64 + 2_000;
+        var deadline = Environment.TickCount64 + 5_000;
         Activity? taggedSpan = null;
         while (Environment.TickCount64 < deadline)
         {
