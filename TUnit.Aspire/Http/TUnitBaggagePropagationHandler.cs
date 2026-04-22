@@ -87,9 +87,11 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 
     private static Activity? StartHttpActivity(HttpRequestMessage request)
     {
-        var path = request.RequestUri?.AbsolutePath ?? request.RequestUri?.ToString() ?? "unknown";
+        var method = string.IsNullOrWhiteSpace(request.Method.Method)
+            ? "HTTP"
+            : request.Method.Method;
         return HttpActivitySource.StartActivity(
-            $"HTTP {request.Method} {path}",
+            method,
             ActivityKind.Client);
     }
 

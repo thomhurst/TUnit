@@ -53,7 +53,7 @@ public class BaggagePropagationHandlerTests
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
         await Assert.That(clientSpan.ParentSpanId).IsEqualTo(activity.SpanId.ToString());
         await Assert.That(clientSpan.Kind).IsEqualTo(ActivityKind.Client);
-        await Assert.That(clientSpan.DisplayName).IsEqualTo("HTTP GET /test");
+        await Assert.That(clientSpan.DisplayName).IsEqualTo("GET");
         await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
         await Assert.That(baggageHeader).Contains("my-test-context-id");
     }

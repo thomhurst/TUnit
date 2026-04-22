@@ -34,6 +34,7 @@ public class ActivityPropagationHandlerTests
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(clientSpan.SpanId);
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
+        await Assert.That(clientSpan.DisplayName).IsEqualTo("GET");
         await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
         await Assert.That(baggageHeader).Contains("my-test-context-id");
     }
@@ -173,6 +174,7 @@ public class ActivityPropagationHandlerTests
                     ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStopped = activity => _stoppedActivities.Enqueue(new RecordedActivity(
                     activity.SpanId.ToString(),
+                    activity.DisplayName,
                     activity.Status,
                     activity.TagObjects.ToDictionary(static t => t.Key, static t => t.Value?.ToString()),
                     activity.Events.Select(static e => e.Name).ToArray()))
@@ -191,6 +193,7 @@ public class ActivityPropagationHandlerTests
 
     private sealed record RecordedActivity(
         string SpanId,
+        string DisplayName,
         ActivityStatusCode Status,
         IReadOnlyDictionary<string, string?> Tags,
         string[] EventNames);
