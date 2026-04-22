@@ -49,6 +49,8 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 
             // Aspire's CreateHttpClient bypasses DiagnosticsHandler, so when we synthesize
             // a client span we also need to flow the ambient baggage onto it explicitly.
+            // Child Activities do not reliably surface parent baggage across all target
+            // frameworks, but correlation relies on the test's baggage being propagated.
             CopyBaggage(ambientActivity, activity);
         }
 
@@ -120,6 +122,7 @@ internal sealed class TUnitBaggagePropagationHandler : DelegatingHandler
 
         foreach (var (key, value) in source.Baggage)
         {
+            // Preserve baggage already attached to the synthesized client span itself.
             if (key is null || destination.GetBaggageItem(key) is not null)
             {
                 continue;

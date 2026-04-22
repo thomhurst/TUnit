@@ -30,10 +30,13 @@ public class ActivityPropagationHandlerTests
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
         var clientSpan = await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
 
-        await Assert.That(parts.Length).IsEqualTo(4);
+        await AssertValidW3CTraceparent(traceparent);
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(clientSpan.SpanId);
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
+        await Assert.That(clientSpan.TraceId).IsEqualTo(activity.TraceId.ToString());
+        await Assert.That(clientSpan.ParentSpanId).IsEqualTo(activity.SpanId.ToString());
+        await Assert.That(clientSpan.Kind).IsEqualTo(ActivityKind.Client);
         await Assert.That(clientSpan.DisplayName).IsEqualTo("GET");
         await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
         await Assert.That(baggageHeader).Contains("my-test-context-id");
@@ -57,6 +60,7 @@ public class ActivityPropagationHandlerTests
         var parts = traceparent.Split('-');
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
 
+        await AssertValidW3CTraceparent(traceparent);
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(activity.SpanId.ToString());
         await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
@@ -160,6 +164,19 @@ public class ActivityPropagationHandlerTests
             : new ActivityPropagationHandler(startActivity);
     }
 
+    private static async Task AssertValidW3CTraceparent(string traceparent)
+    {
+        var parts = traceparent.Split('-');
+
+        await Assert.That(parts.Length).IsEqualTo(4);
+        await Assert.That(parts[0]).IsEqualTo("00");
+        await Assert.That(parts[1].Length).IsEqualTo(32);
+        await Assert.That(parts[1].All(static c => Uri.IsHexDigit(c))).IsTrue();
+        await Assert.That(parts[2].Length).IsEqualTo(16);
+        await Assert.That(parts[2].All(static c => Uri.IsHexDigit(c))).IsTrue();
+        await Assert.That(parts[3] is "00" or "01").IsTrue();
+    }
+
     private sealed class ActivityListenerScope : IDisposable
     {
         private readonly ConcurrentQueue<RecordedActivity> _stoppedActivities = new();
@@ -173,8 +190,11 @@ public class ActivityPropagationHandlerTests
                 Sample = static (ref ActivityCreationOptions<ActivityContext> _) =>
                     ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStopped = activity => _stoppedActivities.Enqueue(new RecordedActivity(
+                    activity.TraceId.ToString(),
                     activity.SpanId.ToString(),
+                    activity.ParentSpanId == default ? null : activity.ParentSpanId.ToString(),
                     activity.DisplayName,
+                    activity.Kind,
                     activity.Status,
                     activity.TagObjects.ToDictionary(static t => t.Key, static t => t.Value?.ToString()),
                     activity.Events.Select(static e => e.Name).ToArray()))
@@ -192,8 +212,11 @@ public class ActivityPropagationHandlerTests
     }
 
     private sealed record RecordedActivity(
+        string TraceId,
         string SpanId,
+        string? ParentSpanId,
         string DisplayName,
+        ActivityKind Kind,
         ActivityStatusCode Status,
         IReadOnlyDictionary<string, string?> Tags,
         string[] EventNames);

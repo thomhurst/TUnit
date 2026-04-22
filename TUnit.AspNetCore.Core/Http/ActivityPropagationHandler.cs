@@ -119,6 +119,7 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 
         foreach (var (key, value) in source.Baggage)
         {
+            // Preserve baggage already attached to the synthesized client span itself.
             if (key is null || destination.GetBaggageItem(key) is not null)
             {
                 continue;

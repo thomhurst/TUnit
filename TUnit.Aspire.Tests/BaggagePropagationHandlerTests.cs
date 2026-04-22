@@ -47,7 +47,7 @@ public class BaggagePropagationHandlerTests
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
         var clientSpan = await Assert.That(listenerScope.StoppedActivities).HasSingleItem();
 
-        await Assert.That(parts.Length).IsEqualTo(4);
+        await AssertValidW3CTraceparent(traceparent);
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(clientSpan.SpanId);
         await Assert.That(parts[2]).IsNotEqualTo(activity.SpanId.ToString());
@@ -105,6 +105,7 @@ public class BaggagePropagationHandlerTests
         var parts = traceparent.Split('-');
         var baggageHeader = captured.LastRequest.Headers.GetValues("baggage").First();
 
+        await AssertValidW3CTraceparent(traceparent);
         await Assert.That(parts[1]).IsEqualTo(activity.TraceId.ToString());
         await Assert.That(parts[2]).IsEqualTo(activity.SpanId.ToString());
         await Assert.That(baggageHeader).Contains(TUnitActivitySource.TagTestId);
@@ -315,6 +316,19 @@ public class BaggagePropagationHandlerTests
         return startActivity is null
             ? new TUnitBaggagePropagationHandler()
             : new TUnitBaggagePropagationHandler(startActivity);
+    }
+
+    private static async Task AssertValidW3CTraceparent(string traceparent)
+    {
+        var parts = traceparent.Split('-');
+
+        await Assert.That(parts.Length).IsEqualTo(4);
+        await Assert.That(parts[0]).IsEqualTo("00");
+        await Assert.That(parts[1].Length).IsEqualTo(32);
+        await Assert.That(parts[1].All(static c => Uri.IsHexDigit(c))).IsTrue();
+        await Assert.That(parts[2].Length).IsEqualTo(16);
+        await Assert.That(parts[2].All(static c => Uri.IsHexDigit(c))).IsTrue();
+        await Assert.That(parts[3] is "00" or "01").IsTrue();
     }
 
     private sealed class ActivityListenerScope : IDisposable
