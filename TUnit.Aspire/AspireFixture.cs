@@ -397,10 +397,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                     {
                         // Forward to user's dashboard if they set OTEL_EXPORTER_OTLP_ENDPOINT
                         // themselves (#4818), otherwise their spans get dropped by the override.
-                        OtlpEndpointEnvironment.CaptureAndOverride(
+                        var userEndpoint = OtlpEndpointEnvironment.CaptureAndOverride(
                             context.EnvironmentVariables,
-                            receiver,
                             otlpEndpoint);
+                        if (userEndpoint is not null)
+                        {
+                            receiver.UpstreamEndpoint = userEndpoint;
+                        }
 
                         context.EnvironmentVariables[OtelExporterProtocolEnvVar] = "http/protobuf";
 

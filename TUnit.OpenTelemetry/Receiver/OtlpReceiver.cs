@@ -69,15 +69,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     public string? UpstreamEndpoint
     {
         get => Volatile.Read(ref _upstreamEndpoint);
-        set
-        {
-            var normalized = value?.TrimEnd('/');
-            if (normalized == Volatile.Read(ref _upstreamEndpoint))
-            {
-                return;
-            }
-            Volatile.Write(ref _upstreamEndpoint, normalized);
-        }
+        set => Volatile.Write(ref _upstreamEndpoint, value?.TrimEnd('/'));
     }
 
     /// <summary>
