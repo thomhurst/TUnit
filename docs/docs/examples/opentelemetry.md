@@ -336,6 +336,8 @@ public sealed class TUnitTagProcessor : BaseProcessor<Activity>
 .AddProcessor(new TUnitTagProcessor())
 ```
 
+Register the correlation processor **before** any synchronous exporter (`SimpleExportProcessor`-based). The built-in `TUnitTestCorrelationProcessor` tags at both `OnStart` and `OnEnd`, and a `SimpleExport`-wrapped exporter that runs first would serialize the activity before the tag is applied. `BatchExportProcessor` (the default for OTLP/Jaeger/Zipkin) defers serialization, so order doesn't matter there.
+
 Now you can filter by `tunit.test.id` in your backend even when the trace hierarchy is wrong.
 
 **Better fix** if you control the worker: stop it from capturing the test's context in the first place.
