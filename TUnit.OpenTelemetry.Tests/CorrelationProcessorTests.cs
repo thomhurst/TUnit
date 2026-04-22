@@ -2,6 +2,7 @@ using System.Diagnostics;
 using OpenTelemetry;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
+using TUnit.Core;
 
 namespace TUnit.OpenTelemetry.Tests;
 
@@ -36,6 +37,61 @@ public class CorrelationProcessorTests
         processor.OnStart(child);
 
         await Assert.That(child.GetTagItem("tunit.test.id")).IsEqualTo("already-set");
+    }
+
+    [Test]
+    public async Task Processor_TagsOnEnd_WhenBaggageAddedAfterStart()
+    {
+        using var listener = AttachPermissiveListener("CorrelationProcessorTests.DeferredBaggage");
+        var processor = new TUnitTestCorrelationProcessor();
+
+        // Simulates server activities whose baggage is populated by the propagator
+        // after ActivitySource.StartActivity returns (e.g. ASP.NET Core Hosting).
+        var previous = Activity.Current;
+        Activity.Current = null;
+        try
+        {
+            using var child = new ActivitySource("CorrelationProcessorTests.DeferredBaggage").StartActivity("child")!;
+            processor.OnStart(child);
+            await Assert.That(child.GetTagItem("tunit.test.id")).IsNull();
+
+            child.AddBaggage("tunit.test.id", "from-propagator");
+            processor.OnEnd(child);
+
+            await Assert.That(child.GetTagItem("tunit.test.id")).IsEqualTo("from-propagator");
+        }
+        finally
+        {
+            Activity.Current = previous;
+        }
+    }
+
+    [Test]
+    public async Task Processor_FallsBackToTraceRegistry_WhenActivityHasNoBaggage()
+    {
+        using var listener = AttachPermissiveListener("CorrelationProcessorTests.TraceRegistryFallback");
+        var processor = new TUnitTestCorrelationProcessor();
+
+        // Simulates a span that outlives the test's async context: no baggage on the
+        // activity, Activity.Current belongs to another test, but the trace ID is
+        // still registered against the originating test.
+        var previous = Activity.Current;
+        Activity.Current = null;
+        try
+        {
+            using var child = new ActivitySource("CorrelationProcessorTests.TraceRegistryFallback").StartActivity("child")!;
+            var traceId = child.TraceId.ToString();
+            // Additive registration — child.TraceId is random, so it can't collide with
+            // registrations from other concurrent tests, and entries live until session end.
+            TraceRegistry.Register(traceId, testNodeUid: "node-42", contextId: "ctx-42");
+            processor.OnEnd(child);
+
+            await Assert.That(child.GetTagItem("tunit.test.id")).IsEqualTo("ctx-42");
+        }
+        finally
+        {
+            Activity.Current = previous;
+        }
     }
 
     [Test]

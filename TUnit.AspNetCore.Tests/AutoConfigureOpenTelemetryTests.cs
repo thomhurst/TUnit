@@ -35,7 +35,21 @@ public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFact
         response.EnsureSuccessStatusCode();
 
         var testId = TestContext.Current!.Id;
-        var taggedSpan = _exported.FirstOrDefault(a => (a.GetTagItem(TUnitActivitySource.TagTestId) as string) == testId);
+
+        // ASP.NET Core stops its server activity on a continuation that may outlive the
+        // client response, so poll briefly instead of reading _exported synchronously.
+        var deadline = Environment.TickCount64 + 5_000;
+        Activity? taggedSpan = null;
+        while (Environment.TickCount64 < deadline)
+        {
+            taggedSpan = _exported.FirstOrDefault(a => (a.GetTagItem(TUnitActivitySource.TagTestId) as string) == testId);
+            if (taggedSpan is not null)
+            {
+                break;
+            }
+            await Task.Delay(20);
+        }
+
         await Assert.That(taggedSpan).IsNotNull();
     }
 }
