@@ -19,6 +19,13 @@ public static class TUnitActivitySource
     /// </summary>
     public const string AspNetCoreHttpSourceName = "TUnit.AspNetCore.Http";
 
+    /// <summary>
+    /// Activity source emitted by TUnit's Aspire HTTP propagation handler.
+    /// Registered automatically by <c>TUnit.OpenTelemetry.AutoStart</c> so outbound
+    /// requests made through <c>AspireFixture.CreateHttpClient</c> appear as client spans.
+    /// </summary>
+    public const string AspireHttpSourceName = "TUnit.Aspire.Http";
+
     /// <summary>W3C baggage HTTP header name.</summary>
     internal const string BaggageHeader = "baggage";
 
