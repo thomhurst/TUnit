@@ -17,7 +17,7 @@ namespace TUnit.Core;
 /// </remarks>
 internal static class HttpActivityPropagator
 {
-    public static void Inject(Activity? activity, HttpRequestHeaders headers)
+    internal static void Inject(Activity? activity, HttpRequestHeaders headers)
     {
         if (activity is null)
         {

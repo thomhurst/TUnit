@@ -23,6 +23,13 @@ namespace TUnit.OpenTelemetry;
 /// <see cref="Activity.TraceId"/>, not <see cref="Activity.Current"/> — this avoids
 /// cross-attribution when a span outlives its test's async context and is stopped on a
 /// thread where <see cref="Activity.Current"/> belongs to a different concurrent test.
+/// <para>
+/// Tag writes during <see cref="OnEnd"/> become visible to downstream processors and
+/// exporters that defer serialization — the default <c>BatchExportProcessor</c>, and
+/// reference-capturing exporters like <c>InMemoryExporter</c>. Synchronous pipelines
+/// (e.g. <c>SimpleExportProcessor</c>) that serialize inside their own <c>OnEnd</c>
+/// only observe the tag if this processor is registered before them.
+/// </para>
 /// </remarks>
 public sealed class TUnitTestCorrelationProcessor : BaseProcessor<Activity>
 {
