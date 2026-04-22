@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using TUnit.Core;
 
 namespace TUnit.AspNetCore;
@@ -17,7 +18,7 @@ internal sealed class ActivityPropagationHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        HttpActivityPropagator.Inject(System.Diagnostics.Activity.Current, request.Headers);
+        HttpActivityPropagator.Inject(Activity.Current, request.Headers);
         return base.SendAsync(request, cancellationToken);
     }
 }
