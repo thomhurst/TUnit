@@ -62,10 +62,8 @@ public static class AutoStart
         var builder = Sdk.CreateTracerProviderBuilder()
             .AddSource("TUnit")
             .AddSource("TUnit.Lifecycle")
-            // Runtime-emitted client spans from the test-runner's own HttpClient traffic
-            // (e.g. AspireFixture.CreateHttpClient). Emitted by .NET's SocketsHttpHandler
-            // pipeline; without this subscription the spans exist but aren't exported, and
-            // cross-process traces show orphan-parent server spans on the SUT side.
+            // Without this subscription, runtime-emitted HttpClient spans are created but
+            // not exported, leaving orphan-parent server spans on the SUT side.
             .AddSource("System.Net.Http")
             .AddProcessor(new TUnitTestCorrelationProcessor());
 

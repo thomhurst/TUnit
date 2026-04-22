@@ -29,7 +29,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 {
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
-    private HttpMessageHandler? _httpHandler;
+    private SocketsHttpHandler? _httpHandler;
 
     /// <summary>
     /// The running Aspire distributed application.
@@ -55,11 +55,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return App.CreateHttpClient(resourceName, endpointName);
         }
 
-        // A shared SocketsHttpHandler reuses the connection pool across tests.
-        // The runtime's DiagnosticsHandler (auto-inserted by SocketsHttpHandler) creates
-        // the outbound client Activity and injects W3C traceparent + baggage via
-        // DistributedContextPropagator — the ambient test Activity's tunit.test.id baggage
-        // flows to the SUT automatically. No TUnit-side propagation handler is needed.
         _httpHandler ??= new SocketsHttpHandler
         {
             // Match Aspire's CreateHttpClient behavior: trust dev certs for HTTPS resources
