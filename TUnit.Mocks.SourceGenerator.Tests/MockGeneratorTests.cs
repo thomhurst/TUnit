@@ -540,9 +540,14 @@ public class MockGeneratorTests : SnapshotTestBase
     {
         // Mirrors the T15 KitchenSink shape: a class implementing an interface that has a
         // static-abstract member plus an instance virtual member. The generator must NOT
-        // emit a MockBridge interface for class targets (CS0527 / CS0540 — see #5677); the
-        // class already provides the concrete static impl, the mock only overrides the
+        // emit a MockBridge interface for class targets (CS0527 / CS0540); the class
+        // already provides the concrete static impl, the mock only overrides the
         // instance-virtual surface.
+        //
+        // The verified snapshot for this test intentionally OMITS a `_MockBridge.g.cs`
+        // file section — that absence is the assertion. Class targets must not get
+        // bridge generation, unlike the interface-target variants in this file which
+        // do produce a bridge.
         var source = """
             using TUnit.Mocks;
 
