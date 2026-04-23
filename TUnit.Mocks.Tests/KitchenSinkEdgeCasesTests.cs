@@ -186,8 +186,11 @@ public interface ICancellableStream
 //     on its constructor and skip initializing required members. Separate
 //     generator fix.
 
-// ─── T18. Member names matching C# keywords (`class`, `event`, `record`) ────
+// ─── T18. Member names matching C# reserved keywords (`class`, `event`, `namespace`) ─
 
+// `record` is included as a CONTEXTUAL keyword — it does NOT require `@`-escaping (the
+// C# compiler disambiguates by position). Kept here to confirm contextual keywords pass
+// through the IdentifierEscaping helper unchanged.
 public interface IEscapedNames
 {
     int @class { get; }
@@ -471,7 +474,7 @@ public class KitchenSinkEdgeCasesTests
     // ── T18 ──
 
     [Test]
-    public async Task T18_Member_Names_That_Are_Contextual_Keywords()
+    public async Task T18_Member_Names_That_Are_Reserved_Keywords()
     {
         var mock = IEscapedNames.Mock();
         mock.@class.Returns(7);

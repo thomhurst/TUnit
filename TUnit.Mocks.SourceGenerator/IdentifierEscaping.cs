@@ -19,6 +19,11 @@ internal static class IdentifierEscaping
     /// otherwise returns <paramref name="name"/> unchanged.
     /// E.g., <c>"event"</c> → <c>"@event"</c>, <c>"class"</c> → <c>"@class"</c>, <c>"Foo"</c> → <c>"Foo"</c>.
     /// </summary>
+    // WHY only GetKeywordKind (reserved): contextual keywords like `record`, `async`, `var`,
+    // `get`, `set`, `nameof`, `value` are valid identifiers and must NOT be `@`-escaped — the
+    // C# compiler already disambiguates them by position. Escaping a contextual keyword would
+    // change the identifier's textual form (e.g. `record` → `@record`), breaking explicit
+    // interface implementation matching against the source-declared member name.
     public static string EscapeIdentifier(string name) =>
         SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 }
