@@ -88,7 +88,7 @@ public sealed class MethodSetup
         var existing = Volatile.Read(ref _rareState);
         if (existing is not null) return existing;
         Interlocked.CompareExchange(ref _rareState, new RareState(), null);
-        return _rareState!;
+        return Volatile.Read(ref _rareState)!;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
