@@ -26,18 +26,20 @@ internal static class MockMembersBuilder
         "Object",
     };
 
-    // Equals/GetHashCode/ToString/GetType clash with inherited object INSTANCE METHODS.
+    // Equals/GetHashCode/ToString clash with inherited object INSTANCE METHODS.
     // C# overload resolution always prefers an instance method on the receiver over an
     // extension method, so a generated `Equals` extension is unreachable (mock.Equals(...)
     // binds to object.Equals and returns bool). A trailing-underscore rename would also be
     // reachable, but we use an "Of" suffix to read naturally at the call site
     // (mock.EqualsOf(other).Returns(true)).
+    // GetType is intentionally omitted: it is non-virtual on object and therefore
+    // cannot be overridden or shadowed in a meaningful way, so any generated helper
+    // would be dead code.
     private static readonly Dictionary<string, string> ObjectMemberDisambiguations = new(System.StringComparer.Ordinal)
     {
         { "Equals", "EqualsOf" },
         { "GetHashCode", "GetHashCodeOf" },
         { "ToString", "ToStringOf" },
-        { "GetType", "GetTypeOf" },
     };
 
     public static string Build(MockTypeModel model)

@@ -105,9 +105,8 @@ public class DoubleInterfaceExplicit : IGetIdInt, IGetIdString
 //     object.Equals via overload-resolution (extension methods can't beat instance
 //     methods on object). Generator emits a disambiguating `EqualsOf(...)` helper
 //     so the typed setup is reachable. Same disambiguation applies to GetHashCode
-//     and ToString. (GetType is not virtual on object, so it can never be overridden
-//     and the GetTypeOf helper is unreachable in practice — kept symmetrically for
-//     completeness only.)
+//     and ToString. (GetType is non-virtual on object so it cannot be overridden;
+//     no helper is generated for it.)
 
 public class SelfEquatable : IEquatable<SelfEquatable>
 {
