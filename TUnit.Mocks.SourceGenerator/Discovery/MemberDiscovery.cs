@@ -60,6 +60,18 @@ internal static class MemberDiscovery
                     continue;
                 }
 
+                // For class partial mocks, the base class already implements (or inherits) all
+                // interface members — re-emitting them as `public override` fails to compile
+                // when the base impl is non-virtual or explicit (#5673:
+                // EntityEntry explicitly implements IInfrastructure<InternalEntityEntry>.Instance).
+                // The inherited impl satisfies the interface; the mock only needs to override
+                // what the class walk already collected (virtual/abstract/override members).
+                if (typeSymbol.TypeKind == TypeKind.Class
+                    && typeSymbol.FindImplementationForInterfaceMember(member) is not null)
+                {
+                    continue;
+                }
+
                 switch (member)
                 {
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:

@@ -107,6 +107,48 @@ public class Level2Leaf : Level1Middle
     public override string Tag { get; set; } = "L2";
 }
 
+// ─── Interface hierarchy with `new`-redeclaration ───────────────────────────
+
+public interface ILegacyService
+{
+    int Ping();
+}
+
+public interface IModernService : ILegacyService
+{
+    /// <summary>Hides ILegacyService.Ping with a wider return type.</summary>
+    new long Ping();
+}
+
+// ─── Hierarchy where L1 explicitly implements an interface (#5673 shape) ────
+
+public interface IScopeMarker
+{
+    string GetScope();
+}
+
+public abstract class ScopedBase : IScopeMarker
+{
+    // Explicit impl on the abstract base — the interface member is *not* a
+    // virtual public member of the class, so a mock of a derived class must
+    // not try to `override` it.
+    string IScopeMarker.GetScope() => "base-scope";
+
+    public abstract string GetName();
+}
+
+public class ScopedLeaf : ScopedBase
+{
+    private readonly string _tag;
+
+    public ScopedLeaf() : this("leaf") { }
+    public ScopedLeaf(string tag) { _tag = tag; }
+
+    public override string GetName() => $"name-{_tag}";
+
+    public virtual int Rank { get; set; } = 5;
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 public class KitchenSinkInheritanceTests
@@ -399,6 +441,49 @@ public class KitchenSinkInheritanceTests
         await Assert.That(mock.Object.GetVersion()).IsEqualTo("v1-sealed");
         await Assert.That(mock.Object.GetId()).IsEqualTo(7);
         await Assert.That(mock.Object.GetRegion()).IsEqualTo("eu");
+    }
+
+    // ── Interface hierarchy with `new`-redeclaration ──
+
+    [Test]
+    public async Task Derived_Interface_New_Return_Resolves_Via_Static_Type()
+    {
+        var mock = IModernService.Mock();
+        mock.Ping().Returns(long.MaxValue);
+
+        // Static type → modern interface → long
+        await Assert.That(mock.Object.Ping()).IsEqualTo(long.MaxValue);
+
+        // Cast to legacy interface → int Ping() — unconfigured, smart default 0
+        ILegacyService legacy = mock.Object;
+        await Assert.That(legacy.Ping()).IsEqualTo(0);
+
+        // Verification tracks the modern-shape call.
+        mock.Ping().WasCalled(Times.Once);
+    }
+
+    // ── Hierarchy where L1 explicitly implements interface (#5673 shape) ──
+
+    [Test]
+    public async Task Derived_Class_Inherits_Base_Explicit_Interface_Impl()
+    {
+        var mock = ScopedLeaf.Mock("x");
+
+        // Abstract member overridden at L2 is mockable + verifiable.
+        mock.GetName().Returns("mocked");
+        await Assert.That(mock.Object.GetName()).IsEqualTo("mocked");
+        mock.GetName().WasCalled(Times.Once);
+
+        // Explicit interface impl on the abstract base flows through unchanged —
+        // the mock must not attempt to override it.
+        IScopeMarker asMarker = mock.Object;
+        await Assert.That(asMarker.GetScope()).IsEqualTo("base-scope");
+
+        // Own virtual property on derived class is still mockable + verifiable.
+        mock.Rank.Returns(999);
+        await Assert.That(mock.Object.Rank).IsEqualTo(999);
+        await Assert.That(mock.Object.Rank).IsEqualTo(999);
+        mock.Rank.WasCalled(Times.Exactly(2));
     }
 
     // ── Verification across hierarchy ──
