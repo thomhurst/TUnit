@@ -10,7 +10,7 @@ namespace TUnit.Mocks.Arguments;
 public static class Arg
 {
     /// <summary>Matches any value of the specified type, including null.</summary>
-    public static Arg<T> Any<T>() => new(new AnyMatcher<T>());
+    public static Arg<T> Any<T>() => new(AnyMatcher<T>.Instance);
 
     /// <summary>Matches any value — type is inferred from the parameter position.</summary>
     public static AnyArg Any() => AnyArg.Instance;
@@ -22,10 +22,10 @@ public static class Arg
     public static Arg<T> Is<T>(Func<T?, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
     /// <summary>Matches only when the argument is null. Supports reference types and nullable value types.</summary>
-    public static Arg<T> IsNull<T>() => new(new NullMatcher<T>());
+    public static Arg<T> IsNull<T>() => new(NullMatcher<T>.Instance);
 
     /// <summary>Matches only when the argument is not null. Supports reference types and nullable value types.</summary>
-    public static Arg<T> IsNotNull<T>() => new(new NotNullMatcher<T>());
+    public static Arg<T> IsNotNull<T>() => new(NotNullMatcher<T>.Instance);
 
     /// <summary>Matches a string against a regular expression pattern.</summary>
     public static Arg<string> Matches(string pattern) => new(new RegexMatcher(pattern));
@@ -45,7 +45,7 @@ public static class Arg
     public static Arg<T> HasCount<T>(int count) => new(new CountMatcher(count));
 
     /// <summary>Matches an empty collection.</summary>
-    public static Arg<T> IsEmpty<T>() => new(new EmptyMatcher());
+    public static Arg<T> IsEmpty<T>() => new(EmptyMatcher.Instance);
 
     /// <summary>Matches a collection with element-by-element equality.</summary>
     public static Arg<TCollection> SequenceEquals<TCollection, TElement>(IEnumerable<TElement> expected)

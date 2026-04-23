@@ -7,6 +7,8 @@ namespace TUnit.Mocks.Matchers;
 /// </summary>
 internal sealed class EmptyMatcher : IArgumentMatcher
 {
+    public static readonly EmptyMatcher Instance = new();
+
     public bool Matches(object? value)
     {
         if (value is System.Collections.ICollection collection)

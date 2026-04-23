@@ -20,6 +20,12 @@ internal sealed class AnyMatcher : IArgumentMatcher
 /// </summary>
 internal sealed class AnyMatcher<T> : IArgumentMatcher<T>
 {
+    /// <summary>
+    /// Cached singleton — <see cref="AnyMatcher{T}"/> is stateless, so a single instance per closed
+    /// generic type avoids a per-call allocation on the common <see cref="Arg.Any{T}"/> path.
+    /// </summary>
+    public static readonly AnyMatcher<T> Instance = new();
+
     public bool Matches(T? value) => true;
 
     public bool Matches(object? value) => true;

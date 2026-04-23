@@ -125,8 +125,6 @@ namespace TUnit.Mocks.Generated
         private readonly string _memberName;
         private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
         private global::TUnit.Mocks.Setup.MethodSetupBuilder<string>? _builder;
-        private bool _builderInitialized;
-        private object? _builderLock;
 
         internal IMyService_GetValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
         {
@@ -136,13 +134,25 @@ namespace TUnit.Mocks.Generated
             _matchers = matchers;
         }
 
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup() =>
-            global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
-            {
-                var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-                _engine.AddSetup(setup);
-                return new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
-            })!;
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetup()
+        {
+            var existing = global::System.Threading.Volatile.Read(ref _builder);
+            if (existing is not null) return existing;
+            return EnsureSetupSlow();
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private global::TUnit.Mocks.Setup.MethodSetupBuilder<string> EnsureSetupSlow()
+        {
+            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<string>(setup);
+            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+            if (prev is not null) return prev;
+            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+            // so a concurrent loser observing the builder before registration is benign.
+            _engine.AddSetup(setup);
+            return fresh;
+        }
 
         /// <inheritdoc />
         public IMyService_GetValue_M0_MockCall Returns(string value) { EnsureSetup().Returns(value); return this; }

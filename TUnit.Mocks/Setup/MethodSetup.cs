@@ -11,16 +11,23 @@ namespace TUnit.Mocks.Setup;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class MethodSetup
 {
-    private readonly IArgumentMatcher[] _matchers;
-    private Lock? _behaviorLock;
-    private Lock BehaviorLock => _behaviorLock ?? EnsureBehaviorLock();
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private Lock EnsureBehaviorLock()
+    /// <summary>
+    /// Rarely-used setup state. Lazily allocated to keep MethodSetup small on the common path
+    /// (single behavior, no events, no out/ref, no state machine).
+    /// </summary>
+    private sealed class RareState
     {
-        Interlocked.CompareExchange(ref _behaviorLock, new Lock(), null);
-        return _behaviorLock!;
+        public Lock? BehaviorLock;
+        public List<EventRaiseInfo>? EventRaises;
+        public EventRaiseInfo[]? EventRaisesSnapshot;
+        public Dictionary<int, object?>? OutRefAssignments;
+        public string? RequiredState;
+        public string? TransitionTarget;
     }
+
+    private readonly IArgumentMatcher[] _matchers;
+    private RareState? _rareState;
+
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
     /// <remarks>
     /// Not declared volatile to avoid CS0420 with Interlocked.CompareExchange.
@@ -29,9 +36,6 @@ public sealed class MethodSetup
     private IBehavior? _singleBehavior;
     /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
     private List<IBehavior>? _behaviors;
-    private List<EventRaiseInfo>? _eventRaises;
-    private EventRaiseInfo[]? _eventRaisesSnapshot;
-    private Dictionary<int, object?>? _outRefAssignments;
     private int _callIndex;
 
     public int MemberId { get; }
@@ -41,14 +45,22 @@ public sealed class MethodSetup
     /// Used for state machine mocking.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public string? RequiredState { get; set; }
+    public string? RequiredState
+    {
+        get => Volatile.Read(ref _rareState) is { } rare ? Volatile.Read(ref rare.RequiredState) : null;
+        set => Volatile.Write(ref EnsureRareState().RequiredState, value);
+    }
 
     /// <summary>
     /// If non-null, the engine transitions to this state after the behavior executes.
     /// Used for state machine mocking.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public string? TransitionTarget { get; set; }
+    public string? TransitionTarget
+    {
+        get => Volatile.Read(ref _rareState) is { } rare ? Volatile.Read(ref rare.TransitionTarget) : null;
+        set => Volatile.Write(ref EnsureRareState().TransitionTarget, value);
+    }
 
     /// <summary>
     /// The number of times this setup has been matched and invoked.
@@ -69,6 +81,35 @@ public sealed class MethodSetup
         MemberId = memberId;
         _matchers = matchers;
         MemberName = memberName;
+    }
+
+    private RareState EnsureRareState()
+    {
+        var existing = Volatile.Read(ref _rareState);
+        if (existing is not null) return existing;
+        Interlocked.CompareExchange(ref _rareState, new RareState(), null);
+        return Volatile.Read(ref _rareState)!;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private Lock EnsureBehaviorLock()
+    {
+        var rare = EnsureRareState();
+        if (Volatile.Read(ref rare.BehaviorLock) is { } existing) return existing;
+        Interlocked.CompareExchange(ref rare.BehaviorLock, new Lock(), null);
+        return Volatile.Read(ref rare.BehaviorLock)!;
+    }
+
+    private Lock BehaviorLock
+    {
+        get
+        {
+            if (Volatile.Read(ref _rareState) is { } rare && Volatile.Read(ref rare.BehaviorLock) is { } existing)
+            {
+                return existing;
+            }
+            return EnsureBehaviorLock();
+        }
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -277,30 +318,32 @@ public sealed class MethodSetup
 
     public void AddEventRaise(EventRaiseInfo raiseInfo)
     {
+        var rare = EnsureRareState();
         lock (BehaviorLock)
         {
-            var list = _eventRaises ??= new();
+            var list = rare.EventRaises ??= new();
             list.Add(raiseInfo);
-            _eventRaisesSnapshot = null;
+            rare.EventRaisesSnapshot = null;
         }
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<EventRaiseInfo> GetEventRaises()
     {
-        if (Volatile.Read(ref _eventRaises) is null)
+        var rare = Volatile.Read(ref _rareState);
+        if (rare is null || Volatile.Read(ref rare.EventRaises) is null)
         {
             return [];
         }
 
-        if (Volatile.Read(ref _eventRaisesSnapshot) is { } snapshot)
+        if (Volatile.Read(ref rare.EventRaisesSnapshot) is { } snapshot)
         {
             return snapshot;
         }
 
         lock (BehaviorLock)
         {
-            return _eventRaisesSnapshot ??= _eventRaises!.ToArray();
+            return rare.EventRaisesSnapshot ??= rare.EventRaises!.ToArray();
         }
     }
 
@@ -327,10 +370,11 @@ public sealed class MethodSetup
     /// <param name="value">The value to assign.</param>
     public void SetOutRefValue(int paramIndex, object? value)
     {
+        var rare = EnsureRareState();
         lock (BehaviorLock)
         {
-            _outRefAssignments ??= new Dictionary<int, object?>();
-            _outRefAssignments[paramIndex] = value;
+            rare.OutRefAssignments ??= new Dictionary<int, object?>();
+            rare.OutRefAssignments[paramIndex] = value;
         }
     }
 
@@ -342,9 +386,11 @@ public sealed class MethodSetup
     {
         get
         {
+            var rare = Volatile.Read(ref _rareState);
+            if (rare is null) return null;
             lock (BehaviorLock)
             {
-                return _outRefAssignments;
+                return rare.OutRefAssignments;
             }
         }
     }
