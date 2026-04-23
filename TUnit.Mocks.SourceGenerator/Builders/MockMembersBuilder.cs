@@ -16,10 +16,24 @@ internal static class MockMembersBuilder
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
+    // "Object" collides with Mock<T>.Object (the property exposing the underlying instance);
+    // we rename a generated member named Object to Object_ to avoid the property/method clash.
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
         "Object",
-        "GetHashCode", "GetType", "ToString", "Equals"
+    };
+
+    // Members on object/Mock<T> that, when re-emitted as a generated extension method,
+    // would lose overload resolution to the base instance method (e.g. mock.Equals(other)
+    // resolves to object.Equals(object?) rather than the typed extension). We give the
+    // generated setup a disambiguating name so it remains reachable: Equals -> EqualsOf,
+    // GetHashCode -> GetHashCodeOf, ToString -> ToStringOf, GetType -> GetTypeOf.
+    private static readonly Dictionary<string, string> ObjectMemberDisambiguations = new(System.StringComparer.Ordinal)
+    {
+        { "Equals", "EqualsOf" },
+        { "GetHashCode", "GetHashCodeOf" },
+        { "ToString", "ToStringOf" },
+        { "GetType", "GetTypeOf" },
     };
 
     public static string Build(MockTypeModel model)
@@ -137,7 +151,11 @@ internal static class MockMembersBuilder
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
     private static string GetSafeMemberName(string name)
-        => MockMemberNames.Contains(name) ? name + "_" : name;
+    {
+        if (ObjectMemberDisambiguations.TryGetValue(name, out var renamed))
+            return renamed;
+        return MockMemberNames.Contains(name) ? name + "_" : name;
+    }
 
     private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)
     {

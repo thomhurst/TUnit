@@ -101,11 +101,17 @@ public class DoubleInterfaceExplicit : IGetIdInt, IGetIdString
     public virtual int OwnMember() => 0;
 }
 
-// ─── T8 SKIPPED. Self-referential IEquatable<T> — `mock.Equals(...)` resolves
-//     to object.Equals via extension-method dispatch rather than to the
-//     generator-emitted setup extension. Separate design limitation: would
-//     require either renaming the extension or generating a disambiguating
-//     helper (e.g. `mock.EqualsOf(...)`).
+// ─── T8. Self-referential IEquatable<T> — `mock.Equals(...)` would resolve to
+//     object.Equals via overload-resolution (extension methods can't beat instance
+//     methods on object). Generator emits a disambiguating `EqualsOf(...)` helper
+//     so the typed setup is reachable.
+
+public class SelfEquatable : IEquatable<SelfEquatable>
+{
+    public virtual bool Equals(SelfEquatable? other) => ReferenceEquals(this, other);
+    public override bool Equals(object? obj) => obj is SelfEquatable s && Equals(s);
+    public override int GetHashCode() => 0;
+}
 
 // ─── T9. Nullable value types ────────────────────────────────────────────────
 
@@ -334,7 +340,35 @@ public class KitchenSinkEdgeCasesTests
         mock.OwnMember().WasCalled(Times.Once);
     }
 
-    // T8 test elided — see the SKIPPED note above the type declarations.
+    // ── T8 ──
+
+    [Test]
+    public async Task T8_Self_Referential_IEquatable_Mockable()
+    {
+        var mock = SelfEquatable.Mock();
+        var other = new SelfEquatable();
+        var unrelated = new SelfEquatable();
+
+        // Setup via the disambiguated helper. Returns(...) must be reachable on the result.
+        mock.EqualsOf(other).Returns(true);
+        mock.EqualsOf(unrelated).Returns(false);
+
+        // Direct call routes through the generated impl's Equals override to the engine.
+        await Assert.That(mock.Object.Equals(other)).IsTrue();
+        await Assert.That(mock.Object.Equals(unrelated)).IsFalse();
+
+        // Interface-cast path resolves to the same underlying setup.
+        IEquatable<SelfEquatable> asInterface = mock.Object;
+        await Assert.That(asInterface.Equals(other)).IsTrue();
+        await Assert.That(asInterface.Equals(unrelated)).IsFalse();
+
+        // Verification: each setup tracks both the direct and interface-cast invocations.
+        mock.EqualsOf(other).WasCalled(Times.Exactly(2));
+        mock.EqualsOf(unrelated).WasCalled(Times.Exactly(2));
+
+        var third = new SelfEquatable();
+        mock.EqualsOf(third).WasNeverCalled();
+    }
 
     // ── T9 ──
 
