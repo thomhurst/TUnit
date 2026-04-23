@@ -60,8 +60,10 @@ public interface IKitchenSink : IEnumerable<string>, IAltNamed
     event EventHandler<string> OnMessage;
     event Action OnPing;
 
-    // ── Default interface method (DIM) ──
+#if NET8_0_OR_GREATER
+    // ── Default interface method (DIM) — requires runtime support (net8.0+) ──
     string DefaultGreet(string name) => $"default-hello-{name}";
+#endif
 
     // ── Params array ──
     int Sum(params int[] values);
@@ -369,7 +371,8 @@ public class KitchenSinkInterfaceTests
         await Assert.That(true).IsTrue();
     }
 
-    // ── Default interface method (DIM) ──
+#if NET8_0_OR_GREATER
+    // ── Default interface method (DIM) — net8.0+ only ──
 
     [Test]
     public async Task Default_Interface_Method_Can_Be_Overridden()
@@ -381,6 +384,7 @@ public class KitchenSinkInterfaceTests
         mock.DefaultGreet("World").WasCalled(Times.Once);
         mock.DefaultGreet("Other").WasNeverCalled();
     }
+#endif
 
     // ── Params array ──
 

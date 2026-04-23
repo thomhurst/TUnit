@@ -9,7 +9,8 @@ using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks.Tests;
 
-// ─── T1. DIM on interface, class target without override ────────────────────
+#if NET8_0_OR_GREATER
+// ─── T1. DIM on interface, class target without override (net8.0+ only) ──
 
 public interface IHasDim
 {
@@ -20,6 +21,7 @@ public class ClassNoDimOverride : IHasDim
 {
     public virtual int Rank { get; set; } = 10;
 }
+#endif
 
 // ─── T2. Abstract class satisfies interface via abstract method ─────────────
 
@@ -213,8 +215,9 @@ public class RefReadonlyReturn
 
 public class KitchenSinkEdgeCasesTests
 {
-    // ── T1 ──
+    // ── T1 (net8.0+ only — DIM requires runtime support) ──
 
+#if NET8_0_OR_GREATER
     [Test]
     public async Task T1_DIM_Class_Without_Override_Compiles_And_Routes_To_DIM()
     {
@@ -229,6 +232,7 @@ public class KitchenSinkEdgeCasesTests
         IHasDim asInterface = mock.Object;
         await Assert.That(asInterface.Say()).IsEqualTo("dim-default");
     }
+#endif
 
     // ── T2 ──
 
