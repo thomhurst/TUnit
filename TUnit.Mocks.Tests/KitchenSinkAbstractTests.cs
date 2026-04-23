@@ -86,6 +86,34 @@ public abstract class AbstractKitchenSink : AbstractGrandparent
 
     // ── Generic virtual method ──
     public virtual T GetDefault<T>() where T : struct => default;
+
+    // ── Abstract params method ──
+    public abstract int Aggregate(params int[] values);
+
+    // ── Abstract tuple return ──
+    public abstract (string Key, int Value) Pair(string seed);
+
+    // ── Virtual Func return ──
+    public virtual Func<int, int> GetAdder(int by) => x => x + by;
+
+    // ── Virtual method with nullable reference param ──
+    public virtual string Combine(string? head, string tail) => $"{head ?? "<null>"}/{tail}";
+}
+
+// ─── Abstract class that explicitly implements an interface member — #5673 shape ───
+
+public interface IAbstractStateProvider
+{
+    string GetState();
+}
+
+public abstract class AbstractWithExplicitInterfaceImpl : IAbstractStateProvider
+{
+    // Explicit impl — not a virtual public member; mock derived class must not try
+    // to `override` this.
+    string IAbstractStateProvider.GetState() => "base-explicit";
+
+    public abstract string GetOwnName();
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -409,6 +437,110 @@ public class KitchenSinkAbstractTests
 
         await Assert.That(mock.Object.GetDefault<int>()).IsEqualTo(0);
         await Assert.That(mock.Object.GetDefault<bool>()).IsFalse();
+    }
+
+    // ── Abstract params method ──
+
+    [Test]
+    public async Task Abstract_Params_Method_Configured()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+        mock.Aggregate(Any()).Returns(999);
+
+        await Assert.That(mock.Object.Aggregate(1, 2)).IsEqualTo(999);
+        await Assert.That(mock.Object.Aggregate()).IsEqualTo(999);
+        mock.Aggregate(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    // ── Abstract tuple return ──
+
+    [Test]
+    public async Task Abstract_Tuple_Return_Configured()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+        mock.Pair("seed").Returns(("k", 42));
+
+        var (key, value) = mock.Object.Pair("seed");
+
+        await Assert.That(key).IsEqualTo("k");
+        await Assert.That(value).IsEqualTo(42);
+        mock.Pair("seed").WasCalled(Times.Once);
+        mock.Pair("other").WasNeverCalled();
+    }
+
+    // ── Virtual Func return ──
+
+    [Test]
+    public async Task Virtual_Func_Return_Unconfigured_Uses_Base()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+
+        var fn = mock.Object.GetAdder(10);
+
+        await Assert.That(fn(5)).IsEqualTo(15);
+    }
+
+    [Test]
+    public async Task Virtual_Func_Return_Configured_And_Verified()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+        Func<int, int> doubler = x => x * 2;
+        mock.GetAdder(7).Returns(doubler);
+
+        var fn = mock.Object.GetAdder(7);
+
+        await Assert.That(fn(5)).IsEqualTo(10);
+        mock.GetAdder(7).WasCalled(Times.Once);
+        mock.GetAdder(0).WasNeverCalled();
+    }
+
+    // ── Virtual nullable reference param ──
+
+    [Test]
+    public async Task Virtual_Nullable_Reference_Param_Null_Flows_To_Base()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+
+        await Assert.That(mock.Object.Combine(null, "y")).IsEqualTo("<null>/y");
+    }
+
+    [Test]
+    public async Task Virtual_Nullable_Reference_Param_Configured_And_Verified()
+    {
+        var mock = AbstractKitchenSink.Mock();
+        mock.GetName().Returns("x");
+        mock.Combine(IsNull<string>(), Any()).Returns("null-path");
+        mock.Combine("p-", Any()).Returns("prefixed");
+
+        await Assert.That(mock.Object.Combine(null, "z")).IsEqualTo("null-path");
+        await Assert.That(mock.Object.Combine("p-", "z")).IsEqualTo("prefixed");
+
+        mock.Combine(IsNull<string>(), Any()).WasCalled(Times.Once);
+        mock.Combine("p-", Any()).WasCalled(Times.Once);
+    }
+
+    // ── Abstract class with explicit interface impl (#5673 shape) ──
+
+    [Test]
+    public async Task Abstract_With_Explicit_Interface_Impl_Inherits_Explicit_Body()
+    {
+        var mock = AbstractWithExplicitInterfaceImpl.Mock();
+        mock.GetOwnName().Returns("own");
+
+        // Abstract member of the class is mockable AND verifiable.
+        await Assert.That(mock.Object.GetOwnName()).IsEqualTo("own");
+        await Assert.That(mock.Object.GetOwnName()).IsEqualTo("own");
+        mock.GetOwnName().WasCalled(Times.Exactly(2));
+
+        // Interface member was explicitly implemented on the abstract base — derived
+        // mock inherits that impl (generator must not emit `public override` for it).
+        IAbstractStateProvider asProvider = mock.Object;
+        await Assert.That(asProvider.GetState()).IsEqualTo("base-explicit");
     }
 
     // ── Verification on abstract and virtual methods ──

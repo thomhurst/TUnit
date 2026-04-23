@@ -107,6 +107,78 @@ public class Level2Leaf : Level1Middle
     public override string Tag { get; set; } = "L2";
 }
 
+// ─── Interface hierarchy with `new`-redeclaration ───────────────────────────
+
+public interface ILegacyService
+{
+    int Ping();
+}
+
+public interface IModernService : ILegacyService
+{
+    /// <summary>Hides ILegacyService.Ping with a wider return type.</summary>
+    new long Ping();
+}
+
+// ─── Hierarchy where L1 explicitly implements an interface (#5673 shape) ────
+
+public interface IScopeMarker
+{
+    string GetScope();
+}
+
+public abstract class ScopedBase : IScopeMarker
+{
+    // Explicit impl on the abstract base — the interface member is *not* a
+    // virtual public member of the class, so a mock of a derived class must
+    // not try to `override` it.
+    string IScopeMarker.GetScope() => "base-scope";
+
+    public abstract string GetName();
+}
+
+public class ScopedLeaf : ScopedBase
+{
+    private readonly string _tag;
+
+    public ScopedLeaf() : this("leaf") { }
+    public ScopedLeaf(string tag) { _tag = tag; }
+
+    public override string GetName() => $"name-{_tag}";
+
+    public virtual int Rank { get; set; } = 5;
+}
+
+// ─── Hierarchy where a BASE class satisfies an interface via virtual methods
+//     and the LEAF (the type being mocked) inherits without redeclaring.
+//     Confirms ProcessClassMembers recurses up the hierarchy and that the
+//     interface-loop guard finds the inherited impl.
+// ─────────────────────────────────────────────────────────────────────────────
+
+public interface IInheritedShape
+{
+    int Area();
+    string Name { get; set; }
+    event EventHandler<int> Resized;
+}
+
+public class ShapeBase : IInheritedShape
+{
+    // Implicit interface impl via virtual members ON THE BASE — leaf inherits.
+    public virtual int Area() => 10;
+    public virtual string Name { get; set; } = "base-name";
+    public virtual event EventHandler<int>? Resized;
+
+    public void RaiseResized(int v) => Resized?.Invoke(this, v);
+}
+
+public class ShapeLeaf : ShapeBase
+{
+    // Deliberately does not redeclare anything — must inherit from ShapeBase,
+    // and the mock must still be able to override Area/Name/Resized because
+    // the class walk collected them via BaseType recursion.
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 public class KitchenSinkInheritanceTests
@@ -399,6 +471,87 @@ public class KitchenSinkInheritanceTests
         await Assert.That(mock.Object.GetVersion()).IsEqualTo("v1-sealed");
         await Assert.That(mock.Object.GetId()).IsEqualTo(7);
         await Assert.That(mock.Object.GetRegion()).IsEqualTo("eu");
+    }
+
+    // ── Interface hierarchy with `new`-redeclaration ──
+
+    [Test]
+    public async Task Derived_Interface_New_Return_Resolves_Via_Static_Type()
+    {
+        var mock = IModernService.Mock();
+        mock.Ping().Returns(long.MaxValue);
+
+        // Static type → modern interface → long
+        await Assert.That(mock.Object.Ping()).IsEqualTo(long.MaxValue);
+
+        // Cast to legacy interface → int Ping() — unconfigured, smart default 0
+        ILegacyService legacy = mock.Object;
+        await Assert.That(legacy.Ping()).IsEqualTo(0);
+
+        // Verification tracks the modern-shape call.
+        mock.Ping().WasCalled(Times.Once);
+    }
+
+    // ── Hierarchy where L1 explicitly implements interface (#5673 shape) ──
+
+    // ── Base-virtual-satisfies-interface: leaf inherits, mock still overrides ──
+
+    [Test]
+    public async Task Leaf_Inherits_Base_Virtual_That_Satisfies_Interface()
+    {
+        // ShapeLeaf declares nothing; ShapeBase provides virtual impls that satisfy
+        // IInheritedShape. Confirms class-walk recursion (ProcessClassMembers walks
+        // into ShapeBase) AND that the interface-loop guard skips the duplicate
+        // interface-member emission once the inherited virtual has been collected.
+        var mock = ShapeLeaf.Mock();
+
+        // Unconfigured → inherited base virtual executes (value from ShapeBase).
+        await Assert.That(mock.Object.Area()).IsEqualTo(10);
+        await Assert.That(mock.Object.Name).IsEqualTo("base-name");
+
+        // Configured → mock intercepts the inherited virtual.
+        mock.Area().Returns(42);
+        mock.Name.Returns("mocked-name");
+
+        await Assert.That(mock.Object.Area()).IsEqualTo(42);
+        await Assert.That(mock.Object.Name).IsEqualTo("mocked-name");
+
+        // Calls through the interface route the same way.
+        IInheritedShape asInterface = mock.Object;
+        await Assert.That(asInterface.Area()).IsEqualTo(42);
+        await Assert.That(asInterface.Name).IsEqualTo("mocked-name");
+
+        // Inherited virtual event fires on the mock (Raise* helper is generated).
+        int? raised = null;
+        asInterface.Resized += (_, v) => raised = v;
+        mock.RaiseResized(7);
+        await Assert.That(raised).IsEqualTo(7);
+
+        // Verification counts the inherited calls (two direct + one via interface).
+        mock.Area().WasCalled(Times.Exactly(3));
+        mock.Name.WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task Derived_Class_Inherits_Base_Explicit_Interface_Impl()
+    {
+        var mock = ScopedLeaf.Mock("x");
+
+        // Abstract member overridden at L2 is mockable + verifiable.
+        mock.GetName().Returns("mocked");
+        await Assert.That(mock.Object.GetName()).IsEqualTo("mocked");
+        mock.GetName().WasCalled(Times.Once);
+
+        // Explicit interface impl on the abstract base flows through unchanged —
+        // the mock must not attempt to override it.
+        IScopeMarker asMarker = mock.Object;
+        await Assert.That(asMarker.GetScope()).IsEqualTo("base-scope");
+
+        // Own virtual property on derived class is still mockable + verifiable.
+        mock.Rank.Returns(999);
+        await Assert.That(mock.Object.Rank).IsEqualTo(999);
+        await Assert.That(mock.Object.Rank).IsEqualTo(999);
+        mock.Rank.WasCalled(Times.Exactly(2));
     }
 
     // ── Verification across hierarchy ──

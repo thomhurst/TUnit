@@ -76,6 +76,55 @@ public class ConcreteKitchenSink : ConcreteBase
 
     // ── Virtual property (own) ──
     public virtual string Description { get; set; } = "default-desc";
+
+    // ── Virtual params array ──
+    public virtual int Total(params int[] values)
+    {
+        int sum = 0;
+        foreach (var v in values) sum += v;
+        return sum;
+    }
+
+    // ── Virtual tuple return ──
+    public virtual (int Count, string Label) Describe() => (0, "base");
+
+    // ── Virtual delegate return ──
+    public virtual Func<int, int> GetMultiplier(int factor) => x => x * factor;
+
+    // ── Virtual method with nullable reference param ──
+    public virtual string Combine(string? prefix, string value) => $"{prefix ?? ""}{value}";
+}
+
+// ─── Interface with an internally-typed return and a concrete class that
+//     implements it explicitly — regression shape for #5673
+// ─────────────────────────────────────────────────────────────────────────────
+
+public interface IHasHiddenInstance
+{
+    IHiddenState Instance { get; }
+}
+
+public interface IHiddenState
+{
+    string Marker { get; }
+}
+
+public sealed class HiddenState : IHiddenState
+{
+    public string Marker { get; init; } = "";
+}
+
+public class HasExplicitInstance : IHasHiddenInstance
+{
+    private readonly HiddenState _state;
+
+    public HasExplicitInstance() : this(new HiddenState { Marker = "default" }) { }
+    public HasExplicitInstance(HiddenState state) { _state = state; }
+
+    // Explicit interface impl — *not* a virtual public member on the class.
+    IHiddenState IHasHiddenInstance.Instance => _state;
+
+    public virtual string Describe() => $"explicit:{_state.Marker}";
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -359,5 +408,111 @@ public class KitchenSinkConcreteTests
         mock.RaiseValueChanged(42);
 
         await Assert.That(received).IsEqualTo(42);
+    }
+
+    // ── Params virtual ──
+
+    [Test]
+    public async Task Virtual_Params_Unconfigured_Uses_Base()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+
+        await Assert.That(mock.Object.Total(1, 2, 3)).IsEqualTo(6);
+    }
+
+    [Test]
+    public async Task Virtual_Params_Configured()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+        mock.Total(Any()).Returns(1000);
+
+        await Assert.That(mock.Object.Total(1, 2, 3)).IsEqualTo(1000);
+        await Assert.That(mock.Object.Total()).IsEqualTo(1000);
+        mock.Total(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    // ── Virtual tuple return ──
+
+    [Test]
+    public async Task Virtual_Tuple_Return_Configured()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+        mock.Describe().Returns((5, "mocked"));
+
+        var (count, label) = mock.Object.Describe();
+
+        await Assert.That(count).IsEqualTo(5);
+        await Assert.That(label).IsEqualTo("mocked");
+        mock.Describe().WasCalled(Times.Once);
+    }
+
+    // ── Virtual delegate return ──
+
+    [Test]
+    public async Task Virtual_Delegate_Return_Unconfigured_Uses_Base()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+
+        var fn = mock.Object.GetMultiplier(3);
+
+        await Assert.That(fn(4)).IsEqualTo(12);
+    }
+
+    [Test]
+    public async Task Virtual_Delegate_Return_Configured()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+        Func<int, int> tripler = x => x * 3;
+        mock.GetMultiplier(5).Returns(tripler);
+
+        var fn = mock.Object.GetMultiplier(5);
+
+        await Assert.That(fn(4)).IsEqualTo(12);
+        mock.GetMultiplier(5).WasCalled(Times.Once);
+        mock.GetMultiplier(9).WasNeverCalled();
+    }
+
+    // ── Nullable reference param ──
+
+    [Test]
+    public async Task Virtual_Nullable_Reference_Param_Unconfigured_Uses_Base()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+
+        await Assert.That(mock.Object.Combine(null, "x")).IsEqualTo("x");
+        await Assert.That(mock.Object.Combine("pre-", "x")).IsEqualTo("pre-x");
+    }
+
+    [Test]
+    public async Task Virtual_Nullable_Reference_Param_Configured_And_Verified()
+    {
+        var mock = ConcreteKitchenSink.Mock();
+        mock.Combine(IsNull<string>(), Any()).Returns("null-path");
+        mock.Combine("p-", Any()).Returns("prefixed");
+
+        await Assert.That(mock.Object.Combine(null, "x")).IsEqualTo("null-path");
+        await Assert.That(mock.Object.Combine("p-", "x")).IsEqualTo("prefixed");
+
+        mock.Combine(IsNull<string>(), Any()).WasCalled(Times.Once);
+        mock.Combine("p-", Any()).WasCalled(Times.Once);
+    }
+
+    // ── Class with explicit interface impl of inaccessible-shaped member (#5673) ──
+
+    [Test]
+    public async Task Class_With_Explicit_Interface_Impl_Compiles_And_Inherits_Impl()
+    {
+        // Mock should compile despite the base explicitly implementing IHasHiddenInstance.Instance.
+        // Accessing through the interface flows to the base's explicit impl.
+        var mock = HasExplicitInstance.Mock();
+
+        IHasHiddenInstance asInterface = mock.Object;
+        await Assert.That(asInterface.Instance.Marker).IsEqualTo("default");
+
+        // Own virtual on the class is still mockable AND verifiable.
+        mock.Describe().Returns("mocked");
+        await Assert.That(mock.Object.Describe()).IsEqualTo("mocked");
+        await Assert.That(mock.Object.Describe()).IsEqualTo("mocked");
+        mock.Describe().WasCalled(Times.Exactly(2));
     }
 }

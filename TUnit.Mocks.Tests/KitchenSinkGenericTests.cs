@@ -18,6 +18,16 @@ public interface IGenericProjection<TValue>
     TValue Echo(TValue value);
 }
 
+// ─── Interface with deeply nested generics and tuple returns ─────────────────
+
+public interface INestedGenericSink<TKey, TValue>
+    where TKey : notnull
+{
+    Dictionary<TKey, List<TValue>> Buckets { get; }
+    (TKey Key, TValue Value) First();
+    Task<Dictionary<TKey, List<TValue>>> GroupAsync(IEnumerable<TValue> items);
+}
+
 public interface IGenericKitchenSink<TItem, TValue> : IEnumerable<TItem>
     where TItem : class
 {
@@ -340,6 +350,67 @@ public class KitchenSinkGenericTests
 
         await Assert.That(value).IsEqualTo(12);
         await Assert.That(updated).IsSameReferenceAs(seed);
+    }
+
+    [Test]
+    public async Task Nested_Generic_Property_Is_Configurable()
+    {
+        var mock = INestedGenericSink<string, int>.Mock();
+        var buckets = new Dictionary<string, List<int>>
+        {
+            ["a"] = new() { 1, 2 },
+            ["b"] = new() { 3 }
+        };
+        mock.Buckets.Returns(buckets);
+
+        await Assert.That(mock.Object.Buckets).IsSameReferenceAs(buckets);
+        await Assert.That(mock.Object.Buckets).IsSameReferenceAs(buckets);
+        mock.Buckets.WasCalled(Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task Nested_Generic_Tuple_Return_Is_Configurable()
+    {
+        var mock = INestedGenericSink<string, int>.Mock();
+        mock.First().Returns(("k", 7));
+
+        var (key, value) = mock.Object.First();
+
+        await Assert.That(key).IsEqualTo("k");
+        await Assert.That(value).IsEqualTo(7);
+        mock.First().WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Nested_Generic_Async_Dictionary_Return_Is_Configurable()
+    {
+        var mock = INestedGenericSink<string, int>.Mock();
+        var grouped = new Dictionary<string, List<int>> { ["g"] = new() { 1 } };
+        mock.GroupAsync(Any()).Returns(grouped);
+
+        var result = await mock.Object.GroupAsync(new[] { 1, 2, 3 });
+
+        await Assert.That(result).IsSameReferenceAs(grouped);
+        mock.GroupAsync(Any()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Nullable_Reference_Type_Argument_Is_Preserved()
+    {
+        // GenericPayload? as TItem forces nullable reference preservation through the
+        // closed generic signature.
+        var mock = IGenericProjection<GenericPayload?>.Mock();
+        var present = new GenericPayload { Name = "present" };
+        mock.Current.Returns((GenericPayload?)null);
+        mock.Echo(IsNull<GenericPayload?>()).Returns((GenericPayload?)null);
+        mock.Echo(present).Returns(present);
+
+        await Assert.That(mock.Object.Current).IsNull();
+        await Assert.That(mock.Object.Echo(null)).IsNull();
+        await Assert.That(mock.Object.Echo(present)).IsSameReferenceAs(present);
+
+        mock.Echo(IsNull<GenericPayload?>()).WasCalled(Times.Once);
+        mock.Echo(present).WasCalled(Times.Once);
     }
 
     [Test]

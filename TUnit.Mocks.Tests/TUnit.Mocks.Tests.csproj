@@ -12,6 +12,14 @@
     <PackageReference Include="Azure.Data.Tables" />
     <PackageReference Include="Azure.Storage.Blobs" />
     <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
+
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
 
     <!-- Wire source generator for mock generation in test code -->

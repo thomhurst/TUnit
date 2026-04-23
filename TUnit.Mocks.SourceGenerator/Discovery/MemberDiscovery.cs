@@ -60,6 +60,18 @@ internal static class MemberDiscovery
                     continue;
                 }
 
+                // For class partial mocks, the base class already implements (or inherits) all
+                // interface members — re-emitting them as `public override` fails to compile
+                // when the base impl is non-virtual or explicit (#5673:
+                // EntityEntry explicitly implements IInfrastructure<InternalEntityEntry>.Instance).
+                // The inherited impl satisfies the interface; the mock only needs to override
+                // what the class walk already collected (virtual/abstract/override members).
+                if (typeSymbol.TypeKind == TypeKind.Class
+                    && typeSymbol.FindImplementationForInterfaceMember(member) is not null)
+                {
+                    continue;
+                }
+
                 switch (member)
                 {
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
@@ -342,6 +354,13 @@ internal static class MemberDiscovery
                         var key = GetMethodKey(method);
                         // Seed both seen sets so the interface loop doesn't re-add class members
                         seenFullMethods.Add(GetFullMethodKey(method));
+                        // ref / ref readonly returns can't be routed through the mock engine —
+                        // treat them as non-mockable so the inherited impl flows through unchanged.
+                        if (method.ReturnsByRef || method.ReturnsByRefReadonly)
+                        {
+                            seenMethods.TryAdd(key, NonMockableEntry);
+                            break;
+                        }
                         if (method.IsAbstract || method.IsVirtual || method.IsOverride)
                         {
                             if (seenMethods.ContainsKey(key)) continue;
