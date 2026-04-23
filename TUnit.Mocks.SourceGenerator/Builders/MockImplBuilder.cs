@@ -5,8 +5,7 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 
 internal static class MockImplBuilder
 {
-    // Tells the compiler the generated ctor satisfies any `required` members on the
-    // mocked base type, so the factory can `new XxxMockImpl(engine)` without CS9035.
+    // Suppresses CS9035: ctor claims responsibility for required members so factory can `new XxxMockImpl(engine)` without initializers.
     private const string SetsRequiredMembersAttribute = "[global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]";
 
     public static void BuildInto(CodeWriter writer, MockTypeModel model)

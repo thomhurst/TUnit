@@ -1348,6 +1348,33 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Class_With_Required_Members()
+    {
+        // Regression for #5678: when a partial-mocked base class has `required` members,
+        // the generated impl ctor must carry [SetsRequiredMembers] so the factory can
+        // `new XxxMockImpl(engine)` without CS9035 (member must be initialized).
+        var source = """
+            using TUnit.Mocks;
+
+            public class ConfigBase
+            {
+                public required string Name { get; set; }
+                public required object Settings { get; init; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ConfigBase>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_Inheriting_Nested_Generic_IEnumerable()
     {
         var source = """
