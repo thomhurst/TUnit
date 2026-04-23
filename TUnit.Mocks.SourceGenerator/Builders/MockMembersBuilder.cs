@@ -16,10 +16,30 @@ internal static class MockMembersBuilder
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
+    // Two distinct shadowing problems below — different fixes because the kinds collide differently.
+
+    // "Object" clashes with the Mock<T>.Object PROPERTY (member-kind collision: property vs.
+    // generated method/property). A trailing underscore is enough since nothing on object
+    // is named "Object_".
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
         "Object",
-        "GetHashCode", "GetType", "ToString", "Equals"
+    };
+
+    // Equals/GetHashCode/ToString clash with inherited object INSTANCE METHODS.
+    // C# overload resolution always prefers an instance method on the receiver over an
+    // extension method, so a generated `Equals` extension is unreachable (mock.Equals(...)
+    // binds to object.Equals and returns bool). A trailing-underscore rename would also be
+    // reachable, but we use an "Of" suffix to read naturally at the call site
+    // (mock.EqualsOf(other).Returns(true)).
+    // GetType is intentionally omitted: it is non-virtual on object and therefore
+    // cannot be overridden or shadowed in a meaningful way, so any generated helper
+    // would be dead code.
+    private static readonly Dictionary<string, string> ObjectMemberDisambiguations = new(System.StringComparer.Ordinal)
+    {
+        { "Equals", "EqualsOf" },
+        { "GetHashCode", "GetHashCodeOf" },
+        { "ToString", "ToStringOf" },
     };
 
     public static string Build(MockTypeModel model)
@@ -150,7 +170,11 @@ internal static class MockMembersBuilder
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
     private static string GetSafeMemberName(string name)
-        => MockMemberNames.Contains(name) ? name + "_" : name;
+    {
+        if (ObjectMemberDisambiguations.TryGetValue(name, out var renamed))
+            return renamed;
+        return MockMemberNames.Contains(name) ? name + "_" : name;
+    }
 
     private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)
     {
