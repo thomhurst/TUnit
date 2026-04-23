@@ -101,11 +101,20 @@ public class DoubleInterfaceExplicit : IGetIdInt, IGetIdString
     public virtual int OwnMember() => 0;
 }
 
-// ─── T8 SKIPPED. Self-referential IEquatable<T> — `mock.Equals(...)` resolves
-//     to object.Equals via extension-method dispatch rather than to the
-//     generator-emitted setup extension. Separate design limitation: would
-//     require either renaming the extension or generating a disambiguating
-//     helper (e.g. `mock.EqualsOf(...)`).
+// ─── T8. Self-referential IEquatable<T> — `mock.Equals(...)` would resolve to
+//     object.Equals via overload-resolution (extension methods can't beat instance
+//     methods on object). Generator emits a disambiguating `EqualsOf(...)` helper
+//     so the typed setup is reachable. Same disambiguation applies to GetHashCode
+//     and ToString. (GetType is non-virtual on object so it cannot be overridden;
+//     no helper is generated for it.)
+
+public class SelfEquatable : IEquatable<SelfEquatable>
+{
+    public virtual bool Equals(SelfEquatable? other) => ReferenceEquals(this, other);
+    public override bool Equals(object? obj) => obj is SelfEquatable s && Equals(s);
+    public override int GetHashCode() => 0;
+    public override string ToString() => "base";
+}
 
 // ─── T9. Nullable value types ────────────────────────────────────────────────
 
@@ -165,10 +174,21 @@ public interface ITagLarge : ITagSmall
     new long Tag { get; }
 }
 
-// ─── T14 SKIPPED. Interfaces with an indexer produce CS0535
-//     ("does not implement IHasIndexer.this[int]") because the mock-impl builder
-//     skips indexer emission without providing a stub. Tracked as a separate
-//     generator gap — not in scope of the #5673 fix.
+// ─── T14. Interface with indexer ────────────────────────────────────────────
+
+public interface IHasIndexer
+{
+    string this[int index] { get; set; }
+    int Regular { get; set; }
+}
+
+// T14b. Indexer with `in` parameter — exercises modifier forwarding
+// in FormatIndexerParameterList. `in` is the only ref-kind C# permits on
+// indexer parameters.
+public interface IHasInIndexer
+{
+    string this[in int key] { get; }
+}
 
 // ─── T15. Class implementing a static-abstract interface ────────────────────
 
@@ -347,7 +367,46 @@ public class KitchenSinkEdgeCasesTests
         mock.OwnMember().WasCalled(Times.Once);
     }
 
-    // T8 test elided — see the SKIPPED note above the type declarations.
+    // ── T8 ──
+
+    [Test]
+    public async Task T8_Self_Referential_IEquatable_Mockable()
+    {
+        var mock = SelfEquatable.Mock();
+        var other = new SelfEquatable();
+        var unrelated = new SelfEquatable();
+
+        // Setup via the disambiguated helper. Returns(...) must be reachable on the result.
+        mock.EqualsOf(other).Returns(true);
+        mock.EqualsOf(unrelated).Returns(false);
+
+        // Direct call routes through the generated impl's Equals override to the engine.
+        await Assert.That(mock.Object.Equals(other)).IsTrue();
+        await Assert.That(mock.Object.Equals(unrelated)).IsFalse();
+
+        // Interface-cast path resolves to the same underlying setup.
+        IEquatable<SelfEquatable> asInterface = mock.Object;
+        await Assert.That(asInterface.Equals(other)).IsTrue();
+        await Assert.That(asInterface.Equals(unrelated)).IsFalse();
+
+        // Verification: each setup tracks both the direct and interface-cast invocations.
+        mock.EqualsOf(other).WasCalled(Times.Exactly(2));
+        mock.EqualsOf(unrelated).WasCalled(Times.Exactly(2));
+
+        var third = new SelfEquatable();
+        mock.EqualsOf(third).WasNeverCalled();
+
+        // GetHashCodeOf / ToStringOf — same disambiguation pattern.
+        // GetType is not virtual on object so cannot be exercised; see class-level note.
+        mock.GetHashCodeOf().Returns(7);
+        mock.ToStringOf().Returns("mocked");
+
+        await Assert.That(mock.Object.GetHashCode()).IsEqualTo(7);
+        await Assert.That(mock.Object.ToString()).IsEqualTo("mocked");
+
+        mock.GetHashCodeOf().WasCalled(Times.Once);
+        mock.ToStringOf().WasCalled(Times.Once);
+    }
 
     // ── T9 ──
 
@@ -446,7 +505,53 @@ public class KitchenSinkEdgeCasesTests
         await Assert.That(asSmall.Tag).IsEqualTo((short)0);
     }
 
-    // T14 test elided — see the SKIPPED note above the type declarations.
+    // ── T14 ──
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Compiles_Regular_Property_Works()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Regular.Returns(123);
+
+        await Assert.That(mock.Object.Regular).IsEqualTo(123);
+        mock.Regular.WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Get_Set_Configurable_And_Verifiable()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(0).Returns("zero");
+        mock.Item(1).Returns("one");
+
+        await Assert.That(mock.Object[0]).IsEqualTo("zero");
+        await Assert.That(mock.Object[1]).IsEqualTo("one");
+        await Assert.That(mock.Object[0]).IsEqualTo("zero");
+
+        mock.Object[5] = "five";
+        mock.Object[5] = "five-again";
+        mock.Object[6] = "six";
+
+        // Distinct index values produce independent setups (verified by the get_*).
+        mock.Item(0).WasCalled(Times.Exactly(2));
+        mock.Item(1).WasCalled(Times.Once);
+
+        // Setter verification per index value.
+        mock.SetItem(5, Any<string>()).WasCalled(Times.Exactly(2));
+        mock.SetItem(6, "six").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task T14b_Indexer_With_In_Parameter_Compiles_And_Dispatches()
+    {
+        var mock = IHasInIndexer.Mock();
+        mock.Item(7).Returns("seven");
+
+        var k = 7;
+        await Assert.That(mock.Object[in k]).IsEqualTo("seven");
+        mock.Item(7).WasCalled(Times.Once);
+    }
 
     // ── T15 (net8.0+ only — static abstract requires runtime support) ──
 

@@ -774,7 +774,7 @@ internal static class MemberDiscovery
                     Name = EscapeIdentifier(p.Name),
                     Type = p.Type.GetMinimallyQualifiedNameWithNullability(),
                     FullyQualifiedType = p.Type.GetFullyQualifiedNameWithNullability(),
-                    Direction = ParameterDirection.In
+                    Direction = p.GetParameterDirection()
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,
