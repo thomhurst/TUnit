@@ -165,10 +165,14 @@ public interface ITagLarge : ITagSmall
     new long Tag { get; }
 }
 
-// ─── T14 SKIPPED. Interfaces with an indexer produce CS0535
-//     ("does not implement IHasIndexer.this[int]") because the mock-impl builder
-//     skips indexer emission without providing a stub. Tracked as a separate
-//     generator gap — not in scope of the #5673 fix.
+// ─── T14. Interface with indexer ────────────────────────────────────────────
+
+public interface IHasIndexer
+{
+    string this[int index] { get; set; }
+    int Regular { get; set; }
+}
+
 // ─── T15 SKIPPED. Mocking a class that implements a static-abstract interface
 //     hits the bridge builder, which treats the target as an interface ("Type
 //     in interface list is not an interface"). Separate generator issue.
@@ -433,7 +437,44 @@ public class KitchenSinkEdgeCasesTests
         await Assert.That(asSmall.Tag).IsEqualTo((short)0);
     }
 
-    // T14, T15 tests elided — see the SKIPPED notes above the type declarations.
+    // ── T14 ──
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Compiles_Regular_Property_Works()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Regular.Returns(123);
+
+        await Assert.That(mock.Object.Regular).IsEqualTo(123);
+        mock.Regular.WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Get_Set_Configurable_And_Verifiable()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(0).Returns("zero");
+        mock.Item(1).Returns("one");
+
+        await Assert.That(mock.Object[0]).IsEqualTo("zero");
+        await Assert.That(mock.Object[1]).IsEqualTo("one");
+        await Assert.That(mock.Object[0]).IsEqualTo("zero");
+
+        mock.Object[5] = "five";
+        mock.Object[5] = "five-again";
+        mock.Object[6] = "six";
+
+        // Distinct index values produce independent setups (verified by the get_*).
+        mock.Item(0).WasCalled(Times.Exactly(2));
+        mock.Item(1).WasCalled(Times.Once);
+
+        // Setter verification per index value.
+        mock.SetItem(5, Any<string>()).WasCalled(Times.Exactly(2));
+        mock.SetItem(6, "six").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Exactly(3));
+    }
+
+    // T15 test elided — see the SKIPPED note above the type declarations.
 
     // ── T16 ──
 

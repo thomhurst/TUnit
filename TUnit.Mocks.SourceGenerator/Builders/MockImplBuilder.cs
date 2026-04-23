@@ -65,10 +65,16 @@ internal static class MockImplBuilder
             // Properties — skip static abstract (they're in bridge DIMs)
             foreach (var prop in model.Properties)
             {
-                if (prop.IsIndexer) continue;
                 if (prop.IsStaticAbstract) continue;
                 writer.AppendLine();
-                GenerateInterfaceProperty(writer, prop, model);
+                if (prop.IsIndexer)
+                {
+                    GenerateInterfaceIndexer(writer, prop);
+                }
+                else
+                {
+                    GenerateInterfaceProperty(writer, prop, model);
+                }
             }
 
             // Events — skip static abstract (they're in bridge DIMs)
@@ -113,10 +119,16 @@ internal static class MockImplBuilder
             // Properties — skip static abstract (they're in bridge DIMs)
             foreach (var prop in model.Properties)
             {
-                if (prop.IsIndexer) continue;
                 if (prop.IsStaticAbstract) continue;
                 writer.AppendLine();
-                GenerateWrapProperty(writer, prop, model);
+                if (prop.IsIndexer)
+                {
+                    GenerateWrapIndexer(writer, prop);
+                }
+                else
+                {
+                    GenerateWrapProperty(writer, prop, model);
+                }
             }
 
             // Events — skip static abstract (they're in bridge DIMs)
@@ -451,10 +463,16 @@ internal static class MockImplBuilder
             // Properties — skip static abstract (they're in bridge DIMs)
             foreach (var prop in model.Properties)
             {
-                if (prop.IsIndexer) continue;
                 if (prop.IsStaticAbstract) continue;
                 writer.AppendLine();
-                GeneratePartialProperty(writer, prop, model);
+                if (prop.IsIndexer)
+                {
+                    GeneratePartialIndexer(writer, prop);
+                }
+                else
+                {
+                    GeneratePartialProperty(writer, prop, model);
+                }
             }
 
             // Events — skip static abstract (they're in bridge DIMs)
@@ -1009,6 +1027,177 @@ internal static class MockImplBuilder
         }
 
         writer.CloseBrace();
+    }
+
+    /// <summary>
+    /// Emits an indexer (<c>this[...]</c>) implementation for an interface mock that routes
+    /// get/set calls through the engine. Each get is dispatched as <c>get_Item</c> and each set
+    /// as <c>set_Item</c>; the index parameters (and value, for setters) become the matchable
+    /// arguments, so distinct index values produce independent setups and verifications.
+    /// </summary>
+    private static void GenerateInterfaceIndexer(CodeWriter writer, MockMemberModel prop)
+    {
+        var paramList = FormatIndexerParameterList(prop);
+        var argsArray = GetIndexerGetterArgsArray(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"public {prop.ReturnType} this[{paramList}]");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+        }
+
+        if (prop.HasSetter)
+        {
+            var setterArgs = GetIndexerSetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+        }
+
+        writer.CloseBrace();
+    }
+
+    /// <summary>
+    /// Emits an overriding indexer for a partial mock. Tries the engine first; on miss, falls back
+    /// to the base implementation. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
+    /// </summary>
+    private static void GeneratePartialIndexer(CodeWriter writer, MockMemberModel prop)
+    {
+        var accessModifier = prop.IsProtected ? "protected" : "public";
+        var paramList = FormatIndexerParameterList(prop);
+        var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
+        var argsArray = GetIndexerGetterArgsArray(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"{accessModifier} override {prop.ReturnType} this[{paramList}]");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            }
+            else
+            {
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine("return __result;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return base[{argPassList}];");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            var setterArgs = GetIndexerSetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+            }
+            else
+            {
+                writer.AppendLine("set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"base[{argPassList}] = value;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    /// <summary>
+    /// Emits an overriding indexer for a wrap mock. Tries the engine first; on miss, falls back
+    /// to the wrapped instance. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
+    /// </summary>
+    private static void GenerateWrapIndexer(CodeWriter writer, MockMemberModel prop)
+    {
+        var accessModifier = prop.IsProtected ? "protected" : "public";
+        var paramList = FormatIndexerParameterList(prop);
+        var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
+        var argsArray = GetIndexerGetterArgsArray(prop);
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+        writer.AppendLine($"{accessModifier} override {prop.ReturnType} this[{paramList}]");
+        writer.OpenBrace();
+
+        if (prop.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+            }
+            else
+            {
+                writer.AppendLine("get");
+                writer.OpenBrace();
+                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine("return __result;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.AppendLine($"return _wrappedInstance[{argPassList}];");
+                writer.CloseBrace();
+            }
+        }
+
+        if (prop.HasSetter)
+        {
+            var setterArgs = GetIndexerSetterArgsArray(prop);
+            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
+            if (prop.IsAbstractMember)
+            {
+                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+            }
+            else
+            {
+                writer.AppendLine("set");
+                writer.OpenBrace();
+                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
+                writer.AppendLine("{");
+                writer.IncreaseIndent();
+                writer.AppendLine($"_wrappedInstance[{argPassList}] = value;");
+                writer.DecreaseIndent();
+                writer.AppendLine("}");
+                writer.CloseBrace();
+            }
+        }
+
+        writer.CloseBrace();
+    }
+
+    private static string FormatIndexerParameterList(MockMemberModel indexer)
+    {
+        return string.Join(", ", indexer.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
+    }
+
+    private static string GetIndexerGetterArgsArray(MockMemberModel indexer)
+    {
+        if (indexer.Parameters.Length == 0) return "global::System.Array.Empty<object?>()";
+        var args = string.Join(", ", indexer.Parameters.Select(p => p.Name));
+        return $"new object?[] {{ {args} }}";
+    }
+
+    private static string GetIndexerSetterArgsArray(MockMemberModel indexer)
+    {
+        if (indexer.Parameters.Length == 0) return "new object?[] { value }";
+        var args = string.Join(", ", indexer.Parameters.Select(p => p.Name)) + ", value";
+        return $"new object?[] {{ {args} }}";
     }
 
     private static void GenerateEvent(CodeWriter writer, MockEventModel evt)
