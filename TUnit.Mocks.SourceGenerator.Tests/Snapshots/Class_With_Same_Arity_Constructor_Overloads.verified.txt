@@ -10,18 +10,22 @@ namespace TUnit.Mocks.Generated
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string name) : base(name)
         {
             _engine = engine;
         }
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, int id) : base(id)
         {
             _engine = engine;
         }
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, string host, int port) : base(host, port)
         {
             _engine = engine;
         }
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal MyServiceMockImpl(global::TUnit.Mocks.MockEngine<global::MyService> engine, int timeout, bool verbose) : base(timeout, verbose)
         {
             _engine = engine;

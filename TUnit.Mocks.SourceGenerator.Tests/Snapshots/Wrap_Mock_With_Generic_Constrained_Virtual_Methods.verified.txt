@@ -11,6 +11,7 @@ namespace TUnit.Mocks.Generated
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal RepositoryWrapMockImpl(global::TUnit.Mocks.MockEngine<global::Repository> engine, global::Repository wrappedInstance) : base()
         {
             _engine = engine;
