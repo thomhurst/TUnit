@@ -38,5 +38,5 @@ public readonly struct Arg<T>
     /// <param name="predicate">The predicate that determines whether an argument matches.</param>
     public static implicit operator Arg<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate!));
 
-    public static implicit operator Arg<T>(AnyArg _) => new(new AnyMatcher<T>());
+    public static implicit operator Arg<T>(AnyArg _) => new(AnyMatcher<T>.Instance);
 }

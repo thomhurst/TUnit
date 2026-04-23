@@ -7,6 +7,8 @@ namespace TUnit.Mocks.Matchers;
 /// </summary>
 internal sealed class NullMatcher<T> : IArgumentMatcher<T>
 {
+    public static readonly NullMatcher<T> Instance = new();
+
     public bool Matches(T? value) => value is null;
 
     public bool Matches(object? value) => value is null;

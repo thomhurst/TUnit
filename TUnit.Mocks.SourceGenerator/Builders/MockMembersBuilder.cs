@@ -212,8 +212,6 @@ internal static class MockMembersBuilder
             writer.AppendLine("private readonly string _memberName;");
             writer.AppendLine("private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;");
             writer.AppendLine($"private {builderType}? _builder;");
-            writer.AppendLine("private bool _builderInitialized;");
-            writer.AppendLine("private object? _builderLock;");
             writer.AppendLine();
 
             // Constructor
@@ -324,8 +322,6 @@ internal static class MockMembersBuilder
             writer.AppendLine("private readonly string _memberName;");
             writer.AppendLine("private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;");
             writer.AppendLine($"private {builderType}? _builder;");
-            writer.AppendLine("private bool _builderInitialized;");
-            writer.AppendLine("private object? _builderLock;");
             writer.AppendLine();
 
             // Constructor — eagerly registers because void methods
@@ -1136,15 +1132,27 @@ internal static class MockMembersBuilder
 
     private static void EmitEnsureSetup(CodeWriter writer, string builderType)
     {
-        writer.AppendLine($"private {builderType} EnsureSetup() =>");
-        writer.IncreaseIndent();
-        writer.AppendLine($"global::System.Threading.LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>");
-        writer.OpenBrace();
-        writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
-        writer.AppendLine("_engine.AddSetup(setup);");
-        writer.AppendLine($"return new {builderType}(setup);");
-        writer.CloseBrace(")!;");
-        writer.DecreaseIndent();
+        // CAS-based lazy init avoids the LazyInitializer Func closure and its two scratch fields.
+        writer.AppendLine($"private {builderType} EnsureSetup()");
+        using (writer.Block())
+        {
+            writer.AppendLine($"var existing = global::System.Threading.Volatile.Read(ref _builder);");
+            writer.AppendLine("if (existing is not null) return existing;");
+            writer.AppendLine("return EnsureSetupSlow();");
+        }
+
+        writer.AppendLine();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]");
+        writer.AppendLine($"private {builderType} EnsureSetupSlow()");
+        using (writer.Block())
+        {
+            writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
+            writer.AppendLine($"var fresh = new {builderType}(setup);");
+            writer.AppendLine($"var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);");
+            writer.AppendLine("if (prev is not null) return prev;");
+            writer.AppendLine("_engine.AddSetup(setup);");
+            writer.AppendLine("return fresh;");
+        }
     }
 
 }
