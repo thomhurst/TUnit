@@ -536,6 +536,41 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Class_Implementing_Static_Abstract_Interface()
+    {
+        // Mirrors the T15 KitchenSink shape: a class implementing an interface that has a
+        // static-abstract member plus an instance virtual member. The generator must NOT
+        // emit a MockBridge interface for class targets (CS0527 / CS0540 — see #5677); the
+        // class already provides the concrete static impl, the mock only overrides the
+        // instance-virtual surface.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IStaticAbstractFactory
+            {
+                static abstract IStaticAbstractFactory Create();
+                int InstanceValue { get; }
+            }
+
+            public class StaticAbstractImpl : IStaticAbstractFactory
+            {
+                public static IStaticAbstractFactory Create() => new StaticAbstractImpl();
+                public virtual int InstanceValue => 99;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = StaticAbstractImpl.Mock();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Inherited_Static_Abstract_Members()
     {
         // Tests the case where an interface inherits static abstract members from a base interface.

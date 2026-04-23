@@ -90,7 +90,9 @@ public class MockGenerator : IIncrementalGenerator
     {
         var fileName = GetSafeFileName(model);
 
-        // Defence-in-depth: MemberDiscovery already filters static-abstract collection on TypeKind, so HasStaticAbstractMembers is always false here for class targets.
+        // Defence-in-depth: MemberDiscovery never sets HasStaticAbstractMembers for class targets
+        // (TypeKind guard in TryCollectStaticAbstractFromInterface), so this branch is only entered
+        // for interface targets. The IsInterface check makes the intent explicit.
         if (model.HasStaticAbstractMembers && model.IsInterface)
         {
             var bridgeSource = MockBridgeBuilder.Build(model);
