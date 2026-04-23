@@ -483,6 +483,9 @@ public class KitchenSinkEdgeCasesTests
 
         await Assert.That(mock.Object.Compute()).IsEqualTo(123);
         mock.Compute().WasCalled(Times.Once);
+
+        // Required members intentionally remain at default in mocks; [SetsRequiredMembers] suppresses CS9035 only.
+        await Assert.That(mock.Object.Name).IsNull();
     }
 
     [Test]
@@ -497,6 +500,11 @@ public class KitchenSinkEdgeCasesTests
 
         mock.Describe().WasCalled(Times.Once);
         mock.Bonus().WasCalled(Times.Once);
+
+        // Required members intentionally remain at default in mocks; [SetsRequiredMembers] suppresses CS9035 only.
+        await Assert.That(mock.Object.Title).IsNull();
+        await Assert.That(mock.Object.Count).IsEqualTo(0);
+        await Assert.That(mock.Object.Id).IsEqualTo(System.Guid.Empty);
     }
 
     // T18 test elided — see the SKIPPED note above the type declarations.
