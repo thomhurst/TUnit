@@ -47,8 +47,8 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public string? RequiredState
     {
-        get => Volatile.Read(ref _rareState)?.RequiredState;
-        set => EnsureRareState().RequiredState = value;
+        get => Volatile.Read(ref _rareState) is { } rare ? Volatile.Read(ref rare.RequiredState) : null;
+        set => Volatile.Write(ref EnsureRareState().RequiredState, value);
     }
 
     /// <summary>
@@ -58,8 +58,8 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public string? TransitionTarget
     {
-        get => Volatile.Read(ref _rareState)?.TransitionTarget;
-        set => EnsureRareState().TransitionTarget = value;
+        get => Volatile.Read(ref _rareState) is { } rare ? Volatile.Read(ref rare.TransitionTarget) : null;
+        set => Volatile.Write(ref EnsureRareState().TransitionTarget, value);
     }
 
     /// <summary>
@@ -95,12 +95,22 @@ public sealed class MethodSetup
     private Lock EnsureBehaviorLock()
     {
         var rare = EnsureRareState();
-        if (rare.BehaviorLock is { } existing) return existing;
+        if (Volatile.Read(ref rare.BehaviorLock) is { } existing) return existing;
         Interlocked.CompareExchange(ref rare.BehaviorLock, new Lock(), null);
-        return rare.BehaviorLock!;
+        return Volatile.Read(ref rare.BehaviorLock)!;
     }
 
-    private Lock BehaviorLock => Volatile.Read(ref _rareState)?.BehaviorLock ?? EnsureBehaviorLock();
+    private Lock BehaviorLock
+    {
+        get
+        {
+            if (Volatile.Read(ref _rareState) is { } rare && Volatile.Read(ref rare.BehaviorLock) is { } existing)
+            {
+                return existing;
+            }
+            return EnsureBehaviorLock();
+        }
+    }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void IncrementInvokeCount() => Interlocked.Increment(ref _invokeCount);

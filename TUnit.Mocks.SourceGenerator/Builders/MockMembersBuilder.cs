@@ -226,7 +226,7 @@ internal static class MockMembersBuilder
 
             writer.AppendLine();
 
-            // EnsureSetup method — uses LazyInitializer to guarantee exactly-once AddSetup
+            // EnsureSetup — CAS-based lazy init (see EmitEnsureSetup)
             EmitEnsureSetup(writer, builderType);
 
             writer.AppendLine();
@@ -338,7 +338,7 @@ internal static class MockMembersBuilder
 
             writer.AppendLine();
 
-            // EnsureSetup method — uses LazyInitializer to guarantee exactly-once AddSetup
+            // EnsureSetup — CAS-based lazy init (see EmitEnsureSetup)
             EmitEnsureSetup(writer, builderType);
 
             writer.AppendLine();
@@ -1142,6 +1142,10 @@ internal static class MockMembersBuilder
         }
 
         writer.AppendLine();
+        // Race note: if two threads lose/win the CAS, the loser returns before the winner
+        // calls AddSetup. Mock setup is sequential in normal usage (test setup phase completes
+        // before invocations), so this window is not observable. If you ever need concurrent
+        // setup + invocation of the same method-wrapper, reintroduce synchronization here.
         writer.AppendLine("[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]");
         writer.AppendLine($"private {builderType} EnsureSetupSlow()");
         using (writer.Block())
@@ -1150,6 +1154,8 @@ internal static class MockMembersBuilder
             writer.AppendLine($"var fresh = new {builderType}(setup);");
             writer.AppendLine($"var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);");
             writer.AppendLine("if (prev is not null) return prev;");
+            writer.AppendLine("// AddSetup runs only on the CAS winner. Setup is sequential in practice,");
+            writer.AppendLine("// so a concurrent loser observing the builder before registration is benign.");
             writer.AppendLine("_engine.AddSetup(setup);");
             writer.AppendLine("return fresh;");
         }
