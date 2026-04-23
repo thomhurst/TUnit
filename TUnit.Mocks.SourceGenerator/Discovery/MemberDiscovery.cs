@@ -44,8 +44,6 @@ internal static class MemberDiscovery
                 seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
-        var collectStaticAbstractFromInterfaces = ShouldCollectStaticAbstractFromInterfaces(typeSymbol);
-
         foreach (var iface in interfaces)
         {
             string? explicitInterfaceName = null;
@@ -55,10 +53,7 @@ internal static class MemberDiscovery
             {
                 if (member.IsStatic)
                 {
-                    if (member.IsAbstract && collectStaticAbstractFromInterfaces)
-                    {
-                        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
-                    }
+                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                     continue;
                 }
 
@@ -193,8 +188,6 @@ internal static class MemberDiscovery
                 ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
                 : typeSymbol.AllInterfaces.AsEnumerable();
 
-            var collectStaticAbstractFromInterfaces = ShouldCollectStaticAbstractFromInterfaces(typeSymbol);
-
             foreach (var iface in interfaces)
             {
                 var interfaceFqn = iface.GetFullyQualifiedName();
@@ -203,10 +196,7 @@ internal static class MemberDiscovery
                 {
                     if (member.IsStatic)
                     {
-                        if (member.IsAbstract && collectStaticAbstractFromInterfaces)
-                        {
-                            CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
-                        }
+                        TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                         continue;
                     }
 
@@ -1075,15 +1065,38 @@ internal static class MemberDiscovery
     }
 
     /// <summary>
-    /// Single source of truth for whether a member-discovery loop should collect static-abstract
-    /// interface members for the given target. Class targets already provide the concrete static
-    /// impl that satisfies any static-abstract interface members; emitting a bridge interface for
-    /// them would produce CS0527 (class in interface list) and CS0540 (explicit interface impl on
-    /// a type that doesn't list the interface). Any new collection loop over interface members
-    /// MUST gate static-abstract collection through this helper.
+    /// Internal predicate consumed only by <see cref="TryCollectStaticAbstractFromInterface"/>.
+    /// Class targets already provide the concrete static impl that satisfies any static-abstract
+    /// interface members; emitting a bridge interface for them would produce CS0527 (class in
+    /// interface list) and CS0540 (explicit interface impl on a type that doesn't list the
+    /// interface). Centralised here so no caller can bypass the gate by accident.
     /// </summary>
     private static bool ShouldCollectStaticAbstractFromInterfaces(ITypeSymbol typeSymbol)
         => typeSymbol.TypeKind != TypeKind.Class;
+
+    /// <summary>
+    /// Gated entry point used by every interface-member discovery loop for static members.
+    /// Derives the static-abstract collection flag from <paramref name="typeSymbol"/> internally
+    /// so that adding a future loop cannot silently re-introduce the #5677 regression — the
+    /// only way to collect a static-abstract member is through this helper.
+    /// </summary>
+    private static void TryCollectStaticAbstractFromInterface(
+        ISymbol member,
+        ITypeSymbol typeSymbol,
+        string interfaceFqn,
+        List<MockMemberModel> methods,
+        List<MockMemberModel> properties,
+        List<MockEventModel> events,
+        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
+        Dictionary<string, int?> seenProperties,
+        HashSet<string> seenEvents,
+        ref int memberIdCounter)
+    {
+        if (!member.IsAbstract) return;
+        if (!ShouldCollectStaticAbstractFromInterfaces(typeSymbol)) return;
+
+        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+    }
 
     /// <summary>
     /// Returns true when the given type symbol is an interface that contains static abstract members
