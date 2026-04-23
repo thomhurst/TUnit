@@ -44,12 +44,7 @@ internal static class MemberDiscovery
                 seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
-        // For class targets, the class itself provides the concrete static impl that
-        // satisfies any static-abstract interface members (#5677). The mock only needs
-        // to override instance-virtual surface — emitting a bridge interface would
-        // produce CS0527 (class in interface list) and CS0540 (explicit interface impl
-        // on a type that doesn't list the interface).
-        var collectStaticAbstractFromInterfaces = typeSymbol.TypeKind != TypeKind.Class;
+        var collectStaticAbstractFromInterfaces = ShouldCollectStaticAbstractFromInterfaces(typeSymbol);
 
         foreach (var iface in interfaces)
         {
@@ -198,10 +193,7 @@ internal static class MemberDiscovery
                 ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
                 : typeSymbol.AllInterfaces.AsEnumerable();
 
-            // For class targets, the class itself provides the concrete static impl that
-            // satisfies any static-abstract interface members (#5677). Skip emitting bridge
-            // dispatch members in that case.
-            var collectStaticAbstractFromInterfaces = typeSymbol.TypeKind != TypeKind.Class;
+            var collectStaticAbstractFromInterfaces = ShouldCollectStaticAbstractFromInterfaces(typeSymbol);
 
             foreach (var iface in interfaces)
             {
@@ -1081,6 +1073,17 @@ internal static class MemberDiscovery
 
         return null;
     }
+
+    /// <summary>
+    /// Single source of truth for whether a member-discovery loop should collect static-abstract
+    /// interface members for the given target. Class targets already provide the concrete static
+    /// impl that satisfies any static-abstract interface members; emitting a bridge interface for
+    /// them would produce CS0527 (class in interface list) and CS0540 (explicit interface impl on
+    /// a type that doesn't list the interface). Any new collection loop over interface members
+    /// MUST gate static-abstract collection through this helper.
+    /// </summary>
+    private static bool ShouldCollectStaticAbstractFromInterfaces(ITypeSymbol typeSymbol)
+        => typeSymbol.TypeKind != TypeKind.Class;
 
     /// <summary>
     /// Returns true when the given type symbol is an interface that contains static abstract members

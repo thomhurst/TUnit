@@ -90,10 +90,7 @@ public class MockGenerator : IIncrementalGenerator
     {
         var fileName = GetSafeFileName(model);
 
-        // Bridge interface only makes sense for interface targets — a class already
-        // provides the concrete static impl for any static-abstract interface members
-        // it implements (#5677). Emitting a bridge with a class in its base list is
-        // CS0527; emitting explicit interface impls without the interface is CS0540.
+        // Defence-in-depth: MemberDiscovery already filters static-abstract collection on TypeKind, so HasStaticAbstractMembers is always false here for class targets.
         if (model.HasStaticAbstractMembers && model.IsInterface)
         {
             var bridgeSource = MockBridgeBuilder.Build(model);
