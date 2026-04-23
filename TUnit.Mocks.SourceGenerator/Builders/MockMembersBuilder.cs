@@ -73,6 +73,19 @@ internal static class MockMembersBuilder
                     GeneratePropertyExtensionBlock(writer, memberProps, model, safeName);
                 }
 
+                // Indexers -- expose as Item(...)/SetItem(..., value) extension methods so
+                // setups and verifications can target distinct index values independently.
+                // Each indexer overload (different parameter signature) gets its own pair.
+                var indexers = model.Properties
+                    .Where(p => p.IsIndexer && !p.IsStaticAbstract)
+                    .ToList();
+                foreach (var indexer in indexers)
+                {
+                    if (!firstMember) writer.AppendLine();
+                    firstMember = false;
+                    GenerateIndexerExtensionMethods(writer, indexer, model);
+                }
+
                 // Raise extension methods for events (skip static abstract)
                 if (instanceEvents.Length > 0)
                 {
@@ -1025,6 +1038,54 @@ internal static class MockMembersBuilder
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
                 writer.AppendLine($"    => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Emits <c>Item(args...)</c> and (optionally) <c>SetItem(args..., value)</c> extension methods
+    /// for an indexer, returning <see cref="MockMethodCall{TReturn}"/> / <see cref="VoidMockMethodCall"/>
+    /// so that callers can configure (<c>.Returns()</c>) and verify (<c>.WasCalled()</c>) per-index.
+    /// </summary>
+    private static void GenerateIndexerExtensionMethods(CodeWriter writer, MockMemberModel indexer, MockTypeModel model)
+    {
+        var mockableType = MockImplBuilder.GetMockableTypeName(model);
+        var typeParams = MockImplBuilder.GetTypeParameterList(model);
+        var constraints = MockImplBuilder.GetConstraintClauses(model);
+        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
+
+        // Indexer parameters as Arg<T> so callers can pass a literal, Arg.Any<T>(), etc.
+        var argParams = string.Join(", ", indexer.Parameters.Select(p =>
+            $"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}"));
+        var matcherList = indexer.Parameters.Length == 0
+            ? "global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>()"
+            : $"new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", indexer.Parameters.Select(p => $"{p.Name}.Matcher"))} }}";
+
+        if (indexer.HasGetter)
+        {
+            writer.AppendLineIfNotEmpty(indexer.ObsoleteAttribute);
+            var getterParams = string.IsNullOrEmpty(argParams) ? extensionParam : $"{extensionParam}, {argParams}";
+            using (writer.Block($"public static global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}> Item{typeParams}({getterParams}){constraints}"))
+            {
+                writer.AppendLine($"var matchers = {matcherList};");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {indexer.MemberId}, \"get_Item\", matchers);");
+            }
+        }
+
+        if (indexer.HasSetter)
+        {
+            if (indexer.HasGetter) writer.AppendLine();
+            writer.AppendLineIfNotEmpty(indexer.ObsoleteAttribute);
+            var valueParam = $"global::TUnit.Mocks.Arguments.Arg<{indexer.ReturnType}> value";
+            var setterArgParams = string.IsNullOrEmpty(argParams) ? valueParam : $"{argParams}, {valueParam}";
+            var setterParams = $"{extensionParam}, {setterArgParams}";
+            var setterMatcherList = indexer.Parameters.Length == 0
+                ? "new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { value.Matcher }"
+                : $"new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", indexer.Parameters.Select(p => $"{p.Name}.Matcher"))}, value.Matcher }}";
+            using (writer.Block($"public static global::TUnit.Mocks.VoidMockMethodCall SetItem{typeParams}({setterParams}){constraints}"))
+            {
+                writer.AppendLine($"var matchers = {setterMatcherList};");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {indexer.SetterMemberId}, \"set_Item\", matchers);");
             }
         }
     }
