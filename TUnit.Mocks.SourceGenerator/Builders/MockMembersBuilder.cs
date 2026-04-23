@@ -139,6 +139,10 @@ internal static class MockMembersBuilder
     // "event" or "class", it appears only as a non-terminal substring of a larger token, which is
     // a valid C# identifier. Escaping (via EscapeIdentifier) is only required when the name would
     // stand alone as a complete identifier in the emitted source.
+    // Note: safeName itself may legitimately start with '@' (when the member name is a reserved
+    // keyword and GetSafeMemberName routed it through EscapeIdentifier), yielding e.g.
+    // "@event_someMethod_M0_MockCall". This is valid C#: the '@' prefix applies to the entire
+    // compound identifier, and the resulting token after '@' is not itself a keyword.
     private static string GetWrapperName(string safeName, MockMemberModel method)
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
