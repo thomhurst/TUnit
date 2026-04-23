@@ -1376,6 +1376,38 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task SelfEquatable_Generates_EqualsOf_GetHashCodeOf_ToStringOf()
+    {
+        // Regression for #5675: self-referential IEquatable<T> together with
+        // overrides of GetHashCode/ToString must produce disambiguated extension
+        // helpers (EqualsOf / GetHashCodeOf / ToStringOf) on the generated mock,
+        // because C# overload resolution always prefers the inherited object
+        // instance methods over an extension named the same.
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public class SelfEquatableSnapshot : IEquatable<SelfEquatableSnapshot>
+            {
+                public virtual bool Equals(SelfEquatableSnapshot? other) => ReferenceEquals(this, other);
+                public override bool Equals(object? obj) => obj is SelfEquatableSnapshot s && Equals(s);
+                public override int GetHashCode() => 0;
+                public override string ToString() => "base";
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<SelfEquatableSnapshot>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_Inheriting_Nested_Generic_IEnumerable()
     {
         var source = """
