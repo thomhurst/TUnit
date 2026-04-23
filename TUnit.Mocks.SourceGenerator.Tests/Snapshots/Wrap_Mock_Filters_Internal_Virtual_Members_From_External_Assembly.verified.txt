@@ -11,6 +11,7 @@ namespace TUnit.Mocks.Generated.ExternalLib
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         internal ExternalServiceWrapMockImpl(global::TUnit.Mocks.MockEngine<global::ExternalLib.ExternalService> engine, global::ExternalLib.ExternalService wrappedInstance) : base()
         {
             _engine = engine;

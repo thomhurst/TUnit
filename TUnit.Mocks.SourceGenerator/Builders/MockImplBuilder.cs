@@ -6,6 +6,9 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 
 internal static class MockImplBuilder
 {
+    // Suppresses CS9035: ctor claims responsibility for required members so factory can `new XxxMockImpl(engine)` without initializers.
+    private const string SetsRequiredMembersAttribute = "[global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]";
+
     public static void BuildInto(CodeWriter writer, MockTypeModel model)
     {
         var safeName = GetCompositeShortSafeName(model);
@@ -152,6 +155,7 @@ internal static class MockImplBuilder
 
         if (model.Constructors.Length == 0)
         {
+            writer.AppendLine(SetsRequiredMembersAttribute);
             using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance)"))
             {
                 writer.AppendLine("_engine = engine;");
@@ -168,6 +172,7 @@ internal static class MockImplBuilder
         {
             if (ctor.Parameters.Length == 0)
             {
+                writer.AppendLine(SetsRequiredMembersAttribute);
                 using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance) : base()"))
                 {
                     writer.AppendLine("_engine = engine;");
@@ -182,6 +187,7 @@ internal static class MockImplBuilder
             {
                 var paramList = string.Join(", ", ctor.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
                 var argList = string.Join(", ", ctor.Parameters.Select(p => p.Name));
+                writer.AppendLine(SetsRequiredMembersAttribute);
                 using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance, {paramList}) : base({argList})"))
                 {
                     writer.AppendLine("_engine = engine;");
@@ -497,6 +503,7 @@ internal static class MockImplBuilder
         if (model.Constructors.Length == 0)
         {
             // No explicit constructors found, generate a default one
+            writer.AppendLine(SetsRequiredMembersAttribute);
             using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine)"))
             {
                 writer.AppendLine("_engine = engine;");
@@ -513,6 +520,7 @@ internal static class MockImplBuilder
             if (ctor.Parameters.Length == 0)
             {
                 // Parameterless constructor
+                writer.AppendLine(SetsRequiredMembersAttribute);
                 using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine) : base()"))
                 {
                     writer.AppendLine("_engine = engine;");
@@ -527,6 +535,7 @@ internal static class MockImplBuilder
                 // Constructor with parameters - pass them through to base
                 var paramList = string.Join(", ", ctor.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
                 var argList = string.Join(", ", ctor.Parameters.Select(p => p.Name));
+                writer.AppendLine(SetsRequiredMembersAttribute);
                 using (writer.Block($"internal {safeName}MockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {paramList}) : base({argList})"))
                 {
                     writer.AppendLine("_engine = engine;");

@@ -201,11 +201,22 @@ public interface ICancellableStream
     IAsyncEnumerable<int> Stream(CancellationToken ct = default);
 }
 
-// ─── T17 SKIPPED. `required` members on a mock target produce CS9035
-//     ("required member must be set in the object initializer") in the
-//     generated factory. The factory would need to emit [SetsRequiredMembers]
-//     on its constructor and skip initializing required members. Separate
-//     generator fix.
+// ─── T17. `required` members on a mock target ───────────────────────────────
+
+public abstract class RequiredShape
+{
+    public required string Name { get; init; }
+    public abstract int Compute();
+}
+
+public abstract class RequiredMixed
+{
+    public required string Title { get; init; }
+    public required int Count { get; init; }
+    public required System.Guid Id { get; init; }
+    public abstract string Describe();
+    public virtual int Bonus() => 0;
+}
 
 // ─── T18. Member names matching C# reserved keywords (`class`, `event`, `namespace`) ─
 
@@ -577,7 +588,39 @@ public class KitchenSinkEdgeCasesTests
         }
     }
 
-    // T17 test elided — see the SKIPPED note above the type declarations.
+    // ── T17 ──
+
+    [Test]
+    public async Task T17_Required_Property_Does_Not_Block_Mock_Instantiation()
+    {
+        var mock = RequiredShape.Mock();
+        mock.Compute().Returns(123);
+
+        await Assert.That(mock.Object.Compute()).IsEqualTo(123);
+        mock.Compute().WasCalled(Times.Once);
+
+        // Required members intentionally remain at default in mocks; [SetsRequiredMembers] suppresses CS9035 only.
+        await Assert.That(mock.Object.Name).IsNull();
+    }
+
+    [Test]
+    public async Task T17_Multiple_Required_Members_Reference_And_Value_Types()
+    {
+        var mock = RequiredMixed.Mock();
+        mock.Describe().Returns("hello");
+        mock.Bonus().Returns(7);
+
+        await Assert.That(mock.Object.Describe()).IsEqualTo("hello");
+        await Assert.That(mock.Object.Bonus()).IsEqualTo(7);
+
+        mock.Describe().WasCalled(Times.Once);
+        mock.Bonus().WasCalled(Times.Once);
+
+        // Required members intentionally remain at default in mocks; [SetsRequiredMembers] suppresses CS9035 only.
+        await Assert.That(mock.Object.Title).IsNull();
+        await Assert.That(mock.Object.Count).IsEqualTo(0);
+        await Assert.That(mock.Object.Id).IsEqualTo(System.Guid.Empty);
+    }
 
     // ── T18 ──
 
