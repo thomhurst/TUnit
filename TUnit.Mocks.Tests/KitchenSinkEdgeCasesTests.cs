@@ -207,11 +207,18 @@ public interface ICancellableStream
 //     on its constructor and skip initializing required members. Separate
 //     generator fix.
 
-// ─── T18 SKIPPED. Member names matching C# keywords (`class`, `event`, `record`)
-//     are passed through to the generator as unescaped identifiers, producing
-//     malformed emission (CS0539, CS0106, CS0066 on the generated impl). The
-//     EscapeIdentifier helper exists but is only applied to parameter names.
-//     Separate generator fix to apply it to method/property/event names.
+// ─── T18. Member names matching C# reserved keywords (`class`, `event`, `namespace`) ─
+
+// `record` is included as a CONTEXTUAL keyword — it does NOT require `@`-escaping (the
+// C# compiler disambiguates by position). Kept here to confirm contextual keywords pass
+// through the IdentifierEscaping helper unchanged.
+public interface IEscapedNames
+{
+    int @class { get; }
+    string @record();
+    void @event(int @params);
+    int @namespace(int @new, int @static);
+}
 
 // ─── T19. Obsolete member ───────────────────────────────────────────────────
 
@@ -572,7 +579,26 @@ public class KitchenSinkEdgeCasesTests
 
     // T17 test elided — see the SKIPPED note above the type declarations.
 
-    // T18 test elided — see the SKIPPED note above the type declarations.
+    // ── T18 ──
+
+    [Test]
+    public async Task T18_Member_Names_That_Are_Reserved_Keywords()
+    {
+        var mock = IEscapedNames.Mock();
+        mock.@class.Returns(7);
+        mock.@record().Returns("rec");
+        mock.@namespace(Any<int>(), Any<int>()).Returns(123);
+
+        await Assert.That(mock.Object.@class).IsEqualTo(7);
+        await Assert.That(mock.Object.@record()).IsEqualTo("rec");
+        await Assert.That(mock.Object.@namespace(1, 2)).IsEqualTo(123);
+        mock.Object.@event(99);
+
+        mock.@class.WasCalled(Times.Once);
+        mock.@record().WasCalled(Times.Once);
+        mock.@event(Any<int>()).WasCalled(Times.Once);
+        mock.@namespace(Any<int>(), Any<int>()).WasCalled(Times.Once);
+    }
 
     // ── T19 ──
 

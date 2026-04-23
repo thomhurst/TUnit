@@ -1,5 +1,6 @@
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
 
@@ -99,14 +100,14 @@ internal static class MockWrapperTypeBuilder
 
         if (method.IsVoid && !method.IsAsync)
         {
-            using (writer.Block($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
+            using (writer.Block($"{returnType} {interfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
             {
-                writer.AppendLine($"{target}.{method.Name}{typeParams}({argPassList});");
+                writer.AppendLine($"{target}.{EscapeIdentifier(method.Name)}{typeParams}({argPassList});");
             }
         }
         else
         {
-            writer.AppendLine($"{returnType} {interfaceName}.{method.Name}{typeParams}({paramList}){constraints} => {target}.{method.Name}{typeParams}({argPassList});");
+            writer.AppendLine($"{returnType} {interfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints} => {target}.{EscapeIdentifier(method.Name)}{typeParams}({argPassList});");
         }
     }
 
@@ -126,10 +127,10 @@ internal static class MockWrapperTypeBuilder
         // Per-accessor [Obsolete] is injected inline so the property line stays a one-liner.
         var getterAttr = prop.GetterObsoleteAttribute.Length > 0 ? prop.GetterObsoleteAttribute + " " : "";
         var setterAttr = prop.SetterObsoleteAttribute.Length > 0 ? prop.SetterObsoleteAttribute + " " : "";
-        var getter = prop.HasGetter ? $"{getterAttr}get => {target}.{prop.Name}; " : "";
-        var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{prop.Name} = value; " : "";
+        var getter = prop.HasGetter ? $"{getterAttr}get => {target}.{EscapeIdentifier(prop.Name)}; " : "";
+        var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{EscapeIdentifier(prop.Name)} = value; " : "";
 
-        writer.AppendLine($"{returnType} {interfaceName}.{prop.Name} {{ {getter}{setter}}}");
+        writer.AppendLine($"{returnType} {interfaceName}.{EscapeIdentifier(prop.Name)} {{ {getter}{setter}}}");
     }
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
@@ -137,7 +138,7 @@ internal static class MockWrapperTypeBuilder
         var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
         writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
-        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{evt.Name} {{ add => Object.{evt.Name} += value; remove => Object.{evt.Name} -= value; }}");
+        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{EscapeIdentifier(evt.Name)} {{ add => Object.{EscapeIdentifier(evt.Name)} += value; remove => Object.{EscapeIdentifier(evt.Name)} -= value; }}");
     }
 
 }

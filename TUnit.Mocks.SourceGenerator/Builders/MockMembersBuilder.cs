@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
 
@@ -166,6 +167,15 @@ internal static class MockMembersBuilder
         return matchableParams.Count <= MaxTypedParams;
     }
 
+    // method.Name is intentionally embedded raw (unescaped) here. The result is a compound
+    // identifier like "IFoo_event_M2_MockCall" — even when method.Name is a C# keyword such as
+    // "event" or "class", it appears only as a non-terminal substring of a larger token, which is
+    // a valid C# identifier. Escaping (via EscapeIdentifier) is only required when the name would
+    // stand alone as a complete identifier in the emitted source.
+    // Note: safeName itself may legitimately start with '@' (when the member name is a reserved
+    // keyword and GetSafeMemberName routed it through EscapeIdentifier), yielding e.g.
+    // "@event_someMethod_M0_MockCall". This is valid C#: the '@' prefix applies to the entire
+    // compound identifier, and the resulting token after '@' is not itself a keyword.
     private static string GetWrapperName(string safeName, MockMemberModel method)
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
@@ -173,7 +183,7 @@ internal static class MockMembersBuilder
     {
         if (ObjectMemberDisambiguations.TryGetValue(name, out var renamed))
             return renamed;
-        return MockMemberNames.Contains(name) ? name + "_" : name;
+        return EscapeIdentifier(MockMemberNames.Contains(name) ? name + "_" : name);
     }
 
     private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)

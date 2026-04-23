@@ -509,6 +509,34 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Keyword_Member_Names()
+    {
+        // Mixed coverage for #5679: keyword-named property, keyword-named method,
+        // keyword-named parameters (reuses the existing parameter-escape path).
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IEscapedNames
+            {
+                int @class { get; }
+                string @record();
+                void @event(int @params);
+                int @namespace(int @new, int @static);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IEscapedNames>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Static_Abstract_Members()
     {
         var source = """
