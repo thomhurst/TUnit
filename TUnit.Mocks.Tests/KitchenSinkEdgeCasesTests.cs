@@ -173,6 +173,14 @@ public interface IHasIndexer
     int Regular { get; set; }
 }
 
+// T14b. Indexer with `in` parameter — exercises modifier forwarding
+// in FormatIndexerParameterList. `in` is the only ref-kind C# permits on
+// indexer parameters.
+public interface IHasInIndexer
+{
+    string this[in int key] { get; }
+}
+
 // ─── T15 SKIPPED. Mocking a class that implements a static-abstract interface
 //     hits the bridge builder, which treats the target as an interface ("Type
 //     in interface list is not an interface"). Separate generator issue.
@@ -472,6 +480,17 @@ public class KitchenSinkEdgeCasesTests
         mock.SetItem(5, Any<string>()).WasCalled(Times.Exactly(2));
         mock.SetItem(6, "six").WasCalled(Times.Once);
         mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task T14b_Indexer_With_In_Parameter_Compiles_And_Dispatches()
+    {
+        var mock = IHasInIndexer.Mock();
+        mock.Item(7).Returns("seven");
+
+        var k = 7;
+        await Assert.That(mock.Object[in k]).IsEqualTo("seven");
+        mock.Item(7).WasCalled(Times.Once);
     }
 
     // T15 test elided — see the SKIPPED note above the type declarations.

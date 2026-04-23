@@ -1029,22 +1029,16 @@ internal static class MockImplBuilder
         writer.CloseBrace();
     }
 
-    /// <summary>
-    /// Emits an indexer (<c>this[...]</c>) implementation for an interface mock that routes
-    /// get/set calls through the engine. Each get is dispatched as <c>get_Item</c> and each set
-    /// as <c>set_Item</c>; the index parameters (and value, for setters) become the matchable
-    /// arguments, so distinct index values produce independent setups and verifications.
-    /// </summary>
     private static void GenerateInterfaceIndexer(CodeWriter writer, MockMemberModel prop)
     {
         var paramList = FormatIndexerParameterList(prop);
-        var argsArray = GetIndexerGetterArgsArray(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
         writer.AppendLine($"public {prop.ReturnType} this[{paramList}]");
         writer.OpenBrace();
 
         if (prop.HasGetter)
         {
+            var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
             writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
         }
@@ -1059,37 +1053,24 @@ internal static class MockImplBuilder
         writer.CloseBrace();
     }
 
-    /// <summary>
-    /// Emits an overriding indexer for a partial mock. Tries the engine first; on miss, falls back
-    /// to the base implementation. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
-    /// </summary>
     private static void GeneratePartialIndexer(CodeWriter writer, MockMemberModel prop)
         => GenerateOverrideIndexer(writer, prop, fallbackTarget: "base");
 
-    /// <summary>
-    /// Emits an overriding indexer for a wrap mock. Tries the engine first; on miss, falls back
-    /// to the wrapped instance. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
-    /// </summary>
     private static void GenerateWrapIndexer(CodeWriter writer, MockMemberModel prop)
         => GenerateOverrideIndexer(writer, prop, fallbackTarget: "_wrappedInstance");
 
-    /// <summary>
-    /// Emits an <c>override</c> indexer that tries the engine first and, on miss, forwards to
-    /// <paramref name="fallbackTarget"/> (e.g. <c>base</c> for partial mocks, <c>_wrappedInstance</c>
-    /// for wrap mocks). For abstract members there is no fallback — the engine call is unconditional.
-    /// </summary>
     private static void GenerateOverrideIndexer(CodeWriter writer, MockMemberModel prop, string fallbackTarget)
     {
         var accessModifier = prop.IsProtected ? "protected" : "public";
         var paramList = FormatIndexerParameterList(prop);
         var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
-        var argsArray = GetIndexerGetterArgsArray(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
         writer.AppendLine($"{accessModifier} override {prop.ReturnType} this[{paramList}]");
         writer.OpenBrace();
 
         if (prop.HasGetter)
         {
+            var argsArray = GetIndexerGetterArgsArray(prop);
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
             if (prop.IsAbstractMember)
             {
@@ -1132,9 +1113,7 @@ internal static class MockImplBuilder
     }
 
     private static string FormatIndexerParameterList(MockMemberModel indexer)
-    {
-        return string.Join(", ", indexer.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
-    }
+        => FormatParameterList(indexer.Parameters);
 
     private static string GetIndexerGetterArgsArray(MockMemberModel indexer)
     {
