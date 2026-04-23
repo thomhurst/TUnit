@@ -354,6 +354,13 @@ internal static class MemberDiscovery
                         var key = GetMethodKey(method);
                         // Seed both seen sets so the interface loop doesn't re-add class members
                         seenFullMethods.Add(GetFullMethodKey(method));
+                        // ref / ref readonly returns can't be routed through the mock engine —
+                        // treat them as non-mockable so the inherited impl flows through unchanged.
+                        if (method.ReturnsByRef || method.ReturnsByRefReadonly)
+                        {
+                            seenMethods.TryAdd(key, NonMockableEntry);
+                            break;
+                        }
                         if (method.IsAbstract || method.IsVirtual || method.IsOverride)
                         {
                             if (seenMethods.ContainsKey(key)) continue;
