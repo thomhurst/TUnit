@@ -1,5 +1,6 @@
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
 
@@ -99,7 +100,7 @@ internal static class MockBridgeBuilder
 
         writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
 
-        using (writer.Block($"static {signatureReturnType} {method.ExplicitInterfaceName}.{method.Name}{typeParams}({paramList}){constraints}"))
+        using (writer.Block($"static {signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
         {
             GenerateStaticEngineDispatchBody(writer, method, staticEngineTypeName);
         }
@@ -108,7 +109,7 @@ internal static class MockBridgeBuilder
     private static void GenerateStaticPropertyDim(CodeWriter writer, MockMemberModel prop, string staticEngineTypeName)
     {
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"static {prop.ReturnType} {prop.ExplicitInterfaceName}.{prop.Name}");
+        writer.AppendLine($"static {prop.ReturnType} {prop.ExplicitInterfaceName}.{EscapeIdentifier(prop.Name)}");
         writer.OpenBrace();
 
         if (prop.HasGetter)
@@ -146,7 +147,7 @@ internal static class MockBridgeBuilder
     private static void GenerateStaticEventDim(CodeWriter writer, MockEventModel evt)
     {
         writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
-        writer.AppendLine($"static event {evt.EventHandlerType} {evt.ExplicitInterfaceName}.{evt.Name}");
+        writer.AppendLine($"static event {evt.EventHandlerType} {evt.ExplicitInterfaceName}.{EscapeIdentifier(evt.Name)}");
         writer.OpenBrace();
         writer.AppendLine("add { }");
         writer.AppendLine("remove { }");

@@ -1,4 +1,5 @@
 using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
 
@@ -49,7 +50,7 @@ internal static class MockEventsBuilder
                         if (!first) writer.AppendLine();
                         first = false;
 
-                        writer.AppendLine($"public global::TUnit.Mocks.EventSubscriptionAccessor {evt.Name}");
+                        writer.AppendLine($"public global::TUnit.Mocks.EventSubscriptionAccessor {EscapeIdentifier(evt.Name)}");
                         writer.AppendLine($"    => new(events.Engine, \"{evt.Name}\");");
                     }
                 }

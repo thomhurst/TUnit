@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using TUnit.Mocks.SourceGenerator.Models;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Builders;
 
@@ -137,7 +138,7 @@ internal static class MockMembersBuilder
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
     private static string GetSafeMemberName(string name)
-        => MockMemberNames.Contains(name) ? name + "_" : name;
+        => EscapeIdentifier(MockMemberNames.Contains(name) ? name + "_" : name);
 
     private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)
     {
