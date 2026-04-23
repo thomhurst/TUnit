@@ -1,10 +1,10 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Mocks.SourceGenerator.Extensions;
 using TUnit.Mocks.SourceGenerator.Models;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
 namespace TUnit.Mocks.SourceGenerator.Discovery;
 
@@ -1039,13 +1039,6 @@ internal static class MemberDiscovery
             .Replace("\r", "\\r")
             .Replace("\t", "\\t")
             + "\"";
-
-    /// <summary>
-    /// Escapes a parameter name that is a C# reserved keyword by prepending '@'.
-    /// E.g., "event" → "@event", "class" → "@class", "return" → "@return".
-    /// </summary>
-    private static string EscapeIdentifier(string name) =>
-        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     /// <summary>
     /// For ReadOnlySpan&lt;T&gt; or Span&lt;T&gt; types, returns the fully qualified element type.
