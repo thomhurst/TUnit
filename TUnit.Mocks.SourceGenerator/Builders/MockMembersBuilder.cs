@@ -16,18 +16,22 @@ internal static class MockMembersBuilder
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
-    // "Object" collides with Mock<T>.Object (the property exposing the underlying instance);
-    // we rename a generated member named Object to Object_ to avoid the property/method clash.
+    // Two distinct shadowing problems below — different fixes because the kinds collide differently.
+
+    // "Object" clashes with the Mock<T>.Object PROPERTY (member-kind collision: property vs.
+    // generated method/property). A trailing underscore is enough since nothing on object
+    // is named "Object_".
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
         "Object",
     };
 
-    // Members on object/Mock<T> that, when re-emitted as a generated extension method,
-    // would lose overload resolution to the base instance method (e.g. mock.Equals(other)
-    // resolves to object.Equals(object?) rather than the typed extension). We give the
-    // generated setup a disambiguating name so it remains reachable: Equals -> EqualsOf,
-    // GetHashCode -> GetHashCodeOf, ToString -> ToStringOf, GetType -> GetTypeOf.
+    // Equals/GetHashCode/ToString/GetType clash with inherited object INSTANCE METHODS.
+    // C# overload resolution always prefers an instance method on the receiver over an
+    // extension method, so a generated `Equals` extension is unreachable (mock.Equals(...)
+    // binds to object.Equals and returns bool). A trailing-underscore rename would also be
+    // reachable, but we use an "Of" suffix to read naturally at the call site
+    // (mock.EqualsOf(other).Returns(true)).
     private static readonly Dictionary<string, string> ObjectMemberDisambiguations = new(System.StringComparer.Ordinal)
     {
         { "Equals", "EqualsOf" },

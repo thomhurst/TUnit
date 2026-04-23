@@ -104,13 +104,17 @@ public class DoubleInterfaceExplicit : IGetIdInt, IGetIdString
 // ─── T8. Self-referential IEquatable<T> — `mock.Equals(...)` would resolve to
 //     object.Equals via overload-resolution (extension methods can't beat instance
 //     methods on object). Generator emits a disambiguating `EqualsOf(...)` helper
-//     so the typed setup is reachable.
+//     so the typed setup is reachable. Same disambiguation applies to GetHashCode
+//     and ToString. (GetType is not virtual on object, so it can never be overridden
+//     and the GetTypeOf helper is unreachable in practice — kept symmetrically for
+//     completeness only.)
 
 public class SelfEquatable : IEquatable<SelfEquatable>
 {
     public virtual bool Equals(SelfEquatable? other) => ReferenceEquals(this, other);
     public override bool Equals(object? obj) => obj is SelfEquatable s && Equals(s);
     public override int GetHashCode() => 0;
+    public override string ToString() => "base";
 }
 
 // ─── T9. Nullable value types ────────────────────────────────────────────────
@@ -368,6 +372,17 @@ public class KitchenSinkEdgeCasesTests
 
         var third = new SelfEquatable();
         mock.EqualsOf(third).WasNeverCalled();
+
+        // GetHashCodeOf / ToStringOf — same disambiguation pattern.
+        // GetType is not virtual on object so cannot be exercised; see class-level note.
+        mock.GetHashCodeOf().Returns(7);
+        mock.ToStringOf().Returns("mocked");
+
+        await Assert.That(mock.Object.GetHashCode()).IsEqualTo(7);
+        await Assert.That(mock.Object.ToString()).IsEqualTo("mocked");
+
+        mock.GetHashCodeOf().WasCalled(Times.Once);
+        mock.ToStringOf().WasCalled(Times.Once);
     }
 
     // ── T9 ──
