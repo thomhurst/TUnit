@@ -44,6 +44,13 @@ internal static class MemberDiscovery
                 seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
+        // For class targets, the class itself provides the concrete static impl that
+        // satisfies any static-abstract interface members (#5677). The mock only needs
+        // to override instance-virtual surface — emitting a bridge interface would
+        // produce CS0527 (class in interface list) and CS0540 (explicit interface impl
+        // on a type that doesn't list the interface).
+        var collectStaticAbstractFromInterfaces = typeSymbol.TypeKind != TypeKind.Class;
+
         foreach (var iface in interfaces)
         {
             string? explicitInterfaceName = null;
@@ -53,7 +60,7 @@ internal static class MemberDiscovery
             {
                 if (member.IsStatic)
                 {
-                    if (member.IsAbstract)
+                    if (member.IsAbstract && collectStaticAbstractFromInterfaces)
                     {
                         CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                     }
@@ -191,6 +198,11 @@ internal static class MemberDiscovery
                 ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
                 : typeSymbol.AllInterfaces.AsEnumerable();
 
+            // For class targets, the class itself provides the concrete static impl that
+            // satisfies any static-abstract interface members (#5677). Skip emitting bridge
+            // dispatch members in that case.
+            var collectStaticAbstractFromInterfaces = typeSymbol.TypeKind != TypeKind.Class;
+
             foreach (var iface in interfaces)
             {
                 var interfaceFqn = iface.GetFullyQualifiedName();
@@ -199,7 +211,7 @@ internal static class MemberDiscovery
                 {
                     if (member.IsStatic)
                     {
-                        if (member.IsAbstract)
+                        if (member.IsAbstract && collectStaticAbstractFromInterfaces)
                         {
                             CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
                         }
