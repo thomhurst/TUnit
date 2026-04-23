@@ -134,6 +134,11 @@ internal static class MockMembersBuilder
         return matchableParams.Count <= MaxTypedParams;
     }
 
+    // method.Name is intentionally embedded raw (unescaped) here. The result is a compound
+    // identifier like "IFoo_event_M2_MockCall" — even when method.Name is a C# keyword such as
+    // "event" or "class", it appears only as a non-terminal substring of a larger token, which is
+    // a valid C# identifier. Escaping (via EscapeIdentifier) is only required when the name would
+    // stand alone as a complete identifier in the emitted source.
     private static string GetWrapperName(string safeName, MockMemberModel method)
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 

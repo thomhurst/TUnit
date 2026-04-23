@@ -24,6 +24,6 @@ internal static class IdentifierEscaping
     // C# compiler already disambiguates them by position. Escaping a contextual keyword would
     // change the identifier's textual form (e.g. `record` → `@record`), breaking explicit
     // interface implementation matching against the source-declared member name.
-    public static string EscapeIdentifier(string name) =>
+    internal static string EscapeIdentifier(string name) =>
         SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 }
