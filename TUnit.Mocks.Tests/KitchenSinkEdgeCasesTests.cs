@@ -190,9 +190,21 @@ public interface IHasInIndexer
     string this[in int key] { get; }
 }
 
-// ─── T15 SKIPPED. Mocking a class that implements a static-abstract interface
-//     hits the bridge builder, which treats the target as an interface ("Type
-//     in interface list is not an interface"). Separate generator issue.
+// ─── T15. Class implementing a static-abstract interface ────────────────────
+
+#if NET8_0_OR_GREATER
+public interface IStaticAbstractFactory
+{
+    static abstract IStaticAbstractFactory Create();
+    int InstanceValue { get; }
+}
+
+public class StaticAbstractImpl : IStaticAbstractFactory
+{
+    public static IStaticAbstractFactory Create() => new StaticAbstractImpl();
+    public virtual int InstanceValue => 99;
+}
+#endif
 
 // ─── T16. IAsyncEnumerable with [EnumeratorCancellation] token ──────────────
 
@@ -559,7 +571,30 @@ public class KitchenSinkEdgeCasesTests
         mock.Item(7).WasCalled(Times.Once);
     }
 
-    // T15 test elided — see the SKIPPED note above the type declarations.
+    // ── T15 (net8.0+ only — static abstract requires runtime support) ──
+
+#if NET8_0_OR_GREATER
+    [Test]
+    public async Task T15_Class_Implementing_Static_Abstract_Interface_Mockable()
+    {
+        // Mocking a class whose interface has static-abstract members should still work:
+        // the class provides the concrete static impl; the mock only needs to override
+        // the instance-virtual surface. No bridge interface is required for class targets.
+        var mock = StaticAbstractImpl.Mock();
+        mock.InstanceValue.Returns(42);
+
+        await Assert.That(mock.Object.InstanceValue).IsEqualTo(42);
+        mock.InstanceValue.WasCalled(Times.Once);
+
+        // The class's concrete static impl is unaffected — direct call still works
+        // and returns a real instance, NOT routed through the mock engine. The static
+        // method's declared return type IStaticAbstractFactory itself can't be a type
+        // argument (CS8920), so observe the result as `object`.
+        object? created = StaticAbstractImpl.Create();
+        await Assert.That(created).IsNotNull();
+        await Assert.That(created).IsTypeOf<StaticAbstractImpl>();
+    }
+#endif
 
     // ── T16 ──
 
