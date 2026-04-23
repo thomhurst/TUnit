@@ -1064,67 +1064,21 @@ internal static class MockImplBuilder
     /// to the base implementation. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
     /// </summary>
     private static void GeneratePartialIndexer(CodeWriter writer, MockMemberModel prop)
-    {
-        var accessModifier = prop.IsProtected ? "protected" : "public";
-        var paramList = FormatIndexerParameterList(prop);
-        var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
-        var argsArray = GetIndexerGetterArgsArray(prop);
-        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"{accessModifier} override {prop.ReturnType} this[{paramList}]");
-        writer.OpenBrace();
-
-        if (prop.HasGetter)
-        {
-            writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
-            if (prop.IsAbstractMember)
-            {
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
-            }
-            else
-            {
-                writer.AppendLine("get");
-                writer.OpenBrace();
-                writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
-                writer.AppendLine("{");
-                writer.IncreaseIndent();
-                writer.AppendLine("return __result;");
-                writer.DecreaseIndent();
-                writer.AppendLine("}");
-                writer.AppendLine($"return base[{argPassList}];");
-                writer.CloseBrace();
-            }
-        }
-
-        if (prop.HasSetter)
-        {
-            var setterArgs = GetIndexerSetterArgsArray(prop);
-            writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
-            if (prop.IsAbstractMember)
-            {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
-            }
-            else
-            {
-                writer.AppendLine("set");
-                writer.OpenBrace();
-                writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
-                writer.AppendLine("{");
-                writer.IncreaseIndent();
-                writer.AppendLine($"base[{argPassList}] = value;");
-                writer.DecreaseIndent();
-                writer.AppendLine("}");
-                writer.CloseBrace();
-            }
-        }
-
-        writer.CloseBrace();
-    }
+        => GenerateOverrideIndexer(writer, prop, fallbackTarget: "base");
 
     /// <summary>
     /// Emits an overriding indexer for a wrap mock. Tries the engine first; on miss, falls back
     /// to the wrapped instance. See <see cref="GenerateInterfaceIndexer"/> for the dispatch shape.
     /// </summary>
     private static void GenerateWrapIndexer(CodeWriter writer, MockMemberModel prop)
+        => GenerateOverrideIndexer(writer, prop, fallbackTarget: "_wrappedInstance");
+
+    /// <summary>
+    /// Emits an <c>override</c> indexer that tries the engine first and, on miss, forwards to
+    /// <paramref name="fallbackTarget"/> (e.g. <c>base</c> for partial mocks, <c>_wrappedInstance</c>
+    /// for wrap mocks). For abstract members there is no fallback — the engine call is unconditional.
+    /// </summary>
+    private static void GenerateOverrideIndexer(CodeWriter writer, MockMemberModel prop, string fallbackTarget)
     {
         var accessModifier = prop.IsProtected ? "protected" : "public";
         var paramList = FormatIndexerParameterList(prop);
@@ -1146,12 +1100,10 @@ internal static class MockImplBuilder
                 writer.AppendLine("get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
-                writer.AppendLine("{");
-                writer.IncreaseIndent();
+                writer.OpenBrace();
                 writer.AppendLine("return __result;");
-                writer.DecreaseIndent();
-                writer.AppendLine("}");
-                writer.AppendLine($"return _wrappedInstance[{argPassList}];");
+                writer.CloseBrace();
+                writer.AppendLine($"return {fallbackTarget}[{argPassList}];");
                 writer.CloseBrace();
             }
         }
@@ -1169,11 +1121,9 @@ internal static class MockImplBuilder
                 writer.AppendLine("set");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
-                writer.AppendLine("{");
-                writer.IncreaseIndent();
-                writer.AppendLine($"_wrappedInstance[{argPassList}] = value;");
-                writer.DecreaseIndent();
-                writer.AppendLine("}");
+                writer.OpenBrace();
+                writer.AppendLine($"{fallbackTarget}[{argPassList}] = value;");
+                writer.CloseBrace();
                 writer.CloseBrace();
             }
         }
