@@ -7,7 +7,7 @@ sidebar_position: 3
 # CombinedWorkflow Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-23** from the latest CI run.
+This benchmark was automatically generated on **2026-04-24** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.203
 :::
@@ -18,12 +18,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1.480 μs | 0.0155 μs | 0.0145 μs | 6.34 KB |
-| Imposter | 2.015 μs | 0.0383 μs | 0.0377 μs | 15.71 KB |
-| Mockolate | 1.916 μs | 0.0179 μs | 0.0167 μs | 7.09 KB |
-| Moq | 238.385 μs | 0.8827 μs | 0.7825 μs | 36.16 KB |
-| NSubstitute | 12.387 μs | 0.0926 μs | 0.0866 μs | 26.72 KB |
-| FakeItEasy | 12.854 μs | 0.2553 μs | 0.2508 μs | 25.64 KB |
+| **TUnit.Mocks** | 1.939 μs | 0.0124 μs | 0.0116 μs | 5.8 KB |
+| Imposter | 3.174 μs | 0.0485 μs | 0.0453 μs | 15.71 KB |
+| Mockolate | 2.672 μs | 0.0196 μs | 0.0183 μs | 7.06 KB |
+| Moq | 309.559 μs | 2.3598 μs | 2.2074 μs | 36.36 KB |
+| NSubstitute | 17.479 μs | 0.0594 μs | 0.0556 μs | 26.89 KB |
+| FakeItEasy | 17.642 μs | 0.1574 μs | 0.1472 μs | 25.61 KB |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 287
-  bar [1.48, 2.015, 1.916, 238.385, 12.387, 12.854]
+  y-axis "Time (μs)" 0 --> 372
+  bar [1.939, 3.174, 2.672, 309.559, 17.479, 17.642]
 ```
 
 ## 🎯 Key Insights
@@ -63,4 +63,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-23T03:25:34.373Z*
+*Last generated: 2026-04-24T03:24:24.137Z*
