@@ -403,6 +403,13 @@ public partial class TestContext : Context,
     internal object? CachedClassInstance { get; set; }
 
     /// <summary>
+    /// Fast-path gate for EnsureEventReceiversCached. A single bool check replaces the
+    /// previous "cache-array is non-null" inspection that ran in every per-test receiver
+    /// getter (see <see cref="TUnit.Engine.Extensions.TestContextExtensions"/>).
+    /// </summary>
+    internal bool EventReceiversBuilt { get; set; }
+
+    /// <summary>
     /// Invalidates all cached event receiver data. Called when class instance changes (e.g., on retry).
     /// </summary>
     internal void InvalidateEventReceiverCaches()
@@ -421,6 +428,7 @@ public partial class TestContext : Context,
         CachedTestDiscoveryReceivers = null;
         CachedTestRegisteredReceivers = null;
         CachedClassInstance = null;
+        EventReceiversBuilt = false;
     }
 
     internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;

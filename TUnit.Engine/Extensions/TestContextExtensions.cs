@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using System.Runtime.CompilerServices;
+using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Utilities;
@@ -18,25 +19,31 @@ internal static class TestContextExtensions
     /// When this happens, eligible event objects may include the new instance (if it implements
     /// event receiver interfaces), so all caches must be invalidated and rebuilt.
     /// </remarks>
+    // Fast-path gate: small enough (~10 bytes IL) for RyuJIT to reliably inline at every call
+    // site, collapsing the 99%+ cache-hit case into a field-load + branch + return. The heavy
+    // build work is outlined into BuildEventReceiverCaches so the JIT's inliner size budget
+    // never rejects this wrapper.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EnsureEventReceiversCached(TestContext testContext)
     {
         var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
-        // Check if caches are valid (populated and class instance hasn't changed)
-#if NET
-        if (testContext.CachedTestStartReceiversEarly != null &&
+        // Fast path: caches populated and class instance unchanged since last build.
+        if (testContext.EventReceiversBuilt &&
             ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
         {
             return;
         }
-#else
-        if (testContext.CachedTestStartReceivers != null &&
-            ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
-        {
-            return;
-        }
-#endif
 
+        BuildEventReceiverCaches(testContext, currentClassInstance);
+    }
+
+    // Explicitly NoInlining so the JIT keeps a single outlined copy instead of duplicating
+    // ~100 bytes of IL into every caller. currentClassInstance is threaded through from the
+    // gate to avoid a redundant field re-read.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void BuildEventReceiverCaches(TestContext testContext, object? currentClassInstance)
+    {
         // Invalidate stale caches if class instance changed
         if (testContext.CachedClassInstance != null &&
             !ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
@@ -138,6 +145,7 @@ internal static class TestContextExtensions
 
         // Update cached class instance last
         testContext.CachedClassInstance = currentClassInstance;
+        testContext.EventReceiversBuilt = true;
     }
 
     private static T[] SortAndFilter<T>(List<T>? receivers) where T : class, IEventReceiver

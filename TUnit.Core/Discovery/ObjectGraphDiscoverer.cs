@@ -62,6 +62,17 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     // Thread-safe collection of discovery errors for diagnostics
     private static readonly ConcurrentBag<DiscoveryError> DiscoveryErrors = [];
 
+    // Memoize ShouldSkipType — Namespace.StartsWith("System") is expensive when repeated
+    // across every per-test initializer traversal.
+    private static readonly ConcurrentDictionary<Type, bool> ShouldSkipTypeCache = new();
+
+    // Cached flattened InitializerPropertyInfo[] for each type, including base-class
+    // properties with derived-first precedence. Traversal would otherwise walk the
+    // inheritance chain and allocate a HashSet<string> on every call.
+    // - non-null array: type has registered source-gen metadata (at this or an ancestor level).
+    // - null           : no source-gen registration anywhere in hierarchy — use reflection fallback.
+    private static readonly ConcurrentDictionary<Type, InitializerPropertyInfo[]?> FlattenedInitializerPropertiesCache = new();
+
     /// <summary>
     /// Gets all discovery errors that occurred during object graph traversal.
     /// Useful for debugging and diagnostics when property access fails.
@@ -249,18 +260,20 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     {
         PropertyCacheManager.ClearCache();
         TypeHierarchyCache.Clear();
+        ShouldSkipTypeCache.Clear();
+        FlattenedInitializerPropertiesCache.Clear();
         ClearDiscoveryErrors();
     }
 
     /// <summary>
-    /// Checks if a type should be skipped during discovery.
+    /// Checks if a type should be skipped during discovery. Result is memoized per type —
+    /// the underlying check (Namespace.StartsWith) is stable for any given type.
     /// </summary>
     private static bool ShouldSkipType(Type type)
-    {
-        return type.IsPrimitive ||
-               SkipTypes.Contains(type) ||
-               type.Namespace?.StartsWith("System") == true;
-    }
+        => ShouldSkipTypeCache.GetOrAdd(type, static t =>
+            t.IsPrimitive ||
+            SkipTypes.Contains(t) ||
+            t.Namespace?.StartsWith("System", StringComparison.Ordinal) == true);
 
     /// <summary>
     /// Add to HashSet at specified depth. Returns true if added (not duplicate).
@@ -408,47 +421,64 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        // Track processed property names to handle overrides correctly
-        // (derived class properties take precedence over base class properties)
-        var processedPropertyNames = new HashSet<string>(StringComparer.Ordinal);
-        var hasAnySourceGenRegistration = false;
+        // Fetch the pre-flattened source-gen property list for this type. The flattening
+        // walks the inheritance chain once and caches the deduplicated result, so per-test
+        // traversal does not re-walk BaseType nor allocate a HashSet<string>.
+        var flattened = GetFlattenedInitializerProperties(type);
 
-        // Walk up the inheritance chain to find all IAsyncInitializer properties
-        // This ensures base class properties are discovered even when derived class has source-gen registration
-        var currentType = type;
-        while (currentType != null && currentType != typeof(object))
+        if (flattened != null)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var registeredProperties = InitializerPropertyRegistry.GetProperties(currentType);
-            if (registeredProperties != null)
-            {
-                hasAnySourceGenRegistration = true;
-                TraverseRegisteredInitializerPropertiesWithTracking(
-                    obj, currentType, registeredProperties, processedPropertyNames,
-                    tryAdd, recurse, currentDepth, cancellationToken);
-            }
-
-            currentType = currentType.BaseType;
+            TraverseFlattenedInitializerProperties(obj, type, flattened, tryAdd, recurse, currentDepth, cancellationToken);
+            return;
         }
 
-        // If no source-gen registration was found in the entire hierarchy, fall back to reflection
-        // Reflection path already handles inheritance correctly via GetProperties without DeclaredOnly
-        if (!hasAnySourceGenRegistration)
-        {
-            TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
-        }
+        // No source-gen registration anywhere in the hierarchy → fall back to reflection.
+        TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken);
     }
 
     /// <summary>
-    /// Traverses source-generated IAsyncInitializer properties with property name tracking.
-    /// Skips properties that have already been processed (handles overrides in derived classes).
+    /// Returns the cached flattened InitializerPropertyInfo[] for a type (inheritance-walked,
+    /// derived-first precedence, deduplicated by property name). Returns null when no
+    /// source-gen registration exists in the type's inheritance chain.
     /// </summary>
-    private static void TraverseRegisteredInitializerPropertiesWithTracking(
+    private static InitializerPropertyInfo[]? GetFlattenedInitializerProperties(Type type)
+        => FlattenedInitializerPropertiesCache.GetOrAdd(type, static t =>
+        {
+            List<InitializerPropertyInfo>? merged = null;
+            HashSet<string>? seen = null;
+
+            for (var currentType = t; currentType != null && currentType != typeof(object); currentType = currentType.BaseType)
+            {
+                var registered = InitializerPropertyRegistry.GetProperties(currentType);
+                if (registered == null)
+                {
+                    continue;
+                }
+
+                merged ??= new List<InitializerPropertyInfo>(registered.Length);
+                seen ??= new HashSet<string>(StringComparer.Ordinal);
+
+                foreach (var p in registered)
+                {
+                    if (seen.Add(p.PropertyName))
+                    {
+                        merged.Add(p);
+                    }
+                }
+            }
+
+            return merged?.ToArray();
+        });
+
+    /// <summary>
+    /// Traverses the pre-flattened source-generated IAsyncInitializer properties.
+    /// No per-call inheritance walk or HashSet allocation — that work was done once
+    /// during flattening and cached in <see cref="FlattenedInitializerPropertiesCache"/>.
+    /// </summary>
+    private static void TraverseFlattenedInitializerProperties(
         object obj,
         Type type,
         InitializerPropertyInfo[] properties,
-        HashSet<string> processedPropertyNames,
         TryAddObjectFunc tryAdd,
         RecurseFunc recurse,
         int currentDepth,
@@ -458,12 +488,6 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Skip if already processed (overridden in derived class)
-            if (!processedPropertyNames.Add(propInfo.PropertyName))
-            {
-                continue;
-            }
-
             try
             {
                 var value = propInfo.GetValue(obj);
@@ -472,7 +496,6 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
                     continue;
                 }
 
-                // Only discover IAsyncInitializer objects
                 if (value is IAsyncInitializer && tryAdd(value, currentDepth))
                 {
                     recurse(value, currentDepth + 1);
@@ -480,15 +503,12 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             }
             catch (OperationCanceledException)
             {
-                throw; // Propagate cancellation
+                throw;
             }
             catch (Exception ex)
             {
-                // Record error for diagnostics (still available via GetDiscoveryErrors())
                 DiscoveryErrors.Add(new DiscoveryError(type.Name, propInfo.PropertyName, ex.Message, ex));
 
-                // Propagate the exception with context about which property failed
-                // This ensures data source failures are reported as test failures
                 throw DataSourceException.FromNestedFailure(
                     $"Failed to access property '{propInfo.PropertyName}' on type '{type.Name}' during object graph discovery. " +
                     $"This may indicate that a data source or its nested dependencies failed to initialize. " +
