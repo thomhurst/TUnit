@@ -292,7 +292,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
-        // Invalidate cached eligible event objects since ClassInstance changed
+        // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
         test.Context.CachedEligibleEventObjects = null;
 
         // Check if this test should be skipped (after creating instance).
@@ -312,7 +312,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         try
         {
-            _testInitializer.PrepareTest(test, cancellationToken);
+            _testInitializer.PrepareTest(test);
             test.Context.RestoreExecutionContext();
             var testTimeout = test.Context.Metadata.TestDetails.Timeout;
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);

@@ -91,6 +91,14 @@ internal sealed class EventReceiverOrchestrator
             return;
         }
 
+        // Defense-in-depth: SkippedTestInstance is a sentinel singleton for tests skipped
+        // at registration time and should never be treated as an event receiver. Callers
+        // already short-circuit on this sentinel, but guard here too.
+        if (classInstance is SkippedTestInstance)
+        {
+            return;
+        }
+
         if (!_initializedObjects.Add(classInstance))
         {
             return;

@@ -20,7 +20,7 @@ internal class TestInitializer
         _objectLifecycleService = objectLifecycleService;
     }
 
-    public void PrepareTest(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public void PrepareTest(AbstractExecutableTest test)
     {
         // Register the freshly created ClassInstance as an event receiver. The initial
         // registration happens before instance creation, so re-iterating the full
