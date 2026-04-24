@@ -47,17 +47,39 @@ public abstract class TestMetadata
 
     public Type[]? GenericMethodTypeArguments { get; init; }
 
-    public required Func<Attribute[]> AttributeFactory { get; init; }
+    public Func<Attribute[]>? AttributeFactory { get; init; }
+
+    /// <summary>
+    /// Class-shared indexed attribute factory. When set, used in preference to <see cref="AttributeFactory"/>
+    /// so TestEntry-emitted metadata avoids allocating a per-test closure over <see cref="AttributeGroupIndex"/>.
+    /// </summary>
+    public Func<int, Attribute[]>? IndexedAttributeFactory { get; init; }
+
+    /// <summary>Index passed to <see cref="IndexedAttributeFactory"/> when dispatching.</summary>
+    public int AttributeGroupIndex { get; init; }
 
     private Attribute[]? _cachedAttributes;
 
     /// <summary>
-    /// Returns the cached attributes array, creating it from <see cref="AttributeFactory"/> on first call.
-    /// Subsequent calls return the same array without re-invoking the factory.
+    /// Returns the cached attributes array, creating it from <see cref="IndexedAttributeFactory"/>
+    /// (preferred) or <see cref="AttributeFactory"/> on first call. Subsequent calls return the same array.
     /// </summary>
     internal Attribute[] GetOrCreateAttributes()
     {
-        return _cachedAttributes ??= AttributeFactory();
+        if (_cachedAttributes is not null)
+        {
+            return _cachedAttributes;
+        }
+
+        var indexed = IndexedAttributeFactory;
+        if (indexed is not null)
+        {
+            return _cachedAttributes = indexed(AttributeGroupIndex);
+        }
+
+        var factory = AttributeFactory
+            ?? throw new InvalidOperationException($"No attribute factory configured for test '{TestName}'.");
+        return _cachedAttributes = factory();
     }
 
     /// <summary>

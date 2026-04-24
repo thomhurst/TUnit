@@ -54,6 +54,16 @@ public class TestMetadata<
     /// </summary>
     public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
 
+    /// <summary>
+    /// Class-shared indexed invoker emitted by the source generator. All tests in a class share this
+    /// delegate and dispatch via <see cref="MethodIndex"/>, so the TestEntry → TestMetadata bridge can
+    /// forward the static delegate without allocating a per-test closure capturing <c>this</c>.
+    /// </summary>
+    public Func<T, int, object?[], CancellationToken, ValueTask>? IndexedInvokeBody { get; init; }
+
+    /// <summary>Index passed to <see cref="IndexedInvokeBody"/> when dispatching.</summary>
+    public int MethodIndex { get; init; }
+
 
 
 
@@ -77,14 +87,14 @@ public class TestMetadata<
                 return cached;
             }
 
-            if (InstanceFactory != null && InvokeTypedTest != null)
+            if (InstanceFactory != null && (InvokeTypedTest != null || IndexedInvokeBody != null))
             {
                 Interlocked.CompareExchange<Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest>?>(
                     ref _cachedExecutableTestFactory, CreateTypedExecutableTest, null);
                 return _cachedExecutableTestFactory!;
             }
 
-            throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");
+            throw new InvalidOperationException($"InstanceFactory and an invoker (InvokeTypedTest or IndexedInvokeBody) must be set for {typeof(T).Name}");
         }
     }
 
