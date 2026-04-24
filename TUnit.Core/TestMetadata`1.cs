@@ -59,13 +59,10 @@ public class TestMetadata<
     /// delegate and dispatch via <see cref="MethodIndex"/>, so the TestEntry → TestMetadata bridge can
     /// forward the static delegate without allocating a per-test closure capturing <c>this</c>.
     /// </summary>
-    public Func<T, int, object?[], CancellationToken, ValueTask>? IndexedInvokeBody { get; init; }
+    internal Func<T, int, object?[], CancellationToken, ValueTask>? IndexedInvokeBody { get; init; }
 
     /// <summary>Index passed to <see cref="IndexedInvokeBody"/> when dispatching.</summary>
-    public int MethodIndex { get; init; }
-
-
-
+    internal int MethodIndex { get; init; }
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.

@@ -47,16 +47,16 @@ public abstract class TestMetadata
 
     public Type[]? GenericMethodTypeArguments { get; init; }
 
-    public Func<Attribute[]>? AttributeFactory { get; init; }
+    public required Func<Attribute[]> AttributeFactory { get; init; }
 
     /// <summary>
     /// Class-shared indexed attribute factory. When set, used in preference to <see cref="AttributeFactory"/>
     /// so TestEntry-emitted metadata avoids allocating a per-test closure over <see cref="AttributeGroupIndex"/>.
     /// </summary>
-    public Func<int, Attribute[]>? IndexedAttributeFactory { get; init; }
+    internal Func<int, Attribute[]>? IndexedAttributeFactory { get; init; }
 
     /// <summary>Index passed to <see cref="IndexedAttributeFactory"/> when dispatching.</summary>
-    public int AttributeGroupIndex { get; init; }
+    internal int AttributeGroupIndex { get; init; }
 
     private Attribute[]? _cachedAttributes;
 
@@ -66,20 +66,18 @@ public abstract class TestMetadata
     /// </summary>
     internal Attribute[] GetOrCreateAttributes()
     {
-        if (_cachedAttributes is not null)
+        // Benign race: factories are idempotent, so on contention we may build two arrays and
+        // discard the loser. CAS publishes exactly one and every future reader sees it — cheaper
+        // than a lock on the hot path.
+        var cached = _cachedAttributes;
+        if (cached is not null)
         {
-            return _cachedAttributes;
+            return cached;
         }
 
         var indexed = IndexedAttributeFactory;
-        if (indexed is not null)
-        {
-            return _cachedAttributes = indexed(AttributeGroupIndex);
-        }
-
-        var factory = AttributeFactory
-            ?? throw new InvalidOperationException($"No attribute factory configured for test '{TestName}'.");
-        return _cachedAttributes = factory();
+        var produced = indexed is not null ? indexed(AttributeGroupIndex) : AttributeFactory();
+        return Interlocked.CompareExchange(ref _cachedAttributes, produced, null) ?? produced;
     }
 
     /// <summary>

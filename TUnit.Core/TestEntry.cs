@@ -107,6 +107,13 @@ public sealed class TestEntry<
     private PropertyDataSource[]? _cachedPropertyDataSources;
     private PropertyInjectionData[]? _cachedPropertyInjections;
 
+    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation:
+    // TestEntry-sourced metadata always takes the IndexedAttributeFactory path, so this throws
+    // if ever invoked — reaching it indicates an engine bug.
+    private static readonly Func<Attribute[]> s_indexedAttributeFactoryPlaceholder =
+        static () => throw new InvalidOperationException(
+            "TestEntry metadata must resolve attributes via IndexedAttributeFactory.");
+
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
         return new TestMetadata<T>
@@ -122,6 +129,7 @@ public sealed class TestEntry<
             InstanceFactory = CreateInstance,
             IndexedInvokeBody = InvokeBody,
             MethodIndex = MethodIndex,
+            AttributeFactory = s_indexedAttributeFactoryPlaceholder,
             IndexedAttributeFactory = CreateAttributes,
             AttributeGroupIndex = AttributeGroupIndex,
             FilePath = FilePath,

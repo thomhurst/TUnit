@@ -1528,8 +1528,7 @@ namespace
     public abstract class TestMetadata
     {
         protected TestMetadata() { }
-        public <[]>? AttributeFactory { get; init; }
-        public int AttributeGroupIndex { get; init; }
+        public required <[]> AttributeFactory { get; init; }
         public required .IDataSourceAttribute[] ClassDataSources { get; init; }
         public abstract <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public required .IDataSourceAttribute[] DataSources { get; init; }
@@ -1538,7 +1537,6 @@ namespace
         public .GenericMethodInfo? GenericMethodInfo { get; init; }
         public []? GenericMethodTypeArguments { get; init; }
         public .GenericTypeInfo? GenericTypeInfo { get; init; }
-        public <int, []>? IndexedAttributeFactory { get; init; }
         public int InheritanceDepth { get; set; }
         public <[], object?[], object> InstanceFactory { get; init; }
         public required int LineNumber { get; init; }
@@ -1578,10 +1576,8 @@ namespace
     {
         public TestMetadata() { }
         public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
-        public <T, int, object?[], .CancellationToken, .>? IndexedInvokeBody { get; init; }
         public new <[], object?[], T>? InstanceFactory { get; init; }
         public <T, object?[], .CancellationToken, .>? InvokeTypedTest { get; init; }
-        public int MethodIndex { get; init; }
         public new <T, object?[], .>? TestInvoker { get; init; }
         public void UseRuntimeDataGeneration(string testSessionId) { }
     }
