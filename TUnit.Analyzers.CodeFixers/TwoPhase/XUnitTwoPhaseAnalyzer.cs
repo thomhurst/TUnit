@@ -865,20 +865,27 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return conversion;
     }
 
+    private static readonly Dictionary<string, string> _xUnitFactAndTheoryToTUnitArguments = new()
+    {
+        { "Skip", "Skip" },
+        { "DisplayName", "DisplayName" },
+        { "Timeout",  "Timeout" },
+    };
+
     private AttributeConversion ConvertTestAttribute(AttributeSyntax node)
     {
-        // Check for Skip argument: [Fact(Skip = "reason")] or [Theory(Skip = "reason")]
+        var result = new AttributeConversion
+        {
+            NewAttributeName = "Test",
+            NewArgumentList = "", // Remove any arguments
+            OriginalText = node.ToString(),
+            AdditionalAttributes = []
+        };
+
         if (node.ArgumentList is null)
         {
-            return new AttributeConversion
-            {
-                NewAttributeName = "Test",
-                NewArgumentList = "", // Remove any arguments
-                OriginalText = node.ToString()
-            };
+            return result;
         }
-
-        var additionalAttributes = new List<AdditionalAttribute>(3);
 
         foreach (var argument in node.ArgumentList.Arguments)
         {
@@ -886,21 +893,21 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             {
                 continue;
             }
-            var argumentValue = argument.Expression.ToString();
-            additionalAttributes.Add(new AdditionalAttribute
+
+            if (!_xUnitFactAndTheoryToTUnitArguments.TryGetValue(argument.NameEquals.Name.Identifier.ValueText, out var argumentName))
             {
-                Name = argument.NameEquals.Name.Identifier.ValueText,
+                continue;
+            }
+
+            var argumentValue = argument.Expression.ToString();
+            result.AdditionalAttributes.Add(new AdditionalAttribute
+            {
+                Name = argumentName,
                 Arguments = $"({argumentValue})"
             });
         }
 
-        return new AttributeConversion
-        {
-            NewAttributeName = "Test",
-            NewArgumentList = "", // Remove the Skip argument
-            OriginalText = node.ToString(),
-            AdditionalAttributes = additionalAttributes
-        };
+        return result;
     }
 
     private AttributeConversion? ConvertCollection(AttributeSyntax node)

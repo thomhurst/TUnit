@@ -111,6 +111,78 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    [Arguments("Fact")]
+    [Arguments("Theory")]
+    [Arguments("Xunit.Fact")]
+    [Arguments("Xunit.Theory")]
+    public async Task DisplayNamed_Test_Attributes_Can_Be_Fixed(string attribute)
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                $$"""
+                  {|#0:using Xunit;
+
+                  public class MyClass
+                  {
+                      [{{attribute}}(DisplayName = "Description")]
+                      public void MyTest()
+                      {
+                      }
+                  }|}
+                  """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                $$"""
+
+                  public class MyClass
+                  {
+                      [Test]
+                      [DisplayName("Description")]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    [Arguments("Fact")]
+    [Arguments("Theory")]
+    [Arguments("Xunit.Fact")]
+    [Arguments("Xunit.Theory")]
+    public async Task Timeout_Test_Attributes_Can_Be_Fixed(string attribute)
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                $$"""
+                  {|#0:using Xunit;
+
+                  public class MyClass
+                  {
+                      [{{attribute}}(Timeout = 3600)]
+                      public void MyTest()
+                      {
+                      }
+                  }|}
+                  """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                $$"""
+
+                  public class MyClass
+                  {
+                      [Test]
+                      [Timeout(3600)]
+                      public void MyTest()
+                      {
+                      }
+                  }
+                  """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task Collection_Attributes_Can_Be_Fixed()
     {
         await CodeFixer
