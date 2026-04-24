@@ -64,7 +64,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             // Register event receivers early so that skip event receivers work
             // even when the test is skipped before full initialization.
-            _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
+            _eventReceiverOrchestrator.RegisterReceivers(test.Context);
 
             // Check if test was already marked as skipped during registration
             // (e.g., by a derived SkipAttribute evaluated in OnTestRegistered).

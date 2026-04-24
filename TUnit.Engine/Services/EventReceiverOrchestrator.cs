@@ -43,7 +43,7 @@ internal sealed class EventReceiverOrchestrator
         _logger = logger;
     }
 
-    public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
+    public void RegisterReceivers(TestContext context)
     {
         var vlb = new ValueListBuilder<object>([null, null, null, null]);
 
