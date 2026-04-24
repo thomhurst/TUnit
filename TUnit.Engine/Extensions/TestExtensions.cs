@@ -114,6 +114,24 @@ internal static class TestExtensions
 
     internal static TestNode ToTestNode(this TestContext testContext, TestNodeStateProperty stateProperty)
     {
+        // Fast path: Discovered and InProgress TestNodes carry immutable data for a given
+        // TestId, so we cache the built TestNode on the TestContext and reuse it across the
+        // two reporter calls per test. Terminal-state TestNodes (passed/failed/skipped/etc.)
+        // carry timing, output, TRX, and exception data that varies and must be built fresh.
+        var isDiscoveredSingleton = ReferenceEquals(stateProperty, DiscoveredTestNodeStateProperty.CachedInstance);
+        var isInProgressSingleton = !isDiscoveredSingleton
+            && ReferenceEquals(stateProperty, InProgressTestNodeStateProperty.CachedInstance);
+
+        if (isDiscoveredSingleton && testContext.CachedDiscoveredTestNode is TestNode cachedDiscovered)
+        {
+            return cachedDiscovered;
+        }
+
+        if (isInProgressSingleton && testContext.CachedInProgressTestNode is TestNode cachedInProgress)
+        {
+            return cachedInProgress;
+        }
+
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
         var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
@@ -212,6 +230,18 @@ internal static class TestExtensions
             DisplayName = testContext.GetDisplayName(),
             Properties = propertyBag
         };
+
+        // Cache the built TestNode for the two non-final lifecycle states so subsequent
+        // reporter calls in the same state reuse the instance instead of rebuilding the
+        // PropertyBag (~2 PropertyBag allocations avoided per test).
+        if (isDiscoveredSingleton)
+        {
+            testContext.CachedDiscoveredTestNode = testNode;
+        }
+        else if (isInProgressSingleton)
+        {
+            testContext.CachedInProgressTestNode = testNode;
+        }
 
         return testNode;
     }

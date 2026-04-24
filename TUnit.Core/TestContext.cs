@@ -425,6 +425,14 @@ public partial class TestContext : Context,
 
     internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;
 
+    // Cached TestNode instances for the two non-final lifecycle states (Discovered, InProgress).
+    // Both states carry immutable data for a given TestId, so the built TestNode (including
+    // its PropertyBag) can be reused across the two reporter calls per test. Terminal-state
+    // TestNodes vary by result and are built fresh each time.
+    // Using object? to avoid a type dependency on Microsoft.Testing.Platform from TUnit.Core.
+    internal object? CachedDiscoveredTestNode { get; set; }
+    internal object? CachedInProgressTestNode { get; set; }
+
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
     internal SortedList<int, HashSet<object>> TrackedObjects { get; } = new();
