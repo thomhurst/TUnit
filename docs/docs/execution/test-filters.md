@@ -44,7 +44,9 @@ TUnit supports several operators for building complex filters:
 - **Equality:** Use `=` for exact match (e.g., `[Category=Unit]`)
 - **Negation:** Use `!=` for excluding values (e.g., `[Category!=Performance]`)
 - **AND operator:** Use `&` to combine conditions (e.g., `[Category=Unit]&[Priority=High]`)
-- **OR operator:** Use `|` to match either condition within a single path segment - requires parentheses (e.g., `/*/*/(Class1)|(Class2)/*`)
+- **OR operator:** Use `|` to match either condition within a single path segment - requires parentheses. Examples:
+  - OR across classes: `/*/*/(Class1)|(Class2)/*`
+  - OR across different properties: `/**[(Category=Smoke)|(Priority=High)]`
 
 For full information on the treenode filters, see [Microsoft's documentation](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
 
@@ -123,3 +125,13 @@ Run tests from either of two classes:
 ```bash
 dotnet run --treenode-filter "/*/*/(LoginTests)|(SignupTests)/*"
 ```
+
+### OR filter across different properties
+
+Run tests matching either property. The OR must live inside a single bracket group, with each condition wrapped in parentheses:
+
+```bash
+dotnet run --treenode-filter "/**[(Category=Smoke)|(Priority=High)]"
+```
+
+Note that `[Category=Smoke]|[Priority=High]` (separate brackets) is **not** valid — the OR has to be inside one `[...]`.
