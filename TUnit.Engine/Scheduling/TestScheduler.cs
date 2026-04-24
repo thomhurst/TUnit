@@ -27,7 +27,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly StaticPropertyHandler _staticPropertyHandler;
     private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly Lazy<int> _maxParallelism;
-#if !NET8_0_OR_GREATER
+#if !NET
     private readonly Lazy<SemaphoreSlim> _maxParallelismSemaphore;
 #endif
 
@@ -59,7 +59,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         _maxParallelism = new Lazy<int>(() => GetMaxParallelism(logger, commandLineOptions));
 
-#if !NET8_0_OR_GREATER
+#if !NET
         // The .NET 8+ path uses Parallel.ForEachAsync which caps concurrency via
         // ParallelOptions.MaxDegreeOfParallelism — the semaphore is only needed
         // for the netstandard2.0 fallback path.
@@ -68,7 +68,7 @@ internal sealed class TestScheduler : ITestScheduler
 #endif
     }
 
-    #if NET8_0_OR_GREATER
+    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     public async Task<bool> ScheduleAndExecuteAsync(
@@ -161,7 +161,7 @@ internal sealed class TestScheduler : ITestScheduler
         return true;
     }
 
-    #if NET8_0_OR_GREATER
+    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteGroupedTestsAsync(
@@ -237,7 +237,7 @@ internal sealed class TestScheduler : ITestScheduler
         await dynamicTestProcessingTask.ConfigureAwait(false);
     }
 
-    #if NET8_0_OR_GREATER
+    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ProcessDynamicTestQueueAsync(CancellationToken cancellationToken)
@@ -310,7 +310,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-#if NET8_0_OR_GREATER
+#if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private Task ExecuteTestsAsync(
@@ -320,14 +320,14 @@ internal sealed class TestScheduler : ITestScheduler
         // All paths run through the shared limiter so the DOP cap is unified in
         // GetMaxParallelism. "Unlimited" is resolved to the default cap
         // (ProcessorCount * 4) there rather than being a separate code path.
-#if NET8_0_OR_GREATER
+#if NET
         return ExecuteWithGlobalLimitAsync(tests, cancellationToken);
 #else
         return ExecuteWithGlobalLimitAsync(tests, _maxParallelismSemaphore.Value, cancellationToken);
 #endif
     }
 
-#if NET8_0_OR_GREATER
+#if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteSequentiallyAsync(
@@ -341,7 +341,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-#if NET8_0_OR_GREATER
+#if NET
     private Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)

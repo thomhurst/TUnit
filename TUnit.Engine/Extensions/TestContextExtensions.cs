@@ -19,8 +19,10 @@ internal static class TestContextExtensions
     /// When this happens, eligible event objects may include the new instance (if it implements
     /// event receiver interfaces), so all caches must be invalidated and rebuilt.
     /// </remarks>
-    // Inlined so the fast-path (cache-hit) check collapses to a field load + branch at every
-    // call site, eliminating call overhead for the 99%+ already-built case.
+    // Fast-path gate: small enough (~10 bytes IL) for RyuJIT to reliably inline at every call
+    // site, collapsing the 99%+ cache-hit case into a field-load + branch + return. The heavy
+    // build work is outlined into BuildEventReceiverCaches so the JIT's inliner size budget
+    // never rejects this wrapper.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void EnsureEventReceiversCached(TestContext testContext)
     {
@@ -33,6 +35,15 @@ internal static class TestContextExtensions
             return;
         }
 
+        BuildEventReceiverCaches(testContext, currentClassInstance);
+    }
+
+    // Explicitly NoInlining so the JIT keeps a single outlined copy instead of duplicating
+    // ~100 bytes of IL into every caller. currentClassInstance is threaded through from the
+    // gate to avoid a redundant field re-read.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void BuildEventReceiverCaches(TestContext testContext, object? currentClassInstance)
+    {
         // Invalidate stale caches if class instance changed
         if (testContext.CachedClassInstance != null &&
             !ReferenceEquals(testContext.CachedClassInstance, currentClassInstance))
