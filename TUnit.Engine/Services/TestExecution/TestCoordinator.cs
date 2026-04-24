@@ -132,8 +132,12 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            // Flush console interceptors to ensure all buffered output is captured
-            // This is critical for output from Console.Write() without newline
+            // Flush console interceptors to ensure all buffered output is captured.
+            // This is critical for output from Console.Write() without newline. The flush
+            // is unconditional because `HasCapturedOutput` is a point-in-time check: a test
+            // that fires `Task.Run(() => Console.WriteLine(...))` without awaiting can land
+            // writes after the check, which would silently lose output. The interceptor's
+            // own FlushIfNonEmpty path is a cheap no-op when there is nothing buffered.
             try
             {
                 await Console.Out.FlushAsync().ConfigureAwait(false);

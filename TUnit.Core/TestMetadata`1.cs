@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -61,65 +59,48 @@ public class TestMetadata<
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
+    /// Uses a static factory method so the cached delegate is a pure method reference —
+    /// no closure, and per-test state is stored on the returned <see cref="ExecutableTest{T}"/>
+    /// instead of in captured lambdas.
     /// </summary>
     public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
         get
         {
-            // Return cached factory if available
-            if (_cachedExecutableTestFactory != null)
+            // Volatile-equivalent read via Interlocked pattern mirrors TestEntry's cached-delegate
+            // idiom: first reader computes, subsequent racers lose the CompareExchange and fall
+            // through to re-read the now-published field. Keeps this allocation-free on the fast
+            // path while guaranteeing publication on weakly-ordered architectures.
+            var cached = _cachedExecutableTestFactory;
+            if (cached != null)
             {
-                return _cachedExecutableTestFactory;
+                return cached;
             }
 
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
-                _cachedExecutableTestFactory = (context, metadata) =>
-                {
-                    var typedMetadata = (TestMetadata<T>)metadata;
-
-                    Func<TestContext, Task<object>> createInstance = async testContext =>
-                    {
-                        if (context.TestClassInstanceFactory != null)
-                        {
-                            return await context.TestClassInstanceFactory();
-                        }
-
-                        var attributes = metadata.GetOrCreateAttributes();
-                        var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
-                            attributes,
-                            TestClassType,
-                            metadata.TestSessionId,
-                            testContext);
-
-                        if (instance != null)
-                        {
-                            return instance;
-                        }
-
-                        return typedMetadata.InstanceFactory!(context.ResolvedClassGenericArguments, context.ClassArguments);
-                    };
-
-                    Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
-                    {
-                        await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
-                    };
-
-                    return new ExecutableTest(createInstance, invokeTest)
-                    {
-                        TestId = context.TestId,
-                        Metadata = metadata,
-                        Arguments = context.Arguments,
-                        ClassArguments = context.ClassArguments,
-                        Context = context.Context
-                    };
-                };
-
-                return _cachedExecutableTestFactory;
+                Interlocked.CompareExchange<Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest>?>(
+                    ref _cachedExecutableTestFactory, CreateTypedExecutableTest, null);
+                return _cachedExecutableTestFactory!;
             }
 
             throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");
         }
+    }
+
+    private static AbstractExecutableTest CreateTypedExecutableTest(
+        ExecutableTestCreationContext context,
+        TestMetadata metadata)
+    {
+        var typedMetadata = (TestMetadata<T>)metadata;
+        return new ExecutableTest<T>(typedMetadata, context)
+        {
+            TestId = context.TestId,
+            Metadata = metadata,
+            Arguments = context.Arguments,
+            ClassArguments = context.ClassArguments,
+            Context = context.Context
+        };
     }
 
     /// <summary>

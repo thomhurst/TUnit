@@ -70,9 +70,11 @@ public abstract class TestMetadata
     public PropertyInjectionData[] PropertyInjections { get; init; } = [];
 
     /// <summary>
-    /// Test session ID used for data generation
+    /// Test session ID used for data generation. Callers must assign a real session id before
+    /// any data-generation code reads it; defaulting to an empty string avoids the per-instance
+    /// <see cref="Guid.NewGuid"/> allocation that every engine caller immediately overwrites.
     /// </summary>
-    public string TestSessionId { get; set; } = Guid.NewGuid().ToString();
+    public string TestSessionId { get; set; } = string.Empty;
 
     /// <summary>
     /// The depth of inheritance for this test method.

@@ -101,7 +101,9 @@ public partial class TestContext
     internal string GetOutputError() => CombineOutputs(_buildTimeErrorOutput, base.GetErrorOutput());
 
     internal override bool HasCapturedOutput =>
-        base.HasCapturedOutput || _buildTimeOutput != null || _buildTimeErrorOutput != null;
+        base.HasCapturedOutput
+        || !string.IsNullOrEmpty(_buildTimeOutput)
+        || !string.IsNullOrEmpty(_buildTimeErrorOutput);
 
     private static string CombineOutputs(string? buildTimeOutput, string runtimeOutput)
     {

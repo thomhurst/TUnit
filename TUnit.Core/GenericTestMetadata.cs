@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -67,6 +68,10 @@ public sealed class GenericTestMetadata : TestMetadata
                 {
                     // Try to create instance with ClassConstructor attribute
                     var attributes = metadata.GetOrCreateAttributes();
+                    // TestSessionId defaults to string.Empty for allocation reasons — the
+                    // engine must assign a real session id before reaching this point.
+                    Debug.Assert(!string.IsNullOrEmpty(metadata.TestSessionId),
+                        $"TestSessionId must be assigned before creating a generic test instance for {metadata.TestName}");
                     var classInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
                         attributes,
                         TestClassType,

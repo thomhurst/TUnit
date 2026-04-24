@@ -224,6 +224,9 @@ internal sealed class PropertyInjectionPlan
 
     /// <summary>
     /// Gets property values from an instance, abstracting source-gen vs reflection.
+    /// Uses the source-generated getter delegate on <see cref="PropertyInjectionMetadata"/>
+    /// when available and caches a reflection-based getter otherwise — no per-call
+    /// <c>Type.GetProperty</c> lookup on the hot path.
     /// </summary>
     public IEnumerable<object?> GetPropertyValues(object instance)
     {
@@ -231,10 +234,12 @@ internal sealed class PropertyInjectionPlan
         {
             foreach (var metadata in SourceGeneratedProperties)
             {
-                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-                if (property?.CanRead == true)
+                // Skip non-readable properties so the enumeration count matches the legacy
+                // reflection behavior (old code did not yield for properties without a getter).
+                var getter = metadata.GetOrCreateGetter();
+                if (getter is not null)
                 {
-                    yield return property.GetValue(instance);
+                    yield return getter(instance);
                 }
             }
         }

@@ -11,7 +11,7 @@ public sealed class ExecutableTest : AbstractExecutableTest
     private readonly Func<object, object?[], TestContext, CancellationToken, Task> _invokeTest;
 
     /// <summary>
-    /// Creates a UnifiedExecutableTest where all mode-specific behavior is encapsulated in the delegates.
+    /// Creates an ExecutableTest where mode-specific behavior is encapsulated in the delegates.
     /// Both AOT and reflection modes provide delegates with identical signatures.
     /// </summary>
     /// <param name="createInstance">Delegate that creates the test instance with all necessary initialization</param>

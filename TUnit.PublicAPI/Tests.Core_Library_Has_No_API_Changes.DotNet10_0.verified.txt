@@ -2742,6 +2742,7 @@ namespace .
         [.(..None | ..PublicProperties | ..NonPublicProperties)]
         public required  ContainingType { get; init; }
         public required <.IDataSourceAttribute> CreateDataSource { get; init; }
+        public <object, object?>? GetProperty { get; init; }
         public required string PropertyName { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicProperties)]
         public required  PropertyType { get; init; }
