@@ -15,7 +15,6 @@ internal sealed class BeforeHookTaskCache
     private readonly ThreadSafeDictionary<Assembly, Task> _beforeAssemblyTasks = new();
     private Task? _beforeTestSessionTask;
     private readonly Lock _testSessionLock = new();
-    private readonly Lock _classLock = new();
 
     public ValueTask GetOrCreateBeforeTestSessionTask(Func<CancellationToken, ValueTask> taskFactory, CancellationToken cancellationToken)
     {
@@ -40,29 +39,26 @@ internal sealed class BeforeHookTaskCache
         return new ValueTask(task);
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2077",
+        Justification = "Type parameter is annotated at the method boundary and the closure invokes ExecuteBeforeClassHooksAsync which requires the same annotation.")]
     public ValueTask GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         HookExecutor hookExecutor,
         CancellationToken cancellationToken)
     {
+        // Lock-free fast path avoids allocating a closure on the common cache-hit case.
         if (_beforeClassTasks.TryGetValue(testClass, out var existingTask))
         {
             return new ValueTask(existingTask);
         }
 
-        lock (_classLock)
-        {
-            if (_beforeClassTasks.TryGetValue(testClass, out existingTask))
-            {
-                return new ValueTask(existingTask);
-            }
-
-            // Call ExecuteBeforeClassHooksAsync directly with the annotated testClass
-            // The factory ignores the key since we've already created the task with the annotated type
-            var newTask = hookExecutor.ExecuteBeforeClassHooksAsync(testClass, cancellationToken).AsTask();
-            _beforeClassTasks.GetOrAdd(testClass, _ => newTask);
-            return new ValueTask(newTask);
-        }
+        // ThreadSafeDictionary<,> internally uses Lazy<T> with ExecutionAndPublication,
+        // guaranteeing single-execution per key without serializing unrelated classes
+        // behind a shared lock.
+        var task = _beforeClassTasks.GetOrAdd(
+            testClass,
+            _ => hookExecutor.ExecuteBeforeClassHooksAsync(testClass, cancellationToken).AsTask());
+        return new ValueTask(task);
     }
 }

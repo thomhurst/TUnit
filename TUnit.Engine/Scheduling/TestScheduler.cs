@@ -15,6 +15,12 @@ namespace TUnit.Engine.Scheduling;
 
 internal sealed class TestScheduler : ITestScheduler
 {
+    // Cap the unlimited-parallelism path to ProcessorCount * 2 to avoid oversubscribing
+    // the thread pool / IOCP when thousands of continuations are scheduled at once.
+    // Without this, Parallel.ForEachAsync defaults to ProcessorCount which still produces
+    // near-simultaneous continuations that saturate GetQueuedCompletionStatus under load.
+    private static readonly int UnlimitedPathMaxDop = Environment.ProcessorCount * 2;
+
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
@@ -321,10 +327,15 @@ internal sealed class TestScheduler : ITestScheduler
         {
 #if NET8_0_OR_GREATER
             // Use Parallel.ForEachAsync for bounded concurrency (eliminates unbounded Task.Run queue depth)
-            // This dramatically reduces ThreadPool contention and GetQueuedCompletionStatus waits
+            // Cap MaxDegreeOfParallelism to ProcessorCount * 2 even on the unlimited path so
+            // large test counts do not saturate the IOCP thread with simultaneous continuations.
             await Parallel.ForEachAsync(
                 tests,
-                new ParallelOptions { CancellationToken = cancellationToken },
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = UnlimitedPathMaxDop,
+                    CancellationToken = cancellationToken
+                },
                 async (test, ct) =>
                 {
                     test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
