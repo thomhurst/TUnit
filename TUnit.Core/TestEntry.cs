@@ -175,10 +175,10 @@ public sealed class TestEntry<
 // a static field on the generic type would otherwise be duplicated per closed type (Sonar S2743).
 internal static class TestEntrySentinel
 {
-    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation:
-    // TestEntry-sourced metadata always takes the IndexedAttributeFactory path, so this throws
-    // if ever invoked — reaching it indicates an engine bug.
+    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation.
+    // GetOrCreateAttributes guards against invocation by checking this reference and throws with
+    // TestName/TestClassType context; this fallback message only surfaces if that guard is bypassed.
     internal static readonly Func<Attribute[]> IndexedAttributeFactoryPlaceholder =
         static () => throw new InvalidOperationException(
-            "TestEntry metadata must resolve attributes via IndexedAttributeFactory.");
+            "TestEntry attribute factory placeholder invoked without test context; call site should have dispatched via IndexedAttributeFactory.");
 }

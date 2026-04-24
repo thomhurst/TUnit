@@ -55,7 +55,9 @@ public abstract class TestMetadata
     /// </summary>
     internal Func<int, Attribute[]>? IndexedAttributeFactory { get; init; }
 
-    /// <summary>Index passed to <see cref="IndexedAttributeFactory"/> when dispatching.</summary>
+    /// <summary>
+    /// Index passed to <see cref="IndexedAttributeFactory"/>. Unused unless that property is set.
+    /// </summary>
     internal int AttributeGroupIndex { get; init; }
 
     private Attribute[]? _cachedAttributes;
@@ -76,7 +78,22 @@ public abstract class TestMetadata
         }
 
         var indexed = IndexedAttributeFactory;
-        var produced = indexed is not null ? indexed(AttributeGroupIndex) : AttributeFactory();
+        Attribute[] produced;
+        if (indexed is not null)
+        {
+            produced = indexed(AttributeGroupIndex);
+        }
+        else
+        {
+            // Throw with test context at the call site so diagnostics identify the offending
+            // metadata — the sentinel delegate itself has no access to TestName/TestClassType.
+            if (ReferenceEquals(AttributeFactory, TestEntrySentinel.IndexedAttributeFactoryPlaceholder))
+            {
+                throw new InvalidOperationException(
+                    $"Test metadata for '{TestName}' on '{TestClassType?.FullName}' is missing an attribute factory. Either IndexedAttributeFactory or AttributeFactory must be supplied.");
+            }
+            produced = AttributeFactory();
+        }
         return Interlocked.CompareExchange(ref _cachedAttributes, produced, null) ?? produced;
     }
 

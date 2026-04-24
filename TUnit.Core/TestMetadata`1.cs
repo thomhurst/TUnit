@@ -61,7 +61,9 @@ public class TestMetadata<
     /// </summary>
     internal Func<T, int, object?[], CancellationToken, ValueTask>? IndexedInvokeBody { get; init; }
 
-    /// <summary>Index passed to <see cref="IndexedInvokeBody"/> when dispatching.</summary>
+    /// <summary>
+    /// Index passed to <see cref="IndexedInvokeBody"/>. Unused unless that property is set.
+    /// </summary>
     internal int MethodIndex { get; init; }
 
     /// <summary>
