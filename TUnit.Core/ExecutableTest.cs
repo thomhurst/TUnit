@@ -5,13 +5,23 @@ namespace TUnit.Core;
 /// Replaces ExecutableTest<T> and DynamicExecutableTest with a single implementation.
 /// All mode-specific logic is handled during delegate creation, not execution.
 /// </summary>
-public sealed class ExecutableTest : AbstractExecutableTest
+public class ExecutableTest : AbstractExecutableTest
 {
-    private readonly Func<TestContext, Task<object>> _createInstance;
-    private readonly Func<object, object?[], TestContext, CancellationToken, Task> _invokeTest;
+    // Null only inside typed subclasses that override CreateInstanceAsync/InvokeTestAsync and
+    // therefore never invoke the delegates. The parameterless constructor enforces that invariant.
+    private readonly Func<TestContext, Task<object>>? _createInstance;
+    private readonly Func<object, object?[], TestContext, CancellationToken, Task>? _invokeTest;
 
     /// <summary>
-    /// Creates a UnifiedExecutableTest where all mode-specific behavior is encapsulated in the delegates.
+    /// Constructor for subclasses that supply their own invocation logic by overriding
+    /// <see cref="CreateInstanceAsync"/> and <see cref="InvokeTestAsync"/> directly.
+    /// </summary>
+    private protected ExecutableTest()
+    {
+    }
+
+    /// <summary>
+    /// Creates an ExecutableTest where mode-specific behavior is encapsulated in the delegates.
     /// Both AOT and reflection modes provide delegates with identical signatures.
     /// </summary>
     /// <param name="createInstance">Delegate that creates the test instance with all necessary initialization</param>
@@ -26,11 +36,11 @@ public sealed class ExecutableTest : AbstractExecutableTest
 
     public override async Task<object> CreateInstanceAsync()
     {
-        return await _createInstance(Context);
+        return await _createInstance!(Context);
     }
 
     public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
-        await _invokeTest(instance, Arguments, Context, cancellationToken);
+        await _invokeTest!(instance, Arguments, Context, cancellationToken);
     }
 }

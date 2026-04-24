@@ -165,6 +165,7 @@ internal sealed class TestRegistry : ITestRegistry
     }
 
     [RequiresUnreferencedCode("Creating test variants requires reflection which is not supported in native AOT scenarios.")]
+    [RequiresDynamicCode("Creating test variants builds Expression trees and may instantiate generic helpers at runtime which is not supported in native AOT scenarios.")]
     private async Task<TestVariantInfo> CreateTestVariantInternal<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -208,16 +209,18 @@ internal sealed class TestRegistry : ITestRegistry
         }
         else if (methodInfo.ReturnType == typeof(ValueTask))
         {
-            // ValueTask.AsTask() converts to Task for proper awaiting
-            var asTaskMethod = typeof(ValueTask).GetMethod(nameof(ValueTask.AsTask))!;
-            body = Expression.Call(methodCall, asTaskMethod);
+            // Bridge through ValueTaskBridge so synchronously-completed ValueTasks avoid the
+            // Task allocation that .AsTask() would force.
+            body = Expression.Call(ValueTaskBridge.ToTaskNonGenericMethod, methodCall);
         }
         else if (methodInfo.ReturnType.IsGenericType &&
                  methodInfo.ReturnType.GetGenericTypeDefinition() == typeof(ValueTask<>))
         {
-            // ValueTask<T>.AsTask() returns Task<T>, then convert to Task
-            var asTaskMethod = methodInfo.ReturnType.GetMethod(nameof(ValueTask.AsTask))!;
-            body = Expression.Convert(Expression.Call(methodCall, asTaskMethod), typeof(Task));
+            // ValueTask<T> → Task via the generic helper. Helper returns Task.FromResult for sync
+            // completion (runtime caches common results) instead of allocating a new Task.
+            var toTaskGeneric = ValueTaskBridge.ToTaskGenericMethodDefinition
+                .MakeGenericMethod(methodInfo.ReturnType.GenericTypeArguments[0]);
+            body = Expression.Convert(Expression.Call(toTaskGeneric, methodCall), typeof(Task));
         }
         else
         {

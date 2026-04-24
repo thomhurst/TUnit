@@ -678,6 +678,18 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("                return dataSource;");
         sb.AppendLine("            },");
 
+        // GetProperty delegate — direct strongly-typed read so the engine hot path
+        // doesn't fall back to Type.GetProperty reflection. Static instance-typed cast
+        // mirrors SetProperty and stays AOT-friendly.
+        if (prop.IsStatic)
+        {
+            sb.AppendLine($"            GetProperty = static _ => {prop.ContainingTypeFullyQualified}.{prop.PropertyName},");
+        }
+        else
+        {
+            sb.AppendLine($"            GetProperty = static instance => (({classTypeName})instance).{prop.PropertyName},");
+        }
+
         // SetProperty delegate
         sb.AppendLine("            SetProperty = (instance, value) =>");
         sb.AppendLine("            {");

@@ -248,6 +248,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     public static void ClearCache()
     {
         PropertyCacheManager.ClearCache();
+        TypeHierarchyCache.Clear();
         ClearDiscoveryErrors();
     }
 
@@ -339,13 +340,11 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var metadata in sourceGeneratedProperties)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-            if (property == null || !property.CanRead)
-            {
-                continue;
-            }
-
-            var value = property.GetValue(obj);
+            // Use the compile-time-generated getter when the source generator emitted one,
+            // otherwise fall back to a cached reflection-based getter. Eliminates the
+            // per-test Type.GetProperty reflection lookup on the hot path.
+            var getter = metadata.GetOrCreateGetter();
+            var value = getter(obj);
             if (value != null && tryAdd(value, currentDepth))
             {
                 recurse(value, currentDepth + 1);
@@ -605,25 +604,33 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     }
 
     /// <summary>
+    /// Cache of type hierarchy sets keyed by <see cref="Type"/>. Per-type hierarchy is invariant,
+    /// and each invocation otherwise allocates a fresh <see cref="HashSet{T}"/> of strings.
+    /// Populated on first access per type and read-only thereafter.
+    /// </summary>
+    private static readonly ConcurrentDictionary<Type, HashSet<string>> TypeHierarchyCache = new();
+
+    /// <summary>
     /// Gets all types in the inheritance hierarchy from the given type up to (but not including) object.
     /// </summary>
     private static HashSet<string> GetTypeHierarchy(Type type)
-    {
-        var result = new HashSet<string>();
-        var currentType = type;
-
-        while (currentType != null && currentType != typeof(object))
+        => TypeHierarchyCache.GetOrAdd(type, static t =>
         {
-            if (currentType.FullName != null)
+            var result = new HashSet<string>();
+            var currentType = t;
+
+            while (currentType != null && currentType != typeof(object))
             {
-                result.Add(currentType.FullName);
+                if (currentType.FullName != null)
+                {
+                    result.Add(currentType.FullName);
+                }
+
+                currentType = currentType.BaseType;
             }
 
-            currentType = currentType.BaseType;
-        }
-
-        return result;
-    }
+            return result;
+        });
 
     /// <summary>
     /// Determines if a cache key represents a direct property (belonging to test class hierarchy)

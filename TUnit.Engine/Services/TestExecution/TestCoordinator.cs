@@ -133,16 +133,21 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            // Flush console interceptors to ensure all buffered output is captured
-            // This is critical for output from Console.Write() without newline
-            try
+            // Flush console interceptors to ensure all buffered output is captured.
+            // This is critical for output from Console.Write() without newline, but Console.Out
+            // is a SynchronizedTextWriter and FlushAsync takes a lock — skip the flush entirely
+            // when the test wrote nothing, which is the hot path for passing tests with no output.
+            if (test.Context.HasCapturedOutput)
             {
-                await Console.Out.FlushAsync().ConfigureAwait(false);
-                await Console.Error.FlushAsync().ConfigureAwait(false);
-            }
-            catch (Exception flushEx)
-            {
-                await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+                try
+                {
+                    await Console.Out.FlushAsync().ConfigureAwait(false);
+                    await Console.Error.FlushAsync().ConfigureAwait(false);
+                }
+                catch (Exception flushEx)
+                {
+                    await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+                }
             }
 
             // Stay null on the success path — materializing the list only when something actually fails
