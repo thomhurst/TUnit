@@ -66,6 +66,13 @@ internal sealed class ExecutableTest<
 
     public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
+        var indexed = _metadata.IndexedInvokeBody;
+        if (indexed is not null)
+        {
+            await indexed((T)instance, _metadata.MethodIndex, Arguments, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         await _metadata.InvokeTypedTest!((T)instance, Arguments, cancellationToken).ConfigureAwait(false);
     }
 }

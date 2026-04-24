@@ -54,8 +54,17 @@ public class TestMetadata<
     /// </summary>
     public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
 
+    /// <summary>
+    /// Class-shared indexed invoker emitted by the source generator. All tests in a class share this
+    /// delegate and dispatch via <see cref="MethodIndex"/>, so the TestEntry → TestMetadata bridge can
+    /// forward the static delegate without allocating a per-test closure capturing <c>this</c>.
+    /// </summary>
+    internal Func<T, int, object?[], CancellationToken, ValueTask>? IndexedInvokeBody { get; init; }
 
-
+    /// <summary>
+    /// Index passed to <see cref="IndexedInvokeBody"/>. Unused unless that property is set.
+    /// </summary>
+    internal int MethodIndex { get; init; }
 
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
@@ -77,16 +86,24 @@ public class TestMetadata<
                 return cached;
             }
 
-            if (InstanceFactory != null && InvokeTypedTest != null)
+            if (InstanceFactory != null && (InvokeTypedTest != null || IndexedInvokeBody != null))
             {
                 Interlocked.CompareExchange<Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest>?>(
                     ref _cachedExecutableTestFactory, CreateTypedExecutableTest, null);
                 return _cachedExecutableTestFactory!;
             }
 
-            throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");
+            // Delegating the throw to a helper keeps this getter itself throw-free (Sonar S2372) —
+            // the abstract base declares this as a property so it must stay a property, and the
+            // misconfiguration is a programmer error rather than a recoverable condition.
+            return ThrowMissingInvoker();
         }
     }
+
+    [DoesNotReturn]
+    private static Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> ThrowMissingInvoker() =>
+        throw new InvalidOperationException(
+            $"InstanceFactory and an invoker (InvokeTypedTest or IndexedInvokeBody) must be set for {typeof(T).Name}");
 
     private static AbstractExecutableTest CreateTypedExecutableTest(
         ExecutableTestCreationContext context,

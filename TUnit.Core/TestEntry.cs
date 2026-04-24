@@ -101,19 +101,14 @@ public sealed class TestEntry<
     /// <summary>
     /// Constructs a TestMetadata&lt;T&gt; from this entry's data and delegates.
     /// </summary>
-    // Cached delegates and arrays — built once from immutable fields
-    private Func<T, object?[], CancellationToken, ValueTask>? _cachedInvokeTypedTest;
-    private Func<Attribute[]>? _cachedAttributeFactory;
+    // Cached arrays — built once from immutable fields. The class-shared InvokeBody/CreateAttributes
+    // delegates and their indexes are forwarded directly onto the resulting TestMetadata so there is
+    // no per-test closure allocation on the hot path.
     private PropertyDataSource[]? _cachedPropertyDataSources;
     private PropertyInjectionData[]? _cachedPropertyInjections;
 
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
-        if (_cachedInvokeTypedTest is null)
-            Interlocked.CompareExchange(ref _cachedInvokeTypedTest, (instance, args, ct) => InvokeBody(instance, MethodIndex, args, ct), null);
-        if (_cachedAttributeFactory is null)
-            Interlocked.CompareExchange(ref _cachedAttributeFactory, () => CreateAttributes(AttributeGroupIndex), null);
-
         return new TestMetadata<T>
         {
             TestName = MethodName,
@@ -125,8 +120,11 @@ public sealed class TestEntry<
             PropertyDataSources = _cachedPropertyDataSources ??= BuildPropertyDataSources(),
             PropertyInjections = _cachedPropertyInjections ??= BuildPropertyInjections(),
             InstanceFactory = CreateInstance,
-            InvokeTypedTest = _cachedInvokeTypedTest,
-            AttributeFactory = _cachedAttributeFactory,
+            IndexedInvokeBody = InvokeBody,
+            MethodIndex = MethodIndex,
+            AttributeFactory = TestEntrySentinel.IndexedAttributeFactoryPlaceholder,
+            IndexedAttributeFactory = CreateAttributes,
+            AttributeGroupIndex = AttributeGroupIndex,
             FilePath = FilePath,
             LineNumber = LineNumber,
             MethodMetadata = MethodMetadata,
@@ -171,4 +169,16 @@ public sealed class TestEntry<
         }
         return result;
     }
+}
+
+// Non-generic holder so the placeholder delegate is shared across every closed TestEntry<T> —
+// a static field on the generic type would otherwise be duplicated per closed type (Sonar S2743).
+internal static class TestEntrySentinel
+{
+    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation.
+    // GetOrCreateAttributes guards against invocation by checking this reference and throws with
+    // TestName/TestClassType context; this fallback message only surfaces if that guard is bypassed.
+    internal static readonly Func<Attribute[]> IndexedAttributeFactoryPlaceholder =
+        static () => throw new InvalidOperationException(
+            "TestEntry attribute factory placeholder invoked without test context; call site should have dispatched via IndexedAttributeFactory.");
 }

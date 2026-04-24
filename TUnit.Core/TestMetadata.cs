@@ -49,15 +49,52 @@ public abstract class TestMetadata
 
     public required Func<Attribute[]> AttributeFactory { get; init; }
 
+    /// <summary>
+    /// Class-shared indexed attribute factory. When set, used in preference to <see cref="AttributeFactory"/>
+    /// so TestEntry-emitted metadata avoids allocating a per-test closure over <see cref="AttributeGroupIndex"/>.
+    /// </summary>
+    internal Func<int, Attribute[]>? IndexedAttributeFactory { get; init; }
+
+    /// <summary>
+    /// Index passed to <see cref="IndexedAttributeFactory"/>. Unused unless that property is set.
+    /// </summary>
+    internal int AttributeGroupIndex { get; init; }
+
     private Attribute[]? _cachedAttributes;
 
     /// <summary>
-    /// Returns the cached attributes array, creating it from <see cref="AttributeFactory"/> on first call.
-    /// Subsequent calls return the same array without re-invoking the factory.
+    /// Returns the cached attributes array, creating it from <see cref="IndexedAttributeFactory"/>
+    /// (preferred) or <see cref="AttributeFactory"/> on first call. Subsequent calls return the same array.
     /// </summary>
     internal Attribute[] GetOrCreateAttributes()
     {
-        return _cachedAttributes ??= AttributeFactory();
+        // Benign race: factories are idempotent, so on contention we may build two arrays and
+        // discard the loser. CAS publishes exactly one and every future reader sees it — cheaper
+        // than a lock on the hot path.
+        var cached = _cachedAttributes;
+        if (cached is not null)
+        {
+            return cached;
+        }
+
+        var indexed = IndexedAttributeFactory;
+        Attribute[] produced;
+        if (indexed is not null)
+        {
+            produced = indexed(AttributeGroupIndex);
+        }
+        else
+        {
+            // Throw with test context at the call site so diagnostics identify the offending
+            // metadata — the sentinel delegate itself has no access to TestName/TestClassType.
+            if (ReferenceEquals(AttributeFactory, TestEntrySentinel.IndexedAttributeFactoryPlaceholder))
+            {
+                throw new InvalidOperationException(
+                    $"Test metadata for '{TestName}' on '{TestClassType?.FullName}' is missing an attribute factory. Either IndexedAttributeFactory or AttributeFactory must be supplied.");
+            }
+            produced = AttributeFactory();
+        }
+        return Interlocked.CompareExchange(ref _cachedAttributes, produced, null) ?? produced;
     }
 
     /// <summary>
