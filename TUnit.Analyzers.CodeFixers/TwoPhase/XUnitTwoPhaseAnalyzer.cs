@@ -868,34 +868,38 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     private AttributeConversion ConvertTestAttribute(AttributeSyntax node)
     {
         // Check for Skip argument: [Fact(Skip = "reason")] or [Theory(Skip = "reason")]
-        var skipArg = node.ArgumentList?.Arguments
-            .FirstOrDefault(a => a.NameEquals?.Name.Identifier.ValueText == "Skip");
-
-        if (skipArg != null)
+        if (node.ArgumentList is null)
         {
-            // Extract the skip reason and create additional Skip attribute
-            var skipReason = skipArg.Expression.ToString();
             return new AttributeConversion
             {
                 NewAttributeName = "Test",
-                NewArgumentList = "", // Remove the Skip argument
-                OriginalText = node.ToString(),
-                AdditionalAttributes = new List<AdditionalAttribute>
-                {
-                    new AdditionalAttribute
-                    {
-                        Name = "Skip",
-                        Arguments = $"({skipReason})"
-                    }
-                }
+                NewArgumentList = "", // Remove any arguments
+                OriginalText = node.ToString()
             };
+        }
+
+        var additionalAttributes = new List<AdditionalAttribute>(3);
+
+        foreach (var argument in node.ArgumentList.Arguments)
+        {
+            if (argument.NameEquals is null)
+            {
+                continue;
+            }
+            var argumentValue = argument.Expression.ToString();
+            additionalAttributes.Add(new AdditionalAttribute
+            {
+                Name = argument.NameEquals.Name.Identifier.ValueText,
+                Arguments = $"({argumentValue})"
+            });
         }
 
         return new AttributeConversion
         {
             NewAttributeName = "Test",
-            NewArgumentList = "", // Remove any arguments
-            OriginalText = node.ToString()
+            NewArgumentList = "", // Remove the Skip argument
+            OriginalText = node.ToString(),
+            AdditionalAttributes = additionalAttributes
         };
     }
 
