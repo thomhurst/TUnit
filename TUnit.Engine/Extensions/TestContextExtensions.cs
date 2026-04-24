@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
@@ -19,7 +19,10 @@ internal static class TestContextExtensions
     /// When this happens, eligible event objects may include the new instance (if it implements
     /// event receiver interfaces), so all caches must be invalidated and rebuilt.
     /// </remarks>
-    public static void EnsureEventReceiversCached(this TestContext testContext)
+    // Inlined so the fast-path (cache-hit) check collapses to a field load + branch at every
+    // call site, eliminating call overhead for the 99%+ already-built case.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void EnsureEventReceiversCached(TestContext testContext)
     {
         var currentClassInstance = testContext.Metadata.TestDetails.ClassInstance;
 
@@ -151,7 +154,7 @@ internal static class TestContextExtensions
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)
     {
         // Use EnsureEventReceiversCached which builds eligible objects as part of cache initialization
-        testContext.EnsureEventReceiversCached();
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedEligibleEventObjects!;
     }
 
@@ -259,13 +262,11 @@ internal static class TestContextExtensions
 
     /// <summary>
     /// Gets pre-computed test start receivers (filtered, sorted, scoped-attribute filtered).
-    /// Assumes <see cref="EnsureEventReceiversCached"/> has been called by the lifecycle
-    /// coordinator — hot-path callers (per-test start/end/skipped) skip the guard.
     /// </summary>
 #if NET
     public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext, EventReceiverStage stage)
     {
-        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestStartReceivers — caller is on the hot path and skips the guard.");
+        EnsureEventReceiversCached(testContext);
         return stage == EventReceiverStage.Early
             ? testContext.CachedTestStartReceiversEarly!
             : testContext.CachedTestStartReceiversLate!;
@@ -273,7 +274,7 @@ internal static class TestContextExtensions
 #else
     public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext)
     {
-        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestStartReceivers — caller is on the hot path and skips the guard.");
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedTestStartReceivers!;
     }
 #endif
@@ -284,7 +285,7 @@ internal static class TestContextExtensions
 #if NET
     public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext, EventReceiverStage stage)
     {
-        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestEndReceivers — caller is on the hot path and skips the guard.");
+        EnsureEventReceiversCached(testContext);
         return stage == EventReceiverStage.Early
             ? testContext.CachedTestEndReceiversEarly!
             : testContext.CachedTestEndReceiversLate!;
@@ -292,7 +293,7 @@ internal static class TestContextExtensions
 #else
     public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext)
     {
-        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestEndReceivers — caller is on the hot path and skips the guard.");
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedTestEndReceivers!;
     }
 #endif
@@ -302,27 +303,25 @@ internal static class TestContextExtensions
     /// </summary>
     public static ITestSkippedEventReceiver[] GetTestSkippedReceivers(this TestContext testContext)
     {
-        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestSkippedReceivers — caller is on the hot path and skips the guard.");
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedTestSkippedReceivers!;
     }
 
     /// <summary>
     /// Gets pre-computed test discovery receivers (filtered, sorted, scoped-attribute filtered).
-    /// Called from discovery / out-of-lifecycle paths, so the guard still builds on demand.
     /// </summary>
     public static ITestDiscoveryEventReceiver[] GetTestDiscoveryReceivers(this TestContext testContext)
     {
-        testContext.EnsureEventReceiversCached();
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedTestDiscoveryReceivers!;
     }
 
     /// <summary>
     /// Gets pre-computed test registered receivers (filtered, sorted, scoped-attribute filtered).
-    /// Called from discovery / out-of-lifecycle paths, so the guard still builds on demand.
     /// </summary>
     public static ITestRegisteredEventReceiver[] GetTestRegisteredReceivers(this TestContext testContext)
     {
-        testContext.EnsureEventReceiversCached();
+        EnsureEventReceiversCached(testContext);
         return testContext.CachedTestRegisteredReceivers!;
     }
 }

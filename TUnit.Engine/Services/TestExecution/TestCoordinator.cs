@@ -3,7 +3,6 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
-using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -277,15 +276,6 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
     /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
     /// </summary>
-    /// <remarks>
-    /// Ordering invariant: <see cref="ExecuteTestInternalAsync"/> calls
-    /// <c>_eventReceiverOrchestrator.RegisterReceivers</c> (which invokes
-    /// <c>EnsureEventReceiversCached</c>) before entering this method. The hot-path
-    /// receiver getters used by <c>InvokeTest{Skipped,End}EventReceiversAsync</c> therefore
-    /// skip their own guards and rely on that upstream call to have populated the caches —
-    /// the skip-path branch below is safe because it cannot be reached without that
-    /// prerequisite having run.
-    /// </remarks>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Check if this test should be skipped before creating the class instance.
@@ -296,7 +286,6 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _stateManager.MarkSkipped(test, test.Context.SkipReason!);
 
-            // Receiver caches are populated upstream (see <remarks> on this method).
             await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
@@ -306,12 +295,8 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
-        // Rebuild the receiver cache now that ClassInstance is assigned — the initial build
-        // at RegisterReceivers time ran with the placeholder instance. EnsureEventReceiversCached
-        // detects the changed instance via its internal invalidation check. Hoisting the call
-        // here lets the five per-test receiver getters (GetTestStartReceivers/GetTestEndReceivers/...)
-        // skip their own guards on the hot path.
-        test.Context.EnsureEventReceiversCached();
+        // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
+        test.Context.CachedEligibleEventObjects = null;
 
         // Check if this test should be skipped (after creating instance).
         // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,
