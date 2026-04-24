@@ -29,6 +29,17 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     /// </summary>
     protected abstract ConsoleLineBuffer GetLineBuffer();
 
+    /// <summary>
+    /// Returns the current context's line buffer and marks the context as having captured
+    /// console output, so TestCoordinator can skip the FlushAsync state machines when nothing
+    /// was written. Called from write paths only.
+    /// </summary>
+    private ConsoleLineBuffer GetLineBufferForWrite()
+    {
+        Context.Current.MarkConsoleOutputCaptured();
+        return GetLineBuffer();
+    }
+
     private protected abstract TextWriter GetOriginalOut();
 
     private protected abstract void ResetDefault();
@@ -83,12 +94,12 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     // Write methods - buffer partial writes until we get a complete line
     public override void Write(bool value) => Write(value.ToString());
-    public override void Write(char value) => GetLineBuffer().Append(value);
+    public override void Write(char value) => GetLineBufferForWrite().Append(value);
     public override void Write(char[]? buffer)
     {
         if (buffer != null)
         {
-            GetLineBuffer().Append(buffer, 0, buffer.Length);
+            GetLineBufferForWrite().Append(buffer, 0, buffer.Length);
         }
     }
     public override void Write(decimal value) => Write(value.ToString());
@@ -100,11 +111,11 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Write(string? value)
     {
         if (value == null) return;
-        GetLineBuffer().Append(value);
+        GetLineBufferForWrite().Append(value);
     }
     public override void Write(uint value) => Write(value.ToString());
     public override void Write(ulong value) => Write(value.ToString());
-    public override void Write(char[] buffer, int index, int count) => GetLineBuffer().Append(buffer, index, count);
+    public override void Write(char[] buffer, int index, int count) => GetLineBufferForWrite().Append(buffer, index, count);
     public override void Write(string format, object? arg0) => Write(string.Format(format, arg0));
     public override void Write(string format, object? arg0, object? arg1) => Write(string.Format(format, arg0, arg1));
     public override void Write(string format, object? arg0, object? arg1, object? arg2) => Write(string.Format(format, arg0, arg1, arg2));
@@ -113,7 +124,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     // WriteLine methods - flush buffer and route complete line to sinks
     public override void WriteLine()
     {
-        RouteToSinks(GetLineBuffer().Drain());
+        RouteToSinks(GetLineBufferForWrite().Drain());
     }
 
     public override void WriteLine(bool value) => WriteLine(value.ToString());
@@ -130,7 +141,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void WriteLine(string? value)
     {
         // Prepend any buffered content
-        value = GetLineBuffer().AppendAndDrain(value);
+        value = GetLineBufferForWrite().AppendAndDrain(value);
         RouteToSinks(value);
     }
 
@@ -159,7 +170,7 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 
     public override async Task WriteLineAsync(string? value)
     {
-        value = GetLineBuffer().AppendAndDrain(value);
+        value = GetLineBufferForWrite().AppendAndDrain(value);
         await RouteToSinksAsync(value).ConfigureAwait(false);
     }
 
