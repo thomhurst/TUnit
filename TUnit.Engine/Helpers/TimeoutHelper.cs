@@ -29,35 +29,14 @@ internal static class TimeoutHelper
         CancellationToken cancellationToken,
         string? timeoutMessage = null)
     {
-        await ExecuteWithTimeoutCoreAsync<bool>(
-            async ct =>
-            {
-                await taskFactory(ct).ConfigureAwait(false);
-                return true;
-            },
-            timeout,
-            cancellationToken,
-            timeoutMessage).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Core timeout implementation. Only called when a timeout is actually configured.
-    /// Allocates CancellationTokenSource, TaskCompletionSource, and uses Task.WhenAny.
-    /// </summary>
-    private static async Task<T> ExecuteWithTimeoutCoreAsync<T>(
-        Func<CancellationToken, Task<T>> taskFactory,
-        TimeSpan timeout,
-        CancellationToken cancellationToken,
-        string? timeoutMessage)
-    {
         // Timeout path: create linked token so task can observe both timeout and external cancellation.
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         // Set up cancellation detection BEFORE scheduling timeout to avoid race condition
         // where timeout fires before registration completes (with very small timeouts)
-        var cancelledTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cancelledTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         using var registration = timeoutCts.Token.Register(
-            static state => ((TaskCompletionSource<T>)state!).TrySetCanceled(),
+            static state => ((TaskCompletionSource<bool>)state!).TrySetCanceled(),
             cancelledTcs);
 
         // Now schedule the timeout - registration is guaranteed to catch it
@@ -102,6 +81,6 @@ internal static class TimeoutHelper
             throw new TimeoutException(diagnosticMessage);
         }
 
-        return await executionTask.ConfigureAwait(false);
+        await executionTask.ConfigureAwait(false);
     }
 }

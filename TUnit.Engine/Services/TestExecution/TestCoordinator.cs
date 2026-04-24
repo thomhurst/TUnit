@@ -97,22 +97,21 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Note: test.Context._dependencies is already populated during discovery
             // in TestBuilder.InvokePostResolutionEventsAsync after dependencies are resolved
 
-            // Check if we can use the fast path (no retry, no timeout)
+            // Fast path: skip RetryHelper whenever there are no retries configured. Timeout is
+            // applied inside TestExecutor.ExecuteAsync regardless, so the retry wrapper is pure
+            // overhead when retryLimit == 0.
             // Note: retryLimit == 0 means "no retries" (run once), not "unlimited retries"
             var retryLimit = test.Context.Metadata.TestDetails.RetryLimit;
-            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
 
-            if (retryLimit == 0 && !testTimeout.HasValue)
+            if (retryLimit == 0)
             {
-                // Fast path: direct execution without wrapper overhead
                 test.Context.CurrentRetryAttempt = 0;
                 await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                // Slow path: use retry wrapper
-                // Timeout is handled inside TestExecutor.ExecuteAsync, wrapping only the test body
-                // (not hooks or data source initialization) — fixes #4772
+                // Retry wrapper path. Timeout is handled inside TestExecutor.ExecuteAsync,
+                // wrapping only the test body (not hooks or data source initialization) — fixes #4772.
                 await RetryHelper.ExecuteWithRetry(test.Context,
                     () => ExecuteTestLifecycleAsync(test, cancellationToken)).ConfigureAwait(false);
             }
@@ -327,22 +326,26 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// Parented under the test case activity when available so cleanup stays in the same
     /// per-test trace seen by external backends and the HTML report.
     /// </summary>
-    private async ValueTask DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
+    private Task DisposeTestInstanceWithSpanAsync(AbstractExecutableTest test)
     {
 #if NET
-        var classType = test.Context.Metadata.TestDetails.ClassType;
-        await TUnitActivitySource.RunWithSpanAsync(
-            $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
-            test.Context.ClassContext.Activity?.Context ?? default,
-            [
-                new(TUnitActivitySource.TagTestId, test.Context.Id),
-                new(TUnitActivitySource.TagTestClass, classType.FullName),
-                new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
-            ],
-            () => DisposeTestInstanceCoreAsync(test));
-#else
-        await DisposeTestInstanceCoreAsync(test);
+        // When no OTEL listener is attached, skip the RunWithSpanAsync wrapper — it would
+        // otherwise allocate a Func<Task> closure and a state machine per test for nothing.
+        if (TUnitActivitySource.Source.HasListeners())
+        {
+            var classType = test.Context.Metadata.TestDetails.ClassType;
+            return TUnitActivitySource.RunWithSpanAsync(
+                $"dispose {TUnitActivitySource.GetReadableTypeName(classType)}",
+                test.Context.ClassContext.Activity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagTestId, test.Context.Id),
+                    new(TUnitActivitySource.TagTestClass, classType.FullName),
+                    new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(SharedType.None))
+                ],
+                () => DisposeTestInstanceCoreAsync(test));
+        }
 #endif
+        return DisposeTestInstanceCoreAsync(test);
     }
 
     private async Task DisposeTestInstanceCoreAsync(AbstractExecutableTest test)
