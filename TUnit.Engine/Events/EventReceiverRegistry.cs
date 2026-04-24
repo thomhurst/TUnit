@@ -150,6 +150,10 @@ internal sealed class EventReceiverRegistry
     {
         var typeKey = typeof(T);
 
+        // Termination contract: this retry loop relies on writers (RegisterReceivers) completing
+        // before steady-state reads. All registrations happen during test setup; during execution
+        // the receiver set is effectively frozen. A caller that registers receivers during test
+        // execution could cause this loop to spin under continuous writer pressure.
         while (true)
         {
             // Lock-free fast path: cache hit (common case after warmup).
