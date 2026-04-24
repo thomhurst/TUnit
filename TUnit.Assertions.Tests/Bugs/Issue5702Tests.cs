@@ -27,7 +27,7 @@ public class Issue5702Tests
         await Assert.That(model).Member(m => m.Name, n => n.IsEqualTo(NonInterned("hello")));
     }
 
-    private static string NonInterned(string s) => new(s.AsSpan());
+    private static string NonInterned(string s) => new(s.ToCharArray());
 
     private sealed class Wrapper
     {
