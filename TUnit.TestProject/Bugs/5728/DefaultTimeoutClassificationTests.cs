@@ -13,16 +13,21 @@ namespace TUnit.TestProject.Bugs._5728;
 /// </summary>
 public class DefaultTimeoutClassificationHooks
 {
-    // Gated on TUNIT_BUG5728_DEFAULT_TIMEOUT so this process-wide setting only takes effect
-    // when the engine-test harness explicitly opts in — otherwise discovery hooks fire for
-    // every run of TUnit.TestProject and would shrink every test's default timeout to 200ms.
+    // Gated on the filter string so this process-wide setting only takes effect when the
+    // engine-test harness targets this class — otherwise discovery hooks fire for every
+    // run of TUnit.TestProject and would shrink every test's default timeout to 200ms.
+    //
+    // We match on the filter (not an env var) because Microsoft.Testing.Platform's
+    // test-host-controller mode (enabled by --hangdump) does not reliably propagate
+    // arbitrary env vars through to the actual test host process on all CI runners.
     //
     // Method name must contain "Before" for the source generator to match it against the
     // BeforeTestDiscoveryContext parameter (see HookMetadataGenerator.IsValidHookMethod).
     [Before(TestDiscovery)]
     public static void BeforeDiscovery_ConfigureDefaultTimeoutWhenTargeted(BeforeTestDiscoveryContext context)
     {
-        if (Environment.GetEnvironmentVariable("TUNIT_BUG5728_DEFAULT_TIMEOUT") != "1")
+        if (context.TestFilter is null ||
+            !context.TestFilter.Contains("DefaultTimeoutClassificationTests", StringComparison.Ordinal))
         {
             return;
         }

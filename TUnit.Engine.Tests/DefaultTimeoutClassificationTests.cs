@@ -18,9 +18,12 @@ public class DefaultTimeoutClassificationTests(TestMode testMode) : InvokableTes
     [Test]
     public async Task Hanging_Test_Fails_With_Timeout_Message_When_Only_DefaultTestTimeout_Is_Set()
     {
-        // The opt-in env var lets the corresponding [Before(TestDiscovery)] hook in TestProject
-        // configure DefaultTestTimeout to 200ms for this run only. Without the env var the hook
-        // is a no-op, so the setting never leaks into the broader test project.
+        // The matching [Before(TestDiscovery)] hook in TestProject detects this class name
+        // in the filter string and programmatically sets DefaultTestTimeout=200ms for the
+        // subprocess — so a hanging test timing out via DefaultTestTimeout can be observed
+        // end-to-end. The gate is the filter (not an env var) because Microsoft.Testing.Platform's
+        // test-host-controller mode under --hangdump does not reliably propagate env vars
+        // through to the test host process on all CI runners.
         await RunTestsWithFilter(
             "/*/*/DefaultTimeoutClassificationTests/Hanging_Test_With_DefaultTestTimeout_Should_Timeout",
             [
@@ -39,7 +42,6 @@ public class DefaultTimeoutClassificationTests(TestMode testMode) : InvokableTes
                     errorMessage.ShouldNotBeNull("Expected an error message for the timed-out test");
                     errorMessage!.ToLowerInvariant().ShouldContain("timed out");
                 }
-            ],
-            new RunOptions().WithEnvironmentVariable("TUNIT_BUG5728_DEFAULT_TIMEOUT", "1"));
+            ]);
     }
 }
