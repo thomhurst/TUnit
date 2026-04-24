@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
@@ -80,10 +81,11 @@ internal sealed class EventReceiverOrchestrator
         vlb.Dispose();
     }
 
-    // ClassInstance is null at the initial RegisterReceivers call, so only it needs registering here.
+    // Precondition: ClassInstance has just been assigned; the initial RegisterReceivers call (with ClassInstance still null) already covered every other eligible object.
     public void RegisterClassInstanceReceiver(TestContext context)
     {
         var classInstance = context.Metadata.TestDetails.ClassInstance;
+        Debug.Assert(classInstance is not null, "RegisterClassInstanceReceiver should only be called after ClassInstance is assigned.");
         if (classInstance is null)
         {
             return;
