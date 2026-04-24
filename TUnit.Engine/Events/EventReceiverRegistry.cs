@@ -4,7 +4,16 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Engine.Events;
 
-/// Fast registry for event receiver presence checks using bit flags
+/// Fast registry for event receiver presence checks using bit flags.
+/// Thread-safe without locks: uses ConcurrentDictionary + copy-on-write arrays
+/// updated via AddOrUpdate. Reads are lock-free.
+/// <remarks>
+/// Batch <see cref="RegisterReceivers(ReadOnlySpan{object})"/> is NOT atomic: a concurrent
+/// reader may observe a subset of a batch because each receiver is registered independently.
+/// Callers must not depend on all-or-nothing visibility. Current callers register receivers
+/// before any test executes (see <c>EventReceiverOrchestrator</c>, which also dedups), so
+/// this relaxation is safe. Future maintainers must preserve that invariant.
+/// </remarks>
 internal sealed class EventReceiverRegistry
 {
     // Bit flags for fast checking
@@ -25,42 +34,42 @@ internal sealed class EventReceiverRegistry
         All = ~0
     }
 
-    private volatile EventTypes _registeredEvents = EventTypes.None;
-    private readonly Dictionary<Type, object[]> _receiversByType = new();
+    // Accessed via Volatile.Read + Interlocked.CompareExchange to provide acquire/release
+    // semantics without the cost of a volatile field on every write path.
+    private int _registeredEvents;
+
+    // Copy-on-write: each value is an immutable snapshot array. Writers replace the
+    // entry via AddOrUpdate with a new array that contains the appended receiver.
+    private readonly ConcurrentDictionary<Type, object[]> _receiversByType = new();
+
+    // Cache of typed arrays (T[]) built on first read per type. Invalidated by
+    // writers removing the entry for the affected interface type.
     private readonly ConcurrentDictionary<Type, Array> _cachedTypedReceivers = new();
-    private readonly Lock _lock = new();
 
     /// <summary>
-    /// Register event receivers from a collection of objects
+    /// Register event receivers from a collection of objects.
     /// </summary>
     public void RegisterReceivers(ReadOnlySpan<object> objects)
     {
-        lock (_lock)
+        foreach (var obj in objects)
         {
-            foreach (var obj in objects)
-            {
-                RegisterReceiverInternal(obj);
-            }
+            RegisterReceiverInternal(obj);
         }
     }
 
     /// <summary>
-    /// Register a single event receiver
+    /// Register a single event receiver.
     /// </summary>
     public void RegisterReceiver(object receiver)
     {
-        lock (_lock)
-        {
-            RegisterReceiverInternal(receiver);
-        }
+        RegisterReceiverInternal(receiver);
     }
 
     private void RegisterReceiverInternal(object receiver)
     {
         UpdateEventFlags(receiver);
 
-        // Register for each interface type the object implements
-        // We use a simpler approach that doesn't require reflection
+        // Register for each interface type the object implements.
         RegisterIfImplements<ITestStartEventReceiver>(receiver);
         RegisterIfImplements<ITestEndEventReceiver>(receiver);
         RegisterIfImplements<ITestSkippedEventReceiver>(receiver);
@@ -75,141 +84,190 @@ internal sealed class EventReceiverRegistry
 
     private void RegisterIfImplements<T>(object receiver) where T : class
     {
-        if (receiver is T)
+        if (receiver is not T)
         {
-            var interfaceType = typeof(T);
-            if (_receiversByType.TryGetValue(interfaceType, out var existing))
+            return;
+        }
+
+        var interfaceType = typeof(T);
+
+        // Copy-on-write append. AddOrUpdate guarantees the updateValueFactory is
+        // retried until the CAS succeeds, so concurrent writers do not lose updates.
+        _receiversByType.AddOrUpdate(
+            interfaceType,
+            _ => [receiver],
+            (_, existing) =>
             {
                 var newArray = new object[existing.Length + 1];
                 existing.CopyTo(newArray, 0);
-                newArray[^1] = receiver;
-                _receiversByType[interfaceType] = newArray;
-            }
-            else
-            {
-                _receiversByType[interfaceType] = [receiver];
-            }
+                newArray[existing.Length] = receiver;
+                return newArray;
+            });
 
-            // Invalidate only the changed type instead of clearing the entire cache
-            _cachedTypedReceivers.TryRemove(interfaceType, out _);
-        }
+        // Invalidate only the changed type instead of clearing the entire cache.
+        // The next read of GetReceiversOfType<T> will rebuild from the freshest
+        // snapshot in _receiversByType.
+        _cachedTypedReceivers.TryRemove(interfaceType, out _);
     }
 
     /// <summary>
     /// Fast check if any receivers registered for event type
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasTestStartReceivers() => (_registeredEvents & EventTypes.TestStart) != 0;
+    public bool HasTestStartReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.TestStart) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasTestEndReceivers() => (_registeredEvents & EventTypes.TestEnd) != 0;
+    public bool HasTestEndReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.TestEnd) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasTestSkippedReceivers() => (_registeredEvents & EventTypes.TestSkipped) != 0;
+    public bool HasTestSkippedReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.TestSkipped) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasTestRegisteredReceivers() => (_registeredEvents & EventTypes.TestRegistered) != 0;
+    public bool HasTestRegisteredReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.TestRegistered) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasFirstTestInSessionReceivers() => (_registeredEvents & EventTypes.FirstTestInSession) != 0;
+    public bool HasFirstTestInSessionReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.FirstTestInSession) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasLastTestInSessionReceivers() => (_registeredEvents & EventTypes.LastTestInSession) != 0;
+    public bool HasLastTestInSessionReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.LastTestInSession) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasFirstTestInAssemblyReceivers() => (_registeredEvents & EventTypes.FirstTestInAssembly) != 0;
+    public bool HasFirstTestInAssemblyReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.FirstTestInAssembly) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasLastTestInAssemblyReceivers() => (_registeredEvents & EventTypes.LastTestInAssembly) != 0;
+    public bool HasLastTestInAssemblyReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.LastTestInAssembly) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasFirstTestInClassReceivers() => (_registeredEvents & EventTypes.FirstTestInClass) != 0;
+    public bool HasFirstTestInClassReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.FirstTestInClass) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasLastTestInClassReceivers() => (_registeredEvents & EventTypes.LastTestInClass) != 0;
+    public bool HasLastTestInClassReceivers() => (Volatile.Read(ref _registeredEvents) & (int)EventTypes.LastTestInClass) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasAnyReceivers() => _registeredEvents != EventTypes.None;
+    public bool HasAnyReceivers() => Volatile.Read(ref _registeredEvents) != (int)EventTypes.None;
 
     public T[] GetReceiversOfType<T>() where T : class
     {
         var typeKey = typeof(T);
 
-        // Lock-free fast path for cache hit (common case)
-        if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
+        // Termination contract: this retry loop relies on writers (RegisterReceivers) completing
+        // before steady-state reads. All registrations happen during test setup; during execution
+        // the receiver set is effectively frozen. A caller that registers receivers during test
+        // execution could cause this loop to spin under continuous writer pressure.
+        while (true)
         {
-            return (T[])cached;
-        }
-
-        // Simple lock for cache miss (rare, happens once per type)
-        lock (_lock)
-        {
-            // Double-check after acquiring lock
-            if (_cachedTypedReceivers.TryGetValue(typeKey, out cached))
+            // Lock-free fast path: cache hit (common case after warmup).
+            if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
             {
                 return (T[])cached;
             }
 
-            // Build and cache
-            if (_receiversByType.TryGetValue(typeKey, out var receivers))
+            // Cache miss. Snapshot the source so we can validate via identity after publish.
+            _receiversByType.TryGetValue(typeKey, out var sourceSnapshot);
+            var typedArray = BuildTypedArray<T>(sourceSnapshot);
+
+            var published = (T[])_cachedTypedReceivers.GetOrAdd(typeKey, typedArray);
+
+            // If a writer raced with us (mutated source between our snapshot and publish),
+            // the writer's TryRemove-on-cache could have been ordered before our GetOrAdd,
+            // leaving a stale value cached. Detect by re-reading source: if it changed,
+            // evict our entry so the next reader rebuilds.
+            _receiversByType.TryGetValue(typeKey, out var latest);
+            if (!ReferenceEquals(latest, sourceSnapshot))
             {
-                var typedArray = new T[receivers.Length];
-                for (var i = 0; i < receivers.Length; i++)
+                if (ReferenceEquals(published, typedArray))
                 {
-                    typedArray[i] = (T)receivers[i];
+                    // Conditional remove: only evicts the entry if its value still matches the stale typedArray.
+                    // netstandard2.0-compatible equivalent of ConcurrentDictionary.TryRemove(KeyValuePair<K,V>).
+                    ((ICollection<KeyValuePair<Type, Array>>)_cachedTypedReceivers)
+                        .Remove(new KeyValuePair<Type, Array>(typeKey, typedArray));
                 }
-                _cachedTypedReceivers[typeKey] = typedArray;
-                return typedArray;
+                continue;
             }
 
-            T[] emptyArray = [];
-            _cachedTypedReceivers[typeKey] = emptyArray;
-            return emptyArray;
+            return published;
         }
+    }
+
+    private static T[] BuildTypedArray<T>(object[]? source) where T : class
+    {
+        if (source is null || source.Length == 0)
+        {
+            return [];
+        }
+
+        var typedArray = new T[source.Length];
+        for (var i = 0; i < source.Length; i++)
+        {
+            typedArray[i] = (T)source[i];
+        }
+        return typedArray;
     }
 
     private void UpdateEventFlags(object receiver)
     {
+        var flags = EventTypes.None;
         if (receiver is ITestStartEventReceiver)
         {
-            _registeredEvents |= EventTypes.TestStart;
+            flags |= EventTypes.TestStart;
         }
         if (receiver is ITestEndEventReceiver)
         {
-            _registeredEvents |= EventTypes.TestEnd;
+            flags |= EventTypes.TestEnd;
         }
         if (receiver is ITestSkippedEventReceiver)
         {
-            _registeredEvents |= EventTypes.TestSkipped;
+            flags |= EventTypes.TestSkipped;
         }
         if (receiver is ITestRegisteredEventReceiver)
         {
-            _registeredEvents |= EventTypes.TestRegistered;
+            flags |= EventTypes.TestRegistered;
         }
         if (receiver is IFirstTestInTestSessionEventReceiver)
         {
-            _registeredEvents |= EventTypes.FirstTestInSession;
+            flags |= EventTypes.FirstTestInSession;
         }
         if (receiver is ILastTestInTestSessionEventReceiver)
         {
-            _registeredEvents |= EventTypes.LastTestInSession;
+            flags |= EventTypes.LastTestInSession;
         }
         if (receiver is IFirstTestInAssemblyEventReceiver)
         {
-            _registeredEvents |= EventTypes.FirstTestInAssembly;
+            flags |= EventTypes.FirstTestInAssembly;
         }
         if (receiver is ILastTestInAssemblyEventReceiver)
         {
-            _registeredEvents |= EventTypes.LastTestInAssembly;
+            flags |= EventTypes.LastTestInAssembly;
         }
         if (receiver is IFirstTestInClassEventReceiver)
         {
-            _registeredEvents |= EventTypes.FirstTestInClass;
+            flags |= EventTypes.FirstTestInClass;
         }
         if (receiver is ILastTestInClassEventReceiver)
         {
-            _registeredEvents |= EventTypes.LastTestInClass;
+            flags |= EventTypes.LastTestInClass;
+        }
+
+        if (flags == EventTypes.None)
+        {
+            return;
+        }
+
+        // Atomic OR without a lock. Retries on contention.
+        var current = Volatile.Read(ref _registeredEvents);
+        while (true)
+        {
+            var desired = current | (int)flags;
+            if (desired == current)
+            {
+                return; // Already set.
+            }
+            var actual = Interlocked.CompareExchange(ref _registeredEvents, desired, current);
+            if (actual == current)
+            {
+                return;
+            }
+            current = actual;
         }
     }
-
 }
