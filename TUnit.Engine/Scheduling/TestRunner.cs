@@ -60,8 +60,9 @@ public sealed class TestRunner
         }
 
         // Skip the extra async state machine that a wrapper method would create. Start the
-        // inner ValueTask, fast-path synchronous completion into the TCS, and otherwise attach
-        // a synchronous continuation that mirrors the outcome onto the TCS.
+        // inner ValueTask, fast-path synchronous completion into the TCS, and otherwise fall
+        // back to a minimal async helper that mirrors the outcome onto the TCS without
+        // allocating a Task via AsTask().
         var innerTask = ExecuteTestInternalAsync(test, cancellationToken);
 
         if (innerTask.IsCompletedSuccessfully)
@@ -70,30 +71,21 @@ public sealed class TestRunner
             return default;
         }
 
-        var asTask = innerTask.AsTask();
-        asTask.ContinueWith(
-            static (completed, state) =>
-            {
-                var completionSource = (TaskCompletionSource<bool>)state!;
-                if (completed.IsFaulted)
-                {
-                    completionSource.TrySetException(completed.Exception!.InnerExceptions);
-                }
-                else if (completed.IsCanceled)
-                {
-                    completionSource.TrySetCanceled();
-                }
-                else
-                {
-                    completionSource.TrySetResult(true);
-                }
-            },
-            tcs,
-            CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
-            TaskScheduler.Default);
+        return WrapAsync(innerTask, tcs);
+    }
 
-        return new ValueTask(asTask);
+    private static async ValueTask WrapAsync(ValueTask inner, TaskCompletionSource<bool> tcs)
+    {
+        try
+        {
+            await inner.ConfigureAwait(false);
+            tcs.SetResult(true);
+        }
+        catch (Exception ex)
+        {
+            tcs.SetException(ex);
+            throw;
+        }
     }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
