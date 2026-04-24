@@ -18,7 +18,6 @@ internal sealed class AfterHookPairTracker
     private readonly ThreadSafeDictionary<Assembly, Task<List<Exception>>> _afterAssemblyTasks = new();
     private Task<List<Exception>>? _afterTestSessionTask;
     private readonly Lock _testSessionLock = new();
-    private readonly Lock _classLock = new();
 
     // Ensure only the first call to RegisterAfterTestSessionHook registers a callback.
     // Subsequent calls (e.g. from per-test timeout tokens) are ignored so that
@@ -162,33 +161,31 @@ internal sealed class AfterHookPairTracker
 
     /// <summary>
     /// Gets or creates the After Class task for the specified test class.
-    /// Thread-safe using double-checked locking.
+    /// Thread-safe via ThreadSafeDictionary's per-key Lazy initialization, which
+    /// guarantees single-execution without serializing unrelated classes behind a shared lock.
     /// Returns the exceptions from hook execution.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2077",
+        Justification = "Type parameter is annotated at the method boundary and the closure invokes ExecuteAfterClassHooksAsync which requires the same annotation.")]
     public ValueTask<List<Exception>> GetOrCreateAfterClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         HookExecutor hookExecutor,
         CancellationToken cancellationToken)
     {
+        // Lock-free fast path avoids allocating a closure on the common cache-hit case.
         if (_afterClassTasks.TryGetValue(testClass, out var existingTask))
         {
             return new ValueTask<List<Exception>>(existingTask);
         }
 
-        lock (_classLock)
-        {
-            if (_afterClassTasks.TryGetValue(testClass, out existingTask))
-            {
-                return new ValueTask<List<Exception>>(existingTask);
-            }
-
-            // Call ExecuteAfterClassHooksAsync directly with the annotated testClass
-            // The factory ignores the key since we've already created the task with the annotated type
-            var newTask = hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).AsTask();
-            _afterClassTasks.GetOrAdd(testClass, _ => newTask);
-            return new ValueTask<List<Exception>>(newTask);
-        }
+        // ThreadSafeDictionary<,> internally uses Lazy<T> with ExecutionAndPublication,
+        // guaranteeing single-execution per key without serializing unrelated classes
+        // behind a shared lock.
+        var task = _afterClassTasks.GetOrAdd(
+            testClass,
+            _ => hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).AsTask());
+        return new ValueTask<List<Exception>>(task);
     }
 
     /// <summary>
