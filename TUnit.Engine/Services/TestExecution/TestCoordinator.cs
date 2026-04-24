@@ -55,14 +55,16 @@ internal sealed class TestCoordinator : ITestCoordinator
         try
         {
             _stateManager.MarkRunning(test);
-            // Fire-and-forget InProgress - it's informational and doesn't need to block test execution
-            _ = _messageBus.InProgress(test.Context);
+            // Await InProgress so back-pressure from MTP's bounded channel spreads publishes
+            // across each test task rather than fanning 1000+ fire-and-forget writers into
+            // the channel at once.
+            await _messageBus.InProgress(test.Context).ConfigureAwait(false);
 
             _contextRestorer.RestoreContext(test);
 
             // Register event receivers early so that skip event receivers work
             // even when the test is skipped before full initialization.
-            _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
+            _eventReceiverOrchestrator.RegisterReceivers(test.Context);
 
             // Check if test was already marked as skipped during registration
             // (e.g., by a derived SkipAttribute evaluated in OnTestRegistered).
@@ -293,7 +295,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
-        // Invalidate cached eligible event objects since ClassInstance changed
+        // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
         test.Context.CachedEligibleEventObjects = null;
 
         // Check if this test should be skipped (after creating instance).
@@ -313,7 +315,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         try
         {
-            _testInitializer.PrepareTest(test, cancellationToken);
+            _testInitializer.PrepareTest(test);
             test.Context.RestoreExecutionContext();
             var testTimeout = test.Context.Metadata.TestDetails.Timeout;
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);

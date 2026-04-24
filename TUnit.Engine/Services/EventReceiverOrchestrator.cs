@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
@@ -42,7 +43,7 @@ internal sealed class EventReceiverOrchestrator
         _logger = logger;
     }
 
-    public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
+    public void RegisterReceivers(TestContext context)
     {
         var vlb = new ValueListBuilder<object>([null, null, null, null]);
 
@@ -80,6 +81,41 @@ internal sealed class EventReceiverOrchestrator
         vlb.Dispose();
     }
 
+    // Precondition: ClassInstance has just been assigned; the initial RegisterReceivers call (with ClassInstance still null) already covered every other eligible object.
+    public void RegisterClassInstanceReceiver(TestContext context)
+    {
+        var classInstance = context.Metadata.TestDetails.ClassInstance;
+        Debug.Assert(classInstance is not null, "RegisterClassInstanceReceiver should only be called after ClassInstance is assigned.");
+        if (classInstance is null)
+        {
+            return;
+        }
+
+        // Defense-in-depth: SkippedTestInstance is a sentinel singleton for tests skipped
+        // at registration time and should never be treated as an event receiver. Callers
+        // already short-circuit on this sentinel, but guard here too.
+        if (classInstance is SkippedTestInstance)
+        {
+            return;
+        }
+
+        if (!_initializedObjects.Add(classInstance))
+        {
+            return;
+        }
+
+        if (classInstance is IFirstTestInTestSessionEventReceiver
+            or IFirstTestInAssemblyEventReceiver
+            or IFirstTestInClassEventReceiver)
+        {
+            if (!_registeredFirstEventReceiverTypes.Add(classInstance.GetType()))
+            {
+                return;
+            }
+        }
+
+        _registry.RegisterReceiver(classInstance);
+    }
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

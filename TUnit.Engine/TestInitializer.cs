@@ -20,13 +20,15 @@ internal class TestInitializer
         _objectLifecycleService = objectLifecycleService;
     }
 
-    public void PrepareTest(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public void PrepareTest(AbstractExecutableTest test)
     {
-        // Register event receivers
-        _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
+        // Register the freshly created ClassInstance as an event receiver. The initial
+        // registration happens before instance creation, so re-iterating the full
+        // eligible-event-object set would duplicate work — only the ClassInstance is new.
+        _eventReceiverOrchestrator.RegisterClassInstanceReceiver(test.Context);
 
-        // Prepare test: set cached property values on the instance
-        // Does NOT call IAsyncInitializer - that is deferred until after BeforeClass hooks
+        // Prepare test: set cached property values on the instance.
+        // Does NOT call IAsyncInitializer - that is deferred until after BeforeClass hooks.
         _objectLifecycleService.PrepareTest(test.Context);
     }
 
