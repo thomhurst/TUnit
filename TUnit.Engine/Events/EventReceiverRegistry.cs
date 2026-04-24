@@ -7,6 +7,13 @@ namespace TUnit.Engine.Events;
 /// Fast registry for event receiver presence checks using bit flags.
 /// Thread-safe without locks: uses ConcurrentDictionary + copy-on-write arrays
 /// updated via AddOrUpdate. Reads are lock-free.
+/// <remarks>
+/// Batch <see cref="RegisterReceivers(ReadOnlySpan{object})"/> is NOT atomic: a concurrent
+/// reader may observe a subset of a batch because each receiver is registered independently.
+/// Callers must not depend on all-or-nothing visibility. Current callers register receivers
+/// before any test executes (see <c>EventReceiverOrchestrator</c>, which also dedups), so
+/// this relaxation is safe. Future maintainers must preserve that invariant.
+/// </remarks>
 internal sealed class EventReceiverRegistry
 {
     // Bit flags for fast checking
@@ -27,7 +34,8 @@ internal sealed class EventReceiverRegistry
         All = ~0
     }
 
-    // _registeredEvents is volatile for publication semantics; updated via Interlocked OR.
+    // Accessed via Volatile.Read + Interlocked.CompareExchange to provide acquire/release
+    // semantics without the cost of a volatile field on every write path.
     private int _registeredEvents;
 
     // Copy-on-write: each value is an immutable snapshot array. Writers replace the
@@ -165,6 +173,8 @@ internal sealed class EventReceiverRegistry
             {
                 if (ReferenceEquals(published, typedArray))
                 {
+                    // Conditional remove: only evicts the entry if its value still matches the stale typedArray.
+                    // netstandard2.0-compatible equivalent of ConcurrentDictionary.TryRemove(KeyValuePair<K,V>).
                     ((ICollection<KeyValuePair<Type, Array>>)_cachedTypedReceivers)
                         .Remove(new KeyValuePair<Type, Array>(typeKey, typedArray));
                 }
