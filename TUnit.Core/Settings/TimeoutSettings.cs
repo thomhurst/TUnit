@@ -19,18 +19,17 @@ public sealed class TimeoutSettings
     /// </summary>
     public TimeSpan DefaultTestTimeout
     {
-        get => _defaultTestTimeout;
+        get => _defaultTestTimeout ?? TimeSpan.FromMinutes(30);
         set
         {
             ValidatePositive(value);
             _defaultTestTimeout = value;
-            _defaultTestTimeoutExplicitlySet = true;
         }
     }
 
-    // When false, tests without [Timeout] bypass TimeoutHelper entirely —
-    // applying the 30-minute built-in default to every test would be pure overhead.
-    internal bool DefaultTestTimeoutExplicitlySet => _defaultTestTimeoutExplicitlySet;
+    // Null means the user never assigned a project-level default, so tests without [Timeout]
+    // bypass TimeoutHelper entirely instead of paying wrap overhead for a 30-minute backstop.
+    internal TimeSpan? ExplicitDefaultTestTimeout => _defaultTestTimeout;
 
     /// <summary>
     /// Default timeout for hook methods (Before/After at every level). Default: 5 minutes.
@@ -80,8 +79,7 @@ public sealed class TimeoutSettings
         }
     }
 
-    private TimeSpan _defaultTestTimeout = TimeSpan.FromMinutes(30);
-    private bool _defaultTestTimeoutExplicitlySet;
+    private TimeSpan? _defaultTestTimeout;
     private TimeSpan _defaultHookTimeout = TimeSpan.FromMinutes(5);
     private TimeSpan _forcefulExitTimeout = TimeSpan.FromSeconds(30);
     private TimeSpan _processExitHookDelay = TimeSpan.FromMilliseconds(500);

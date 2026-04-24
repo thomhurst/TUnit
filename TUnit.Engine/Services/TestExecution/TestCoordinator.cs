@@ -376,15 +376,8 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.RestoreExecutionContext();
             // The built-in 30-minute default is intentionally not applied per-test;
             // only honor an opt-in override set via TUnitSettings when no [Timeout] is present.
-            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
-            if (testTimeout is null)
-            {
-                var timeouts = TUnitSettings.Default.Timeouts;
-                if (timeouts.DefaultTestTimeoutExplicitlySet)
-                {
-                    testTimeout = timeouts.DefaultTestTimeout;
-                }
-            }
+            var testTimeout = test.Context.Metadata.TestDetails.Timeout
+                ?? TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
