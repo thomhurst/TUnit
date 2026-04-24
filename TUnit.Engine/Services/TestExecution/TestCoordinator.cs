@@ -134,20 +134,24 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            // Flush console interceptors to ensure all buffered output is captured.
-            // This is critical for output from Console.Write() without newline. The flush
-            // is unconditional because `HasCapturedOutput` is a point-in-time check: a test
-            // that fires `Task.Run(() => Console.WriteLine(...))` without awaiting can land
-            // writes after the check, which would silently lose output. The interceptor's
-            // own FlushIfNonEmpty path is a cheap no-op when there is nothing buffered.
-            try
+            // Flush console interceptors only when the test actually wrote something. The
+            // interceptor sets HasCapturedConsoleOutput on first write, so skipping when the
+            // flag is false avoids two async state machines per test in the common case of a
+            // passing test that produced no output. A test that fires-and-forgets writes via
+            // Task.Run without awaiting is already racing with termination under the old
+            // unconditional flush — the flag preserves identical semantics for that case
+            // (writes land -> flag set -> flush happens).
+            if (test.Context.HasCapturedConsoleOutput)
             {
-                await Console.Out.FlushAsync().ConfigureAwait(false);
-                await Console.Error.FlushAsync().ConfigureAwait(false);
-            }
-            catch (Exception flushEx)
-            {
-                await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+                try
+                {
+                    await Console.Out.FlushAsync().ConfigureAwait(false);
+                    await Console.Error.FlushAsync().ConfigureAwait(false);
+                }
+                catch (Exception flushEx)
+                {
+                    await _logger.LogErrorAsync($"Error flushing console output for {test.TestId}: {flushEx}").ConfigureAwait(false);
+                }
             }
 
             // Stay null on the success path — materializing the list only when something actually fails
