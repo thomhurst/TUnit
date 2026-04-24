@@ -2665,6 +2665,7 @@ namespace .
         public PropertyInjectionMetadata() { }
         public required  ContainingType { get; init; }
         public required <.IDataSourceAttribute> CreateDataSource { get; init; }
+        public <object, object?>? GetProperty { get; init; }
         public required string PropertyName { get; init; }
         public required  PropertyType { get; init; }
         public required <object, object?> SetProperty { get; init; }

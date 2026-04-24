@@ -4,15 +4,17 @@ using TUnit.Core.Helpers;
 namespace TUnit.Core;
 
 /// <summary>
-/// Strongly typed <see cref="ExecutableTest"/> that stores the per-test delegates from
+/// Strongly typed executable test that stores the per-test delegates from
 /// <see cref="TestMetadata{T}"/> as fields instead of capturing them in closures. This avoids the
 /// two closure allocations (<c>createInstance</c> and <c>invokeTest</c>) that the generic factory
 /// would otherwise allocate per test invocation — on a 1000-test run that is 2000 delegates saved.
+/// Inherits directly from <see cref="AbstractExecutableTest"/> so <see cref="ExecutableTest"/>
+/// can remain sealed (public API surface).
 /// </summary>
 /// <typeparam name="T">The test class type.</typeparam>
 internal sealed class ExecutableTest<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-    T> : ExecutableTest where T : class
+    T> : AbstractExecutableTest where T : class
 {
     // Fields that the previous closures captured. ClassArguments and Arguments live on the
     // base AbstractExecutableTest, so only the metadata reference plus the two ExecutableTestCreationContext

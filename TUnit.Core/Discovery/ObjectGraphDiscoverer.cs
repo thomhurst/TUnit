@@ -606,12 +606,17 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// <summary>
     /// Cache of type hierarchy sets keyed by <see cref="Type"/>. Per-type hierarchy is invariant,
     /// and each invocation otherwise allocates a fresh <see cref="HashSet{T}"/> of strings.
-    /// Populated on first access per type and read-only thereafter.
+    /// Populated on first access per type and read-only thereafter. The stored
+    /// <see cref="HashSet{T}"/> instance is shared — callers MUST treat it as read-only.
+    /// (Not typed as <c>IReadOnlySet{T}</c> because netstandard2.0 lacks the interface and
+    /// the only consumer, <see cref="IsDirectProperty"/>, needs the concrete type for
+    /// <see cref="HashSet{T}.GetAlternateLookup"/> on newer TFMs.)
     /// </summary>
     private static readonly ConcurrentDictionary<Type, HashSet<string>> TypeHierarchyCache = new();
 
     /// <summary>
     /// Gets all types in the inheritance hierarchy from the given type up to (but not including) object.
+    /// The returned <see cref="HashSet{T}"/> is shared across callers and MUST NOT be mutated.
     /// </summary>
     private static HashSet<string> GetTypeHierarchy(Type type)
         => TypeHierarchyCache.GetOrAdd(type, static t =>

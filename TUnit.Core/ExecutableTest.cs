@@ -5,20 +5,10 @@ namespace TUnit.Core;
 /// Replaces ExecutableTest<T> and DynamicExecutableTest with a single implementation.
 /// All mode-specific logic is handled during delegate creation, not execution.
 /// </summary>
-public class ExecutableTest : AbstractExecutableTest
+public sealed class ExecutableTest : AbstractExecutableTest
 {
-    // Null only inside typed subclasses that override CreateInstanceAsync/InvokeTestAsync and
-    // therefore never invoke the delegates. The parameterless constructor enforces that invariant.
-    private readonly Func<TestContext, Task<object>>? _createInstance;
-    private readonly Func<object, object?[], TestContext, CancellationToken, Task>? _invokeTest;
-
-    /// <summary>
-    /// Constructor for subclasses that supply their own invocation logic by overriding
-    /// <see cref="CreateInstanceAsync"/> and <see cref="InvokeTestAsync"/> directly.
-    /// </summary>
-    private protected ExecutableTest()
-    {
-    }
+    private readonly Func<TestContext, Task<object>> _createInstance;
+    private readonly Func<object, object?[], TestContext, CancellationToken, Task> _invokeTest;
 
     /// <summary>
     /// Creates an ExecutableTest where mode-specific behavior is encapsulated in the delegates.
@@ -36,11 +26,11 @@ public class ExecutableTest : AbstractExecutableTest
 
     public override async Task<object> CreateInstanceAsync()
     {
-        return await _createInstance!(Context);
+        return await _createInstance(Context);
     }
 
     public override async Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
     {
-        await _invokeTest!(instance, Arguments, Context, cancellationToken);
+        await _invokeTest(instance, Arguments, Context, cancellationToken);
     }
 }

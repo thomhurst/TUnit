@@ -8,7 +8,15 @@ namespace TUnit.Core.Interfaces.SourceGenerator;
 /// </summary>
 public sealed class PropertyInjectionMetadata
 {
-    private Func<object, object?>? _getProperty;
+    // Source-gen-supplied delegate (or null for hand-authored/reflection-only metadata).
+    // Kept separate from the lazy-init reflection fallback so the public GetProperty
+    // contract ("what the source generator emitted") is not polluted by internal caching.
+    private readonly Func<object, object?>? _sourceGenGetter;
+
+    // Lazily populated reflection-based fallback. volatile so a racing reader observes
+    // the completed delegate write without tearing on weakly-ordered architectures;
+    // Interlocked.CompareExchange makes the winning writer visible to everyone.
+    private volatile Func<object, object?>? _cachedGetter;
 
     /// <summary>
     /// Gets the name of the property that needs injection.
@@ -50,8 +58,8 @@ public sealed class PropertyInjectionMetadata
     /// </summary>
     public Func<object, object?>? GetProperty
     {
-        get => _getProperty;
-        init => _getProperty = value;
+        get => _sourceGenGetter;
+        init => _sourceGenGetter = value;
     }
 
     /// <summary>
@@ -63,19 +71,29 @@ public sealed class PropertyInjectionMetadata
         Justification = "ContainingType is annotated to preserve properties; reflection fallback is only used when source-gen did not emit a delegate.")]
     internal Func<object, object?> GetOrCreateGetter()
     {
-        if (_getProperty != null)
+        // Fast path: source-gen supplied a delegate.
+        if (_sourceGenGetter != null)
         {
-            return _getProperty;
+            return _sourceGenGetter;
+        }
+
+        // Fast path: reflection fallback already cached (volatile read).
+        var cached = _cachedGetter;
+        if (cached != null)
+        {
+            return cached;
         }
 
         var property = ContainingType.GetProperty(PropertyName);
-        if (property is null || !property.CanRead)
-        {
+        Func<object, object?> computed = property is null || !property.CanRead
             // Memoize a stub that mirrors the behavior the previous reflection-based
             // call sites expected (null when the property can't be read).
-            return _getProperty = static _ => null;
-        }
+            ? static _ => null
+            : property.GetValue;
 
-        return _getProperty = property.GetValue;
+        // Benign race: both racers compute equivalent delegates; CompareExchange makes the
+        // winner visible to any subsequent reader without a lock.
+        Interlocked.CompareExchange(ref _cachedGetter, computed, null);
+        return _cachedGetter!;
     }
 }
