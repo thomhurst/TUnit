@@ -92,7 +92,7 @@ public sealed class PropertyInjectionMetadata
         var property = ContainingType.GetProperty(PropertyName);
         var computed = property is null || !property.CanRead
             ? s_notReadableSentinel
-            : property.GetValue;
+            : (Func<object, object?>)(obj => property.GetValue(obj));
 
         // Benign race: both racers compute equivalent delegates; CompareExchange makes the
         // winner visible to any subsequent reader without a lock.

@@ -67,15 +67,21 @@ public class TestMetadata<
     {
         get
         {
-            if (_cachedExecutableTestFactory != null)
+            // Volatile-equivalent read via Interlocked pattern mirrors TestEntry's cached-delegate
+            // idiom: first reader computes, subsequent racers lose the CompareExchange and fall
+            // through to re-read the now-published field. Keeps this allocation-free on the fast
+            // path while guaranteeing publication on weakly-ordered architectures.
+            var cached = _cachedExecutableTestFactory;
+            if (cached != null)
             {
-                return _cachedExecutableTestFactory;
+                return cached;
             }
 
             if (InstanceFactory != null && InvokeTypedTest != null)
             {
-                _cachedExecutableTestFactory = CreateTypedExecutableTest;
-                return _cachedExecutableTestFactory;
+                Interlocked.CompareExchange<Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest>?>(
+                    ref _cachedExecutableTestFactory, CreateTypedExecutableTest, null);
+                return _cachedExecutableTestFactory!;
             }
 
             throw new InvalidOperationException($"InstanceFactory and InvokeTypedTest must be set for {typeof(T).Name}");

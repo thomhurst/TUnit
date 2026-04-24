@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Engine.Helpers;
@@ -41,8 +42,31 @@ internal static class ValueTaskBridge
     /// <summary>
     /// Pre-resolved generic method definition for <see cref="ToTask{T}(ValueTask{T})"/>.
     /// Callers invoke <see cref="MethodInfo.MakeGenericMethod"/> on this instance per element type.
+    /// On .NET 8+ uses the typed <see cref="Type.GetMethod(string, int, BindingFlags, Binder?, Type[], ParameterModifier[]?)"/>
+    /// overload so a future <c>ToTask</c> overload cannot silently match; on netstandard2.0
+    /// (which lacks that overload and <see cref="Type.MakeGenericMethodParameter(int)"/>)
+    /// falls back to a name-scan that uses <see cref="Enumerable.Single{TSource}(IEnumerable{TSource}, Func{TSource, bool})"/>
+    /// so an accidental duplicate match throws instead of silently picking one.
     /// </summary>
-    internal static readonly MethodInfo ToTaskGenericMethodDefinition =
-        typeof(ValueTaskBridge).GetMethods()
-            .First(m => m.Name == nameof(ToTask) && m.IsGenericMethodDefinition);
+    internal static readonly MethodInfo ToTaskGenericMethodDefinition = ResolveToTaskGenericMethodDefinition();
+
+#if NET8_0_OR_GREATER
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "MakeGenericType is called on ValueTask<> with a generic method parameter placeholder at startup to find the MethodInfo for ToTask<T>; the shared generic-type vtable is always available, and the resolved MethodInfo is then instantiated per-element-type in the same expression tree paths that already require dynamic code (AOT paths use direct delegates).")]
+#endif
+    private static MethodInfo ResolveToTaskGenericMethodDefinition()
+    {
+#if NET8_0_OR_GREATER
+        return typeof(ValueTaskBridge).GetMethod(
+            name: nameof(ToTask),
+            genericParameterCount: 1,
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: [typeof(ValueTask<>).MakeGenericType(Type.MakeGenericMethodParameter(0))],
+            modifiers: null)!;
+#else
+        return typeof(ValueTaskBridge).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(m => m.Name == nameof(ToTask) && m.IsGenericMethodDefinition);
+#endif
+    }
 }
