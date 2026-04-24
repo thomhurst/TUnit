@@ -442,39 +442,33 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// source-gen registration exists in the type's inheritance chain.
     /// </summary>
     private static InitializerPropertyInfo[]? GetFlattenedInitializerProperties(Type type)
-    {
-        if (FlattenedInitializerPropertiesCache.TryGetValue(type, out var cached))
+        => FlattenedInitializerPropertiesCache.GetOrAdd(type, static t =>
         {
-            return cached;
-        }
+            List<InitializerPropertyInfo>? merged = null;
+            HashSet<string>? seen = null;
 
-        List<InitializerPropertyInfo>? merged = null;
-        HashSet<string>? seen = null;
-
-        for (var currentType = type; currentType != null && currentType != typeof(object); currentType = currentType.BaseType)
-        {
-            var registered = InitializerPropertyRegistry.GetProperties(currentType);
-            if (registered == null)
+            for (var currentType = t; currentType != null && currentType != typeof(object); currentType = currentType.BaseType)
             {
-                continue;
-            }
-
-            merged ??= new List<InitializerPropertyInfo>(registered.Length);
-            seen ??= new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (var p in registered)
-            {
-                if (seen.Add(p.PropertyName))
+                var registered = InitializerPropertyRegistry.GetProperties(currentType);
+                if (registered == null)
                 {
-                    merged.Add(p);
+                    continue;
+                }
+
+                merged ??= new List<InitializerPropertyInfo>(registered.Length);
+                seen ??= new HashSet<string>(StringComparer.Ordinal);
+
+                foreach (var p in registered)
+                {
+                    if (seen.Add(p.PropertyName))
+                    {
+                        merged.Add(p);
+                    }
                 }
             }
-        }
 
-        var result = merged?.ToArray();
-        FlattenedInitializerPropertiesCache[type] = result;
-        return result;
-    }
+            return merged?.ToArray();
+        });
 
     /// <summary>
     /// Traverses the pre-flattened source-generated IAsyncInitializer properties.

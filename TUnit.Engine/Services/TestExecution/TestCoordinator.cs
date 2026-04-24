@@ -277,6 +277,15 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
     /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
     /// </summary>
+    /// <remarks>
+    /// Ordering invariant: <see cref="ExecuteTestInternalAsync"/> calls
+    /// <c>_eventReceiverOrchestrator.RegisterReceivers</c> (which invokes
+    /// <c>EnsureEventReceiversCached</c>) before entering this method. The hot-path
+    /// receiver getters used by <c>InvokeTest{Skipped,End}EventReceiversAsync</c> therefore
+    /// skip their own guards and rely on that upstream call to have populated the caches —
+    /// the skip-path branch below is safe because it cannot be reached without that
+    /// prerequisite having run.
+    /// </remarks>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Check if this test should be skipped before creating the class instance.
@@ -287,6 +296,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _stateManager.MarkSkipped(test, test.Context.SkipReason!);
 
+            // Receiver caches are populated upstream (see <remarks> on this method).
             await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);

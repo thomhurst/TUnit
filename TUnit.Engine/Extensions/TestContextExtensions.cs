@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+﻿using System.Diagnostics;
+using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Utilities;
@@ -264,6 +265,7 @@ internal static class TestContextExtensions
 #if NET
     public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext, EventReceiverStage stage)
     {
+        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestStartReceivers — caller is on the hot path and skips the guard.");
         return stage == EventReceiverStage.Early
             ? testContext.CachedTestStartReceiversEarly!
             : testContext.CachedTestStartReceiversLate!;
@@ -271,6 +273,7 @@ internal static class TestContextExtensions
 #else
     public static ITestStartEventReceiver[] GetTestStartReceivers(this TestContext testContext)
     {
+        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestStartReceivers — caller is on the hot path and skips the guard.");
         return testContext.CachedTestStartReceivers!;
     }
 #endif
@@ -281,6 +284,7 @@ internal static class TestContextExtensions
 #if NET
     public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext, EventReceiverStage stage)
     {
+        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestEndReceivers — caller is on the hot path and skips the guard.");
         return stage == EventReceiverStage.Early
             ? testContext.CachedTestEndReceiversEarly!
             : testContext.CachedTestEndReceiversLate!;
@@ -288,6 +292,7 @@ internal static class TestContextExtensions
 #else
     public static ITestEndEventReceiver[] GetTestEndReceivers(this TestContext testContext)
     {
+        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestEndReceivers — caller is on the hot path and skips the guard.");
         return testContext.CachedTestEndReceivers!;
     }
 #endif
@@ -297,6 +302,7 @@ internal static class TestContextExtensions
     /// </summary>
     public static ITestSkippedEventReceiver[] GetTestSkippedReceivers(this TestContext testContext)
     {
+        Debug.Assert(testContext.EventReceiversBuilt, "EnsureEventReceiversCached must run before GetTestSkippedReceivers — caller is on the hot path and skips the guard.");
         return testContext.CachedTestSkippedReceivers!;
     }
 
