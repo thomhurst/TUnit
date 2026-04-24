@@ -378,6 +378,14 @@ internal sealed class TestCoordinator : ITestCoordinator
             // only honor an opt-in override set via TUnitSettings when no [Timeout] is present.
             var testTimeout = test.Context.Metadata.TestDetails.Timeout
                 ?? TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
+            // Write the resolved timeout back onto TestDetails so downstream classification
+            // (TUnitMessageBus.GetFailureStateProperty) can recognise this as a timeout failure.
+            // Without this, DefaultTestTimeout-triggered timeouts would slip through the
+            // `TestDetails.Timeout != null` guard and be misreported as generic errors.
+            if (testTimeout is not null && test.Context.Metadata.TestDetails.Timeout is null)
+            {
+                test.Context.Metadata.TestDetails.Timeout = testTimeout;
+            }
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
