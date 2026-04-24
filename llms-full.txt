@@ -15604,10 +15604,15 @@ TUnit supports several operators for building complex filters:
 - **Wildcard matching:** Use `*` for pattern matching (e.g., `LoginTests*` matches `LoginTests`, `LoginTestsSuite`, etc.)
 - **Equality:** Use `=` for exact match (e.g., `[Category=Unit]`)
 - **Negation:** Use `!=` for excluding values (e.g., `[Category!=Performance]`)
-- **AND operator:** Use `&` to combine conditions (e.g., `[Category=Unit]&[Priority=High]`)
-- **OR operator:** Use `|` to match either condition within a single path segment - requires parentheses. Examples:
+- **AND operator:** Use `&` to combine conditions within a single path segment or property group, with each side wrapped in parentheses. Examples:
+  - AND across path patterns: `/*/*/(ClassA*)&(*Smoke)/*`
+  - AND across properties: `/**[(Category=Unit)&(Priority=High)]`
+- **OR operator:** Use `|` the same way — within a single segment or property group, with parentheses. Examples:
   - OR across classes: `/*/*/(Class1)|(Class2)/*`
-  - OR across different properties: `/**[(Category=Smoke)|(Priority=High)]`
+  - OR across properties: `/**[(Category=Smoke)|(Priority=High)]`
+- **Match-all:** `**` matches any path depth (e.g., `/**` or `/MyAssembly/**`). It must appear at the end of the path — `/**/Path` is not allowed.
+
+Only one property group `[...]` is permitted per path segment, so combine multiple property conditions inside a single bracket (e.g., `[(A=1)&(B=2)]`, not `[A=1]&[B=2]`).
 
 For full information on the treenode filters, see [Microsoft's documentation](https://github.com/microsoft/testfx/blob/main/docs/mstest-runner-graphqueryfiltering/graph-query-filtering.md)
 
@@ -15667,16 +15672,16 @@ dotnet run --treenode-filter "/*/*/*/*[Category!=Slow]"
 
 ### Combined filters
 
-Combine multiple conditions with `&` to narrow results. Run only high-priority smoke tests:
+Combine multiple property conditions inside a single bracket group with `&`. Run only high-priority smoke tests:
 
 ```bash
-dotnet run --treenode-filter "/*/*/*/*[Category=Smoke]&[Priority=High]"
+dotnet run --treenode-filter "/*/*/*/*[(Category=Smoke)&(Priority=High)]"
 ```
 
 Combine namespace and property filters. Run integration tests tagged as critical:
 
 ```bash
-dotnet run --treenode-filter "/*/MyProject.Tests.Integration/*/*/*[Priority=Critical]"
+dotnet run --treenode-filter "/*/MyProject.Tests.Integration/*/*[Priority=Critical]"
 ```
 
 ### OR filter across classes
@@ -15695,7 +15700,7 @@ Run tests matching either property. The OR must live inside a single bracket gro
 dotnet run --treenode-filter "/**[(Category=Smoke)|(Priority=High)]"
 ```
 
-Note that `[Category=Smoke]|[Priority=High]` (separate brackets) is **not** valid — the OR has to be inside one `[...]`.
+Note that `[Category=Smoke]|[Priority=High]` (separate brackets) is **not** valid — only one `[...]` group is allowed per path segment, so every property condition must live inside it.
 
 ---
 
