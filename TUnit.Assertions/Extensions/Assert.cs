@@ -50,12 +50,16 @@ public static class Assert
     /// Example: await Assert.That("hello").IsEqualTo("hello");
     /// Example: await Assert.That((IEnumerable&lt;char&gt;)"ABC").Contains('B');
     /// </summary>
+    /// <remarks>
+    /// Accepts <see cref="StringValue"/> rather than <c>string?</c> so user types with their own
+    /// <c>implicit operator string</c> do not bind here. See <see cref="StringValue"/> for details.
+    /// </remarks>
     [OverloadResolutionPriority(2)]
     public static ValueAssertion<string> That(
-        string? value,
+        StringValue value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new ValueAssertion<string>(value, expression);
+        return new ValueAssertion<string>(value.Value, expression);
     }
 
     /// <summary>
