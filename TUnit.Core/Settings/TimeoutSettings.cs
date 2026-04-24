@@ -9,9 +9,13 @@ public sealed class TimeoutSettings
     internal TimeoutSettings() { }
 
     /// <summary>
-    /// Default timeout for individual tests. Default: 30 minutes.
-    /// Overridden per-test by <see cref="TimeoutAttribute"/>.
+    /// Default timeout for individual tests. Overridden per-test by <see cref="TimeoutAttribute"/>.
     /// Precedence: CLI/env var (N/A for test timeout) → TUnitSettings → built-in default.
+    /// <para>
+    /// If this property is never explicitly set, tests without a <see cref="TimeoutAttribute"/>
+    /// run without any timeout wrapper. The 30-minute fallback only applies when this
+    /// property is explicitly assigned.
+    /// </para>
     /// </summary>
     public TimeSpan DefaultTestTimeout
     {
@@ -24,7 +28,7 @@ public sealed class TimeoutSettings
         }
     }
 
-    // When false, tests without [Timeout] bypass TimeoutHelper entirely (#5711) —
+    // When false, tests without [Timeout] bypass TimeoutHelper entirely —
     // applying the 30-minute built-in default to every test would be pure overhead.
     internal bool DefaultTestTimeoutExplicitlySet => _defaultTestTimeoutExplicitlySet;
 
