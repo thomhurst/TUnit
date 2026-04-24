@@ -256,8 +256,7 @@ internal sealed class TestBuilderPipeline
                 TestLineNumber = metadata.LineNumber,
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
-                AttributesByType = attributes.ToAttributeDictionary(),
-                Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+                AttributesByType = attributes.ToAttributeDictionary()
             };
 
             var testBuilderContext = CreateTestBuilderContext(metadata);
@@ -383,8 +382,7 @@ internal sealed class TestBuilderPipeline
                         TestLineNumber = resolvedMetadata.LineNumber,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
-                        AttributesByType = attributes.ToAttributeDictionary(),
-                        Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+                        AttributesByType = attributes.ToAttributeDictionary()
                     };
 
                     var context = _contextProvider.CreateTestContext(
@@ -462,8 +460,7 @@ internal sealed class TestBuilderPipeline
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+            AttributesByType = AttributeDictionaryHelper.Empty
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -515,8 +512,7 @@ internal sealed class TestBuilderPipeline
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+            AttributesByType = AttributeDictionaryHelper.Empty
         };
 
         var context = _contextProvider.CreateTestContext(

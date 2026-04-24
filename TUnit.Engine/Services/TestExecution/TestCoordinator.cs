@@ -2,6 +2,7 @@ using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Settings;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
@@ -373,7 +374,14 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _testInitializer.PrepareTest(test);
             test.Context.RestoreExecutionContext();
-            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+            // The built-in 30-minute default is intentionally not applied per-test (#5711);
+            // only honor an opt-in override set via TUnitSettings when no [Timeout] is present.
+            var timeouts = TUnitSettings.Default.Timeouts;
+            TimeSpan? testTimeout = test.Context.Metadata.TestDetails.Timeout;
+            if (testTimeout is null && timeouts.DefaultTestTimeoutExplicitlySet)
+            {
+                testTimeout = timeouts.DefaultTestTimeout;
+            }
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
