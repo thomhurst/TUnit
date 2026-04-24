@@ -476,13 +476,28 @@ internal sealed class HookExecutor
     }
 #endif
 
-    public async ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
 
-        // Execute BeforeEvery(Test) hooks first (global test hooks run before specific hooks)
-        var beforeEveryTestHooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
+        var beforeEveryTestHooks = _hookCollectionService.GetCachedBeforeEveryTestHooks();
+        var hasCachedBeforeTestHooks = _hookCollectionService.TryGetCachedBeforeTestHooks(testClassType, out var beforeTestHooks);
 
+        if (beforeEveryTestHooks.Count == 0 && hasCachedBeforeTestHooks && beforeTestHooks.Count == 0)
+        {
+            return default;
+        }
+
+        return ExecuteBeforeTestHooksCoreAsync(test, testClassType, beforeEveryTestHooks, hasCachedBeforeTestHooks ? beforeTestHooks : null, cancellationToken);
+    }
+
+    private async ValueTask ExecuteBeforeTestHooksCoreAsync(
+        AbstractExecutableTest test,
+        Type testClassType,
+        IReadOnlyList<NamedHookDelegate<TestContext>> beforeEveryTestHooks,
+        IReadOnlyList<NamedHookDelegate<TestContext>>? cachedBeforeTestHooks,
+        CancellationToken cancellationToken)
+    {
         if (beforeEveryTestHooks.Count > 0)
         {
             foreach (var hook in beforeEveryTestHooks)
@@ -509,8 +524,8 @@ internal sealed class HookExecutor
             }
         }
 
-        // Execute Before(Test) hooks after BeforeEvery hooks
-        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
+        var beforeTestHooks = cachedBeforeTestHooks
+            ?? await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
 
         if (beforeTestHooks.Count > 0)
         {
@@ -539,14 +554,32 @@ internal sealed class HookExecutor
         }
     }
 
-    public async ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Defer exception list allocation until actually needed
-        List<Exception>? exceptions = null;
         var testClassType = test.Metadata.TestClassType;
 
-        // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
-        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
+        var afterEveryTestHooks = _hookCollectionService.GetCachedAfterEveryTestHooks();
+        var hasCachedAfterTestHooks = _hookCollectionService.TryGetCachedAfterTestHooks(testClassType, out var afterTestHooks);
+
+        if (afterEveryTestHooks.Count == 0 && hasCachedAfterTestHooks && afterTestHooks.Count == 0)
+        {
+            return new ValueTask<IReadOnlyList<Exception>>([]);
+        }
+
+        return ExecuteAfterTestHooksCoreAsync(test, testClassType, afterEveryTestHooks, hasCachedAfterTestHooks ? afterTestHooks : null, cancellationToken);
+    }
+
+    private async ValueTask<IReadOnlyList<Exception>> ExecuteAfterTestHooksCoreAsync(
+        AbstractExecutableTest test,
+        Type testClassType,
+        IReadOnlyList<NamedHookDelegate<TestContext>> afterEveryTestHooks,
+        IReadOnlyList<NamedHookDelegate<TestContext>>? cachedAfterTestHooks,
+        CancellationToken cancellationToken)
+    {
+        List<Exception>? exceptions = null;
+
+        var afterTestHooks = cachedAfterTestHooks
+            ?? await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
 
         if (afterTestHooks.Count > 0)
         {
@@ -564,9 +597,6 @@ internal sealed class HookExecutor
                 }
             }
         }
-
-        // Execute AfterEvery(Test) hooks after After hooks (global test hooks run last for cleanup)
-        var afterEveryTestHooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
 
         if (afterEveryTestHooks.Count > 0)
         {
