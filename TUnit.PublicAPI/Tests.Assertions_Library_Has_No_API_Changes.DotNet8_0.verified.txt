@@ -2672,6 +2672,10 @@ namespace .Extensions
             where TValue :  struct, <TValue> { }
         public static . Length(this .<string> source) { }
         public static . Length(this .<string> source, <.<int>, .<int>?> lengthAssertion, [.("lengthAssertion")] string? expression = null) { }
+        public static .<TObject> Member<TObject>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, .<string>> assertions) { }
+        [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
+            "Object, TTransformed> overload with strongly-typed assertions.")]
+        public static .<TObject> Member<TObject>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, object> assertions) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TItem, TTransformed> overload with strongly-typed assertions.")]
@@ -2688,6 +2692,7 @@ namespace .Extensions
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, object> assertions) { }
+        public static .<TObject> Member<TObject, TTransformed>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions)
             where TKey :  notnull { }
