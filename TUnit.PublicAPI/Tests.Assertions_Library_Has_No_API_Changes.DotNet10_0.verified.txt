@@ -189,7 +189,7 @@ namespace
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
         [.(2)]
-        public static .<string> That(string? value, [.("value")] string? expression = null) { }
+        public static .<string> That(.StringValue value, [.("value")] string? expression = null) { }
         [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         [.(1)]
@@ -270,6 +270,11 @@ namespace
         public override string ToString() { }
         public static .StringMatcher AsRegex(string pattern) { }
         public static .StringMatcher AsWildcard(string pattern) { }
+    }
+    public readonly struct StringValue
+    {
+        public string? Value { get; }
+        public static .StringValue op_Implicit(string? value) { }
     }
 }
 namespace .
