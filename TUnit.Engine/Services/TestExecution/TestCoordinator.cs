@@ -3,6 +3,7 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -295,8 +296,12 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
-        // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
-        test.Context.CachedEligibleEventObjects = null;
+        // Rebuild the receiver cache now that ClassInstance is assigned — the initial build
+        // at RegisterReceivers time ran with the placeholder instance. EnsureEventReceiversCached
+        // detects the changed instance via its internal invalidation check. Hoisting the call
+        // here lets the five per-test receiver getters (GetTestStartReceivers/GetTestEndReceivers/...)
+        // skip their own guards on the hot path.
+        test.Context.EnsureEventReceiversCached();
 
         // Check if this test should be skipped (after creating instance).
         // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,

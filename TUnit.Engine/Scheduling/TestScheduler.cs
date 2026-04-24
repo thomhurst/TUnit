@@ -27,7 +27,9 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly StaticPropertyHandler _staticPropertyHandler;
     private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly Lazy<int> _maxParallelism;
+#if !NET8_0_OR_GREATER
     private readonly Lazy<SemaphoreSlim> _maxParallelismSemaphore;
+#endif
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -57,8 +59,13 @@ internal sealed class TestScheduler : ITestScheduler
 
         _maxParallelism = new Lazy<int>(() => GetMaxParallelism(logger, commandLineOptions));
 
+#if !NET8_0_OR_GREATER
+        // The .NET 8+ path uses Parallel.ForEachAsync which caps concurrency via
+        // ParallelOptions.MaxDegreeOfParallelism — the semaphore is only needed
+        // for the netstandard2.0 fallback path.
         _maxParallelismSemaphore = new Lazy<SemaphoreSlim>(() =>
             new SemaphoreSlim(_maxParallelism.Value, _maxParallelism.Value));
+#endif
     }
 
     #if NET8_0_OR_GREATER
@@ -310,10 +317,14 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        // All paths run through the semaphore-backed limiter so the DOP cap is
-        // unified in GetMaxParallelism. "Unlimited" is resolved to the default
-        // cap (ProcessorCount * 4) there rather than being a separate code path.
+        // All paths run through the shared limiter so the DOP cap is unified in
+        // GetMaxParallelism. "Unlimited" is resolved to the default cap
+        // (ProcessorCount * 4) there rather than being a separate code path.
+#if NET8_0_OR_GREATER
+        return ExecuteWithGlobalLimitAsync(tests, cancellationToken);
+#else
         return ExecuteWithGlobalLimitAsync(tests, _maxParallelismSemaphore.Value, cancellationToken);
+#endif
     }
 
 #if NET8_0_OR_GREATER
@@ -330,19 +341,16 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private async Task ExecuteWithGlobalLimitAsync(
+#if NET8_0_OR_GREATER
+    private Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
-        SemaphoreSlim globalSemaphore,
         CancellationToken cancellationToken)
     {
-        var maxParallelism = _maxParallelism.Value;
-
-#if NET8_0_OR_GREATER
-        await Parallel.ForEachAsync(
+        return Parallel.ForEachAsync(
             tests,
             new ParallelOptions
             {
-                MaxDegreeOfParallelism = maxParallelism,
+                MaxDegreeOfParallelism = _maxParallelism.Value,
                 CancellationToken = cancellationToken
             },
             async (test, ct) =>
@@ -350,8 +358,14 @@ internal sealed class TestScheduler : ITestScheduler
                 test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
                 await test.ExecutionTask.ConfigureAwait(false);
             }
-        ).ConfigureAwait(false);
+        );
+    }
 #else
+    private async Task ExecuteWithGlobalLimitAsync(
+        AbstractExecutableTest[] tests,
+        SemaphoreSlim globalSemaphore,
+        CancellationToken cancellationToken)
+    {
         // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
         var tasks = new Task[tests.Length];
         for (var i = 0; i < tests.Length; i++)
@@ -372,8 +386,8 @@ internal sealed class TestScheduler : ITestScheduler
             }, CancellationToken.None);
         }
         await Task.WhenAll(tasks).ConfigureAwait(false);
-#endif
     }
+#endif
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
     {
