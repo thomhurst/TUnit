@@ -185,6 +185,7 @@ public class ImplicitStringOperatorOverloadTests
         await Assert.That(assertion).IsTypeOf<MutableDictionaryAssertion<string, int>>();
     }
 
+#if NET5_0_OR_GREATER
     [Test]
     public async Task MemoryOfChar_RoutesToMemoryAssertion()
     {
@@ -200,6 +201,7 @@ public class ImplicitStringOperatorOverloadTests
         var assertion = Assert.That(mem);
         await Assert.That(assertion).IsTypeOf<ReadOnlyMemoryAssertion<char>>();
     }
+#endif
 
     // ============ Delegate / Task overloads unchanged ============
 
