@@ -112,14 +112,8 @@ public abstract class Context : IContext, IDisposable
 
     // Fast path for callers that need to know whether anything was ever captured —
     // lets the result-building code skip the reader/writer lock acquisition entirely
-    // for the (very common) case of a passing test with no output. Includes the
-    // console interceptor line buffers so partial writes (Console.Write without a
-    // newline) still force a flush at end-of-test.
-    internal virtual bool HasCapturedOutput =>
-        _outputWriter != null
-        || _errorOutputWriter != null
-        || _consoleStdOutLineBuffer != null
-        || _consoleStdErrLineBuffer != null;
+    // for the (very common) case of a passing test with no output.
+    internal virtual bool HasCapturedOutput => _outputWriter != null || _errorOutputWriter != null;
 
     public DefaultLogger GetDefaultLogger()
     {

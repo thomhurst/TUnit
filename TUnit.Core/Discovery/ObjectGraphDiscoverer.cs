@@ -343,7 +343,13 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             // Use the compile-time-generated getter when the source generator emitted one,
             // otherwise fall back to a cached reflection-based getter. Eliminates the
             // per-test Type.GetProperty reflection lookup on the hot path.
+            // null getter => property is not readable; skip.
             var getter = metadata.GetOrCreateGetter();
+            if (getter is null)
+            {
+                continue;
+            }
+
             var value = getter(obj);
             if (value != null && tryAdd(value, currentDepth))
             {

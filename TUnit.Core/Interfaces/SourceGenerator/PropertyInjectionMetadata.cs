@@ -8,6 +8,10 @@ namespace TUnit.Core.Interfaces.SourceGenerator;
 /// </summary>
 public sealed class PropertyInjectionMetadata
 {
+    // Sentinel indicating the property is not readable — distinct from "not yet computed"
+    // (null) so the memoized negative result does not keep re-running reflection.
+    private static readonly Func<object, object?> s_notReadableSentinel = static _ => null;
+
     // Source-gen-supplied delegate (or null for hand-authored/reflection-only metadata).
     // Kept separate from the lazy-init reflection fallback so the public GetProperty
     // contract ("what the source generator emitted") is not polluted by internal caching.
@@ -63,13 +67,14 @@ public sealed class PropertyInjectionMetadata
     }
 
     /// <summary>
-    /// Returns a delegate that reads the property value from a given instance. Uses the
+    /// Returns a delegate that reads the property value from a given instance, or <c>null</c>
+    /// when the property is not readable (callers should skip such properties). Uses the
     /// source-generated <see cref="GetProperty"/> delegate when available, otherwise compiles
     /// a reflection-based getter once and caches it on the metadata instance.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075",
         Justification = "ContainingType is annotated to preserve properties; reflection fallback is only used when source-gen did not emit a delegate.")]
-    internal Func<object, object?> GetOrCreateGetter()
+    internal Func<object, object?>? GetOrCreateGetter()
     {
         // Fast path: source-gen supplied a delegate.
         if (_sourceGenGetter != null)
@@ -81,19 +86,18 @@ public sealed class PropertyInjectionMetadata
         var cached = _cachedGetter;
         if (cached != null)
         {
-            return cached;
+            return ReferenceEquals(cached, s_notReadableSentinel) ? null : cached;
         }
 
         var property = ContainingType.GetProperty(PropertyName);
-        Func<object, object?> computed = property is null || !property.CanRead
-            // Memoize a stub that mirrors the behavior the previous reflection-based
-            // call sites expected (null when the property can't be read).
-            ? static _ => null
+        var computed = property is null || !property.CanRead
+            ? s_notReadableSentinel
             : property.GetValue;
 
         // Benign race: both racers compute equivalent delegates; CompareExchange makes the
         // winner visible to any subsequent reader without a lock.
         Interlocked.CompareExchange(ref _cachedGetter, computed, null);
-        return _cachedGetter!;
+        var winner = _cachedGetter!;
+        return ReferenceEquals(winner, s_notReadableSentinel) ? null : winner;
     }
 }

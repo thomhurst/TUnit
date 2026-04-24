@@ -234,7 +234,13 @@ internal sealed class PropertyInjectionPlan
         {
             foreach (var metadata in SourceGeneratedProperties)
             {
-                yield return metadata.GetOrCreateGetter()(instance);
+                // Skip non-readable properties so the enumeration count matches the legacy
+                // reflection behavior (old code did not yield for properties without a getter).
+                var getter = metadata.GetOrCreateGetter();
+                if (getter is not null)
+                {
+                    yield return getter(instance);
+                }
             }
         }
         else if (ReflectionProperties.Length > 0)

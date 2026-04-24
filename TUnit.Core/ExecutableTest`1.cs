@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 
@@ -40,6 +41,11 @@ internal sealed class ExecutableTest<
         }
 
         var attributes = _metadata.GetOrCreateAttributes();
+        // TestSessionId defaults to string.Empty for allocation reasons — callers in the
+        // engine must overwrite it before reaching test-variant generation. Assert here
+        // rather than guarding every write site.
+        Debug.Assert(!string.IsNullOrEmpty(_metadata.TestSessionId),
+            $"TestSessionId must be assigned before creating a test instance for {_metadata.TestName}");
         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
             attributes,
             _metadata.TestClassType,
