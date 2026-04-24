@@ -27,6 +27,8 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     /// This ensures each test has its own buffer, preventing output mixing between parallel tests.
     /// Locking is handled internally by <see cref="ConsoleLineBuffer"/> using the efficient Lock type.
     /// </summary>
+    // Use GetLineBufferForWrite() on all write paths; this method is for Flush/Close only
+    // so that reading the buffer to drain it doesn't spuriously set HasCapturedConsoleOutput.
     protected abstract ConsoleLineBuffer GetLineBuffer();
 
     /// <summary>

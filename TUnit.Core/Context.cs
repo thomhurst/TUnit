@@ -37,8 +37,8 @@ public abstract class Context : IContext, IDisposable
 
     // Set by the console interceptor on first write so TestCoordinator can skip the
     // two Console.Out/Err FlushAsync state machines per test when nothing was written.
-    // Volatile read/write is cheap and sufficient — the flag only ever transitions false -> true.
-    private int _consoleOutputCaptured;
+    // volatile is cheap and sufficient — the flag only ever transitions false -> true.
+    private volatile bool _consoleOutputCaptured;
 
     // Thread-safe: console interceptors may access from multiple threads.
     private StringBuilder GetOutputBuilder() =>
@@ -68,9 +68,9 @@ public abstract class Context : IContext, IDisposable
     internal ConsoleLineBuffer ConsoleStdErrLineBuffer =>
         LazyInitializer.EnsureInitialized(ref _consoleStdErrLineBuffer)!;
 
-    internal bool HasCapturedConsoleOutput => Volatile.Read(ref _consoleOutputCaptured) != 0;
+    internal bool HasCapturedConsoleOutput => _consoleOutputCaptured;
 
-    internal void MarkConsoleOutputCaptured() => Volatile.Write(ref _consoleOutputCaptured, 1);
+    internal void MarkConsoleOutputCaptured() => _consoleOutputCaptured = true;
 
     internal Context(Context? parent)
     {
