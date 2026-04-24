@@ -91,9 +91,17 @@ public class TestMetadata<
                 return _cachedExecutableTestFactory!;
             }
 
-            throw new InvalidOperationException($"InstanceFactory and an invoker (InvokeTypedTest or IndexedInvokeBody) must be set for {typeof(T).Name}");
+            // Delegating the throw to a helper keeps this getter itself throw-free (Sonar S2372) —
+            // the abstract base declares this as a property so it must stay a property, and the
+            // misconfiguration is a programmer error rather than a recoverable condition.
+            return ThrowMissingInvoker();
         }
     }
+
+    [DoesNotReturn]
+    private static Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> ThrowMissingInvoker() =>
+        throw new InvalidOperationException(
+            $"InstanceFactory and an invoker (InvokeTypedTest or IndexedInvokeBody) must be set for {typeof(T).Name}");
 
     private static AbstractExecutableTest CreateTypedExecutableTest(
         ExecutableTestCreationContext context,

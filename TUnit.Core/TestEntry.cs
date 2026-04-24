@@ -107,13 +107,6 @@ public sealed class TestEntry<
     private PropertyDataSource[]? _cachedPropertyDataSources;
     private PropertyInjectionData[]? _cachedPropertyInjections;
 
-    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation:
-    // TestEntry-sourced metadata always takes the IndexedAttributeFactory path, so this throws
-    // if ever invoked — reaching it indicates an engine bug.
-    private static readonly Func<Attribute[]> s_indexedAttributeFactoryPlaceholder =
-        static () => throw new InvalidOperationException(
-            "TestEntry metadata must resolve attributes via IndexedAttributeFactory.");
-
     internal TestMetadata<T> ToTestMetadata(string testSessionId)
     {
         return new TestMetadata<T>
@@ -129,7 +122,7 @@ public sealed class TestEntry<
             InstanceFactory = CreateInstance,
             IndexedInvokeBody = InvokeBody,
             MethodIndex = MethodIndex,
-            AttributeFactory = s_indexedAttributeFactoryPlaceholder,
+            AttributeFactory = TestEntrySentinel.IndexedAttributeFactoryPlaceholder,
             IndexedAttributeFactory = CreateAttributes,
             AttributeGroupIndex = AttributeGroupIndex,
             FilePath = FilePath,
@@ -176,4 +169,16 @@ public sealed class TestEntry<
         }
         return result;
     }
+}
+
+// Non-generic holder so the placeholder delegate is shared across every closed TestEntry<T> —
+// a static field on the generic type would otherwise be duplicated per closed type (Sonar S2743).
+internal static class TestEntrySentinel
+{
+    // Satisfies TestMetadata's `required` AttributeFactory without a per-test allocation:
+    // TestEntry-sourced metadata always takes the IndexedAttributeFactory path, so this throws
+    // if ever invoked — reaching it indicates an engine bug.
+    internal static readonly Func<Attribute[]> IndexedAttributeFactoryPlaceholder =
+        static () => throw new InvalidOperationException(
+            "TestEntry metadata must resolve attributes via IndexedAttributeFactory.");
 }
