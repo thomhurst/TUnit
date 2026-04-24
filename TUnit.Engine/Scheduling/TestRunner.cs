@@ -59,21 +59,41 @@ public sealed class TestRunner
             return new ValueTask(existingTcs.Task);
         }
 
-        return ExecuteTestWithCompletionAsync(test, cancellationToken, tcs);
-    }
+        // Skip the extra async state machine that a wrapper method would create. Start the
+        // inner ValueTask, fast-path synchronous completion into the TCS, and otherwise attach
+        // a synchronous continuation that mirrors the outcome onto the TCS.
+        var innerTask = ExecuteTestInternalAsync(test, cancellationToken);
 
-    private async ValueTask ExecuteTestWithCompletionAsync(AbstractExecutableTest test, CancellationToken cancellationToken, TaskCompletionSource<bool> tcs)
-    {
-        try
+        if (innerTask.IsCompletedSuccessfully)
         {
-            await ExecuteTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             tcs.SetResult(true);
+            return default;
         }
-        catch (Exception ex)
-        {
-            tcs.SetException(ex);
-            throw;
-        }
+
+        var asTask = innerTask.AsTask();
+        asTask.ContinueWith(
+            static (completed, state) =>
+            {
+                var completionSource = (TaskCompletionSource<bool>)state!;
+                if (completed.IsFaulted)
+                {
+                    completionSource.TrySetException(completed.Exception!.InnerExceptions);
+                }
+                else if (completed.IsCanceled)
+                {
+                    completionSource.TrySetCanceled();
+                }
+                else
+                {
+                    completionSource.TrySetResult(true);
+                }
+            },
+            tcs,
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+
+        return new ValueTask(asTask);
     }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
