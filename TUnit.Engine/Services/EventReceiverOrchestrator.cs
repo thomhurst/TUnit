@@ -80,12 +80,7 @@ internal sealed class EventReceiverOrchestrator
         vlb.Dispose();
     }
 
-    /// <summary>
-    /// Registers the freshly created ClassInstance as an event receiver if it is one,
-    /// without iterating the full eligible-event-object set (which otherwise re-checks
-    /// attributes, arguments, etc. that were already processed by the earlier
-    /// <see cref="RegisterReceivers"/> call). See #5685.
-    /// </summary>
+    // ClassInstance is null at the initial RegisterReceivers call, so only it needs registering here.
     public void RegisterClassInstanceReceiver(TestContext context)
     {
         var classInstance = context.Metadata.TestDetails.ClassInstance;

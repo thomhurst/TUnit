@@ -57,15 +57,13 @@ internal sealed class TestCoordinator : ITestCoordinator
             _stateManager.MarkRunning(test);
             // Await InProgress so back-pressure from MTP's bounded channel spreads publishes
             // across each test task rather than fanning 1000+ fire-and-forget writers into
-            // the channel at once (#5685).
+            // the channel at once.
             await _messageBus.InProgress(test.Context).ConfigureAwait(false);
 
             _contextRestorer.RestoreContext(test);
 
             // Register event receivers early so that skip event receivers work
             // even when the test is skipped before full initialization.
-            // A second, targeted registration for the freshly created ClassInstance happens
-            // in TestInitializer.PrepareTest (#5685).
             _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
 
             // Check if test was already marked as skipped during registration
