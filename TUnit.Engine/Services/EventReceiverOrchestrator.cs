@@ -80,6 +80,37 @@ internal sealed class EventReceiverOrchestrator
         vlb.Dispose();
     }
 
+    /// <summary>
+    /// Registers the freshly created ClassInstance as an event receiver if it is one,
+    /// without iterating the full eligible-event-object set (which otherwise re-checks
+    /// attributes, arguments, etc. that were already processed by the earlier
+    /// <see cref="RegisterReceivers"/> call). See #5685.
+    /// </summary>
+    public void RegisterClassInstanceReceiver(TestContext context)
+    {
+        var classInstance = context.Metadata.TestDetails.ClassInstance;
+        if (classInstance is null)
+        {
+            return;
+        }
+
+        if (!_initializedObjects.Add(classInstance))
+        {
+            return;
+        }
+
+        if (classInstance is IFirstTestInTestSessionEventReceiver
+            or IFirstTestInAssemblyEventReceiver
+            or IFirstTestInClassEventReceiver)
+        {
+            if (!_registeredFirstEventReceiverTypes.Add(classInstance.GetType()))
+            {
+                return;
+            }
+        }
+
+        _registry.RegisterReceiver(classInstance);
+    }
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
