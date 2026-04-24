@@ -1,4 +1,5 @@
 using TUnit.Core.Settings;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.UnitTests;
 
@@ -56,5 +57,60 @@ public class TUnitSettingsTests
     {
         TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(10);
         await Assert.That(TUnitSettings.Default.Timeouts.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(10));
+    }
+
+    // Covers TestCoordinator's `test.Timeout ?? TUnitSettings...ExplicitDefaultTestTimeout` fallback:
+    // when the user never assigns DefaultTestTimeout, tests without [Timeout] skip the
+    // TimeoutHelper wrapper entirely (the right-hand side of the coalesce is null).
+    [Test]
+    public async Task ExplicitDefaultTestTimeout_Is_Null_When_Unset()
+    {
+        // A fresh TimeoutSettings instance models the pristine "user never assigned
+        // DefaultTestTimeout" state — SnapshotSettings/RestoreSettings on the shared
+        // TUnitSettings.Default cannot un-assign the backing field once any test has set it.
+        var freshSettings = new TimeoutSettings();
+
+        await Assert.That(freshSettings.ExplicitDefaultTestTimeout).IsNull();
+        await Assert.That(freshSettings.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(30));
+    }
+
+    [Test]
+    public async Task ExplicitDefaultTestTimeout_Returns_Assigned_Value()
+    {
+        TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMilliseconds(200);
+
+        await Assert.That(TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout)
+            .IsEqualTo(TimeSpan.FromMilliseconds(200));
+    }
+
+    // End-to-end proof of the fallback: feeding ExplicitDefaultTestTimeout into the same
+    // TimeoutHelper that TestCoordinator uses must cause a hanging test body to fail with
+    // TimeoutException. Mirrors TestCoordinator's call site verbatim for this branch.
+    [Test]
+    public async Task Configured_Default_Timeout_Fires_On_Hanging_Test()
+    {
+        TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMilliseconds(200);
+
+        var testTimeout = TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
+        await Assert.That(testTimeout).IsNotNull();
+
+        // Ignore the passed token so TimeoutHelper's timeout branch wins the race
+        // (a cooperative Task.Delay(ct) would throw TaskCanceledException first).
+        // A private CTS scoped to this test lets us cancel the delay on exit instead
+        // of leaking a 30s Task to process end.
+        using var hangCts = new CancellationTokenSource();
+        try
+        {
+            await Assert.That(async () =>
+                await TimeoutHelper.ExecuteWithTimeoutAsync(
+                    _ => Task.Delay(TimeSpan.FromSeconds(30), hangCts.Token),
+                    testTimeout!.Value,
+                    CancellationToken.None))
+                .Throws<TimeoutException>();
+        }
+        finally
+        {
+            hangCts.Cancel();
+        }
     }
 }
