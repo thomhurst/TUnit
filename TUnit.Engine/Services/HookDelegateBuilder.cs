@@ -188,14 +188,31 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         }
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectBeforeTestHooksAsync(Type testClassType)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectBeforeTestHooksAsync(Type testClassType)
     {
         if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildBeforeTestHooksAsync(testClassType);
+        return BuildAndCacheBeforeTestHooksAsync(testClassType);
+    }
+
+    public bool TryGetCachedBeforeTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
+    {
+        if (_beforeTestHooksCache.TryGetValue(testClassType, out var cached))
+        {
+            hooks = cached;
+            return true;
+        }
+
+        hooks = [];
+        return false;
+    }
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildAndCacheBeforeTestHooksAsync(Type testClassType)
+    {
+        var hooks = await BuildBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
         _beforeTestHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -255,14 +272,37 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return finalHooks;
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectAfterTestHooksAsync(Type testClassType)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectAfterTestHooksAsync(Type testClassType)
     {
         if (_afterTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildAfterTestHooksAsync(testClassType);
+        return BuildAndCacheAfterTestHooksAsync(testClassType);
+    }
+
+    public bool TryGetCachedAfterTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
+    {
+        if (_afterTestHooksCache.TryGetValue(testClassType, out var cached))
+        {
+            hooks = cached;
+            return true;
+        }
+
+        hooks = [];
+        return false;
+    }
+
+    public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedBeforeEveryTestHooks()
+        => _beforeEveryTestHooks ?? [];
+
+    public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedAfterEveryTestHooks()
+        => _afterEveryTestHooks ?? [];
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildAndCacheAfterTestHooksAsync(Type testClassType)
+    {
+        var hooks = await BuildAfterTestHooksAsync(testClassType).ConfigureAwait(false);
         _afterTestHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -331,14 +371,19 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return new ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>>(_afterEveryTestHooks ?? []);
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectBeforeClassHooksAsync(Type testClassType)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectBeforeClassHooksAsync(Type testClassType)
     {
         if (_beforeClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildBeforeClassHooksAsync(testClassType);
+        return BuildAndCacheBeforeClassHooksAsync(testClassType);
+    }
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildAndCacheBeforeClassHooksAsync(Type testClassType)
+    {
+        var hooks = await BuildBeforeClassHooksAsync(testClassType).ConfigureAwait(false);
         _beforeClassHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -395,14 +440,19 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return finalHooks;
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectAfterClassHooksAsync(Type testClassType)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectAfterClassHooksAsync(Type testClassType)
     {
         if (_afterClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildAfterClassHooksAsync(testClassType);
+        return BuildAndCacheAfterClassHooksAsync(testClassType);
+    }
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildAndCacheAfterClassHooksAsync(Type testClassType)
+    {
+        var hooks = await BuildAfterClassHooksAsync(testClassType).ConfigureAwait(false);
         _afterClassHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -457,14 +507,19 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return finalHooks;
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
     {
         if (_beforeAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildBeforeAssemblyHooksAsync(assembly);
+        return BuildAndCacheBeforeAssemblyHooksAsync(assembly);
+    }
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildAndCacheBeforeAssemblyHooksAsync(Assembly assembly)
+    {
+        var hooks = await BuildBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
         _beforeAssemblyHooksCache.TryAdd(assembly, hooks);
         return hooks;
     }
@@ -487,14 +542,19 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         return SortAndProject(allHooks);
     }
 
-    public async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
+    public ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
     {
         if (_afterAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>(cachedHooks);
         }
 
-        var hooks = await BuildAfterAssemblyHooksAsync(assembly);
+        return BuildAndCacheAfterAssemblyHooksAsync(assembly);
+    }
+
+    private async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildAndCacheAfterAssemblyHooksAsync(Assembly assembly)
+    {
+        var hooks = await BuildAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
         _afterAssemblyHooksCache.TryAdd(assembly, hooks);
         return hooks;
     }

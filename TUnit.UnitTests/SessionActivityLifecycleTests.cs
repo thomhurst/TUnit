@@ -335,6 +335,18 @@ public class SessionActivityLifecycleTests
             new([]);
         public ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectAfterEveryTestHooksAsync(Type testClassType) =>
             new([]);
+        public bool TryGetCachedBeforeTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
+        {
+            hooks = [];
+            return true;
+        }
+        public bool TryGetCachedAfterTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
+        {
+            hooks = [];
+            return true;
+        }
+        public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedBeforeEveryTestHooks() => [];
+        public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedAfterEveryTestHooks() => [];
         public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectBeforeClassHooksAsync(Type testClassType) =>
             new([]);
         public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectAfterClassHooksAsync(Type testClassType) =>
