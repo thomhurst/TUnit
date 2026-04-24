@@ -47,10 +47,10 @@ internal sealed class TestCoordinator : ITestCoordinator
     // Dedup happens in TestRunner via its own ConcurrentDictionary<string, TCS<bool>> —
     // it's the single entry point for both scheduler and dependency recursion, so a second
     // guard here would just double the TCS/dict allocations per test.
-    public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
-        => ExecuteTestInternalAsync(test, cancellationToken);
-
-    private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    //
+    // Note: the previous pure-forward ExecuteTestAsync → ExecuteTestInternalAsync wrapper
+    // was collapsed to eliminate one async state machine per test (#5714).
+    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
         {
@@ -107,8 +107,58 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             if (retryLimit == 0)
             {
+                // No-retry fast path: the lifecycle body is inlined here to eliminate an
+                // extra async state machine on the hot path (#5714). The retry branch still
+                // dispatches through ExecuteTestLifecycleAsync because RetryHelper needs a
+                // callable delegate.
                 test.Context.CurrentRetryAttempt = 0;
-                await ExecuteTestLifecycleAsync(test, cancellationToken).ConfigureAwait(false);
+
+                // Check if this test should be skipped before creating the class instance.
+                // Derived SkipAttribute subclasses set SkipReason during OnTestRegistered (registration phase),
+                // and creating the instance can trigger expensive data source initialization (e.g., starting a
+                // WebApplicationFactory) that would fail or waste resources for tests that should be skipped.
+                if (!string.IsNullOrEmpty(test.Context.SkipReason))
+                {
+                    _stateManager.MarkSkipped(test, test.Context.SkipReason!);
+
+                    await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+                    await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
+
+                    // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
+                    test.Context.CachedEligibleEventObjects = null;
+
+                    // Check if this test should be skipped (after creating instance).
+                    // This handles basic [Skip] attributes that use SkippedTestInstance as a sentinel,
+                    // and any SkipReason set during instance creation.
+                    if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+                        !string.IsNullOrEmpty(test.Context.SkipReason))
+                    {
+                        _stateManager.MarkSkipped(test, test.Context.SkipReason ?? "Test was skipped");
+
+                        await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+                        await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            _testInitializer.PrepareTest(test);
+                            test.Context.RestoreExecutionContext();
+                            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+                            await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            await DisposeTestInstanceWithSpanAsync(test).ConfigureAwait(false);
+                        }
+                    }
+                }
             }
             else
             {
@@ -275,6 +325,8 @@ internal sealed class TestCoordinator : ITestCoordinator
     /// Core test lifecycle execution: instance creation, initialization, execution, and disposal.
     /// Timeout is passed through to TestExecutor.ExecuteAsync, which applies it only to the test
     /// body — hooks and data source initialization run outside the timeout scope (fixes #4772).
+    /// Used only by the retry path (RetryHelper requires a Func&lt;ValueTask&gt;); the no-retry
+    /// fast path inlines the body directly inside ExecuteTestAsync to skip one state machine.
     /// </summary>
     private async ValueTask ExecuteTestLifecycleAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
