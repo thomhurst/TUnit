@@ -31,6 +31,18 @@ public sealed class TimeoutSettings
     // bypass TimeoutHelper entirely instead of paying wrap overhead for a 30-minute backstop.
     internal TimeSpan? ExplicitDefaultTestTimeout => _defaultTestTimeout;
 
+    // Test-only seam: the public setter validates positive-only and can't write null, which
+    // leaves the harness unable to restore the "unset" state after a snapshot/restore cycle.
+    internal void SetExplicitDefaultTestTimeout(TimeSpan? value)
+    {
+        if (value is { } positive)
+        {
+            ValidatePositive(positive);
+        }
+
+        _defaultTestTimeout = value;
+    }
+
     /// <summary>
     /// Default timeout for hook methods (Before/After at every level). Default: 5 minutes.
     /// Overridden per-hook by <see cref="TimeoutAttribute"/>.

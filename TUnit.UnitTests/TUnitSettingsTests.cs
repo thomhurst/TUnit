@@ -8,7 +8,10 @@ namespace TUnit.UnitTests;
 [NotInParallel]
 public class TUnitSettingsTests
 {
-    private TimeSpan _savedTestTimeout;
+    // Nullable: the public getter coalesces to 30-minute fallback, which would silently
+    // turn the "user never set this" state into a concrete assignment when restored.
+    // Reading the internal property and restoring via the setter method preserves null.
+    private TimeSpan? _savedTestTimeout;
     private TimeSpan _savedHookTimeout;
     private TimeSpan _savedForcefulExitTimeout;
     private TimeSpan _savedProcessExitHookDelay;
@@ -19,7 +22,7 @@ public class TUnitSettingsTests
     [Before(HookType.Test)]
     public void SnapshotSettings()
     {
-        _savedTestTimeout = TUnitSettings.Default.Timeouts.DefaultTestTimeout;
+        _savedTestTimeout = TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
         _savedHookTimeout = TUnitSettings.Default.Timeouts.DefaultHookTimeout;
         _savedForcefulExitTimeout = TUnitSettings.Default.Timeouts.ForcefulExitTimeout;
         _savedProcessExitHookDelay = TUnitSettings.Default.Timeouts.ProcessExitHookDelay;
@@ -31,7 +34,7 @@ public class TUnitSettingsTests
     [After(HookType.Test)]
     public void RestoreSettings()
     {
-        TUnitSettings.Default.Timeouts.DefaultTestTimeout = _savedTestTimeout;
+        TUnitSettings.Default.Timeouts.SetExplicitDefaultTestTimeout(_savedTestTimeout);
         TUnitSettings.Default.Timeouts.DefaultHookTimeout = _savedHookTimeout;
         TUnitSettings.Default.Timeouts.ForcefulExitTimeout = _savedForcefulExitTimeout;
         TUnitSettings.Default.Timeouts.ProcessExitHookDelay = _savedProcessExitHookDelay;
@@ -65,13 +68,27 @@ public class TUnitSettingsTests
     [Test]
     public async Task ExplicitDefaultTestTimeout_Is_Null_When_Unset()
     {
-        // A fresh TimeoutSettings instance models the pristine "user never assigned
-        // DefaultTestTimeout" state — SnapshotSettings/RestoreSettings on the shared
-        // TUnitSettings.Default cannot un-assign the backing field once any test has set it.
+        // Fresh instance models the pristine "user never assigned DefaultTestTimeout" state.
+        // A parallel round-trip assertion on TUnitSettings.Default lives below — this one
+        // stays isolated so it still passes if the shared-state harness ever regresses.
         var freshSettings = new TimeoutSettings();
 
         await Assert.That(freshSettings.ExplicitDefaultTestTimeout).IsNull();
         await Assert.That(freshSettings.DefaultTestTimeout).IsEqualTo(TimeSpan.FromMinutes(30));
+    }
+
+    // Round-trip on the shared Default: before the fix, snapshotting via the public getter
+    // collapsed the null "unset" state to 30 minutes, so RestoreSettings permanently pinned
+    // the backing field and every later test ran with an implicit timeout.
+    [Test]
+    public async Task SnapshotRestore_Preserves_Unset_DefaultTestTimeout()
+    {
+        var snapshot = TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
+
+        TUnitSettings.Default.Timeouts.DefaultTestTimeout = TimeSpan.FromMilliseconds(500);
+        TUnitSettings.Default.Timeouts.SetExplicitDefaultTestTimeout(snapshot);
+
+        await Assert.That(TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout).IsEqualTo(snapshot);
     }
 
     [Test]
