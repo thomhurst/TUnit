@@ -1,7 +1,7 @@
-namespace TUnit.TestProject.IgnoreExplicit;
+namespace TUnit.TestProject.IncludeExplicit;
 
 // Standalone fixture used by TUnit.Engine.Tests.ExplicitTests to exercise the
-// no-filter (NopFilter) code path with --ignore-explicit. Running this project
+// no-filter (NopFilter) code path with --include-explicit. Running this project
 // without --treenode-filter is safe because every test here is non-failing.
 public class Tests
 {

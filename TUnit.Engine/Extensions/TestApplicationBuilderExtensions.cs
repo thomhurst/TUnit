@@ -44,7 +44,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));
-        testApplicationBuilder.CommandLine.AddProvider(() => new IgnoreExplicitCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new IncludeExplicitCommandProvider(extension));
 
         // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));

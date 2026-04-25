@@ -20,7 +20,7 @@ internal class TestFilterService(
 {
     private static readonly ConcurrentDictionary<Type, bool> _explicitClassCache = new();
     private HashSet<string>? _uidFilterSet;
-    private readonly bool _ignoreExplicit = commandLineOptions.IsOptionSet(IgnoreExplicitCommandProvider.IgnoreExplicit);
+    private readonly bool _includeExplicit = commandLineOptions.IsOptionSet(IncludeExplicitCommandProvider.IncludeExplicit);
 
     public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
@@ -36,11 +36,11 @@ internal class TestFilterService(
         // Pre-allocate capacity to avoid resizing during filtering
         var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : 16;
 
-        // Fast path: no [Explicit] classification needed when --ignore-explicit is set.
+        // Fast path: no [Explicit] classification needed when --include-explicit is set.
         // Avoids allocating the unused filteredExplicitTests list on every call.
-        if (_ignoreExplicit)
+        if (_includeExplicit)
         {
-            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
+            logger.LogTrace($"--{IncludeExplicitCommandProvider.IncludeExplicit} is set. Including [Explicit] tests in the filtered run.");
 
             var result = new List<AbstractExecutableTest>(capacity);
             foreach (var test in testNodes)
@@ -306,9 +306,9 @@ internal class TestFilterService(
 
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
-        if (_ignoreExplicit)
+        if (_includeExplicit)
         {
-            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests with no filter.");
+            logger.LogTrace($"--{IncludeExplicitCommandProvider.IncludeExplicit} is set. Including [Explicit] tests with no filter.");
             return testNodes;
         }
 

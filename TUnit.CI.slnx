@@ -104,7 +104,7 @@
     <Project Path="TUnit.Example.FsCheck.TestProject/TUnit.Example.FsCheck.TestProject.csproj" />
     <Project Path="TUnit.TestProject/TUnit.TestProject.csproj" />
     <Project Path="TUnit.TestProject.FSharp/TUnit.TestProject.FSharp.fsproj" />
-    <Project Path="TUnit.TestProject.IgnoreExplicit/TUnit.TestProject.IgnoreExplicit.csproj" />
+    <Project Path="TUnit.TestProject.IncludeExplicit/TUnit.TestProject.IncludeExplicit.csproj" />
     <Project Path="TUnit.TestProject.Library/TUnit.TestProject.Library.csproj" />
     <Project Path="TUnit.TestProject.VB.NET/TUnit.TestProject.VB.NET.vbproj" />
   </Folder>

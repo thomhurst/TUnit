@@ -4,9 +4,9 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class IgnoreExplicitCommandProvider(IExtension extension) : ICommandLineOptionsProvider
+internal class IncludeExplicitCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string IgnoreExplicit = "ignore-explicit";
+    public const string IncludeExplicit = "include-explicit";
 
     public Task<bool> IsEnabledAsync()
     {
@@ -25,7 +25,7 @@ internal class IgnoreExplicitCommandProvider(IExtension extension) : ICommandLin
     {
         return
         [
-            new CommandLineOption(IgnoreExplicit, "Ignore the [Explicit] attribute so explicit tests run alongside non-explicit tests", ArgumentArity.Zero, false)
+            new CommandLineOption(IncludeExplicit, "Include [Explicit] tests in the run alongside non-explicit tests", ArgumentArity.Zero, false)
         ];
     }
 
