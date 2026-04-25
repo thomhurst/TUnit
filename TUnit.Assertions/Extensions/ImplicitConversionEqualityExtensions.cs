@@ -80,14 +80,7 @@ internal static class ImplicitConversionCache
     public static Func<TFrom?, TTo?> GetConverter<TFrom, TTo>()
     {
         var key = (typeof(TFrom), typeof(TTo));
-        if (Cache.TryGetValue(key, out var cached))
-        {
-            return (Func<TFrom?, TTo?>)cached;
-        }
-
-        var converter = BuildConverter<TFrom, TTo>();
-        Cache[key] = converter;
-        return converter;
+        return (Func<TFrom?, TTo?>)Cache.GetOrAdd(key, static _ => BuildConverter<TFrom, TTo>());
     }
 
     [RequiresUnreferencedCode("Reflects over user-defined operators on TFrom and TTo.")]

@@ -41,6 +41,12 @@ public class Issue5720Tests
         public static implicit operator TargetWithIncoming(SourceWithoutOperators s) => new(s.Value);
     }
 
+    /// <summary>
+    /// Type with no implicit conversion to or from <see cref="string"/>. Used to verify
+    /// the diagnostic thrown when no implicit operator can be found.
+    /// </summary>
+    public sealed record UnrelatedType(string Value);
+
     [Test]
     public async Task IsEqualTo_StringWrapper_Against_Primitive_Passes()
     {
@@ -151,5 +157,37 @@ public class Issue5720Tests
         var source = new SourceWithoutOperators("Example");
 
         await Assert.That(source).IsNotEqualTo(new TargetWithIncoming("Other"));
+    }
+
+    [Test]
+    public async Task IsEqualTo_NoImplicitOperator_Surfaces_Diagnostic()
+    {
+        // When no implicit conversion exists, the converter throws InvalidOperationException
+        // with a clear diagnostic. EqualsAssertion captures the evaluation exception and
+        // re-throws it as an AssertionException whose InnerException is the original
+        // InvalidOperationException — the diagnostic must be reachable via that chain.
+        var source = new UnrelatedType("Example");
+
+        var assertionException = await Assert.That(
+                async () => await Assert.That(source).IsEqualTo("Example"))
+            .Throws<AssertionException>();
+
+        await Assert.That(assertionException!.InnerException).IsTypeOf<InvalidOperationException>();
+        await Assert.That(assertionException.InnerException!.Message).StartsWith(
+            $"No implicit conversion operator from '{typeof(UnrelatedType)}' to '{typeof(string)}' was found.");
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_NoImplicitOperator_Surfaces_Diagnostic()
+    {
+        var source = new UnrelatedType("Example");
+
+        var assertionException = await Assert.That(
+                async () => await Assert.That(source).IsNotEqualTo("Other"))
+            .Throws<AssertionException>();
+
+        await Assert.That(assertionException!.InnerException).IsTypeOf<InvalidOperationException>();
+        await Assert.That(assertionException.InnerException!.Message).StartsWith(
+            $"No implicit conversion operator from '{typeof(UnrelatedType)}' to '{typeof(string)}' was found.");
     }
 }
