@@ -260,20 +260,28 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         }
 
         // Finally initialize the test class and its nested objects.
+        // The class instance itself is not in TrackedObjects, so it still needs a graph
+        // walk to pick up non-data-source IAsyncInitializer properties (e.g., set in the
+        // constructor or by BeforeClass hooks). Tracked objects above skipped this walk
+        // because their nested dependencies are already in TrackedObjects at higher depths.
         // The test class instance is unregistered in TraceScopeRegistry, so
         // GetSharedType returns null → defaults to per-test scope automatically.
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
+        await InitializeNestedObjectsForExecutionAsync(classInstance, cancellationToken);
         await InitializeObjectWithSpanAsync(classInstance, testContext, cancellationToken);
     }
 
     /// <summary>
-    /// Initializes an object and its nested objects, wrapped in a scope-aware OpenTelemetry span.
+    /// Initializes an object wrapped in a scope-aware OpenTelemetry span.
     /// </summary>
+    /// <remarks>
+    /// Callers are responsible for ensuring nested dependencies are already initialized.
+    /// <see cref="InitializeTrackedObjectsAsync"/> achieves this by iterating the
+    /// pre-discovered <see cref="TestContext.TrackedObjects"/> sorted list from deepest
+    /// to shallowest, so a separate per-object graph walk is no longer needed here.
+    /// </remarks>
     private async Task InitializeObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
     {
-        // First initialize nested objects depth-first
-        await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
-
 #if NET
         var sharedType = TraceScopeRegistry.GetSharedType(obj);
         var activitySource = TUnitActivitySource.GetSourceForSharedType(sharedType);
