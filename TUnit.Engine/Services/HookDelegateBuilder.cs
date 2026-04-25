@@ -52,7 +52,10 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     private IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>? _beforeEveryAssemblyHooks;
     private IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>? _afterEveryAssemblyHooks;
 
-    // Cache for processed hooks to avoid re-processing event receivers
+    // Cache for processed hooks to avoid re-processing event receivers.
+    // Dedup relies on reference identity (HookMethod does not override Equals/GetHashCode);
+    // safe today because Materialize() returns the same cached instance per hook.
+    // If HookMethod ever overrides Equals/GetHashCode, revisit this assumption.
     private readonly ConcurrentDictionary<object, bool> _processedHooks = new();
 
     public HookDelegateBuilder(EventReceiverOrchestrator eventReceiverOrchestrator, TUnitFrameworkLogger logger)

@@ -490,9 +490,15 @@ internal sealed class ReflectionHookDiscoveryService
                 break;
             case HookType.TestDiscovery:
                 var discoveryMetadata = CreateMethodMetadata(type, method);
-                // Check if this hook is already registered (prevent duplicates)
-                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.Materialize().MethodInfo.Name == discoveryMetadata.Name &&
-                                                               h.Materialize().MethodInfo.Type == discoveryMetadata.Type))
+                // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
+                // before we reach here, but this guard protects against future refactors that
+                // might bypass the upstream dedup (e.g. a separate registration path).
+                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
+                    {
+                        var m = h.Materialize();
+                        return m.MethodInfo.Name == discoveryMetadata.Name &&
+                               m.MethodInfo.Type == discoveryMetadata.Type;
+                    }))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -673,9 +679,15 @@ internal sealed class ReflectionHookDiscoveryService
                 // The source generator ignores the "Every" suffix for TestDiscovery hooks
                 // Register it as a regular After hook to match source-gen behavior
                 var discoveryEveryMetadata = CreateMethodMetadata(type, method);
-                // Check if this hook is already registered (prevent duplicates)
-                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.Materialize().MethodInfo.Name == discoveryEveryMetadata.Name &&
-                                                               h.Materialize().MethodInfo.Type == discoveryEveryMetadata.Type))
+                // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
+                // before we reach here, but this guard protects against future refactors that
+                // might bypass the upstream dedup (e.g. a separate registration path).
+                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
+                    {
+                        var m = h.Materialize();
+                        return m.MethodInfo.Name == discoveryEveryMetadata.Name &&
+                               m.MethodInfo.Type == discoveryEveryMetadata.Type;
+                    }))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
