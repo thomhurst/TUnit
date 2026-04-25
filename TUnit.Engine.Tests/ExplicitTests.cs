@@ -128,6 +128,7 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
                     "--no-build",
                     "-f", "net10.0",
                     "--configuration", "Release",
+                    "--",
                     "--ignore-explicit",
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
