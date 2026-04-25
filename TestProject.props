@@ -46,8 +46,12 @@
         <None Include="SourceGeneratedViewer\**" />
     </ItemGroup>
 
+    <!-- Always clean SourceGeneratedViewer\ on local builds when the folder exists.
+         When EmitCompilerGeneratedFiles=true, this gives a fresh dump per build.
+         When EmitCompilerGeneratedFiles=false (the default), this clears stale files
+         left over from a prior opt-in build. CI runners are ephemeral, so skip. -->
     <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild"
-            Condition="'$(EmitCompilerGeneratedFiles)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
+            Condition="'$(ContinuousIntegrationBuild)' != 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
         <ItemGroup>
             <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
         </ItemGroup>
