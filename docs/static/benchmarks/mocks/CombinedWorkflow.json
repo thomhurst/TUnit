@@ -1,66 +1,66 @@
 {
-  "timestamp": "2026-04-24T03:24:24.137Z",
+  "timestamp": "2026-04-25T03:21:02.718Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
     "sdk": ".NET SDK 10.0.203",
-    "host": ".NET 10.0.7 (10.0.7, 10.0.726.21808), X64 RyuJIT x86-64-v3"
+    "host": ".NET 10.0.7 (10.0.7, 10.0.726.21808), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "1.939 μs",
-      "Error": "0.0124 μs",
-      "StdDev": "0.0116 μs",
-      "Gen0": "0.2365",
-      "Gen1": "0.0038",
+      "Mean": "1.825 μs",
+      "Error": "0.0205 μs",
+      "StdDev": "0.0192 μs",
+      "Gen0": "0.3548",
+      "Gen1": "0.0057",
       "Allocated": "5.8 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "3.174 μs",
-      "Error": "0.0485 μs",
-      "StdDev": "0.0453 μs",
-      "Gen0": "0.6409",
-      "Gen1": "0.0267",
+      "Mean": "2.609 μs",
+      "Error": "0.0503 μs",
+      "StdDev": "0.0637 μs",
+      "Gen0": "0.9613",
+      "Gen1": "0.0458",
       "Allocated": "15.71 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "2.672 μs",
-      "Error": "0.0196 μs",
-      "StdDev": "0.0183 μs",
-      "Gen0": "0.2861",
-      "Gen1": "-",
-      "Allocated": "7.06 KB"
+      "Mean": "2.545 μs",
+      "Error": "0.0417 μs",
+      "StdDev": "0.0390 μs",
+      "Gen0": "0.4311",
+      "Gen1": "0.0038",
+      "Allocated": "7.09 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "309.559 μs",
-      "Error": "2.3598 μs",
-      "StdDev": "2.2074 μs",
-      "Gen0": "0.9766",
-      "Gen1": "-",
-      "Allocated": "36.36 KB"
+      "Mean": "314.342 μs",
+      "Error": "2.1645 μs",
+      "StdDev": "1.9188 μs",
+      "Gen0": "1.9531",
+      "Gen1": "0.9766",
+      "Allocated": "36.58 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "17.479 μs",
-      "Error": "0.0594 μs",
-      "StdDev": "0.0556 μs",
-      "Gen0": "1.0681",
+      "Mean": "16.053 μs",
+      "Error": "0.2678 μs",
+      "StdDev": "0.2374 μs",
+      "Gen0": "1.6174",
       "Gen1": "0.0305",
-      "Allocated": "26.89 KB"
+      "Allocated": "26.72 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "17.642 μs",
-      "Error": "0.1574 μs",
-      "StdDev": "0.1472 μs",
-      "Gen0": "0.9766",
+      "Mean": "15.982 μs",
+      "Error": "0.3078 μs",
+      "StdDev": "0.2879 μs",
+      "Gen0": "1.4648",
       "Gen1": "0.1221",
-      "Allocated": "25.61 KB"
+      "Allocated": "25.52 KB"
     }
   ]
 }
