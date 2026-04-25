@@ -196,7 +196,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // When there are no public members to compare structurally (e.g., types with only
         // private state), fall back to Equals(). This respects IEquatable<T> implementations
         // and avoids false positives from empty member lists.
-        if (expectedMembers.Count == 0)
+        if (expectedMembers.Length == 0)
         {
             if (!Equals(actual, expected))
             {

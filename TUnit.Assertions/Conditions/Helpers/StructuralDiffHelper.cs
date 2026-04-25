@@ -49,14 +49,15 @@ internal static class StructuralDiffHelper
     [RequiresUnreferencedCode("Structural diff uses reflection to inspect object members and is not compatible with AOT")]
     public static DiffResult FindFirstDifference(object? actual, object? expected)
     {
-        var visited = new HashSet<object>(ReferenceEqualityComparer<object>.Instance);
-        return FindFirstDifference(actual, expected, string.Empty, visited);
+        var visitedActual = new HashSet<object>(ReferenceEqualityComparer<object>.Instance);
+        var visitedExpected = new HashSet<object>(ReferenceEqualityComparer<object>.Instance);
+        return FindFirstDifference(actual, expected, string.Empty, visitedActual, visitedExpected);
     }
 
     [RequiresUnreferencedCode("Structural diff uses reflection to inspect object members and is not compatible with AOT")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Structural diff intentionally inspects runtime types reflectively")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Structural diff intentionally inspects runtime types reflectively")]
-    private static DiffResult FindFirstDifference(object? actual, object? expected, string path, HashSet<object> visited)
+    private static DiffResult FindFirstDifference(object? actual, object? expected, string path, HashSet<object> visitedActual, HashSet<object> visitedExpected)
     {
         if (ReferenceEquals(actual, expected))
         {
@@ -83,9 +84,10 @@ internal static class StructuralDiffHelper
                 : DiffResult.Found(path, expected, actual);
         }
 
-        // Cycle guard — if we have already walked into this actual instance, stop here. We
-        // cannot prove inequality from inside a cycle, so report no diff at this branch.
-        if (!visited.Add(actual))
+        // Cycle guard — track both sides so a self-referential expected graph cannot loop
+        // forever even if the actual side is acyclic (mirrors StructuralEquivalencyAssertion).
+        // We cannot prove inequality from inside a cycle, so report no diff at this branch.
+        if (!visitedActual.Add(actual) || !visitedExpected.Add(expected))
         {
             return DiffResult.None;
         }
@@ -93,11 +95,11 @@ internal static class StructuralDiffHelper
         if (actual is IEnumerable actualEnumerable && expected is IEnumerable expectedEnumerable
             && actual is not string && expected is not string)
         {
-            return FindEnumerableDifference(actualEnumerable, expectedEnumerable, path, visited);
+            return FindEnumerableDifference(actualEnumerable, expectedEnumerable, path, visitedActual, visitedExpected);
         }
 
         var members = ReflectionHelper.GetMembersToCompare(actualType);
-        if (members.Count == 0)
+        if (members.Length == 0)
         {
             // No reflectable surface — fall back to Equals(). If they are not equal, surface the
             // raw values; we have nothing more granular to offer.
@@ -112,7 +114,7 @@ internal static class StructuralDiffHelper
             var actualValue = ReflectionHelper.GetMemberValue(actual, member);
             var expectedValue = ReflectionHelper.GetMemberValue(expected, member);
 
-            var nested = FindFirstDifference(actualValue, expectedValue, memberPath, visited);
+            var nested = FindFirstDifference(actualValue, expectedValue, memberPath, visitedActual, visitedExpected);
             if (nested.HasDiff)
             {
                 return nested;
@@ -123,7 +125,7 @@ internal static class StructuralDiffHelper
     }
 
     [RequiresUnreferencedCode("Structural diff uses reflection to inspect object members and is not compatible with AOT")]
-    private static DiffResult FindEnumerableDifference(IEnumerable actual, IEnumerable expected, string path, HashSet<object> visited)
+    private static DiffResult FindEnumerableDifference(IEnumerable actual, IEnumerable expected, string path, HashSet<object> visitedActual, HashSet<object> visitedExpected)
     {
         var actualEnumerator = actual.GetEnumerator();
         var expectedEnumerator = expected.GetEnumerator();
@@ -153,7 +155,7 @@ internal static class StructuralDiffHelper
                     return DiffResult.Found(indexPath, null, actualEnumerator.Current, "actual has extra item");
                 }
 
-                var nested = FindFirstDifference(actualEnumerator.Current, expectedEnumerator.Current, indexPath, visited);
+                var nested = FindFirstDifference(actualEnumerator.Current, expectedEnumerator.Current, indexPath, visitedActual, visitedExpected);
                 if (nested.HasDiff)
                 {
                     return nested;
@@ -181,7 +183,12 @@ internal static class StructuralDiffHelper
         }
 
         var location = string.IsNullOrEmpty(diff.Path) ? "value" : $"member {diff.Path}";
-        return $"differs at {location}: expected {FormatValue(diff.ExpectedValue)} but found {FormatValue(diff.ActualValue)}";
+        var message = $"differs at {location}: expected {FormatValue(diff.ExpectedValue)} but found {FormatValue(diff.ActualValue)}";
+        if (!string.IsNullOrEmpty(diff.Reason))
+        {
+            message += $" — {diff.Reason}";
+        }
+        return message;
     }
 
     internal static string FormatValue(object? value) => value switch

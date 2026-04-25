@@ -153,7 +153,9 @@ internal static class CollectionEquivalencyChecker
 
             if (foundIndex == -1)
             {
-                var diff = DescribeClosestDiff(expectedItem, actualList);
+                // Score the closest match against items still unmatched — items already
+                // paired up earlier in the loop are by definition not the candidate we want.
+                var diff = DescribeClosestDiff(expectedItem, remainingActual);
                 return CheckResult.Failure(
                     $"collection does not contain expected item: {expectedItem}{diff}");
             }
@@ -212,7 +214,11 @@ internal static class CollectionEquivalencyChecker
             }
         }
 
-        if (bestScore < 0)
+        // Require at least one matching top-level member before we claim a "closest match".
+        // CountMatchingTopLevelMembers returns 0 for completely dissimilar candidates, and a
+        // bestScore of 0 beating the initial -1 would otherwise produce misleading hints
+        // pointing at unrelated objects.
+        if (bestScore < 1)
         {
             return string.Empty;
         }
