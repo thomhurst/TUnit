@@ -118,6 +118,22 @@ internal static class TestExtensions
 
         var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
 
+        // Fast path: non-final TestNodes are immutable for a given TestId, so reuse the cached
+        // PropertyBag/TestNode across the Discovered + InProgress message-bus publishes.
+        if (!isFinalState)
+        {
+            if (ReferenceEquals(stateProperty, DiscoveredTestNodeStateProperty.CachedInstance)
+                && testContext.CachedDiscoveredTestNode is TestNode cachedDiscovered)
+            {
+                return cachedDiscovered;
+            }
+            else if (ReferenceEquals(stateProperty, InProgressTestNodeStateProperty.CachedInstance)
+                && testContext.CachedInProgressTestNode is TestNode cachedInProgress)
+            {
+                return cachedInProgress;
+            }
+        }
+
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
         var cachedProps = GetOrCreateCachedProperties(testContext);
@@ -212,6 +228,18 @@ internal static class TestExtensions
             DisplayName = testContext.GetDisplayName(),
             Properties = propertyBag
         };
+
+        if (!isFinalState)
+        {
+            if (ReferenceEquals(stateProperty, DiscoveredTestNodeStateProperty.CachedInstance))
+            {
+                testContext.CachedDiscoveredTestNode = testNode;
+            }
+            else if (ReferenceEquals(stateProperty, InProgressTestNodeStateProperty.CachedInstance))
+            {
+                testContext.CachedInProgressTestNode = testNode;
+            }
+        }
 
         return testNode;
     }
