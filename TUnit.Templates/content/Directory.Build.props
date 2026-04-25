@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+    <!-- TUnit-family package version policy (see #5709):
+         All TUnit-owned packages referenced by templates (TUnit, TUnit.Aspire, TUnit.Playwright,
+         TUnit.Assertions.FSharp) MUST use Version="1.*" floating-range pinning in their template
+         .csproj/.fsproj/.vbproj files. This:
+           - eliminates Renovate maintenance PRs against template content, and
+           - ensures freshly-scaffolded projects always restore the latest published version.
+         Do NOT re-pin these packages to specific versions. Third-party packages should continue
+         to use exact versions as normal. -->
+
     <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.fsproj'">
         <!-- TUnit.Assertions.props auto-adds TUnit.Assertions.FSharp for F# projects;
              template fsproj files also include it explicitly with a pinned version -->
