@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.Testing.Extensions.TrxReport.Abstractions;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -17,17 +16,6 @@ internal static class TestExtensions
 
     private static readonly ConcurrentDictionary<Assembly, string> AssemblyFullNameCache = new();
     private static readonly ConcurrentDictionary<string, CachedTestNodeProperties> TestNodePropertiesCache = new();
-
-    // Caches the Discovered/InProgress TestNode per TestContext. Tying lifetime to the
-    // TestContext via ConditionalWeakTable lets the GC evict entries automatically and keeps
-    // engine-only types out of TUnit.Core.
-    private static readonly ConditionalWeakTable<TestContext, NodeCache> NodeCacheTable = new();
-
-    private sealed class NodeCache
-    {
-        public TestNode? Discovered;
-        public TestNode? InProgress;
-    }
 
     private sealed class CachedTestNodeProperties
     {
@@ -130,26 +118,6 @@ internal static class TestExtensions
 
         var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
 
-        // Fast path: non-final TestNodes are immutable for a given TestId, so reuse the cached
-        // PropertyBag/TestNode across the Discovered + InProgress message-bus publishes.
-        NodeCache? nodeCache = null;
-        if (!isFinalState)
-        {
-            nodeCache = NodeCacheTable.GetValue(testContext, static _ => new NodeCache());
-
-            if (ReferenceEquals(stateProperty, DiscoveredTestNodeStateProperty.CachedInstance)
-                && nodeCache.Discovered is { } cachedDiscovered)
-            {
-                return cachedDiscovered;
-            }
-
-            if (ReferenceEquals(stateProperty, InProgressTestNodeStateProperty.CachedInstance)
-                && nodeCache.InProgress is { } cachedInProgress)
-            {
-                return cachedInProgress;
-            }
-        }
-
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
         var cachedProps = GetOrCreateCachedProperties(testContext);
@@ -244,18 +212,6 @@ internal static class TestExtensions
             DisplayName = testContext.GetDisplayName(),
             Properties = propertyBag
         };
-
-        if (nodeCache is not null)
-        {
-            if (ReferenceEquals(stateProperty, DiscoveredTestNodeStateProperty.CachedInstance))
-            {
-                nodeCache.Discovered = testNode;
-            }
-            else if (ReferenceEquals(stateProperty, InProgressTestNodeStateProperty.CachedInstance))
-            {
-                nodeCache.InProgress = testNode;
-            }
-        }
 
         return testNode;
     }
