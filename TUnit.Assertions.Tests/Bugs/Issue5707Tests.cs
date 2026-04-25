@@ -19,8 +19,12 @@ namespace TUnit.Assertions.Tests.Bugs;
 public class Issue5707Tests
 {
     [Test]
-    public async Task Count_String_Items_Use_String_Assertion_Source()
+    public async Task Count_String_Items_Bind_To_Generic_Instance_Method()
     {
+        // Strings already resolve through the generic instance method on
+        // CollectionAssertionBase: `IEnumerable<TInner>` cannot bind to
+        // `string` via type inference (no concrete-to-interface unification),
+        // so no specialised string overload is needed.
         var items = new List<string> { "apple", "banana", "apricot", "cherry" };
 
         await Assert.That(items).Count(s => s.IsEqualTo("apple")).IsEqualTo(1);
@@ -128,6 +132,51 @@ public class Issue5707Tests
         };
 
         await Assert.That(listOfArrays).Count(a => a.IsSingleElement()).IsEqualTo(2);
+    }
+
+    // ---- Concrete-type item tests ---------------------------------------
+    // C# generic inference resolves TItem to the exact declared type, never
+    // to an interface, so e.g. List<List<int>> items must bind to a
+    // List<TInner> overload, not the IList<TInner> overload above.
+
+    [Test]
+    public async Task Count_ConcreteList_Items_Reach_HasItemAt_On_Inner()
+    {
+        var listOfLists = new List<List<int>>
+        {
+            new() { 10, 20 },
+            new() { 99 },
+            new() { 10, 30 },
+        };
+
+        await Assert.That(listOfLists).Count(l => l.HasItemAt(0, 10)).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Count_ConcreteHashSet_Items_Reach_IsSubsetOf_On_Inner()
+    {
+        var universe = new HashSet<int> { 1, 2, 3, 4, 5 };
+        var sets = new List<HashSet<int>>
+        {
+            new() { 1, 2 },
+            new() { 6 },
+            new() { 3, 4 },
+        };
+
+        await Assert.That(sets).Count(s => s.IsSubsetOf(universe)).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Count_ConcreteDictionary_Items_Reach_ContainsKey_On_Inner()
+    {
+        var dicts = new List<Dictionary<string, int>>
+        {
+            new() { ["k"] = 1 },
+            new() { ["other"] = 2 },
+            new() { ["k"] = 5 },
+        };
+
+        await Assert.That(dicts).Count(d => d.ContainsKey("k")).IsEqualTo(2);
     }
 
     [Test]
