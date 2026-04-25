@@ -283,6 +283,46 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts on a string member of an object using a lambda selector and assertion lambda.
+    /// This overload takes priority over the collection overload so that `string` is treated as a
+    /// scalar value rather than an `IEnumerable&lt;char&gt;`.
+    /// Example: await Assert.That(obj).Member(x => x.Name, n => n.IsEqualTo("expected"));
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static MemberAssertionResult<TObject> Member<TObject, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, string?>> memberSelector,
+        Func<IAssertionSource<string>, Assertion<TTransformed>> assertions)
+        => Member<TObject, string, TTransformed>(source, memberSelector, assertions);
+
+    /// <summary>
+    /// Asserts on a string member of an object using a lambda selector and assertion lambda.
+    /// This overload takes priority over the collection overload so that `string` is treated as a
+    /// scalar value rather than an `IEnumerable&lt;char&gt;`.
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static MemberAssertionResult<TObject> Member<TObject>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, string?>> memberSelector,
+        Func<IAssertionSource<string>, Assertion<string>> assertions)
+        => Member<TObject, string>(source, memberSelector, assertions);
+
+    /// <summary>
+    /// Asserts on a string member of an object using a lambda selector and assertion lambda
+    /// that returns an untyped assertion (for extension methods returning non-<see cref="Assertion{T}"/> types).
+    /// This overload takes priority over the collection overload so that `string` is treated as a
+    /// scalar value rather than an `IEnumerable&lt;char&gt;`.
+    /// Note: For AOT compatibility, use the TTransformed overload instead.
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TTransformed> overload with strongly-typed assertions.")]
+    public static MemberAssertionResult<TObject> Member<TObject>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, string?>> memberSelector,
+        Func<IAssertionSource<string>, object> assertions)
+        => Member<TObject, string>(source, memberSelector, assertions);
+
+    /// <summary>
     /// Asserts on a collection member of an object using a lambda selector and assertion lambda.
     /// The assertion lambda receives collection assertion methods (Count, Contains, IsEmpty, etc.).
     /// Supports type transformations like IsTypeOf within the assertion lambda.
