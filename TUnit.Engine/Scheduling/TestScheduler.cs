@@ -171,11 +171,31 @@ internal sealed class TestScheduler : ITestScheduler
         // Start dynamic test queue processing in background
         var dynamicTestProcessingTask = ProcessDynamicTestQueueAsync(cancellationToken);
 
+        // Unconstrained Parallel and KeyedNotInParallel buckets share no state — keyed tests
+        // only block other tests sharing a key (per docs/parallelism.md). Running them
+        // sequentially makes a `[Test] T1` always run before `[Test, NotInParallel("k")] T2`
+        // which is observable as "Test1 never overlaps Test2" (discussion #5700). Run them
+        // concurrently instead. ParallelGroups still serialize (cross-group exclusion) and
+        // global NotInParallel still drains last (must run alone).
+        var concurrentPhases = new List<Task>(2);
+
         if (groupedTests.Parallel.Length > 0)
         {
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
-            await ExecuteTestsAsync(groupedTests.Parallel, cancellationToken).ConfigureAwait(false);
+            concurrentPhases.Add(ExecuteTestsAsync(groupedTests.Parallel, cancellationToken));
+        }
+
+        if (groupedTests.KeyedNotInParallel.Length > 0)
+        {
+            if (_logger.IsTraceEnabled)
+                await _logger.LogTraceAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
+            concurrentPhases.Add(_constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).AsTask());
+        }
+
+        if (concurrentPhases.Count > 0)
+        {
+            await WaitForTasksWithFailFastHandling(concurrentPhases.ToArray(), cancellationToken).ConfigureAwait(false);
         }
 
         foreach (var group in groupedTests.ParallelGroups)
@@ -216,13 +236,6 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 await WaitForTasksWithFailFastHandling(tasks.ToArray(), cancellationToken).ConfigureAwait(false);
             }
-        }
-
-        if (groupedTests.KeyedNotInParallel.Length > 0)
-        {
-            if (_logger.IsTraceEnabled)
-                await _logger.LogTraceAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
-            await _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).ConfigureAwait(false);
         }
 
         if (groupedTests.NotInParallel.Length > 0)
