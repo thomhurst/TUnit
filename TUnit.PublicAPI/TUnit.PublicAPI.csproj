@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+        <!-- Multi-target so public API snapshots cover every supported consumer TFM. -->
+        <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+    </PropertyGroup>
+
   <Import Project="..\TestProject.props" />
-    
+
     <PropertyGroup>
         <Configuration>Release</Configuration>
     </PropertyGroup>

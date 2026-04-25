@@ -9,7 +9,11 @@
         Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
     <PropertyGroup>
-        <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+        <!-- Default test projects to net10.0 only. Multi-targeting (net472;net8;net9) is
+             expensive (4x compile work) and only matters for projects that snapshot output
+             across consumer TFMs (e.g. TUnit.PublicAPI, TUnit.Core.SourceGenerator.Tests).
+             Those projects set <TargetFrameworks> explicitly before this import. -->
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == '' and '$(TargetFramework)' == ''">net10.0</TargetFrameworks>
 
         <OutputType>Exe</OutputType>
 
@@ -25,23 +29,30 @@
 
     </PropertyGroup>
 
+    <!-- Default off: emitting generator output to disk costs significant I/O per build. -->
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles Condition="'$(EmitCompilerGeneratedFiles)' == ''">false</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <!-- Compile Remove must stay unconditional: a stale folder from a previous opt-in build
+         would otherwise be picked up by the implicit C# glob and produce CS0111 / CS0579
+         duplicate-member errors alongside the in-memory generator output. -->
+    <ItemGroup>
+        <Compile Remove="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">
+        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
     <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild"
-            Condition="'$(ContinuousIntegrationBuild)' != 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
+            Condition="'$(EmitCompilerGeneratedFiles)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
         <ItemGroup>
             <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
         </ItemGroup>
         <Delete Files="@(FilesToDelete)" ContinueOnError="true" />
     </Target>
-
-    <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <Compile Remove="SourceGeneratedViewer\**" />
-        <None Include="SourceGeneratedViewer\**" />
-    </ItemGroup>
 
     <!-- Enable VSCode test discovery integration -->
     <ItemGroup>

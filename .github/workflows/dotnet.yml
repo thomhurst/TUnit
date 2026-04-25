@@ -136,7 +136,7 @@ jobs:
       - name: Publish AOT
         shell: bash
         run: >-
-          dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release
+          dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --no-restore
           --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net10.0
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
