@@ -72,3 +72,15 @@ Run all explicit dev tools at once:
 ```bash
 dotnet run -- --treenode-filter "/*/*/*/*[Category=DevTool]"
 ```
+
+## Opting out of `[Explicit]` filtering
+
+There are times when you want to run your full test surface — including `[Explicit]` tests — without removing the attribute (for example, on a nightly CI job that intentionally includes long-running or environment-sensitive tests).
+
+Pass the `--ignore-explicit` switch to bypass the filter:
+
+```bash
+dotnet run -- --ignore-explicit
+```
+
+When the flag is set, the framework treats `[Explicit]` as if it were not applied, so explicit and non-explicit tests run side by side. `[Skip]` and other filters still take precedence.

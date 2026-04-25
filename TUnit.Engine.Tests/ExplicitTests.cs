@@ -68,4 +68,22 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
+    [Test]
+    public async Task MixedClassTest_WithIgnoreExplicitFlag_ShouldIncludeExplicitMethodsAlongsideNormal()
+    {
+        // With --ignore-explicit, [Explicit] tests participate in the run alongside
+        // non-explicit tests. Skip still wins over Explicit.
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._2755/MixedTests/*",
+            [
+                // ExplicitTestInNormalClass throws, so the run is "Failed" overall
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4), // all four methods
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1), // NormalTest
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1), // ExplicitTestInNormalClass
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(2) // SkippedTest + ExplicitAndSkippedTest (Skip wins)
+            ],
+            new RunOptions().WithArgument("--ignore-explicit"));
+    }
+
 }

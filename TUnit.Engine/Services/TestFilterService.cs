@@ -1,20 +1,27 @@
 ﻿#pragma warning disable TPEXP
 
 using System.Collections.Concurrent;
+using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
+using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegistrationService testArgumentRegistrationService)
+internal class TestFilterService(
+    TUnitFrameworkLogger logger,
+    TestArgumentRegistrationService testArgumentRegistrationService,
+    ICommandLineOptions commandLineOptions)
 {
     private static readonly ConcurrentDictionary<Type, bool> _explicitClassCache = new();
     private HashSet<string>? _uidFilterSet;
+    private readonly bool _ignoreExplicit = commandLineOptions.IsOptionSet(IgnoreExplicitCommandProvider.IgnoreExplicit);
+
     public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
         if (testExecutionFilter is null or NopFilter)
@@ -33,17 +40,26 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         foreach (var test in testNodes)
         {
-            if (MatchesTest(testExecutionFilter, test))
+            if (!MatchesTest(testExecutionFilter, test))
             {
-                if (IsExplicitTest(test))
-                {
-                    filteredExplicitTests.Add(test);
-                }
-                else
-                {
-                    filteredTests.Add(test);
-                }
+                continue;
             }
+
+            // When ignoring [Explicit], skip the per-test classification entirely.
+            if (_ignoreExplicit || !IsExplicitTest(test))
+            {
+                filteredTests.Add(test);
+            }
+            else
+            {
+                filteredExplicitTests.Add(test);
+            }
+        }
+
+        if (_ignoreExplicit)
+        {
+            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
+            return filteredTests;
         }
 
         if (filteredTests.Count > 0)
@@ -278,6 +294,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
+        if (_ignoreExplicit)
+        {
+            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests with no filter.");
+            return testNodes;
+        }
+
         // Pre-allocate assuming most tests are not explicit
         var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : testNodes.Count;
         var filteredTests = new List<AbstractExecutableTest>(capacity);
