@@ -58,13 +58,13 @@ public static partial class NotEqualsAssertionExtensions
     [RequiresUnreferencedCode("Looks up implicit conversion operators via reflection. Trimming may remove user-defined operators.")]
     public static NotEqualsAssertion<TOther> IsNotEqualTo<TValue, TOther>(
         this IAssertionSource<TValue> source,
-        TOther notExpected,
+        TOther? notExpected,
         [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null)
     {
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
         source.Context.ExpressionBuilder.Append($".IsNotEqualTo({notExpectedExpression})");
         var mapped = source.Context.Map(converter);
-        return new NotEqualsAssertion<TOther>(mapped, notExpected);
+        return new NotEqualsAssertion<TOther>(mapped, notExpected!);
     }
 }
 
@@ -97,10 +97,11 @@ internal static class ImplicitConversionCache
         var fromType = typeof(TFrom);
         var toType = typeof(TTo);
 
-        // Source value may have a more derived runtime type than TFrom; allow the
-        // conversion to be defined on either declared type. Search both for symmetry.
-        var op = FindImplicitOperator(fromType, toType)
-                 ?? FindImplicitOperator(toType, fromType);
+        // C# allows `public static implicit operator TTo(TFrom)` to be declared on
+        // either participant. Try TFrom first (the common Value Object pattern),
+        // then fall back to TTo for cases where the conversion lives on the target.
+        var op = FindImplicitOperator(fromType, fromType, toType)
+                 ?? FindImplicitOperator(toType, fromType, toType);
 
         if (op is null)
         {
@@ -110,6 +111,10 @@ internal static class ImplicitConversionCache
                 $"to define 'public static implicit operator {toType.Name}({fromType.Name} value)'.");
         }
 
+        // MethodInfo.Invoke boxes value-type arguments on every call. An
+        // Expression.Lambda<Func<TFrom,TTo>>(...).Compile() avoids the box but
+        // requires [RequiresDynamicCode] which breaks Native AOT compatibility,
+        // so we accept the boxing here.
         return value =>
         {
             if (value is null)
@@ -120,25 +125,26 @@ internal static class ImplicitConversionCache
         };
     }
 
+    /// <summary>
+    /// Looks for <c>public static implicit operator <paramref name="toType"/>(<paramref name="fromType"/>)</c>
+    /// declared on <paramref name="definedOn"/>. C# requires <paramref name="definedOn"/> to be either
+    /// <paramref name="fromType"/> or <paramref name="toType"/>; we try both call sites.
+    /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "User-defined operators are looked up reflectively; warning is surfaced via RequiresUnreferencedCode on public entry points.")]
     private static MethodInfo? FindImplicitOperator(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type definedOn,
-        Type targetType)
+        Type fromType,
+        Type toType)
     {
         foreach (var method in definedOn.GetMethods(BindingFlags.Public | BindingFlags.Static))
         {
-            if (method.Name != "op_Implicit")
-            {
-                continue;
-            }
-
-            if (method.ReturnType != targetType)
+            if (method.Name != "op_Implicit" || method.ReturnType != toType)
             {
                 continue;
             }
 
             var parameters = method.GetParameters();
-            if (parameters.Length == 1)
+            if (parameters.Length == 1 && parameters[0].ParameterType == fromType)
             {
                 return method;
             }

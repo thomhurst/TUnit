@@ -23,7 +23,10 @@ type Tests() =
         async {
             Console.WriteLine("This one can accept arguments from an attribute")
             let result = a + b
-            do! check(Assert.That(result).IsEqualTo(c))
+            // F# does not honour [OverloadResolutionPriority], so call the int-specific
+            // extension directly to avoid IsEqualTo ambiguity between the int, generic
+            // and implicit-conversion overloads.
+            do! check(IntEqualsAssertionExtensions.IsEqualTo(Assert.That(result), c))
         }
 
 
@@ -33,7 +36,7 @@ type Tests() =
         async {
             Console.WriteLine("This one can accept arguments from a method")
             let result = a + b
-            do! check(Assert.That(result).IsEqualTo(c))
+            do! check(IntEqualsAssertionExtensions.IsEqualTo(Assert.That(result), c))
         }
 
     [<Test>]
@@ -51,7 +54,7 @@ type Tests() =
         async {
             Console.WriteLine("You can even define your own custom data generators")
             let result = a + b
-            do! check(Assert.That(result).IsEqualTo(c))
+            do! check(IntEqualsAssertionExtensions.IsEqualTo(Assert.That(result), c))
         }
 
     static member DataSource() : IEnumerable<struct (int * int * int)> =

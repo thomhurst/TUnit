@@ -4173,7 +4173,7 @@ namespace .Extensions
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
         [.(-1)]
-        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther notExpected, [.("notExpected")] string? notExpectedExpression = null) { }
+        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null) { }
     }
     public static class NotEquivalentToAssertionExtensions
     {

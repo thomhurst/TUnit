@@ -19,7 +19,10 @@ type Tests() =
             let client = this.WebApplicationFactory.CreateClient()
             let! response = client.GetAsync("/ping") |> Async.AwaitTask
             let! stringContent = response.Content.ReadAsStringAsync() |> Async.AwaitTask
-            do! check (Assert.That<string>(stringContent).IsEqualTo("Hello, World!"))
+            // F# does not honour [OverloadResolutionPriority], so call the string-specific
+            // extension directly to avoid IsEqualTo ambiguity between the string, generic
+            // and implicit-conversion overloads.
+            do! check (StringEqualsAssertionExtensions.IsEqualTo(Assert.That<string>(stringContent), "Hello, World!"))
         }
 
     [<Test>]

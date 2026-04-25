@@ -30,6 +30,17 @@ public class Issue5720Tests
 
     public sealed record StockItem(ProductCode ProductCode, WrappedNumber Quantity);
 
+    /// <summary>
+    /// Source type with no operators of its own — the implicit conversion to <see cref="TargetWithIncoming"/>
+    /// is declared on the target. Exercises the <c>FindImplicitOperatorOnTarget</c> fallback.
+    /// </summary>
+    public sealed record SourceWithoutOperators(string Value);
+
+    public sealed record TargetWithIncoming(string Value)
+    {
+        public static implicit operator TargetWithIncoming(SourceWithoutOperators s) => new(s.Value);
+    }
+
     [Test]
     public async Task IsEqualTo_StringWrapper_Against_Primitive_Passes()
     {
@@ -106,5 +117,39 @@ public class Issue5720Tests
         ProductCode? code = null;
 
         await Assert.That(code).IsEqualTo((string?)null);
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_NullWrapper_Against_Non_Null_Primitive_Passes()
+    {
+        ProductCode? code = null;
+
+        await Assert.That(code).IsNotEqualTo("Example");
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_NonNull_Wrapper_Against_Null_Primitive_Passes()
+    {
+        var stock = new StockItem(new ProductCode("Example"), new WrappedNumber(5));
+
+        await Assert.That(stock.ProductCode).IsNotEqualTo((string?)null);
+    }
+
+    [Test]
+    public async Task IsEqualTo_OperatorDefinedOnTargetType_Passes()
+    {
+        // The implicit conversion lives on TargetWithIncoming, not on SourceWithoutOperators.
+        // Verifies the FindImplicitOperatorOnTarget fallback in BuildConverter.
+        var source = new SourceWithoutOperators("Example");
+
+        await Assert.That(source).IsEqualTo(new TargetWithIncoming("Example"));
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_OperatorDefinedOnTargetType_Passes_When_Different()
+    {
+        var source = new SourceWithoutOperators("Example");
+
+        await Assert.That(source).IsNotEqualTo(new TargetWithIncoming("Other"));
     }
 }
