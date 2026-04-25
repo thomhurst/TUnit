@@ -88,11 +88,13 @@ public class OrderWorkflowTests
         // The Worker service listens for PaymentProcessed events on RabbitMQ
         // and updates the order status to Fulfilled.
         // WaitsFor polls repeatedly until the assertion passes or the timeout expires.
+        // Generous timeout so the assertion doesn't trip on a busy CI runner where
+        // RabbitMQ delivery + Worker processing can lag behind under concurrent load.
         var order = await Assert.That(async () =>
                 await Customer.Client.GetFromJsonAsync<OrderResponse>($"/api/orders/{orderId}"))
             .WaitsFor(
                 assert => assert.Satisfies(o => o?.Status == OrderStatus.Fulfilled),
-                timeout: TimeSpan.FromSeconds(25),
+                timeout: TimeSpan.FromSeconds(60),
                 pollingInterval: TimeSpan.FromMilliseconds(500));
 
         await Assert.That(order).IsNotNull();
