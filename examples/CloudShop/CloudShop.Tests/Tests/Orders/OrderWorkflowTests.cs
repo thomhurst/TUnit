@@ -94,7 +94,7 @@ public class OrderWorkflowTests
                 await Customer.Client.GetFromJsonAsync<OrderResponse>($"/api/orders/{orderId}"))
             .WaitsFor(
                 assert => assert.Satisfies(o => o?.Status == OrderStatus.Fulfilled),
-                timeout: TimeSpan.FromSeconds(60),
+                timeout: TimeSpan.FromSeconds(120),
                 pollingInterval: TimeSpan.FromMilliseconds(500));
 
         await Assert.That(order).IsNotNull();

@@ -12,12 +12,10 @@ namespace TUnit.AspNetCore.Tests;
 /// correlation processor + ASP.NET Core instrumentation.
 /// </summary>
 /// <remarks>
-/// Serialized against sibling auto-wire tests because <see cref="OpenTelemetry.Sdk"/>
-/// attaches a process-global <see cref="ActivityListener"/> per <c>TracerProvider</c>,
-/// so a parallel factory's correlation processor can tag activities created by another
-/// factory's SUT. Serializing keeps assertions observing only their own factory's wiring.
+/// AutoWires asserts presence of its own <c>TestId</c> tag, so foreign spans observed
+/// via the global ASP.NET Core <see cref="System.Diagnostics.ActivitySource"/> do not
+/// affect it — no key needed.
 /// </remarks>
-[NotInParallel(nameof(AutoConfigureOpenTelemetryTests))]
 public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFactory, Program>
 {
     private readonly List<Activity> _exported = [];
@@ -54,7 +52,16 @@ public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFact
     }
 }
 
-[NotInParallel(nameof(AutoConfigureOpenTelemetryTests))]
+/// <remarks>
+/// Global <see cref="NotInParallelAttribute"/> (no key): asserts <em>absence</em> of any
+/// <see cref="TUnitActivitySource.TagTestId"/> tag, but every <see cref="TracerProvider"/>
+/// with <c>AddAspNetCoreInstrumentation()</c> subscribes to the process-global
+/// <c>Microsoft.AspNetCore</c> <see cref="System.Diagnostics.ActivitySource"/> and a parallel
+/// factory's correlation processor stamps spans with its own <c>TestId</c> before they reach
+/// this exporter. A keyed constraint cannot enumerate every parallel <see cref="WebApplicationTest{TFactory,TEntryPoint}"/>;
+/// draining alone is the only reliable isolation until per-factory filtering lands.
+/// </remarks>
+[NotInParallel]
 public class AutoConfigureOpenTelemetryOptOutTests : WebApplicationTest<TestWebAppFactory, Program>
 {
     private readonly List<Activity> _exported = [];
