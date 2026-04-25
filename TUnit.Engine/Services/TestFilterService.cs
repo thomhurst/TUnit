@@ -35,6 +35,24 @@ internal class TestFilterService(
 
         // Pre-allocate capacity to avoid resizing during filtering
         var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : 16;
+
+        // Fast path: no [Explicit] classification needed when --ignore-explicit is set.
+        // Avoids allocating the unused filteredExplicitTests list on every call.
+        if (_ignoreExplicit)
+        {
+            var result = new List<AbstractExecutableTest>(capacity);
+            foreach (var test in testNodes)
+            {
+                if (MatchesTest(testExecutionFilter, test))
+                {
+                    result.Add(test);
+                }
+            }
+
+            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
+            return result;
+        }
+
         var filteredTests = new List<AbstractExecutableTest>(capacity);
         var filteredExplicitTests = new List<AbstractExecutableTest>(capacity / 4); // Estimate ~25% explicit tests
 
@@ -45,8 +63,7 @@ internal class TestFilterService(
                 continue;
             }
 
-            // When ignoring [Explicit], skip the per-test classification entirely.
-            if (_ignoreExplicit || !IsExplicitTest(test))
+            if (!IsExplicitTest(test))
             {
                 filteredTests.Add(test);
             }
@@ -54,12 +71,6 @@ internal class TestFilterService(
             {
                 filteredExplicitTests.Add(test);
             }
-        }
-
-        if (_ignoreExplicit)
-        {
-            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
-            return filteredTests;
         }
 
         if (filteredTests.Count > 0)

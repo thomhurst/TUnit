@@ -86,4 +86,22 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
             new RunOptions().WithArgument("--ignore-explicit"));
     }
 
+    [Test]
+    public async Task ExplicitClassTest_WithIgnoreExplicitFlag_ShouldRunExplicitClass()
+    {
+        // With --ignore-explicit, the class-level [Explicit] path in IsExplicitTest
+        // (via _explicitClassCache) should also be bypassed so all tests in
+        // [Explicit] classes participate in the run.
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._2755/ExplicitClass/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+            ],
+            new RunOptions().WithArgument("--ignore-explicit"));
+    }
+
 }
