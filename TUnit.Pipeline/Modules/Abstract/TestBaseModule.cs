@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -30,10 +31,19 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
         foreach (var framework in TestableFrameworks)
         {
+            var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
+
+            // Test projects no longer multi-target every TFM by default (see TestProject.props).
+            // Skip frameworks that this project did not actually build to avoid spurious
+            // "process cannot find the file" errors for missing per-TFM output binaries.
+            if (!HasFrameworkOutput(executionOptions, framework))
+            {
+                context.Logger.LogInformation($"Skipping {framework}: no build output found for this test project.");
+                continue;
+            }
+
             var testResult = await context.SubModule<CommandResult>(framework, async () =>
             {
-                var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
-
                 var finalExecutionOptions = SetDefaults(testOptions, executionOptions ?? new CommandExecutionOptions(), framework);
 
                 return await context.DotNet().Run(testOptions, finalExecutionOptions, cancellationToken);
@@ -43,6 +53,19 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
 
         return results;
+    }
+
+    private static bool HasFrameworkOutput(CommandExecutionOptions? executionOptions, string framework)
+    {
+        var workingDirectory = executionOptions?.WorkingDirectory;
+        if (string.IsNullOrEmpty(workingDirectory))
+        {
+            // Cannot determine — fall through to attempt the run (preserves prior behaviour).
+            return true;
+        }
+
+        var binPath = Path.Combine(workingDirectory, "bin", "Release", framework);
+        return Directory.Exists(binPath);
     }
 
     private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)

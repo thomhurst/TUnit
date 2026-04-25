@@ -18,7 +18,11 @@ namespace TUnit.Core.Hooks;
 public sealed class LazyHookEntry<T> where T : HookMethod
 {
     private Func<int, T>? _factory;
-    private T? _materialized;
+    // volatile is required for the double-checked-lock pattern in Materialize() — without it
+    // the JIT is allowed to cache the unlocked read in a register on weakly-ordered architectures,
+    // which would let one thread perpetually see null after another thread published the value.
+    // T is constrained to HookMethod (a reference type), so `volatile T?` is legal.
+    private volatile T? _materialized;
     private readonly object _lock = new();
 
     /// <summary>
