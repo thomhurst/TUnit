@@ -126,7 +126,44 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"received {actualPreview}"));
         }
 
+        // For non-primitive reference objects, surface a focused diff pointing to the first
+        // differing member instead of dumping the entire serialized object. Falls through to the
+        // generic "received {value}" message if no structural diff is available.
+        if (_comparer is null && TryFormatObjectDiff(value, _expected, out var diffMessage))
+        {
+            return Task.FromResult(AssertionResult.Failed(diffMessage));
+        }
+
         return Task.FromResult(AssertionResult.Failed($"received {value}"));
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Structural diff is best-effort; gracefully degrades when reflection is unavailable")]
+    private static bool TryFormatObjectDiff(object? actual, object? expected, out string message)
+    {
+        message = string.Empty;
+
+        if (actual is null || expected is null)
+        {
+            return false;
+        }
+
+        var type = actual.GetType();
+        // Primitives, strings, and well-known immutable types already produce useful messages
+        // via the standard "received {value}" path — no need for structural inspection.
+        if (TypeHelper.IsPrimitiveOrWellKnownType(type))
+        {
+            return false;
+        }
+
+        var diff = StructuralDiffHelper.FindFirstDifference(actual, expected);
+        var formatted = StructuralDiffHelper.FormatDiff(diff);
+        if (formatted is null)
+        {
+            return false;
+        }
+
+        message = $"received {actual} ({formatted})";
+        return true;
     }
 
     private const int CollectionPreviewMax = 10;

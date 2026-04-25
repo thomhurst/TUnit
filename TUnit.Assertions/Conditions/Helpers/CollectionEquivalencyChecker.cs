@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Conditions.Helpers;
@@ -70,12 +71,38 @@ internal static class CollectionEquivalencyChecker
 
             if (!areEqual)
             {
+                var diff = DescribeItemDifference(expectedItem, actualItem);
                 return CheckResult.Failure(
-                    $"collection item at index {i} does not match: expected {expectedItem}, but was {actualItem}");
+                    $"collection item at index {i} does not match: expected {expectedItem}, but was {actualItem}{diff}");
             }
         }
 
         return CheckResult.Success();
+    }
+
+    /// <summary>
+    /// Adds a focused structural diff to the failure message when both items are non-null
+    /// reference objects with reflectable members. Returns an empty string for primitives or
+    /// well-known types — those already render as "expected X but was Y" via the caller's
+    /// message, so a structural diff would be redundant.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Structural diff is best-effort; gracefully degrades when reflection is unavailable")]
+    private static string DescribeItemDifference<TItem>(TItem expected, TItem actual)
+    {
+        if (expected is null || actual is null)
+        {
+            return string.Empty;
+        }
+
+        var type = expected.GetType();
+        if (TypeHelper.IsPrimitiveOrWellKnownType(type))
+        {
+            return string.Empty;
+        }
+
+        var diff = StructuralDiffHelper.FindFirstDifference(actual, expected);
+        var formatted = StructuralDiffHelper.FormatDiff(diff);
+        return formatted is null ? string.Empty : $" ({formatted})";
     }
 
     private static CheckResult CheckUnorderedEquivalence<TItem>(
@@ -126,14 +153,77 @@ internal static class CollectionEquivalencyChecker
 
             if (foundIndex == -1)
             {
+                var diff = DescribeClosestDiff(expectedItem, actualList);
                 return CheckResult.Failure(
-                    $"collection does not contain expected item: {expectedItem}");
+                    $"collection does not contain expected item: {expectedItem}{diff}");
             }
 
             remainingActual.RemoveAt(foundIndex);
         }
 
         return CheckResult.Success();
+    }
+
+    /// <summary>
+    /// Finds the candidate in <paramref name="candidates"/> with the highest "similarity score"
+    /// to <paramref name="expected"/> and returns a parenthesized hint pointing to the diff for
+    /// that candidate. Similarity counts top-level members that match exactly — this picks the
+    /// candidate that "almost matches" rather than an unrelated item. Returns empty when no
+    /// useful hint can be produced (primitives, no reflectable members, or no candidate of the
+    /// matching type).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Structural diff is best-effort; gracefully degrades when reflection is unavailable")]
+    private static string DescribeClosestDiff<TItem>(TItem expected, IReadOnlyList<TItem> candidates)
+    {
+        if (expected is null || candidates.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var expectedType = expected.GetType();
+        if (TypeHelper.IsPrimitiveOrWellKnownType(expectedType))
+        {
+            return string.Empty;
+        }
+
+        StructuralDiffHelper.DiffResult bestDiff = default;
+        var bestScore = -1;
+        TItem? bestCandidate = default;
+
+        foreach (var candidate in candidates)
+        {
+            if (candidate is null || candidate.GetType() != expectedType)
+            {
+                continue;
+            }
+
+            var diff = StructuralDiffHelper.FindFirstDifference(candidate, expected);
+            if (!diff.HasDiff)
+            {
+                continue;
+            }
+
+            var score = StructuralDiffHelper.CountMatchingTopLevelMembers(candidate, expected);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestDiff = diff;
+                bestCandidate = candidate;
+            }
+        }
+
+        if (bestScore < 0)
+        {
+            return string.Empty;
+        }
+
+        var formatted = StructuralDiffHelper.FormatDiff(bestDiff);
+        if (formatted is null)
+        {
+            return string.Empty;
+        }
+
+        return $" (closest match {bestCandidate} {formatted})";
     }
 
     private static CheckResult CheckUnorderedEquivalenceDictionary<TItem>(
@@ -183,8 +273,9 @@ internal static class CollectionEquivalencyChecker
             {
                 if (!actualCounts.TryGetValue(expectedItem, out var count) || count == 0)
                 {
+                    var diff = DescribeClosestDiff(expectedItem, actualList);
                     return CheckResult.Failure(
-                        $"collection does not contain expected item: {expectedItem}");
+                        $"collection does not contain expected item: {expectedItem}{diff}");
                 }
                 actualCounts[expectedItem] = count - 1;
             }
