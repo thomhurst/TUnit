@@ -60,7 +60,9 @@ type TaskAssertTests() =
             let mutable exceptionThrown = false
             try
                 do! taskAssert {
-                    do! Assert.That(1 + 1).IsEqualTo(3)
+                    // F# cannot use OverloadResolutionPriority — call the int-specific
+                    // generated extension method directly to avoid IsEqualTo ambiguity.
+                    do! IntEqualsAssertionExtensions.IsEqualTo(Assert.That(1 + 1), 3)
                 }
             with
             | _ -> exceptionThrown <- true

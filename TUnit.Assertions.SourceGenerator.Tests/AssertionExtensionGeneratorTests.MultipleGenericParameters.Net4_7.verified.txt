@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Generated extension methods for IsAssignableToAssertion.
 /// </summary>
-public static class IsAssignableToAssertionExtensions
+public static partial class IsAssignableToAssertionExtensions
 {
 
     /// <summary>
