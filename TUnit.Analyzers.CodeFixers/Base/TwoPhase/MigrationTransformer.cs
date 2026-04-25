@@ -1282,26 +1282,15 @@ public class MigrationTransformer
             endInclusive++;
         }
 
+        // Whitespace and EOL between the first and last meaningful items are intentionally
+        // included via the contiguous slice — preserving original spacing/structure between them.
         return SyntaxFactory.TriviaList(leading.Skip(first).Take(endInclusive - first + 1));
     }
 
-    private static bool IsMeaningfulTrivia(SyntaxTrivia trivia) => trivia.Kind() switch
-    {
-        SyntaxKind.SingleLineCommentTrivia
+    private static bool IsMeaningfulTrivia(SyntaxTrivia trivia) =>
+        trivia.IsDirective ||
+        trivia.Kind() is SyntaxKind.SingleLineCommentTrivia
             or SyntaxKind.MultiLineCommentTrivia
             or SyntaxKind.SingleLineDocumentationCommentTrivia
-            or SyntaxKind.MultiLineDocumentationCommentTrivia
-            or SyntaxKind.RegionDirectiveTrivia
-            or SyntaxKind.EndRegionDirectiveTrivia
-            or SyntaxKind.IfDirectiveTrivia
-            or SyntaxKind.ElseDirectiveTrivia
-            or SyntaxKind.ElifDirectiveTrivia
-            or SyntaxKind.EndIfDirectiveTrivia
-            or SyntaxKind.DefineDirectiveTrivia
-            or SyntaxKind.UndefDirectiveTrivia
-            or SyntaxKind.PragmaWarningDirectiveTrivia
-            or SyntaxKind.PragmaChecksumDirectiveTrivia
-            or SyntaxKind.NullableDirectiveTrivia => true,
-        _ => false
-    };
+            or SyntaxKind.MultiLineDocumentationCommentTrivia;
 }
