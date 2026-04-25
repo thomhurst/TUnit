@@ -177,26 +177,23 @@ internal sealed class TestScheduler : ITestScheduler
         // which is observable as "Test1 never overlaps Test2" (discussion #5700). Run them
         // concurrently instead. ParallelGroups still serialize (cross-group exclusion) and
         // global NotInParallel still drains last (must run alone).
-        var concurrentPhases = new List<Task>(2);
-
+        Task? parallelPhase = null;
         if (groupedTests.Parallel.Length > 0)
         {
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
-            concurrentPhases.Add(ExecuteTestsAsync(groupedTests.Parallel, cancellationToken));
+            parallelPhase = ExecuteTestsAsync(groupedTests.Parallel, cancellationToken);
         }
 
+        Task? keyedPhase = null;
         if (groupedTests.KeyedNotInParallel.Length > 0)
         {
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
-            concurrentPhases.Add(_constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).AsTask());
+            keyedPhase = _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).AsTask();
         }
 
-        if (concurrentPhases.Count > 0)
-        {
-            await WaitForTasksWithFailFastHandling(concurrentPhases, cancellationToken).ConfigureAwait(false);
-        }
+        await RunPhasesConcurrentlyAsync(parallelPhase, keyedPhase, cancellationToken).ConfigureAwait(false);
 
         foreach (var group in groupedTests.ParallelGroups)
         {
@@ -223,19 +220,13 @@ internal sealed class TestScheduler : ITestScheduler
             if (_logger.IsTraceEnabled)
                 await _logger.LogTraceAsync($"Starting constrained parallel group '{kvp.Key}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
 
-            var tasks = new List<Task>();
-            if (constrainedTests.UnconstrainedTests.Length > 0)
-            {
-                tasks.Add(ExecuteTestsAsync(constrainedTests.UnconstrainedTests, cancellationToken));
-            }
-            if (constrainedTests.KeyedTests.Length > 0)
-            {
-                tasks.Add(_constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(constrainedTests.KeyedTests, cancellationToken).AsTask());
-            }
-            if (tasks.Count > 0)
-            {
-                await WaitForTasksWithFailFastHandling(tasks.ToArray(), cancellationToken).ConfigureAwait(false);
-            }
+            var unconstrainedPhase = constrainedTests.UnconstrainedTests.Length > 0
+                ? ExecuteTestsAsync(constrainedTests.UnconstrainedTests, cancellationToken)
+                : null;
+            var groupKeyedPhase = constrainedTests.KeyedTests.Length > 0
+                ? _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(constrainedTests.KeyedTests, cancellationToken).AsTask()
+                : null;
+            await RunPhasesConcurrentlyAsync(unconstrainedPhase, groupKeyedPhase, cancellationToken).ConfigureAwait(false);
         }
 
         if (groupedTests.NotInParallel.Length > 0)
@@ -401,6 +392,13 @@ internal sealed class TestScheduler : ITestScheduler
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 #endif
+
+    private Task RunPhasesConcurrentlyAsync(Task? a, Task? b, CancellationToken cancellationToken)
+    {
+        if (a is null) return b ?? Task.CompletedTask;
+        if (b is null) return a;
+        return WaitForTasksWithFailFastHandling([a, b], cancellationToken);
+    }
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
     {

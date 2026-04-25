@@ -25,4 +25,19 @@ public class KeyedNotInParallelCrossPhaseTests(TestMode testMode) : InvokableTes
         ],
         new RunOptions().WithForcefulCancellationToken(cts.Token));
     }
+
+    [Test]
+    public async Task KeyedNotInParallel_DifferentKeys_RunInParallel()
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        await RunTestsWithFilter("/*/*/CrossKeyOverlap5700/*",
+        [
+            result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+            result => result.ResultSummary.Counters.Total.ShouldBe(2),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+        ],
+        new RunOptions().WithForcefulCancellationToken(cts.Token));
+    }
 }
