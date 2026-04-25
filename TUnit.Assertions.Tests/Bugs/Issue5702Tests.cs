@@ -27,10 +27,21 @@ public class Issue5702Tests
         await Assert.That(model).Member(m => m.Name, n => n.IsEqualTo(NonInterned("hello")));
     }
 
+    [Test]
+    public async Task Member_On_String_Property_Composes_With_And_Chaining()
+    {
+        var model = new Wrapper { Name = NonInterned("hello"), Count = 42 };
+
+        await Assert.That(model)
+            .Member(m => m.Name, n => n.IsEqualTo(NonInterned("hello")))
+            .And.Member(m => m.Count, c => c.IsEqualTo(42));
+    }
+
     private static string NonInterned(string s) => new(s.ToCharArray());
 
     private sealed class Wrapper
     {
         public string Name { get; set; } = string.Empty;
+        public int Count { get; set; }
     }
 }
