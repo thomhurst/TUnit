@@ -120,6 +120,36 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_TestFixture_Attribute_Removed_Followed_By_Another_Attribute_List_Preserves_Comments()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                // Critical comment
+                {|#0:[TestFixture]|}
+                [Category("Smoke")]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod() { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                // Critical comment
+                [Category("Smoke")]
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod() { }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_TestFixture_Attribute_Removed_Preserves_Single_Line_Comment()
     {
         await CodeFixer.VerifyCodeFixAsync(

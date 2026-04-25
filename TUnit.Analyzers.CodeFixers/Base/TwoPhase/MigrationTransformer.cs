@@ -1237,9 +1237,8 @@ public class MigrationTransformer
         AttributeListSyntax attributeList)
     {
         var preservedTrivia = ExtractMeaningfulLeadingTrivia(attributeList.GetLeadingTrivia());
-        var nextToken = attributeList.CloseBracketToken.GetNextToken();
 
-        if (preservedTrivia.Count == 0 || nextToken == default)
+        if (preservedTrivia.Count == 0)
         {
             return root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
@@ -1248,6 +1247,11 @@ public class MigrationTransformer
         var tracked = root.TrackNodes(attributeList);
         var trackedList = tracked.GetCurrentNode(attributeList)!;
         var trackedNextToken = trackedList.CloseBracketToken.GetNextToken();
+
+        if (trackedNextToken == default)
+        {
+            return root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
+        }
 
         tracked = tracked.ReplaceToken(
             trackedNextToken,
@@ -1276,6 +1280,8 @@ public class MigrationTransformer
         }
 
         // Include the trailing EOL so the next declaration lands on its own line.
+        // (Documentation comment trivia embeds its own EOL, so this only kicks in for
+        // line/block comments and preprocessor directives.)
         int endInclusive = last;
         if (endInclusive + 1 < leading.Count && leading[endInclusive + 1].IsKind(SyntaxKind.EndOfLineTrivia))
         {
