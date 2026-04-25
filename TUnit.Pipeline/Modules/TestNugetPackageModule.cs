@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using ModularPipelines.Attributes;
+﻿using ModularPipelines.Attributes;
 using ModularPipelines.Configuration;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
@@ -44,7 +43,7 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
             yield return "net10.0";
             yield return "net8.0";
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (IsWindows)
             {
                 yield return "net481";
                 yield return "net48";

@@ -13,17 +13,11 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
     protected virtual IEnumerable<string> TestableFrameworks
     {
-        get
-        {
-            yield return "net10.0";
-            yield return "net8.0";
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                yield return "net472";
-            }
-        }
+        get { yield return "net10.0"; }
     }
+
+    /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
+    protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
@@ -67,7 +61,19 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
 
         var binPath = Path.Combine(workingDirectory, "bin", configuration, framework);
-        return Directory.Exists(binPath);
+
+        // Probe for an actual built binary, not just the directory: a stale empty
+        // bin/<config>/<tfm> folder (e.g. from `dotnet clean`) would otherwise be treated
+        // as a successful build and trigger a misleading "process cannot find the file" later.
+        try
+        {
+            return Directory.EnumerateFiles(binPath, "*.dll", SearchOption.TopDirectoryOnly).Any()
+                || Directory.EnumerateFiles(binPath, "*.exe", SearchOption.TopDirectoryOnly).Any();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return false;
+        }
     }
 
     private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)
@@ -95,5 +101,10 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         };
     }
 
+    /// <summary>
+    /// Called once per framework in <see cref="TestableFrameworks"/>, <em>before</em> the
+    /// missing-output skip check. Keep this cheap — expensive work (e.g. awaiting other modules)
+    /// is wasted on TFMs the project did not build for.
+    /// </summary>
     protected abstract Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken);
 }
