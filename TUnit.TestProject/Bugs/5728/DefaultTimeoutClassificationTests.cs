@@ -17,17 +17,19 @@ public class DefaultTimeoutClassificationHooks
     // engine-test harness targets this class — otherwise discovery hooks fire for every
     // run of TUnit.TestProject and would shrink every test's default timeout to 200ms.
     //
-    // We match on the filter (not an env var) because Microsoft.Testing.Platform's
-    // test-host-controller mode (enabled by --hangdump) does not reliably propagate
-    // arbitrary env vars through to the actual test host process on all CI runners.
+    // Read the filter from GlobalContext.Current rather than the BeforeTestDiscoveryContext
+    // parameter — TUnitTestFramework installs GlobalContext.Current with the stringified
+    // filter before any hooks run, and it survives the controller-mode + AOT codepaths
+    // where the hook-parameter's required-init TestFilter has come through empty in CI.
     //
     // Method name must contain "Before" for the source generator to match it against the
     // BeforeTestDiscoveryContext parameter (see HookMetadataGenerator.IsValidHookMethod).
     [Before(TestDiscovery)]
     public static void BeforeDiscovery_ConfigureDefaultTimeoutWhenTargeted(BeforeTestDiscoveryContext context)
     {
-        if (context.TestFilter is null ||
-            !context.TestFilter.Contains("DefaultTimeoutClassificationTests", StringComparison.Ordinal))
+        var filter = GlobalContext.Current.TestFilter;
+        if (filter is null ||
+            !filter.Contains("DefaultTimeoutClassificationTests", StringComparison.Ordinal))
         {
             return;
         }
