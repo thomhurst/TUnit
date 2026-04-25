@@ -1988,13 +1988,32 @@ public static class AssertionExtensions
     }
 #endif
 
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against a <typeparamref name="TInner"/>[]-typed source.
+    /// Use this overload when the collection's items are themselves arrays; the lambda
+    /// receives an <see cref="ArrayAssertion{TInner}"/> so array-specific assertions
+    /// (e.g. <c>IsEmpty</c>, <c>IsSingleElement</c>) defined on <c>IAssertionSource&lt;TInner[]&gt;</c>
+    /// are reachable in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, TInner[]> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, TInner[]> source,
+        Func<ArrayAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<TInner[]>
+    {
+        return CountSpecialised<TCollection, TInner[]>(
+            source,
+            (item, index) => itemAssertion(new ArrayAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
     private static CollectionCountSource<TCollection, TItem> CountSpecialised<TCollection, TItem>(
         CollectionAssertionBase<TCollection, TItem> source,
         Func<TItem, int, IAssertion?> itemAssertionFactory,
         string? expression)
         where TCollection : IEnumerable<TItem>
     {
-        var context = ((IAssertionSource<TCollection>)source).Context;
+        var context = source.InternalContext;
         context.ExpressionBuilder.Append($".Count({expression})");
         return new CollectionCountSource<TCollection, TItem>(context, itemAssertionFactory);
     }

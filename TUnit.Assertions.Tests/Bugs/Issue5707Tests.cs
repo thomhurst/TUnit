@@ -118,6 +118,19 @@ public class Issue5707Tests
     }
 
     [Test]
+    public async Task Count_Array_Items_Reach_IsSingleElement_On_Inner()
+    {
+        var listOfArrays = new List<int[]>
+        {
+            new[] { 10, 20 },
+            new[] { 99 },
+            new[] { 10 },
+        };
+
+        await Assert.That(listOfArrays).Count(a => a.IsSingleElement()).IsEqualTo(2);
+    }
+
+    [Test]
     public async Task Count_Specialised_Source_Failure_Message_Mentions_Inner_Expectation()
     {
         IEnumerable<IEnumerable<int>> listOfLists = new List<List<int>>
@@ -134,5 +147,103 @@ public class Issue5707Tests
 
         // The chained expression should include `.Count(...)` per-item filter.
         await Assert.That(ex.Message).Contains(".Count(l => l.Count().IsEqualTo(3))");
+    }
+
+    [Test]
+    public async Task Count_List_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var listOfLists = new List<IList<int>>
+        {
+            new List<int> { 99 },
+            new List<int> { 99 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(listOfLists).Count(l => l.HasItemAt(0, 10)).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(l => l.HasItemAt(0, 10))");
+    }
+
+    [Test]
+    public async Task Count_Dictionary_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var dicts = new List<IDictionary<string, int>>
+        {
+            new Dictionary<string, int> { ["other"] = 1 },
+            new Dictionary<string, int> { ["other"] = 2 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(dicts).Count(d => d.ContainsKey("k")).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(d => d.ContainsKey(\"k\"))");
+    }
+
+    [Test]
+    public async Task Count_Set_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var universe = new HashSet<int> { 1, 2, 3 };
+        var sets = new List<ISet<int>>
+        {
+            new HashSet<int> { 6 },
+            new HashSet<int> { 7 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(sets).Count(s => s.IsSubsetOf(universe)).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(s => s.IsSubsetOf(universe))");
+    }
+
+    [Test]
+    public async Task Count_ReadOnlyList_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var listOfLists = new List<IReadOnlyList<int>>
+        {
+            new List<int> { 99 },
+            new List<int> { 99 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(listOfLists).Count(l => l.HasItemAt(0, 10)).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(l => l.HasItemAt(0, 10))");
+    }
+
+    [Test]
+    public async Task Count_ReadOnlySet_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var universe = new HashSet<int> { 1, 2, 3 };
+        var sets = new List<IReadOnlySet<int>>
+        {
+            new HashSet<int> { 6 },
+            new HashSet<int> { 7 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(sets).Count(s => s.IsSubsetOf(universe)).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(s => s.IsSubsetOf(universe))");
+    }
+
+    [Test]
+    public async Task Count_Array_Failure_Message_Mentions_Specialised_Inner_Expectation()
+    {
+        var listOfArrays = new List<int[]>
+        {
+            new[] { 1, 2 },
+            new[] { 1, 2 },
+        };
+
+        var ex = await Assert.That(async () =>
+                await Assert.That(listOfArrays).Count(a => a.IsSingleElement()).IsEqualTo(5))
+            .Throws<AssertionException>();
+
+        await Assert.That(ex.Message).Contains(".Count(a => a.IsSingleElement())");
     }
 }

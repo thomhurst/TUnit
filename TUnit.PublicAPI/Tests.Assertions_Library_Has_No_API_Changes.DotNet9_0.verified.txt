@@ -817,7 +817,6 @@ namespace .Conditions
     public class CollectionCountSource<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionCountSource(.<TCollection> collectionContext, <.<TItem>, .<TItem>?>? assertion) { }
         public .<TCollection, TItem> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
@@ -2643,6 +2642,8 @@ namespace .Extensions
             where TCollection : .<.<TInner>> { }
         public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TInner>> { }
+        public static .<TCollection, TInner[]> Count<TCollection, TInner>(this .<TCollection, TInner[]> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<TInner[]> { }
         public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TKey, TValue>>
             where TKey :  notnull { }
