@@ -15,7 +15,7 @@ public class CollectionCountSource<TCollection, TItem>
     private readonly Func<TItem, int, IAssertion?>? _itemAssertionFactory;
 
     /// <summary>
-    /// Constructor used by the generic <see cref="CollectionAssertionBase{TCollection, TItem}.Count(System.Func{IAssertionSource{TItem}, Assertion{TItem}?}, string?)"/>
+    /// Constructor used by the generic <see cref="CollectionAssertionBase{TCollection, TItem}.Count(System.Func{IAssertionSource{TItem}, IAssertion?}, string?)"/>
     /// instance method: wraps each item with <see cref="ValueAssertion{TItem}"/> before
     /// invoking the user-supplied lambda. Specialised <c>Count(itemAssertion)</c>
     /// extension overloads use the per-item factory ctor below to preserve
@@ -23,7 +23,7 @@ public class CollectionCountSource<TCollection, TItem>
     /// </summary>
     internal CollectionCountSource(
         AssertionContext<TCollection> collectionContext,
-        Func<IAssertionSource<TItem>, Assertion<TItem>?>? assertion)
+        Func<IAssertionSource<TItem>, IAssertion?>? assertion)
     {
         _collectionContext = collectionContext;
         _itemAssertionFactory = assertion is null

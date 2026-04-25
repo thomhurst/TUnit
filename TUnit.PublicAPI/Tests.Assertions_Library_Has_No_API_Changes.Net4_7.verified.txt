@@ -5349,7 +5349,7 @@ namespace .Sources
         public .<TCollection, TItem> Contains(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
-        public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public .<TCollection, TItem> Count(<.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
         public .<TCollection, TItem> Count(<.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
