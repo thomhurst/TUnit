@@ -104,6 +104,38 @@ The relevant files are at `docs > docs > tutorials-[basics|extras|assertions]`
 
 If want to provide sample code for complicated or useful different test suite set-ups, that's also very welcome, as this can help other users get started a lot quicker!
 
+## Building TUnit Locally
+
+TUnit ships several solution files. Pick the right one for your task — the
+full `TUnit.slnx` is large enough that a cold build can take 20+ minutes,
+which is rarely what contributors actually need:
+
+| Solution         | Projects | When to use                                                                                                    |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `TUnit.Dev.slnx` | 44       | **Recommended for contributors.** Drops the per-Roslyn-version generator variants and example projects. Open this in Visual Studio / Rider for day-to-day work. |
+| `TUnit.CI.slnx`  | 73       | What CI builds. Use only when you're verifying CI-specific changes.                                            |
+| `TUnit.slnx`     | 96       | Full shipping graph including all per-Roslyn-version analyzer/generator variants. Slow; rarely needed locally. |
+
+### Faster repeat builds
+
+Set `MSBUILDUSESERVER=1` in your shell to keep the MSBuild process alive
+between invocations — significant speedup on warm/incremental builds.
+
+```bash
+export MSBUILDUSESERVER=1   # bash/zsh
+$env:MSBUILDUSESERVER = '1' # PowerShell
+```
+
+### Inspecting generated source
+
+Source-generated files are not written to disk by default (saves significant
+disk I/O on every build). To dump them under each test project's
+`SourceGeneratedViewer\` folder, build with:
+
+```bash
+dotnet build -p:EmitCompilerGeneratedFiles=true
+```
+
 ### Code Contributions
 
 When contributing code to TUnit, please keep these important requirements in mind:
