@@ -37,11 +37,24 @@ public class Issue5702Tests
             .And.Member(m => m.Count, c => c.IsEqualTo(42));
     }
 
+    [Test]
+    public async Task Member_On_NonString_IEnumerableChar_Still_Uses_Collection_Overload()
+    {
+        var model = new WithChars { Chars = ['h', 'i'] };
+
+        await Assert.That(model).Member(m => m.Chars, c => c.Contains('h'));
+    }
+
     private static string NonInterned(string s) => new(s.ToCharArray());
 
     private sealed class Wrapper
     {
         public string Name { get; set; } = string.Empty;
         public int Count { get; set; }
+    }
+
+    private sealed class WithChars
+    {
+        public IEnumerable<char> Chars { get; set; } = [];
     }
 }
