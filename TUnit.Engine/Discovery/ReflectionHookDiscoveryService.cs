@@ -385,7 +385,7 @@ internal sealed class ReflectionHookDiscoveryService
                         LineNumber = 0,
                         Body = CreateHookDelegate<TestContext>(type, method)
                     };
-                    Sources.BeforeEveryTestHooks.Add(hook);
+                    Sources.BeforeEveryTestHooks.Add(new LazyHookEntry<BeforeTestHookMethod>(hook));
                 }
                 else
                 {
@@ -409,7 +409,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestSessionContext>(type, method)
                 };
-                Sources.BeforeTestSessionHooks.Add(sessionHook);
+                Sources.BeforeTestSessionHooks.Add(new LazyHookEntry<BeforeTestSessionHookMethod>(sessionHook));
                 break;
             case HookType.TestDiscovery:
                 // BeforeEvery(TestDiscovery) is treated the same as Before(TestDiscovery)
@@ -425,7 +425,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<BeforeTestDiscoveryContext>(type, method)
                 };
-                Sources.BeforeTestDiscoveryHooks.Add(discoveryHook);
+                Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
                 break;
         }
     }
@@ -462,7 +462,7 @@ internal sealed class ReflectionHookDiscoveryService
                         LineNumber = 0,
                         Body = CreateHookDelegate<TestContext>(type, method)
                     };
-                    Sources.AfterEveryTestHooks.Add(hook);
+                    Sources.AfterEveryTestHooks.Add(new LazyHookEntry<AfterTestHookMethod>(hook));
                 }
                 else
                 {
@@ -486,13 +486,13 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestSessionContext>(type, method)
                 };
-                Sources.AfterTestSessionHooks.Add(sessionHook);
+                Sources.AfterTestSessionHooks.Add(new LazyHookEntry<AfterTestSessionHookMethod>(sessionHook));
                 break;
             case HookType.TestDiscovery:
                 var discoveryMetadata = CreateMethodMetadata(type, method);
                 // Check if this hook is already registered (prevent duplicates)
-                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.MethodInfo.Name == discoveryMetadata.Name &&
-                                                               h.MethodInfo.Type == discoveryMetadata.Type))
+                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.Materialize().MethodInfo.Name == discoveryMetadata.Name &&
+                                                               h.Materialize().MethodInfo.Type == discoveryMetadata.Type))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -504,7 +504,7 @@ internal sealed class ReflectionHookDiscoveryService
                         LineNumber = 0,
                         Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
                     };
-                    Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                    Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
                 }
                 break;
         }
@@ -540,7 +540,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestContext>(type, method)
                 };
-                Sources.BeforeEveryTestHooks.Add(testHook);
+                Sources.BeforeEveryTestHooks.Add(new LazyHookEntry<BeforeTestHookMethod>(testHook));
                 break;
             case HookType.Class:
                 var classHook = new BeforeClassHookMethod
@@ -553,7 +553,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<ClassHookContext>(type, method)
                 };
-                Sources.BeforeEveryClassHooks.Add(classHook);
+                Sources.BeforeEveryClassHooks.Add(new LazyHookEntry<BeforeClassHookMethod>(classHook));
                 break;
             case HookType.Assembly:
                 var assemblyHook = new BeforeAssemblyHookMethod
@@ -566,7 +566,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<AssemblyHookContext>(type, method)
                 };
-                Sources.BeforeEveryAssemblyHooks.Add(assemblyHook);
+                Sources.BeforeEveryAssemblyHooks.Add(new LazyHookEntry<BeforeAssemblyHookMethod>(assemblyHook));
                 break;
             case HookType.TestSession:
                 var sessionHook = new BeforeTestSessionHookMethod
@@ -579,7 +579,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestSessionContext>(type, method)
                 };
-                Sources.BeforeTestSessionHooks.Add(sessionHook);
+                Sources.BeforeTestSessionHooks.Add(new LazyHookEntry<BeforeTestSessionHookMethod>(sessionHook));
                 break;
             case HookType.TestDiscovery:
                 var discoveryHook = new BeforeTestDiscoveryHookMethod
@@ -592,7 +592,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<BeforeTestDiscoveryContext>(type, method)
                 };
-                Sources.BeforeTestDiscoveryHooks.Add(discoveryHook);
+                Sources.BeforeTestDiscoveryHooks.Add(new LazyHookEntry<BeforeTestDiscoveryHookMethod>(discoveryHook));
                 break;
         }
     }
@@ -627,7 +627,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestContext>(type, method)
                 };
-                Sources.AfterEveryTestHooks.Add(testHook);
+                Sources.AfterEveryTestHooks.Add(new LazyHookEntry<AfterTestHookMethod>(testHook));
                 break;
             case HookType.Class:
                 var classHook = new AfterClassHookMethod
@@ -640,7 +640,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<ClassHookContext>(type, method)
                 };
-                Sources.AfterEveryClassHooks.Add(classHook);
+                Sources.AfterEveryClassHooks.Add(new LazyHookEntry<AfterClassHookMethod>(classHook));
                 break;
             case HookType.Assembly:
                 var assemblyHook = new AfterAssemblyHookMethod
@@ -653,7 +653,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<AssemblyHookContext>(type, method)
                 };
-                Sources.AfterEveryAssemblyHooks.Add(assemblyHook);
+                Sources.AfterEveryAssemblyHooks.Add(new LazyHookEntry<AfterAssemblyHookMethod>(assemblyHook));
                 break;
             case HookType.TestSession:
                 var sessionHook = new AfterTestSessionHookMethod
@@ -666,7 +666,7 @@ internal sealed class ReflectionHookDiscoveryService
                     LineNumber = 0,
                     Body = CreateHookDelegate<TestSessionContext>(type, method)
                 };
-                Sources.AfterTestSessionHooks.Add(sessionHook);
+                Sources.AfterTestSessionHooks.Add(new LazyHookEntry<AfterTestSessionHookMethod>(sessionHook));
                 break;
             case HookType.TestDiscovery:
                 // AfterEvery(TestDiscovery) is treated the same as After(TestDiscovery)
@@ -674,8 +674,8 @@ internal sealed class ReflectionHookDiscoveryService
                 // Register it as a regular After hook to match source-gen behavior
                 var discoveryEveryMetadata = CreateMethodMetadata(type, method);
                 // Check if this hook is already registered (prevent duplicates)
-                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.MethodInfo.Name == discoveryEveryMetadata.Name &&
-                                                               h.MethodInfo.Type == discoveryEveryMetadata.Type))
+                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.Materialize().MethodInfo.Name == discoveryEveryMetadata.Name &&
+                                                               h.Materialize().MethodInfo.Type == discoveryEveryMetadata.Type))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -687,7 +687,7 @@ internal sealed class ReflectionHookDiscoveryService
                         LineNumber = 0,
                         Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
                     };
-                    Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                    Sources.AfterTestDiscoveryHooks.Add(new LazyHookEntry<AfterTestDiscoveryHookMethod>(discoveryHook));
                 }
                 break;
         }
@@ -715,7 +715,7 @@ internal sealed class ReflectionHookDiscoveryService
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             Body = CreateInstanceHookDelegate(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<InstanceHookMethod>(hook));
     }
 
     private static void RegisterInstanceAfterHook(
@@ -740,7 +740,7 @@ internal sealed class ReflectionHookDiscoveryService
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             Body = CreateInstanceHookDelegate(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<InstanceHookMethod>(hook));
     }
 
     private static void RegisterBeforeClassHook(
@@ -760,7 +760,7 @@ internal sealed class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateHookDelegate<ClassHookContext>(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<BeforeClassHookMethod>(hook));
     }
 
     private static void RegisterAfterClassHook(
@@ -780,7 +780,7 @@ internal sealed class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateHookDelegate<ClassHookContext>(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<AfterClassHookMethod>(hook));
     }
 
     private static void RegisterBeforeAssemblyHook(
@@ -801,7 +801,7 @@ internal sealed class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateHookDelegate<AssemblyHookContext>(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<BeforeAssemblyHookMethod>(hook));
     }
 
     private static void RegisterAfterAssemblyHook(
@@ -822,7 +822,7 @@ internal sealed class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateHookDelegate<AssemblyHookContext>(type, method)
         };
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<AfterAssemblyHookMethod>(hook));
     }
 
     #if NET8_0_OR_GREATER

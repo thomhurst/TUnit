@@ -80,20 +80,22 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
     /// <summary>
     /// Generic helper to build global hooks from Sources collections.
-    /// Eliminates duplication across all BuildGlobalXXXHooksAsync methods.
+    /// Materializes each <see cref="LazyHookEntry{T}"/> on first access — the heavy
+    /// MethodMetadata/ClassMetadata graph is constructed here rather than at module init.
     /// </summary>
     private async Task<IReadOnlyList<NamedHookDelegate<TContext>>> BuildGlobalHooksAsync<THookMethod, TContext>(
-        IEnumerable<THookMethod> sourceHooks,
+        IEnumerable<LazyHookEntry<THookMethod>> sourceHooks,
         Func<THookMethod, ValueTask<NamedHookDelegate<TContext>>> createDelegate,
         string hookTypeName)
         where THookMethod : HookMethod
     {
         // Pre-size list if possible for better performance
-        var capacity = sourceHooks is ICollection<THookMethod> coll ? coll.Count : 0;
+        var capacity = sourceHooks is ICollection<LazyHookEntry<THookMethod>> coll ? coll.Count : 0;
         var hooks = new List<(int order, int registrationIndex, NamedHookDelegate<TContext> hook)>(capacity);
 
-        foreach (var hook in sourceHooks)
+        foreach (var entry in sourceHooks)
         {
+            var hook = entry.Materialize();
             await _logger.LogTraceAsync($"Creating delegate for {hookTypeName} hook: {hook.Name}").ConfigureAwait(false);
             var namedHook = await createDelegate(hook);
             hooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
@@ -229,8 +231,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.BeforeTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -242,8 +245,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -319,8 +323,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.AfterTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -332,8 +337,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -400,8 +406,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.BeforeClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -413,8 +420,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -469,8 +477,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.AfterClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -482,8 +491,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -533,8 +543,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
-        foreach (var hook in assemblyHooks)
+        foreach (var entry in assemblyHooks)
         {
+            var hook = entry.Materialize();
             var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
@@ -568,8 +579,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
-        foreach (var hook in assemblyHooks)
+        foreach (var entry in assemblyHooks)
         {
+            var hook = entry.Materialize();
             var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
