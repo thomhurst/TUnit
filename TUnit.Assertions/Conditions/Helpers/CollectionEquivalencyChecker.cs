@@ -188,7 +188,7 @@ internal static class CollectionEquivalencyChecker
             return string.Empty;
         }
 
-        StructuralDiffHelper.DiffResult bestDiff = default;
+        StructuralDiffHelper.StructuralDiffResult bestDiff = default;
         var bestScore = -1;
         TItem? bestCandidate = default;
 
@@ -279,7 +279,12 @@ internal static class CollectionEquivalencyChecker
             {
                 if (!actualCounts.TryGetValue(expectedItem, out var count) || count == 0)
                 {
-                    var diff = DescribeClosestDiff(expectedItem, actualList);
+                    // Materialize the still-unconsumed items from the frequency map so
+                    // DescribeClosestDiff cannot point at items already paired up by an
+                    // earlier expected entry. Built only on the failure path so the
+                    // success path stays O(n).
+                    var remaining = ExpandRemaining(actualCounts, nullCount);
+                    var diff = DescribeClosestDiff(expectedItem, remaining);
                     return CheckResult.Failure(
                         $"collection does not contain expected item: {expectedItem}{diff}");
                 }
@@ -288,5 +293,24 @@ internal static class CollectionEquivalencyChecker
         }
 
         return CheckResult.Success();
+    }
+
+#pragma warning disable CS8714 // Nullability of type argument doesn't match 'notnull' constraint - we handle nulls separately
+    private static List<TItem> ExpandRemaining<TItem>(Dictionary<TItem, int> counts, int nullCount)
+#pragma warning restore CS8714
+    {
+        var remaining = new List<TItem>(counts.Count + nullCount);
+        for (int i = 0; i < nullCount; i++)
+        {
+            remaining.Add(default!);
+        }
+        foreach (var pair in counts)
+        {
+            for (int i = 0; i < pair.Value; i++)
+            {
+                remaining.Add(pair.Key);
+            }
+        }
+        return remaining;
     }
 }
