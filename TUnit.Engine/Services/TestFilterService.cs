@@ -40,6 +40,8 @@ internal class TestFilterService(
         // Avoids allocating the unused filteredExplicitTests list on every call.
         if (_ignoreExplicit)
         {
+            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
+
             var result = new List<AbstractExecutableTest>(capacity);
             foreach (var test in testNodes)
             {
@@ -49,7 +51,6 @@ internal class TestFilterService(
                 }
             }
 
-            logger.LogTrace($"--{IgnoreExplicitCommandProvider.IgnoreExplicit} is set. Including [Explicit] tests in the filtered run.");
             return result;
         }
 

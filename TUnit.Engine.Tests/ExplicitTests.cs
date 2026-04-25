@@ -1,3 +1,5 @@
+using CliWrap;
+using CliWrap.Buffered;
 using Shouldly;
 using TUnit.Engine.Tests.Enums;
 
@@ -102,6 +104,51 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ],
             new RunOptions().WithArgument("--ignore-explicit"));
+    }
+
+    [Test]
+    public async Task NoFilter_WithIgnoreExplicitFlag_RunsExplicitTests()
+    {
+        // Exercises the FilterOutExplicitTests fast path: no --treenode-filter is
+        // supplied, so MTP feeds a NopFilter to TestFilterService. With
+        // --ignore-explicit, every test (explicit or not) should run.
+        // Uses the standalone TUnit.TestProject.IgnoreExplicit fixture so we can
+        // safely run with no filter. Reflection-only - the standalone fixture
+        // isn't published as an AOT executable.
+        Skip.When(testMode != TestMode.Reflection, "No-filter scenario only runs in Reflection mode.");
+
+        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject_IgnoreExplicit;
+        var guid = Guid.NewGuid().ToString("N");
+        var trxFilename = guid + ".trx";
+
+        var command = Cli.Wrap("dotnet")
+            .WithArguments(
+                [
+                    "run",
+                    "--no-build",
+                    "-f", "net10.0",
+                    "--configuration", "Release",
+                    "--ignore-explicit",
+                    "--report-trx", "--report-trx-filename", trxFilename,
+                    "--diagnostic-verbosity", "Debug",
+                    "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_NoFilter_",
+                    "--timeout", "5m"
+                ]
+            )
+            .WithWorkingDirectory(testProject.DirectoryName!)
+            .WithValidation(CommandResultValidation.None);
+
+        var result = await command.ExecuteBufferedAsync();
+
+        await TrxAsserter.AssertTrx(TestMode.Reflection, command, result,
+            [
+                run => run.ResultSummary.Outcome.ShouldBe("Completed"),
+                run => run.ResultSummary.Counters.Total.ShouldBe(4),
+                run => run.ResultSummary.Counters.Passed.ShouldBe(4),
+                run => run.ResultSummary.Counters.Failed.ShouldBe(0),
+                run => run.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+            ],
+            trxFilename);
     }
 
 }

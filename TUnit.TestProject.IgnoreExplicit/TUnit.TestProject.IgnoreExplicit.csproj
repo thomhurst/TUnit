@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\TestProject.props" />
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <Import Project="..\TestProject.targets" />
+
+</Project>
