@@ -433,15 +433,6 @@ public partial class TestContext : Context,
 
     internal ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.StateBag;
 
-    // Cached MTP TestNode instances for non-final lifecycle states (Discovered, InProgress).
-    // These nodes are immutable for a given TestId, so we build them once and reuse across the
-    // three message-bus publishes per test. Stored as object? to avoid pulling the
-    // Microsoft.Testing.Platform dependency into TUnit.Core; the engine casts to TestNode on read.
-    // Final-state nodes (Passed/Failed/Skipped/Cancelled/Timeout) are still built fresh because
-    // their PropertyBag carries result-specific data (timing, output, exception).
-    internal object? CachedDiscoveredTestNode { get; set; }
-    internal object? CachedInProgressTestNode { get; set; }
-
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
     internal SortedList<int, HashSet<object>> TrackedObjects { get; } = new();
