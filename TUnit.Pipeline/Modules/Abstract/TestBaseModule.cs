@@ -31,7 +31,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
             // Skip frameworks that this project did not actually build to avoid spurious
             // "process cannot find the file" errors for missing per-TFM output binaries.
             var configuration = testOptions.Configuration ?? "Release";
-            if (!HasFrameworkOutput(context, executionOptions, framework, configuration))
+            if (!HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
             {
                 context.Logger.LogInformation("Skipping {Framework}: no build output found for this test project.", framework);
                 continue;
@@ -50,13 +50,13 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         return results;
     }
 
-    private static bool HasFrameworkOutput(IModuleContext context, CommandExecutionOptions? executionOptions, string framework, string configuration)
+    private static bool HasFrameworkOutput(ILogger logger, CommandExecutionOptions? executionOptions, string framework, string configuration)
     {
         var workingDirectory = executionOptions?.WorkingDirectory;
         if (string.IsNullOrEmpty(workingDirectory))
         {
             // Cannot determine — fall through to attempt the run (preserves prior behaviour).
-            context.Logger.LogWarning("Cannot probe build output for {Framework}: no WorkingDirectory set on execution options.", framework);
+            logger.LogWarning("Cannot probe build output for {Framework}: no WorkingDirectory set on execution options.", framework);
             return true;
         }
 
