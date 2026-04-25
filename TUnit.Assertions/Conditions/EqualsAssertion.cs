@@ -83,7 +83,11 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}", exception));
         }
 
-        // Deep comparison with ignored types
+        // Deep comparison with ignored types.
+        // Intentionally skips the TryFormatObjectDiff path below: StructuralDiffHelper has no
+        // knowledge of the ignored-type set, so any "differs at member X" hint it produced
+        // could falsely flag a member the user explicitly opted out of comparing. DeepEquals
+        // already produces a member-aware failure message that respects _ignoredTypes.
         if (_ignoredTypes.Count > 0)
         {
             // Use reference-based tracking to detect cycles

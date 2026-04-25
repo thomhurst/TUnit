@@ -199,37 +199,60 @@ internal static class StructuralDiffHelper
     };
 
     /// <summary>
-    /// Counts how many top-level public members of <paramref name="actual"/> and
-    /// <paramref name="expected"/> compare equal under <see cref="object.Equals(object?, object?)"/>.
-    /// Used as a similarity score when picking the "closest match" in a collection diff.
-    /// Returns 0 if either input is null or the runtime types differ.
+    /// Single-pass walk over top-level members of <paramref name="actual"/> and
+    /// <paramref name="expected"/>, returning both a similarity score (count of top-level
+    /// members that compare equal under <see cref="object.Equals(object?, object?)"/>) and
+    /// the first nested structural diff. Used by the "closest match" hint to avoid two
+    /// reflection walks per candidate.
     /// </summary>
     [RequiresUnreferencedCode("Structural diff uses reflection to inspect object members and is not compatible with AOT")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Structural diff intentionally inspects runtime types reflectively")]
-    public static int CountMatchingTopLevelMembers(object? actual, object? expected)
+    public static (int Score, StructuralDiffResult Diff) ScoreAndDiff(object? actual, object? expected)
     {
         if (actual is null || expected is null)
         {
-            return 0;
+            return (0, FindFirstDifference(actual, expected));
         }
 
         var type = actual.GetType();
         if (type != expected.GetType())
         {
-            return 0;
+            return (0, FindFirstDifference(actual, expected));
         }
 
         var members = ReflectionHelper.GetMembersToCompare(type);
+        if (members.Length == 0)
+        {
+            return (0, FindFirstDifference(actual, expected));
+        }
+
+        var visitedActual = new HashSet<object>(ReferenceEqualityComparer<object>.Instance) { actual };
+        var visitedExpected = new HashSet<object>(ReferenceEqualityComparer<object>.Instance) { expected };
+
         var matches = 0;
+        var firstDiff = StructuralDiffResult.None;
         foreach (var member in members)
         {
             var actualValue = ReflectionHelper.GetMemberValue(actual, member);
             var expectedValue = ReflectionHelper.GetMemberValue(expected, member);
+
+            // Match the scoring semantics of CountMatchingTopLevelMembers: a top-level member
+            // counts as "matching" iff Equals reports it equal. This avoids paying for a deep
+            // recursion on members that already compare equal at the top level.
             if (Equals(actualValue, expectedValue))
             {
                 matches++;
+                continue;
+            }
+
+            // Only descend for the first differing member — once we have a diff, additional
+            // recursion is wasted work since we only return the first one.
+            if (!firstDiff.HasDiff)
+            {
+                firstDiff = FindFirstDifference(actualValue, expectedValue, member.Name, visitedActual, visitedExpected);
             }
         }
-        return matches;
+
+        return (matches, firstDiff);
     }
 }

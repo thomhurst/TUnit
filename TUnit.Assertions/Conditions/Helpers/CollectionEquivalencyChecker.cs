@@ -199,13 +199,14 @@ internal static class CollectionEquivalencyChecker
                 continue;
             }
 
-            var diff = StructuralDiffHelper.FindFirstDifference(candidate, expected);
+            // Single pass per candidate: ScoreAndDiff walks top-level members exactly once,
+            // counting matches and capturing the first nested diff together.
+            var (score, diff) = StructuralDiffHelper.ScoreAndDiff(candidate, expected);
             if (!diff.HasDiff)
             {
                 continue;
             }
 
-            var score = StructuralDiffHelper.CountMatchingTopLevelMembers(candidate, expected);
             if (score > bestScore)
             {
                 bestScore = score;
@@ -215,9 +216,9 @@ internal static class CollectionEquivalencyChecker
         }
 
         // Require at least one matching top-level member before we claim a "closest match".
-        // CountMatchingTopLevelMembers returns 0 for completely dissimilar candidates, and a
-        // bestScore of 0 beating the initial -1 would otherwise produce misleading hints
-        // pointing at unrelated objects.
+        // ScoreAndDiff returns score 0 for completely dissimilar candidates, and a bestScore
+        // of 0 beating the initial -1 would otherwise produce misleading hints pointing at
+        // unrelated objects.
         if (bestScore < 1)
         {
             return string.Empty;
@@ -299,7 +300,16 @@ internal static class CollectionEquivalencyChecker
     private static List<TItem> ExpandRemaining<TItem>(Dictionary<TItem, int> counts, int nullCount)
 #pragma warning restore CS8714
     {
-        var remaining = new List<TItem>(counts.Count + nullCount);
+        // Capacity must account for the sum of frequencies, not the unique-key count: a
+        // single key with a high frequency (e.g. [A,A,A]) would otherwise force the list
+        // to grow on the first few additions.
+        var capacity = nullCount;
+        foreach (var pair in counts)
+        {
+            capacity += pair.Value;
+        }
+
+        var remaining = new List<TItem>(capacity);
         for (int i = 0; i < nullCount; i++)
         {
             remaining.Add(default!);
