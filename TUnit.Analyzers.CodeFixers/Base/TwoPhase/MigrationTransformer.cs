@@ -764,9 +764,7 @@ public class MigrationTransformer
 
                 if (attributeList.Attributes.Count == 1)
                 {
-                    // Remove the entire attribute list without keeping its trivia
-                    // This prevents extra indentation from being left behind
-                    currentRoot = currentRoot.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
+                    currentRoot = RemoveAttributeListPreservingComments(currentRoot, attributeList);
                 }
                 else
                 {
@@ -1233,4 +1231,77 @@ public class MigrationTransformer
         var existingTrivia = root.GetLeadingTrivia();
         return root.WithLeadingTrivia(SyntaxFactory.TriviaList(commentTrivia).AddRange(existingTrivia));
     }
+
+    private static CompilationUnitSyntax RemoveAttributeListPreservingComments(
+        CompilationUnitSyntax root,
+        AttributeListSyntax attributeList)
+    {
+        var preservedTrivia = ExtractMeaningfulLeadingTrivia(attributeList.GetLeadingTrivia());
+        var nextToken = attributeList.CloseBracketToken.GetNextToken();
+
+        if (preservedTrivia.Count == 0 || nextToken == default)
+        {
+            return root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia)!;
+        }
+
+        // Track the attribute list so we can locate it after ReplaceToken rewrites the tree.
+        var tracked = root.TrackNodes(attributeList);
+        var trackedList = tracked.GetCurrentNode(attributeList)!;
+        var trackedNextToken = trackedList.CloseBracketToken.GetNextToken();
+
+        tracked = tracked.ReplaceToken(
+            trackedNextToken,
+            trackedNextToken.WithLeadingTrivia(preservedTrivia.AddRange(trackedNextToken.LeadingTrivia)));
+
+        var refoundList = tracked.GetCurrentNode(attributeList)!;
+        return tracked.RemoveNode(refoundList, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+
+    private static SyntaxTriviaList ExtractMeaningfulLeadingTrivia(SyntaxTriviaList leading)
+    {
+        int first = -1;
+        int last = -1;
+        for (int i = 0; i < leading.Count; i++)
+        {
+            if (IsMeaningfulTrivia(leading[i]))
+            {
+                if (first < 0) first = i;
+                last = i;
+            }
+        }
+
+        if (first < 0)
+        {
+            return SyntaxFactory.TriviaList();
+        }
+
+        // Include the trailing EOL so the next declaration lands on its own line.
+        int endInclusive = last;
+        if (endInclusive + 1 < leading.Count && leading[endInclusive + 1].IsKind(SyntaxKind.EndOfLineTrivia))
+        {
+            endInclusive++;
+        }
+
+        return SyntaxFactory.TriviaList(leading.Skip(first).Take(endInclusive - first + 1));
+    }
+
+    private static bool IsMeaningfulTrivia(SyntaxTrivia trivia) => trivia.Kind() switch
+    {
+        SyntaxKind.SingleLineCommentTrivia
+            or SyntaxKind.MultiLineCommentTrivia
+            or SyntaxKind.SingleLineDocumentationCommentTrivia
+            or SyntaxKind.MultiLineDocumentationCommentTrivia
+            or SyntaxKind.RegionDirectiveTrivia
+            or SyntaxKind.EndRegionDirectiveTrivia
+            or SyntaxKind.IfDirectiveTrivia
+            or SyntaxKind.ElseDirectiveTrivia
+            or SyntaxKind.ElifDirectiveTrivia
+            or SyntaxKind.EndIfDirectiveTrivia
+            or SyntaxKind.DefineDirectiveTrivia
+            or SyntaxKind.UndefDirectiveTrivia
+            or SyntaxKind.PragmaWarningDirectiveTrivia
+            or SyntaxKind.PragmaChecksumDirectiveTrivia
+            or SyntaxKind.NullableDirectiveTrivia => true,
+        _ => false
+    };
 }
