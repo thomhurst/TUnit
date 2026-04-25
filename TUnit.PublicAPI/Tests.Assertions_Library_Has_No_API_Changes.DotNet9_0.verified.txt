@@ -2641,6 +2641,8 @@ namespace .Extensions
             where TCollection : .<.<TInner>> { }
         public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
         public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TKey, TValue>>
             where TKey :  notnull { }

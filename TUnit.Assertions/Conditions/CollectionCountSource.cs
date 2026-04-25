@@ -17,8 +17,11 @@ public class CollectionCountSource<TCollection, TItem>
     public CollectionCountSource(
         AssertionContext<TCollection> collectionContext,
         Func<IAssertionSource<TItem>, Assertion<TItem>?>? assertion)
-        : this(collectionContext, WrapWithValueAssertion(assertion))
     {
+        _collectionContext = collectionContext;
+        _itemAssertionFactory = assertion is null
+            ? null
+            : (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]"));
     }
 
     /// <summary>
@@ -33,17 +36,6 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext = collectionContext;
         _itemAssertionFactory = itemAssertionFactory;
-    }
-
-    internal static Func<TItem, int, IAssertion?>? WrapWithValueAssertion(
-        Func<IAssertionSource<TItem>, Assertion<TItem>?>? assertion)
-    {
-        if (assertion is null)
-        {
-            return null;
-        }
-
-        return (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]"));
     }
 
     /// <summary>
@@ -171,15 +163,6 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
 
     internal CollectionCountEqualsAssertion(
         AssertionContext<TCollection> context,
-        Func<IAssertionSource<TItem>, Assertion<TItem>?>? itemAssertion,
-        int expected,
-        CountComparison comparison)
-        : this(context, CollectionCountSource<TCollection, TItem>.WrapWithValueAssertion(itemAssertion), expected, comparison)
-    {
-    }
-
-    internal CollectionCountEqualsAssertion(
-        AssertionContext<TCollection> context,
         Func<TItem, int, IAssertion?>? itemAssertionFactory,
         int expected,
         CountComparison comparison)
@@ -232,7 +215,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
                         await resultingAssertion.AssertAsync();
                         _actualCount++;
                     }
-                    catch
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         // Item did not satisfy the assertion, don't count it
                     }

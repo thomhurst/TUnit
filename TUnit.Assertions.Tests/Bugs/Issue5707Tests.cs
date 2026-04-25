@@ -104,6 +104,20 @@ public class Issue5707Tests
     }
 
     [Test]
+    public async Task Count_ReadOnlySet_Items_Reach_IsSubsetOf_On_Inner()
+    {
+        var universe = new HashSet<int> { 1, 2, 3, 4, 5 };
+        var sets = new List<IReadOnlySet<int>>
+        {
+            new HashSet<int> { 1, 2 },
+            new HashSet<int> { 6 },
+            new HashSet<int> { 3, 4 },
+        };
+
+        await Assert.That(sets).Count(s => s.IsSubsetOf(universe)).IsEqualTo(2);
+    }
+
+    [Test]
     public async Task Count_Specialised_Source_Failure_Message_Mentions_Inner_Expectation()
     {
         IEnumerable<IEnumerable<int>> listOfLists = new List<List<int>>

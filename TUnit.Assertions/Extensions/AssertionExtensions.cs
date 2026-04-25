@@ -1968,6 +1968,26 @@ public static class AssertionExtensions
             expression);
     }
 
+#if NET5_0_OR_GREATER
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IReadOnlySet{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves read-only sets; the lambda
+    /// receives a <see cref="ReadOnlySetAssertion{TInner}"/> with set-specific assertions
+    /// (IsSubsetOf, IsSupersetOf, Overlaps, etc.) in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IReadOnlySet<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, IReadOnlySet<TInner>> source,
+        Func<ReadOnlySetAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IReadOnlySet<TInner>>
+    {
+        return CountSpecialised<TCollection, IReadOnlySet<TInner>>(
+            source,
+            (item, index) => itemAssertion(new ReadOnlySetAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+#endif
+
     private static CollectionCountSource<TCollection, TItem> CountSpecialised<TCollection, TItem>(
         CollectionAssertionBase<TCollection, TItem> source,
         Func<TItem, int, IAssertion?> itemAssertionFactory,
