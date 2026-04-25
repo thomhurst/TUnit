@@ -195,7 +195,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         if (concurrentPhases.Count > 0)
         {
-            await WaitForTasksWithFailFastHandling(concurrentPhases.ToArray(), cancellationToken).ConfigureAwait(false);
+            await WaitForTasksWithFailFastHandling(concurrentPhases, cancellationToken).ConfigureAwait(false);
         }
 
         foreach (var group in groupedTests.ParallelGroups)
