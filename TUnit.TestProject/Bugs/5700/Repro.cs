@@ -5,7 +5,7 @@ namespace TUnit.TestProject.Bugs._5700;
 /// <summary>
 /// Regression test for https://github.com/thomhurst/TUnit/discussions/5700.
 ///
-/// Test1 has no parallel constraint. Test2 has [NotInParallel("Tests.Test2")] — a
+/// Test1 has no parallel constraint. Test2 has [NotInParallel(Test2Key)] — a
 /// keyed constraint that should only block other tests sharing the key (per
 /// docs/execution/parallelism.md). The buggy scheduler ran all unconstrained
 /// tests to completion before starting keyed-NotInParallel tests, so Test1
@@ -19,7 +19,8 @@ namespace TUnit.TestProject.Bugs._5700;
 [EngineTest(ExpectedResult.Pass)]
 public class Repro5700
 {
-    private static int _test1Active;
+    private const string Test2Key = "Tests.Test2";
+
     private static int _test2Active;
     private static int _test1ObservedTest2;
     private static int _test2ConcurrentViolations;
@@ -27,30 +28,22 @@ public class Repro5700
     [Test]
     public async Task Test1_RunsAlongsideKeyedTest2()
     {
-        Interlocked.Increment(ref _test1Active);
-        try
+        // Test1 = 3s sample window; Test2 cases serialize to ~2s, so Test1
+        // must overlap at least one Test2 invocation when the fix is in place.
+        for (var i = 0; i < 60; i++)
         {
-            // Sample for 3s; keyed Test2 cases serialize to ~2s so Test1 must
-            // overlap at least one Test2 invocation if cross-phase parallelism works.
-            for (var i = 0; i < 60; i++)
+            if (Volatile.Read(ref _test2Active) > 0)
             {
-                if (Volatile.Read(ref _test2Active) > 0)
-                {
-                    Interlocked.Increment(ref _test1ObservedTest2);
-                }
-                await Task.Delay(50);
+                Interlocked.Increment(ref _test1ObservedTest2);
             }
-        }
-        finally
-        {
-            Interlocked.Decrement(ref _test1Active);
+            await Task.Delay(50);
         }
     }
 
     [Test]
     [Arguments(1)]
     [Arguments(2)]
-    [NotInParallel("Tests.Test2")]
+    [NotInParallel(Test2Key)]
     public async Task Test2_KeyedSerializes(int param)
     {
         var concurrent = Interlocked.Increment(ref _test2Active);
@@ -61,7 +54,6 @@ public class Repro5700
                 Interlocked.Increment(ref _test2ConcurrentViolations);
             }
             await Task.Delay(1000);
-            _ = param;
         }
         finally
         {
