@@ -176,13 +176,6 @@ public static class Rules
     public static readonly DiagnosticDescriptor RedundantHookAttributeOnOverride =
         CreateDescriptor("TUnit0074", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
-        CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
-
-    public static readonly DiagnosticDescriptor TupleNotAotCompatible =
-        CreateDescriptor("TUnit0301", UsageCategory, DiagnosticSeverity.Warning);
-
-
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
         string[]? customTags = null, string? helpLinkUri = null)
     {
