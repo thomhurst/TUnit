@@ -879,7 +879,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             NewAttributeName = "Test",
             NewArgumentList = "", // Remove any arguments
             OriginalText = node.ToString(),
-            AdditionalAttributes = []
+            AdditionalAttributes = node.ArgumentList is null ? null : []
         };
 
         if (node.ArgumentList is null)
@@ -900,7 +900,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             }
 
             var argumentValue = argument.Expression.ToString();
-            result.AdditionalAttributes.Add(new AdditionalAttribute
+            result.AdditionalAttributes!.Add(new AdditionalAttribute
             {
                 Name = argumentName,
                 Arguments = $"({argumentValue})"
