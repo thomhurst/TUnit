@@ -2366,6 +2366,22 @@ namespace .Extensions
     {
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<TCollection, string> Count<TCollection>(this .<TCollection, string> source, <.<string>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<string> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TKey, TValue>>
+            where TKey :  notnull { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> Eventually<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +
