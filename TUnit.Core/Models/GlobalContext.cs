@@ -15,7 +15,10 @@ public class GlobalContext : Context
     private static GlobalContext? _current;
     public static new GlobalContext Current
     {
-        get => LazyInitializer.EnsureInitialized(ref _current)!;
+        // Explicit factory rather than the factory-less overload — the latter calls
+        // Activator.CreateInstance<T>() which the AOT trimmer may not honour for
+        // GlobalContext's internal constructor. CLAUDE.md: all code must work with Native AOT.
+        get => LazyInitializer.EnsureInitialized(ref _current, static () => new GlobalContext())!;
         internal set => Volatile.Write(ref _current, value);
     }
 
