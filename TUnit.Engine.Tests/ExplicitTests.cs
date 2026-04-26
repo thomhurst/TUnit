@@ -126,7 +126,7 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
                 [
                     "run",
                     "--no-build",
-                    "-f", "net10.0",
+                    "-f", Environment.GetEnvironmentVariable("NET_VERSION") ?? "net10.0",
                     "--configuration", "Release",
                     "--",
                     "--include-explicit",
