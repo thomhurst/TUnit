@@ -53,15 +53,19 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         {
             var serviceProvider = GetOrCreateServiceProvider(context);
 
-            serviceProvider.Initializer.Initialize(context);
-
-            await serviceProvider.HookDelegateBuilder.InitializeAsync();
-
+            // Install the session-wide contexts before any awaits so that anything reading
+            // GlobalContext.Current (including BeforeTestDiscovery hooks fired from
+            // initialization paths or background work) observes the populated contexts
+            // — not the lazy fallback instance with a null TestFilter.
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
             GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
             BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
+
+            serviceProvider.Initializer.Initialize(context);
+
+            await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
             serviceProvider.CancellationToken.Initialise(context.CancellationToken);
 

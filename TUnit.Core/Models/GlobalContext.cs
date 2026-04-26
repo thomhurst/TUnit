@@ -6,14 +6,17 @@ namespace TUnit.Core;
 
 public class GlobalContext : Context
 {
-    private static readonly AsyncLocal<GlobalContext?> Contexts = new();
+    // Per-process, not per-async-context: GlobalContext is the session-wide root and
+    // must be visible from any thread/async branch (test discovery hooks, parallel
+    // hook execution, MTP test-host-controller mode under --hangdump). The previous
+    // AsyncLocal getter mutated `Contexts.Value` on first read, poisoning that
+    // async branch with a fresh empty instance and preventing the framework's later
+    // assignment from being observed there.
+    private static GlobalContext? _current;
     public static new GlobalContext Current
     {
-        get
-        {
-            return Contexts.Value ??= new GlobalContext();
-        }
-        internal set => Contexts.Value = value;
+        get => LazyInitializer.EnsureInitialized(ref _current)!;
+        internal set => Volatile.Write(ref _current, value);
     }
 
     internal GlobalContext() : base(null)
