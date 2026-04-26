@@ -17,12 +17,25 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 {
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly ConcurrentDictionary<Type, IReadOnlyList<NamedHookDelegate<TestContext>>> _beforeTestHooksCache = new();
-    private readonly ConcurrentDictionary<Type, IReadOnlyList<NamedHookDelegate<TestContext>>> _afterTestHooksCache = new();
-    private readonly ConcurrentDictionary<Type, IReadOnlyList<NamedHookDelegate<ClassHookContext>>> _beforeClassHooksCache = new();
-    private readonly ConcurrentDictionary<Type, IReadOnlyList<NamedHookDelegate<ClassHookContext>>> _afterClassHooksCache = new();
-    private readonly ConcurrentDictionary<Assembly, IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> _beforeAssemblyHooksCache = new();
-    private readonly ConcurrentDictionary<Assembly, IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> _afterAssemblyHooksCache = new();
+    // Lazy<Task<...>> ensures only one thread builds the hook list per key — racing threads
+    // observe the same Lazy instance via GetOrAdd and await the same underlying Task.
+    // Without this wrapper, two threads racing the first test of the same class would both
+    // build the full sorted hook list and the loser's result is silently discarded.
+    private readonly ConcurrentDictionary<Type, Lazy<Task<IReadOnlyList<NamedHookDelegate<TestContext>>>>> _beforeTestHooksCache = new();
+    private readonly ConcurrentDictionary<Type, Lazy<Task<IReadOnlyList<NamedHookDelegate<TestContext>>>>> _afterTestHooksCache = new();
+    private readonly ConcurrentDictionary<Type, Lazy<Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>>> _beforeClassHooksCache = new();
+    private readonly ConcurrentDictionary<Type, Lazy<Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>>> _afterClassHooksCache = new();
+    private readonly ConcurrentDictionary<Assembly, Lazy<Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>>> _beforeAssemblyHooksCache = new();
+    private readonly ConcurrentDictionary<Assembly, Lazy<Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>>> _afterAssemblyHooksCache = new();
+
+    // Cache the build delegates so the per-test cache-hit path doesn't allocate a new
+    // method-group delegate on every call (matters because Collect*HooksAsync runs per test).
+    private readonly Func<Type, Task<IReadOnlyList<NamedHookDelegate<TestContext>>>> _buildBeforeTestHooks;
+    private readonly Func<Type, Task<IReadOnlyList<NamedHookDelegate<TestContext>>>> _buildAfterTestHooks;
+    private readonly Func<Type, Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>> _buildBeforeClassHooks;
+    private readonly Func<Type, Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>> _buildAfterClassHooks;
+    private readonly Func<Assembly, Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>> _buildBeforeAssemblyHooks;
+    private readonly Func<Assembly, Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>> _buildAfterAssemblyHooks;
 
     // Cache for GetGenericTypeDefinition() calls to avoid repeated reflection
     private static readonly ConcurrentDictionary<Type, Type> _genericTypeDefinitionCache = new();
@@ -39,13 +52,22 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     private IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>? _beforeEveryAssemblyHooks;
     private IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>? _afterEveryAssemblyHooks;
 
-    // Cache for processed hooks to avoid re-processing event receivers
+    // Cache for processed hooks to avoid re-processing event receivers.
+    // Dedup relies on reference identity (HookMethod does not override Equals/GetHashCode);
+    // safe today because Materialize() returns the same cached instance per hook.
+    // If HookMethod ever overrides Equals/GetHashCode, revisit this assumption.
     private readonly ConcurrentDictionary<object, bool> _processedHooks = new();
 
     public HookDelegateBuilder(EventReceiverOrchestrator eventReceiverOrchestrator, TUnitFrameworkLogger logger)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
+        _buildBeforeTestHooks = BuildBeforeTestHooksAsync;
+        _buildAfterTestHooks = BuildAfterTestHooksAsync;
+        _buildBeforeClassHooks = BuildBeforeClassHooksAsync;
+        _buildAfterClassHooks = BuildAfterClassHooksAsync;
+        _buildBeforeAssemblyHooks = BuildBeforeAssemblyHooksAsync;
+        _buildAfterAssemblyHooks = BuildAfterAssemblyHooksAsync;
     }
 
     private static Type GetCachedGenericTypeDefinition(Type type)
@@ -80,20 +102,22 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
     /// <summary>
     /// Generic helper to build global hooks from Sources collections.
-    /// Eliminates duplication across all BuildGlobalXXXHooksAsync methods.
+    /// Materializes each <see cref="LazyHookEntry{T}"/> on first access — the heavy
+    /// MethodMetadata/ClassMetadata graph is constructed here rather than at module init.
     /// </summary>
     private async Task<IReadOnlyList<NamedHookDelegate<TContext>>> BuildGlobalHooksAsync<THookMethod, TContext>(
-        IEnumerable<THookMethod> sourceHooks,
+        IEnumerable<LazyHookEntry<THookMethod>> sourceHooks,
         Func<THookMethod, ValueTask<NamedHookDelegate<TContext>>> createDelegate,
         string hookTypeName)
         where THookMethod : HookMethod
     {
         // Pre-size list if possible for better performance
-        var capacity = sourceHooks is ICollection<THookMethod> coll ? coll.Count : 0;
+        var capacity = sourceHooks is ICollection<LazyHookEntry<THookMethod>> coll ? coll.Count : 0;
         var hooks = new List<(int order, int registrationIndex, NamedHookDelegate<TContext> hook)>(capacity);
 
-        foreach (var hook in sourceHooks)
+        foreach (var entry in sourceHooks)
         {
+            var hook = entry.Materialize();
             await _logger.LogTraceAsync($"Creating delegate for {hookTypeName} hook: {hook.Name}").ConfigureAwait(false);
             var namedHook = await createDelegate(hook);
             hooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
@@ -158,7 +182,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         List<NamedHookDelegate<TContext>> target,
         List<(int order, int registrationIndex, NamedHookDelegate<TContext> hook)> hooks)
     {
-        hooks.Sort((a, b) => a.order != b.order
+        hooks.Sort(static (a, b) => a.order != b.order
             ? a.order.CompareTo(b.order)
             : a.registrationIndex.CompareTo(b.registrationIndex));
 
@@ -166,6 +190,51 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
         {
             target.Add(hook);
         }
+    }
+
+    /// <summary>
+    /// Single-flight cache lookup: returns the shared <see cref="Lazy{T}"/> task for a key,
+    /// creating one (per-instance) on first access. Other racing threads observe the same
+    /// Lazy and await the same underlying build, avoiding duplicate work.
+    /// </summary>
+    private static ValueTask<IReadOnlyList<NamedHookDelegate<TContext>>> GetOrBuildHooksAsync<TKey, TContext>(
+        ConcurrentDictionary<TKey, Lazy<Task<IReadOnlyList<NamedHookDelegate<TContext>>>>> cache,
+        TKey key,
+        Func<TKey, Task<IReadOnlyList<NamedHookDelegate<TContext>>>> build)
+        where TKey : notnull
+    {
+        var lazy = cache.GetOrAdd(
+            key,
+            static (k, b) => new Lazy<Task<IReadOnlyList<NamedHookDelegate<TContext>>>>(
+                () => b(k),
+                LazyThreadSafetyMode.ExecutionAndPublication),
+            build);
+        var task = lazy.Value;
+        return task.Status == TaskStatus.RanToCompletion
+            ? new ValueTask<IReadOnlyList<NamedHookDelegate<TContext>>>(task.Result)
+            : new ValueTask<IReadOnlyList<NamedHookDelegate<TContext>>>(task);
+    }
+
+    /// <summary>
+    /// Synchronous fast-path for the executor: returns the cached hook list only if the
+    /// build task has already completed successfully.
+    /// </summary>
+    private static bool TryGetCachedHooks<TKey, TContext>(
+        ConcurrentDictionary<TKey, Lazy<Task<IReadOnlyList<NamedHookDelegate<TContext>>>>> cache,
+        TKey key,
+        out IReadOnlyList<NamedHookDelegate<TContext>> hooks)
+        where TKey : notnull
+    {
+        if (cache.TryGetValue(key, out var cached)
+            && cached.IsValueCreated
+            && cached.Value.Status == TaskStatus.RanToCompletion)
+        {
+            hooks = cached.Value.Result;
+            return true;
+        }
+
+        hooks = [];
+        return false;
     }
 
     private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)
@@ -189,33 +258,10 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectBeforeTestHooksAsync(Type testClassType)
-    {
-        if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheBeforeTestHooksAsync(testClassType);
-    }
+        => GetOrBuildHooksAsync(_beforeTestHooksCache, testClassType, _buildBeforeTestHooks);
 
     public bool TryGetCachedBeforeTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
-    {
-        if (_beforeTestHooksCache.TryGetValue(testClassType, out var cached))
-        {
-            hooks = cached;
-            return true;
-        }
-
-        hooks = [];
-        return false;
-    }
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildAndCacheBeforeTestHooksAsync(Type testClassType)
-    {
-        var hooks = await BuildBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
-        _beforeTestHooksCache.TryAdd(testClassType, hooks);
-        return hooks;
-    }
+        => TryGetCachedHooks(_beforeTestHooksCache, testClassType, out hooks);
 
     private async Task<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildBeforeTestHooksAsync(Type type)
     {
@@ -229,8 +275,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.BeforeTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -242,8 +289,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -273,39 +321,16 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> CollectAfterTestHooksAsync(Type testClassType)
-    {
-        if (_afterTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheAfterTestHooksAsync(testClassType);
-    }
+        => GetOrBuildHooksAsync(_afterTestHooksCache, testClassType, _buildAfterTestHooks);
 
     public bool TryGetCachedAfterTestHooks(Type testClassType, out IReadOnlyList<NamedHookDelegate<TestContext>> hooks)
-    {
-        if (_afterTestHooksCache.TryGetValue(testClassType, out var cached))
-        {
-            hooks = cached;
-            return true;
-        }
-
-        hooks = [];
-        return false;
-    }
+        => TryGetCachedHooks(_afterTestHooksCache, testClassType, out hooks);
 
     public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedBeforeEveryTestHooks()
         => _beforeEveryTestHooks ?? [];
 
     public IReadOnlyList<NamedHookDelegate<TestContext>> GetCachedAfterEveryTestHooks()
         => _afterEveryTestHooks ?? [];
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildAndCacheAfterTestHooksAsync(Type testClassType)
-    {
-        var hooks = await BuildAfterTestHooksAsync(testClassType).ConfigureAwait(false);
-        _afterTestHooksCache.TryAdd(testClassType, hooks);
-        return hooks;
-    }
 
     private async Task<IReadOnlyList<NamedHookDelegate<TestContext>>> BuildAfterTestHooksAsync(Type type)
     {
@@ -319,8 +344,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.AfterTestHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateInstanceHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -332,8 +358,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateInstanceHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -372,21 +399,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectBeforeClassHooksAsync(Type testClassType)
-    {
-        if (_beforeClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheBeforeClassHooksAsync(testClassType);
-    }
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildAndCacheBeforeClassHooksAsync(Type testClassType)
-    {
-        var hooks = await BuildBeforeClassHooksAsync(testClassType).ConfigureAwait(false);
-        _beforeClassHooksCache.TryAdd(testClassType, hooks);
-        return hooks;
-    }
+        => GetOrBuildHooksAsync(_beforeClassHooksCache, testClassType, _buildBeforeClassHooks);
 
     private async Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildBeforeClassHooksAsync(Type type)
     {
@@ -400,8 +413,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.BeforeClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -413,8 +427,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -441,21 +456,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> CollectAfterClassHooksAsync(Type testClassType)
-    {
-        if (_afterClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheAfterClassHooksAsync(testClassType);
-    }
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildAndCacheAfterClassHooksAsync(Type testClassType)
-    {
-        var hooks = await BuildAfterClassHooksAsync(testClassType).ConfigureAwait(false);
-        _afterClassHooksCache.TryAdd(testClassType, hooks);
-        return hooks;
-    }
+        => GetOrBuildHooksAsync(_afterClassHooksCache, testClassType, _buildAfterClassHooks);
 
     private async Task<IReadOnlyList<NamedHookDelegate<ClassHookContext>>> BuildAfterClassHooksAsync(Type type)
     {
@@ -469,8 +470,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
             if (Sources.AfterClassHooks.TryGetValue(currentType, out var sourceHooks))
             {
-                foreach (var hook in sourceHooks)
+                foreach (var entry in sourceHooks)
                 {
+                    var hook = entry.Materialize();
                     var namedHook = await CreateStaticHookDelegateAsync(hook);
                     typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                 }
@@ -482,8 +484,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
                 var openGenericType = GetCachedGenericTypeDefinition(currentType);
                 if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                 {
-                    foreach (var hook in openTypeHooks)
+                    foreach (var entry in openTypeHooks)
                     {
+                        var hook = entry.Materialize();
                         var namedHook = await CreateStaticHookDelegateAsync(hook);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
                     }
@@ -508,21 +511,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
-    {
-        if (_beforeAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheBeforeAssemblyHooksAsync(assembly);
-    }
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildAndCacheBeforeAssemblyHooksAsync(Assembly assembly)
-    {
-        var hooks = await BuildBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
-        _beforeAssemblyHooksCache.TryAdd(assembly, hooks);
-        return hooks;
-    }
+        => GetOrBuildHooksAsync(_beforeAssemblyHooksCache, assembly, _buildBeforeAssemblyHooks);
 
     private async Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildBeforeAssemblyHooksAsync(Assembly assembly)
     {
@@ -533,8 +522,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
-        foreach (var hook in assemblyHooks)
+        foreach (var entry in assemblyHooks)
         {
+            var hook = entry.Materialize();
             var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }
@@ -543,21 +533,7 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
     }
 
     public ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
-    {
-        if (_afterAssemblyHooksCache.TryGetValue(assembly, out var cachedHooks))
-        {
-            return new ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>>(cachedHooks);
-        }
-
-        return BuildAndCacheAfterAssemblyHooksAsync(assembly);
-    }
-
-    private async ValueTask<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildAndCacheAfterAssemblyHooksAsync(Assembly assembly)
-    {
-        var hooks = await BuildAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
-        _afterAssemblyHooksCache.TryAdd(assembly, hooks);
-        return hooks;
-    }
+        => GetOrBuildHooksAsync(_afterAssemblyHooksCache, assembly, _buildAfterAssemblyHooks);
 
     private async Task<IReadOnlyList<NamedHookDelegate<AssemblyHookContext>>> BuildAfterAssemblyHooksAsync(Assembly assembly)
     {
@@ -568,8 +544,9 @@ internal sealed class HookDelegateBuilder : IHookDelegateBuilder
 
         var allHooks = new List<(int order, int registrationIndex, NamedHookDelegate<AssemblyHookContext> hook)>(assemblyHooks.Count);
 
-        foreach (var hook in assemblyHooks)
+        foreach (var entry in assemblyHooks)
         {
+            var hook = entry.Materialize();
             var namedHook = await CreateStaticHookDelegateAsync(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, namedHook));
         }

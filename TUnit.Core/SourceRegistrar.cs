@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
@@ -61,29 +62,43 @@ public class SourceRegistrar
     }
 
     /// <summary>
-    /// Registers a hook into a type-keyed dictionary and returns a dummy value for use as a field initializer.
+    /// Registers a hook factory into a type-keyed dictionary. The factory is not invoked
+    /// until the engine materializes the hook for execution. Use a <c>static</c> lambda
+    /// (no captures) to keep module-init cost minimal and to remain AOT compatible.
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static int RegisterHook<T>(ConcurrentDictionary<Type, ConcurrentBag<T>> dictionary, Type key, T hook)
+    public static int RegisterHook<T>(ConcurrentDictionary<Type, ConcurrentBag<LazyHookEntry<T>>> dictionary, Type key, int registrationIndex, Func<int, T> factory)
+        where T : HookMethod
     {
-        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<T>()).Add(hook);
+        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<LazyHookEntry<T>>())
+            .Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
     }
 
     /// <summary>
-    /// Registers a hook into an assembly-keyed dictionary and returns a dummy value for use as a field initializer.
+    /// Registers a hook factory into an assembly-keyed dictionary. The factory is not invoked
+    /// until the engine materializes the hook for execution. Use a <c>static</c> lambda
+    /// (no captures) to keep module-init cost minimal and to remain AOT compatible.
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static int RegisterHook<T>(ConcurrentDictionary<Assembly, ConcurrentBag<T>> dictionary, Assembly key, T hook)
+    public static int RegisterHook<T>(ConcurrentDictionary<Assembly, ConcurrentBag<LazyHookEntry<T>>> dictionary, Assembly key, int registrationIndex, Func<int, T> factory)
+        where T : HookMethod
     {
-        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<T>()).Add(hook);
+        dictionary.GetOrAdd(key, static _ => new ConcurrentBag<LazyHookEntry<T>>())
+            .Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
     }
 
     /// <summary>
-    /// Registers a hook into a global bag and returns a dummy value for use as a field initializer.
+    /// Registers a hook factory into a global bag. The factory is not invoked until the engine
+    /// materializes the hook for execution. Use a <c>static</c> lambda (no captures) to keep
+    /// module-init cost minimal and to remain AOT compatible.
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static int RegisterHook<T>(ConcurrentBag<T> bag, T hook)
+    public static int RegisterHook<T>(ConcurrentBag<LazyHookEntry<T>> bag, int registrationIndex, Func<int, T> factory)
+        where T : HookMethod
     {
-        bag.Add(hook);
+        bag.Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
     }
 
