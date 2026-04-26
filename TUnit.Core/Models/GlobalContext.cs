@@ -6,14 +6,16 @@ namespace TUnit.Core;
 
 public class GlobalContext : Context
 {
-    private static readonly AsyncLocal<GlobalContext?> Contexts = new();
+    // Static, not AsyncLocal: a lazy-creating AsyncLocal getter poisons the first
+    // reading branch with a fresh empty instance, hiding the framework's later
+    // Current = ... assignment from that branch.
+    private static GlobalContext? _current;
     public static new GlobalContext Current
     {
-        get
-        {
-            return Contexts.Value ??= new GlobalContext();
-        }
-        internal set => Contexts.Value = value;
+        // Factory overload — the parameterless one uses Activator.CreateInstance<T>(),
+        // which AOT trimming may not preserve for GlobalContext's internal ctor.
+        get => LazyInitializer.EnsureInitialized(ref _current, static () => new GlobalContext())!;
+        internal set => Volatile.Write(ref _current, value);
     }
 
     internal GlobalContext() : base(null)

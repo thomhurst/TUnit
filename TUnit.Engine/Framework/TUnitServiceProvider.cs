@@ -170,7 +170,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
-        ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
+        ContextProvider = Register(new ContextProvider(this, TestSessionId, FilterParser.StringifyFilter(Filter)));
 
         var hookExecutor = Register(new HookExecutor(HookDelegateBuilder, ContextProvider, EventReceiverOrchestrator));
         var lifecycleCoordinator = Register(new TestLifecycleCoordinator());

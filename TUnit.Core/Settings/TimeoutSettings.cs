@@ -9,18 +9,44 @@ public sealed class TimeoutSettings
     internal TimeoutSettings() { }
 
     /// <summary>
-    /// Default timeout for individual tests. Default: 30 minutes.
-    /// Overridden per-test by <see cref="TimeoutAttribute"/>.
+    /// Default timeout for individual tests. Overridden per-test by <see cref="TimeoutAttribute"/>.
     /// Precedence: CLI/env var (N/A for test timeout) → TUnitSettings → built-in default.
+    /// <para>
+    /// If this property is never explicitly set, tests without a <see cref="TimeoutAttribute"/>
+    /// run without any timeout wrapper. The 30-minute fallback only applies when this
+    /// property is explicitly assigned.
+    /// </para>
     /// </summary>
     public TimeSpan DefaultTestTimeout
     {
-        get => _defaultTestTimeout;
+        get => _defaultTestTimeout ?? TimeSpan.FromMinutes(30);
         set
         {
             ValidatePositive(value);
             _defaultTestTimeout = value;
         }
+    }
+
+    // Null means the user never assigned a project-level default, so tests without [Timeout]
+    // bypass TimeoutHelper entirely instead of paying wrap overhead for a 30-minute backstop.
+    internal TimeSpan? ExplicitDefaultTestTimeout => _defaultTestTimeout;
+
+    // Coalesces the per-test [Timeout] attribute value with the project-wide opt-in
+    // DefaultTestTimeout. Null when neither is set — TestCoordinator's null fast path
+    // then skips the TimeoutHelper wrap entirely.
+    internal TimeSpan? GetEffectiveTestTimeout(TimeSpan? attributeTimeout)
+        => attributeTimeout ?? _defaultTestTimeout;
+
+    // Test-only seam: the public setter validates positive-only and can't write null, which
+    // leaves the harness unable to restore the "unset" state after a snapshot/restore cycle.
+    internal void SetExplicitDefaultTestTimeout(TimeSpan? value)
+    {
+        if (value is { } positive)
+        {
+            ValidatePositive(positive);
+        }
+
+        _defaultTestTimeout = value;
     }
 
     /// <summary>
@@ -71,7 +97,7 @@ public sealed class TimeoutSettings
         }
     }
 
-    private TimeSpan _defaultTestTimeout = TimeSpan.FromMinutes(30);
+    private TimeSpan? _defaultTestTimeout;
     private TimeSpan _defaultHookTimeout = TimeSpan.FromMinutes(5);
     private TimeSpan _forcefulExitTimeout = TimeSpan.FromSeconds(30);
     private TimeSpan _processExitHookDelay = TimeSpan.FromMilliseconds(500);
