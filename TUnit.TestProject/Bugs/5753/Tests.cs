@@ -16,6 +16,7 @@ public class Issue5753ReflectionPropertyInjectionTests
     }
 }
 
+[EngineTest(ExpectedResult.Pass)]
 public class Issue5753ValueTypePropertyInjectionTests
 {
     [Issue5753IntDataSource]
@@ -53,11 +54,10 @@ public class Issue5753InjectedService : IAsyncInitializer
     }
 }
 
-public class Issue5753IntDataSourceAttribute : TypedDataSourceAttribute<int>
+public class Issue5753IntDataSourceAttribute : DataSourceGeneratorAttribute<int>
 {
-    public override async IAsyncEnumerable<Func<Task<int>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        yield return () => Task.FromResult(42);
-        await Task.CompletedTask;
+        yield return () => 42;
     }
 }
