@@ -15,7 +15,7 @@
     <PackageVersion Include="EnumerableAsyncProcessor" Version="3.8.4" />
     <PackageVersion Include="FakeItEasy" Version="9.0.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="FsCheck" Version="3.3.2" />
+    <PackageVersion Include="FsCheck" Version="3.3.3" />
     <PackageVersion Include="FSharp.Core" Version="11.0.100" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.7.0" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
