@@ -104,7 +104,7 @@ public sealed class CancellationTokenBehaviourTests
 /// Used by <see cref="CancellationTokenBehaviourTests.UserSuppliedArbitraryOverridesDefault"/>
 /// to verify that user-supplied arbitraries take precedence over the default.
 /// </summary>
-internal sealed class AlwaysNoneTokenArbitrary
+internal static class AlwaysNoneTokenArbitrary
 {
     /// <summary>Always returns <see cref="CancellationToken.None"/>.</summary>
     public static Arbitrary<CancellationToken> CancellationToken()
