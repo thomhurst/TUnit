@@ -67,6 +67,10 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
     private readonly AssertionContext<TList> _listContext;
     private readonly int _index;
 
+    internal AssertionContext<TList> InternalListContext => _listContext;
+
+    internal int InternalIndex => _index;
+
     public AssertionContext<TItem> Context { get; }
 
     public ListItemAtSource(AssertionContext<TList> listContext, int index)
@@ -420,12 +424,23 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
     where TList : IList<TItem>
 {
     private readonly int _index;
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, int, IAssertion?> _assertion;
 
     public ListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(
+            context,
+            index,
+            (item, itemIndex) => assertion(new ValueAssertion<TItem>(item, $"item[{itemIndex}]")))
+    {
+    }
+
+    internal ListItemAtSatisfiesAssertion(
+        AssertionContext<TList> context,
+        int index,
+        Func<TItem, int, IAssertion?> assertion)
         : base(context)
     {
         _index = index;
@@ -451,8 +466,7 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
         }
 
         var actualItem = metadata.Value[_index];
-        var itemSource = new ValueAssertion<TItem>(actualItem, $"item[{_index}]");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(actualItem, _index);
 
         if (resultingAssertion != null)
         {

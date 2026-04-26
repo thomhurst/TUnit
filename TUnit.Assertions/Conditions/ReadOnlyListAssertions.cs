@@ -69,6 +69,10 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
     private readonly AssertionContext<TList> _listContext;
     private readonly int _index;
 
+    internal AssertionContext<TList> InternalListContext => _listContext;
+
+    internal int InternalIndex => _index;
+
     public AssertionContext<TItem> Context { get; }
 
     public ReadOnlyListItemAtSource(AssertionContext<TList> listContext, int index)
@@ -422,12 +426,23 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, int, IAssertion?> _assertion;
 
     public ReadOnlyListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(
+            context,
+            index,
+            (item, itemIndex) => assertion(new ValueAssertion<TItem>(item, $"item[{itemIndex}]")))
+    {
+    }
+
+    internal ReadOnlyListItemAtSatisfiesAssertion(
+        AssertionContext<TList> context,
+        int index,
+        Func<TItem, int, IAssertion?> assertion)
         : base(context)
     {
         _index = index;
@@ -453,8 +468,7 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
         }
 
         var actualItem = metadata.Value[_index];
-        var itemSource = new ValueAssertion<TItem>(actualItem, $"item[{_index}]");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(actualItem, _index);
 
         if (resultingAssertion != null)
         {
