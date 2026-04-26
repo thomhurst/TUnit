@@ -192,6 +192,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     protected virtual IEnumerable<string> ResourcesToWaitFor() => [];
 
     /// <summary>
+    /// Resources to be removed from the <see cref="DistributedApplicationTestingBuilder"/>.
+    /// </summary>
+    protected virtual IEnumerable<string> ResourcesToRemove() => [];
+
+    /// <summary>
     /// Override for full control over the resource waiting logic.
     /// </summary>
     /// <param name="app">The running distributed application.</param>
@@ -258,6 +263,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost);
         ConfigureBuilder(builder);
+        RemoveResources(builder);
 
         // Configure OTLP endpoint on project resources AFTER user's ConfigureBuilder
         if (_otlpReceiver is not null)
@@ -321,6 +327,25 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                 $"Resources: [{resourceNames}]. " +
                 $"Wait behavior: {WaitBehavior}. " +
                 $"Consider increasing ResourceTimeout, checking resource health, or using WatchResourceLogs() to diagnose startup issues.");
+        }
+    }
+
+    private void RemoveResources(IDistributedApplicationTestingBuilder builder)
+    {
+        foreach (var name in ResourcesToRemove())
+        {
+            var resource =
+                builder.Resources.SingleOrDefault(r =>
+                    string.Equals(r.Name, name, StringComparison.Ordinal));
+
+            if (resource is not null)
+            {
+                builder.Resources.Remove(resource);
+            }
+            else
+            {
+                LogProgress($"ResourcesToRemove: resource '{name}' not found (skipped).");
+            }
         }
     }
 
