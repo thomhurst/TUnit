@@ -159,7 +159,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"/// <summary>");
         sourceBuilder.AppendLine($"/// Generated extension methods for {data.ClassSymbol.Name}.");
         sourceBuilder.AppendLine($"/// </summary>");
-        sourceBuilder.AppendLine($"public static class {extensionClassName}");
+        sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
         sourceBuilder.AppendLine("{");
 
         // Generate extension methods for each constructor

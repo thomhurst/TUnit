@@ -12,14 +12,37 @@ public class CollectionCountSource<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly AssertionContext<TCollection> _collectionContext;
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?>? _assertion;
+    private readonly Func<TItem, int, IAssertion?>? _itemAssertionFactory;
 
-    public CollectionCountSource(
+    /// <summary>
+    /// Constructor used by the generic <see cref="CollectionAssertionBase{TCollection, TItem}.Count(System.Func{IAssertionSource{TItem}, IAssertion?}, string?)"/>
+    /// instance method: wraps each item with <see cref="ValueAssertion{TItem}"/> before
+    /// invoking the user-supplied lambda. Specialised <c>Count(itemAssertion)</c>
+    /// extension overloads use the per-item factory ctor below to preserve
+    /// item-shape-specific assertion sources (issue #5707).
+    /// </summary>
+    internal CollectionCountSource(
         AssertionContext<TCollection> collectionContext,
-        Func<IAssertionSource<TItem>, Assertion<TItem>?>? assertion)
+        Func<IAssertionSource<TItem>, IAssertion?>? assertion)
     {
         _collectionContext = collectionContext;
-        _assertion = assertion;
+        _itemAssertionFactory = assertion is null
+            ? null
+            : (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]"));
+    }
+
+    /// <summary>
+    /// Internal constructor that accepts a per-item assertion factory directly.
+    /// Used by specialised <c>Count(itemAssertion)</c> overloads that supply
+    /// item-shape-specific assertion sources (e.g. collection, dictionary, set)
+    /// instead of the generic <see cref="ValueAssertion{TItem}"/>.
+    /// </summary>
+    internal CollectionCountSource(
+        AssertionContext<TCollection> collectionContext,
+        Func<TItem, int, IAssertion?>? itemAssertionFactory)
+    {
+        _collectionContext = collectionContext;
+        _itemAssertionFactory = itemAssertionFactory;
     }
 
     /// <summary>
@@ -32,7 +55,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsEqualTo({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.Equal);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.Equal);
     }
 
     /// <summary>
@@ -45,7 +68,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.NotEqual);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.NotEqual);
     }
 
     /// <summary>
@@ -58,7 +81,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsGreaterThan({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.GreaterThan);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.GreaterThan);
     }
 
     /// <summary>
@@ -71,7 +94,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsGreaterThanOrEqualTo({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.GreaterThanOrEqual);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.GreaterThanOrEqual);
     }
 
     /// <summary>
@@ -84,7 +107,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsLessThan({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.LessThan);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.LessThan);
     }
 
     /// <summary>
@@ -97,7 +120,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append($".IsLessThanOrEqualTo({expression})");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, expected, CountComparison.LessThanOrEqual);
+            _collectionContext, _itemAssertionFactory, expected, CountComparison.LessThanOrEqual);
     }
 
     /// <summary>
@@ -108,7 +131,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append(".IsZero()");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, 0, CountComparison.Equal);
+            _collectionContext, _itemAssertionFactory, 0, CountComparison.Equal);
     }
 
     /// <summary>
@@ -119,7 +142,7 @@ public class CollectionCountSource<TCollection, TItem>
     {
         _collectionContext.ExpressionBuilder.Append(".IsPositive()");
         return new CollectionCountEqualsAssertion<TCollection, TItem>(
-            _collectionContext, _assertion, 0, CountComparison.GreaterThan);
+            _collectionContext, _itemAssertionFactory, 0, CountComparison.GreaterThan);
     }
 }
 
@@ -140,19 +163,19 @@ internal enum CountComparison
 public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?>? _itemAssertion;
+    private readonly Func<TItem, int, IAssertion?>? _itemAssertionFactory;
     private readonly int _expected;
     private readonly CountComparison _comparison;
     private int _actualCount;
 
     internal CollectionCountEqualsAssertion(
         AssertionContext<TCollection> context,
-        Func<IAssertionSource<TItem>, Assertion<TItem>?>? itemAssertion,
+        Func<TItem, int, IAssertion?>? itemAssertionFactory,
         int expected,
         CountComparison comparison)
         : base(context)
     {
-        _itemAssertion = itemAssertion;
+        _itemAssertionFactory = itemAssertionFactory;
         _expected = expected;
         _comparison = comparison;
     }
@@ -173,7 +196,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
         }
 
         // Calculate count
-        if (_itemAssertion == null)
+        if (_itemAssertionFactory == null)
         {
             // Simple count without filtering
             _actualCount = value switch
@@ -190,8 +213,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
 
             foreach (var item in value)
             {
-                var itemAssertionSource = new ValueAssertion<TItem>(item, $"item[{index}]");
-                var resultingAssertion = _itemAssertion(itemAssertionSource);
+                var resultingAssertion = _itemAssertionFactory(item, index);
 
                 if (resultingAssertion != null)
                 {
@@ -200,7 +222,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
                         await resultingAssertion.AssertAsync();
                         _actualCount++;
                     }
-                    catch
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         // Item did not satisfy the assertion, don't count it
                     }

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
@@ -12,17 +13,11 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 {
     protected virtual IEnumerable<string> TestableFrameworks
     {
-        get
-        {
-            yield return "net10.0";
-            yield return "net8.0";
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                yield return "net472";
-            }
-        }
+        get { yield return "net10.0"; }
     }
+
+    /// <summary>True on Windows, where legacy .NET Framework TFMs (net4xx) can be tested.</summary>
+    protected static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
     protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
@@ -30,10 +25,20 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
 
         foreach (var framework in TestableFrameworks)
         {
+            var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
+
+            // Test projects no longer multi-target every TFM by default (see TestProject.props).
+            // Skip frameworks that this project did not actually build to avoid spurious
+            // "process cannot find the file" errors for missing per-TFM output binaries.
+            var configuration = testOptions.Configuration ?? "Release";
+            if (!HasFrameworkOutput(context.Logger, executionOptions, framework, configuration))
+            {
+                context.Logger.LogInformation("Skipping {Framework}: no build output found for this test project.", framework);
+                continue;
+            }
+
             var testResult = await context.SubModule<CommandResult>(framework, async () =>
             {
-                var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
-
                 var finalExecutionOptions = SetDefaults(testOptions, executionOptions ?? new CommandExecutionOptions(), framework);
 
                 return await context.DotNet().Run(testOptions, finalExecutionOptions, cancellationToken);
@@ -43,6 +48,32 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
 
         return results;
+    }
+
+    private static bool HasFrameworkOutput(ILogger logger, CommandExecutionOptions? executionOptions, string framework, string configuration)
+    {
+        var workingDirectory = executionOptions?.WorkingDirectory;
+        if (string.IsNullOrEmpty(workingDirectory))
+        {
+            // Cannot determine — fall through to attempt the run (preserves prior behaviour).
+            logger.LogWarning("Cannot probe build output for {Framework}: no WorkingDirectory set on execution options.", framework);
+            return true;
+        }
+
+        var binPath = Path.Combine(workingDirectory, "bin", configuration, framework);
+
+        // Probe for an actual built binary, not just the directory: a stale empty
+        // bin/<config>/<tfm> folder (e.g. from `dotnet clean`) would otherwise be treated
+        // as a successful build and trigger a misleading "process cannot find the file" later.
+        try
+        {
+            return Directory.EnumerateFiles(binPath, "*.dll", SearchOption.TopDirectoryOnly).Any()
+                || Directory.EnumerateFiles(binPath, "*.exe", SearchOption.TopDirectoryOnly).Any();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return false;
+        }
     }
 
     private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)
@@ -70,5 +101,10 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         };
     }
 
+    /// <summary>
+    /// Called once per framework in <see cref="TestableFrameworks"/>, <em>before</em> the
+    /// missing-output skip check. Keep this cheap — expensive work (e.g. awaiting other modules)
+    /// is wasted on TFMs the project did not build for.
+    /// </summary>
     protected abstract Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken);
 }

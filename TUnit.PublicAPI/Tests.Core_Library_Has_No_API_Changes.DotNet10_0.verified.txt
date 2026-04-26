@@ -1294,30 +1294,33 @@ namespace
         public static int RegisterEntries<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(<.TestEntry<T>[]> factory)
             where T :  class { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
-        public static int RegisterHook<T>(.<T> bag, T hook) { }
-        public static int RegisterHook<T>(.<.Assembly, .<T>> dictionary, .Assembly key, T hook) { }
-        public static int RegisterHook<T>(.<, .<T>> dictionary,  key, T hook) { }
+        public static int RegisterHook<T>(.<.<T>> bag, int registrationIndex, <int, T> factory)
+            where T : . { }
+        public static int RegisterHook<T>(.<.Assembly, .<.<T>>> dictionary, .Assembly key, int registrationIndex, <int, T> factory)
+            where T : . { }
+        public static int RegisterHook<T>(.<, .<.<T>>> dictionary,  key, int registrationIndex, <int, T> factory)
+            where T : . { }
         public static void RegisterProperty(..IPropertySource propertySource) { }
     }
     public static class Sources
     {
-        public static readonly .<.Assembly, .<.>> AfterAssemblyHooks;
-        public static readonly .<, .<.>> AfterClassHooks;
-        public static readonly .<.> AfterEveryAssemblyHooks;
-        public static readonly .<.> AfterEveryClassHooks;
-        public static readonly .<.> AfterEveryTestHooks;
-        public static readonly .<.> AfterTestDiscoveryHooks;
-        public static readonly .<, .<.>> AfterTestHooks;
-        public static readonly .<.> AfterTestSessionHooks;
+        public static readonly .<.Assembly, .<.<.>>> AfterAssemblyHooks;
+        public static readonly .<, .<.<.>>> AfterClassHooks;
+        public static readonly .<.<.>> AfterEveryAssemblyHooks;
+        public static readonly .<.<.>> AfterEveryClassHooks;
+        public static readonly .<.<.>> AfterEveryTestHooks;
+        public static readonly .<.<.>> AfterTestDiscoveryHooks;
+        public static readonly .<, .<.<.>>> AfterTestHooks;
+        public static readonly .<.<.>> AfterTestSessionHooks;
         public static readonly .<<.Assembly>> AssemblyLoaders;
-        public static readonly .<.Assembly, .<.>> BeforeAssemblyHooks;
-        public static readonly .<, .<.>> BeforeClassHooks;
-        public static readonly .<.> BeforeEveryAssemblyHooks;
-        public static readonly .<.> BeforeEveryClassHooks;
-        public static readonly .<.> BeforeEveryTestHooks;
-        public static readonly .<.> BeforeTestDiscoveryHooks;
-        public static readonly .<, .<.>> BeforeTestHooks;
-        public static readonly .<.> BeforeTestSessionHooks;
+        public static readonly .<.Assembly, .<.<.>>> BeforeAssemblyHooks;
+        public static readonly .<, .<.<.>>> BeforeClassHooks;
+        public static readonly .<.<.>> BeforeEveryAssemblyHooks;
+        public static readonly .<.<.>> BeforeEveryClassHooks;
+        public static readonly .<.<.>> BeforeEveryTestHooks;
+        public static readonly .<.<.>> BeforeTestDiscoveryHooks;
+        public static readonly .<, .<.<.>>> BeforeTestHooks;
+        public static readonly .<.<.>> BeforeTestSessionHooks;
         public static readonly .<.IDynamicTestSource> DynamicTestSources;
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
@@ -2392,6 +2395,14 @@ namespace .Hooks
         public int Order { get; }
         public bool Execute(.ClassHookContext context, .CancellationToken cancellationToken) { }
         public . ExecuteAsync(.ClassHookContext context, .CancellationToken cancellationToken) { }
+    }
+    public sealed class LazyHookEntry<T>
+        where T : .
+    {
+        public LazyHookEntry(T hook) { }
+        public LazyHookEntry(int registrationIndex, <int, T> factory) { }
+        public int RegistrationIndex { get; }
+        public T Materialize() { }
     }
     public abstract class StaticHookMethod : ., <.>
     {

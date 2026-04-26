@@ -686,7 +686,7 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.Collect
                     await assertion.AssertAsync();
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return AssertionResult.Failed($"item at index {index} failed assertion: {ex.Message}", ex);
             }
@@ -753,7 +753,7 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
                     await resultingAssertion.AssertAsync();
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return AssertionResult.Failed($"item at index {index} (mapped by {_mapperDescription}) failed assertion: {ex.Message}", ex);
             }

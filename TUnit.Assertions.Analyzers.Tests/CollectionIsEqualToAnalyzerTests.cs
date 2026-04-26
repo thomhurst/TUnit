@@ -4,6 +4,13 @@ namespace TUnit.Assertions.Analyzers.Tests;
 
 public class CollectionIsEqualToAnalyzerTests
 {
+    // NOTE: Snippets that pass an expected of the same type as the source use the
+    // explicit type argument `IsEqualTo<T>(...)` so the analyzer-test compiler
+    // (Roslyn 4.8 — bound by the testing harness) does not raise CS0121 between
+    // the source-generated `IsEqualTo<TValue>` and the implicit-conversion-aware
+    // `IsEqualTo<TValue, TOther>`. Roslyn 4.12+ honours [OverloadResolutionPriority]
+    // and disambiguates automatically, so this is purely a test-infrastructure
+    // workaround and does not affect users.
     [Test]
     public async Task List_IsEqualTo_Raises_Info()
     {
@@ -23,7 +30,7 @@ public class CollectionIsEqualToAnalyzerTests
                     {
                         var a = new List<int> { 1, 2, 3 };
                         var b = new List<int> { 1, 2, 3 };
-                        await Assert.That(a).{|#0:IsEqualTo(b)|};
+                        await Assert.That(a).{|#0:IsEqualTo<List<int>>(b)|};
                     }
                 }
                 """,
@@ -93,7 +100,7 @@ public class CollectionIsEqualToAnalyzerTests
                     {
                         int[] a = { 1, 2 };
                         int[] b = { 1, 2 };
-                        await Assert.That(a).{|#0:IsEqualTo(b)|};
+                        await Assert.That(a).{|#0:IsEqualTo<int[]>(b)|};
                     }
                 }
                 """,

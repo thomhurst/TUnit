@@ -459,7 +459,9 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     /// <summary>
     /// Emits a single SourceRegistrar.RegisterHook(...) expression for use as a field initializer.
-    /// The hook object is constructed inline, so no per-hook method needs JIT.
+    /// Module init pays only for one HookRegistrationIndices.GetNext*() increment + a static
+    /// lambda reference; the heavy MethodMetadata/ClassMetadata graph is constructed lazily
+    /// on first hook execution via LazyHookEntry.Materialize().
     /// </summary>
     private static void GenerateInlineHookRegistration(CodeWriter writer, HookModel hook, string safeFileName)
     {
@@ -469,17 +471,19 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         // Determine collection name and key expression
         var (collectionName, keyExpr) = GetHookCollectionAndKey(hook, typeDisplay, isInstance);
+        var indexExpr = $"global::TUnit.Core.HookRegistrationIndices.GetNext{GetHookIndexMethodName(hook)}";
 
         if (keyExpr != null)
         {
-            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName}, {keyExpr},");
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName}, {keyExpr}, {indexExpr},");
         }
         else
         {
-            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName},");
+            writer.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.{collectionName}, {indexExpr},");
         }
 
         writer.Indent();
+        writer.AppendLine("static __registrationIndex =>");
         GenerateHookObject(writer, hook, isInstance, delegatePrefix);
         writer.Unindent();
         writer.Append(")");
@@ -715,7 +719,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine($"HookExecutor = {HookExecutorHelper.GetHookExecutor(hook.HookExecutorTypeName)},");
         writer.AppendLine($"Order = {hook.Order},");
-        writer.AppendLine($"RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNext{GetHookIndexMethodName(hook)},");
+        writer.AppendLine("RegistrationIndex = __registrationIndex,");
         writer.AppendLine($"Body = {bodyRef}" + (isInstance ? "" : ","));
 
         if (!isInstance)

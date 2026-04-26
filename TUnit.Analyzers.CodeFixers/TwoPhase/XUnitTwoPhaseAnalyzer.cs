@@ -865,38 +865,49 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         return conversion;
     }
 
+    private static readonly Dictionary<string, string> _xUnitFactAndTheoryToTUnitArguments = new()
+    {
+        { "Skip", "Skip" },
+        { "DisplayName", "DisplayName" },
+        { "Timeout",  "Timeout" },
+    };
+
     private AttributeConversion ConvertTestAttribute(AttributeSyntax node)
     {
-        // Check for Skip argument: [Fact(Skip = "reason")] or [Theory(Skip = "reason")]
-        var skipArg = node.ArgumentList?.Arguments
-            .FirstOrDefault(a => a.NameEquals?.Name.Identifier.ValueText == "Skip");
-
-        if (skipArg != null)
-        {
-            // Extract the skip reason and create additional Skip attribute
-            var skipReason = skipArg.Expression.ToString();
-            return new AttributeConversion
-            {
-                NewAttributeName = "Test",
-                NewArgumentList = "", // Remove the Skip argument
-                OriginalText = node.ToString(),
-                AdditionalAttributes = new List<AdditionalAttribute>
-                {
-                    new AdditionalAttribute
-                    {
-                        Name = "Skip",
-                        Arguments = $"({skipReason})"
-                    }
-                }
-            };
-        }
-
-        return new AttributeConversion
+        var result = new AttributeConversion
         {
             NewAttributeName = "Test",
             NewArgumentList = "", // Remove any arguments
-            OriginalText = node.ToString()
+            OriginalText = node.ToString(),
+            AdditionalAttributes = node.ArgumentList is null ? null : []
         };
+
+        if (node.ArgumentList is null)
+        {
+            return result;
+        }
+
+        foreach (var argument in node.ArgumentList.Arguments)
+        {
+            if (argument.NameEquals is null)
+            {
+                continue;
+            }
+
+            if (!_xUnitFactAndTheoryToTUnitArguments.TryGetValue(argument.NameEquals.Name.Identifier.ValueText, out var argumentName))
+            {
+                continue;
+            }
+
+            var argumentValue = argument.Expression.ToString();
+            result.AdditionalAttributes!.Add(new AdditionalAttribute
+            {
+                Name = argumentName,
+                Arguments = $"({argumentValue})"
+            });
+        }
+
+        return result;
     }
 
     private AttributeConversion? ConvertCollection(AttributeSyntax node)

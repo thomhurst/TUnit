@@ -86,6 +86,40 @@ public class MSTestMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task MSTest_TestClass_Attribute_Removed_Preserves_Leading_Comments_And_Docstring()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                // TODO Fix this
+                /// <summary>
+                /// This class is testing X
+                /// </summary>
+                {|#0:[TestClass]|}
+                public class MyClass
+                {
+                    [TestMethod]
+                    public void MyMethod() { }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+                // TODO Fix this
+                /// <summary>
+                /// This class is testing X
+                /// </summary>
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod() { }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
     public async Task MSTest_Assertions_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(

@@ -4,6 +4,12 @@ namespace TUnit.Assertions.Analyzers.Tests;
 
 public class PreferIsTrueOrIsFalseAnalyzerTests
 {
+    // NOTE: Snippets use the explicit type argument `IsEqualTo<bool>(...)` so the
+    // analyzer-test compiler (Roslyn 4.8 — bound by the testing harness) does not
+    // raise CS0121 between the source-generated `IsEqualTo<TValue>` and the
+    // implicit-conversion-aware `IsEqualTo<TValue, TOther>`. Roslyn 4.12+ honours
+    // [OverloadResolutionPriority] and disambiguates without the explicit arg, so
+    // this is purely a test-infrastructure workaround and does not affect users.
     [Test]
     public async Task IsEqualTo_True_Is_Flagged()
     {
@@ -21,7 +27,7 @@ public class PreferIsTrueOrIsFalseAnalyzerTests
                     public async Task MyTest()
                     {
                         var value = true;
-                        await {|#0:Assert.That(value).IsEqualTo(true)|};
+                        await {|#0:Assert.That(value).IsEqualTo<bool>(true)|};
                     }
                 }
                 """,
@@ -49,7 +55,7 @@ public class PreferIsTrueOrIsFalseAnalyzerTests
                     public async Task MyTest()
                     {
                         var value = false;
-                        await {|#0:Assert.That(value).IsEqualTo(false)|};
+                        await {|#0:Assert.That(value).IsEqualTo<bool>(false)|};
                     }
                 }
                 """,

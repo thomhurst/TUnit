@@ -108,7 +108,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
         // When there are no public members to compare structurally (e.g., types with only
         // private state), fall back to Equals(). This respects IEquatable<T> implementations
         // and avoids false positives from empty member lists.
-        if (members.Count == 0)
+        if (members.Length == 0)
         {
             return Equals(x, y);
         }

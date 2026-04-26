@@ -101,7 +101,6 @@
 
   <!-- Examples and playground projects -->
   <Folder Name="/Examples/">
-    <Project Path="Playground/Playground.csproj" />
     <Project Path="TUnit.Example.Asp.Net/TUnit.Example.Asp.Net.csproj" />
     <Project Path="TUnit.Example.Asp.Net.TestProject/TUnit.Example.Asp.Net.TestProject.csproj" />
     <Project Path="TUnit.Example.FsCheck.TestProject/TUnit.Example.FsCheck.TestProject.csproj" />

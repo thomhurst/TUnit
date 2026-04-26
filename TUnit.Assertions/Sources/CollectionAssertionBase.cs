@@ -139,7 +139,8 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     public CollectionCountSource<TCollection, TItem> Count()
     {
         Context.ExpressionBuilder.Append(".Count()");
-        return new CollectionCountSource<TCollection, TItem>(Context, null);
+        return new CollectionCountSource<TCollection, TItem>(
+            Context, (Func<TItem, int, IAssertion?>?)null);
     }
 
     /// <summary>
@@ -165,7 +166,7 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     /// Example: await Assert.That(list).Count(item => item.IsGreaterThan(10)).IsEqualTo(3).And.Contains(1);
     /// </summary>
     public CollectionCountSource<TCollection, TItem> Count(
-        Func<IAssertionSource<TItem>, Assertion<TItem>?> itemAssertion,
+        Func<IAssertionSource<TItem>, IAssertion?> itemAssertion,
         [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Count({expression})");

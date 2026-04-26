@@ -29,7 +29,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -55,7 +56,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_Class.TUnit_TestProject_BeforeTests_Base1_BeforeAll1_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base1_BeforeAll1_0Params_Body,
         FilePath = @"",
         LineNumber = 5
@@ -99,7 +100,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base1), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base1),
@@ -126,7 +128,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_Test.TUnit_TestProject_BeforeTests_Base1_BeforeEach1_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base1_BeforeEach1_0Params_Body
     }
 );
@@ -167,7 +169,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -193,7 +196,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_Class.TUnit_TestProject_BeforeTests_Base2_BeforeAll2_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base2_BeforeAll2_0Params_Body,
         FilePath = @"",
         LineNumber = 20
@@ -237,7 +240,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base2), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base2),
@@ -264,7 +268,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_Test.TUnit_TestProject_BeforeTests_Base2_BeforeEach2_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base2_BeforeEach2_0Params_Body
     }
 );
@@ -305,7 +309,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -331,7 +336,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_Class.TUnit_TestProject_BeforeTests_Base3_BeforeAll3_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_Base3_BeforeAll3_0Params_Body,
         FilePath = @"",
         LineNumber = 35
@@ -375,7 +380,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3),
+        static readonly int _h_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.Base3), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.Base3),
@@ -402,7 +408,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_Test.TUnit_TestProject_BeforeTests_Base3_BeforeEach3_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_Base3_BeforeEach3_0Params_Body
     }
 );
@@ -443,7 +449,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -469,7 +476,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_0Params_Body,
         FilePath = @"",
         LineNumber = 50
@@ -512,7 +519,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -541,7 +549,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_1Params_Body,
         FilePath = @"",
         LineNumber = 56
@@ -584,7 +592,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -613,7 +622,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp__CancellationToken_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUp_1Params_Body,
         FilePath = @"",
         LineNumber = 62
@@ -656,7 +665,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeClassHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+    static __registrationIndex =>
     new BeforeClassHookMethod
     {
         MethodInfo = new global::TUnit.Core.MethodMetadata
@@ -686,7 +696,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeClassHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_Class.TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext__ClassHookContext_CancellationToken_Before_ClassInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_BeforeAllSetUpWithContext_2Params_Body,
         FilePath = @"",
         LineNumber = 68
@@ -730,7 +740,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -757,7 +768,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_Setup_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_Setup_0Params_Body
     }
 );
@@ -799,7 +810,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -829,7 +841,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_Setup__CancellationToken_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_Setup_1Params_Body
     }
 );
@@ -871,7 +883,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -901,7 +914,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_1Params_Body
     }
 );
@@ -943,7 +956,8 @@ namespace TUnit.Generated
 {
     internal static partial class TUnit_HookRegistration
     {
-        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
+        static readonly int _h_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test = global::TUnit.Core.SourceRegistrar.RegisterHook(global::TUnit.Core.Sources.BeforeTestHooks, typeof(global::TUnit.TestProject.BeforeTests.SetupTests), global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+    static __registrationIndex =>
     new InstanceHookMethod
     {
         InitClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
@@ -974,7 +988,7 @@ namespace TUnit.Generated
         },
         HookExecutor = DefaultExecutor.Instance,
         Order = 0,
-        RegistrationIndex = global::TUnit.Core.HookRegistrationIndices.GetNextBeforeTestHookIndex(),
+        RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_Test.TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext__TestContext_CancellationToken_Before_TestInitializer.global_TUnit_TestProject_BeforeTests_SetupTests_SetupWithContext_2Params_Body
     }
 );

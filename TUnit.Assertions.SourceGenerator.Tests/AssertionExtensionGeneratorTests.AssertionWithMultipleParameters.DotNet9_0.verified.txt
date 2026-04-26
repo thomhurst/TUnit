@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Generated extension methods for BetweenAssertion.
 /// </summary>
-public static class BetweenAssertionExtensions
+public static partial class BetweenAssertionExtensions
 {
 
     /// <summary>
