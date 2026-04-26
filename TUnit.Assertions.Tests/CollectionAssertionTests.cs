@@ -263,10 +263,10 @@ public class CollectionAssertionTests
     {
         var names = new[] { "Alice", "Bob", "Charlie" };
 
-        // For non-int collections, Count(c => c.IsEqualTo(3)) works unambiguously
+        // Count(predicate) is the per-item filter overload and returns a source without .And.
         await Assert.That(names)
             .IsNotEmpty()
-            .And.Count(c => c.IsEqualTo(3))
+            .And.Count().IsEqualTo(3)
             .And.Contains("Bob")
             .And.DoesNotContain("Dave");
     }
