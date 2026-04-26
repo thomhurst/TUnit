@@ -263,8 +263,7 @@ public class CollectionAssertionTests
     {
         var names = new[] { "Alice", "Bob", "Charlie" };
 
-        // Use Count().IsEqualTo(3) to assert the count itself; Count(item => ...)
-        // is the per-item filter form (returns a count source without .And).
+        // Count(predicate) is the per-item filter overload and returns a source without .And.
         await Assert.That(names)
             .IsNotEmpty()
             .And.Count().IsEqualTo(3)
