@@ -6,18 +6,14 @@ namespace TUnit.Core;
 
 public class GlobalContext : Context
 {
-    // Per-process, not per-async-context: GlobalContext is the session-wide root and
-    // must be visible from any thread/async branch (test discovery hooks, parallel
-    // hook execution, MTP test-host-controller mode under --hangdump). The previous
-    // AsyncLocal getter mutated `Contexts.Value` on first read, poisoning that
-    // async branch with a fresh empty instance and preventing the framework's later
-    // assignment from being observed there.
+    // Static, not AsyncLocal: a lazy-creating AsyncLocal getter poisons the first
+    // reading branch with a fresh empty instance, hiding the framework's later
+    // Current = ... assignment from that branch.
     private static GlobalContext? _current;
     public static new GlobalContext Current
     {
-        // Explicit factory rather than the factory-less overload — the latter calls
-        // Activator.CreateInstance<T>() which the AOT trimmer may not honour for
-        // GlobalContext's internal constructor. CLAUDE.md: all code must work with Native AOT.
+        // Factory overload — the parameterless one uses Activator.CreateInstance<T>(),
+        // which AOT trimming may not preserve for GlobalContext's internal ctor.
         get => LazyInitializer.EnsureInitialized(ref _current, static () => new GlobalContext())!;
         internal set => Volatile.Write(ref _current, value);
     }
