@@ -1,11 +1,14 @@
 <Project>
     <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+        <EmitCompilerGeneratedFiles Condition="'$(EnableSourceGenerationDebug)' == 'true'">true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath Condition="'$(EmitCompilerGeneratedFiles)' == 'true' AND '$(CompilerGeneratedFilesOutputPath)' == ''">SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Remove="SourceGeneratedViewer\**" />
-        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">
+        <None Include="SourceGeneratedViewer\**" Exclude="@(None)" />
     </ItemGroup>
 </Project>

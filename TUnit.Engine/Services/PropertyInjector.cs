@@ -329,6 +329,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<object, byte> visitedObjects,
         CancellationToken cancellationToken)
     {
+        if (property.CanRead && property.GetValue(instance) != null)
+        {
+            return;
+        }
+
         var testContext = TestContext.Current;
         var propertySetter = PropertySetterFactory.CreateSetter(property);
 
