@@ -11,31 +11,53 @@ public class Issue5753ReflectionPropertyInjectionTests
     public async Task InjectedProperty_IsNotResolvedAgain_WhenAlreadySet(Issue5753Container container)
     {
         await Assert.That(container.Service).IsNotNull();
-        await Assert.That(container.Service.InstanceNumber).IsEqualTo(1);
-        await Assert.That(Issue5753InjectedService.InstancesCreated).IsEqualTo(1);
+        await Assert.That(container.Service).IsSameReferenceAs(container.ServiceCapturedDuringInitialization);
         await Assert.That(container.Service.IsInitialized).IsTrue();
     }
 }
 
-public class Issue5753Container
+public class Issue5753ValueTypePropertyInjectionTests
+{
+    [Issue5753IntDataSource]
+    public int Value { get; set; }
+
+    [Test]
+    public async Task ValueTypeProperty_IsInjected_WhenDefaultValueIsBoxed()
+    {
+        await Assert.That(Value).IsEqualTo(42);
+    }
+}
+
+public class Issue5753Container : IAsyncInitializer
 {
     [ClassDataSource<Issue5753InjectedService>]
     public Issue5753InjectedService Service { get; set; } = null!;
+
+    public Issue5753InjectedService? ServiceCapturedDuringInitialization { get; private set; }
+
+    public Task InitializeAsync()
+    {
+        ServiceCapturedDuringInitialization = Service;
+        return Task.CompletedTask;
+    }
 }
 
 public class Issue5753InjectedService : IAsyncInitializer
 {
-    private static int _instancesCreated;
-
-    public static int InstancesCreated => Volatile.Read(ref _instancesCreated);
-
-    public int InstanceNumber { get; } = Interlocked.Increment(ref _instancesCreated);
-
     public bool IsInitialized { get; private set; }
 
     public Task InitializeAsync()
     {
         IsInitialized = true;
         return Task.CompletedTask;
+    }
+}
+
+public class Issue5753IntDataSourceAttribute : TypedDataSourceAttribute<int>
+{
+    public override async IAsyncEnumerable<Func<Task<int>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => Task.FromResult(42);
+        await Task.CompletedTask;
     }
 }

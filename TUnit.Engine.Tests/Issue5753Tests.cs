@@ -18,4 +18,18 @@ public class Issue5753Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task ValueTypePropertyInjection_DoesNotTreatDefaultValueAsAlreadyPopulated()
+    {
+        await RunTestsWithFilter(
+            "/*/*/Issue5753ValueTypePropertyInjectionTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+            ]);
+    }
 }
