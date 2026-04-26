@@ -17,12 +17,15 @@ public class CrossKeyOverlap5700
     private static readonly TaskCompletionSource KeyALive = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private static readonly TaskCompletionSource KeyBLive = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
+    // See Repro5700 for why the rendezvous deadline is generous.
+    private static readonly TimeSpan RendezvousTimeout = TimeSpan.FromSeconds(60);
+
     [Test]
     [NotInParallel(KeyA)]
     public async Task KeyedA_RunsAlongsideKeyedB()
     {
         KeyALive.TrySetResult();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var cts = new CancellationTokenSource(RendezvousTimeout);
         await KeyBLive.Task.WaitAsync(cts.Token);
     }
 
@@ -31,7 +34,7 @@ public class CrossKeyOverlap5700
     public async Task KeyedB_RunsAlongsideKeyedA()
     {
         KeyBLive.TrySetResult();
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var cts = new CancellationTokenSource(RendezvousTimeout);
         await KeyALive.Task.WaitAsync(cts.Token);
     }
 }

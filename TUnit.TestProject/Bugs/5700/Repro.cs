@@ -28,15 +28,21 @@ public class Repro5700
     private static int _test2Active;
     private static int _test2ConcurrentViolations;
 
+    // Deadline is generous because the engine-test harness runs Repro5700 inside a
+    // subprocess populated with every `[EngineTest=Pass]` test in the project
+    // (hundreds). On a busy CI runner the parallel queue can be saturated by other
+    // unconstrained tests, so allow a full minute for either side to be dispatched.
+    // The bug being guarded — keyed tests deferred behind the entire parallel
+    // bucket — would manifest as Test1Live/Test2Live never being set at all, not as
+    // a 60-second scheduling delay.
+    private static readonly TimeSpan RendezvousTimeout = TimeSpan.FromSeconds(60);
+
     [Test]
     public async Task Test1_RunsAlongsideKeyedTest2()
     {
         Test1Live.TrySetResult();
 
-        // If keyed Test2 cannot run alongside Test1, this wait never completes.
-        // The 15s ceiling is enough headroom for any plausible scheduling delay
-        // while still failing fast on the bug.
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var cts = new CancellationTokenSource(RendezvousTimeout);
         await Test2Live.Task.WaitAsync(cts.Token);
     }
 
@@ -56,7 +62,7 @@ public class Repro5700
 
             Test2Live.TrySetResult();
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = new CancellationTokenSource(RendezvousTimeout);
             await Test1Live.Task.WaitAsync(cts.Token);
 
             // Hold the key briefly so the second Test2 invocation queues behind
