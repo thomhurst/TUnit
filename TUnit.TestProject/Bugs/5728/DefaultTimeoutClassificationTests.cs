@@ -27,21 +27,13 @@ public class DefaultTimeoutClassificationHooks
     [Before(TestDiscovery)]
     public static void BeforeDiscovery_ConfigureDefaultTimeoutWhenTargeted(BeforeTestDiscoveryContext context)
     {
-        // DIAGNOSTIC: emit a marker line so we can see in CI logs whether this hook
-        // is actually being invoked. Keep the existing filter gate so other test
-        // runs of TUnit.TestProject aren't accidentally given a 200ms default.
-        var globalFilter = GlobalContext.Current.TestFilter;
-        var paramFilter = context.TestFilter;
-        Console.Error.WriteLine($"[5728-DIAG] BeforeTestDiscovery hook fired; globalFilter='{globalFilter ?? "<null>"}' paramFilter='{paramFilter ?? "<null>"}'");
-
-        if (globalFilter is null ||
-            !globalFilter.Contains("DefaultTimeoutClassificationTests", StringComparison.Ordinal))
+        var filter = GlobalContext.Current.TestFilter;
+        if (filter is null ||
+            !filter.Contains("DefaultTimeoutClassificationTests", StringComparison.Ordinal))
         {
-            Console.Error.WriteLine("[5728-DIAG] gate FAIL via globalFilter; not setting timeout");
             return;
         }
 
-        Console.Error.WriteLine("[5728-DIAG] gate PASS; setting DefaultTestTimeout=200ms");
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMilliseconds(200);
     }
 }
