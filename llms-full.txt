@@ -10950,10 +10950,11 @@ dotnet add package TUnit.Aspire
 ```
 
 :::info Prerequisites
+
 - An Aspire AppHost project in your solution
 - Docker running (Aspire uses containers for infrastructure resources)
 - .NET 8.0 or later
-:::
+  :::
 
 ## Quick Start
 
@@ -10978,6 +10979,7 @@ public class ApiTests(AspireFixture<Projects.MyAppHost> fixture)
 ```
 
 That's it. The fixture will:
+
 1. Build your Aspire AppHost
 2. Start all containers and projects
 3. Wait for all resources to become healthy
@@ -11092,16 +11094,30 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 
 Available `ResourceWaitBehavior` values:
 
-| Value | Description |
-|-------|-------------|
-| `AllHealthy` | Wait for all resources to pass health checks (default) |
-| `AllRunning` | Wait for all resources to reach the Running state |
-| `Named` | Wait only for resources returned by `ResourcesToWaitFor()` |
-| `None` | Don't wait — handle readiness manually in tests |
+| Value        | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| `AllHealthy` | Wait for all resources to pass health checks (default)     |
+| `AllRunning` | Wait for all resources to reach the Running state          |
+| `Named`      | Wait only for resources returned by `ResourcesToWaitFor()` |
+| `None`       | Don't wait — handle readiness manually in tests            |
+
+### Removing Resources
+
+Use `ResourcesToRemove()` to exclude specific resources from the distributed application before it is built. This is useful when your AppHost defines UI tools or optional infrastructure (e.g. `pgAdmin`, `RedisInsight`, `seq`) that are not needed — and potentially slow to start — during automated tests:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>
+{
+    protected override IEnumerable<string> ResourcesToRemove()
+        => ["pgadmin", "redisinsight", "seq"];
+}
+```
+
+:::tip
+Resources are removed by exact name (case-sensitive) after the builder is created but before the app is built, so they never start. Unrecognised names are silently ignored.
+:::
 
 ### Timeouts
-
-The `ResourceTimeout` controls how long the fixture waits for both `StartAsync()` and resource readiness:
 
 ```csharp
 public class AppFixture : AspireFixture<Projects.MyAppHost>
@@ -11112,6 +11128,7 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 ```
 
 When a timeout occurs, the error includes:
+
 - Which resources are ready vs. still pending
 - Recent container logs from pending resources
 - Diagnostic information about the failure
@@ -11120,33 +11137,34 @@ When a timeout occurs, the error includes:
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `App` | `DistributedApplication` | The running Aspire app. Access for advanced scenarios. |
+| Property | Type                     | Description                                            |
+| -------- | ------------------------ | ------------------------------------------------------ |
+| `App`    | `DistributedApplication` | The running Aspire app. Access for advanced scenarios. |
 
 ### Methods
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `CreateHttpClient(resourceName, endpointName?)` | `HttpClient` | Creates an HTTP client connected to the named resource. When telemetry collection is enabled, automatically propagates `traceparent` and `baggage` headers for cross-process correlation. |
-| `GetConnectionStringAsync(resourceName, ct?)` | `Task<string?>` | Gets the connection string for the named resource |
-| `WatchResourceLogs(resourceName)` | `IAsyncDisposable` | Streams resource logs to the current test's output |
+| Method                                          | Returns            | Description                                                                                                                                                                               |
+| ----------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateHttpClient(resourceName, endpointName?)` | `HttpClient`       | Creates an HTTP client connected to the named resource. When telemetry collection is enabled, automatically propagates `traceparent` and `baggage` headers for cross-process correlation. |
+| `GetConnectionStringAsync(resourceName, ct?)`   | `Task<string?>`    | Gets the connection string for the named resource                                                                                                                                         |
+| `WatchResourceLogs(resourceName)`               | `IAsyncDisposable` | Streams resource logs to the current test's output                                                                                                                                        |
 
 ### Virtual Methods (Override to Customize)
 
-| Method | Default | Description |
-|--------|---------|-------------|
-| `InitializeAsync()` | Full lifecycle | Override to add post-start logic (migrations, seeding) |
-| `DisposeAsync()` | Stop and dispose app | Override to add custom cleanup |
-| `Args` | Empty | Command-line arguments passed to the AppHost entry point |
-| `ConfigureAppHost(options, settings)` | No-op | Configure `DistributedApplicationOptions` and `HostApplicationBuilderSettings` during builder creation |
-| `ConfigureBuilder(builder)` | No-op | Customize the builder before building |
-| `EnableTelemetryCollection` | `true` | Starts an OTLP receiver that correlates SUT logs to the originating test |
-| `ResourceTimeout` | 60 seconds | How long to wait for startup and resources |
-| `WaitBehavior` | `AllHealthy` | Which resources to wait for |
-| `ResourcesToWaitFor()` | Empty | Resource names when `WaitBehavior` is `Named` |
-| `WaitForResourcesAsync(app, ct)` | Waits per `WaitBehavior` | Full control over resource waiting |
-| `LogProgress(message)` | Writes to stderr | Override to route progress logs elsewhere |
+| Method                                | Default                  | Description                                                                                            |
+| ------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `InitializeAsync()`                   | Full lifecycle           | Override to add post-start logic (migrations, seeding)                                                 |
+| `DisposeAsync()`                      | Stop and dispose app     | Override to add custom cleanup                                                                         |
+| `Args`                                | Empty                    | Command-line arguments passed to the AppHost entry point                                               |
+| `ConfigureAppHost(options, settings)` | No-op                    | Configure `DistributedApplicationOptions` and `HostApplicationBuilderSettings` during builder creation |
+| `ConfigureBuilder(builder)`           | No-op                    | Customize the builder before building                                                                  |
+| `EnableTelemetryCollection`           | `true`                   | Starts an OTLP receiver that correlates SUT logs to the originating test                               |
+| `ResourceTimeout`                     | 60 seconds               | How long to wait for startup and resources                                                             |
+| `WaitBehavior`                        | `AllHealthy`             | Which resources to wait for                                                                            |
+| `ResourcesToWaitFor()`                | Empty                    | Resource names when `WaitBehavior` is `Named`                                                          |
+| `ResourcesToRemove()`                 | Empty                    | Resource names to remove from the builder before the app is built                                      |
+| `WaitForResourcesAsync(app, ct)`      | Waits per `WaitBehavior` | Full control over resource waiting                                                                     |
+| `LogProgress(message)`                | Writes to stderr         | Override to route progress logs elsewhere                                                              |
 
 ### Overriding the Lifecycle
 
@@ -11191,10 +11209,11 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 ```
 
 :::tip When to use `Args` vs `ConfigureAppHost` vs `ConfigureBuilder`
-- Use **`Args`** for configuration values that the AppHost reads during `CreateBuilder(args)` — these must be set *before* the builder is created.
+
+- Use **`Args`** for configuration values that the AppHost reads during `CreateBuilder(args)` — these must be set _before_ the builder is created.
 - Use **`ConfigureAppHost`** to configure `DistributedApplicationOptions` (e.g., `DisableDashboard`) and `HostApplicationBuilderSettings` — these are passed to `CreateAsync` during builder creation.
-- Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied *after* the builder is created.
-:::
+- Use **`ConfigureBuilder`** for service registrations, HTTP client defaults, and other configuration that can be applied _after_ the builder is created.
+  :::
 
 ## Watching Resource Logs
 
@@ -11249,13 +11268,13 @@ When multiple tests run concurrently against the same resource, each test only s
 
 The SUT must have OpenTelemetry configured to export logs and traces via OTLP. `AspireFixture` automatically injects the following environment variables into all project resources:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://127.0.0.1:{port}` | Points to TUnit's OTLP receiver |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` | Protocol for OTLP export |
-| `OTEL_SERVICE_NAME` | Aspire resource name | Shown as `[service-name]` prefix in test output |
-| `OTEL_BLRP_SCHEDULE_DELAY` | `1000` | Reduces log batch export delay for faster test feedback |
-| `OTEL_BSP_SCHEDULE_DELAY` | `1000` | Reduces span batch export delay for faster test feedback |
+| Variable                      | Value                     | Purpose                                                  |
+| ----------------------------- | ------------------------- | -------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://127.0.0.1:{port}` | Points to TUnit's OTLP receiver                          |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf`           | Protocol for OTLP export                                 |
+| `OTEL_SERVICE_NAME`           | Aspire resource name      | Shown as `[service-name]` prefix in test output          |
+| `OTEL_BLRP_SCHEDULE_DELAY`    | `1000`                    | Reduces log batch export delay for faster test feedback  |
+| `OTEL_BSP_SCHEDULE_DELAY`     | `1000`                    | Reduces span batch export delay for faster test feedback |
 
 The SUT only needs to register the OpenTelemetry exporters — TUnit handles everything else.
 
@@ -11288,6 +11307,7 @@ builder.Logging.AddOpenTelemetry(otel =>
 Note that `OTEL_SERVICE_NAME` and `OTEL_EXPORTER_OTLP_ENDPOINT` are injected by TUnit, so the SUT does not need `.ConfigureResource()` or any endpoint configuration.
 
 The key pieces are:
+
 - **`AddAspNetCoreInstrumentation()`** — ensures incoming HTTP requests create spans that carry the test's TraceId, so logs within that request context inherit it.
 - **`AddOtlpExporter()`** on both tracing and logging — exports telemetry to TUnit's OTLP receiver (endpoint is injected automatically).
 - **`IncludeFormattedMessage = true`** — without this, log bodies are empty in the test output. Aspire `ServiceDefaults` sets this by default.
@@ -11517,6 +11537,7 @@ dotnet new tunit-aspire-test -n MyApp.Tests
 **Symptom:** Tests time out during startup with no obvious error.
 
 **Common causes:**
+
 1. **TLS/SSL errors** — Set `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true` or call `.WithoutHttpsCertificate()` on container resources in your AppHost.
 2. **Docker images not pulled** — First run pulls container images, which can take minutes. Increase `ResourceTimeout`.
 3. **Docker not running** — Aspire requires Docker. Verify with `docker info`.
@@ -11552,7 +11573,7 @@ public class AppBTests(AppBFixture fixture) { /* ... */ }
 
 ### How do I skip waiting for tool containers?
 
-Tool containers like pgAdmin or RedisInsight don't need to be ready before tests run. Use `Named` wait behavior:
+Tool containers like pgAdmin or RedisInsight don't need to be ready before tests run. If you want them to still run (e.g. for manual inspection), use `Named` wait behavior:
 
 ```csharp
 public class AppFixture : AspireFixture<Projects.MyAppHost>
@@ -11565,9 +11586,20 @@ public class AppFixture : AspireFixture<Projects.MyAppHost>
 }
 ```
 
+If you don't need them to run at all during tests, remove them entirely instead:
+
+```csharp
+public class AppFixture : AspireFixture<Projects.MyAppHost>
+{
+    protected override IEnumerable<string> ResourcesToRemove()
+        => ["pgadmin", "redisinsight"];
+}
+```
+
 ### My resource never becomes healthy
 
 If a resource stays in `Running` but never reaches `Healthy`, check:
+
 1. The resource has a health check configured (`.WithHttpHealthCheck("/health")` or similar)
 2. The health check endpoint is reachable from inside the container network
 3. Use `WatchResourceLogs("resourceName")` in a test to see the resource's output
@@ -11580,12 +11612,12 @@ protected override ResourceWaitBehavior WaitBehavior => ResourceWaitBehavior.All
 
 ### What's the difference between TUnit.Aspire and TUnit.AspNetCore?
 
-| | TUnit.Aspire | TUnit.AspNetCore |
-|---|---|---|
-| **Purpose** | Test distributed apps (multiple services + infrastructure) | Test a single ASP.NET Core app |
-| **Infrastructure** | Real containers via Aspire/Docker | In-process `TestServer` or Testcontainers |
-| **Isolation** | Shared app, per-test HTTP clients | Per-test `WebApplicationFactory` |
-| **Use when** | Your app uses Aspire orchestration | Your app is a single ASP.NET Core project |
+|                    | TUnit.Aspire                                               | TUnit.AspNetCore                          |
+| ------------------ | ---------------------------------------------------------- | ----------------------------------------- |
+| **Purpose**        | Test distributed apps (multiple services + infrastructure) | Test a single ASP.NET Core app            |
+| **Infrastructure** | Real containers via Aspire/Docker                          | In-process `TestServer` or Testcontainers |
+| **Isolation**      | Shared app, per-test HTTP clients                          | Per-test `WebApplicationFactory`          |
+| **Use when**       | Your app uses Aspire orchestration                         | Your app is a single ASP.NET Core project |
 
 They can be used together — for example, using Aspire to manage infrastructure while using `TestWebApplicationFactory` for per-test app isolation.
 
