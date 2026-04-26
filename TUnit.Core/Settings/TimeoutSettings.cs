@@ -31,6 +31,12 @@ public sealed class TimeoutSettings
     // bypass TimeoutHelper entirely instead of paying wrap overhead for a 30-minute backstop.
     internal TimeSpan? ExplicitDefaultTestTimeout => _defaultTestTimeout;
 
+    // Coalesces the per-test [Timeout] attribute value with the project-wide opt-in
+    // DefaultTestTimeout. Null when neither is set — TestCoordinator's null fast path
+    // then skips the TimeoutHelper wrap entirely.
+    internal TimeSpan? GetEffectiveTestTimeout(TimeSpan? attributeTimeout)
+        => attributeTimeout ?? _defaultTestTimeout;
+
     // Test-only seam: the public setter validates positive-only and can't write null, which
     // leaves the harness unable to restore the "unset" state after a snapshot/restore cycle.
     internal void SetExplicitDefaultTestTimeout(TimeSpan? value)

@@ -383,15 +383,13 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
     }
 
-    // Coalesces the [Timeout]-attribute value with TUnitSettings.DefaultTestTimeout (the
-    // user's opt-in project-wide override) and propagates the resolved value back onto
-    // TestDetails.Timeout so TUnitMessageBus.GetFailureStateProperty can classify a timeout
-    // failure as TimeoutTestNodeStateProperty rather than a generic error. Both the no-retry
-    // fast path and the retry-wrapped lifecycle call through here so the two stay in sync.
+    // Propagation is required so TUnitMessageBus.GetFailureStateProperty (which gates on
+    // TestDetails.Timeout != null) classifies a DefaultTestTimeout-triggered failure as
+    // TimeoutTestNodeStateProperty rather than a generic error.
     private static TimeSpan? ResolveAndPropagateTestTimeout(AbstractExecutableTest test)
     {
         var details = test.Context.Metadata.TestDetails;
-        var testTimeout = details.Timeout ?? TUnitSettings.Default.Timeouts.ExplicitDefaultTestTimeout;
+        var testTimeout = TUnitSettings.Default.Timeouts.GetEffectiveTestTimeout(details.Timeout);
         if (testTimeout is not null && details.Timeout is null)
         {
             details.Timeout = testTimeout;
