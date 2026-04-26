@@ -1822,4 +1822,256 @@ public static class AssertionExtensions
         return new Assertions.Enums.IsNotDefinedAssertion<TEnum>(source.Context);
     }
 
+    // ========================================================================
+    // Specialised Count(itemAssertion) overloads — issue #5707.
+    //
+    // The instance-method `Count(Func<IAssertionSource<TItem>, Assertion<TItem>?>, ...)`
+    // on CollectionAssertionBase exposes only the generic `IAssertionSource<TItem>`
+    // inside the lambda. When TItem itself is a collection, dictionary or set,
+    // specialised assertions defined as instance methods on the matching
+    // assertion-source base (e.g. `HasCount`, `ContainsKey`, `IsSubsetOf`,
+    // `HasItemAt`) are unreachable.
+    //
+    // These extension methods preserve the specialised assertion source by
+    // matching on the closed shape of TItem and constructing the appropriate
+    // typed source per item. C# generic type inference requires an exact match
+    // on the receiver's TItem (it does not unify a concrete type with an
+    // interface), so we provide overloads for both the interface shapes
+    // (IList<T>, IDictionary<K,V>, ISet<T>, ...) and the most common concrete
+    // shapes (List<T>, Dictionary<K,V>, HashSet<T>, T[]). Items whose shape
+    // does not match a specialised overload still resolve to the generic
+    // instance method.
+    //
+    // No overload is needed for `string` items: the `IEnumerable<TInner>`
+    // overload below cannot bind to a string item (C# inference does not
+    // unify `string` with `IEnumerable<TInner>` for a generic type parameter),
+    // so the generic instance method already wraps each string in
+    // `ValueAssertion<string>` — which is exactly what a dedicated overload
+    // would do.
+    // ========================================================================
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IEnumerable{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves enumerables; the lambda
+    /// receives a <see cref="CollectionAssertion{TInner}"/> with the full collection assertion
+    /// surface (Contains, IsInOrder, HasCount, etc.).
+    /// </summary>
+    public static CollectionCountSource<TCollection, IEnumerable<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, IEnumerable<TInner>> source,
+        Func<CollectionAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IEnumerable<TInner>>
+    {
+        return CountSpecialised<TCollection, IEnumerable<TInner>>(
+            source,
+            (item, index) => itemAssertion(new CollectionAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IList{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves lists; the lambda
+    /// receives a <see cref="ListAssertion{TInner}"/> with index-based assertions in addition
+    /// to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IList<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, IList<TInner>> source,
+        Func<ListAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IList<TInner>>
+    {
+        return CountSpecialised<TCollection, IList<TInner>>(
+            source,
+            (item, index) => itemAssertion(new ListAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IReadOnlyList{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves read-only lists; the lambda
+    /// receives a <see cref="ReadOnlyListAssertion{TInner}"/> with index-based assertions in addition
+    /// to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IReadOnlyList<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, IReadOnlyList<TInner>> source,
+        Func<ReadOnlyListAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IReadOnlyList<TInner>>
+    {
+        return CountSpecialised<TCollection, IReadOnlyList<TInner>>(
+            source,
+            (item, index) => itemAssertion(new ReadOnlyListAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IReadOnlyDictionary{TKey, TValue}"/>-typed source.
+    /// Use this overload when the collection's items are themselves read-only dictionaries; the lambda
+    /// receives a <see cref="DictionaryAssertion{TKey, TValue}"/> with dictionary-specific assertions
+    /// (ContainsKey, ContainsValue, etc.) in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IReadOnlyDictionary<TKey, TValue>> Count<TCollection, TKey, TValue>(
+        this CollectionAssertionBase<TCollection, IReadOnlyDictionary<TKey, TValue>> source,
+        Func<DictionaryAssertion<TKey, TValue>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IReadOnlyDictionary<TKey, TValue>>
+        where TKey : notnull
+    {
+        return CountSpecialised<TCollection, IReadOnlyDictionary<TKey, TValue>>(
+            source,
+            (item, index) => itemAssertion(new DictionaryAssertion<TKey, TValue>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IDictionary{TKey, TValue}"/>-typed source.
+    /// Use this overload when the collection's items are themselves dictionaries; the lambda
+    /// receives a <see cref="MutableDictionaryAssertion{TKey, TValue}"/> with dictionary-specific assertions
+    /// in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IDictionary<TKey, TValue>> Count<TCollection, TKey, TValue>(
+        this CollectionAssertionBase<TCollection, IDictionary<TKey, TValue>> source,
+        Func<MutableDictionaryAssertion<TKey, TValue>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IDictionary<TKey, TValue>>
+        where TKey : notnull
+    {
+        return CountSpecialised<TCollection, IDictionary<TKey, TValue>>(
+            source,
+            (item, index) => itemAssertion(new MutableDictionaryAssertion<TKey, TValue>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="ISet{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves sets; the lambda
+    /// receives a <see cref="SetAssertion{TInner}"/> with set-specific assertions
+    /// (IsSubsetOf, IsSupersetOf, Overlaps, etc.) in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, ISet<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, ISet<TInner>> source,
+        Func<SetAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<ISet<TInner>>
+    {
+        return CountSpecialised<TCollection, ISet<TInner>>(
+            source,
+            (item, index) => itemAssertion(new SetAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+#if NET5_0_OR_GREATER
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against an <see cref="IReadOnlySet{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves read-only sets; the lambda
+    /// receives a <see cref="ReadOnlySetAssertion{TInner}"/> with set-specific assertions
+    /// (IsSubsetOf, IsSupersetOf, Overlaps, etc.) in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, IReadOnlySet<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, IReadOnlySet<TInner>> source,
+        Func<ReadOnlySetAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<IReadOnlySet<TInner>>
+    {
+        return CountSpecialised<TCollection, IReadOnlySet<TInner>>(
+            source,
+            (item, index) => itemAssertion(new ReadOnlySetAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+#endif
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against a <typeparamref name="TInner"/>[]-typed source.
+    /// Use this overload when the collection's items are themselves arrays; the lambda
+    /// receives an <see cref="ArrayAssertion{TInner}"/> so array-specific assertions
+    /// (e.g. <c>IsEmpty</c>, <c>IsSingleElement</c>) defined on <c>IAssertionSource&lt;TInner[]&gt;</c>
+    /// are reachable in addition to the standard collection surface.
+    /// </summary>
+    public static CollectionCountSource<TCollection, TInner[]> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, TInner[]> source,
+        Func<ArrayAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<TInner[]>
+    {
+        return CountSpecialised<TCollection, TInner[]>(
+            source,
+            (item, index) => itemAssertion(new ArrayAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    // ----- Concrete-type overloads -----
+    // C# generic inference resolves TItem to the exact declared type, never to
+    // an interface, so e.g. `List<HashSet<int>>` items would not match the
+    // `ISet<TInner>` overload above. These cover the common BCL concrete types.
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against a <see cref="List{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves <see cref="List{TInner}"/> instances;
+    /// the lambda receives a <see cref="ListAssertion{TInner}"/> with index-based assertions in addition
+    /// to the standard collection surface. Without this overload, C# inference would not unify
+    /// <c>List&lt;TInner&gt;</c> with the <c>IList&lt;TInner&gt;</c> overload.
+    /// </summary>
+    public static CollectionCountSource<TCollection, List<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, List<TInner>> source,
+        Func<ListAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<List<TInner>>
+    {
+        return CountSpecialised<TCollection, List<TInner>>(
+            source,
+            (item, index) => itemAssertion(new ListAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against a <see cref="HashSet{TInner}"/>-typed source.
+    /// Use this overload when the collection's items are themselves <see cref="HashSet{TInner}"/> instances;
+    /// the lambda receives a <see cref="HashSetAssertion{TInner}"/> with set-specific assertions
+    /// (IsSubsetOf, IsSupersetOf, Overlaps, etc.) in addition to the standard collection surface.
+    /// Without this overload, C# inference would not unify <c>HashSet&lt;TInner&gt;</c> with the
+    /// <c>ISet&lt;TInner&gt;</c> overload.
+    /// </summary>
+    public static CollectionCountSource<TCollection, HashSet<TInner>> Count<TCollection, TInner>(
+        this CollectionAssertionBase<TCollection, HashSet<TInner>> source,
+        Func<HashSetAssertion<TInner>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<HashSet<TInner>>
+    {
+        return CountSpecialised<TCollection, HashSet<TInner>>(
+            source,
+            (item, index) => itemAssertion(new HashSetAssertion<TInner>(item, $"item[{index}]")),
+            expression);
+    }
+
+    /// <summary>
+    /// Counts items satisfying an assertion expressed against a <see cref="Dictionary{TKey, TValue}"/>-typed source.
+    /// Use this overload when the collection's items are themselves <see cref="Dictionary{TKey, TValue}"/> instances;
+    /// the lambda receives a <see cref="MutableDictionaryAssertion{TKey, TValue}"/> with dictionary-specific
+    /// assertions (ContainsKey, ContainsValue, etc.) in addition to the standard collection surface.
+    /// Without this overload, C# inference would not unify <c>Dictionary&lt;TKey, TValue&gt;</c> with the
+    /// <c>IDictionary&lt;TKey, TValue&gt;</c> overload.
+    /// </summary>
+    public static CollectionCountSource<TCollection, Dictionary<TKey, TValue>> Count<TCollection, TKey, TValue>(
+        this CollectionAssertionBase<TCollection, Dictionary<TKey, TValue>> source,
+        Func<MutableDictionaryAssertion<TKey, TValue>, IAssertion?> itemAssertion,
+        [CallerArgumentExpression(nameof(itemAssertion))] string? expression = null)
+        where TCollection : IEnumerable<Dictionary<TKey, TValue>>
+        where TKey : notnull
+    {
+        return CountSpecialised<TCollection, Dictionary<TKey, TValue>>(
+            source,
+            (item, index) => itemAssertion(new MutableDictionaryAssertion<TKey, TValue>(item, $"item[{index}]")),
+            expression);
+    }
+
+    private static CollectionCountSource<TCollection, TItem> CountSpecialised<TCollection, TItem>(
+        CollectionAssertionBase<TCollection, TItem> source,
+        Func<TItem, int, IAssertion?> itemAssertionFactory,
+        string? expression)
+        where TCollection : IEnumerable<TItem>
+    {
+        var context = source.InternalContext;
+        context.ExpressionBuilder.Append($".Count({expression})");
+        return new CollectionCountSource<TCollection, TItem>(context, itemAssertionFactory);
+    }
 }

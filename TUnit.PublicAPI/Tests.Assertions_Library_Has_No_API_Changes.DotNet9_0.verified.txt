@@ -817,7 +817,6 @@ namespace .Conditions
     public class CollectionCountSource<TCollection, TItem>
         where TCollection : .<TItem>
     {
-        public CollectionCountSource(.<TCollection> collectionContext, <.<TItem>, .<TItem>?>? assertion) { }
         public .<TCollection, TItem> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
@@ -2631,6 +2630,31 @@ namespace .Extensions
     {
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TInner>> { }
+        public static .<TCollection, TInner[]> Count<TCollection, TInner>(this .<TCollection, TInner[]> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<TInner[]> { }
+        public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TCollection, .<TKey, TValue>> Count<TCollection, TKey, TValue>(this .<TCollection, .<TKey, TValue>> source, <.<TKey, TValue>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TCollection : .<.<TKey, TValue>>
+            where TKey :  notnull { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> Eventually<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         [("Use Length() instead, which provides all numeric assertion methods. Example: Asse" +
@@ -6155,7 +6179,7 @@ namespace .Sources
         public .<TCollection, TItem> Contains(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
-        public .<TCollection, TItem> Count(<.<TItem>, .<TItem>?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public .<TCollection, TItem> Count(<.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
         [.(-1)]
         public .<TCollection, TItem> Count(<.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
