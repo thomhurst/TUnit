@@ -13,22 +13,12 @@ namespace TUnit.Example.FsCheck.TestProject;
 [Timeout(10_000)]
 public sealed class CancellationTokenBehaviourTests
 {
-    /// <summary>
-    /// 100 invocations check that the CT is NOT pre-cancelled at entry. Before the fix,
-    /// FsCheck's default arbitrary produced a pre-cancelled token on roughly half of
-    /// invocations. No <see cref="FsCheckPropertyAttribute.Arbitrary"/> is specified,
-    /// so only the default registration applies.
-    /// </summary>
     [Test, FsCheckProperty(MaxTest = 100)]
     public bool CancellationTokenIsNotPreCancelled(CancellationToken cancellationToken)
     {
         return !cancellationToken.IsCancellationRequested;
     }
 
-    /// <summary>
-    /// Verifies the token identity: the CT passed to the property IS the one from
-    /// <see cref="TestContext.Current"/>, not just any non-cancelled token.
-    /// </summary>
     [Test, FsCheckProperty(MaxTest = 1)]
     public bool CancellationTokenIsTestContextToken(CancellationToken cancellationToken)
     {
@@ -36,39 +26,24 @@ public sealed class CancellationTokenBehaviourTests
         return cancellationToken == expected;
     }
 
-    /// <summary>
-    /// A user-supplied <see cref="Arbitrary{T}"/> via <see cref="FsCheckPropertyAttribute.Arbitrary"/>
-    /// takes precedence over the default CancellationToken arbitrary.
-    /// </summary>
-    [Test, FsCheckProperty(MaxTest = 10, Arbitrary = new[] { typeof(AlwaysNoneTokenArbitrary) })]
+    [Test, FsCheckProperty(MaxTest = 10, Arbitrary = [typeof(AlwaysNoneTokenArbitrary)])]
     public bool UserSuppliedArbitraryOverridesDefault(CancellationToken cancellationToken)
     {
         return cancellationToken == CancellationToken.None;
     }
 
-    /// <summary>
-    /// A user-supplied arbitrary for an unrelated type does not displace the default
-    /// CancellationToken registration; both apply alongside each other.
-    /// </summary>
-    [Test, FsCheckProperty(MaxTest = 10, Arbitrary = new[] { typeof(PositiveIntArbitrary) })]
+    [Test, FsCheckProperty(MaxTest = 10, Arbitrary = [typeof(PositiveIntArbitrary)])]
     public bool UserArbitraryForDifferentTypeDoesNotBypassDefault(int x, CancellationToken cancellationToken)
     {
         return x > 0 && !cancellationToken.IsCancellationRequested;
     }
 
-    /// <summary>
-    /// An empty <see cref="FsCheckPropertyAttribute.Arbitrary"/> array does not bypass
-    /// the default registration; properties still receive the test-context CancellationToken.
-    /// </summary>
-    [Test, FsCheckProperty(MaxTest = 1, Arbitrary = new Type[0])]
+    [Test, FsCheckProperty(MaxTest = 1, Arbitrary = [])]
     public bool EmptyArbitraryArrayStillUsesDefault(CancellationToken cancellationToken)
     {
         return !cancellationToken.IsCancellationRequested;
     }
 
-    /// <summary>
-    /// FsCheck properties without a CancellationToken parameter are unaffected by the fix.
-    /// </summary>
 #pragma warning disable TUnit0015 // intentionally omitted to verify the no-CT path
     [Test, FsCheckProperty(MaxTest = 50)]
     public bool NoCancellationTokenParameter_UnchangedBehaviour(int x, int y)
@@ -78,8 +53,8 @@ public sealed class CancellationTokenBehaviourTests
 #pragma warning restore TUnit0015
 
     /// <summary>
-    /// <c>[Timeout(500)]</c> + an await on the CT for 5s. If the CT is the timeout one,
-    /// the await is cooperatively cancelled at ~500ms. Before the fix, FsCheck injected its
+    /// <c>[Timeout(500)]</c> + an await on the CT for 5s. If the CT is the timeout token,
+    /// the await is cooperatively cancelled at ~500ms. Without the fix, FsCheck injected its
     /// own token and the await either threw immediately (pre-cancelled) or ran to completion.
     /// </summary>
     [Test, FsCheckProperty(MaxTest = 1)]
@@ -94,7 +69,7 @@ public sealed class CancellationTokenBehaviourTests
         }
         catch (OperationCanceledException)
         {
-            return stopwatch.Elapsed.TotalMilliseconds is >= 200 and <= 2_000;
+            return stopwatch.Elapsed.TotalMilliseconds is >= 200 and <= 1_500;
         }
     }
 }
