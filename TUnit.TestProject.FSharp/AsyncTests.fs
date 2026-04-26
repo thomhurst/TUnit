@@ -47,5 +47,7 @@ type AsyncTests() =
     [<Test>]
     member _.FSharpAsync_WithAssertion() : Async<unit> = async {
         let result = 1 + 1
-        do! check (Assert.That(result).IsEqualTo(2))
+        // F# can't disambiguate between the int-specific, generic, and implicit-conversion
+        // IsEqualTo extension overloads via OverloadResolutionPriority, so call directly.
+        do! check (IntEqualsAssertionExtensions.IsEqualTo(Assert.That(result), 2))
     }

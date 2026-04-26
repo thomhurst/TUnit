@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Generated extension methods for EqualsAssertion.
 /// </summary>
-public static class EqualsAssertionExtensions
+public static partial class EqualsAssertionExtensions
 {
 
     /// <summary>
