@@ -43,6 +43,7 @@ jobs:
         with:
           args: >-
             --config ./docs/lychee.toml
+            --base https://tunit.dev
             --no-progress
             'docs/docs/**/*.md'
             'docs/docs/**/*.mdx'

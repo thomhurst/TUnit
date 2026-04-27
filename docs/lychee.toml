@@ -8,15 +8,25 @@ retry_wait_time = 5
 timeout = 20
 user_agent = "Mozilla/5.0 (compatible; lychee-tunit-docs)"
 
-# 429 = rate-limited; the link is fine, just throttled. 200/206 are accepted by default.
-accept = [429]
+# Lychee's `accept` REPLACES defaults rather than extending — must list 200/206 explicitly.
+# 429 = rate-limited; the link is fine, just throttled.
+accept = [200, 206, 429]
 
 cache = true
 max_cache_age = "1d"
 
-# Sites that consistently 4xx/5xx automated checks even though the link is correct,
-# plus localhost/loopback.
+# Only check HTTP(S) URLs. File / mailto / etc. are skipped — internal Docusaurus
+# links are validated at build time by `onBrokenLinks: 'throw'` and friends in
+# docusaurus.config.ts, so re-checking them here is duplicate work and produces
+# false positives (e.g. bare paths `mocking/advanced` that Docusaurus rewrites
+# to `.md` but lychee can't).
+scheme = ["https", "http"]
+
 exclude = [
+  # Self-links — validated at build time; new pages in a PR are not yet live and would 404.
+  "^https?://tunit\\.dev/",
+
+  # Bot-hostile sites that 4xx/5xx automated checks even when the link is fine.
   "^https://github\\.com/thomhurst/TUnit/edit/",   # Docusaurus "edit this page" — generated, may 404 on new docs
   "^https://www\\.nuget\\.org/packages/",           # NuGet returns 429/403 to bot UAs
   "^https://stackoverflow\\.com/",                  # Cloudflare bot challenge
