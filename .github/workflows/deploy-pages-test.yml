@@ -30,3 +30,20 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Test build website
         run: yarn build
+
+      - name: Restore lychee cache
+        uses: actions/cache@v4
+        with:
+          path: docs/.lycheecache
+          key: lychee-html-${{ hashFiles('docs/docs/**/*.md', 'docs/docs/**/*.mdx', 'docs/lychee.toml') }}
+          restore-keys: lychee-html-
+
+      - name: Check links in built HTML
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --config ./docs/lychee.toml
+            --no-progress
+            'docs/build/**/*.html'
+          fail: true
+          workingDirectory: ${{ github.workspace }}

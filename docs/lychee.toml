@@ -1,0 +1,32 @@
+# Lychee link-checker configuration. Used by .github/workflows/link-check.yml
+# and the link-check step in .github/workflows/deploy-pages-test.yml.
+# Docs: https://lychee.cli.rs/usage/config/
+
+max_concurrency = 8
+max_retries = 3
+retry_wait_time = 5
+timeout = 20
+user_agent = "Mozilla/5.0 (compatible; lychee-tunit-docs)"
+
+# 429 = rate-limited; the link is fine, just throttled. 200/206 are accepted by default.
+accept = [429]
+
+cache = true
+max_cache_age = "1d"
+
+# Sites that consistently 4xx/5xx automated checks even though the link is correct,
+# plus localhost/loopback.
+exclude = [
+  "^https://github\\.com/thomhurst/TUnit/edit/",   # Docusaurus "edit this page" — generated, may 404 on new docs
+  "^https://www\\.nuget\\.org/packages/",           # NuGet returns 429/403 to bot UAs
+  "^https://stackoverflow\\.com/",                  # Cloudflare bot challenge
+  "^https://github\\.com/sponsors/",                # often 403 to bots
+  "^https://tluma\\.ai/",                           # third-party widget script, not a doc link
+  "^http://localhost",
+  "^https?://127\\.0\\.0\\.1",
+]
+
+exclude_path = [
+  "docs/node_modules",
+  "docs/.docusaurus",
+]
