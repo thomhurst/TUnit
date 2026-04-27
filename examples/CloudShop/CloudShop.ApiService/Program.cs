@@ -5,6 +5,7 @@ using CloudShop.ApiService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,18 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.EnsureCreatedAsync();
+}
+
+// Pre-declare exchange + durable queue + bindings so events published
+// before the worker subscribes are still queued (otherwise messages
+// routed to an unbound exchange are dropped on the floor).
+using (var scope = app.Services.CreateScope())
+{
+    var connection = scope.ServiceProvider.GetRequiredService<IConnection>();
+    await using var channel = await connection.CreateChannelAsync();
+    await channel.ExchangeDeclareAsync("order-events", ExchangeType.Topic, durable: true);
+    await channel.QueueDeclareAsync("order-processing", durable: true, exclusive: false, autoDelete: false);
+    await channel.QueueBindAsync("order-processing", "order-events", "order.payment-processed");
 }
 
 app.UseExceptionHandler();
