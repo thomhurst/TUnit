@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'docs/docs/**'
+      - 'docs/docusaurus.config.ts'
+      - 'docs/sidebars.ts'
       - 'docs/lychee.toml'
       - '.github/workflows/link-check.yml'
   push:
@@ -13,6 +15,8 @@ on:
       - main
     paths:
       - 'docs/docs/**'
+      - 'docs/docusaurus.config.ts'
+      - 'docs/sidebars.ts'
       - 'docs/lychee.toml'
       - '.github/workflows/link-check.yml'
   workflow_dispatch:
