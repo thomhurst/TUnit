@@ -9,7 +9,10 @@ internal static class ExternalSpanSink
 {
     private static Action<SpanData>? _sink;
 
-    public static Action<SpanData>? Current => _sink;
+    // Volatile.Read pairs with the full fence in Interlocked.CompareExchange on the
+    // Register/Unregister side; without it, weak memory models (ARM) could observe
+    // a stale null after another thread has published a sink.
+    public static Action<SpanData>? Current => Volatile.Read(ref _sink);
 
     public static void Register(Action<SpanData> sink)
     {
