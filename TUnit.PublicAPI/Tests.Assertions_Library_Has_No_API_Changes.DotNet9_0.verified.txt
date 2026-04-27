@@ -1590,6 +1590,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class LongEqualsAssertion : .<long, long>
@@ -1844,6 +1846,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     [.<.Rune>("IsAscii", CustomName="IsNotAscii", ExpectationMessage="be ASCII", NegateLogic=true)]
     [.<.Rune>("IsAscii", ExpectationMessage="be ASCII")]
@@ -4725,6 +4729,59 @@ namespace .Extensions
         protected override string GetExpectation() { }
     }
     public static class ListItemAtSatisfiesExtensions
+    {
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, TInner[]> Satisfies<TList, TInner>(this .<TList, TInner[]> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<TInner[]> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TInner>> { }
+        public static .<TList, TInner[]> Satisfies<TList, TInner>(this .<TList, TInner[]> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<TInner[]> { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+        public static .<TList, .<TKey, TValue>> Satisfies<TList, TKey, TValue>(this .<TList, .<TKey, TValue>> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TList : .<.<TKey, TValue>>
+            where TKey :  notnull { }
+    }
+    public static class ListLastItemSatisfiesExtensions
     {
         public static .<TList, .<TInner>> Satisfies<TList, TInner>(this .<TList, .<TInner>> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null)
             where TList : .<.<TInner>> { }
