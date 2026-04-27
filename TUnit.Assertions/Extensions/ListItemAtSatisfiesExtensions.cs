@@ -289,11 +289,7 @@ public static class ListItemAtSatisfiesExtensions
         string? expression)
         where TList : IList<TItem>
     {
-        source.InternalListContext.ExpressionBuilder.Append($".Satisfies({expression})");
-        return new ListItemAtSatisfiesAssertion<TList, TItem>(
-            source.InternalListContext,
-            source.InternalIndex,
-            assertionFactory);
+        return source.CreateSatisfiesAssertion(assertionFactory, expression);
     }
 
     private static ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> SatisfiesSpecialised<TList, TItem>(
@@ -302,10 +298,6 @@ public static class ListItemAtSatisfiesExtensions
         string? expression)
         where TList : IReadOnlyList<TItem>
     {
-        source.InternalListContext.ExpressionBuilder.Append($".Satisfies({expression})");
-        return new ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>(
-            source.InternalListContext,
-            source.InternalIndex,
-            assertionFactory);
+        return source.CreateSatisfiesAssertion(assertionFactory, expression);
     }
 }

@@ -67,10 +67,6 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
     private readonly AssertionContext<TList> _listContext;
     private readonly int _index;
 
-    internal AssertionContext<TList> InternalListContext => _listContext;
-
-    internal int InternalIndex => _index;
-
     public AssertionContext<TItem> Context { get; }
 
     public ListItemAtSource(AssertionContext<TList> listContext, int index)
@@ -130,6 +126,15 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
     public ListItemAtSatisfiesAssertion<TList, TItem> Satisfies(
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+    {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]")),
+            expression);
+    }
+
+    internal ListItemAtSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
+        Func<TItem, int, IAssertion?> assertion,
+        string? expression)
     {
         _listContext.ExpressionBuilder.Append($".Satisfies({expression})");
         return new ListItemAtSatisfiesAssertion<TList, TItem>(_listContext, _index, assertion);

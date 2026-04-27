@@ -24,6 +24,14 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_Array_Item_Source()
+    {
+        IList<int[]> items = new List<int[]> { new[] { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
     public async Task List_ItemAt_Satisfies_Preserves_Dictionary_Item_Source()
     {
         IList<IDictionary<string, int>> items = new List<IDictionary<string, int>>
@@ -35,11 +43,33 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_Concrete_Dictionary_Item_Source()
+    {
+        IList<Dictionary<string, int>> items = new List<Dictionary<string, int>>
+        {
+            new() { ["answer"] = 42 }
+        };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.ContainsKey("answer"));
+    }
+
+    [Test]
     public async Task List_ItemAt_Satisfies_Preserves_Set_Item_Source()
     {
         IList<ISet<int>> items = new List<ISet<int>>
         {
             new HashSet<int> { 1, 2, 3 }
+        };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.IsSupersetOf(new[] { 1, 2 }));
+    }
+
+    [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_HashSet_Item_Source()
+    {
+        IList<HashSet<int>> items = new List<HashSet<int>>
+        {
+            new() { 1, 2, 3 }
         };
 
         await Assert.That(items).ItemAt(0).Satisfies(item => item.IsSupersetOf(new[] { 1, 2 }));
@@ -65,6 +95,14 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_Array_Item_Source()
+    {
+        IReadOnlyList<int[]> items = new List<int[]> { new[] { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
     public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_Dictionary_Item_Source()
     {
         IReadOnlyList<Dictionary<string, int>> items = new List<Dictionary<string, int>>
@@ -76,11 +114,33 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_ReadOnly_Dictionary_Item_Source()
+    {
+        IReadOnlyList<IReadOnlyDictionary<string, int>> items = new List<IReadOnlyDictionary<string, int>>
+        {
+            new Dictionary<string, int> { ["answer"] = 42 }
+        };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.ContainsKey("answer"));
+    }
+
+    [Test]
     public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_Set_Item_Source()
     {
         IReadOnlyList<HashSet<int>> items = new List<HashSet<int>>
         {
             new() { 1, 2, 3 }
+        };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.IsSupersetOf(new[] { 1, 2 }));
+    }
+
+    [Test]
+    public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_ReadOnly_Set_Item_Source()
+    {
+        IReadOnlyList<IReadOnlySet<int>> items = new List<IReadOnlySet<int>>
+        {
+            new HashSet<int> { 1, 2, 3 }
         };
 
         await Assert.That(items).ItemAt(0).Satisfies(item => item.IsSupersetOf(new[] { 1, 2 }));
