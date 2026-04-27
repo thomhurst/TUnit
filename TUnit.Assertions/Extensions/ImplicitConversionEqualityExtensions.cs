@@ -1,3 +1,13 @@
+// The IsEqualTo<TValue, TOther> / IsNotEqualTo<TValue, TOther> overloads below
+// rely on [OverloadResolutionPriority] to disambiguate against the source-generated
+// IsEqualTo<TValue> / IsNotEqualTo<TValue> overloads when called with a same-type
+// expected value. That attribute is only honored by the C# 13+ compiler and is only
+// present in System.Runtime.CompilerServices on .NET 9+. On older targets the
+// attribute is silently dropped (Polyfill does not supply it), every same-type
+// IsEqualTo call becomes ambiguous (CS0121), and we break effectively every existing
+// test suite. Gating the entire feature to .NET 9+ keeps net8.0 / netstandard2.0
+// consumers on the original well-defined overload. See issue #5765.
+#if NET9_0_OR_GREATER
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -146,3 +156,4 @@ internal static class ImplicitConversionCache
         return null;
     }
 }
+#endif
