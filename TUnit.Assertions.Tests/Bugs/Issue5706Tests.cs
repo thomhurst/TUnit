@@ -48,6 +48,14 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_ConcreteList_Item_Source()
+    {
+        IList<List<int>> items = new List<List<int>> { new() { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
     public async Task List_ItemAt_Satisfies_Preserves_Dictionary_Item_Source()
     {
         IList<IDictionary<string, int>> items = new List<IDictionary<string, int>>

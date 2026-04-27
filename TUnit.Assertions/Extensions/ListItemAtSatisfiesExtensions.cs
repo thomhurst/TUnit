@@ -12,6 +12,13 @@ namespace TUnit.Assertions.Extensions;
 /// <c>Satisfies&lt;TSource&gt;</c> on the item-at source, picking the matching
 /// <see cref="IAssertionSourceFor{TItem,TSelf}"/> implementation.
 /// </summary>
+/// <remarks>
+/// Both interface-shaped (e.g. <c>IList&lt;T&gt;</c>) and concrete-shaped
+/// (e.g. <c>List&lt;T&gt;</c>) overloads are required because C# overload
+/// resolution performs exact type matching on the source's <c>TItem</c>:
+/// <c>IList&lt;List&lt;int&gt;&gt;</c> binds the <c>List&lt;TInner&gt;</c>
+/// overload, never the <c>IList&lt;TInner&gt;</c> one.
+/// </remarks>
 public static class ListItemAtSatisfiesExtensions
 {
     public static ListItemAtSatisfiesAssertion<TList, IEnumerable<TInner>> Satisfies<TList, TInner>(
