@@ -8,8 +8,8 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"blue",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.bd3cf430.css">
-<script src="/assets/js/runtime~main.3d5d7f93.js" defer="defer"></script>
-<script src="/assets/js/main.f200fc8a.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d97c4235.js" defer="defer"></script>
+<script src="/assets/js/main.81dd9d4d.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -21,8 +21,8 @@
 <code>dotnet test --filter &quot;Category=X&quot;</code> is <strong>not supported</strong> — the flag is
 silently rejected, the MTP help is printed, and the run exits with
 <code>Zero tests ran</code>. This can look like a test failure when it&#x27;s actually
-just an unrecognised flag.</p><p>Use <code>--treenode-filter</code> instead:</p><table><thead><tr><th>VSTest (xUnit / NUnit / MSTest)</th><th>TUnit</th></tr></thead><tbody><tr><td><code>--filter &quot;Category=Integration&quot;</code></td><td><code>--treenode-filter &quot;/*/*/*/*[Category=Integration]&quot;</code></td></tr><tr><td><code>--filter &quot;FullyQualifiedName~LoginTests&quot;</code></td><td><code>--treenode-filter &quot;/*/*/LoginTests/*&quot;</code></td></tr><tr><td><code>--filter &quot;Name=AcceptCookiesTest&quot;</code></td><td><code>--treenode-filter &quot;/*/*/*/AcceptCookiesTest&quot;</code></td></tr></tbody></table><p>When using <code>dotnet test</code>, pass the flag as an application argument:
-<code>dotnet test -- --treenode-filter &quot;...&quot;</code>.</p></div></div>
+just an unrecognised flag.</p><p>Use <code>--treenode-filter</code> instead:</p><table><thead><tr><th>VSTest (xUnit / NUnit / MSTest)</th><th>TUnit</th></tr></thead><tbody><tr><td><code>--filter &quot;Category=Integration&quot;</code></td><td><code>--treenode-filter &quot;/*/*/*/*[Category=Integration]&quot;</code></td></tr><tr><td><code>--filter &quot;FullyQualifiedName~LoginTests&quot;</code></td><td><code>--treenode-filter &quot;/*/*/LoginTests/*&quot;</code></td></tr><tr><td><code>--filter &quot;Name=AcceptCookiesTest&quot;</code></td><td><code>--treenode-filter &quot;/*/*/*/AcceptCookiesTest&quot;</code></td></tr></tbody></table><p>When using <code>dotnet test</code>, pass the flag directly:
+<code>dotnet test --treenode-filter &quot;...&quot;</code>. (On older SDKs, separate it with <code>--</code>: <code>dotnet test -- --treenode-filter &quot;...&quot;</code>.)</p></div></div>
 <p>TUnit can select tests by:</p>
 <ul>
 <li class="">Assembly</li>
