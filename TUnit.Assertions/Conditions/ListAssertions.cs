@@ -482,6 +482,13 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
     private readonly int _index;
     private readonly Func<TItem, int, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ListItemAtSource{TList,TItem}.Satisfies{TSource}"/> entry point
+    /// to get specialised assertion sources.
+    /// </summary>
     public ListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
@@ -667,6 +674,13 @@ public class ListLastItemSatisfiesAssertion<TList, TItem> : ListAssertionBase<TL
 {
     private readonly Func<TItem, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ListLastItemSource{TList,TItem}.Satisfies{TSource}"/> entry point
+    /// to get specialised assertion sources.
+    /// </summary>
     public ListLastItemSatisfiesAssertion(
         AssertionContext<TList> context,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)

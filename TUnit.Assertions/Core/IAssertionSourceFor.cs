@@ -18,6 +18,17 @@ namespace TUnit.Assertions.Core;
 public interface IAssertionSourceFor<TItem, TSelf>
     where TSelf : IAssertionSourceFor<TItem, TSelf>
 {
+    /// <summary>
+    /// Constructs the specialised assertion source wrapping <paramref name="item"/> with the
+    /// given <paramref name="label"/>.
+    /// </summary>
+    /// <remarks>
+    /// Implementations may receive a <see langword="null"/> <paramref name="item"/> when the
+    /// caller selects from a collection that allows nulls. Whether the resulting assertion
+    /// surfaces a graceful failure or throws on a subsequent operation is the implementer's
+    /// responsibility — the contract is "construct a source that callers can run assertions
+    /// against", not "validate non-null up front".
+    /// </remarks>
     static abstract TSelf Create(TItem item, string label);
 }
 #endif

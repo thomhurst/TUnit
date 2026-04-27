@@ -484,6 +484,13 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
     private readonly int _index;
     private readonly Func<TItem, int, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ReadOnlyListItemAtSource{TList,TItem}.Satisfies{TSource}"/> entry
+    /// point to get specialised assertion sources.
+    /// </summary>
     public ReadOnlyListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
@@ -669,6 +676,13 @@ public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyList
 {
     private readonly Func<TItem, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ReadOnlyListLastItemSource{TList,TItem}.Satisfies{TSource}"/>
+    /// entry point to get specialised assertion sources.
+    /// </summary>
     public ReadOnlyListLastItemSatisfiesAssertion(
         AssertionContext<TList> context,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)

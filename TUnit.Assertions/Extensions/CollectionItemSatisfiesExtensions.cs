@@ -63,11 +63,13 @@ public static class CollectionItemSatisfiesExtensions
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<SetAssertion<TInner>>(assertion, expression);
 
+#if NET5_0_OR_GREATER
     public static TResult Satisfies<TInner, TResult>(
         this IItemSatisfiesSource<IReadOnlySet<TInner>, TResult> source,
         Func<ReadOnlySetAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ReadOnlySetAssertion<TInner>>(assertion, expression);
+#endif
 
     public static TResult Satisfies<TInner, TResult>(
         this IItemSatisfiesSource<TInner[], TResult> source,
