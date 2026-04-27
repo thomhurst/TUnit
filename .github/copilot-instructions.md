@@ -70,8 +70,8 @@ cd TUnit.TestProject && dotnet run
 cd TUnit.TestProject && dotnet test
 
 # ✅ CORRECT - Always use targeted filters when testing TUnit.TestProject
-cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
-cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+cd TUnit.TestProject && dotnet test -- --treenode-filter "/*/*/SpecificClass/*"
+cd TUnit.TestProject && dotnet test -- --treenode-filter "/*/*/*/*[Category!=Performance]"
 
 # ✅ CORRECT - Test other test projects normally (they don't have intentional failures)
 dotnet test TUnit.Engine.Tests
