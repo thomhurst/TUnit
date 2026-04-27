@@ -24,6 +24,10 @@ namespace TUnit.Assertions.Extensions;
 /// <see cref="ListLastItemSource{TList,TItem}"/> and
 /// <see cref="ReadOnlyListLastItemSource{TList,TItem}"/>; otherwise users
 /// must spell out the type argument explicitly: <c>.Satisfies&lt;MyAssertion&lt;T&gt;&gt;(...)</c>.
+///
+/// Changes here must also be mirrored in <c>ListItemAtSatisfiesExtensions</c>
+/// (and vice versa) — both files enumerate the same collection shapes but bind
+/// to different item-selector sources.
 /// </remarks>
 public static class ListLastItemSatisfiesExtensions
 {
