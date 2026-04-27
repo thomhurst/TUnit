@@ -24,6 +24,22 @@ public class Issue5706Tests
     }
 
     [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_IList_Item_Source()
+    {
+        IList<IList<int>> items = new List<IList<int>> { new List<int> { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
+    public async Task List_ItemAt_Satisfies_Preserves_IReadOnlyList_Item_Source()
+    {
+        IList<IReadOnlyList<int>> items = new List<IReadOnlyList<int>> { new List<int> { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
     public async Task List_ItemAt_Satisfies_Preserves_Array_Item_Source()
     {
         IList<int[]> items = new List<int[]> { new[] { 1, 2, 3 } };
@@ -90,6 +106,22 @@ public class Issue5706Tests
         {
             new() { 1, 2, 3 }
         };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
+    public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_IList_Item_Source()
+    {
+        IReadOnlyList<IList<int>> items = new List<IList<int>> { new List<int> { 1, 2, 3 } };
+
+        await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
+    }
+
+    [Test]
+    public async Task ReadOnlyList_ItemAt_Satisfies_Preserves_IReadOnlyList_Item_Source()
+    {
+        IReadOnlyList<IReadOnlyList<int>> items = new List<IReadOnlyList<int>> { new List<int> { 1, 2, 3 } };
 
         await Assert.That(items).ItemAt(0).Satisfies(item => item.Count().IsEqualTo(3));
     }

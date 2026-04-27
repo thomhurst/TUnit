@@ -130,26 +130,19 @@ public static class ListItemAtSatisfiesExtensions
         where TList : IReadOnlyList<TInner[]>
         => source.Satisfies<ArrayAssertion<TInner>>(assertion, expression);
 
-    // Concrete List<T> overloads bridge to the IList<T>-typed ListAssertion<T> directly.
-    // ListAssertion implements IAssertionSourceFor<IList<TInner>>, not IAssertionSourceFor<List<TInner>>,
-    // so the generic Satisfies<TSource> constraint cannot bind here.
     public static ListItemAtSatisfiesAssertion<TList, List<TInner>> Satisfies<TList, TInner>(
         this ListItemAtSource<TList, List<TInner>> source,
         Func<ListAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TList : IList<List<TInner>>
-        => source.CreateSatisfiesAssertion(
-            (item, index) => assertion(new ListAssertion<TInner>(item, $"item[{index}]")),
-            expression);
+        => source.Satisfies<ListAssertion<TInner>>(assertion, expression);
 
     public static ReadOnlyListItemAtSatisfiesAssertion<TList, List<TInner>> Satisfies<TList, TInner>(
         this ReadOnlyListItemAtSource<TList, List<TInner>> source,
         Func<ListAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TList : IReadOnlyList<List<TInner>>
-        => source.CreateSatisfiesAssertion(
-            (item, index) => assertion(new ListAssertion<TInner>(item, $"item[{index}]")),
-            expression);
+        => source.Satisfies<ListAssertion<TInner>>(assertion, expression);
 
     public static ListItemAtSatisfiesAssertion<TList, HashSet<TInner>> Satisfies<TList, TInner>(
         this ListItemAtSource<TList, HashSet<TInner>> source,
@@ -165,17 +158,13 @@ public static class ListItemAtSatisfiesExtensions
         where TList : IReadOnlyList<HashSet<TInner>>
         => source.Satisfies<HashSetAssertion<TInner>>(assertion, expression);
 
-    // Concrete Dictionary<TKey,TValue> overloads bridge directly: MutableDictionaryAssertion
-    // implements IAssertionSourceFor<IDictionary<TKey,TValue>>, not the concrete Dictionary<,>.
     public static ListItemAtSatisfiesAssertion<TList, Dictionary<TKey, TValue>> Satisfies<TList, TKey, TValue>(
         this ListItemAtSource<TList, Dictionary<TKey, TValue>> source,
         Func<MutableDictionaryAssertion<TKey, TValue>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TList : IList<Dictionary<TKey, TValue>>
         where TKey : notnull
-        => source.CreateSatisfiesAssertion(
-            (item, index) => assertion(new MutableDictionaryAssertion<TKey, TValue>(item, $"item[{index}]")),
-            expression);
+        => source.Satisfies<MutableDictionaryAssertion<TKey, TValue>>(assertion, expression);
 
     public static ReadOnlyListItemAtSatisfiesAssertion<TList, Dictionary<TKey, TValue>> Satisfies<TList, TKey, TValue>(
         this ReadOnlyListItemAtSource<TList, Dictionary<TKey, TValue>> source,
@@ -183,8 +172,6 @@ public static class ListItemAtSatisfiesExtensions
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TList : IReadOnlyList<Dictionary<TKey, TValue>>
         where TKey : notnull
-        => source.CreateSatisfiesAssertion(
-            (item, index) => assertion(new MutableDictionaryAssertion<TKey, TValue>(item, $"item[{index}]")),
-            expression);
+        => source.Satisfies<MutableDictionaryAssertion<TKey, TValue>>(assertion, expression);
 }
 #endif

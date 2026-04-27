@@ -13,6 +13,7 @@ namespace TUnit.Assertions.Sources;
 public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAssertionBase<IDictionary<TKey, TValue>, TKey, TValue>
 #if !NETSTANDARD2_0
     , IAssertionSourceFor<IDictionary<TKey, TValue>, MutableDictionaryAssertion<TKey, TValue>>
+    , IAssertionSourceFor<Dictionary<TKey, TValue>, MutableDictionaryAssertion<TKey, TValue>>
 #endif
     where TKey : notnull
 {
@@ -23,6 +24,7 @@ public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAsserti
 
 #if !NETSTANDARD2_0
     public static MutableDictionaryAssertion<TKey, TValue> Create(IDictionary<TKey, TValue> item, string label) => new(item, label);
+    public static MutableDictionaryAssertion<TKey, TValue> Create(Dictionary<TKey, TValue> item, string label) => new(item, label);
 #endif
 
     private static AssertionContext<IDictionary<TKey, TValue>> CreateContext(

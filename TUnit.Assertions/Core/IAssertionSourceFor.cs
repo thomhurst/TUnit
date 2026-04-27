@@ -7,9 +7,15 @@ namespace TUnit.Assertions.Core;
 /// Implementations expose a static factory used to materialise the specialised source
 /// per-item without per-shape overload enumeration.
 /// </summary>
+/// <remarks>
+/// Intentionally does not extend <see cref="IAssertionSource{TItem}"/>: a single
+/// implementing class can implement multiple parameterisations of this interface
+/// (e.g. against both an interface item type and a matching concrete type) without
+/// triggering conflicting <c>Context</c> property requirements.
+/// </remarks>
 /// <typeparam name="TItem">The value type the source wraps.</typeparam>
 /// <typeparam name="TSelf">The implementing source type (CRTP).</typeparam>
-public interface IAssertionSourceFor<TItem, TSelf> : IAssertionSource<TItem>
+public interface IAssertionSourceFor<TItem, TSelf>
     where TSelf : IAssertionSourceFor<TItem, TSelf>
 {
     static abstract TSelf Create(TItem item, string label);

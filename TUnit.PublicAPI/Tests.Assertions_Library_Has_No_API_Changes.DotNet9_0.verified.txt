@@ -2505,7 +2505,7 @@ namespace .Core
         . AssertAsync();
     }
     public interface IAssertionSource { }
-    public interface IAssertionSourceFor<TItem, TSelf> : ., .<TItem>
+    public interface IAssertionSourceFor<TItem, TSelf>
         where TSelf : .<TItem, TSelf>
     {
         TSelf Create(TItem item, string label);
@@ -6150,7 +6150,7 @@ namespace .Extensions
 }
 namespace .Sources
 {
-    public class ArrayAssertion<TItem> : .<TItem[], TItem>, ., .<TItem[], .<TItem>>, .<TItem[]>
+    public class ArrayAssertion<TItem> : .<TItem[], TItem>, .<TItem[], .<TItem>>
     {
         public ArrayAssertion(TItem[]? value, string? expression) { }
         public static .<TItem> Create(TItem[] item, string label) { }
@@ -6284,7 +6284,7 @@ namespace .Sources
         public .<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(<TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class CollectionAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
+    public class CollectionAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
@@ -6323,7 +6323,7 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
     }
-    public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, ., .<.<TKey, TValue>, .<TKey, TValue>>, .<.<TKey, TValue>>
+    public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>, .<TKey, TValue>>
         where TKey :  notnull
     {
         public DictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
@@ -6369,9 +6369,10 @@ namespace .Sources
         public .<TList, TItem> ItemAt(int index, [.("index")] string? expression = null) { }
         public .<TList, TItem> LastItem() { }
     }
-    public class ListAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
+    public class ListAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>, .<.<TItem>, .<TItem>>
     {
         public ListAssertion(.<TItem>? value, string? expression) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
@@ -6437,10 +6438,11 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
     }
-    public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, ., .<.<TKey, TValue>, .<TKey, TValue>>, .<.<TKey, TValue>>
+    public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>, .<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>>
         where TKey :  notnull
     {
         public MutableDictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
+        public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
         public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
     }
     public abstract class ReadOnlyListAssertionBase<TList, TItem> : .<TList, TItem>
@@ -6454,7 +6456,7 @@ namespace .Sources
         public .<TList, TItem> ItemAt(int index, [.("index")] string? indexExpression = null) { }
         public .<TList, TItem> LastItem() { }
     }
-    public class ReadOnlyListAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
+    public class ReadOnlyListAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>
     {
         public ReadOnlyListAssertion(.<TItem>? value, string? expression) { }
         public static .<TItem> Create(.<TItem> item, string label) { }

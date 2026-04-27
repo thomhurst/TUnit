@@ -12,6 +12,7 @@ namespace TUnit.Assertions.Sources;
 public class ListAssertion<TItem> : ListAssertionBase<IList<TItem>, TItem>
 #if !NETSTANDARD2_0
     , IAssertionSourceFor<IList<TItem>, ListAssertion<TItem>>
+    , IAssertionSourceFor<List<TItem>, ListAssertion<TItem>>
 #endif
 {
     public ListAssertion(IList<TItem>? value, string? expression)
@@ -26,6 +27,7 @@ public class ListAssertion<TItem> : ListAssertionBase<IList<TItem>, TItem>
 
 #if !NETSTANDARD2_0
     public static ListAssertion<TItem> Create(IList<TItem> item, string label) => new(item, label);
+    public static ListAssertion<TItem> Create(List<TItem> item, string label) => new(item, label);
 #endif
 
     private static AssertionContext<IList<TItem>> CreateContext(
