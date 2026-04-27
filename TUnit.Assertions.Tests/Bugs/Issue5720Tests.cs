@@ -1,9 +1,4 @@
-// The IsEqualTo<TValue, TOther> overload these tests exercise lives behind
-// `#if NET9_0_OR_GREATER` in TUnit.Assertions (see issue #5765 / #5751) because it
-// relies on [OverloadResolutionPriority] for disambiguation, which is only honored
-// by C# 13+ and only present in System.Runtime.CompilerServices on .NET 9+. The
-// assertions test project multi-targets net8.0/net9.0/net10.0, so this file must
-// match the same gate to keep the net8.0 build green.
+// Gated to match ImplicitConversionEqualityExtensions.cs — see issue #5765.
 #if NET9_0_OR_GREATER
 namespace TUnit.Assertions.Tests.Bugs;
 
