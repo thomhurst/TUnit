@@ -63,7 +63,7 @@ public class ListHasItemAtAssertion<TList, TItem> : ListAssertionBase<TList, TIt
 /// </summary>
 public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 #if !NETSTANDARD2_0
-    , IItemSatisfiesSource<TList, TItem, ListItemAtSatisfiesAssertion<TList, TItem>>
+    , IItemSatisfiesSource<TItem, ListItemAtSatisfiesAssertion<TList, TItem>>
 #endif
     where TList : IList<TItem>
 {
@@ -210,7 +210,7 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// </summary>
 public class ListLastItemSource<TList, TItem> : IAssertionSource<TItem>
 #if !NETSTANDARD2_0
-    , IItemSatisfiesSource<TList, TItem, ListLastItemSatisfiesAssertion<TList, TItem>>
+    , IItemSatisfiesSource<TItem, ListLastItemSatisfiesAssertion<TList, TItem>>
 #endif
     where TList : IList<TItem>
 {

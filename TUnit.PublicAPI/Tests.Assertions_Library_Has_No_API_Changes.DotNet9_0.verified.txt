@@ -1534,7 +1534,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ListItemAtSource<TList, TItem> : ., .<TItem>, .<TList, TItem, .<TList, TItem>>
+    public class ListItemAtSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ListItemAtSource(.<TList> listContext, int index) { }
@@ -1574,7 +1574,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ListLastItemSource<TList, TItem> : ., .<TItem>, .<TList, TItem, .<TList, TItem>>
+    public class ListLastItemSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ListLastItemSource(.<TList> listContext) { }
@@ -1790,7 +1790,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ReadOnlyListItemAtSource<TList, TItem> : ., .<TItem>, .<TList, TItem, .<TList, TItem>>
+    public class ReadOnlyListItemAtSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ReadOnlyListItemAtSource(.<TList> listContext, int index) { }
@@ -1830,7 +1830,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ReadOnlyListLastItemSource<TList, TItem> : ., .<TItem>, .<TList, TItem, .<TList, TItem>>
+    public class ReadOnlyListLastItemSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ReadOnlyListLastItemSource(.<TList> listContext) { }
@@ -2525,7 +2525,7 @@ namespace .Core
         .<TValue, TExpected> IsTypeOf<TExpected>();
     }
     public interface IDelegateAssertionSource<TValue> : ., .<TValue> { }
-    public interface IItemSatisfiesSource<TList, TItem, TResult> : ., .<TItem>
+    public interface IItemSatisfiesSource<TItem, TResult> : ., .<TItem>
     {
         TResult Satisfies<TSource>(<TSource, .?> assertion, string? expression = null)
             where TSource : .<TItem, TSource>;
@@ -3113,19 +3113,19 @@ namespace .Extensions
     }
     public static class CollectionItemSatisfiesExtensions
     {
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, .<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TInner, TResult>(this .<TList, TInner[], TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
-        public static TResult Satisfies<TList, TKey, TValue, TResult>(this .<TList, .<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<TInner[], TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
             where TKey :  notnull { }
-        public static TResult Satisfies<TList, TKey, TValue, TResult>(this .<TList, .<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
             where TKey :  notnull { }
-        public static TResult Satisfies<TList, TKey, TValue, TResult>(this .<TList, .<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
             where TKey :  notnull { }
     }
     public static class ComparisonAssertionExtensions

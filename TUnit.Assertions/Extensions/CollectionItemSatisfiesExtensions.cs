@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Extensions;
 /// Specialised <c>Satisfies</c> overloads when the selected item (from <c>ItemAt</c>,
 /// <c>LastItem</c>, etc.) is itself a collection-like value. Each overload binds the
 /// matching <see cref="IAssertionSourceFor{TItem,TSelf}"/> implementation and dispatches
-/// through <see cref="IItemSatisfiesSource{TList,TItem,TResult}.Satisfies{TSource}"/>,
+/// through <see cref="IItemSatisfiesSource{TItem,TResult}.Satisfies{TSource}"/>,
 /// so a single set of per-shape overloads serves every item-selector source type.
 /// </summary>
 /// <remarks>
@@ -25,70 +25,70 @@ namespace TUnit.Assertions.Extensions;
 /// </remarks>
 public static class CollectionItemSatisfiesExtensions
 {
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, IEnumerable<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<IEnumerable<TInner>, TResult> source,
         Func<CollectionAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<CollectionAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, IList<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<IList<TInner>, TResult> source,
         Func<ListAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ListAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, IReadOnlyList<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<IReadOnlyList<TInner>, TResult> source,
         Func<ReadOnlyListAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ReadOnlyListAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TKey, TValue, TResult>(
-        this IItemSatisfiesSource<TList, IReadOnlyDictionary<TKey, TValue>, TResult> source,
+    public static TResult Satisfies<TKey, TValue, TResult>(
+        this IItemSatisfiesSource<IReadOnlyDictionary<TKey, TValue>, TResult> source,
         Func<DictionaryAssertion<TKey, TValue>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TKey : notnull
         => source.Satisfies<DictionaryAssertion<TKey, TValue>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TKey, TValue, TResult>(
-        this IItemSatisfiesSource<TList, IDictionary<TKey, TValue>, TResult> source,
+    public static TResult Satisfies<TKey, TValue, TResult>(
+        this IItemSatisfiesSource<IDictionary<TKey, TValue>, TResult> source,
         Func<MutableDictionaryAssertion<TKey, TValue>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TKey : notnull
         => source.Satisfies<MutableDictionaryAssertion<TKey, TValue>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, ISet<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<ISet<TInner>, TResult> source,
         Func<SetAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<SetAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, IReadOnlySet<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<IReadOnlySet<TInner>, TResult> source,
         Func<ReadOnlySetAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ReadOnlySetAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, TInner[], TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<TInner[], TResult> source,
         Func<ArrayAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ArrayAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, List<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<List<TInner>, TResult> source,
         Func<ListAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<ListAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TInner, TResult>(
-        this IItemSatisfiesSource<TList, HashSet<TInner>, TResult> source,
+    public static TResult Satisfies<TInner, TResult>(
+        this IItemSatisfiesSource<HashSet<TInner>, TResult> source,
         Func<HashSetAssertion<TInner>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         => source.Satisfies<HashSetAssertion<TInner>>(assertion, expression);
 
-    public static TResult Satisfies<TList, TKey, TValue, TResult>(
-        this IItemSatisfiesSource<TList, Dictionary<TKey, TValue>, TResult> source,
+    public static TResult Satisfies<TKey, TValue, TResult>(
+        this IItemSatisfiesSource<Dictionary<TKey, TValue>, TResult> source,
         Func<MutableDictionaryAssertion<TKey, TValue>, IAssertion?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
         where TKey : notnull

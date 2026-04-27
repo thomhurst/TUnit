@@ -65,7 +65,7 @@ public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertio
 /// </summary>
 public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 #if !NETSTANDARD2_0
-    , IItemSatisfiesSource<TList, TItem, ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>>
+    , IItemSatisfiesSource<TItem, ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>>
 #endif
     where TList : IReadOnlyList<TItem>
 {
@@ -212,7 +212,7 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// </summary>
 public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
 #if !NETSTANDARD2_0
-    , IItemSatisfiesSource<TList, TItem, ReadOnlyListLastItemSatisfiesAssertion<TList, TItem>>
+    , IItemSatisfiesSource<TItem, ReadOnlyListLastItemSatisfiesAssertion<TList, TItem>>
 #endif
     where TList : IReadOnlyList<TItem>
 {
