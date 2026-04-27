@@ -1,6 +1,7 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
@@ -258,6 +259,27 @@ public class GitHubReporterTests
         var output = await File.ReadAllTextAsync(outputFile);
         output.ShouldContain("Quick diagnosis:");
         output.ShouldContain("Timeout");
+    }
+
+    [Test]
+    public async Task AfterRunAsync_Unwraps_TestFailedException_For_Grouping()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+
+        var inner1 = new InvalidOperationException("Docker image not created");
+        var inner2 = new InvalidOperationException("Docker image not created");
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", "T1", "Svc", new TestFailedException(inner1)),
+            CreateFailedTestMessage("2", "T2", "Svc", new TestFailedException(inner2))
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("InvalidOperationException (2 tests)");
+        output.ShouldNotContain("TestFailedException (");
+        output.ShouldContain("Docker image not created");
+        output.ShouldContain("2 × `InvalidOperationException`");
     }
 
     [Test]
