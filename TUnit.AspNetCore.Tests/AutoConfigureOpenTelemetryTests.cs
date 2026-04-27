@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Trace;
@@ -12,15 +13,16 @@ namespace TUnit.AspNetCore.Tests;
 /// correlation processor + ASP.NET Core instrumentation.
 /// </summary>
 /// <remarks>
-/// Serialized against sibling auto-wire tests because <see cref="OpenTelemetry.Sdk"/>
-/// attaches a process-global <see cref="ActivityListener"/> per <c>TracerProvider</c>,
-/// so a parallel factory's correlation processor can tag activities created by another
-/// factory's SUT. Serializing keeps assertions observing only their own factory's wiring.
+/// AutoWires asserts presence of its own <c>TestId</c> tag, so foreign spans observed
+/// via the global ASP.NET Core <see cref="System.Diagnostics.ActivitySource"/> do not
+/// affect it — no key needed. Parallel <see cref="WebApplicationTest{TFactory,TEntryPoint}"/>
+/// instances stamp activities (subscribed via <c>AddAspNetCoreInstrumentation</c>) on
+/// background continuations, so the exporter sink must be thread-safe — polling
+/// <see cref="LockedActivityList"/> snapshots its items under a lock.
 /// </remarks>
-[NotInParallel(nameof(AutoConfigureOpenTelemetryTests))]
 public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFactory, Program>
 {
-    private readonly List<Activity> _exported = [];
+    private readonly LockedActivityList _exported = [];
 
     protected override void ConfigureTestServices(IServiceCollection services)
     {
@@ -42,7 +44,14 @@ public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFact
         Activity? taggedSpan = null;
         while (Environment.TickCount64 < deadline)
         {
-            taggedSpan = _exported.FirstOrDefault(a => (a.GetTagItem(TUnitActivitySource.TagTestId) as string) == testId);
+            foreach (var activity in _exported.Snapshot())
+            {
+                if (activity.GetTagItem(TUnitActivitySource.TagTestId) as string == testId)
+                {
+                    taggedSpan = activity;
+                    break;
+                }
+            }
             if (taggedSpan is not null)
             {
                 break;
@@ -54,10 +63,19 @@ public class AutoConfigureOpenTelemetryTests : WebApplicationTest<TestWebAppFact
     }
 }
 
-[NotInParallel(nameof(AutoConfigureOpenTelemetryTests))]
+/// <remarks>
+/// Global <see cref="NotInParallelAttribute"/> (no key): asserts <em>absence</em> of any
+/// <see cref="TUnitActivitySource.TagTestId"/> tag, but every <see cref="TracerProvider"/>
+/// with <c>AddAspNetCoreInstrumentation()</c> subscribes to the process-global
+/// <c>Microsoft.AspNetCore</c> <see cref="System.Diagnostics.ActivitySource"/> and a parallel
+/// factory's correlation processor stamps spans with its own <c>TestId</c> before they reach
+/// this exporter. A keyed constraint cannot enumerate every parallel <see cref="WebApplicationTest{TFactory,TEntryPoint}"/>;
+/// draining alone is the only reliable isolation until per-factory filtering lands.
+/// </remarks>
+[NotInParallel]
 public class AutoConfigureOpenTelemetryOptOutTests : WebApplicationTest<TestWebAppFactory, Program>
 {
-    private readonly List<Activity> _exported = [];
+    private readonly LockedActivityList _exported = [];
 
     protected override void ConfigureTestOptions(WebApplicationTestOptions options)
     {
@@ -78,9 +96,44 @@ public class AutoConfigureOpenTelemetryOptOutTests : WebApplicationTest<TestWebA
         var response = await client.GetAsync("/ping");
         response.EnsureSuccessStatusCode();
 
-        foreach (var activity in _exported)
+        foreach (var activity in _exported.Snapshot())
         {
             await Assert.That(activity.GetTagItem(TUnitActivitySource.TagTestId)).IsNull();
         }
     }
+}
+
+/// <summary>
+/// OpenTelemetry's <c>AddInMemoryExporter</c> calls <c>ICollection&lt;T&gt;.Add</c> on a
+/// background batch thread without locking, so a plain <see cref="List{T}"/> races with
+/// any reader (the test's poll loop) and intermittently throws "Collection was modified".
+/// This wrapper synchronises every mutation and exposes a <see cref="Snapshot"/> for
+/// safe iteration.
+/// </summary>
+internal sealed class LockedActivityList : ICollection<Activity>
+{
+    private readonly List<Activity> _items = [];
+
+    public int Count
+    {
+        get { lock (_items) return _items.Count; }
+    }
+
+    public bool IsReadOnly => false;
+
+    public void Add(Activity item) { lock (_items) _items.Add(item); }
+
+    public void Clear() { lock (_items) _items.Clear(); }
+
+    public bool Contains(Activity item) { lock (_items) return _items.Contains(item); }
+
+    public void CopyTo(Activity[] array, int arrayIndex) { lock (_items) _items.CopyTo(array, arrayIndex); }
+
+    public bool Remove(Activity item) { lock (_items) return _items.Remove(item); }
+
+    public Activity[] Snapshot() { lock (_items) return _items.ToArray(); }
+
+    public IEnumerator<Activity> GetEnumerator() => ((IEnumerable<Activity>)Snapshot()).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

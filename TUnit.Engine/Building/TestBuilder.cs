@@ -1085,8 +1085,7 @@ internal sealed class TestBuilder : ITestBuilder
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = attributes.ToAttributeDictionary(),
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
-            ClassGenericArguments = testData.ResolvedClassGenericArguments,
-            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+            ClassGenericArguments = testData.ResolvedClassGenericArguments
         };
 
         var context = _contextProvider.CreateTestContext(
@@ -1188,8 +1187,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty,
-            Timeout = Core.Settings.TUnitSettings.Default.Timeouts.DefaultTestTimeout
+            AttributesByType = AttributeDictionaryHelper.Empty
         };
     }
 
