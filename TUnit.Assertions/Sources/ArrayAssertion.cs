@@ -10,6 +10,9 @@ namespace TUnit.Assertions.Sources;
 /// enabling generated assertions that target concrete array types (e.g., string[]).
 /// </summary>
 public class ArrayAssertion<TItem> : CollectionAssertionBase<TItem[], TItem>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<TItem[], ArrayAssertion<TItem>>
+#endif
 {
     public ArrayAssertion(TItem[]? value, string? expression)
         : base(new AssertionContext<TItem[]>(value!, CreateExpressionBuilder(expression)))
@@ -20,6 +23,10 @@ public class ArrayAssertion<TItem> : CollectionAssertionBase<TItem[], TItem>
         : base(context)
     {
     }
+
+#if !NETSTANDARD2_0
+    public static ArrayAssertion<TItem> Create(TItem[] item, string label) => new(item, label);
+#endif
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {

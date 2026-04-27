@@ -134,6 +134,24 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
             expression);
     }
 
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Asserts that the item at the index satisfies the given assertion expressed against
+    /// a specialised assertion source <typeparamref name="TSource"/>. The source is constructed
+    /// per-item via its static <see cref="IAssertionSourceFor{TItem,TSelf}.Create"/> factory.
+    /// Specify <typeparamref name="TSource"/> explicitly or via a typed lambda parameter.
+    /// </summary>
+    public ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> Satisfies<TSource>(
+        Func<TSource, IAssertion?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TSource : IAssertionSourceFor<TItem, TSource>
+    {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(TSource.Create(item, $"item[{index}]")),
+            expression);
+    }
+#endif
+
     internal ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
         Func<TItem, int, IAssertion?> assertion,
         string? expression)

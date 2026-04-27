@@ -11,12 +11,19 @@ namespace TUnit.Assertions.Sources;
 /// plus collection methods (Contains, IsEmpty, All, etc.) since dictionaries are collections of KeyValuePair items.
 /// </summary>
 public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAssertionBase<IDictionary<TKey, TValue>, TKey, TValue>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IDictionary<TKey, TValue>, MutableDictionaryAssertion<TKey, TValue>>
+#endif
     where TKey : notnull
 {
     public MutableDictionaryAssertion(IDictionary<TKey, TValue>? value, string? expression)
         : base(CreateContext(value, expression))
     {
     }
+
+#if !NETSTANDARD2_0
+    public static MutableDictionaryAssertion<TKey, TValue> Create(IDictionary<TKey, TValue> item, string label) => new(item, label);
+#endif
 
     private static AssertionContext<IDictionary<TKey, TValue>> CreateContext(
         IDictionary<TKey, TValue>? value,
