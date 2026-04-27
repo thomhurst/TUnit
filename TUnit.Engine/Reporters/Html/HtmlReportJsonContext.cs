@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using TUnit.Core;
 
 namespace TUnit.Engine.Reporters.Html;
 
