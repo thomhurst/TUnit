@@ -62,6 +62,9 @@ public class ListHasItemAtAssertion<TList, TItem> : ListAssertionBase<TList, TIt
 /// This enables patterns like: Assert.That(list).ItemAt(0).IsEqualTo(expected)
 /// </summary>
 public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TList, TItem, ListItemAtSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -206,6 +209,9 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// This enables patterns like: Assert.That(list).LastItem().IsEqualTo(expected)
 /// </summary>
 public class ListLastItemSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TList, TItem, ListLastItemSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;

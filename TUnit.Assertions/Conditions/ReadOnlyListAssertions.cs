@@ -64,6 +64,9 @@ public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertio
 /// This enables patterns like: Assert.That(list).ItemAt(0).IsEqualTo(expected)
 /// </summary>
 public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TList, TItem, ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IReadOnlyList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -208,6 +211,9 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// This enables patterns like: Assert.That(list).LastItem().IsEqualTo(expected)
 /// </summary>
 public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TList, TItem, ReadOnlyListLastItemSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IReadOnlyList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
