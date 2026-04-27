@@ -43,7 +43,7 @@ jobs:
         with:
           args: >-
             --config ./docs/lychee.toml
-            --base https://tunit.dev
+            --base-url https://tunit.dev
             --no-progress
             'docs/build/**/*.html'
           fail: true
