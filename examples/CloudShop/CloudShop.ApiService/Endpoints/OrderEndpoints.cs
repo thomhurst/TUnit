@@ -55,7 +55,7 @@ public static class OrderEndpoints
                 order.CreatedAt, order.FulfilledAt));
         });
 
-        group.MapPost("/", async (CreateOrderRequest request, ClaimsPrincipal user, AppDbContext db, OrderEventPublisher publisher) =>
+        group.MapPost("/", async (CreateOrderRequest request, ClaimsPrincipal user, AppDbContext db, OrderEventPublisher publisher, ILogger<OrderEventPublisher> logger) =>
         {
             if (request.Items.Count == 0)
                 return Results.BadRequest(new ErrorResponse("Order must contain at least one item"));
@@ -104,9 +104,11 @@ public static class OrderEndpoints
             {
                 await publisher.PublishOrderCreatedAsync(new OrderCreatedEvent(order.Id, email, order.TotalAmount, order.CreatedAt));
             }
-            catch
+            catch (Exception ex)
             {
-                // Don't fail the order if messaging is down
+                logger.LogError(ex,
+                    "OrderCreated event for order {OrderId} was not published; downstream consumers will not see it",
+                    order.Id);
             }
 
             var response = new OrderResponse(
@@ -117,7 +119,7 @@ public static class OrderEndpoints
             return Results.Created($"/api/orders/{order.Id}", response);
         });
 
-        group.MapPost("/{id:int}/pay", async (int id, ProcessPaymentRequest request, ClaimsPrincipal user, AppDbContext db, OrderEventPublisher publisher) =>
+        group.MapPost("/{id:int}/pay", async (int id, ProcessPaymentRequest request, ClaimsPrincipal user, AppDbContext db, OrderEventPublisher publisher, ILogger<OrderEventPublisher> logger) =>
         {
             var email = user.FindFirstValue(ClaimTypes.Email)!;
             var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == id && o.CustomerEmail == email);
@@ -133,9 +135,11 @@ public static class OrderEndpoints
             {
                 await publisher.PublishPaymentProcessedAsync(new OrderPaymentProcessedEvent(order.Id, request.PaymentMethod, DateTime.UtcNow));
             }
-            catch
+            catch (Exception ex)
             {
-                // Don't fail payment if messaging is down
+                logger.LogError(ex,
+                    "PaymentProcessed event for order {OrderId} was not published; worker will not fulfil this order",
+                    order.Id);
             }
 
             return Results.Ok(new { order.Id, order.Status });
