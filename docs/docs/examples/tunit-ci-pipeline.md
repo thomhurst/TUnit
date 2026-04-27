@@ -590,14 +590,14 @@ Run different test categories in separate jobs:
 ```yaml
 # Unit tests (fast)
 - name: Unit Tests
-  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Unit]"
+  run: dotnet test --treenode-filter "/*/*/*/*[Category=Unit]"
 
 # Integration tests (slower)
 - name: Integration Tests
-  run: dotnet test -- --treenode-filter "/*/*/*/*[Category=Integration]"
+  run: dotnet test --treenode-filter "/*/*/*/*[Category=Integration]"
 ```
 
-> **Note**: The `--` separator is always required when passing TUnit-specific arguments like `--treenode-filter` to ensure they are parsed correctly as program arguments rather than `dotnet test` arguments.
+> **Note**: On the .NET 10+ SDK, TUnit-specific flags like `--treenode-filter` can be passed directly to `dotnet test`. On older SDKs, separate them with `--`: `dotnet test -- --treenode-filter "..."`.
 
 ### Fail Fast in PRs
 

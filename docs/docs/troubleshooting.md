@@ -12,21 +12,21 @@ TUnit includes code fixers to help with migration from [xUnit](migration/xunit.m
 
 No. Coverlet only works with the VSTest platform. TUnit uses `Microsoft.Testing.Platform`, so you need `Microsoft.Testing.Extensions.CodeCoverage` instead — this is already included in the `TUnit` meta package.
 
-### Why `dotnet run` instead of `dotnet test`?
+### `dotnet test` vs `dotnet run`?
 
-TUnit uses `Microsoft.Testing.Platform`, not VSTest. `dotnet run` launches the test app directly. `dotnet test` can work but `dotnet run` gives you the best experience and the full set of CLI flags.
+TUnit uses `Microsoft.Testing.Platform`, not VSTest, but both commands work. Prefer `dotnet test` — it runs against every targeted TFM automatically, whereas `dotnet run` only runs a single TFM. On the .NET 10+ SDK, platform flags can be passed directly (no `--` separator needed).
 
 ```bash
-# Run all tests
-dotnet run
+# Run all tests (across every targeted TFM)
+dotnet test
 
-# Pass flags after --
-dotnet run -- --treenode-filter "/*/*/MyTestClass/*"
+# Pass flags directly
+dotnet test --treenode-filter "/*/*/MyTestClass/*"
 ```
 
 ## Tests Not Discovered
 
-If no tests appear in the test explorer or `dotnet run` reports 0 tests, check these in order:
+If no tests appear in the test explorer or `dotnet test` reports 0 tests, check these in order:
 
 **Missing TUnit package:**
 ```xml
@@ -72,22 +72,22 @@ TUnit uses tree-node filter syntax, not the VSTest filter syntax.
 
 ```bash
 # All tests in a class
-dotnet run -- --treenode-filter "/*/*/MyTestClass/*"
+dotnet test --treenode-filter "/*/*/MyTestClass/*"
 
 # A specific test method
-dotnet run -- --treenode-filter "/*/*/MyTestClass/MyTestMethod"
+dotnet test --treenode-filter "/*/*/MyTestClass/MyTestMethod"
 
 # By category
-dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration]"
+dotnet test --treenode-filter "/*/*/*/*[Category=Integration]"
 
 # Exclude a category
-dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
 
 # Multiple filters (OR)
-dotnet run -- --treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
+dotnet test --treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
 
 # Combine filters (AND)
-dotnet run -- --treenode-filter "/*/*/*/*[Category=Integration][Priority=High]"
+dotnet test --treenode-filter "/*/*/*/*[Category=Integration][Priority=High]"
 ```
 
 ## AOT Compilation Errors

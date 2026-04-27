@@ -33,7 +33,7 @@ public class MyTestClass
 Use a treenode filter that selects only the explicit test by name or class:
 
 ```bash
-dotnet run -- --treenode-filter "/*/*/MyTestClass/Seed_Local_Database"
+dotnet test --treenode-filter "/*/*/MyTestClass/Seed_Local_Database"
 ```
 
 Because every test matched by the filter has `[Explicit]`, TUnit will run them.
@@ -70,5 +70,5 @@ public class DevUtilities
 Run all explicit dev tools at once:
 
 ```bash
-dotnet run -- --treenode-filter "/*/*/*/*[Category=DevTool]"
+dotnet test --treenode-filter "/*/*/*/*[Category=DevTool]"
 ```
