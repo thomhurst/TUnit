@@ -62,6 +62,9 @@ public class ListHasItemAtAssertion<TList, TItem> : ListAssertionBase<TList, TIt
 /// This enables patterns like: Assert.That(list).ItemAt(0).IsEqualTo(expected)
 /// </summary>
 public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TItem, ListItemAtSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -127,6 +130,33 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
     {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]")),
+            expression);
+    }
+
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Asserts that the item at the index satisfies the given assertion expressed against
+    /// a specialised assertion source <typeparamref name="TSource"/>. The source is constructed
+    /// per-item via its static <see cref="IAssertionSourceFor{TItem,TSelf}.Create"/> factory.
+    /// Specify <typeparamref name="TSource"/> explicitly or via a typed lambda parameter.
+    /// </summary>
+    public ListItemAtSatisfiesAssertion<TList, TItem> Satisfies<TSource>(
+        Func<TSource, IAssertion?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TSource : IAssertionSourceFor<TItem, TSource>
+    {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(TSource.Create(item, $"item[{index}]")),
+            expression);
+    }
+#endif
+
+    internal ListItemAtSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
+        Func<TItem, int, IAssertion?> assertion,
+        string? expression)
+    {
         _listContext.ExpressionBuilder.Append($".Satisfies({expression})");
         return new ListItemAtSatisfiesAssertion<TList, TItem>(_listContext, _index, assertion);
     }
@@ -179,6 +209,9 @@ public class ListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// This enables patterns like: Assert.That(list).LastItem().IsEqualTo(expected)
 /// </summary>
 public class ListLastItemSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TItem, ListLastItemSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -241,6 +274,33 @@ public class ListLastItemSource<TList, TItem> : IAssertionSource<TItem>
     public ListLastItemSatisfiesAssertion<TList, TItem> Satisfies(
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+    {
+        return CreateSatisfiesAssertion(
+            item => assertion(new ValueAssertion<TItem>(item, "lastItem")),
+            expression);
+    }
+
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Asserts that the last item satisfies the given assertion expressed against
+    /// a specialised assertion source <typeparamref name="TSource"/>. The source is constructed
+    /// from the last item via its static <see cref="IAssertionSourceFor{TItem,TSelf}.Create"/> factory.
+    /// Specify <typeparamref name="TSource"/> explicitly or via a typed lambda parameter.
+    /// </summary>
+    public ListLastItemSatisfiesAssertion<TList, TItem> Satisfies<TSource>(
+        Func<TSource, IAssertion?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TSource : IAssertionSourceFor<TItem, TSource>
+    {
+        return CreateSatisfiesAssertion(
+            item => assertion(TSource.Create(item, "lastItem")),
+            expression);
+    }
+#endif
+
+    internal ListLastItemSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
+        Func<TItem, IAssertion?> assertion,
+        string? expression)
     {
         _listContext.ExpressionBuilder.Append($".Satisfies({expression})");
         return new ListLastItemSatisfiesAssertion<TList, TItem>(_listContext, assertion);
@@ -420,12 +480,30 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
     where TList : IList<TItem>
 {
     private readonly int _index;
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, int, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ListItemAtSource{TList,TItem}.Satisfies{TSource}"/> entry point
+    /// to get specialised assertion sources.
+    /// </summary>
     public ListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(
+            context,
+            index,
+            (item, itemIndex) => assertion(new ValueAssertion<TItem>(item, $"item[{itemIndex}]")))
+    {
+    }
+
+    internal ListItemAtSatisfiesAssertion(
+        AssertionContext<TList> context,
+        int index,
+        Func<TItem, int, IAssertion?> assertion)
         : base(context)
     {
         _index = index;
@@ -451,8 +529,7 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
         }
 
         var actualItem = metadata.Value[_index];
-        var itemSource = new ValueAssertion<TItem>(actualItem, $"item[{_index}]");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(actualItem, _index);
 
         if (resultingAssertion != null)
         {
@@ -595,11 +672,25 @@ public class ListLastItemNullAssertion<TList, TItem> : ListAssertionBase<TList, 
 public class ListLastItemSatisfiesAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
     where TList : IList<TItem>
 {
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ListLastItemSource{TList,TItem}.Satisfies{TSource}"/> entry point
+    /// to get specialised assertion sources.
+    /// </summary>
     public ListLastItemSatisfiesAssertion(
         AssertionContext<TList> context,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(context, item => assertion(new ValueAssertion<TItem>(item, "lastItem")))
+    {
+    }
+
+    internal ListLastItemSatisfiesAssertion(
+        AssertionContext<TList> context,
+        Func<TItem, IAssertion?> assertion)
         : base(context)
     {
         _assertion = assertion;
@@ -623,8 +714,7 @@ public class ListLastItemSatisfiesAssertion<TList, TItem> : ListAssertionBase<TL
         }
 
         var lastItem = metadata.Value[metadata.Value.Count - 1];
-        var itemSource = new ValueAssertion<TItem>(lastItem, "lastItem");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(lastItem);
 
         if (resultingAssertion != null)
         {

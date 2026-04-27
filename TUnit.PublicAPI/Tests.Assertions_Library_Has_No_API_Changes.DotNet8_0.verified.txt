@@ -1517,7 +1517,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ListItemAtSource<TList, TItem> : ., .<TItem>
+    public class ListItemAtSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ListItemAtSource(.<TList> listContext, int index) { }
@@ -1533,6 +1533,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     public class ListLastItemEqualsAssertion<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -1555,7 +1557,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ListLastItemSource<TList, TItem> : ., .<TItem>
+    public class ListLastItemSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ListLastItemSource(.<TList> listContext) { }
@@ -1571,6 +1573,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class LongEqualsAssertion : .<long, long>
@@ -1769,7 +1773,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ReadOnlyListItemAtSource<TList, TItem> : ., .<TItem>
+    public class ReadOnlyListItemAtSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ReadOnlyListItemAtSource(.<TList> listContext, int index) { }
@@ -1785,6 +1789,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -1807,7 +1813,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TList> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ReadOnlyListLastItemSource<TList, TItem> : ., .<TItem>
+    public class ReadOnlyListLastItemSource<TList, TItem> : ., .<TItem>, .<TItem, .<TList, TItem>>
         where TList : .<TItem>
     {
         public ReadOnlyListLastItemSource(.<TList> listContext) { }
@@ -1823,6 +1829,8 @@ namespace .Conditions
         public .<TList, TItem> IsNull() { }
         public .<TItem, TExpected> IsTypeOf<TExpected>() { }
         public .<TList, TItem> Satisfies(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
+        public .<TList, TItem> Satisfies<TSource>(<TSource, .?> assertion, [.("assertion")] string? expression = null)
+            where TSource : .<TItem, TSource> { }
     }
     [.<.Rune>("IsAscii", CustomName="IsNotAscii", ExpectationMessage="be ASCII", NegateLogic=true)]
     [.<.Rune>("IsAscii", ExpectationMessage="be ASCII")]
@@ -2480,6 +2488,11 @@ namespace .Core
         . AssertAsync();
     }
     public interface IAssertionSource { }
+    public interface IAssertionSourceFor<TItem, TSelf>
+        where TSelf : .<TItem, TSelf>
+    {
+        TSelf Create(TItem item, string label);
+    }
     public interface IAssertionSource<TValue> : .
     {
         .<TValue> Context { get; }
@@ -2491,6 +2504,11 @@ namespace .Core
         .<TValue, TExpected> IsTypeOf<TExpected>();
     }
     public interface IDelegateAssertionSource<TValue> : ., .<TValue> { }
+    public interface IItemSatisfiesSource<TItem, TResult> : ., .<TItem>
+    {
+        TResult Satisfies<TSource>(<TSource, .?> assertion, string? expression = null)
+            where TSource : .<TItem, TSource>;
+    }
     public class ListAndContinuation<TList, TItem> : .<TList, TItem>
         where TList : .<TItem> { }
     public class ListOrContinuation<TList, TItem> : .<TList, TItem>
@@ -3057,6 +3075,23 @@ namespace .Extensions
     {
         public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
+    }
+    public static class CollectionItemSatisfiesExtensions
+    {
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<.<TInner>, TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TInner, TResult>(this .<TInner[], TResult> source, <.<TInner>, .?> assertion, [.("assertion")] string? expression = null) { }
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static TResult Satisfies<TKey, TValue, TResult>(this .<.<TKey, TValue>, TResult> source, <.<TKey, TValue>, .?> assertion, [.("assertion")] string? expression = null)
+            where TKey :  notnull { }
     }
     public static class ComparisonAssertionExtensions
     {
@@ -6011,9 +6046,10 @@ namespace .Extensions
 }
 namespace .Sources
 {
-    public class ArrayAssertion<TItem> : .<TItem[], TItem>
+    public class ArrayAssertion<TItem> : .<TItem[], TItem>, .<TItem[], .<TItem>>
     {
         public ArrayAssertion(TItem[]? value, string? expression) { }
+        public static .<TItem> Create(TItem[] item, string label) { }
     }
     public class AsyncDelegateAssertion : ., .<object?>, .<.>, .<object?>
     {
@@ -6143,9 +6179,10 @@ namespace .Sources
         public .<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(<TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class CollectionAssertion<TItem> : .<.<TItem>, TItem>
+    public class CollectionAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class DelegateAssertion : ., .<object?>, .<object?>
     {
@@ -6181,10 +6218,11 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
     }
-    public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
+    public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>, .<TKey, TValue>>
         where TKey :  notnull
     {
         public DictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
+        public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
     }
     public class FuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -6209,10 +6247,11 @@ namespace .Sources
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
     }
-    public class HashSetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    public class HashSetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
     {
         public HashSetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public abstract class ListAssertionBase<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -6225,9 +6264,11 @@ namespace .Sources
         public .<TList, TItem> ItemAt(int index, [.("index")] string? expression = null) { }
         public .<TList, TItem> LastItem() { }
     }
-    public class ListAssertion<TItem> : .<.<TItem>, TItem>
+    public class ListAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>, .<.<TItem>, .<TItem>>
     {
         public ListAssertion(.<TItem>? value, string? expression) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
@@ -6292,10 +6333,12 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
     }
-    public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
+    public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>, .<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>>
         where TKey :  notnull
     {
         public MutableDictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
+        public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
+        public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
     }
     public abstract class ReadOnlyListAssertionBase<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -6308,19 +6351,21 @@ namespace .Sources
         public .<TList, TItem> ItemAt(int index, [.("index")] string? indexExpression = null) { }
         public .<TList, TItem> LastItem() { }
     }
-    public class ReadOnlyListAssertion<TItem> : .<.<TItem>, TItem>
+    public class ReadOnlyListAssertion<TItem> : .<.<TItem>, TItem>, .<.<TItem>, .<TItem>>
     {
         public ReadOnlyListAssertion(.<TItem>? value, string? expression) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class ReadOnlyMemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
     {
         public ReadOnlyMemoryAssertion(<TItem> value, string expression) { }
         protected override .<TItem> CreateAdapter(<TItem> value) { }
     }
-    public class ReadOnlySetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    public class ReadOnlySetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
     {
         public ReadOnlySetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class SetAndContinuation<TSet, TItem> : .<TSet, TItem>
         where TSet : .<TItem>
@@ -6343,10 +6388,11 @@ namespace .Sources
         public .<TSet, TItem> Overlaps(.<TItem> other, [.("other")] string? expression = null) { }
         public .<TSet, TItem> SetEquals(.<TItem> other, [.("other")] string? expression = null) { }
     }
-    public class SetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>>
+    public class SetAssertion<TItem> : .<.<TItem>, TItem>, ., .<.<TItem>, .<TItem>>, .<.<TItem>>
     {
         public SetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public static .<TItem> Create(.<TItem> item, string label) { }
     }
     public class SetOrContinuation<TSet, TItem> : .<TSet, TItem>
         where TSet : .<TItem>
