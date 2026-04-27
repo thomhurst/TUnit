@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                     {
                         case 1:
                             {
-                                instance.Explicit(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ExplicitInteger>(args[0]));
+                                instance.Explicit((global::TUnit.TestProject.ExplicitInteger)(int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -63,7 +63,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
                     {
                         case 1:
                             {
-                                instance.Implicit(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ImplicitInteger>(args[0]));
+                                instance.Implicit((global::TUnit.TestProject.ImplicitInteger)(int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

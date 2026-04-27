@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new glob
                     {
                         case 1:
                             {
-                                instance.Normal(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                                instance.Normal((string)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

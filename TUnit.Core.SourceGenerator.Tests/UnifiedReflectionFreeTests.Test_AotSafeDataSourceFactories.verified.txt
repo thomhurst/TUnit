@@ -41,7 +41,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global:
                     {
                         case 3:
                             {
-                                instance.TestWithDataSource(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
+                                instance.TestWithDataSource((int)args[0], (int)args[1], (int)args[2]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

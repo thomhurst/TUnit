@@ -14,7 +14,10 @@ internal class MatrixTests : TestsBase
             [
                 Path.Combine(Git.RootDirectory.FullName,
                     "TUnit.TestProject",
-                    "TestEnum.cs")
+                    "TestEnum.cs"),
+                Path.Combine(Git.RootDirectory.FullName,
+                    "TUnit.TestProject",
+                    "TestEnum2.cs")
             ]
         },
         async generatedFiles =>

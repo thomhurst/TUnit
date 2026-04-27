@@ -2,11 +2,11 @@ using TUnit.Core.SourceGenerator.Tests.Options;
 
 namespace TUnit.Core.SourceGenerator.Tests;
 
-public class AotConverterGeneratorTests : TestsBase
+public class FullProjectGenerationTests : TestsBase
 {
     [Test]
     [Skip("Need to investigate - Behaves differently on local vs CI")]
-    public Task GeneratesCode() => AotConverterGenerator.RunTest(
+    public Task GeneratesCode() => TestMetadataGenerator.RunTest(
         Path.GetTempFileName(),
         new RunTestOptions
         {

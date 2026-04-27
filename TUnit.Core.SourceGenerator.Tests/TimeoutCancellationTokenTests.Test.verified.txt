@@ -99,7 +99,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.DataTest(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.DataTest((int)args[0], context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -139,7 +139,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
+                                return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest((int)args[0], context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

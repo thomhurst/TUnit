@@ -14,7 +14,7 @@ else
     // BenchmarkRunner.Run<DynamicTestsGeneratorBenchmarks>();
     // BenchmarkRunner.Run<InfrastructureGeneratorBenchmarks>();
     // BenchmarkRunner.Run<StaticPropertyInitializationGeneratorBenchmarks>();
-    // BenchmarkRunner.Run<AotConverterGeneratorBenchmarks>();
+    // AOT converter generation is now part of TestMetadataGenerator
     // BenchmarkRunner.Run<HookMetadataGeneratorBenchmarks>();
     // BenchmarkRunner.Run<PropertyInjectionSourceGeneratorBenchmarks>();
 }

@@ -43,7 +43,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts(global::TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts((double)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -62,7 +62,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
                     {
                         case 1:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts(global::TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                                return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts((float)args[0]));
                             }
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

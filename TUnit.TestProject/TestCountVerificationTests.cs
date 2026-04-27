@@ -2,7 +2,7 @@ namespace TUnit.TestProject;
 
 [Arguments(1)]
 [Arguments(2)]
-[ClassDataSource(typeof(TestDataSource))]
+[ClassDataSource<TestDataSource>]
 public class TestCountVerificationTests(int value)
 {
     [Test]

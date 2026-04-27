@@ -4,9 +4,9 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
-[ClassDataSource(typeof(DataSource1))]
-[ClassDataSource(typeof(DataSource2))]
-[ClassDataSource(typeof(DataSource3))]
+[ClassDataSource<DataSource1>]
+[ClassDataSource<DataSource2>]
+[ClassDataSource<DataSource3>]
 public class ClassDataSourceWithMethodDataSourceTests(int classValue)
 {
     private static readonly ConcurrentBag<string> ExecutedTests =

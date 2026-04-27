@@ -59,7 +59,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.Int(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                                instance.Int((int)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -79,7 +79,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.Double(global::TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
+                                instance.Double((double)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -99,7 +99,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.Float(global::TUnit.Core.Helpers.CastHelper.Cast<float>(args[0]));
+                                instance.Float((float)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -119,7 +119,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.Long(global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
+                                instance.Long((long)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -139,7 +139,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.ULong(global::TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0]));
+                                instance.ULong((ulong)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
@@ -159,7 +159,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
                     {
                         case 1:
                             {
-                                instance.UInt(global::TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0]));
+                                instance.UInt((uint)args[0]);
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:

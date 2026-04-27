@@ -64,7 +64,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
                     {
                         case 2:
                             {
-                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
+                                instance.Test2((byte)args[0], global::TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
