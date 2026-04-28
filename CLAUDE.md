@@ -23,7 +23,7 @@ See `.claude/docs/mandatory-rules.md` for full details.
 **NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail.
 ```bash
 cd TUnit.TestProject
-dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
+dotnet test --treenode-filter "/*/*/SpecificClass/*"
 ```
 See `.claude/docs/workflows.md` for filter syntax and details.
 

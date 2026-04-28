@@ -70,8 +70,8 @@ cd TUnit.TestProject && dotnet run
 cd TUnit.TestProject && dotnet test
 
 # ✅ CORRECT - Always use targeted filters when testing TUnit.TestProject
-cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
-cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+cd TUnit.TestProject && dotnet test --treenode-filter "/*/*/SpecificClass/*"
+cd TUnit.TestProject && dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
 
 # ✅ CORRECT - Test other test projects normally (they don't have intentional failures)
 dotnet test TUnit.Engine.Tests
@@ -103,10 +103,10 @@ dotnet test TUnit.PublicAPI
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
 # Run specific test by tree node filter
-dotnet test -- --treenode-filter "/Assembly/Namespace/ClassName/TestName"
+dotnet test --treenode-filter "/Assembly/Namespace/ClassName/TestName"
 
 # Run tests excluding performance tests
-dotnet test -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
 
 # Build in release mode
 dotnet build -c Release
@@ -603,7 +603,7 @@ public async Task MyFeature_WorksInBothModes(ExecutionMode mode)
 public void MyPerformanceTest() { }
 
 // Run without performance tests:
-// dotnet test -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+// dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
 ```
 
 ### Snapshot Testing
@@ -895,7 +895,7 @@ dotnet test --parallel
 **Diagnostic Process**:
 ```bash
 # 1. Run test in specific mode
-dotnet test -- --treenode-filter "/*/*/*/YourTest*"
+dotnet test --treenode-filter "/*/*/*/YourTest*"
 
 # 2. Check generated code
 # Look in obj/Debug/net9.0/generated/TUnit.Core.SourceGenerator/

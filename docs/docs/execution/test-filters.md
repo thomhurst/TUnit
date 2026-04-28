@@ -18,8 +18,8 @@ Use `--treenode-filter` instead:
 | `--filter "FullyQualifiedName~LoginTests"` | `--treenode-filter "/*/*/LoginTests/*"`                |
 | `--filter "Name=AcceptCookiesTest"`        | `--treenode-filter "/*/*/*/AcceptCookiesTest"`         |
 
-When using `dotnet test`, pass the flag as an application argument:
-`dotnet test -- --treenode-filter "..."`.
+When using `dotnet test`, pass the flag directly:
+`dotnet test --treenode-filter "..."`. (On older SDKs, separate it with `--`: `dotnet test -- --treenode-filter "..."`.)
 
 :::
 

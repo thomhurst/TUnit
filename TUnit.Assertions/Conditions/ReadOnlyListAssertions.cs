@@ -64,6 +64,9 @@ public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertio
 /// This enables patterns like: Assert.That(list).ItemAt(0).IsEqualTo(expected)
 /// </summary>
 public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TItem, ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IReadOnlyList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -129,6 +132,33 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
     {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(new ValueAssertion<TItem>(item, $"item[{index}]")),
+            expression);
+    }
+
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Asserts that the item at the index satisfies the given assertion expressed against
+    /// a specialised assertion source <typeparamref name="TSource"/>. The source is constructed
+    /// per-item via its static <see cref="IAssertionSourceFor{TItem,TSelf}.Create"/> factory.
+    /// Specify <typeparamref name="TSource"/> explicitly or via a typed lambda parameter.
+    /// </summary>
+    public ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> Satisfies<TSource>(
+        Func<TSource, IAssertion?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TSource : IAssertionSourceFor<TItem, TSource>
+    {
+        return CreateSatisfiesAssertion(
+            (item, index) => assertion(TSource.Create(item, $"item[{index}]")),
+            expression);
+    }
+#endif
+
+    internal ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
+        Func<TItem, int, IAssertion?> assertion,
+        string? expression)
+    {
         _listContext.ExpressionBuilder.Append($".Satisfies({expression})");
         return new ReadOnlyListItemAtSatisfiesAssertion<TList, TItem>(_listContext, _index, assertion);
     }
@@ -181,6 +211,9 @@ public class ReadOnlyListItemAtSource<TList, TItem> : IAssertionSource<TItem>
 /// This enables patterns like: Assert.That(list).LastItem().IsEqualTo(expected)
 /// </summary>
 public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
+#if !NETSTANDARD2_0
+    , IItemSatisfiesSource<TItem, ReadOnlyListLastItemSatisfiesAssertion<TList, TItem>>
+#endif
     where TList : IReadOnlyList<TItem>
 {
     private readonly AssertionContext<TList> _listContext;
@@ -243,6 +276,33 @@ public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
     public ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> Satisfies(
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+    {
+        return CreateSatisfiesAssertion(
+            item => assertion(new ValueAssertion<TItem>(item, "lastItem")),
+            expression);
+    }
+
+#if !NETSTANDARD2_0
+    /// <summary>
+    /// Asserts that the last item satisfies the given assertion expressed against
+    /// a specialised assertion source <typeparamref name="TSource"/>. The source is constructed
+    /// from the last item via its static <see cref="IAssertionSourceFor{TItem,TSelf}.Create"/> factory.
+    /// Specify <typeparamref name="TSource"/> explicitly or via a typed lambda parameter.
+    /// </summary>
+    public ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> Satisfies<TSource>(
+        Func<TSource, IAssertion?> assertion,
+        [CallerArgumentExpression(nameof(assertion))] string? expression = null)
+        where TSource : IAssertionSourceFor<TItem, TSource>
+    {
+        return CreateSatisfiesAssertion(
+            item => assertion(TSource.Create(item, "lastItem")),
+            expression);
+    }
+#endif
+
+    internal ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> CreateSatisfiesAssertion(
+        Func<TItem, IAssertion?> assertion,
+        string? expression)
     {
         _listContext.ExpressionBuilder.Append($".Satisfies({expression})");
         return new ReadOnlyListLastItemSatisfiesAssertion<TList, TItem>(_listContext, assertion);
@@ -422,12 +482,30 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, int, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ReadOnlyListItemAtSource{TList,TItem}.Satisfies{TSource}"/> entry
+    /// point to get specialised assertion sources.
+    /// </summary>
     public ReadOnlyListItemAtSatisfiesAssertion(
         AssertionContext<TList> context,
         int index,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(
+            context,
+            index,
+            (item, itemIndex) => assertion(new ValueAssertion<TItem>(item, $"item[{itemIndex}]")))
+    {
+    }
+
+    internal ReadOnlyListItemAtSatisfiesAssertion(
+        AssertionContext<TList> context,
+        int index,
+        Func<TItem, int, IAssertion?> assertion)
         : base(context)
     {
         _index = index;
@@ -453,8 +531,7 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
         }
 
         var actualItem = metadata.Value[_index];
-        var itemSource = new ValueAssertion<TItem>(actualItem, $"item[{_index}]");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(actualItem, _index);
 
         if (resultingAssertion != null)
         {
@@ -597,11 +674,25 @@ public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListAsser
 public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
-    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
+    private readonly Func<TItem, IAssertion?> _assertion;
 
+    /// <summary>
+    /// Backward-compatible constructor preserved for direct consumers from before the
+    /// internal refactor to a raw-item delegate. Wraps the supplied factory in a
+    /// <see cref="ValueAssertion{TItem}"/> — the unspecialised path. Internal callers should
+    /// use the <see cref="ReadOnlyListLastItemSource{TList,TItem}.Satisfies{TSource}"/>
+    /// entry point to get specialised assertion sources.
+    /// </summary>
     public ReadOnlyListLastItemSatisfiesAssertion(
         AssertionContext<TList> context,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion)
+        : this(context, item => assertion(new ValueAssertion<TItem>(item, "lastItem")))
+    {
+    }
+
+    internal ReadOnlyListLastItemSatisfiesAssertion(
+        AssertionContext<TList> context,
+        Func<TItem, IAssertion?> assertion)
         : base(context)
     {
         _assertion = assertion;
@@ -625,8 +716,7 @@ public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyList
         }
 
         var lastItem = metadata.Value[metadata.Value.Count - 1];
-        var itemSource = new ValueAssertion<TItem>(lastItem, "lastItem");
-        var resultingAssertion = _assertion(itemSource);
+        var resultingAssertion = _assertion(lastItem);
 
         if (resultingAssertion != null)
         {

@@ -13,6 +13,7 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 
 #pragma warning disable TPEXP
@@ -592,6 +593,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             return null;
         }
+
+        ex = TUnitFailedException.Unwrap(ex);
 
         return new ReportExceptionData
         {

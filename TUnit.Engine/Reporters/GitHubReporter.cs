@@ -9,6 +9,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestHost;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
+using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
 
@@ -528,9 +529,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return stateProperty switch
         {
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
-                GetTruncatedExceptionMessage(failedTestNodeStateProperty.Exception) ?? "Test failed",
+                GetTruncatedExceptionMessage(TUnitFailedException.Unwrap(failedTestNodeStateProperty.Exception)) ?? "Test failed",
             ErrorTestNodeStateProperty errorTestNodeStateProperty =>
-                GetTruncatedExceptionMessage(errorTestNodeStateProperty.Exception) ?? "Test failed",
+                GetTruncatedExceptionMessage(TUnitFailedException.Unwrap(errorTestNodeStateProperty.Exception)) ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
 #pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
             CancelledTestNodeStateProperty => "Test was cancelled",
@@ -637,8 +638,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private static string GetExceptionTypeName(IProperty? stateProperty) => stateProperty switch
     {
-        FailedTestNodeStateProperty f => f.Exception?.GetType().Name ?? "Unknown",
-        ErrorTestNodeStateProperty e => e.Exception?.GetType().Name ?? "Unknown",
+        FailedTestNodeStateProperty f => TUnitFailedException.Unwrap(f.Exception)?.GetType().Name ?? "Unknown",
+        ErrorTestNodeStateProperty e => TUnitFailedException.Unwrap(e.Exception)?.GetType().Name ?? "Unknown",
         TimeoutTestNodeStateProperty => "Timeout",
         _ => "Unknown"
     };

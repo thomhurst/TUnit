@@ -5,6 +5,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Xml;
 
@@ -245,7 +246,7 @@ internal static class JUnitXmlWriter
     {
         writer.WriteStartElement("failure");
 
-        var exception = failed.Exception;
+        var exception = TUnitFailedException.Unwrap(failed.Exception);
         if (exception != null)
         {
             writer.WriteAttributeString("message", SanitizeForXml(exception.Message));
@@ -267,7 +268,7 @@ internal static class JUnitXmlWriter
     {
         writer.WriteStartElement("error");
 
-        var exception = error.Exception;
+        var exception = TUnitFailedException.Unwrap(error.Exception);
         if (exception != null)
         {
             writer.WriteAttributeString("message", SanitizeForXml(exception.Message));

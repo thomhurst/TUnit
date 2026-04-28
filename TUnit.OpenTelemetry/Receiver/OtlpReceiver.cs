@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using TUnit.Core;
-using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.OpenTelemetry.Receiver;
 
@@ -212,8 +211,8 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
     private static void ProcessTraces(byte[] body)
     {
-        var collector = ActivityCollector.Current;
-        if (collector is null)
+        var sink = ExternalSpanSink.Current;
+        if (sink is null)
         {
             return;
         }
@@ -231,7 +230,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
         foreach (var span in spans)
         {
-            collector.IngestExternalSpan(ToSpanData(span));
+            sink(ToSpanData(span));
         }
     }
 
