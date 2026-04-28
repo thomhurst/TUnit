@@ -494,7 +494,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var suppressedTrimWarnings = CollectSuppressedTrimWarnings(method.GetAttributes());
 
-        var (overrideName, _) = TryGetShouldNameOverride(returnType, ctx.ShouldNameAttribute);
+        var overrideName = TryGetShouldNameOverride(returnType, ctx.ShouldNameAttribute);
 
         ctx.Builder.Add(new MethodData(
             ContainerName: container.Name,
@@ -572,19 +572,18 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static (string? Name, string? Negated) TryGetShouldNameOverride(INamedTypeSymbol returnType, INamedTypeSymbol? shouldNameAttr)
+    private static string? TryGetShouldNameOverride(INamedTypeSymbol returnType, INamedTypeSymbol? shouldNameAttr)
     {
-        if (shouldNameAttr is null) return (null, null);
-        var attr = returnType.GetAttributes().FirstOrDefault(a =>
-            SymbolEqualityComparer.Default.Equals(a.AttributeClass, shouldNameAttr));
-        if (attr is null || attr.ConstructorArguments.Length == 0) return (null, null);
-        var name = attr.ConstructorArguments[0].Value as string;
-        string? negated = null;
-        foreach (var na in attr.NamedArguments)
+        if (shouldNameAttr is null) return null;
+        foreach (var attr in returnType.GetAttributes())
         {
-            if (na.Key == "Negated") negated = na.Value.Value as string;
+            if (SymbolEqualityComparer.Default.Equals(attr.AttributeClass, shouldNameAttr)
+                && attr.ConstructorArguments.Length > 0)
+            {
+                return attr.ConstructorArguments[0].Value as string;
+            }
         }
-        return (name, negated);
+        return null;
     }
 
     private static bool IsAssertionSourceInterface(INamedTypeSymbol type, INamedTypeSymbol assertionSource)
