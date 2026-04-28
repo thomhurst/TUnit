@@ -232,14 +232,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return;
         }
 
-        // Always collect for the always-emit-skip-set case. Only emit (i.e. include in builder for
-        // partial generation) when the wrapper itself lives in the current compilation.
-        if (!isCurrentAssembly)
-        {
-            // Still record return-type keys via WrapperData so the caller can dedup,
-            // but mark IsCurrentAssembly false so the emission step skips.
-        }
-
+        // Wrappers from referenced assemblies are still collected — their return-type keys
+        // feed the dedup set so the main extension-method scan skips already-baked extensions.
+        // The IsCurrentAssembly flag on WrapperData controls whether the emission step actually
+        // generates partial methods (only true for wrappers in this compilation).
         var methods = ImmutableArray.CreateBuilder<WrapperMethodData>();
         foreach (var sourceMember in EnumerateInstanceMethods(wrappedType))
         {
