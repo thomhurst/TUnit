@@ -90,6 +90,20 @@ public class CollectionTests
     }
 
     [Test]
+    public async Task HaveCount()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        await list.Should().HaveCount(3);
+    }
+
+    [Test]
+    public async Task Contain_predicate()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        await list.Should().Contain(x => x > 2);
+    }
+
+    [Test]
     public async Task Empty_list_NotContain()
     {
         var list = new List<int>();

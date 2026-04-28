@@ -35,21 +35,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private const string RequiresUnreferencedCodeAttributeName = "RequiresUnreferencedCodeAttribute";
     private const string UnconditionalSuppressMessageAttributeName = "UnconditionalSuppressMessageAttribute";
     private const string DynamicallyAccessedMembersAttributeName = "DynamicallyAccessedMembersAttribute";
-
-    /// <summary>
-    /// Return-type names whose Should counterparts are hand-crafted instance methods on
-    /// <c>ShouldCollectionSource&lt;T&gt;</c>. Skipped to prevent shadow / drift.
-    /// </summary>
-    private static readonly HashSet<string> InstanceMethodAssertions = new(StringComparer.Ordinal)
-    {
-        "CollectionIsInOrderAssertion",
-        "CollectionIsInDescendingOrderAssertion",
-        "CollectionAllAssertion",
-        "CollectionAnyAssertion",
-        "HasSingleItemAssertion",
-        "HasSingleItemPredicateAssertion",
-        "HasDistinctItemsAssertion",
-    };
+    private const string ShouldGeneratePartialAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldGeneratePartialAttribute";
 
     private static readonly SymbolDisplayFormat NoGlobalFormat =
         SymbolDisplayFormat.FullyQualifiedFormat
@@ -63,25 +49,42 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.CompilationProvider.Select((compilation, _) => CollectMethods(compilation));
+        var provider = context.CompilationProvider.Select((compilation, _) => Collect(compilation));
 
-        context.RegisterSourceOutput(provider, static (ctx, items) =>
+        context.RegisterSourceOutput(provider, static (ctx, payload) =>
         {
-            if (items.Length == 0)
+            var emittedHints = new HashSet<string>(StringComparer.Ordinal);
+
+            // Wrappers first: they own the return types they cover, and their method names
+            // win over extension methods at call sites anyway.
+            foreach (var wrapper in payload.Wrappers)
             {
-                return;
+                EmitWrapperPartial(ctx, wrapper, emittedHints);
             }
 
-            var emittedHints = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var group in items.GroupBy(m => m.ContainerName, StringComparer.Ordinal))
+            foreach (var group in payload.Methods.GroupBy(m => m.ContainerName, StringComparer.Ordinal))
             {
                 EmitContainer(ctx, group.Key, group.ToArray(), emittedHints);
             }
         });
     }
 
-    private static EquatableArray<MethodData> CollectMethods(Compilation compilation)
+    private static GeneratorPayload Collect(Compilation compilation)
     {
+        var methods = CollectMethods(compilation, out var wrappedReturnTypeKeys);
+        var wrappers = CollectWrappers(compilation);
+        // Filter out methods whose return type is owned by a wrapper — wrapper instance methods
+        // take precedence at call sites; the corresponding extension would be dead code.
+        var filteredMethods = methods.Length == 0
+            ? methods
+            : new EquatableArray<MethodData>(methods.Where(m => !wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName)).ToArray());
+        return new GeneratorPayload(filteredMethods, wrappers);
+    }
+
+    private static EquatableArray<MethodData> CollectMethods(Compilation compilation, out HashSet<string> wrappedReturnTypeKeys)
+    {
+        wrappedReturnTypeKeys = CollectWrappedReturnTypeKeys(compilation);
+
         var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
         var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
         var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
@@ -118,6 +121,225 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
 
         return new EquatableArray<MethodData>(ctx.Builder.ToArray());
+    }
+
+    private static EquatableArray<WrapperData> CollectWrappers(Compilation compilation)
+    {
+        var marker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
+        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
+        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        if (marker is null || assertionBase is null || assertionContext is null)
+        {
+            return new EquatableArray<WrapperData>(Array.Empty<WrapperData>());
+        }
+
+        var builder = new List<WrapperData>();
+        WalkForWrappers(compilation.Assembly.GlobalNamespace, marker, assertionBase, assertionContext, builder, isCurrentAssembly: true);
+        // Wrappers in referenced assemblies (e.g. TUnit.Assertions.Should.dll already shipping
+        // the baked partials) must NOT be re-emitted in consumer compilations.
+        return new EquatableArray<WrapperData>(builder.ToArray());
+    }
+
+    private static HashSet<string> CollectWrappedReturnTypeKeys(Compilation compilation)
+    {
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        var marker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
+        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
+        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        if (marker is null || assertionBase is null || assertionContext is null)
+        {
+            return keys;
+        }
+
+        // Walk both source and references — extension methods in any assembly returning a type
+        // covered by ANY wrapper (current or already-baked) should be suppressed to avoid dead code.
+        var perAssemblyWrappers = new List<WrapperData>();
+        WalkForWrappers(compilation.Assembly.GlobalNamespace, marker, assertionBase, assertionContext, perAssemblyWrappers, isCurrentAssembly: true);
+        foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
+        {
+            WalkForWrappers(reference.GlobalNamespace, marker, assertionBase, assertionContext, perAssemblyWrappers, isCurrentAssembly: false);
+        }
+
+        foreach (var wrapper in perAssemblyWrappers)
+        {
+            foreach (var method in wrapper.Methods)
+            {
+                keys.Add(method.ReturnTypeFullName);
+            }
+        }
+
+        return keys;
+    }
+
+    private static void WalkForWrappers(
+        INamespaceSymbol ns,
+        INamedTypeSymbol marker,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        List<WrapperData> builder,
+        bool isCurrentAssembly)
+    {
+        foreach (var type in ns.GetTypeMembers())
+        {
+            CollectWrapper(type, marker, assertionBase, assertionContext, builder, isCurrentAssembly);
+        }
+        foreach (var nested in ns.GetNamespaceMembers())
+        {
+            WalkForWrappers(nested, marker, assertionBase, assertionContext, builder, isCurrentAssembly);
+        }
+    }
+
+    private static void CollectWrapper(
+        INamedTypeSymbol type,
+        INamedTypeSymbol marker,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        List<WrapperData> builder,
+        bool isCurrentAssembly)
+    {
+        foreach (var nested in type.GetTypeMembers())
+        {
+            CollectWrapper(nested, marker, assertionBase, assertionContext, builder, isCurrentAssembly);
+        }
+
+        if (!type.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, marker)))
+        {
+            return;
+        }
+
+        // Locate the single instance field whose type derives from Assertion<T>. Convention-based,
+        // matches the ShouldCollectionSource layout (private readonly CollectionAssertion<TItem> _inner).
+        IFieldSymbol? wrappedField = null;
+        ITypeSymbol? wrappedAssertionTypeArg = null;
+        foreach (var member in type.GetMembers())
+        {
+            if (member is IFieldSymbol field && !field.IsStatic
+                && field.Type is INamedTypeSymbol fieldType
+                && DerivesFromAssertion(fieldType, assertionBase, out var typeArg))
+            {
+                if (wrappedField is not null)
+                {
+                    return; // Ambiguous — multiple Assertion-derived fields. Skip silently.
+                }
+                wrappedField = field;
+                wrappedAssertionTypeArg = typeArg;
+            }
+        }
+
+        if (wrappedField is null || wrappedAssertionTypeArg is null
+            || wrappedField.Type is not INamedTypeSymbol wrappedType)
+        {
+            return;
+        }
+
+        // Always collect for the always-emit-skip-set case. Only emit (i.e. include in builder for
+        // partial generation) when the wrapper itself lives in the current compilation.
+        if (!isCurrentAssembly)
+        {
+            // Still record return-type keys via WrapperData so the caller can dedup,
+            // but mark IsCurrentAssembly false so the emission step skips.
+        }
+
+        var methods = ImmutableArray.CreateBuilder<WrapperMethodData>();
+        foreach (var sourceMember in EnumerateInstanceMethods(wrappedType))
+        {
+            if (TryDescribeWrapperMethod(sourceMember, wrappedAssertionTypeArg, assertionBase, assertionContext, out var data))
+            {
+                methods.Add(data);
+            }
+        }
+
+        if (methods.Count == 0 && isCurrentAssembly)
+        {
+            return;
+        }
+
+        builder.Add(new WrapperData(
+            ContainingNamespace: type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty,
+            ClassName: type.Name,
+            ClassGenericParams: new EquatableArray<GenericParamData>(type.TypeParameters.Select(tp => GenericParamData.From(tp, NoGlobalFormat)).ToList()),
+            ClassGenericSuffix: type.IsGenericType ? "<" + string.Join(", ", type.TypeParameters.Select(tp => tp.Name)) + ">" : string.Empty,
+            AssertionTypeArgDisplay: wrappedAssertionTypeArg.ToDisplayString(NoGlobalFormat),
+            Methods: new EquatableArray<WrapperMethodData>(methods),
+            IsCurrentAssembly: isCurrentAssembly));
+    }
+
+    private static IEnumerable<IMethodSymbol> EnumerateInstanceMethods(INamedTypeSymbol type)
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            foreach (var member in current.GetMembers())
+            {
+                if (member is IMethodSymbol m
+                    && m.MethodKind == MethodKind.Ordinary
+                    && !m.IsStatic
+                    && m.DeclaredAccessibility == Accessibility.Public)
+                {
+                    yield return m;
+                }
+            }
+        }
+    }
+
+    private static bool TryDescribeWrapperMethod(
+        IMethodSymbol method,
+        ITypeSymbol assertionTypeArg,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        out WrapperMethodData data)
+    {
+        data = null!;
+
+        // Skip methods with method-level generic parameters for v1 — emitting them requires
+        // propagating type-arg references that appear in the return type's generic arguments
+        // (e.g. IsAssignableTo<TTarget> returns IsAssignableToAssertion<TTarget, TValue>) and
+        // the inference works less reliably without explicit declaration site info.
+        if (method.TypeParameters.Length > 0)
+        {
+            return false;
+        }
+
+        if (method.ReturnType is not INamedTypeSymbol returnType
+            || !DerivesFromAssertion(returnType, assertionBase, out var returnedAssertionArg))
+        {
+            return false;
+        }
+
+        // Wrapper instance methods only make sense when the underlying assertion's value type
+        // matches the wrapper's wrapped type — anything else would require a context Map.
+        if (!SymbolEqualityComparer.Default.Equals(returnedAssertionArg, assertionTypeArg))
+        {
+            return false;
+        }
+
+        var paramData = ImmutableArray.CreateBuilder<ParameterData>();
+        var ctorCandidates = new List<IParameterSymbol>();
+        foreach (var p in method.Parameters)
+        {
+            var caeTarget = TryGetCallerArgumentExpressionTarget(p);
+            paramData.Add(new ParameterData(
+                Name: p.Name,
+                TypeName: p.Type.ToDisplayString(NoGlobalFormat),
+                HasDefaultValue: p.HasExplicitDefaultValue,
+                DefaultValueLiteral: p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null,
+                CallerArgumentExpressionTarget: caeTarget));
+            if (caeTarget is null) ctorCandidates.Add(p);
+        }
+
+        if (!HasMatchingConstructor(returnType, assertionTypeArg, assertionContext, ctorCandidates))
+        {
+            return false;
+        }
+
+        data = new WrapperMethodData(
+            SourceMethodName: method.Name,
+            Parameters: new EquatableArray<ParameterData>(paramData),
+            ReturnTypeFullName: returnType.ConstructedFrom.ToDisplayString(NameWithoutTypeArgsFormat),
+            ReturnTypeGenericArgs: new EquatableArray<string>(returnType.TypeArguments.Select(a => a.ToDisplayString(NoGlobalFormat)).ToList()),
+            RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
+                                          ?? TryGetRucMessage(returnType.GetAttributes())
+                                          ?? TryGetRucMessageFromConstructors(returnType));
+        return true;
     }
 
     private static bool ReferencesAssertionsAssembly(IAssemblySymbol reference, IAssemblySymbol assertionsAssembly)
@@ -226,11 +448,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         if (method.ReturnType is not INamedTypeSymbol returnType
             || !DerivesFromAssertion(returnType, ctx.AssertionBase, out var assertionTypeArg))
-        {
-            return;
-        }
-
-        if (InstanceMethodAssertions.Contains(returnType.OriginalDefinition.Name))
         {
             return;
         }
@@ -459,6 +676,114 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         };
     }
 
+    private static void EmitWrapperPartial(SourceProductionContext ctx, WrapperData wrapper, HashSet<string> emittedHints)
+    {
+        if (!wrapper.IsCurrentAssembly || wrapper.Methods.Length == 0)
+        {
+            return;
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Runtime.CompilerServices;");
+        sb.AppendLine("using TUnit.Assertions.Core;");
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(wrapper.ContainingNamespace))
+        {
+            sb.AppendLine($"namespace {wrapper.ContainingNamespace};");
+            sb.AppendLine();
+        }
+
+        var classGenericList = wrapper.ClassGenericParams.Length > 0
+            ? "<" + string.Join(", ", wrapper.ClassGenericParams.Select(p => p.Name)) + ">"
+            : string.Empty;
+
+        sb.AppendLine($"partial class {wrapper.ClassName}{classGenericList}");
+        sb.AppendLine("{");
+
+        foreach (var m in wrapper.Methods)
+        {
+            EmitWrapperMethod(sb, wrapper, m);
+        }
+
+        sb.AppendLine("}");
+
+        var hint = $"{wrapper.ClassName}.Generated.g.cs";
+        var suffix = 0;
+        while (!emittedHints.Add(hint))
+        {
+            hint = $"{wrapper.ClassName}_{++suffix}.Generated.g.cs";
+        }
+        ctx.AddSource(hint, sb.ToString());
+    }
+
+    private static void EmitWrapperMethod(StringBuilder sb, WrapperData wrapper, WrapperMethodData m)
+    {
+        var positiveName = NameConjugator.Conjugate(m.SourceMethodName).Name;
+        var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>";
+
+        sb.AppendLine();
+        if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
+        {
+            var escaped = m.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
+        }
+
+        sb.Append($"    public {returnType} {positiveName}(");
+        var first = true;
+        foreach (var p in m.Parameters)
+        {
+            if (p.CallerArgumentExpressionTarget is not null) continue;
+            if (!first) sb.Append(", ");
+            sb.Append($"{p.TypeName} {p.Name}");
+            if (p.HasDefaultValue)
+            {
+                sb.Append(" = ").Append(p.DefaultValueLiteral);
+            }
+            first = false;
+        }
+        foreach (var p in m.Parameters)
+        {
+            if (p.CallerArgumentExpressionTarget is null) continue;
+            if (!first) sb.Append(", ");
+            sb.Append($"[global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{p.CallerArgumentExpressionTarget}\")] string? {p.Name} = null");
+            first = false;
+        }
+        sb.AppendLine(")");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        Context.ExpressionBuilder.Append(\".{positiveName}(\");");
+
+        var caeParams = m.Parameters.Where(p => p.CallerArgumentExpressionTarget is not null).ToArray();
+        if (caeParams.Length == 1)
+        {
+            sb.AppendLine($"        Context.ExpressionBuilder.Append({caeParams[0].Name});");
+        }
+        else if (caeParams.Length > 1)
+        {
+            sb.AppendLine("        var __added = false;");
+            foreach (var p in caeParams)
+            {
+                sb.AppendLine($"        if ({p.Name} is not null)");
+                sb.AppendLine("        {");
+                sb.AppendLine("            if (__added) Context.ExpressionBuilder.Append(\", \");");
+                sb.AppendLine($"            Context.ExpressionBuilder.Append({p.Name});");
+                sb.AppendLine("            __added = true;");
+                sb.AppendLine("        }");
+            }
+        }
+        sb.AppendLine("        Context.ExpressionBuilder.Append(\")\");");
+
+        var ctorArgs = new List<string> { "Context" };
+        ctorArgs.AddRange(m.Parameters.Where(p => p.CallerArgumentExpressionTarget is null).Select(p => p.Name));
+
+        sb.AppendLine($"        var inner = new global::{m.ReturnTypeFullName}{FormatGenericArgs(m.ReturnTypeGenericArgs)}({string.Join(", ", ctorArgs)});");
+        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>(Context, inner);");
+        sb.AppendLine("    }");
+    }
+
     private static void EmitContainer(SourceProductionContext ctx, string containerName, MethodData[] methods, HashSet<string> emittedHints)
     {
         var sb = new StringBuilder();
@@ -580,6 +905,26 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private static string FormatGenericArgs(EquatableArray<string> args)
         => args.Length == 0 ? string.Empty : "<" + string.Join(", ", args) + ">";
+
+    private sealed record GeneratorPayload(
+        EquatableArray<MethodData> Methods,
+        EquatableArray<WrapperData> Wrappers);
+
+    private sealed record WrapperData(
+        string ContainingNamespace,
+        string ClassName,
+        EquatableArray<GenericParamData> ClassGenericParams,
+        string ClassGenericSuffix,
+        string AssertionTypeArgDisplay,
+        EquatableArray<WrapperMethodData> Methods,
+        bool IsCurrentAssembly);
+
+    private sealed record WrapperMethodData(
+        string SourceMethodName,
+        EquatableArray<ParameterData> Parameters,
+        string ReturnTypeFullName,
+        EquatableArray<string> ReturnTypeGenericArgs,
+        string? RequiresUnreferencedCodeMessage);
 
     private sealed record CollectionContext(
         Compilation Compilation,
