@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Assertions.SourceGenerator.Generators;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Assertions.Should.SourceGenerator;
 
@@ -22,6 +23,24 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private const string AssertionBaseFullName = "TUnit.Assertions.Core.Assertion`1";
     private const string AssertionContextFullName = "TUnit.Assertions.Core.AssertionContext`1";
     private const string ShouldExtensionsNamespace = "TUnit.Assertions.Should.Extensions";
+
+    /// <summary>
+    /// Assertion classes whose Should counterparts live as hand-crafted instance methods on
+    /// <c>ShouldCollectionSource&lt;T&gt;</c>. Skipped by the generator so the two paths can't drift
+    /// or shadow each other. Instance methods are required because the generated extension form
+    /// (<c>Method&lt;TCollection, TItem&gt;</c> with constraint) can't infer <c>TItem</c> from a
+    /// constraint alone — see <c>ShouldCollectionSource</c> for the rationale.
+    /// </summary>
+    private static readonly HashSet<string> InstanceMethodAssertions = new(StringComparer.Ordinal)
+    {
+        "CollectionIsInOrderAssertion",
+        "CollectionIsInDescendingOrderAssertion",
+        "CollectionAllAssertion",
+        "CollectionAnyAssertion",
+        "HasSingleItemAssertion",
+        "HasSingleItemPredicateAssertion",
+        "HasDistinctItemsAssertion",
+    };
 
     private static readonly SymbolDisplayFormat NoGlobalFormat =
         SymbolDisplayFormat.FullyQualifiedFormat
@@ -154,6 +173,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return;
         }
 
+        if (InstanceMethodAssertions.Contains(type.Name))
+        {
+            return;
+        }
+
         // Skip referenced types whose Should{ClassName}Extensions has already been baked in
         // another reference (typically TUnit.Assertions.Should.dll); re-emitting would cause
         // CS0121 ambiguities. Types declared in the current compilation are always emitted
@@ -247,7 +271,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                     p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null));
             }
 
-            ctorData.Add(new ConstructorData(paramData.ToImmutable(), TryGetRucMessage(ctor.GetAttributes())));
+            ctorData.Add(new ConstructorData(new EquatableArray<ParameterData>(paramData), TryGetRucMessage(ctor.GetAttributes())));
         }
 
         if (ctorData.Count == 0)
@@ -259,12 +283,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var typeParam = assertionBaseType.TypeArguments[0];
         var typeParamDisplay = typeParam.ToDisplayString(NoGlobalFormat);
-        var typeParamIsTypeParameter = typeParam is ITypeParameterSymbol;
-        // No method-level covariance: every extension targets IShouldSource<typeParam> directly.
-        // Source-type narrowing happens at the Should() entry overloads (mirroring Assert.That),
-        // which avoids inference failures on element-typed assertions like BeInOrder where there's
-        // no parameter to bind TItem from.
-        var needsMethodLevelCovariance = false;
 
         var classGenericParams = ImmutableArray.CreateBuilder<GenericParamData>();
         if (type.IsGenericType)
@@ -279,17 +297,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             ClassName: type.Name,
             ClassFullName: type.ToDisplayString(NameWithoutTypeArgsFormat),
             IsClassGeneric: type.IsGenericType,
-            ClassGenericParams: classGenericParams.ToImmutable(),
+            ClassGenericParams: new EquatableArray<GenericParamData>(classGenericParams),
             MethodName: methodName!,
             NegatedMethodName: negatedMethodName,
             OverloadResolutionPriority: overloadPriority,
             ShouldNameOverride: shouldNameOverride,
             ShouldNegatedOverride: shouldNegatedOverride,
             TypeParamDisplay: typeParamDisplay,
-            TypeParamIsTypeParameter: typeParamIsTypeParameter,
-            NeedsMethodLevelCovariance: needsMethodLevelCovariance,
-            TypeParamConstraintName: CovarianceHelper.GetConstraintTypeName(typeParamDisplay, typeParam),
-            Constructors: ctorData.ToImmutable(),
+            Constructors: new EquatableArray<ConstructorData>(ctorData),
             RequiresUnreferencedCodeMessage: rucMessage));
     }
 
@@ -401,24 +416,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
-        string sourceType;
-        string contextExpr;
         var assertionTypeParamForCtor = data.TypeParamDisplay;
-
-        if (data.NeedsMethodLevelCovariance)
-        {
-            var covariantParam = CovarianceHelper.GetCovariantTypeParamName(classGenericList);
-            allMethodGenerics.Add(covariantParam);
-            sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{covariantParam}>";
-            constraints.Add($"where {covariantParam} : {data.TypeParamConstraintName}");
-            // Lambda body upcasts TActual to typeParam via the constraint; the signature shift handles variance.
-            contextExpr = $"source.Context.Map<{data.TypeParamDisplay}>(static x => x)";
-        }
-        else
-        {
-            sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{data.TypeParamDisplay}>";
-            contextExpr = "source.Context";
-        }
+        var sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{data.TypeParamDisplay}>";
+        var contextExpr = "source.Context";
 
         var classGenericSuffix = data.IsClassGeneric
             ? "<" + string.Join(", ", classGenericList) + ">"
@@ -535,9 +535,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         string? ShouldNameOverride,
         string? ShouldNegatedOverride,
         string TypeParamDisplay,
-        bool TypeParamIsTypeParameter,
-        bool NeedsMethodLevelCovariance,
-        string TypeParamConstraintName,
         EquatableArray<ConstructorData> Constructors,
         string? RequiresUnreferencedCodeMessage);
 

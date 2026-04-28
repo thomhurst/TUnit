@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\TUnit.Assertions.SourceGenerator\Generators\CovarianceHelper.cs" Link="Shared\CovarianceHelper.cs" />
+    <Compile Include="..\TUnit.Core.SourceGenerator\Models\EquatableArray.cs" Link="Shared\EquatableArray.cs" />
   </ItemGroup>
 
   <ItemGroup>
