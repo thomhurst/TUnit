@@ -67,4 +67,22 @@ public class DelegateTests
             .Throws<AssertionException>();
         await Assert.That(ex.Message).Contains(".Should().Throw<");
     }
+
+    [Test]
+    public async Task Throw_call_site_renders_generic_exception_type_in_expression()
+    {
+        Action act = () => { };
+        var ex = await Assert.That(async () => await act.Should().Throw<MyGenericException<int>>())
+            .Throws<AssertionException>();
+        // Type.Name on a generic returns "MyGenericException`1". The Should layer's expression
+        // formatter strips the backtick-arity suffix and recurses into generic arguments so
+        // the call-site portion of the failure message reads "Throw<MyGenericException<Int32>>()"
+        // rather than the mangled "Throw<MyGenericException`1>()".
+        await Assert.That(ex.Message).Contains(".Throw<MyGenericException<Int32>>()");
+    }
+
+    private sealed class MyGenericException<TPayload> : Exception
+    {
+        public MyGenericException() : base("test") { }
+    }
 }
