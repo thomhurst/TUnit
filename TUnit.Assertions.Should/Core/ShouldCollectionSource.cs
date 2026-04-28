@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
@@ -19,10 +20,15 @@ public sealed class ShouldCollectionSource<TItem> : IShouldSource<IEnumerable<TI
 
     public AssertionContext<IEnumerable<TItem>> Context { get; }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldCollectionSource(IEnumerable<TItem>? value, string? expression)
     {
         _inner = new CollectionAssertion<TItem>(value!, expression);
         Context = ((IAssertionSource<IEnumerable<TItem>>)_inner).Context;
+        // CollectionAssertion seeds the ExpressionBuilder with "Assert.That({expression})" — replace
+        // it with the Should-flavored "{expression}.Should()" so failure messages match the entry form.
+        Context.ExpressionBuilder.Clear();
+        Context.ExpressionBuilder.Append(expression ?? "?").Append(".Should()");
     }
 
     public ShouldAssertion<IEnumerable<TItem>> BeInOrder()

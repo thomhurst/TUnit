@@ -28,10 +28,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 {
     private const string AssertionSourceFullName = "TUnit.Assertions.Core.IAssertionSource`1";
     private const string AssertionBaseFullName = "TUnit.Assertions.Core.Assertion`1";
+    private const string AssertionContextFullName = "TUnit.Assertions.Core.AssertionContext`1";
     private const string ShouldExtensionsNamespace = "TUnit.Assertions.Should.Extensions";
     private const string ShouldNameAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldNameAttribute";
     private const string CallerArgumentExpressionAttributeName = "CallerArgumentExpressionAttribute";
     private const string RequiresUnreferencedCodeAttributeName = "RequiresUnreferencedCodeAttribute";
+    private const string UnconditionalSuppressMessageAttributeName = "UnconditionalSuppressMessageAttribute";
+    private const string DynamicallyAccessedMembersAttributeName = "DynamicallyAccessedMembersAttribute";
 
     /// <summary>
     /// Return-type names whose Should counterparts are hand-crafted instance methods on
@@ -64,7 +67,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(provider, static (ctx, items) =>
         {
-            if (items.IsDefaultOrEmpty)
+            if (items.Length == 0)
             {
                 return;
             }
@@ -77,30 +80,64 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         });
     }
 
-    private static ImmutableArray<MethodData> CollectMethods(Compilation compilation)
+    private static EquatableArray<MethodData> CollectMethods(Compilation compilation)
     {
         var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
         var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
-        if (assertionSource is null || assertionBase is null)
+        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        if (assertionSource is null || assertionBase is null || assertionContext is null)
         {
-            return ImmutableArray<MethodData>.Empty;
+            return new EquatableArray<MethodData>(Array.Empty<MethodData>());
         }
 
         var ctx = new CollectionContext(
             compilation,
             assertionSource,
             assertionBase,
+            assertionContext,
             compilation.GetTypeByMetadataName(ShouldNameAttributeFullName),
             CollectAlreadyBakedShouldExtensionNames(compilation),
             ImmutableArray.CreateBuilder<MethodData>());
 
+        // Always walk the current compilation — first-party assertions live here.
         WalkNamespace(compilation.Assembly.GlobalNamespace, ctx);
+
+        // Skip referenced assemblies that don't transitively reference TUnit.Assertions.
+        // For a typical consumer project this is most of the BCL plus arbitrary NuGet packages,
+        // and walking them costs tens of thousands of types × methods that all fail the first
+        // filter ("extension method on IAssertionSource<T>"). Pre-filtering by reference closure
+        // is the single biggest perf win for the generator.
+        var assertionsAssembly = assertionSource.ContainingAssembly;
         foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
         {
+            if (!ReferencesAssertionsAssembly(reference, assertionsAssembly))
+            {
+                continue;
+            }
             WalkNamespace(reference.GlobalNamespace, ctx);
         }
 
-        return ctx.Builder.ToImmutable();
+        return new EquatableArray<MethodData>(ctx.Builder.ToArray());
+    }
+
+    private static bool ReferencesAssertionsAssembly(IAssemblySymbol reference, IAssemblySymbol assertionsAssembly)
+    {
+        if (SymbolEqualityComparer.Default.Equals(reference, assertionsAssembly))
+        {
+            return true;
+        }
+
+        foreach (var module in reference.Modules)
+        {
+            foreach (var refed in module.ReferencedAssemblySymbols)
+            {
+                if (SymbolEqualityComparer.Default.Equals(refed, assertionsAssembly))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static HashSet<string> CollectAlreadyBakedShouldExtensionNames(Compilation compilation)
@@ -198,7 +235,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return;
         }
 
-        // Method params after `this`: split into "ctor candidates" (non-CAE) and CAE.
         var paramData = ImmutableArray.CreateBuilder<ParameterData>();
         var ctorCandidates = new List<IParameterSymbol>();
         for (var i = 1; i < method.Parameters.Length; i++)
@@ -224,7 +260,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         // Find a public ctor on the return type whose param list (after the leading
         // AssertionContext<assertionTypeArg>) matches our ctor candidates by type.
-        if (!HasMatchingConstructor(returnType, assertionTypeArg, ctorCandidates))
+        if (!HasMatchingConstructor(returnType, assertionTypeArg, ctx.AssertionContext, ctorCandidates))
         {
             return;
         }
@@ -262,7 +298,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var result = new List<string>();
         foreach (var a in attrs)
         {
-            if (a.AttributeClass?.Name != "UnconditionalSuppressMessageAttribute"
+            if (a.AttributeClass?.Name != UnconditionalSuppressMessageAttributeName
                 || a.ConstructorArguments.Length < 2)
             {
                 continue;
@@ -285,6 +321,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private static bool HasMatchingConstructor(
         INamedTypeSymbol returnType,
         ITypeSymbol assertionTypeArg,
+        INamedTypeSymbol assertionContextSymbol,
         List<IParameterSymbol> ctorCandidates)
     {
         foreach (var ctor in returnType.Constructors)
@@ -298,9 +335,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
             var firstCtorParam = ctor.Parameters[0].Type as INamedTypeSymbol;
             if (firstCtorParam is null
-                || firstCtorParam.Name != "AssertionContext"
-                || firstCtorParam.ContainingNamespace?.ToDisplayString() != "TUnit.Assertions.Core"
-                || firstCtorParam.TypeArguments.Length != 1
+                || !SymbolEqualityComparer.Default.Equals(firstCtorParam.OriginalDefinition, assertionContextSymbol)
                 || !SymbolEqualityComparer.Default.Equals(firstCtorParam.TypeArguments[0], assertionTypeArg))
             {
                 continue;
@@ -550,6 +585,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         Compilation Compilation,
         INamedTypeSymbol AssertionSource,
         INamedTypeSymbol AssertionBase,
+        INamedTypeSymbol AssertionContext,
         INamedTypeSymbol? ShouldNameAttribute,
         HashSet<string> AlreadyBakedShouldExtensionNames,
         ImmutableArray<MethodData>.Builder Builder);
@@ -591,7 +627,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             string? damAttr = null;
             foreach (var attr in tp.GetAttributes())
             {
-                if (attr.AttributeClass?.Name != "DynamicallyAccessedMembersAttribute"
+                if (attr.AttributeClass?.Name != DynamicallyAccessedMembersAttributeName
                     || attr.ConstructorArguments.Length == 0)
                 {
                     continue;

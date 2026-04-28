@@ -104,4 +104,15 @@ public class CollectionTests
             .Throws<TUnit.Assertions.Exceptions.AssertionException>();
         await Assert.That(ex.Message).Contains("Contain");
     }
+
+    [Test]
+    public async Task Failure_message_uses_Should_flavored_expression()
+    {
+        var list = new List<int> { 1, 2, 3 };
+        var ex = await Assert.That(async () => await list.Should().Contain(99))
+            .Throws<TUnit.Assertions.Exceptions.AssertionException>();
+        // Collection entry must mirror the value entry's expression style — ".Should().Method(...)"
+        // rather than the underlying CollectionAssertion's "Assert.That(...)" form.
+        await Assert.That(ex.Message).Contains(".Should().Contain(");
+    }
 }

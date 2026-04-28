@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -12,6 +13,7 @@ public sealed class ShouldDelegateSource<T> : IShouldSource<T>
 {
     public AssertionContext<T> Context { get; }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldDelegateSource(AssertionContext<T> context) => Context = context;
 
     /// <summary>
