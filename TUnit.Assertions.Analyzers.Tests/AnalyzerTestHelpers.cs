@@ -34,6 +34,7 @@ public static class AnalyzerTestHelpers
                 [
                     MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location),
                 ]
             );
 
@@ -141,6 +142,7 @@ public static class AnalyzerTestHelpers
             .AddRange([
                 MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location),
             ]);
 
         return test;

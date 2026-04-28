@@ -4,6 +4,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
+  </ItemGroup>
+
+  <!-- Copy the netstandard2.0 build of TUnit.Assertions.Should into the test bin so the
+       analyzer-test framework (which references net9.0 BCL via Microsoft.CodeAnalysis.Testing
+       1.1.2) can load a Should.dll without triggering CS1705 against System.Runtime v10. -->
+  <ItemGroup>
+    <None Include="..\TUnit.Assertions.Should\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Should.dll"
+          Link="TUnit.Assertions.Should.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -37,7 +37,8 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             CheckMultipleInvocation(context, invocationOperation);
         }
 
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
+        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That"
+                                                 or "global::TUnit.Assertions.Should.ShouldExtensions.Should")
         {
             CheckAssertInvocation(context, invocationOperation);
         }

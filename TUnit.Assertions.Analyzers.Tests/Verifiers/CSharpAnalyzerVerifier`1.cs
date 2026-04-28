@@ -21,6 +21,16 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         return ReferenceAssemblies.Net.Net80; // Default fallback
 #endif
     }
+    private static string GetCompatibleShouldDllPath()
+    {
+        // The netstandard2.0 build of TUnit.Assertions.Should is copied into the test bin as
+        // "TUnit.Assertions.Should.netstandard2.0.dll" by the csproj. It targets netstandard2.0
+        // so loading it doesn't pull in System.Runtime v10, which would otherwise CS1705
+        // against the analyzer-test framework's net9.0 reference assemblies.
+        var ns20Path = Path.Combine(AppContext.BaseDirectory, "TUnit.Assertions.Should.netstandard2.0.dll");
+        return File.Exists(ns20Path) ? ns20Path : typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location;
+    }
+
     /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic()
         => CSharpAnalyzerVerifier<TAnalyzer, DefaultVerifier>.Diagnostic();
@@ -47,6 +57,10 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 {
                     typeof(TUnitAttribute).Assembly.Location,
                     typeof(Assert).Assembly.Location,
+                    // The analyzer test framework references net9.0 BCL — load the netstandard2.0
+                    // build of TUnit.Assertions.Should so System.Runtime version mismatches
+                    // (CS1705) don't surface, while keeping the same public API surface.
+                    GetCompatibleShouldDllPath(),
                 },
             },
             CompilerDiagnostics = CompilerDiagnostics.None
