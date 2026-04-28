@@ -721,7 +721,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private static void EmitWrapperMethod(StringBuilder sb, WrapperData wrapper, WrapperMethodData m)
     {
-        var positiveName = NameConjugator.Conjugate(m.SourceMethodName).Name;
+        var positiveName = NameConjugator.Conjugate(m.SourceMethodName);
         var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>";
 
         sb.AppendLine();
@@ -819,7 +819,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private static void EmitMethod(StringBuilder sb, MethodData m)
     {
-        var positiveName = m.ShouldNameOverride ?? NameConjugator.Conjugate(m.MethodName).Name;
+        var positiveName = m.ShouldNameOverride ?? NameConjugator.Conjugate(m.MethodName);
 
         var genericList = m.MethodGenericParams.Length > 0
             ? "<" + string.Join(", ", m.MethodGenericParams.Select(p =>

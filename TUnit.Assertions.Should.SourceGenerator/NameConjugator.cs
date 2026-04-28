@@ -9,26 +9,26 @@ internal static class NameConjugator
 {
     /// <summary>
     /// Conjugate an <c>[AssertionExtension]</c> method name into its Should-flavored counterpart.
-    /// Returns the conjugated name plus a flag indicating whether a known rule was applied.
-    /// When <c>Matched</c> is false the original name is returned unchanged so the caller can
-    /// emit a TUSHOULD001 diagnostic.
+    /// Names that don't match any rule are returned unchanged — this is the intended forward-compat
+    /// behaviour for unrecognised naming conventions; callers can layer <c>[ShouldName]</c> overrides
+    /// on top to rename specific assertions.
     /// </summary>
-    public static (string Name, bool Matched) Conjugate(string methodName)
+    public static string Conjugate(string methodName)
     {
         if (string.IsNullOrEmpty(methodName))
         {
-            return (methodName, false);
+            return methodName;
         }
 
         // Order: longest-prefix-first so IsNot/DoesNot win over Is/Does.
-        if (TryReplacePrefix(methodName, "IsNot", "NotBe", out var s)) return (s, true);
-        if (TryReplacePrefix(methodName, "Is", "Be", out s)) return (s, true);
-        if (TryReplacePrefix(methodName, "Has", "Have", out s)) return (s, true);
-        if (TryReplacePrefix(methodName, "DoesNot", "Not", out s)) return (s, true);
-        if (TryReplacePrefix(methodName, "Does", "", out s)) return (s, true);
-        if (TryDropTrailingS(methodName, out s)) return (s, true);
+        if (TryReplacePrefix(methodName, "IsNot", "NotBe", out var s)) return s;
+        if (TryReplacePrefix(methodName, "Is", "Be", out s)) return s;
+        if (TryReplacePrefix(methodName, "Has", "Have", out s)) return s;
+        if (TryReplacePrefix(methodName, "DoesNot", "Not", out s)) return s;
+        if (TryReplacePrefix(methodName, "Does", "", out s)) return s;
+        if (TryDropTrailingS(methodName, out s)) return s;
 
-        return (methodName, false);
+        return methodName;
     }
 
     /// <summary>

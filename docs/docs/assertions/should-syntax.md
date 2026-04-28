@@ -50,19 +50,25 @@ Boundary-aware: `Issue` doesn't become `Besue`. The first word of the method nam
 
 ### Custom names
 
-For irregulars or when the conjugation produces an unwanted name, decorate the assertion class with `[ShouldName(...)]`:
+For irregulars or when the conjugation produces an unwanted name, decorate the assertion class with `[ShouldName("...")]`. The override is consulted before the conjugation rules:
+
+```csharp
+[AssertionExtension("IsOdd")]
+[ShouldName("BeAnOddNumber")]
+public class OddAssertion : Assertion<int> { … }
+```
+
+`[AssertionExtension(NegatedMethodName = "...")]` produces a second extension method for the negated form, which the Should generator picks up and conjugates independently — `Contains` → `Contain` and `DoesNotContain` → `NotContain` come out automatically without any `[ShouldName]`. When TUnit's pattern uses **separate classes** for positive and negated forms (e.g. `EqualsAssertion` + `NotEqualsAssertion`), place a separate `[ShouldName]` on each:
 
 ```csharp
 [AssertionExtension("IsBetween")]
-[ShouldName("BeBetween")]                    // would default to "BeBetween" anyway
+[ShouldName("BeWithinRange")]
 public class BetweenAssertion<TValue> : Assertion<TValue> { … }
 
-[AssertionExtension("IsNotBetween", NegatedMethodName = "IsBetween")]
-[ShouldName("NotBeBetween", Negated = "BeBetween")]
+[AssertionExtension("IsNotBetween")]
+[ShouldName("NotBeWithinRange")]
 public class NotBetweenAssertion<TValue> : Assertion<TValue> { … }
 ```
-
-The override is consulted before the conjugation rules.
 
 ## Entry Points
 
