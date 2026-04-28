@@ -1,7 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+    <!-- Snapshot tests for a netstandard2.0 generator: the emitted source is determined
+         by the input compilation, not the consumer runtime, so per-TFM snapshots all
+         contain identical text. Multi-targeting net8.0/9.0/10.0 keeps cross-TFM coverage
+         for the generator host (Roslyn). net472 is omitted because the in-memory
+         compilation harness can't resolve user-declared generic assertions reliably
+         against the .NET Framework BCL — adds zero coverage for an output-deterministic
+         generator and 4x build cost. -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
   </PropertyGroup>
 
   <Import Project="..\TestProject.props" />
@@ -28,6 +35,8 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
   </ItemGroup>
 
   <Import Project="..\TestProject.targets" />

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.Core;
@@ -174,12 +175,15 @@ public class ShouldExtensionGeneratorTests
     }
 
     /// <summary>
-    /// Compiles <paramref name="userSource"/> together with the Should-generator's input
-    /// dependencies, runs <see cref="ShouldExtensionGenerator"/>, and returns the concatenated
-    /// generated source so callers can string-match key tokens. Asserts that the generator emits
-    /// no diagnostics for valid input.
+    /// Compiles <paramref name="userSource"/> with the Should-generator's input dependencies,
+    /// runs <see cref="ShouldExtensionGenerator"/>, snapshots the full generated source via
+    /// Verify (per-TFM <c>.verified.txt</c> files), and returns the concatenated output so
+    /// callers can additionally string-match key tokens. The Verify snapshot catches
+    /// formatting/ordering/<c>global::</c> regressions that token-level checks miss; the
+    /// inline <c>Contains</c> assertions remain as explicit guard-rails for the user-visible
+    /// API tokens that any change should call out deliberately.
     /// </summary>
-    private static async Task<string> RunGenerator(string userSource)
+    private static async Task<string> RunGenerator(string userSource, [CallerMemberName] string testName = "")
     {
         var compilation = CSharpCompilation.Create(
             assemblyName: "GeneratorTest",
@@ -198,18 +202,29 @@ public class ShouldExtensionGeneratorTests
             .Where(t => t != compilation.SyntaxTrees[0])
             .Select(t => t.ToString());
 
-        return string.Join("\n//------\n", trees);
+        var combined = string.Join("\n//------\n", trees);
+
+        await Verify(combined)
+            .UseFileName($"{nameof(ShouldExtensionGeneratorTests)}.{testName}")
+            .UniqueForTargetFrameworkAndVersion();
+
+        return combined;
     }
 
     private static IEnumerable<MetadataReference> GetReferences()
     {
-        // Trust assembly references from the running test process — they include all of
-        // TUnit.Assertions, TUnit.Assertions.Should, and the BCL.
-        var trustedAssemblies = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))?.Split(Path.PathSeparator)
-            ?? [];
-        foreach (var path in trustedAssemblies)
+        // Mirror the loaded assemblies of the test process. Works on both .NET Core
+        // (where TRUSTED_PLATFORM_ASSEMBLIES populates this set) and .NET Framework,
+        // unlike <c>AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")</c> which returns
+        // null on .NET Framework and would leave the in-memory compilation without BCL
+        // references — making symbol resolution silently fail in the generator.
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
         {
-            yield return MetadataReference.CreateFromFile(path);
+            if (asm.IsDynamic || string.IsNullOrWhiteSpace(asm.Location))
+            {
+                continue;
+            }
+            yield return MetadataReference.CreateFromFile(asm.Location);
         }
 
         yield return MetadataReference.CreateFromFile(typeof(Assertion<>).Assembly.Location);
