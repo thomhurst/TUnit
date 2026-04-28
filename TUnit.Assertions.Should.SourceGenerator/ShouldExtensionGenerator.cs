@@ -921,14 +921,39 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         EquatableArray<string> ReturnTypeGenericArgs,
         string? RequiresUnreferencedCodeMessage);
 
-    private sealed record CollectionContext(
-        Compilation Compilation,
-        INamedTypeSymbol AssertionSource,
-        INamedTypeSymbol AssertionBase,
-        INamedTypeSymbol AssertionContext,
-        INamedTypeSymbol? ShouldNameAttribute,
-        HashSet<string> AlreadyBakedShouldExtensionNames,
-        ImmutableArray<MethodData>.Builder Builder);
+    /// <summary>
+    /// Mutable bag of pre-resolved Roslyn symbols and the in-flight <see cref="MethodData"/>
+    /// builder, threaded through the namespace walk. Not a record — it doesn't flow through
+    /// the incremental pipeline as a cache key, and embeds a mutable builder.
+    /// </summary>
+    private sealed class CollectionContext
+    {
+        public CollectionContext(
+            Compilation compilation,
+            INamedTypeSymbol assertionSource,
+            INamedTypeSymbol assertionBase,
+            INamedTypeSymbol assertionContext,
+            INamedTypeSymbol? shouldNameAttribute,
+            HashSet<string> alreadyBakedShouldExtensionNames,
+            ImmutableArray<MethodData>.Builder builder)
+        {
+            Compilation = compilation;
+            AssertionSource = assertionSource;
+            AssertionBase = assertionBase;
+            AssertionContext = assertionContext;
+            ShouldNameAttribute = shouldNameAttribute;
+            AlreadyBakedShouldExtensionNames = alreadyBakedShouldExtensionNames;
+            Builder = builder;
+        }
+
+        public Compilation Compilation { get; }
+        public INamedTypeSymbol AssertionSource { get; }
+        public INamedTypeSymbol AssertionBase { get; }
+        public INamedTypeSymbol AssertionContext { get; }
+        public INamedTypeSymbol? ShouldNameAttribute { get; }
+        public HashSet<string> AlreadyBakedShouldExtensionNames { get; }
+        public ImmutableArray<MethodData>.Builder Builder { get; }
+    }
 
     private sealed record MethodData(
         string ContainerName,
