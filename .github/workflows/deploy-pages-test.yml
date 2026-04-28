@@ -35,7 +35,7 @@ jobs:
         run: yarn build
 
       - name: Restore lychee cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .lycheecache
           key: lychee-html-${{ hashFiles('docs/docs/**/*.md', 'docs/docs/**/*.mdx', 'docs/lychee.toml') }}
