@@ -1125,6 +1125,16 @@ internal sealed class TestBuilder : ITestBuilder
             context.Metadata.TestDetails.TestName,
             context);
 
+        // Expose the resolved method argument values as filterable properties so
+        // callers can use `--treenode-filter` with syntax like `MyTest[arg0=*foo*]`
+        // to target a specific parameterized instance.
+        var testMethodArguments = context.Metadata.TestDetails.TestMethodArguments;
+        for (var i = 0; i < testMethodArguments.Length; i++)
+        {
+            var argValue = testMethodArguments[i]?.ToString() ?? "";
+            discoveredContext.AddProperty($"arg{i}", argValue);
+        }
+
         return _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
     }
 
