@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Should.SourceGenerator\TUnit.Assertions.Should.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+</Project>

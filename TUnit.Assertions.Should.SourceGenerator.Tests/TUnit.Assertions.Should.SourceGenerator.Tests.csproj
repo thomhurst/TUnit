@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <Import Project="..\TestProject.props" />
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Assertions.Should.SourceGenerator\TUnit.Assertions.Should.SourceGenerator.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Sourcy.DotNet">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Sourcy.Git">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+</Project>
