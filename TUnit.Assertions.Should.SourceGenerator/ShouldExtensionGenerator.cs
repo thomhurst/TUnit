@@ -4,32 +4,38 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Assertions.Should.SourceGenerator;
 
 /// <summary>
-/// Source generator that scans the current compilation and every referenced assembly
-/// for classes decorated with <c>TUnit.Assertions.Attributes.AssertionExtensionAttribute</c>
-/// and emits Should-flavored extension methods on <c>IShouldSource&lt;T&gt;</c> that
-/// construct the original assertion class and wrap it in <c>ShouldAssertion&lt;T&gt;</c>.
+/// Source generator that scans the current compilation and every referenced assembly for
+/// public extension methods on <c>IAssertionSource&lt;T&gt;</c> whose return type derives
+/// from <c>Assertion&lt;TReturn&gt;</c> and whose body is a "simple factory" — meaning the
+/// non-CAE method parameters map 1-to-1 (by name and type) onto a public constructor of
+/// the return type, after the leading <c>AssertionContext&lt;T&gt;</c> parameter. For each
+/// match, emits a Should-flavored counterpart on <c>IShouldSource&lt;T&gt;</c>.
+/// <para>
+/// This unifies four assertion sources: classes with <c>[AssertionExtension]</c>, methods
+/// with <c>[GenerateAssertion]</c>, types decorated with <c>[AssertionFrom&lt;T&gt;]</c>,
+/// and any hand-written extension methods whose body is just <c>new T(ctx, args)</c>.
+/// Methods that don't fit the factory template (context mapping, transformations, etc.)
+/// are silently skipped — they couldn't be wrapped without inspecting their body anyway.
+/// </para>
 /// </summary>
 [Generator]
 public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 {
-    private const string AssertionExtensionAttributeFullName = "TUnit.Assertions.Attributes.AssertionExtensionAttribute";
-    private const string ShouldNameAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldNameAttribute";
+    private const string AssertionSourceFullName = "TUnit.Assertions.Core.IAssertionSource`1";
     private const string AssertionBaseFullName = "TUnit.Assertions.Core.Assertion`1";
-    private const string AssertionContextFullName = "TUnit.Assertions.Core.AssertionContext`1";
     private const string ShouldExtensionsNamespace = "TUnit.Assertions.Should.Extensions";
+    private const string ShouldNameAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldNameAttribute";
+    private const string CallerArgumentExpressionAttributeName = "CallerArgumentExpressionAttribute";
+    private const string RequiresUnreferencedCodeAttributeName = "RequiresUnreferencedCodeAttribute";
 
     /// <summary>
-    /// Assertion classes whose Should counterparts live as hand-crafted instance methods on
-    /// <c>ShouldCollectionSource&lt;T&gt;</c>. Skipped by the generator so the two paths can't drift
-    /// or shadow each other. Instance methods are required because the generated extension form
-    /// (<c>Method&lt;TCollection, TItem&gt;</c> with constraint) can't infer <c>TItem</c> from a
-    /// constraint alone — see <c>ShouldCollectionSource</c> for the rationale.
+    /// Return-type names whose Should counterparts are hand-crafted instance methods on
+    /// <c>ShouldCollectionSource&lt;T&gt;</c>. Skipped to prevent shadow / drift.
     /// </summary>
     private static readonly HashSet<string> InstanceMethodAssertions = new(StringComparer.Ordinal)
     {
@@ -54,52 +60,41 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var assertionsProvider = context.CompilationProvider
-            .Select((compilation, _) => CollectAssertions(compilation));
+        var provider = context.CompilationProvider.Select((compilation, _) => CollectMethods(compilation));
 
-        context.RegisterSourceOutput(assertionsProvider, static (ctx, items) =>
+        context.RegisterSourceOutput(provider, static (ctx, items) =>
         {
             if (items.IsDefaultOrEmpty)
             {
                 return;
             }
 
-            var emittedFiles = new HashSet<string>(StringComparer.Ordinal);
-            var seenTypes = new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (var item in items)
+            var emittedHints = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var group in items.GroupBy(m => m.ContainerName, StringComparer.Ordinal))
             {
-                if (!seenTypes.Add(item.ClassFullName))
-                {
-                    continue;
-                }
-                EmitClass(ctx, item, emittedFiles);
+                EmitContainer(ctx, group.Key, group.ToArray(), emittedHints);
             }
         });
     }
 
-    private static ImmutableArray<AssertionData> CollectAssertions(Compilation compilation)
+    private static ImmutableArray<MethodData> CollectMethods(Compilation compilation)
     {
-        var attributeSymbol = compilation.GetTypeByMetadataName(AssertionExtensionAttributeFullName);
-        var assertionBaseSymbol = compilation.GetTypeByMetadataName(AssertionBaseFullName);
-        var assertionContextSymbol = compilation.GetTypeByMetadataName(AssertionContextFullName);
-
-        if (attributeSymbol is null || assertionBaseSymbol is null || assertionContextSymbol is null)
+        var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
+        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
+        if (assertionSource is null || assertionBase is null)
         {
-            return ImmutableArray<AssertionData>.Empty;
+            return ImmutableArray<MethodData>.Empty;
         }
 
         var ctx = new CollectionContext(
             compilation,
-            compilation.Assembly,
-            attributeSymbol,
+            assertionSource,
+            assertionBase,
             compilation.GetTypeByMetadataName(ShouldNameAttributeFullName),
-            assertionBaseSymbol,
-            assertionContextSymbol,
             CollectAlreadyBakedShouldExtensionNames(compilation),
-            ImmutableArray.CreateBuilder<AssertionData>());
+            ImmutableArray.CreateBuilder<MethodData>());
 
-        WalkNamespace(ctx.CurrentAssembly.GlobalNamespace, ctx);
+        WalkNamespace(compilation.Assembly.GlobalNamespace, ctx);
         foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
         {
             WalkNamespace(reference.GlobalNamespace, ctx);
@@ -108,32 +103,19 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return ctx.Builder.ToImmutable();
     }
 
-    /// <summary>
-    /// Build a one-shot set of <c>Should{Name}Extensions</c> classes that already exist in
-    /// referenced (non-current) assemblies — typically those baked into TUnit.Assertions.Should.dll.
-    /// Avoids per-type metadata lookups during the walk.
-    /// </summary>
     private static HashSet<string> CollectAlreadyBakedShouldExtensionNames(Compilation compilation)
     {
         var result = new HashSet<string>(StringComparer.Ordinal);
-        var currentAssembly = compilation.Assembly;
-
         foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
         {
-            if (SymbolEqualityComparer.Default.Equals(reference, currentAssembly))
-            {
-                continue;
-            }
-
+            if (SymbolEqualityComparer.Default.Equals(reference, compilation.Assembly)) continue;
             var ns = LookupNamespace(reference.GlobalNamespace, ShouldExtensionsNamespace);
             if (ns is null) continue;
-
             foreach (var type in ns.GetTypeMembers())
             {
                 result.Add(type.Name);
             }
         }
-
         return result;
     }
 
@@ -152,170 +134,260 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     {
         foreach (var type in ns.GetTypeMembers())
         {
-            CollectFromType(type, ctx);
+            CollectFromContainer(type, ctx);
         }
-
         foreach (var nested in ns.GetNamespaceMembers())
         {
             WalkNamespace(nested, ctx);
         }
     }
 
-    private static void CollectFromType(INamedTypeSymbol type, CollectionContext ctx)
+    private static void CollectFromContainer(INamedTypeSymbol type, CollectionContext ctx)
     {
         foreach (var nested in type.GetTypeMembers())
         {
-            CollectFromType(nested, ctx);
+            CollectFromContainer(nested, ctx);
         }
 
-        if (type.DeclaredAccessibility != Accessibility.Public)
+        if (type.DeclaredAccessibility != Accessibility.Public
+            || !type.IsStatic
+            || type.IsGenericType)
         {
             return;
         }
 
-        if (InstanceMethodAssertions.Contains(type.Name))
+        if (!SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, ctx.Compilation.Assembly)
+            && ctx.AlreadyBakedShouldExtensionNames.Contains($"Should{type.Name}"))
         {
             return;
         }
 
-        // Skip referenced types whose Should{ClassName}Extensions has already been baked in
-        // another reference (typically TUnit.Assertions.Should.dll); re-emitting would cause
-        // CS0121 ambiguities. Types declared in the current compilation are always emitted
-        // so users get Should-flavored extensions for assertion classes they author.
-        if (!SymbolEqualityComparer.Default.Equals(type.ContainingAssembly, ctx.CurrentAssembly)
-            && ctx.AlreadyBakedShouldExtensionNames.Contains($"Should{type.Name}Extensions"))
+        foreach (var member in type.GetMembers())
         {
-            return;
-        }
-
-        var typeAttributes = type.GetAttributes();
-
-        var attribute = typeAttributes.FirstOrDefault(a =>
-            SymbolEqualityComparer.Default.Equals(a.AttributeClass, ctx.AssertionExtensionAttribute));
-        if (attribute is null || attribute.ConstructorArguments.Length == 0)
-        {
-            return;
-        }
-
-        var methodName = attribute.ConstructorArguments[0].Value as string;
-        if (string.IsNullOrEmpty(methodName))
-        {
-            return;
-        }
-
-        string? negatedMethodName = null;
-        var overloadPriority = 0;
-        foreach (var named in attribute.NamedArguments)
-        {
-            switch (named.Key)
+            if (member is IMethodSymbol method)
             {
-                case "NegatedMethodName":
-                    negatedMethodName = named.Value.Value as string;
-                    break;
-                case "OverloadResolutionPriority" when named.Value.Value is int p:
-                    overloadPriority = p;
-                    break;
+                CollectFromMethod(method, type, ctx);
             }
         }
+    }
 
-        var assertionBaseType = FindAssertionBase(type, ctx.AssertionBase);
-        if (assertionBaseType is null)
+    private static void CollectFromMethod(IMethodSymbol method, INamedTypeSymbol container, CollectionContext ctx)
+    {
+        if (method.DeclaredAccessibility != Accessibility.Public
+            || !method.IsStatic
+            || !method.IsExtensionMethod
+            || method.Parameters.Length == 0)
         {
             return;
         }
 
-        string? shouldNameOverride = null;
-        string? shouldNegatedOverride = null;
-        if (ctx.ShouldNameAttribute is not null)
+        if (method.Parameters[0].Type is not INamedTypeSymbol firstParamType
+            || !IsAssertionSourceInterface(firstParamType, ctx.AssertionSource))
         {
-            var shouldAttr = typeAttributes.FirstOrDefault(a =>
-                SymbolEqualityComparer.Default.Equals(a.AttributeClass, ctx.ShouldNameAttribute));
-            if (shouldAttr is { ConstructorArguments.Length: > 0 })
-            {
-                shouldNameOverride = shouldAttr.ConstructorArguments[0].Value as string;
-                foreach (var named in shouldAttr.NamedArguments)
-                {
-                    if (named.Key == "Negated")
-                    {
-                        shouldNegatedOverride = named.Value.Value as string;
-                    }
-                }
-            }
+            return;
         }
 
-        var ctorData = ImmutableArray.CreateBuilder<ConstructorData>();
-        foreach (var ctor in type.Constructors)
+        if (method.ReturnType is not INamedTypeSymbol returnType
+            || !DerivesFromAssertion(returnType, ctx.AssertionBase, out var assertionTypeArg))
+        {
+            return;
+        }
+
+        if (InstanceMethodAssertions.Contains(returnType.OriginalDefinition.Name))
+        {
+            return;
+        }
+
+        // Method params after `this`: split into "ctor candidates" (non-CAE) and CAE.
+        var paramData = ImmutableArray.CreateBuilder<ParameterData>();
+        var ctorCandidates = new List<IParameterSymbol>();
+        for (var i = 1; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            var caeTarget = TryGetCallerArgumentExpressionTarget(p);
+            paramData.Add(new ParameterData(
+                Name: p.Name,
+                TypeName: p.Type.ToDisplayString(NoGlobalFormat),
+                HasDefaultValue: p.HasExplicitDefaultValue,
+                DefaultValueLiteral: p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null,
+                CallerArgumentExpressionTarget: caeTarget));
+            if (caeTarget is null) ctorCandidates.Add(p);
+        }
+
+        // Skip cross-type extensions where the source's TypeArg differs from the return-type's
+        // assertion TypeArg (e.g. ImplicitConversionEqualityExtensions.IsEqualTo<TValue, TOther>).
+        // These need a Context.Map call we can't synthesize without inspecting the body.
+        if (!SymbolEqualityComparer.Default.Equals(firstParamType.TypeArguments[0], assertionTypeArg))
+        {
+            return;
+        }
+
+        // Find a public ctor on the return type whose param list (after the leading
+        // AssertionContext<assertionTypeArg>) matches our ctor candidates by type.
+        if (!HasMatchingConstructor(returnType, assertionTypeArg, ctorCandidates))
+        {
+            return;
+        }
+
+        var classGenericParams = ImmutableArray.CreateBuilder<GenericParamData>();
+        foreach (var tp in method.TypeParameters)
+        {
+            classGenericParams.Add(GenericParamData.From(tp, NoGlobalFormat));
+        }
+
+        var rucMessage = TryGetRucMessage(method.GetAttributes())
+                       ?? TryGetRucMessage(returnType.GetAttributes())
+                       ?? TryGetRucMessageFromConstructors(returnType);
+
+        var suppressedTrimWarnings = CollectSuppressedTrimWarnings(method.GetAttributes());
+
+        var (overrideName, _) = TryGetShouldNameOverride(returnType, ctx.ShouldNameAttribute);
+
+        ctx.Builder.Add(new MethodData(
+            ContainerName: container.Name,
+            MethodName: method.Name,
+            MethodGenericParams: new EquatableArray<GenericParamData>(classGenericParams),
+            SourceTypeArgDisplay: firstParamType.TypeArguments[0].ToDisplayString(NoGlobalFormat),
+            AssertionTypeArgDisplay: assertionTypeArg.ToDisplayString(NoGlobalFormat),
+            ReturnTypeFullName: returnType.ConstructedFrom.ToDisplayString(NameWithoutTypeArgsFormat),
+            ReturnTypeGenericArgs: new EquatableArray<string>(returnType.TypeArguments.Select(a => a.ToDisplayString(NoGlobalFormat)).ToList()),
+            Parameters: new EquatableArray<ParameterData>(paramData),
+            ShouldNameOverride: overrideName,
+            RequiresUnreferencedCodeMessage: rucMessage,
+            SuppressedTrimWarnings: new EquatableArray<string>(suppressedTrimWarnings)));
+    }
+
+    private static List<string> CollectSuppressedTrimWarnings(ImmutableArray<AttributeData> attrs)
+    {
+        var result = new List<string>();
+        foreach (var a in attrs)
+        {
+            if (a.AttributeClass?.Name != "UnconditionalSuppressMessageAttribute"
+                || a.ConstructorArguments.Length < 2)
+            {
+                continue;
+            }
+            if (a.ConstructorArguments[0].Value is string category && category == "Trimming"
+                && a.ConstructorArguments[1].Value is string code)
+            {
+                result.Add(code);
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns true when <paramref name="returnType"/> has a public ctor whose parameters,
+    /// after a leading <c>AssertionContext&lt;assertionTypeArg&gt;</c>, match
+    /// <paramref name="ctorCandidates"/> by type. This guards the "simple factory" template
+    /// against extension methods that map context or otherwise transform before construction.
+    /// </summary>
+    private static bool HasMatchingConstructor(
+        INamedTypeSymbol returnType,
+        ITypeSymbol assertionTypeArg,
+        List<IParameterSymbol> ctorCandidates)
+    {
+        foreach (var ctor in returnType.Constructors)
         {
             if (ctor.DeclaredAccessibility != Accessibility.Public
                 || ctor.IsStatic
-                || ctor.Parameters.Length == 0)
+                || ctor.Parameters.Length != ctorCandidates.Count + 1)
             {
                 continue;
             }
 
-            var firstParam = ctor.Parameters[0].Type as INamedTypeSymbol;
-            if (firstParam is null
-                || !SymbolEqualityComparer.Default.Equals(firstParam.OriginalDefinition, ctx.AssertionContext))
+            var firstCtorParam = ctor.Parameters[0].Type as INamedTypeSymbol;
+            if (firstCtorParam is null
+                || firstCtorParam.Name != "AssertionContext"
+                || firstCtorParam.ContainingNamespace?.ToDisplayString() != "TUnit.Assertions.Core"
+                || firstCtorParam.TypeArguments.Length != 1
+                || !SymbolEqualityComparer.Default.Equals(firstCtorParam.TypeArguments[0], assertionTypeArg))
             {
                 continue;
             }
 
-            var paramData = ImmutableArray.CreateBuilder<ParameterData>(ctor.Parameters.Length - 1);
-            for (var i = 1; i < ctor.Parameters.Length; i++)
+            var allMatch = true;
+            for (var i = 0; i < ctorCandidates.Count; i++)
             {
-                var p = ctor.Parameters[i];
-                paramData.Add(new ParameterData(
-                    p.Name,
-                    p.Type.ToDisplayString(NoGlobalFormat),
-                    p.HasExplicitDefaultValue,
-                    p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null));
+                if (!SymbolEqualityComparer.Default.Equals(ctor.Parameters[i + 1].Type, ctorCandidates[i].Type))
+                {
+                    allMatch = false;
+                    break;
+                }
             }
-
-            ctorData.Add(new ConstructorData(new EquatableArray<ParameterData>(paramData), TryGetRucMessage(ctor.GetAttributes())));
+            if (allMatch) return true;
         }
-
-        if (ctorData.Count == 0)
-        {
-            return;
-        }
-
-        var rucMessage = TryGetRucMessage(typeAttributes);
-
-        var typeParam = assertionBaseType.TypeArguments[0];
-        var typeParamDisplay = typeParam.ToDisplayString(NoGlobalFormat);
-
-        var classGenericParams = ImmutableArray.CreateBuilder<GenericParamData>();
-        if (type.IsGenericType)
-        {
-            foreach (var tp in type.TypeParameters)
-            {
-                classGenericParams.Add(GenericParamData.From(tp));
-            }
-        }
-
-        ctx.Builder.Add(new AssertionData(
-            ClassName: type.Name,
-            ClassFullName: type.ToDisplayString(NameWithoutTypeArgsFormat),
-            IsClassGeneric: type.IsGenericType,
-            ClassGenericParams: new EquatableArray<GenericParamData>(classGenericParams),
-            MethodName: methodName!,
-            NegatedMethodName: negatedMethodName,
-            OverloadResolutionPriority: overloadPriority,
-            ShouldNameOverride: shouldNameOverride,
-            ShouldNegatedOverride: shouldNegatedOverride,
-            TypeParamDisplay: typeParamDisplay,
-            Constructors: new EquatableArray<ConstructorData>(ctorData),
-            RequiresUnreferencedCodeMessage: rucMessage));
+        return false;
     }
 
-    private static INamedTypeSymbol? FindAssertionBase(INamedTypeSymbol type, INamedTypeSymbol assertionBaseSymbol)
+    private static (string? Name, string? Negated) TryGetShouldNameOverride(INamedTypeSymbol returnType, INamedTypeSymbol? shouldNameAttr)
     {
-        for (var current = type.BaseType; current is not null; current = current.BaseType)
+        if (shouldNameAttr is null) return (null, null);
+        var attr = returnType.GetAttributes().FirstOrDefault(a =>
+            SymbolEqualityComparer.Default.Equals(a.AttributeClass, shouldNameAttr));
+        if (attr is null || attr.ConstructorArguments.Length == 0) return (null, null);
+        var name = attr.ConstructorArguments[0].Value as string;
+        string? negated = null;
+        foreach (var na in attr.NamedArguments)
         {
-            if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, assertionBaseSymbol))
+            if (na.Key == "Negated") negated = na.Value.Value as string;
+        }
+        return (name, negated);
+    }
+
+    private static bool IsAssertionSourceInterface(INamedTypeSymbol type, INamedTypeSymbol assertionSource)
+        => type.OriginalDefinition is { } def
+           && SymbolEqualityComparer.Default.Equals(def, assertionSource)
+           && type.TypeArguments.Length == 1;
+
+    private static bool DerivesFromAssertion(INamedTypeSymbol type, INamedTypeSymbol assertionBase, out ITypeSymbol assertionTypeArg)
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            if (current.OriginalDefinition is { } def
+                && SymbolEqualityComparer.Default.Equals(def, assertionBase))
             {
-                return current;
+                assertionTypeArg = current.TypeArguments[0];
+                return true;
             }
+        }
+        assertionTypeArg = null!;
+        return false;
+    }
+
+    private static string? TryGetCallerArgumentExpressionTarget(IParameterSymbol parameter)
+    {
+        foreach (var attr in parameter.GetAttributes())
+        {
+            if (attr.AttributeClass?.Name == CallerArgumentExpressionAttributeName
+                && attr.ConstructorArguments.Length > 0
+                && attr.ConstructorArguments[0].Value is string target)
+            {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    private static string? TryGetRucMessage(ImmutableArray<AttributeData> attrs)
+    {
+        foreach (var a in attrs)
+        {
+            if (a.AttributeClass?.Name == RequiresUnreferencedCodeAttributeName
+                && a.ConstructorArguments.Length > 0)
+            {
+                return a.ConstructorArguments[0].Value as string;
+            }
+        }
+        return null;
+    }
+
+    private static string? TryGetRucMessageFromConstructors(INamedTypeSymbol type)
+    {
+        foreach (var ctor in type.Constructors)
+        {
+            var msg = TryGetRucMessage(ctor.GetAttributes());
+            if (msg is not null) return msg;
         }
         return null;
     }
@@ -324,8 +396,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     {
         if (defaultValue is null)
         {
-            // For non-nullable reference types declared with a null default, emit "default!" so the
-            // nullability annotation is suppressed; the original assertion class accepts null at runtime.
             return type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated
                 ? "default!"
                 : "default";
@@ -354,7 +424,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         };
     }
 
-    private static void EmitClass(SourceProductionContext ctx, AssertionData data, HashSet<string> emittedFiles)
+    private static void EmitContainer(SourceProductionContext ctx, string containerName, MethodData[] methods, HashSet<string> emittedHints)
     {
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated />");
@@ -368,187 +438,145 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine("namespace TUnit.Assertions.Should.Extensions;");
         sb.AppendLine();
 
-        // Class name needs to be unique even when several assertion classes share a simple name
-        // across namespaces. Suffix with the FullName hash if needed for uniqueness.
-        var className = "Should" + data.ClassName + "Extensions";
+        var className = "Should" + containerName;
         sb.AppendLine($"public static partial class {className}");
         sb.AppendLine("{");
 
-        var positiveName = data.ShouldNameOverride
-                          ?? NameConjugator.Conjugate(data.MethodName).Name;
-
-        var negatedName = data.ShouldNegatedOverride
-                          ?? (data.NegatedMethodName is not null
-                              ? NameConjugator.Conjugate(data.NegatedMethodName).Name
-                              : null);
-
-        foreach (var ctor in data.Constructors)
+        foreach (var m in methods)
         {
-            EmitMethod(sb, data, ctor, positiveName);
-            if (negatedName is not null)
-            {
-                EmitMethod(sb, data, ctor, negatedName);
-            }
+            EmitMethod(sb, m);
         }
 
         sb.AppendLine("}");
 
-        // Avoid duplicate hint name collisions across compilations / nested types.
-        var hint = className;
+        var hint = className + ".g.cs";
         var suffix = 0;
-        while (!emittedFiles.Add(hint + ".g.cs"))
+        while (!emittedHints.Add(hint))
         {
-            hint = className + "_" + (++suffix);
+            hint = $"{className}_{++suffix}.g.cs";
         }
-        ctx.AddSource(hint + ".g.cs", sb.ToString());
+        ctx.AddSource(hint, sb.ToString());
     }
 
-    private static void EmitMethod(StringBuilder sb, AssertionData data, ConstructorData ctor, string methodName)
+    private static void EmitMethod(StringBuilder sb, MethodData m)
     {
-        var classGenericList = data.ClassGenericParams.Select(p => p.Name).ToList();
-        var allMethodGenerics = new List<string>(classGenericList);
-        var constraints = new List<string>();
-        foreach (var p in data.ClassGenericParams)
-        {
-            if (p.ConstraintClause is not null)
-            {
-                constraints.Add(p.ConstraintClause);
-            }
-        }
+        var positiveName = m.ShouldNameOverride ?? NameConjugator.Conjugate(m.MethodName).Name;
 
-        var assertionTypeParamForCtor = data.TypeParamDisplay;
-        var sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{data.TypeParamDisplay}>";
-        var contextExpr = "source.Context";
+        var genericList = m.MethodGenericParams.Length > 0
+            ? "<" + string.Join(", ", m.MethodGenericParams.Select(p =>
+                p.DynamicallyAccessedMembersAttribute is null
+                    ? p.Name
+                    : $"{p.DynamicallyAccessedMembersAttribute} {p.Name}")) + ">"
+            : string.Empty;
 
-        var classGenericSuffix = data.IsClassGeneric
-            ? "<" + string.Join(", ", classGenericList) + ">"
-            : string.Empty;
-        var methodGenericSuffix = allMethodGenerics.Count > 0
-            ? "<" + string.Join(", ", allMethodGenerics) + ">"
-            : string.Empty;
-        var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{assertionTypeParamForCtor}>";
+        var constraints = string.Join(" ", m.MethodGenericParams
+            .Select(p => p.ConstraintClause)
+            .Where(c => c is not null));
+
+        var sourceType = $"global::TUnit.Assertions.Should.Core.IShouldSource<{m.SourceTypeArgDisplay}>";
+        var returnType = $"global::TUnit.Assertions.Should.Core.ShouldAssertion<{m.AssertionTypeArgDisplay}>";
 
         sb.AppendLine();
-        var rucMessage = ctor.RequiresUnreferencedCodeMessage ?? data.RequiresUnreferencedCodeMessage;
-        if (!string.IsNullOrEmpty(rucMessage))
+        if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
         {
-            var escaped = rucMessage!.Replace("\"", "\\\"");
+            var escaped = m.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
             sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
         }
-
-        if (data.OverloadResolutionPriority > 0)
+        foreach (var code in m.SuppressedTrimWarnings)
         {
-            sb.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({data.OverloadResolutionPriority})]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"{code}\", Justification = \"Forwarded from source method\")]");
         }
 
-        sb.Append($"    public static {returnType} {methodName}{methodGenericSuffix}(this {sourceType} source");
-        foreach (var p in ctor.Parameters)
+        sb.Append($"    public static {returnType} {positiveName}{genericList}(this {sourceType} source");
+        foreach (var p in m.Parameters)
         {
+            if (p.CallerArgumentExpressionTarget is not null) continue;
             sb.Append($", {p.TypeName} {p.Name}");
             if (p.HasDefaultValue)
             {
                 sb.Append(" = ").Append(p.DefaultValueLiteral);
             }
         }
-        foreach (var p in ctor.Parameters)
+        foreach (var p in m.Parameters)
         {
-            sb.Append($", [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{p.Name}\")] string? {p.Name}Expression = null");
+            if (p.CallerArgumentExpressionTarget is null) continue;
+            sb.Append($", [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{p.CallerArgumentExpressionTarget}\")] string? {p.Name} = null");
         }
         sb.Append(')');
 
-        if (constraints.Count > 0)
+        if (!string.IsNullOrEmpty(constraints))
         {
             sb.AppendLine();
-            sb.Append("        ").Append(string.Join(" ", constraints));
+            sb.Append("        ").Append(constraints);
         }
 
         sb.AppendLine();
         sb.AppendLine("    {");
+        sb.AppendLine("        var innerContext = source.Context;");
+        sb.AppendLine($"        innerContext.ExpressionBuilder.Append(\".{positiveName}(\");");
 
-        sb.AppendLine($"        var innerContext = {contextExpr};");
-
-        sb.AppendLine($"        innerContext.ExpressionBuilder.Append(\".{methodName}(\");");
-        if (ctor.Parameters.Length == 1)
+        var caeParams = m.Parameters.Where(p => p.CallerArgumentExpressionTarget is not null).ToArray();
+        if (caeParams.Length == 1)
         {
-            sb.AppendLine($"        innerContext.ExpressionBuilder.Append({ctor.Parameters[0].Name}Expression);");
+            sb.AppendLine($"        innerContext.ExpressionBuilder.Append({caeParams[0].Name});");
         }
-        else if (ctor.Parameters.Length > 1)
+        else if (caeParams.Length > 1)
         {
             sb.AppendLine("        var __added = false;");
-            foreach (var p in ctor.Parameters)
+            foreach (var p in caeParams)
             {
-                sb.AppendLine($"        if ({p.Name}Expression is not null)");
+                sb.AppendLine($"        if ({p.Name} is not null)");
                 sb.AppendLine("        {");
                 sb.AppendLine("            if (__added) innerContext.ExpressionBuilder.Append(\", \");");
-                sb.AppendLine($"            innerContext.ExpressionBuilder.Append({p.Name}Expression);");
+                sb.AppendLine($"            innerContext.ExpressionBuilder.Append({p.Name});");
                 sb.AppendLine("            __added = true;");
                 sb.AppendLine("        }");
             }
         }
         sb.AppendLine("        innerContext.ExpressionBuilder.Append(\")\");");
 
-        var innerCtorArgs = new List<string> { "innerContext" };
-        innerCtorArgs.AddRange(ctor.Parameters.Select(p => p.Name));
+        var ctorArgs = new List<string> { "innerContext" };
+        ctorArgs.AddRange(m.Parameters.Where(p => p.CallerArgumentExpressionTarget is null).Select(p => p.Name));
 
-        var innerTypeName = "global::" + data.ClassFullName + classGenericSuffix;
-
-        sb.AppendLine($"        var inner = new {innerTypeName}({string.Join(", ", innerCtorArgs)});");
-        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{assertionTypeParamForCtor}>(innerContext, inner);");
+        sb.AppendLine($"        var inner = new global::{m.ReturnTypeFullName}{FormatGenericArgs(m.ReturnTypeGenericArgs)}({string.Join(", ", ctorArgs)});");
+        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{m.AssertionTypeArgDisplay}>(innerContext, inner);");
         sb.AppendLine("    }");
     }
 
-    private static string? TryGetRucMessage(ImmutableArray<AttributeData> attributes)
-    {
-        foreach (var a in attributes)
-        {
-            if (a.AttributeClass?.Name == "RequiresUnreferencedCodeAttribute"
-                && a.ConstructorArguments.Length > 0)
-            {
-                return a.ConstructorArguments[0].Value as string;
-            }
-        }
-        return null;
-    }
+    private static string FormatGenericArgs(EquatableArray<string> args)
+        => args.Length == 0 ? string.Empty : "<" + string.Join(", ", args) + ">";
 
-    /// <summary>
-    /// Bag of per-compilation state passed to walk/collect helpers. Avoids threading 7+ args
-    /// through the recursive namespace walk.
-    /// </summary>
     private sealed record CollectionContext(
         Compilation Compilation,
-        IAssemblySymbol CurrentAssembly,
-        INamedTypeSymbol AssertionExtensionAttribute,
-        INamedTypeSymbol? ShouldNameAttribute,
+        INamedTypeSymbol AssertionSource,
         INamedTypeSymbol AssertionBase,
-        INamedTypeSymbol AssertionContext,
+        INamedTypeSymbol? ShouldNameAttribute,
         HashSet<string> AlreadyBakedShouldExtensionNames,
-        ImmutableArray<AssertionData>.Builder Builder);
+        ImmutableArray<MethodData>.Builder Builder);
 
-    private sealed record AssertionData(
-        string ClassName,
-        string ClassFullName,
-        bool IsClassGeneric,
-        EquatableArray<GenericParamData> ClassGenericParams,
+    private sealed record MethodData(
+        string ContainerName,
         string MethodName,
-        string? NegatedMethodName,
-        int OverloadResolutionPriority,
+        EquatableArray<GenericParamData> MethodGenericParams,
+        string SourceTypeArgDisplay,
+        string AssertionTypeArgDisplay,
+        string ReturnTypeFullName,
+        EquatableArray<string> ReturnTypeGenericArgs,
+        EquatableArray<ParameterData> Parameters,
         string? ShouldNameOverride,
-        string? ShouldNegatedOverride,
-        string TypeParamDisplay,
-        EquatableArray<ConstructorData> Constructors,
-        string? RequiresUnreferencedCodeMessage);
-
-    private sealed record ConstructorData(EquatableArray<ParameterData> Parameters, string? RequiresUnreferencedCodeMessage);
+        string? RequiresUnreferencedCodeMessage,
+        EquatableArray<string> SuppressedTrimWarnings);
 
     private sealed record ParameterData(
         string Name,
         string TypeName,
         bool HasDefaultValue,
-        string? DefaultValueLiteral) : IEquatable<ParameterData>;
+        string? DefaultValueLiteral,
+        string? CallerArgumentExpressionTarget);
 
-    private sealed record GenericParamData(string Name, string? ConstraintClause) : IEquatable<GenericParamData>
+    private sealed record GenericParamData(string Name, string? ConstraintClause, string? DynamicallyAccessedMembersAttribute)
     {
-        public static GenericParamData From(ITypeParameterSymbol tp)
+        public static GenericParamData From(ITypeParameterSymbol tp, SymbolDisplayFormat format)
         {
             var constraints = new List<string>();
             if (tp.HasReferenceTypeConstraint) constraints.Add("class");
@@ -556,10 +584,30 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             if (tp.HasNotNullConstraint) constraints.Add("notnull");
             foreach (var ct in tp.ConstraintTypes)
             {
-                constraints.Add(ct.ToDisplayString(NoGlobalFormat));
+                constraints.Add(ct.ToDisplayString(format));
             }
             if (tp.HasConstructorConstraint) constraints.Add("new()");
-            return new GenericParamData(tp.Name, constraints.Count > 0 ? $"where {tp.Name} : {string.Join(", ", constraints)}" : null);
+
+            string? damAttr = null;
+            foreach (var attr in tp.GetAttributes())
+            {
+                if (attr.AttributeClass?.Name != "DynamicallyAccessedMembersAttribute"
+                    || attr.ConstructorArguments.Length == 0)
+                {
+                    continue;
+                }
+                var ctorArg = attr.ConstructorArguments[0];
+                if (ctorArg.Type is INamedTypeSymbol enumType && ctorArg.Value is int intValue)
+                {
+                    damAttr = $"[global::System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(({enumType.ToDisplayString(format)}){intValue})]";
+                }
+                break;
+            }
+
+            return new GenericParamData(
+                tp.Name,
+                constraints.Count > 0 ? $"where {tp.Name} : {string.Join(", ", constraints)}" : null,
+                damAttr);
         }
     }
 }
