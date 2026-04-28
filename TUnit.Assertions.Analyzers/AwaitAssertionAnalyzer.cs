@@ -7,8 +7,8 @@ using TUnit.Assertions.Analyzers.Extensions;
 namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
+/// Reports <c>Assert.That(...)</c> / <c>value.Should()</c> assertion entries that aren't awaited
+/// (which silently no-op) and <c>Assert.Multiple()</c> calls without a <c>using</c> declaration.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer

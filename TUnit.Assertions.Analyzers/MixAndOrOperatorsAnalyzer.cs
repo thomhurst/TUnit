@@ -7,8 +7,9 @@ using TUnit.Assertions.Analyzers.Extensions;
 namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
+/// Reports awaited assertion chains that mix <c>.And</c> and <c>.Or</c> combinators without
+/// explicit grouping — the runtime throws <c>MixedAndOrAssertionsException</c>, this surfaces it
+/// at compile time. Covers both <c>Assert.That</c> and <c>value.Should()</c> entry points.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer

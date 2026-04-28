@@ -34,11 +34,22 @@ public static class AnalyzerTestHelpers
                 [
                     MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location),
+                    MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
                 ]
             );
 
         return csTest;
+    }
+
+    /// <summary>
+    /// Resolves a TUnit.Assertions.Should.dll path compatible with the analyzer-test framework's
+    /// net9.0 reference assemblies. The csproj copies the netstandard2.0 build into the test bin
+    /// so it loads without dragging in System.Runtime v10 (CS1705).
+    /// </summary>
+    public static string GetCompatibleShouldDllPath()
+    {
+        var ns20Path = Path.Combine(AppContext.BaseDirectory, "TUnit.Assertions.Should.netstandard2.0.dll");
+        return File.Exists(ns20Path) ? ns20Path : typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location;
     }
 
     public sealed class CSharpSuppressorTest<TSuppressor, TVerifier> : CSharpAnalyzerTest<TSuppressor, TVerifier>
@@ -142,7 +153,7 @@ public static class AnalyzerTestHelpers
             .AddRange([
                 MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location),
+                MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
             ]);
 
         return test;
@@ -154,9 +165,7 @@ public static class AnalyzerTestHelpers
         return ReferenceAssemblies.NetFramework.Net472.Default;
 #elif NET8_0
         return ReferenceAssemblies.Net.Net80;
-#elif NET9_0
-        return ReferenceAssemblies.Net.Net90;
-#elif NET10_0_OR_GREATER
+#elif NET9_0_OR_GREATER
         return ReferenceAssemblies.Net.Net90;
 #else
         return ReferenceAssemblies.Net.Net80; // Default fallback

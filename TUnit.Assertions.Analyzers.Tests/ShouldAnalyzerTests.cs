@@ -3,10 +3,6 @@ using MixVerifier = TUnit.Assertions.Analyzers.Tests.Verifiers.CSharpAnalyzerVer
 
 namespace TUnit.Assertions.Analyzers.Tests;
 
-/// <summary>
-/// Verifies the existing analyzers also recognise the Should-flavored entry surface so users
-/// of <c>value.Should().X()</c> get the same compile-time guidance as <c>Assert.That(value).X()</c>.
-/// </summary>
 public class ShouldAnalyzerTests
 {
     [Test]

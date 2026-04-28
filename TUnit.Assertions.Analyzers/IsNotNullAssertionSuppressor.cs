@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -181,7 +182,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         var assertThatCall = FindAssertThatInChain(invocation);
         if (assertThatCall is null
             || assertThatCall.ArgumentList.Arguments.Count != 1
-            || !IsTUnitAssertThat(assertThatCall, semanticModel, cancellationToken))
+            || !IsTUnitMethod(assertThatCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Assert.That"))
         {
             return null;
         }
@@ -195,7 +196,8 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         CancellationToken cancellationToken)
     {
         var shouldCall = FindShouldInChain(invocation);
-        if (shouldCall is null || !IsTUnitShould(shouldCall, semanticModel, cancellationToken))
+        if (shouldCall is null
+            || !IsTUnitMethod(shouldCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Should.ShouldExtensions.Should"))
         {
             return null;
         }
@@ -206,19 +208,13 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
             : null;
     }
 
-    private static bool IsTUnitAssertThat(InvocationExpressionSyntax invocation, SemanticModel semanticModel, CancellationToken cancellationToken)
-    {
-        var symbol = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
-        return symbol?.ContainingType?.ToDisplayString() == "TUnit.Assertions.Assert"
-            && symbol.Name == "That";
-    }
-
-    private static bool IsTUnitShould(InvocationExpressionSyntax invocation, SemanticModel semanticModel, CancellationToken cancellationToken)
-    {
-        var symbol = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
-        return symbol?.ContainingType?.ToDisplayString() == "TUnit.Assertions.Should.ShouldExtensions"
-            && symbol.Name == "Should";
-    }
+    private static bool IsTUnitMethod(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken,
+        string fullyQualifiedNonGenericName)
+        => semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol symbol
+           && symbol.GloballyQualifiedNonGeneric() == fullyQualifiedNonGenericName;
 
     private bool ExpressionsMatch(
         ExpressionSyntax assertArgument,
