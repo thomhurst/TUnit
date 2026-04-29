@@ -255,6 +255,9 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
     private static InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
         => FindInvocationInChain(invocation, identifierName: "That", parentName: "Assert");
 
+    // Should() is an extension method, so its receiver is the asserted value (any expression).
+    // parentName MUST stay null — constraining it would break the suppressor for user-defined
+    // assertion entry points and for Should() reached via using-aliases / namespace imports.
     private static InvocationExpressionSyntax? FindShouldInChain(InvocationExpressionSyntax invocation)
         => FindInvocationInChain(invocation, identifierName: "Should", parentName: null);
 

@@ -34,6 +34,9 @@ public sealed partial class ShouldCollectionSource<TItem> : IShouldSource<IEnume
         Context = ((IAssertionSource<IEnumerable<TItem>>)_inner).Context;
         // CollectionAssertion seeds the ExpressionBuilder with "Assert.That({expression})" — replace
         // it with the Should-flavored "{expression}.Should()" so failure messages match the entry form.
+        // Coverage: CollectionTests.Failure_message_uses_Should_flavored_expression — that test fails
+        // immediately if the seed format ever drifts, so any change in CollectionAssertion's base
+        // ctor will surface here rather than silently corrupting failure messages.
         Context.ExpressionBuilder.Clear();
         Context.ExpressionBuilder.Append(expression ?? "?").Append(".Should()");
     }

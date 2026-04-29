@@ -48,6 +48,8 @@ The package's source generator scans every `[AssertionExtension]`, `[GenerateAss
 
 Boundary-aware: `Issue` doesn't become `Besue`. The first word of the method name is matched against the rule, not the substring.
 
+The `Does*` strip rule reads naturally for verbs (`DoesMatch` → `Match`, `DoesContain` → `Contain`) but can produce awkward names where the auxiliary `does` was load-bearing — for example `DoesRun` → `Run` or `DoesLoad` → `Load`. If the conjugated name reads poorly, decorate the assertion class with `[ShouldName("...")]` to override it. The same applies to non-verb `-es` words (the `Match`/`Wash`/`Fix` family is handled by the sibilant-aware `-es` drop, but exotic stems may still need an override).
+
 ### Custom names
 
 For irregulars or when the conjugation produces an unwanted name, decorate the assertion class with `[ShouldName("...")]`. The override is consulted before the conjugation rules:
