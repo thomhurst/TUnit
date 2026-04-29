@@ -39,7 +39,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             {
                 AdditionalReferences =
                 {
-                    GetCompatibleCoreDllPath(),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnit.Core.TUnitAttribute).Assembly),
                 },
             },
         };
@@ -50,8 +50,4 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
         await test.RunAsync(CancellationToken.None);
     }
-
-    private static string GetCompatibleCoreDllPath()
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(
-            "TUnit.Core", typeof(TUnit.Core.TUnitAttribute).Assembly);
 }

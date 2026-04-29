@@ -44,9 +44,9 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             {
                 AdditionalReferences =
                 {
-                    AnalyzerTestHelpers.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
                     typeof(CircuitState).Assembly.Location,
-                    AnalyzerTestHelpers.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly),
                 },
             },
         };

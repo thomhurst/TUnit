@@ -42,7 +42,10 @@ public sealed class ShouldDelegateSource<T> : IShouldSource<T>
     /// backtick-arity suffix and recurses into generic arguments so that
     /// <c>typeof(MyException&lt;int&gt;)</c> appears as <c>MyException&lt;Int32&gt;</c> in
     /// failure messages rather than the raw <c>MyException`1</c> that <see cref="System.Type.Name"/>
-    /// returns.
+    /// returns. Note: this runs at runtime (no Roslyn) so primitive aliases come through as their
+    /// CLR names (<c>Int32</c>, not <c>int</c>); the source-generator's emit path uses Roslyn's
+    /// display format and produces <c>int</c>. The asymmetry is acceptable for failure messages
+    /// — exception types are rarely generic and almost never primitive — but is worth noting.
     /// </summary>
     private static string FormatTypeName(System.Type t)
     {

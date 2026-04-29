@@ -32,31 +32,14 @@ public static class AnalyzerTestHelpers
         csTest.TestState.AdditionalReferences
             .AddRange(
                 [
-                    MetadataReference.CreateFromFile(GetCompatibleCoreDllPath()),
-                    MetadataReference.CreateFromFile(GetCompatibleAssertionsDllPath()),
-                    MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
                 ]
             );
 
         return csTest;
     }
-
-    /// <summary>
-    /// Resolves a TUnit.Assertions.Should.dll path compatible with the analyzer-test framework's
-    /// net9.0 reference assemblies. The csproj copies the netstandard2.0 build into the test bin
-    /// so it loads without dragging in System.Runtime v10 (CS1705).
-    /// </summary>
-    public static string GetCompatibleShouldDllPath()
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(
-            "TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly);
-
-    public static string GetCompatibleAssertionsDllPath()
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(
-            "TUnit.Assertions", typeof(Assert).Assembly);
-
-    public static string GetCompatibleCoreDllPath()
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(
-            "TUnit.Core", typeof(TUnitAttribute).Assembly);
 
     public sealed class CSharpSuppressorTest<TSuppressor, TVerifier> : CSharpAnalyzerTest<TSuppressor, TVerifier>
         where TSuppressor : DiagnosticSuppressor, new()
@@ -157,9 +140,9 @@ public static class AnalyzerTestHelpers
 
         test.TestState.AdditionalReferences
             .AddRange([
-                MetadataReference.CreateFromFile(GetCompatibleCoreDllPath()),
-                MetadataReference.CreateFromFile(GetCompatibleAssertionsDllPath()),
-                MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
             ]);
 
         return test;

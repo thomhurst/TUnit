@@ -50,6 +50,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // CompilationProvider fires per-keystroke. Cross-assembly cost is absorbed by the
+        // ConditionalWeakTable cache below; the current-compilation walk still re-runs every
+        // keystroke. A SyntaxProvider-based pipeline (paired with ForAttributeWithMetadataName
+        // for [AssertionExtension] declarations and a custom-syntax filter for hand-rolled
+        // extensions on IAssertionSource<T>) would eliminate that cost. Deferred to a follow-up
+        // — the structural refactor is non-trivial and the current bound (~types-with-extension-
+        // methods in current compilation) is acceptable for v1.
         var provider = context.CompilationProvider.Select((compilation, _) => Collect(compilation));
 
         context.RegisterSourceOutput(provider, static (ctx, payload) =>
@@ -453,6 +460,15 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return true;
     }
 
+    /// <summary>
+    /// Pre-filter: returns true only when the reference (or one of its direct module references)
+    /// is <see cref="TUnit.Assertions"/> itself. The check is one-level deep, NOT transitive — a
+    /// transitive reference is treated as "doesn't contain Should-relevant types" and skipped.
+    /// In practice this is safe because <c>IAssertionSource&lt;T&gt;</c> lives in TUnit.Assertions,
+    /// so any assembly declaring extension methods on it must have a direct reference. Skipping
+    /// transitively-only-referenced assemblies is the single biggest perf win for the generator
+    /// (otherwise it'd walk the entire BCL).
+    /// </summary>
     private static bool ReferencesAssertionsAssembly(IAssemblySymbol reference, IAssemblySymbol assertionsAssembly)
     {
         if (SymbolEqualityComparer.Default.Equals(reference, assertionsAssembly))

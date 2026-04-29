@@ -71,9 +71,13 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
     // Walks the syntactic parent chain. Stops at IBlockOperation/IDelegateCreationOperation as
     // negative answers — that means the invocation was used as a statement / lambda body without
     // an enclosing await. This catches the common `value.Should();` mistake but produces a false
-    // positive for split-variable patterns (`var src = value.Should(); await src.X();`) since the
-    // declaration's parent block is reached before any await. Fixing requires usage-site
-    // dataflow analysis; left as a known limitation.
+    // positive for split-variable patterns:
+    //   var src = Assert.That(value);   // ← walk hits the declaration's block before any await
+    //   await src.IsEqualTo(...);       //   even though the chain IS awaited here
+    // The same applies to `var src = value.Should(); await src.X();`. Both Assert.That and
+    // Should() share this limitation by design — fixing requires usage-site dataflow analysis,
+    // which is significant complexity for a niche style. Left as a known imprecision so users who
+    // hit it know it's not their code.
     private static bool IsAwaited(IInvocationOperation invocationOperation)
     {
         var parent = invocationOperation.Parent;

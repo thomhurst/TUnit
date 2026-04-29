@@ -14,9 +14,6 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
-    private static string GetCompatibleDllPath(string assemblyName, System.Reflection.Assembly fallback)
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(assemblyName, fallback);
-
     private static ReferenceAssemblies GetReferenceAssemblies()
     {
 #if NET472
@@ -63,8 +60,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
-                    GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                 },
             },
         };
@@ -105,8 +102,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
-                    GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                 },
             },
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,

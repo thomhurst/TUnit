@@ -10,6 +10,14 @@ namespace TUnit.Assertions.Should.Core;
 /// and forwards <c>await</c> to it. Exposes <c>.And</c>/<c>.Or</c> properties that
 /// return Should-flavored continuations to keep the chain in Should naming.
 /// </summary>
+/// <remarks>
+/// Class rather than <c>readonly struct</c>: <see cref="GetAwaiter"/> forwards to the wrapped
+/// <see cref="Assertion{T}"/>'s state-machine awaiter, which mutates instance state during
+/// evaluation. A struct ShouldAssertion would either copy that mutation away from the captured
+/// receiver or have to box-and-shelve through <see cref="IShouldSource{T}"/>, neither of which
+/// is desirable. The single per-call allocation is the conscious cost; the entry types
+/// (<c>ShouldSource</c>, <c>ShouldContinuation</c>) stay structs because they're pure routers.
+/// </remarks>
 public sealed class ShouldAssertion<T> : IShouldSource<T>
 {
     private readonly Assertion<T> _inner;

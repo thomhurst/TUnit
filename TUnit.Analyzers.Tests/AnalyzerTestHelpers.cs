@@ -34,17 +34,14 @@ public static class AnalyzerTestHelpers
         csTest.TestState.AdditionalReferences
             .AddRange(
                 [
-                    MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                     MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
-                    MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
                 ]
             );
 
         return csTest;
     }
-
-    public static string GetCompatibleDllPath(string assemblyName, System.Reflection.Assembly fallback)
-        => TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath(assemblyName, fallback);
 
     public sealed class CSharpSuppressorTest<TSuppressor, TVerifier> : CSharpAnalyzerTest<TSuppressor, TVerifier>
         where TSuppressor : DiagnosticSuppressor, new()
@@ -148,9 +145,9 @@ public static class AnalyzerTestHelpers
 
         test.TestState.AdditionalReferences
             .AddRange([
-                MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                 MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
-                MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
             ]);
 
         return test;
