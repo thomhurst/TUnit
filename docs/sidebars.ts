@@ -83,6 +83,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'assertions/getting-started',
+        'assertions/should-syntax',
         'assertions/awaiting',
         {
           type: 'category',
