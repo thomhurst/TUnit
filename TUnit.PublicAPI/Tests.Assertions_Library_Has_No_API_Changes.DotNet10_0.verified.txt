@@ -4883,7 +4883,9 @@ namespace .Extensions
         public static ._HasBothIndicesFromEnd_Assertion HasBothIndicesFromEnd(this .<> source) { }
         public static ._HasEndFromBeginning_Assertion HasEndFromBeginning(this .<> source) { }
         public static ._HasStartFromBeginning_Assertion HasStartFromBeginning(this .<> source) { }
+        [("Use IsFullRange instead.")]
         public static ._IsAll_Assertion IsAll(this .<> source) { }
+        public static ._IsFullRange_Assertion IsFullRange(this .<> source) { }
     }
     public sealed class Range_HasBothIndicesFromEnd_Assertion : .<>
     {
@@ -4906,6 +4908,12 @@ namespace .Extensions
     public sealed class Range_IsAll_Assertion : .<>
     {
         public Range_IsAll_Assertion(.<> context) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Range_IsFullRange_Assertion : .<>
+    {
+        public Range_IsFullRange_Assertion(.<> context) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }

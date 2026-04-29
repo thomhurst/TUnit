@@ -173,7 +173,28 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         foreach (var attr in methodSymbol.GetAttributes())
         {
             var attributeClass = attr.AttributeClass;
-            if (attributeClass == null || attributeClass.ContainingNamespace?.ToDisplayString() != "System.Diagnostics.CodeAnalysis")
+            if (attributeClass == null)
+                continue;
+
+            var attrNamespace = attributeClass.ContainingNamespace?.ToDisplayString();
+
+            // Forward [Obsolete] / [EditorBrowsable] to the generated extension method so the
+            // user-visible API surface carries the same deprecation/visibility decisions as the
+            // source-declared method. Without this, [Obsolete] on a [GenerateAssertion] method is
+            // a no-op — the source method is internal (file-scoped or hidden inside the assertion
+            // class), and only the generated extension is callable by users.
+            if (attributeClass.Name == "ObsoleteAttribute" && attrNamespace == "System")
+            {
+                diagnosticAttributesForExtensionMethod.Add(FormatObsoleteAttribute(attr));
+                continue;
+            }
+            if (attributeClass.Name == "EditorBrowsableAttribute" && attrNamespace == "System.ComponentModel")
+            {
+                diagnosticAttributesForExtensionMethod.Add(FormatEditorBrowsableAttribute(attr));
+                continue;
+            }
+
+            if (attrNamespace != "System.Diagnostics.CodeAnalysis")
                 continue;
 
             // Handle UnconditionalSuppressMessage - goes to CheckAsync
@@ -343,6 +364,40 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static bool IsExtensionMethod(IMethodSymbol methodSymbol) =>
         methodSymbol.IsExtensionMethod ||
         (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
+
+    private static string FormatObsoleteAttribute(AttributeData attr)
+    {
+        var args = new List<string>();
+        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string message)
+        {
+            args.Add($"\"{message.Replace("\"", "\\\"")}\"");
+        }
+        if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is bool isError && isError)
+        {
+            args.Add("true");
+        }
+
+        var diagnosticIdPart = "";
+        var urlFormatPart = "";
+        foreach (var named in attr.NamedArguments)
+        {
+            if (named.Key == "DiagnosticId" && named.Value.Value is string id)
+            {
+                diagnosticIdPart = $", DiagnosticId = \"{id}\"";
+            }
+            else if (named.Key == "UrlFormat" && named.Value.Value is string url)
+            {
+                urlFormatPart = $", UrlFormat = \"{url}\"";
+            }
+        }
+        return $"[System.Obsolete({string.Join(", ", args)}{diagnosticIdPart}{urlFormatPart})]";
+    }
+
+    private static string FormatEditorBrowsableAttribute(AttributeData attr)
+    {
+        var state = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is int s ? s : 0;
+        return $"[System.ComponentModel.EditorBrowsable((System.ComponentModel.EditorBrowsableState){state})]";
+    }
 
     /// <summary>
     /// Checks if a type is file-scoped (has 'file' accessibility)

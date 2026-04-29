@@ -586,6 +586,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var suppressedTrimWarnings = CollectSuppressedTrimWarnings(method.GetAttributes());
 
+        var forwardedAttributes = CollectForwardedAttributes(method.GetAttributes());
+
         var overrideName = TryGetShouldNameOverride(returnType, ctx.ShouldNameAttribute);
 
         ctx.Builder.Add(new MethodData(
@@ -599,7 +601,66 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             Parameters: new EquatableArray<ParameterData>(paramData),
             ShouldNameOverride: overrideName,
             RequiresUnreferencedCodeMessage: rucMessage,
-            SuppressedTrimWarnings: new EquatableArray<string>(suppressedTrimWarnings)));
+            SuppressedTrimWarnings: new EquatableArray<string>(suppressedTrimWarnings),
+            ForwardedAttributes: new EquatableArray<string>(forwardedAttributes)));
+    }
+
+    /// <summary>
+    /// Captures <see cref="System.ObsoleteAttribute"/> and
+    /// <see cref="System.ComponentModel.EditorBrowsableAttribute"/> on the source extension method
+    /// so they propagate to the Should-flavored counterpart. Without forwarding, deprecating an
+    /// underlying assertion (<c>IsAll</c>) would leave the Should counterpart (<c>BeAll</c>)
+    /// undeprecated — users would see the warning on one entry but not the other.
+    /// </summary>
+    private static List<string> CollectForwardedAttributes(ImmutableArray<AttributeData> attrs)
+    {
+        var result = new List<string>();
+        foreach (var a in attrs)
+        {
+            var ns = a.AttributeClass?.ContainingNamespace?.ToDisplayString();
+            if (a.AttributeClass?.Name == "ObsoleteAttribute" && ns == "System")
+            {
+                result.Add(FormatObsolete(a));
+            }
+            else if (a.AttributeClass?.Name == "EditorBrowsableAttribute" && ns == "System.ComponentModel")
+            {
+                result.Add(FormatEditorBrowsable(a));
+            }
+        }
+        return result;
+    }
+
+    private static string FormatObsolete(AttributeData attr)
+    {
+        var args = new List<string>();
+        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string message)
+        {
+            args.Add($"\"{message.Replace("\"", "\\\"")}\"");
+        }
+        if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is bool isError && isError)
+        {
+            args.Add("true");
+        }
+        var diagnosticIdPart = "";
+        var urlFormatPart = "";
+        foreach (var named in attr.NamedArguments)
+        {
+            if (named.Key == "DiagnosticId" && named.Value.Value is string id)
+            {
+                diagnosticIdPart = $", DiagnosticId = \"{id}\"";
+            }
+            else if (named.Key == "UrlFormat" && named.Value.Value is string url)
+            {
+                urlFormatPart = $", UrlFormat = \"{url}\"";
+            }
+        }
+        return $"[global::System.Obsolete({string.Join(", ", args)}{diagnosticIdPart}{urlFormatPart})]";
+    }
+
+    private static string FormatEditorBrowsable(AttributeData attr)
+    {
+        var state = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is int s ? s : 0;
+        return $"[global::System.ComponentModel.EditorBrowsable((global::System.ComponentModel.EditorBrowsableState){state})]";
     }
 
     private static List<string> CollectSuppressedTrimWarnings(ImmutableArray<AttributeData> attrs)
@@ -947,6 +1008,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         {
             sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"{code}\", Justification = \"Forwarded from source method\")]");
         }
+        foreach (var attr in m.ForwardedAttributes)
+        {
+            sb.AppendLine($"    {attr}");
+        }
 
         sb.Append($"    public static {returnType} {positiveName}{genericList}(this {sourceType} source");
         foreach (var p in m.Parameters)
@@ -1072,7 +1137,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         EquatableArray<ParameterData> Parameters,
         string? ShouldNameOverride,
         string? RequiresUnreferencedCodeMessage,
-        EquatableArray<string> SuppressedTrimWarnings);
+        EquatableArray<string> SuppressedTrimWarnings,
+        EquatableArray<string> ForwardedAttributes);
 
     private sealed record ParameterData(
         string Name,

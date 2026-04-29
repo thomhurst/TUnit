@@ -1,4 +1,6 @@
 #if NET8_0_OR_GREATER
+using System;
+using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
@@ -15,6 +17,17 @@ file static partial class RangeAssertionExtensions
     public static bool HasStartFromBeginning(this Range value) => !value.Start.IsFromEnd;
     [GenerateAssertion(ExpectationMessage = "to have end index from beginning", InlineMethodBody = true)]
     public static bool HasEndFromBeginning(this Range value) => !value.End.IsFromEnd;
+
+    [GenerateAssertion(ExpectationMessage = "to be the full range", InlineMethodBody = true)]
+    public static bool IsFullRange(this Range value) => value.Equals(Range.All);
+
+    // Conjugates to "BeAll" via the Should generator's Is* -> Be* rule, which reads as
+    // "should be all of what?" — the "all-range" context is lost. Replaced by IsFullRange
+    // (-> BeFullRange). Kept around for backwards compatibility; both Obsolete and the hidden
+    // visibility propagate through MethodAssertionGenerator/ShouldExtensionGenerator to the
+    // user-callable extension surface.
+    [Obsolete("Use IsFullRange instead.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be the all range", InlineMethodBody = true)]
     public static bool IsAll(this Range value) => value.Equals(Range.All);
 }

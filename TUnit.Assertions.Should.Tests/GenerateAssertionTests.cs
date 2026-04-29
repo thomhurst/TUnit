@@ -55,9 +55,9 @@ public class GenerateAssertionTests
     }
 
     [Test]
-    public async Task Range_BeAll()
+    public async Task Range_BeFullRange()
     {
-        await Range.All.Should().BeAll();
+        await Range.All.Should().BeFullRange();
     }
 
     [Test]
