@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Models;
@@ -78,8 +78,15 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     /// every keystroke. The cache stores raw walk results (no dedup applied) so that the
     /// dedup sets — built from the union of all references plus the current compilation —
     /// can be applied at merge time without invalidating cache entries.
+    /// <para>
+    /// <see cref="ConditionalWeakTable{TKey, TValue}"/> uses weak keys so entries become
+    /// eligible for GC the moment Roslyn drops the underlying <c>MetadataReference</c> (e.g.
+    /// when the dependency assembly is rebuilt). A <c>ConcurrentDictionary</c> would pin
+    /// stale references for the lifetime of the IDE process and cause unbounded memory
+    /// growth across long sessions with frequent rebuilds.
+    /// </para>
     /// </summary>
-    private static readonly ConcurrentDictionary<MetadataReference, ReferenceData> s_referenceCache = new();
+    private static readonly ConditionalWeakTable<MetadataReference, ReferenceData> s_referenceCache = new();
 
     private sealed record ReferenceData(
         EquatableArray<MethodData> Methods,
@@ -208,11 +215,41 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol? partialMarker)
     {
         var metadataRef = compilation.GetMetadataReference(refAssembly);
-        if (metadataRef is not null && s_referenceCache.TryGetValue(metadataRef, out var cached))
+        if (metadataRef is null)
+        {
+            return ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker);
+        }
+
+        if (s_referenceCache.TryGetValue(metadataRef, out var cached))
         {
             return cached;
         }
 
+        var fresh = ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker);
+
+        // Concurrent races between two compilations seeing the same uncached MetadataReference
+        // are harmless — both compute the same ReferenceData; first writer wins. Catching
+        // ArgumentException is the documented way to handle the "already added" case on
+        // ConditionalWeakTable.Add (no TryAdd overload exists in netstandard2.0).
+        try
+        {
+            s_referenceCache.Add(metadataRef, fresh);
+        }
+        catch (ArgumentException)
+        {
+        }
+        return fresh;
+    }
+
+    private static ReferenceData ScanReference(
+        IAssemblySymbol refAssembly,
+        Compilation compilation,
+        INamedTypeSymbol assertionSource,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        INamedTypeSymbol? shouldNameAttr,
+        INamedTypeSymbol? partialMarker)
+    {
         var methods = ImmutableArray.CreateBuilder<MethodData>();
         var ctx = new CollectionContext(
             compilation,
@@ -240,16 +277,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
-        var result = new ReferenceData(
+        return new ReferenceData(
             new EquatableArray<MethodData>(methods.ToArray()),
             new EquatableArray<WrapperData>(wrappers.ToArray()),
             new EquatableArray<string>(bakedNames.ToArray()));
-
-        if (metadataRef is not null)
-        {
-            s_referenceCache.TryAdd(metadataRef, result);
-        }
-        return result;
     }
 
     private static void WalkForWrappers(
