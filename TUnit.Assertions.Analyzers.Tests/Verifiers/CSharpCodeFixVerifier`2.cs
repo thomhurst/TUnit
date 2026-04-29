@@ -38,8 +38,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    AnalyzerTestHelpers.GetCompatibleCoreDllPath(),
+                    AnalyzerTestHelpers.GetCompatibleAssertionsDllPath(),
                 },
             },
         };
@@ -72,8 +72,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    AnalyzerTestHelpers.GetCompatibleCoreDllPath(),
+                    AnalyzerTestHelpers.GetCompatibleAssertionsDllPath(),
                 },
             },
         };

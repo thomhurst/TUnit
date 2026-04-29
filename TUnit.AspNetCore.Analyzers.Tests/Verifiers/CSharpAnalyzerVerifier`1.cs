@@ -33,12 +33,13 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         var test = new Test
         {
             TestCode = source,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+                .AddPackages([new PackageIdentity("Microsoft.Bcl.AsyncInterfaces", "9.0.0")]),
             TestState =
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnit.Core.TUnitAttribute).Assembly.Location,
+                    GetCompatibleCoreDllPath(),
                 },
             },
         };
@@ -48,5 +49,16 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         configureTest(test);
 
         await test.RunAsync(CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Resolves a TUnit.Core path compatible with the analyzer-test framework's Net90 reference
+    /// assemblies. The csproj copies the netstandard2.0 build into the test bin; loading that copy
+    /// avoids CS1705 against System.Runtime v10 from the test process's net10.0 build.
+    /// </summary>
+    private static string GetCompatibleCoreDllPath()
+    {
+        var ns20Path = Path.Combine(AppContext.BaseDirectory, "TUnit.Core.netstandard2.0.dll");
+        return File.Exists(ns20Path) ? ns20Path : typeof(TUnit.Core.TUnitAttribute).Assembly.Location;
     }
 }

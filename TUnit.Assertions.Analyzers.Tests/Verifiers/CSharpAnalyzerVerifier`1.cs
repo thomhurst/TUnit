@@ -45,8 +45,8 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    AnalyzerTestHelpers.GetCompatibleCoreDllPath(),
+                    AnalyzerTestHelpers.GetCompatibleAssertionsDllPath(),
                     AnalyzerTestHelpers.GetCompatibleShouldDllPath(),
                 },
             },

@@ -34,13 +34,24 @@ public static class AnalyzerTestHelpers
         csTest.TestState.AdditionalReferences
             .AddRange(
                 [
-                    MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
+                    MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                     MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ProjectReferenceEnum).Assembly.Location)
+                    MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
                 ]
             );
 
         return csTest;
+    }
+
+    /// <summary>
+    /// Resolves a TFM-compatible path to <paramref name="assemblyName"/>. The csproj copies the
+    /// netstandard2.0 build into the test bin; loading that copy avoids CS1705 against
+    /// System.Runtime v10 under the analyzer-test framework's Net90 reference assemblies.
+    /// </summary>
+    public static string GetCompatibleDllPath(string assemblyName, System.Reflection.Assembly fallback)
+    {
+        var ns20Path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.netstandard2.0.dll");
+        return File.Exists(ns20Path) ? ns20Path : fallback.Location;
     }
 
     public sealed class CSharpSuppressorTest<TSuppressor, TVerifier> : CSharpAnalyzerTest<TSuppressor, TVerifier>
@@ -145,9 +156,9 @@ public static class AnalyzerTestHelpers
 
         test.TestState.AdditionalReferences
             .AddRange([
-                MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
+                MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                 MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(ProjectReferenceEnum).Assembly.Location)
+                MetadataReference.CreateFromFile(GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
             ]);
 
         return test;

@@ -32,8 +32,8 @@ public static class AnalyzerTestHelpers
         csTest.TestState.AdditionalReferences
             .AddRange(
                 [
-                    MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                    MetadataReference.CreateFromFile(GetCompatibleCoreDllPath()),
+                    MetadataReference.CreateFromFile(GetCompatibleAssertionsDllPath()),
                     MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
                 ]
             );
@@ -47,9 +47,28 @@ public static class AnalyzerTestHelpers
     /// so it loads without dragging in System.Runtime v10 (CS1705).
     /// </summary>
     public static string GetCompatibleShouldDllPath()
+        => GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly);
+
+    /// <summary>
+    /// Resolves a TUnit.Assertions.dll path compatible with the analyzer-test framework's
+    /// net9.0 reference assemblies. Without this redirect, the test process's net10.0 build is
+    /// loaded via <c>typeof(Assert).Assembly.Location</c> and silently fails symbol resolution
+    /// for every extension method ("IsEqualTo", "Throws", etc.) under Net90 ref assemblies.
+    /// </summary>
+    public static string GetCompatibleAssertionsDllPath()
+        => GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly);
+
+    /// <summary>
+    /// Resolves a TUnit.Core.dll path compatible with the analyzer-test framework's net9.0
+    /// reference assemblies (same rationale as <see cref="GetCompatibleAssertionsDllPath"/>).
+    /// </summary>
+    public static string GetCompatibleCoreDllPath()
+        => GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly);
+
+    private static string GetCompatibleDllPath(string assemblyName, System.Reflection.Assembly fallback)
     {
-        var ns20Path = Path.Combine(AppContext.BaseDirectory, "TUnit.Assertions.Should.netstandard2.0.dll");
-        return File.Exists(ns20Path) ? ns20Path : typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly.Location;
+        var ns20Path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.netstandard2.0.dll");
+        return File.Exists(ns20Path) ? ns20Path : fallback.Location;
     }
 
     public sealed class CSharpSuppressorTest<TSuppressor, TVerifier> : CSharpAnalyzerTest<TSuppressor, TVerifier>
@@ -151,8 +170,8 @@ public static class AnalyzerTestHelpers
 
         test.TestState.AdditionalReferences
             .AddRange([
-                MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                MetadataReference.CreateFromFile(GetCompatibleCoreDllPath()),
+                MetadataReference.CreateFromFile(GetCompatibleAssertionsDllPath()),
                 MetadataReference.CreateFromFile(GetCompatibleShouldDllPath()),
             ]);
 
