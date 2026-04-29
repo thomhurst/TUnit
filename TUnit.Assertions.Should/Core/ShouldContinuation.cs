@@ -9,7 +9,23 @@ namespace TUnit.Assertions.Should.Core;
 /// </summary>
 public readonly struct ShouldContinuation<T> : IShouldSource<T>
 {
+    private readonly string? _becauseMessage;
+
     public AssertionContext<T> Context { get; }
 
-    public ShouldContinuation(AssertionContext<T> context) => Context = context;
+    public ShouldContinuation(AssertionContext<T> context) : this(context, becauseMessage: null)
+    {
+    }
+
+    private ShouldContinuation(AssertionContext<T> context, string? becauseMessage)
+    {
+        Context = context;
+        _becauseMessage = becauseMessage;
+    }
+
+    public ShouldContinuation<T> Because(string message)
+        => new(Context, message.Trim());
+
+    string? IShouldSource<T>.ConsumeBecauseMessage()
+        => _becauseMessage;
 }

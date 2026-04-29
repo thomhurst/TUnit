@@ -25,6 +25,8 @@ public static class ShouldExtensions
     /// <summary>
     /// Strings — explicit overload so they don't bind to the <see cref="IEnumerable{T}"/> overload
     /// (which would lose string-specific assertions like <c>StartWith</c>/<c>Contain</c>).
+    /// <see cref="OverloadResolutionPriorityAttribute"/> is honored by SDK 9+ compilers; older
+    /// compilers ignore it and fall back to normal overload resolution.
     /// </summary>
     [OverloadResolutionPriority(2)]
     public static ShouldSource<string> Should(
@@ -41,6 +43,8 @@ public static class ShouldExtensions
     /// the element type without an explicit type argument. The wrapper also implements
     /// <see cref="IShouldSource{T}"/> for <see cref="IEnumerable{T}"/> so generated extensions
     /// that DO have item-typed parameters (<c>Contain</c>, <c>NotContain</c>) resolve as well.
+    /// <see cref="OverloadResolutionPriorityAttribute"/> is honored by SDK 9+ compilers; older
+    /// compilers ignore it and fall back to normal overload resolution.
     /// </summary>
     [OverloadResolutionPriority(1)]
     public static ShouldCollectionSource<T> Should<T>(

@@ -95,6 +95,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     /// </summary>
     private static readonly ConditionalWeakTable<MetadataReference, ReferenceData> s_referenceCache = new();
 
+    // IMPORTANT: keep ReferenceData compilation-independent. Do not cache live ISymbol
+    // instances here; symbols are tied to the compilation that produced them and become stale
+    // when Roslyn creates the next compilation.
     private sealed record ReferenceData(
         EquatableArray<MethodData> Methods,
         EquatableArray<WrapperData> Wrappers,
@@ -384,19 +387,37 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private static IEnumerable<IMethodSymbol> EnumerateInstanceMethods(INamedTypeSymbol type)
     {
-        for (var current = type; current is not null; current = current.BaseType)
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (var current = type;
+             current is not null && current.SpecialType != SpecialType.System_Object;
+             current = current.BaseType)
         {
             foreach (var member in current.GetMembers())
             {
                 if (member is IMethodSymbol m
                     && m.MethodKind == MethodKind.Ordinary
                     && !m.IsStatic
-                    && m.DeclaredAccessibility == Accessibility.Public)
+                    && m.DeclaredAccessibility == Accessibility.Public
+                    && seen.Add(GetMethodSignatureKey(m)))
                 {
                     yield return m;
                 }
             }
         }
+    }
+
+    private static string GetMethodSignatureKey(IMethodSymbol method)
+    {
+        var sb = new StringBuilder(method.Name);
+        sb.Append('`').Append(method.Arity);
+        foreach (var parameter in method.Parameters)
+        {
+            sb.Append('|')
+                .Append(parameter.RefKind)
+                .Append(':')
+                .Append(parameter.Type.ToDisplayString(NoGlobalFormat));
+        }
+        return sb.ToString();
     }
 
     private static bool TryDescribeWrapperMethod(
@@ -704,6 +725,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             var firstCtorParam = ctor.Parameters[0].Type as INamedTypeSymbol;
             if (firstCtorParam is null
                 || !SymbolEqualityComparer.Default.Equals(firstCtorParam.OriginalDefinition, assertionContextSymbol)
+                || firstCtorParam.TypeArguments.Length != 1
                 || !SymbolEqualityComparer.Default.Equals(firstCtorParam.TypeArguments[0], assertionTypeArg))
             {
                 continue;
@@ -749,6 +771,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             if (current.OriginalDefinition is { } def
                 && SymbolEqualityComparer.Default.Equals(def, assertionBase))
             {
+                if (current.TypeArguments.Length != 1)
+                {
+                    break;
+                }
                 assertionTypeArg = current.TypeArguments[0];
                 return true;
             }
@@ -940,6 +966,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         ctorArgs.AddRange(m.Parameters.Where(p => p.CallerArgumentExpressionTarget is null).Select(p => p.Name));
 
         sb.AppendLine($"        var inner = new global::{m.ReturnTypeFullName}{FormatGenericArgs(m.ReturnTypeGenericArgs)}({string.Join(", ", ctorArgs)});");
+        sb.AppendLine($"        var __tunit_should_because = ((global::TUnit.Assertions.Should.Core.IShouldSource<{wrapper.AssertionTypeArgDisplay}>)this).ConsumeBecauseMessage();");
+        sb.AppendLine("        if (__tunit_should_because is not null)");
+        sb.AppendLine("        {");
+        sb.AppendLine("            inner.Because(__tunit_should_because);");
+        sb.AppendLine("        }");
         sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{wrapper.AssertionTypeArgDisplay}>(Context, inner);");
         sb.AppendLine("    }");
     }
@@ -1063,6 +1094,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         ctorArgs.AddRange(m.Parameters.Where(p => p.CallerArgumentExpressionTarget is null).Select(p => p.Name));
 
         sb.AppendLine($"        var inner = new global::{m.ReturnTypeFullName}{FormatGenericArgs(m.ReturnTypeGenericArgs)}({string.Join(", ", ctorArgs)});");
+        sb.AppendLine("        var __tunit_should_because = source.ConsumeBecauseMessage();");
+        sb.AppendLine("        if (__tunit_should_because is not null)");
+        sb.AppendLine("        {");
+        sb.AppendLine("            inner.Because(__tunit_should_because);");
+        sb.AppendLine("        }");
         sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldAssertion<{m.AssertionTypeArgDisplay}>(innerContext, inner);");
         sb.AppendLine("    }");
     }

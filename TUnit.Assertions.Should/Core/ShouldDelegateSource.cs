@@ -12,10 +12,26 @@ namespace TUnit.Assertions.Should.Core;
 /// </summary>
 public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
 {
+    private readonly string? _becauseMessage;
+
     public AssertionContext<T> Context { get; }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public ShouldDelegateSource(AssertionContext<T> context) => Context = context;
+    public ShouldDelegateSource(AssertionContext<T> context) : this(context, becauseMessage: null)
+    {
+    }
+
+    private ShouldDelegateSource(AssertionContext<T> context, string? becauseMessage)
+    {
+        Context = context;
+        _becauseMessage = becauseMessage;
+    }
+
+    public ShouldDelegateSource<T> Because(string message)
+        => new(Context, message.Trim());
+
+    string? IShouldSource<T>.ConsumeBecauseMessage()
+        => _becauseMessage;
 
     /// <summary>
     /// Asserts the delegate throws an exception of <typeparamref name="TException"/> or a subclass.
@@ -24,7 +40,9 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
     {
         Context.ExpressionBuilder.Append($".Throw<{FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
-        return new ShouldAssertion<TException>(mapped, new ThrowsAssertion<TException>(mapped));
+        var inner = new ThrowsAssertion<TException>(mapped);
+        ApplyBecause(inner);
+        return new ShouldAssertion<TException>(mapped, inner);
     }
 
     /// <summary>
@@ -34,7 +52,17 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
     {
         Context.ExpressionBuilder.Append($".ThrowExactly<{FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
-        return new ShouldAssertion<TException>(mapped, new ThrowsExactlyAssertion<TException>(mapped));
+        var inner = new ThrowsExactlyAssertion<TException>(mapped);
+        ApplyBecause(inner);
+        return new ShouldAssertion<TException>(mapped, inner);
+    }
+
+    private void ApplyBecause<TAssertionValue>(Assertion<TAssertionValue> assertion)
+    {
+        if (_becauseMessage is not null)
+        {
+            assertion.Because(_becauseMessage);
+        }
     }
 
     /// <summary>

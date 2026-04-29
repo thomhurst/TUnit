@@ -8,7 +8,23 @@ namespace TUnit.Assertions.Should.Core;
 /// </summary>
 public readonly struct ShouldSource<T> : IShouldSource<T>
 {
+    private readonly string? _becauseMessage;
+
     public AssertionContext<T> Context { get; }
 
-    public ShouldSource(AssertionContext<T> context) => Context = context;
+    public ShouldSource(AssertionContext<T> context) : this(context, becauseMessage: null)
+    {
+    }
+
+    private ShouldSource(AssertionContext<T> context, string? becauseMessage)
+    {
+        Context = context;
+        _becauseMessage = becauseMessage;
+    }
+
+    public ShouldSource<T> Because(string message)
+        => new(Context, message.Trim());
+
+    string? IShouldSource<T>.ConsumeBecauseMessage()
+        => _becauseMessage;
 }

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Should.Core;
@@ -18,4 +19,11 @@ public interface IShouldSource;
 public interface IShouldSource<T> : IShouldSource
 {
     AssertionContext<T> Context { get; }
+
+    /// <summary>
+    /// Consumes a pending <c>Because</c> message set before the next assertion is created.
+    /// Used by generated extensions to apply pre-chain reasons to the assertion instance.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    string? ConsumeBecauseMessage();
 }

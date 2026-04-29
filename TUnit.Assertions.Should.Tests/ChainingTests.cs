@@ -75,4 +75,22 @@ public class ChainingTests
             .Throws<AssertionException>();
         await Assert.That(ex.Message).Contains("business rule X");
     }
+
+    [Test]
+    public async Task Pre_chain_Because_propagates_to_failure_message()
+    {
+        var ex = await Assert.That(async () =>
+                await 5.Should().Because("business rule Y").BeEqualTo(99))
+            .Throws<AssertionException>();
+        await Assert.That(ex.Message).Contains("business rule Y");
+    }
+
+    [Test]
+    public async Task Continuation_Because_propagates_to_next_assertion()
+    {
+        var ex = await Assert.That(async () =>
+                await 5.Should().BeEqualTo(5).And.Because("business rule Z").BeEqualTo(99))
+            .Throws<AssertionException>();
+        await Assert.That(ex.Message).Contains("business rule Z");
+    }
 }

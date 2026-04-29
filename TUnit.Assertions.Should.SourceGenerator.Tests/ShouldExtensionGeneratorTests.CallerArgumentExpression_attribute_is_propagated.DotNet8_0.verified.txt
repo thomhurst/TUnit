@@ -30,6 +30,11 @@ public static partial class ShouldMyBetweenExtensions
         }
         innerContext.ExpressionBuilder.Append(")");
         var inner = new global::MyNamespace.MyBetweenAssertion<TValue>(innerContext, min, max);
+        var __tunit_should_because = source.ConsumeBecauseMessage();
+        if (__tunit_should_because is not null)
+        {
+            inner.Because(__tunit_should_because);
+        }
         return new global::TUnit.Assertions.Should.Core.ShouldAssertion<TValue>(innerContext, inner);
     }
 }

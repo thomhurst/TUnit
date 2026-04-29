@@ -32,4 +32,28 @@ public class NullSourceTests
         await Assert.That(async () => await list.Should().BeInOrder())
             .Throws<AssertionException>();
     }
+
+    [Test]
+    public async Task Null_collection_All_predicate_fails_with_assertion_exception()
+    {
+        List<int>? list = null;
+        await Assert.That(async () => await list.Should().All(x => x > 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Null_collection_Any_predicate_fails_with_assertion_exception()
+    {
+        List<int>? list = null;
+        await Assert.That(async () => await list.Should().Any(x => x > 0))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Null_collection_HaveSingleItem_predicate_fails_with_assertion_exception()
+    {
+        List<int>? list = null;
+        await Assert.That(async () => await list.Should().HaveSingleItem(x => x > 0))
+            .Throws<AssertionException>();
+    }
 }

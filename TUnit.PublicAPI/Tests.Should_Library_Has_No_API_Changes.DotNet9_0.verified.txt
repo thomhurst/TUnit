@@ -20,6 +20,7 @@ namespace .
     public interface IShouldSource<T> : ..IShouldSource
     {
         .<T> Context { get; }
+        string? ConsumeBecauseMessage();
     }
     public sealed class ShouldAssertion<T> : ..IShouldSource, ..IShouldSource<T>
     {
@@ -40,6 +41,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> BeEmpty() { }
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
+        public ..ShouldCollectionSource<TItem> Because(string message) { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
@@ -57,11 +59,13 @@ namespace .
     {
         public ShouldContinuation(.<T> context) { }
         public .<T> Context { get; }
+        public ..ShouldContinuation<T> Because(string message) { }
     }
     public readonly struct ShouldDelegateSource<T> : ..IShouldSource, ..IShouldSource<T>
     {
         public ShouldDelegateSource(.<T> context) { }
         public .<T> Context { get; }
+        public ..ShouldDelegateSource<T> Because(string message) { }
         public ..ShouldAssertion<TException> Throw<TException>()
             where TException :  { }
         public ..ShouldAssertion<TException> ThrowExactly<TException>()
@@ -71,6 +75,7 @@ namespace .
     {
         public ShouldSource(.<T> context) { }
         public .<T> Context { get; }
+        public ..ShouldSource<T> Because(string message) { }
     }
 }
 namespace .

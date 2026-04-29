@@ -20,8 +20,9 @@ namespace TUnit.Tests.Shared;
 /// The fix is to load the netstandard2.0 builds (compatible with both Net90 ref assemblies and the
 /// test runtime). Each analyzer test csproj copies the relevant netstandard2.0 build into the test
 /// bin via a <c>&lt;None Include="..." Link="X.netstandard2.0.dll" CopyToOutputDirectory="..."&gt;</c>
-/// item; this helper resolves the copy when present, falling back to the runtime assembly path so
-/// the build doesn't hard-fail before the copy item runs.
+/// item; this helper resolves that copy and fails fast if it is missing. Falling back to the
+/// runtime assembly path would silently reintroduce the CS1705/symbol-resolution failure this
+/// helper exists to avoid.
 /// </para>
 /// <para>
 /// Linked into multiple test projects via <c>&lt;Compile Include="..\SharedTestHelpers\..."&gt;</c>;
@@ -34,6 +35,14 @@ internal static class AnalyzerTestCompatibility
     public static string GetCompatibleDllPath(string assemblyName, Assembly fallback)
     {
         var ns20Path = Path.Combine(AppContext.BaseDirectory, $"{assemblyName}.netstandard2.0.dll");
-        return File.Exists(ns20Path) ? ns20Path : fallback.Location;
+        if (!File.Exists(ns20Path))
+        {
+            throw new FileNotFoundException(
+                $"netstandard2.0 build of {assemblyName} not found at '{ns20Path}'. " +
+                "Run 'dotnet build' before running analyzer tests.",
+                ns20Path);
+        }
+
+        return ns20Path;
     }
 }

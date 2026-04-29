@@ -14,6 +14,9 @@ namespace TUnit.Assertions.Should.Attributes;
 /// <c>TUnit.Assertions.SourceGenerator</c> and get their own auto-conjugation pass — to override
 /// a negated name, place a separate <c>[ShouldName]</c> on the negated assertion class (TUnit's
 /// own naming convention typically gives positive and negated assertions distinct classes).
+/// This attribute applies only to assertion classes. Methods decorated with
+/// <c>[GenerateAssertion]</c> use generated, file-scoped assertion classes that cannot be annotated;
+/// those Should names are always produced by automatic conjugation.
 /// </remarks>
 /// <example>
 /// <code>

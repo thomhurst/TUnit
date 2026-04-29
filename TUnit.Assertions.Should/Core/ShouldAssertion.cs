@@ -42,4 +42,7 @@ public sealed class ShouldAssertion<T> : IShouldSource<T>
     public ShouldContinuation<T> And => new(_inner.And.Context);
 
     public ShouldContinuation<T> Or => new(_inner.Or.Context);
+
+    string? IShouldSource<T>.ConsumeBecauseMessage()
+        => null;
 }

@@ -115,6 +115,72 @@ public class ShouldExtensionGeneratorTests
     }
 
     [Test]
+    public async Task Obsolete_attribute_is_forwarded()
+    {
+        var output = await RunGenerator("""
+            using System;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class LegacyAssertion : Assertion<int>
+            {
+                public LegacyAssertion(AssertionContext<int> context) : base(context) { }
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to be legacy";
+            }
+
+            public static class LegacyExtensions
+            {
+                [Obsolete("Use IsModern instead.")]
+                public static LegacyAssertion IsLegacy(this IAssertionSource<int> source)
+                    => new(source.Context);
+            }
+            """);
+
+        await Assert.That(output).Contains("Obsolete");
+        await Assert.That(output).Contains("Use IsModern instead.");
+    }
+
+    [Test]
+    public async Task Wrapper_generation_deduplicates_overridden_instance_methods()
+    {
+        var output = await RunGenerator("""
+            using TUnit.Assertions.Core;
+            using TUnit.Assertions.Should.Attributes;
+            using TUnit.Assertions.Should.Core;
+
+            namespace MyNamespace;
+
+            public class BaseWrappedAssertion : Assertion<int>
+            {
+                public BaseWrappedAssertion(AssertionContext<int> context) : base(context) { }
+                public virtual BaseWrappedAssertion IsReady() => new(Context);
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to be ready";
+            }
+
+            public sealed class DerivedWrappedAssertion : BaseWrappedAssertion
+            {
+                public DerivedWrappedAssertion(AssertionContext<int> context) : base(context) { }
+                public override BaseWrappedAssertion IsReady() => new(Context);
+            }
+
+            [ShouldGeneratePartial(typeof(DerivedWrappedAssertion))]
+            public sealed partial class ShouldDerivedSource : IShouldSource<int>
+            {
+                public AssertionContext<int> Context { get; }
+                public ShouldDerivedSource(AssertionContext<int> context) => Context = context;
+                string? IShouldSource<int>.ConsumeBecauseMessage() => null;
+            }
+            """);
+
+        await Assert.That(CountOccurrences(output, " BeReady(")).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task IsNot_prefix_conjugates_to_NotBe()
     {
         var output = await RunGenerator("""
@@ -229,5 +295,17 @@ public class ShouldExtensionGeneratorTests
 
         yield return MetadataReference.CreateFromFile(typeof(Assertion<>).Assembly.Location);
         yield return MetadataReference.CreateFromFile(typeof(TUnit.Assertions.Should.Core.IShouldSource).Assembly.Location);
+    }
+
+    private static int CountOccurrences(string value, string search)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = value.IndexOf(search, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += search.Length;
+        }
+        return count;
     }
 }
