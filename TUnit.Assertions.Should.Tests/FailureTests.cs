@@ -19,6 +19,23 @@ public class FailureTests
     }
 
     [Test]
+    public async Task Boolean_generated_extension_failure_throws_assertion_exception()
+    {
+        await Assert.That(async () => await false.Should().BeTrue())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task DateTime_specialized_extension_failure_throws_assertion_exception()
+    {
+        var value = new DateTime(2026, 4, 29, 12, 0, 0);
+        var expected = value.AddDays(1);
+
+        await Assert.That(async () => await value.Should().BeEqualTo(expected))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
     public async Task String_generated_extension_failure_throws_assertion_exception()
     {
         await Assert.That(async () => await "hello".Should().Contain("missing"))
@@ -50,10 +67,61 @@ public class FailureTests
     }
 
     [Test]
-    public async Task Delegate_assertion_failure_throws_assertion_exception()
+    public async Task Task_void_returning_value_failure_throws_assertion_exception()
+    {
+        await Assert.That(async () => await Task.CompletedTask.Should().BeNull())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Task_value_returning_value_failure_throws_assertion_exception()
+    {
+        var task = Task.FromResult(42);
+
+        await Assert.That(async () => await task.Should().BeNull())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task ValueTask_void_returning_value_failure_throws_assertion_exception()
+    {
+        await Assert.That(async () => await ValueTask.CompletedTask.Should().BeNull())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Action_void_returning_delegate_failure_throws_assertion_exception()
     {
         Action action = () => { };
+
         await Assert.That(async () => await action.Should().Throw<InvalidOperationException>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Func_value_returning_delegate_failure_throws_assertion_exception()
+    {
+        Func<int> func = () => 42;
+
+        await Assert.That(async () => await func.Should().BeEqualTo(7))
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Async_void_returning_delegate_failure_throws_assertion_exception()
+    {
+        Func<Task> action = () => Task.CompletedTask;
+
+        await Assert.That(async () => await action.Should().Throw<InvalidOperationException>())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Async_value_returning_delegate_failure_throws_assertion_exception()
+    {
+        Func<Task<int>> func = () => Task.FromResult(42);
+
+        await Assert.That(async () => await func.Should().BeEqualTo(7))
             .Throws<AssertionException>();
     }
 
