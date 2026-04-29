@@ -20,9 +20,10 @@ internal static class NameConjugator
             return methodName;
         }
 
-        // Order: longest-prefix-first so IsNot/DoesNot win over Is/Does.
+        // Order: longest-prefix-first so negated prefixes win over their positive forms.
         if (TryReplacePrefix(methodName, "IsNot", "NotBe", out var s)) return s;
         if (TryReplacePrefix(methodName, "Is", "Be", out s)) return s;
+        if (TryReplacePrefix(methodName, "HasNot", "NotHave", out s)) return s;
         if (TryReplacePrefix(methodName, "Has", "Have", out s)) return s;
         if (TryReplacePrefix(methodName, "DoesNot", "Not", out s)) return s;
         if (TryReplacePrefix(methodName, "Does", "", out s)) return s;
@@ -53,7 +54,8 @@ internal static class NameConjugator
     /// First-word trailing-s drop. <c>Contains</c>→<c>Contain</c>, <c>StartsWith</c>→<c>StartWith</c>.
     /// Recognises English <c>-es</c> third-person endings (<c>Matches</c>→<c>Match</c>,
     /// <c>Washes</c>→<c>Wash</c>, <c>Fixes</c>→<c>Fix</c>, <c>Buzzes</c>→<c>Buzz</c>,
-    /// <c>Goes</c>→<c>Go</c>, <c>Passes</c>→<c>Pass</c>) and drops both letters in those cases.
+    /// <c>Goes</c>→<c>Go</c>, <c>Passes</c>→<c>Pass</c>) and consonant+<c>-ies</c>
+    /// endings (<c>Applies</c>→<c>Apply</c>).
     /// Plain <c>-ss</c> endings stay put so <c>Pass</c> remains <c>Pass</c>.
     /// </summary>
     private static bool TryDropTrailingS(string name, out string result)
@@ -74,6 +76,11 @@ internal static class NameConjugator
             return false;
         }
 
+        if (TryReplaceTrailingIes(name, firstWordEnd, out result))
+        {
+            return true;
+        }
+
         var dropCount = GetTrailingSDropCount(name, firstWordEnd);
         if (dropCount == 0)
         {
@@ -84,6 +91,24 @@ internal static class NameConjugator
         result = name.Substring(0, firstWordEnd - dropCount) + name.Substring(firstWordEnd);
         return true;
     }
+
+    private static bool TryReplaceTrailingIes(string name, int firstWordEnd, out string result)
+    {
+        if (firstWordEnd < 5
+            || name[firstWordEnd - 3] != 'i'
+            || name[firstWordEnd - 2] != 'e'
+            || IsVowel(name[firstWordEnd - 4]))
+        {
+            result = name;
+            return false;
+        }
+
+        result = name.Substring(0, firstWordEnd - 3) + "y" + name.Substring(firstWordEnd);
+        return true;
+    }
+
+    private static bool IsVowel(char c)
+        => c is 'a' or 'e' or 'i' or 'o' or 'u' or 'A' or 'E' or 'I' or 'O' or 'U';
 
     /// <summary>
     /// Returns how many trailing letters of the first word should be removed: 2 for an English

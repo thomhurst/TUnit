@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Should.Core;
 /// <c>Throw&lt;TException&gt;</c> / <c>ThrowExactly&lt;TException&gt;</c> instance methods
 /// that mirror <c>FuncAssertion</c>/<c>DelegateAssertion</c> behavior in TUnit.Assertions.
 /// </summary>
-public sealed class ShouldDelegateSource<T> : IShouldSource<T>
+public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
 {
     public AssertionContext<T> Context { get; }
 

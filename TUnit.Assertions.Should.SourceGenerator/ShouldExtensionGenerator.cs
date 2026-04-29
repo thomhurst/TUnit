@@ -520,8 +520,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
 
         if (type.DeclaredAccessibility != Accessibility.Public
-            || !type.IsStatic
-            || type.IsGenericType)
+            || !type.IsStatic)
+        {
+            return;
+        }
+
+        // Generic static containers are not supported; [AssertionExtension] methods live on
+        // non-generic static classes so the generated Should wrapper has a concrete owner.
+        if (type.IsGenericType)
         {
             return;
         }
