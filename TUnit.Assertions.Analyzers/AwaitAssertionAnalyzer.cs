@@ -68,6 +68,12 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         );
     }
 
+    // Walks the syntactic parent chain. Stops at IBlockOperation/IDelegateCreationOperation as
+    // negative answers — that means the invocation was used as a statement / lambda body without
+    // an enclosing await. This catches the common `value.Should();` mistake but produces a false
+    // positive for split-variable patterns (`var src = value.Should(); await src.X();`) since the
+    // declaration's parent block is reached before any await. Fixing requires usage-site
+    // dataflow analysis; left as a known limitation.
     private static bool IsAwaited(IInvocationOperation invocationOperation)
     {
         var parent = invocationOperation.Parent;

@@ -39,6 +39,8 @@
           Link="TUnit.TestProject.Library.netstandard2.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

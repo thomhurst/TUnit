@@ -82,6 +82,11 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         };
     }
 
+    // Statement-order match only — not control-flow aware. An assertion inside an `if (cond)` or
+    // `try`/`catch` branch suppresses warnings on subsequent uses even when the assertion may not
+    // have run on every path. Accepting that imprecision keeps the analyzer cheap; the alternative
+    // (full dataflow analysis via Roslyn's IFlowAnalysis) is significant complexity for a niche
+    // false-suppression case. See AwaitAssertionAnalyzer for the symmetric awaitedness check.
     private bool WasAssertedNotNull(
         ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
