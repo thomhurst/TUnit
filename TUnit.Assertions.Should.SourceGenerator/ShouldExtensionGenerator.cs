@@ -126,19 +126,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         // Phase 2 — union dedup sets across all references.
         var alreadyBaked = new HashSet<string>(StringComparer.Ordinal);
-        var wrappedReturnTypeKeys = new HashSet<string>(StringComparer.Ordinal);
         foreach (var r in refResults)
         {
             foreach (var name in r.AlreadyBakedNames)
             {
                 alreadyBaked.Add(name);
-            }
-            foreach (var w in r.Wrappers)
-            {
-                foreach (var m in w.Methods)
-                {
-                    wrappedReturnTypeKeys.Add(m.ReturnTypeFullName);
-                }
             }
         }
 
@@ -159,34 +151,24 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         {
             WalkForWrappers(compilation.Assembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, localWrappers, isCurrentAssembly: true);
         }
-        foreach (var w in localWrappers)
-        {
-            foreach (var m in w.Methods)
-            {
-                wrappedReturnTypeKeys.Add(m.ReturnTypeFullName);
-            }
-        }
 
-        // Phase 4 — merge and apply post-walk dedup. Wrappers own their return types, so any
-        // extension whose return type matches a wrapped type is suppressed; references whose
-        // ShouldNameExtensions counterpart is already baked are likewise dropped.
+        // Phase 4 — merge and apply post-walk dedup. Wrapper instance methods and Should-flavored
+        // extensions co-exist by design: the wrapper's [ShouldGeneratePartial] only emits methods
+        // whose source overload exactly matches a public ctor on the inner assertion (the simple-
+        // factory rule), so overloads with optional/default parameters land only on the extension
+        // surface. Instance methods take overload-resolution precedence at call sites, so there's
+        // no ambiguity. References whose ShouldNameExtensions counterpart is already baked are
+        // dropped to prevent CS0121.
         var allMethods = ImmutableArray.CreateBuilder<MethodData>();
         foreach (var m in localMethods)
         {
-            if (!wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName))
-            {
-                allMethods.Add(m);
-            }
+            allMethods.Add(m);
         }
         foreach (var r in refResults)
         {
             foreach (var m in r.Methods)
             {
                 if (alreadyBaked.Contains($"Should{m.ContainerName}"))
-                {
-                    continue;
-                }
-                if (wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName))
                 {
                     continue;
                 }
@@ -314,32 +296,29 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             CollectWrapper(nested, marker, assertionBase, assertionContext, builder, isCurrentAssembly);
         }
 
-        if (!type.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, marker)))
-        {
-            return;
-        }
-
-        // Locate the single instance field whose type derives from Assertion<T>. Convention-based,
-        // matches the ShouldCollectionSource layout (private readonly CollectionAssertion<TItem> _inner).
-        IFieldSymbol? wrappedField = null;
+        // Read the wrapped type from [ShouldGeneratePartial(typeof(...))]. The attribute's
+        // single ctor argument names the wrapped definition explicitly, so the wrapper class
+        // is free to construct its own AssertionContext rather than piggybacking on the
+        // wrapped type's constructor. For 1-arity generics the open form is supplied
+        // (typeof(Foo<>)) and we substitute the wrapper class's type parameter to close it.
+        INamedTypeSymbol? wrappedType = null;
         ITypeSymbol? wrappedAssertionTypeArg = null;
-        foreach (var member in type.GetMembers())
+        foreach (var attr in type.GetAttributes())
         {
-            if (member is IFieldSymbol field && !field.IsStatic
-                && field.Type is INamedTypeSymbol fieldType
-                && DerivesFromAssertion(fieldType, assertionBase, out var typeArg))
-            {
-                if (wrappedField is not null)
-                {
-                    return; // Ambiguous — multiple Assertion-derived fields. Skip silently.
-                }
-                wrappedField = field;
-                wrappedAssertionTypeArg = typeArg;
-            }
+            if (!SymbolEqualityComparer.Default.Equals(attr.AttributeClass, marker)) continue;
+            if (attr.ConstructorArguments.Length != 1) continue;
+            if (attr.ConstructorArguments[0].Value is not INamedTypeSymbol declared) continue;
+
+            var closed = CloseWrappedType(declared, type);
+            if (closed is null) continue;
+            if (!DerivesFromAssertion(closed, assertionBase, out var typeArg)) continue;
+
+            wrappedType = closed;
+            wrappedAssertionTypeArg = typeArg;
+            break;
         }
 
-        if (wrappedField is null || wrappedAssertionTypeArg is null
-            || wrappedField.Type is not INamedTypeSymbol wrappedType)
+        if (wrappedType is null || wrappedAssertionTypeArg is null)
         {
             return;
         }
@@ -370,6 +349,30 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             AssertionTypeArgDisplay: wrappedAssertionTypeArg.ToDisplayString(NoGlobalFormat),
             Methods: new EquatableArray<WrapperMethodData>(methods),
             IsCurrentAssembly: isCurrentAssembly));
+    }
+
+    /// <summary>
+    /// Closes <paramref name="declared"/> against <paramref name="wrapper"/>'s type parameters.
+    /// Already-closed types pass through unchanged. Open generics whose arity matches the wrapper
+    /// are constructed by substituting the wrapper's type parameters in declaration order — this
+    /// covers the typical <c>typeof(Foo&lt;&gt;)</c> on a 1-arity wrapper case. Anything else
+    /// returns null so the caller skips emission.
+    /// </summary>
+    private static INamedTypeSymbol? CloseWrappedType(INamedTypeSymbol declared, INamedTypeSymbol wrapper)
+    {
+        if (!declared.IsUnboundGenericType && !declared.IsGenericType)
+        {
+            return declared;
+        }
+        if (!declared.IsUnboundGenericType)
+        {
+            return declared; // already closed
+        }
+        if (declared.TypeParameters.Length != wrapper.TypeParameters.Length)
+        {
+            return null;
+        }
+        return declared.OriginalDefinition.Construct(wrapper.TypeParameters.Cast<ITypeSymbol>().ToArray());
     }
 
     private static IEnumerable<IMethodSymbol> EnumerateInstanceMethods(INamedTypeSymbol type)
@@ -631,37 +634,10 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     }
 
     private static string FormatObsolete(AttributeData attr)
-    {
-        var args = new List<string>();
-        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string message)
-        {
-            args.Add($"\"{message.Replace("\"", "\\\"")}\"");
-        }
-        if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is bool isError && isError)
-        {
-            args.Add("true");
-        }
-        var diagnosticIdPart = "";
-        var urlFormatPart = "";
-        foreach (var named in attr.NamedArguments)
-        {
-            if (named.Key == "DiagnosticId" && named.Value.Value is string id)
-            {
-                diagnosticIdPart = $", DiagnosticId = \"{id}\"";
-            }
-            else if (named.Key == "UrlFormat" && named.Value.Value is string url)
-            {
-                urlFormatPart = $", UrlFormat = \"{url}\"";
-            }
-        }
-        return $"[global::System.Obsolete({string.Join(", ", args)}{diagnosticIdPart}{urlFormatPart})]";
-    }
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatObsolete(attr, globalQualifier: "global::");
 
     private static string FormatEditorBrowsable(AttributeData attr)
-    {
-        var state = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is int s ? s : 0;
-        return $"[global::System.ComponentModel.EditorBrowsable((global::System.ComponentModel.EditorBrowsableState){state})]";
-    }
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatEditorBrowsable(attr, globalQualifier: "global::");
 
     private static List<string> CollectSuppressedTrimWarnings(ImmutableArray<AttributeData> attrs)
     {

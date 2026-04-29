@@ -366,38 +366,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
 
     private static string FormatObsoleteAttribute(AttributeData attr)
-    {
-        var args = new List<string>();
-        if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string message)
-        {
-            args.Add($"\"{message.Replace("\"", "\\\"")}\"");
-        }
-        if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is bool isError && isError)
-        {
-            args.Add("true");
-        }
-
-        var diagnosticIdPart = "";
-        var urlFormatPart = "";
-        foreach (var named in attr.NamedArguments)
-        {
-            if (named.Key == "DiagnosticId" && named.Value.Value is string id)
-            {
-                diagnosticIdPart = $", DiagnosticId = \"{id}\"";
-            }
-            else if (named.Key == "UrlFormat" && named.Value.Value is string url)
-            {
-                urlFormatPart = $", UrlFormat = \"{url}\"";
-            }
-        }
-        return $"[System.Obsolete({string.Join(", ", args)}{diagnosticIdPart}{urlFormatPart})]";
-    }
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatObsolete(attr);
 
     private static string FormatEditorBrowsableAttribute(AttributeData attr)
-    {
-        var state = attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is int s ? s : 0;
-        return $"[System.ComponentModel.EditorBrowsable((System.ComponentModel.EditorBrowsableState){state})]";
-    }
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatEditorBrowsable(attr);
 
     /// <summary>
     /// Checks if a type is file-scoped (has 'file' accessibility)
