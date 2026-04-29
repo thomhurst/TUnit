@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -69,106 +70,186 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         });
     }
 
+    /// <summary>
+    /// Caches the data extracted from each referenced assembly, keyed on the
+    /// <see cref="MetadataReference"/> instance. Roslyn typically reuses the same
+    /// <c>MetadataReference</c> across compilations as long as the underlying assembly
+    /// hasn't been rebuilt, so cache hits eliminate the expensive cross-assembly walk on
+    /// every keystroke. The cache stores raw walk results (no dedup applied) so that the
+    /// dedup sets — built from the union of all references plus the current compilation —
+    /// can be applied at merge time without invalidating cache entries.
+    /// </summary>
+    private static readonly ConcurrentDictionary<MetadataReference, ReferenceData> s_referenceCache = new();
+
+    private sealed record ReferenceData(
+        EquatableArray<MethodData> Methods,
+        EquatableArray<WrapperData> Wrappers,
+        EquatableArray<string> AlreadyBakedNames);
+
     private static GeneratorPayload Collect(Compilation compilation)
     {
-        var methods = CollectMethods(compilation, out var wrappedReturnTypeKeys);
-        var wrappers = CollectWrappers(compilation);
-        // Filter out methods whose return type is owned by a wrapper — wrapper instance methods
-        // take precedence at call sites; the corresponding extension would be dead code.
-        var filteredMethods = methods.Length == 0
-            ? methods
-            : new EquatableArray<MethodData>(methods.Where(m => !wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName)).ToArray());
-        return new GeneratorPayload(filteredMethods, wrappers);
-    }
-
-    private static EquatableArray<MethodData> CollectMethods(Compilation compilation, out HashSet<string> wrappedReturnTypeKeys)
-    {
-        wrappedReturnTypeKeys = CollectWrappedReturnTypeKeys(compilation);
-
         var assertionSource = compilation.GetTypeByMetadataName(AssertionSourceFullName);
         var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
         var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
+        var shouldNameAttr = compilation.GetTypeByMetadataName(ShouldNameAttributeFullName);
+        var partialMarker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
+
         if (assertionSource is null || assertionBase is null || assertionContext is null)
         {
-            return new EquatableArray<MethodData>(Array.Empty<MethodData>());
+            return new GeneratorPayload(
+                new EquatableArray<MethodData>(Array.Empty<MethodData>()),
+                new EquatableArray<WrapperData>(Array.Empty<WrapperData>()));
         }
 
+        // Phase 1 — per-reference scan, cached by MetadataReference identity.
+        // Skip references that don't transitively reference TUnit.Assertions: the BCL plus arbitrary
+        // NuGet packages can't possibly contain extension methods on IAssertionSource<T>, and the
+        // closure pre-filter is the single biggest perf win for the generator.
+        var assertionsAssembly = assertionSource.ContainingAssembly;
+        var refResults = new List<ReferenceData>();
+        foreach (var refAssembly in compilation.SourceModule.ReferencedAssemblySymbols)
+        {
+            if (!ReferencesAssertionsAssembly(refAssembly, assertionsAssembly))
+            {
+                continue;
+            }
+            refResults.Add(GetOrComputeReferenceData(
+                compilation, refAssembly, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker));
+        }
+
+        // Phase 2 — union dedup sets across all references.
+        var alreadyBaked = new HashSet<string>(StringComparer.Ordinal);
+        var wrappedReturnTypeKeys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var r in refResults)
+        {
+            foreach (var name in r.AlreadyBakedNames)
+            {
+                alreadyBaked.Add(name);
+            }
+            foreach (var w in r.Wrappers)
+            {
+                foreach (var m in w.Methods)
+                {
+                    wrappedReturnTypeKeys.Add(m.ReturnTypeFullName);
+                }
+            }
+        }
+
+        // Phase 3 — walk the current compilation (cannot be cached: changes on every edit).
+        var localMethods = ImmutableArray.CreateBuilder<MethodData>();
+        var localCtx = new CollectionContext(
+            compilation,
+            assertionSource,
+            assertionBase,
+            assertionContext,
+            shouldNameAttr,
+            alreadyBaked,
+            localMethods);
+        WalkNamespace(compilation.Assembly.GlobalNamespace, localCtx);
+
+        var localWrappers = new List<WrapperData>();
+        if (partialMarker is not null)
+        {
+            WalkForWrappers(compilation.Assembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, localWrappers, isCurrentAssembly: true);
+        }
+        foreach (var w in localWrappers)
+        {
+            foreach (var m in w.Methods)
+            {
+                wrappedReturnTypeKeys.Add(m.ReturnTypeFullName);
+            }
+        }
+
+        // Phase 4 — merge and apply post-walk dedup. Wrappers own their return types, so any
+        // extension whose return type matches a wrapped type is suppressed; references whose
+        // ShouldNameExtensions counterpart is already baked are likewise dropped.
+        var allMethods = ImmutableArray.CreateBuilder<MethodData>();
+        foreach (var m in localMethods)
+        {
+            if (!wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName))
+            {
+                allMethods.Add(m);
+            }
+        }
+        foreach (var r in refResults)
+        {
+            foreach (var m in r.Methods)
+            {
+                if (alreadyBaked.Contains($"Should{m.ContainerName}"))
+                {
+                    continue;
+                }
+                if (wrappedReturnTypeKeys.Contains(m.ReturnTypeFullName))
+                {
+                    continue;
+                }
+                allMethods.Add(m);
+            }
+        }
+
+        return new GeneratorPayload(
+            new EquatableArray<MethodData>(allMethods.ToArray()),
+            new EquatableArray<WrapperData>(localWrappers.ToArray()));
+    }
+
+    /// <summary>
+    /// Returns the cached <see cref="ReferenceData"/> for <paramref name="refAssembly"/>, or
+    /// performs a one-shot scan and stores the result. The scan is dedup-free — the union dedup
+    /// is applied at merge time, so a cache entry remains valid even when other references in
+    /// the compilation change.
+    /// </summary>
+    private static ReferenceData GetOrComputeReferenceData(
+        Compilation compilation,
+        IAssemblySymbol refAssembly,
+        INamedTypeSymbol assertionSource,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        INamedTypeSymbol? shouldNameAttr,
+        INamedTypeSymbol? partialMarker)
+    {
+        var metadataRef = compilation.GetMetadataReference(refAssembly);
+        if (metadataRef is not null && s_referenceCache.TryGetValue(metadataRef, out var cached))
+        {
+            return cached;
+        }
+
+        var methods = ImmutableArray.CreateBuilder<MethodData>();
         var ctx = new CollectionContext(
             compilation,
             assertionSource,
             assertionBase,
             assertionContext,
-            compilation.GetTypeByMetadataName(ShouldNameAttributeFullName),
-            CollectAlreadyBakedShouldExtensionNames(compilation),
-            ImmutableArray.CreateBuilder<MethodData>());
+            shouldNameAttr,
+            new HashSet<string>(StringComparer.Ordinal), // no per-reference dedup; applied at merge
+            methods);
+        WalkNamespace(refAssembly.GlobalNamespace, ctx);
 
-        // Always walk the current compilation — first-party assertions live here.
-        WalkNamespace(compilation.Assembly.GlobalNamespace, ctx);
-
-        // Skip referenced assemblies that don't transitively reference TUnit.Assertions.
-        // For a typical consumer project this is most of the BCL plus arbitrary NuGet packages,
-        // and walking them costs tens of thousands of types × methods that all fail the first
-        // filter ("extension method on IAssertionSource<T>"). Pre-filtering by reference closure
-        // is the single biggest perf win for the generator.
-        var assertionsAssembly = assertionSource.ContainingAssembly;
-        foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
+        var wrappers = new List<WrapperData>();
+        if (partialMarker is not null)
         {
-            if (!ReferencesAssertionsAssembly(reference, assertionsAssembly))
+            WalkForWrappers(refAssembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, wrappers, isCurrentAssembly: false);
+        }
+
+        var bakedNames = new List<string>();
+        var bakedNs = LookupNamespace(refAssembly.GlobalNamespace, ShouldExtensionsNamespace);
+        if (bakedNs is not null)
+        {
+            foreach (var t in bakedNs.GetTypeMembers())
             {
-                continue;
-            }
-            WalkNamespace(reference.GlobalNamespace, ctx);
-        }
-
-        return new EquatableArray<MethodData>(ctx.Builder.ToArray());
-    }
-
-    private static EquatableArray<WrapperData> CollectWrappers(Compilation compilation)
-    {
-        var marker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
-        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
-        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
-        if (marker is null || assertionBase is null || assertionContext is null)
-        {
-            return new EquatableArray<WrapperData>(Array.Empty<WrapperData>());
-        }
-
-        var builder = new List<WrapperData>();
-        WalkForWrappers(compilation.Assembly.GlobalNamespace, marker, assertionBase, assertionContext, builder, isCurrentAssembly: true);
-        // Wrappers in referenced assemblies (e.g. TUnit.Assertions.Should.dll already shipping
-        // the baked partials) must NOT be re-emitted in consumer compilations.
-        return new EquatableArray<WrapperData>(builder.ToArray());
-    }
-
-    private static HashSet<string> CollectWrappedReturnTypeKeys(Compilation compilation)
-    {
-        var keys = new HashSet<string>(StringComparer.Ordinal);
-        var marker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
-        var assertionBase = compilation.GetTypeByMetadataName(AssertionBaseFullName);
-        var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
-        if (marker is null || assertionBase is null || assertionContext is null)
-        {
-            return keys;
-        }
-
-        // Walk both source and references — extension methods in any assembly returning a type
-        // covered by ANY wrapper (current or already-baked) should be suppressed to avoid dead code.
-        var perAssemblyWrappers = new List<WrapperData>();
-        WalkForWrappers(compilation.Assembly.GlobalNamespace, marker, assertionBase, assertionContext, perAssemblyWrappers, isCurrentAssembly: true);
-        foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
-        {
-            WalkForWrappers(reference.GlobalNamespace, marker, assertionBase, assertionContext, perAssemblyWrappers, isCurrentAssembly: false);
-        }
-
-        foreach (var wrapper in perAssemblyWrappers)
-        {
-            foreach (var method in wrapper.Methods)
-            {
-                keys.Add(method.ReturnTypeFullName);
+                bakedNames.Add(t.Name);
             }
         }
 
-        return keys;
+        var result = new ReferenceData(
+            new EquatableArray<MethodData>(methods.ToArray()),
+            new EquatableArray<WrapperData>(wrappers.ToArray()),
+            new EquatableArray<string>(bakedNames.ToArray()));
+
+        if (metadataRef is not null)
+        {
+            s_referenceCache.TryAdd(metadataRef, result);
+        }
+        return result;
     }
 
     private static void WalkForWrappers(
@@ -356,22 +437,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
         return false;
-    }
-
-    private static HashSet<string> CollectAlreadyBakedShouldExtensionNames(Compilation compilation)
-    {
-        var result = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var reference in compilation.SourceModule.ReferencedAssemblySymbols)
-        {
-            if (SymbolEqualityComparer.Default.Equals(reference, compilation.Assembly)) continue;
-            var ns = LookupNamespace(reference.GlobalNamespace, ShouldExtensionsNamespace);
-            if (ns is null) continue;
-            foreach (var type in ns.GetTypeMembers())
-            {
-                result.Add(type.Name);
-            }
-        }
-        return result;
     }
 
     private static INamespaceSymbol? LookupNamespace(INamespaceSymbol root, string dottedName)
@@ -662,12 +727,22 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return $"({enumType.ToDisplayString(NoGlobalFormat)})({defaultValue})";
         }
 
+        // Numeric literals need their C# type suffix or they'd default-bind to int/double:
+        // a `float` parameter with default 1.5f would otherwise emit `= 1.5` (a double literal)
+        // and fail to compile. Cast through invariant culture so locales using comma decimal
+        // separators don't produce malformed literals like `1,5F`.
         return defaultValue switch
         {
             string s => "\"" + s.Replace("\"", "\\\"") + "\"",
             bool b => b ? "true" : "false",
             char c => $"'{c}'",
-            _ => defaultValue.ToString() ?? "default",
+            float f => System.FormattableString.Invariant($"{f}F"),
+            double d => System.FormattableString.Invariant($"{d}D"),
+            decimal m => System.FormattableString.Invariant($"{m}M"),
+            long l => System.FormattableString.Invariant($"{l}L"),
+            ulong ul => System.FormattableString.Invariant($"{ul}UL"),
+            uint u => System.FormattableString.Invariant($"{u}U"),
+            _ => System.Convert.ToString(defaultValue, System.Globalization.CultureInfo.InvariantCulture) ?? "default",
         };
     }
 

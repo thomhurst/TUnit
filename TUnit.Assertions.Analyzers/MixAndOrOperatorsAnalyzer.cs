@@ -30,13 +30,13 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         }
 
         // Check if the awaited type implements IAssertionSource<T>/IShouldSource<T> or
-        // inherits from Assertion<T>/ShouldAssertion<T>.
+        // inherits from Assertion<T>. ShouldAssertion<T> is covered by the IShouldSource branch
+        // (it implements that interface), so it doesn't need a separate base-type check.
         var awaitedType = awaitOperation.Operation.Type;
         var isAssertionSource = awaitedType?.AllInterfaces.Any(x =>
             x.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.IAssertionSource"
                                             or "global::TUnit.Assertions.Should.Core.IShouldSource") == true;
-        var isAssertion = (awaitedType?.BaseType != null && IsAssertionType(awaitedType.BaseType))
-                       || IsShouldAssertionType(awaitedType);
+        var isAssertion = awaitedType?.BaseType != null && IsAssertionType(awaitedType.BaseType);
 
         if (!isAssertionSource && !isAssertion)
         {
@@ -68,8 +68,4 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         // Check base type recursively
         return IsAssertionType(type.BaseType);
     }
-
-    private static bool IsShouldAssertionType(ITypeSymbol? type)
-        => type is INamedTypeSymbol named
-           && named.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Should.Core.ShouldAssertion";
 }
