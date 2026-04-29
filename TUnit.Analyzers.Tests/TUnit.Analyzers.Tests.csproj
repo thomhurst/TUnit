@@ -12,6 +12,7 @@
     <PackageReference Include="NUnit" />
     <PackageReference Include="xunit.v3.extensibility.core" />
     <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
@@ -20,6 +21,32 @@
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
     <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+  </ItemGroup>
+
+  <!-- Copy netstandard2.0 builds into the test bin so the analyzer-test framework's
+       Net90 reference assemblies don't trigger CS1705 against the net10.0 builds otherwise
+       loaded via typeof(...).Assembly.Location. CS1705 is suppressed silently and the resulting
+       symbol-resolution failures cause analyzers to find nothing to flag. -->
+  <ItemGroup>
+    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="TUnit.Core.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll"
+          Link="TUnit.Assertions.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\netstandard2.0\TUnit.TestProject.Library.dll"
+          Link="TUnit.TestProject.Library.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
+          Condition="'$(TargetFramework)' == 'net8.0'"
+          Link="System.Text.Json.9.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TUnit.Playwright\TUnit.Playwright.csproj" />
+      <ProjectReference Include="..\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' != 'net472'">

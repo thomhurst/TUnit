@@ -32,8 +32,12 @@ public static class AnalyzerTestHelpers
         csTest.TestState.AdditionalReferences
             .AddRange(
                 [
-                    MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
+#if NET8_0
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
+#endif
                 ]
             );
 
@@ -139,8 +143,12 @@ public static class AnalyzerTestHelpers
 
         test.TestState.AdditionalReferences
             .AddRange([
-                MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
+#if NET8_0
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
+#endif
             ]);
 
         return test;
@@ -152,9 +160,7 @@ public static class AnalyzerTestHelpers
         return ReferenceAssemblies.NetFramework.Net472.Default;
 #elif NET8_0
         return ReferenceAssemblies.Net.Net80;
-#elif NET9_0
-        return ReferenceAssemblies.Net.Net90;
-#elif NET10_0_OR_GREATER
+#elif NET9_0_OR_GREATER
         return ReferenceAssemblies.Net.Net90;
 #else
         return ReferenceAssemblies.Net.Net80; // Default fallback

@@ -25,7 +25,8 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         "TUnit.Mocks",
         "TUnit.Mocks.Assertions",
         "TUnit.Mocks.Http",
-        "TUnit.Mocks.Logging"
+        "TUnit.Mocks.Logging",
+        "TUnit.Assertions.Should"
     ];
 
     protected override async Task<List<PackedProject>?> ExecuteAsync(IModuleContext context,

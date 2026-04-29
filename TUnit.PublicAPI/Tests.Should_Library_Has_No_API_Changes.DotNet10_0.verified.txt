@@ -1,0 +1,763 @@
+[assembly: .(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+namespace .
+{
+    [(.Class, AllowMultiple=false)]
+    public sealed class ShouldGeneratePartialAttribute : 
+    {
+        public ShouldGeneratePartialAttribute( wrappedTypeDefinition) { }
+        public  WrappedTypeDefinition { get; }
+    }
+    [(.Class, AllowMultiple=false)]
+    public sealed class ShouldNameAttribute : 
+    {
+        public ShouldNameAttribute(string name) { }
+        public string Name { get; }
+    }
+}
+namespace .
+{
+    public interface IShouldSource { }
+    public interface IShouldSource<T> : ..IShouldSource
+    {
+        .<T> Context { get; }
+        string? ConsumeBecauseMessage();
+    }
+    public sealed class ShouldAssertion<T> : ..IShouldSource, ..IShouldSource<T>
+    {
+        public ShouldAssertion(.<T> context, .<T> inner) { }
+        public ..ShouldContinuation<T> And { get; }
+        public .<T> Context { get; }
+        public ..ShouldContinuation<T> Or { get; }
+        public ..ShouldAssertion<T> Because(string message) { }
+        public .<T?> GetAwaiter() { }
+    }
+    [..ShouldGeneratePartial(typeof(.<!0>))]
+    public sealed class ShouldCollectionSource<TItem> : ..IShouldSource, ..IShouldSource<.<TItem>>
+    {
+        public ShouldCollectionSource(.<TItem>? value, string? expression) { }
+        public .<.<TItem>> Context { get; }
+        public ..ShouldAssertion<.<TItem>> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> BeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TItem>> BeInOrder() { }
+        public ..ShouldCollectionSource<TItem> Because(string message) { }
+        public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TItem>> HaveSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public readonly struct ShouldContinuation<T> : ..IShouldSource, ..IShouldSource<T>
+    {
+        public ShouldContinuation(.<T> context) { }
+        public .<T> Context { get; }
+        public ..ShouldContinuation<T> Because(string message) { }
+    }
+    public readonly struct ShouldDelegateSource<T> : ..IShouldSource, ..IShouldSource<T>
+    {
+        public ShouldDelegateSource(.<T> context) { }
+        public .<T> Context { get; }
+        public ..ShouldDelegateSource<T> Because(string message) { }
+        public ..ShouldAssertion<TException> Throw<TException>()
+            where TException :  { }
+        public ..ShouldAssertion<TException> ThrowExactly<TException>()
+            where TException :  { }
+    }
+    public readonly struct ShouldSource<T> : ..IShouldSource, ..IShouldSource<T>
+    {
+        public ShouldSource(.<T> context) { }
+        public .<T> Context { get; }
+        public ..ShouldSource<T> Because(string message) { }
+    }
+}
+namespace .
+{
+    public static class ShouldArrayAssertionExtensions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T[]> BeEmpty<T>(this ..IShouldSource<T[]> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<.<T>> BeSingleElement<T>(this ..IShouldSource<.<T>> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T[]> BeSingleElement<T>(this ..IShouldSource<T[]> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T[]> NotBeEmpty<T>(this ..IShouldSource<T[]> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<.<T>> NotBeSingleElement<T>(this ..IShouldSource<.<T>> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T[]> NotBeSingleElement<T>(this ..IShouldSource<T[]> source) { }
+    }
+    public static class ShouldAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeAfter(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfter(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfter(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfter(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfterOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfterOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfterOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeAfterOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBefore(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBefore(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBefore(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBefore(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBeforeOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBeforeOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBeforeOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<> BeBeforeOrEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<TEnum> BeDefined<TEnum>(this ..IShouldSource<TEnum> source)
+            where TEnum :  struct,  { }
+        public static ..ShouldAssertion<TValue> BeOfType<TValue>(this ..IShouldSource<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
+        public static ..ShouldAssertion<string> BeParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<TValue> EqualTo<TValue>(this ..IShouldSource<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
+        public static ..ShouldAssertion<TValue> Eventually<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
+        [("Use Length().IsEqualTo(expectedLength) instead.")]
+        public static ..ShouldAssertion<string> HaveLength(this ..IShouldSource<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
+        public static ..ShouldAssertion<TException> HaveMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> HaveMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TValue> HaveMessageEqualTo<TValue>(this ..IShouldSource<TValue> source, string expectedMessage,  comparison) { }
+        public static ..ShouldAssertion<TValue> HaveMessageStartingWith<TValue>(this ..IShouldSource<TValue> source, string expectedPrefix,  comparison) { }
+        public static ..ShouldAssertion<TEnum> NotBeDefined<TEnum>(this ..IShouldSource<TEnum> source)
+            where TEnum :  struct,  { }
+        public static ..ShouldAssertion<TValue> NotBeNull<TValue>(this ..IShouldSource<TValue> source)
+            where TValue :  class { }
+        public static ..ShouldAssertion<string> NotBeParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<TValue> WaitFor<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
+        public static ..ShouldAssertion<TException> WithInnerException<TException, TInnerException>(this ..IShouldSource<TException> source)
+            where TException : 
+            where TInnerException :  { }
+        public static ..ShouldAssertion<TException> WithMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageMatching<TException>(this ..IShouldSource<TException> source, .StringMatcher matcher, [.("matcher")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageMatching<TException>(this ..IShouldSource<TException> source, string pattern, [.("pattern")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageNotContaining<TException>(this ..IShouldSource<TException> source, string notExpectedSubstring,  comparison, [.("notExpectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithStackTraceContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+    }
+    public static class ShouldBetweenAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> BeBetween<TValue>(this ..IShouldSource<TValue> source, TValue minimum, TValue maximum, [.("minimum")] string? minimumExpression = null, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
+    }
+    public static class ShouldBooleanAssertionExtensions
+    {
+        public static ..ShouldAssertion<bool> BeFalse(this ..IShouldSource<bool> source) { }
+        public static ..ShouldAssertion<bool?> BeFalse(this ..IShouldSource<bool?> source) { }
+        public static ..ShouldAssertion<bool> BeTrue(this ..IShouldSource<bool> source) { }
+        public static ..ShouldAssertion<bool?> BeTrue(this ..IShouldSource<bool?> source) { }
+    }
+    public static class ShouldByteAssertions
+    {
+        public static ..ShouldAssertion<byte> BeEven(this ..IShouldSource<byte> source) { }
+        public static ..ShouldAssertion<byte> BeOdd(this ..IShouldSource<byte> source) { }
+        public static ..ShouldAssertion<byte> BeZero(this ..IShouldSource<byte> source) { }
+        public static ..ShouldAssertion<byte> NotBeZero(this ..IShouldSource<byte> source) { }
+    }
+    public static class ShouldCancellationTokenAssertionExtensions
+    {
+        public static ..ShouldAssertion<.CancellationToken> BeNone(this ..IShouldSource<.CancellationToken> source) { }
+        public static ..ShouldAssertion<.CancellationToken> NotBeNone(this ..IShouldSource<.CancellationToken> source) { }
+    }
+    public static class ShouldCollectionAllAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> All<TCollection, TItem>(this ..IShouldSource<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionAnyAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> Any<TCollection, TItem>(this ..IShouldSource<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionContainsAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> Contain<TCollection, TItem>(this ..IShouldSource<TCollection> source, TItem expected, .<TItem>? comparer = null, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionContainsPredicateAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> Contain<TCollection, TItem>(this ..IShouldSource<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? predicateExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionDoesNotContainAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> NotContain<TCollection, TItem>(this ..IShouldSource<TCollection> source, TItem expected, .<TItem>? comparer = null, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionDoesNotContainPredicateAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> NotContain<TCollection, TItem>(this ..IShouldSource<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionIsInDescendingOrderAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> BeInDescendingOrder<TCollection, TItem>(this ..IShouldSource<TCollection> source)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldCollectionIsInOrderAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> BeInOrder<TCollection, TItem>(this ..IShouldSource<TCollection> source)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldComparisonAssertionExtensions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeGreaterThan<TValue>(this ..IShouldSource<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeGreaterThanOrEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeLessThan<TValue>(this ..IShouldSource<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeLessThanOrEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
+    }
+    public static class ShouldDateOnlyAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeFirstDayOfMonth(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInFuture(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInPast(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeLastDayOfMonth(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekend(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeToday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeToday(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldDateOnlyEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDateTimeAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeInFuture(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInFutureUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInPast(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInPastUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekend(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeToday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeToday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeUtc(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldDateTimeEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDateTimeEqualsExactAssertionExtensions
+    {
+        public static ..ShouldAssertion<> EqualExact(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDateTimeOffsetAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeInFuture(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInFutureUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInPast(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeInPastUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeOnWeekend(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeToday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeUtc(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeLeapYear(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeToday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeUtc(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldDateTimeOffsetEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDayOfWeekAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeFriday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeMonday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeWeekday(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeWeekend(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldDecimalAssertions
+    {
+        public static ..ShouldAssertion<decimal> BeZero(this ..IShouldSource<decimal> source) { }
+        public static ..ShouldAssertion<decimal> NotBeZero(this ..IShouldSource<decimal> source) { }
+    }
+    public static class ShouldDecimalEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<decimal> BeEqualTo(this ..IShouldSource<decimal> source, decimal expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDecimalIsCloseToAssertionExtensions
+    {
+        public static ..ShouldAssertion<decimal> BeCloseTo(this ..IShouldSource<decimal> source, decimal expected, decimal tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class ShouldDecimalIsWithinPercentOfAssertionExtensions
+    {
+        public static ..ShouldAssertion<decimal> BeWithinPercentOf(this ..IShouldSource<decimal> source, decimal expected, decimal percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
+    public static class ShouldDirectoryHasFilesAssertionExtensions
+    {
+        public static ..ShouldAssertion<.DirectoryInfo> HaveFiles(this ..IShouldSource<.DirectoryInfo> source) { }
+    }
+    public static class ShouldDirectoryHasNoSubdirectoriesAssertionExtensions
+    {
+        public static ..ShouldAssertion<.DirectoryInfo> HaveNoSubdirectories(this ..IShouldSource<.DirectoryInfo> source) { }
+    }
+    public static class ShouldDirectoryInfoAssertionExtensions
+    {
+        public static ..ShouldAssertion<.DirectoryInfo> BeEmpty(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> BeHidden(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> BeRoot(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> BeSystemDirectory(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> NotBeEmpty(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> NotBeHidden(this ..IShouldSource<.DirectoryInfo> source) { }
+        public static ..ShouldAssertion<.DirectoryInfo> NotBeRoot(this ..IShouldSource<.DirectoryInfo> source) { }
+    }
+    public static class ShouldDoubleAssertions
+    {
+        public static ..ShouldAssertion<double> BeZero(this ..IShouldSource<double> source) { }
+        public static ..ShouldAssertion<double> NotBeZero(this ..IShouldSource<double> source) { }
+    }
+    public static class ShouldDoubleEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<double> BeEqualTo(this ..IShouldSource<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldDoubleIsCloseToAssertionExtensions
+    {
+        public static ..ShouldAssertion<double> BeCloseTo(this ..IShouldSource<double> source, double expected, double tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class ShouldDoubleIsWithinPercentOfAssertionExtensions
+    {
+        public static ..ShouldAssertion<double> BeWithinPercentOf(this ..IShouldSource<double> source, double expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
+    public static class ShouldEnumAssertionExtensions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> HaveFlag<TEnum>(this ..IShouldSource<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expectedFlagExpression = null)
+            where TEnum :  struct,  { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> HaveSameNameAs<TEnum>(this ..IShouldSource<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> HaveSameValueAs<TEnum>(this ..IShouldSource<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> NotHaveFlag<TEnum>(this ..IShouldSource<TEnum> source, TEnum unexpectedFlag, [.("unexpectedFlag")] string? unexpectedFlagExpression = null)
+            where TEnum :  struct,  { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> NotHaveSameNameAs<TEnum>(this ..IShouldSource<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TEnum> NotHaveSameValueAs<TEnum>(this ..IShouldSource<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? otherEnumValueExpression = null)
+            where TEnum :  struct,  { }
+    }
+    public static class ShouldEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> BeEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue? expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<TValue> BeEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue? expected, .<TValue> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public static class ShouldEquatableAssertionExtensions
+    {
+        public static ..ShouldAssertion<TActual> BeEquatableTo<TActual, TExpected>(this ..IShouldSource<TActual> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual : <TExpected> { }
+    }
+    public static class ShouldFileInfoAssertionExtensions
+    {
+        public static ..ShouldAssertion<.FileInfo> BeArchived(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> BeEmpty(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> BeHidden(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> BeSystemFile(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> HaveExtension(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> HaveNoExtension(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> NotBeEmpty(this ..IShouldSource<.FileInfo> source) { }
+        public static ..ShouldAssertion<.FileInfo> NotBeHidden(this ..IShouldSource<.FileInfo> source) { }
+    }
+    public static class ShouldFileIsNotExecutableAssertionExtensions
+    {
+        public static ..ShouldAssertion<.FileInfo> NotBeExecutable(this ..IShouldSource<.FileInfo> source) { }
+    }
+    public static class ShouldFileIsNotSystemAssertionExtensions
+    {
+        public static ..ShouldAssertion<.FileInfo> NotBeSystem(this ..IShouldSource<.FileInfo> source) { }
+    }
+    public static class ShouldFileSystemComparisonAssertions
+    {
+        public static ..ShouldAssertion<.DirectoryInfo> BeEquivalentTo(this ..IShouldSource<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.FileInfo> HaveSameContentAs(this ..IShouldSource<.FileInfo> source, .FileInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.DirectoryInfo> HaveSameStructureAs(this ..IShouldSource<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.DirectoryInfo> NotBeEquivalentTo(this ..IShouldSource<.DirectoryInfo> source, .DirectoryInfo expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.FileInfo> NotHaveSameContentAs(this ..IShouldSource<.FileInfo> source, .FileInfo expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldFloatAssertions
+    {
+        public static ..ShouldAssertion<float> BeZero(this ..IShouldSource<float> source) { }
+        public static ..ShouldAssertion<float> NotBeZero(this ..IShouldSource<float> source) { }
+    }
+    public static class ShouldFloatEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<float> BeEqualTo(this ..IShouldSource<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldFloatIsCloseToAssertionExtensions
+    {
+        public static ..ShouldAssertion<float> BeCloseTo(this ..IShouldSource<float> source, float expected, float tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class ShouldFloatIsWithinPercentOfAssertionExtensions
+    {
+        public static ..ShouldAssertion<float> BeWithinPercentOf(this ..IShouldSource<float> source, float expected, float percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
+    public static class ShouldGenericAssertions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> BeIn<T>(this ..IShouldSource<T> source, T[] collection) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> BeIn<T>(this ..IShouldSource<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> NotBeIn<T>(this ..IShouldSource<T> source, T[] collection) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> NotBeIn<T>(this ..IShouldSource<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
+    }
+    public static class ShouldGuidAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEmptyGuid(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeEmptyGuid(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldHasSingleItemAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> HaveSingleItem<TCollection, TItem>(this ..IShouldSource<TCollection> source)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldHasSingleItemPredicateAssertionExtensions
+    {
+        public static ..ShouldAssertion<TCollection> HaveSingleItem<TCollection, TItem>(this ..IShouldSource<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldHttpStatusCodeAssertionExtensions
+    {
+        public static ..ShouldAssertion<.HttpStatusCode> BeClientError(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> BeError(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> BeInformational(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> BeRedirection(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> BeServerError(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> BeSuccess(this ..IShouldSource<.HttpStatusCode> source) { }
+        public static ..ShouldAssertion<.HttpStatusCode> NotBeSuccess(this ..IShouldSource<.HttpStatusCode> source) { }
+    }
+    public static class ShouldIntAssertions
+    {
+        public static ..ShouldAssertion<int> BeEven(this ..IShouldSource<int> source) { }
+        public static ..ShouldAssertion<int> BeOdd(this ..IShouldSource<int> source) { }
+        public static ..ShouldAssertion<int> BeZero(this ..IShouldSource<int> source) { }
+        public static ..ShouldAssertion<int> NotBeZero(this ..IShouldSource<int> source) { }
+    }
+    public static class ShouldIntEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<int> BeEqualTo(this ..IShouldSource<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldIntIsCloseToAssertionExtensions
+    {
+        public static ..ShouldAssertion<int> BeCloseTo(this ..IShouldSource<int> source, int expected, int tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class ShouldIntIsWithinPercentOfAssertionExtensions
+    {
+        public static ..ShouldAssertion<int> BeWithinPercentOf(this ..IShouldSource<int> source, int expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
+    public static class ShouldIsDefaultAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> BeDefault<TValue>(this ..IShouldSource<TValue> source)
+            where TValue :  struct { }
+    }
+    public static class ShouldIsDefaultNullableAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue?> BeDefault<TValue>(this ..IShouldSource<TValue?> source)
+            where TValue :  struct { }
+    }
+    public static class ShouldIsDefaultReferenceAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> BeDefault<TValue>(this ..IShouldSource<TValue> source)
+            where TValue :  class { }
+    }
+    public static class ShouldIsEquatableOrEqualToAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> BeEquatableOrEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldIsEquivalentToAssertionExtensions
+    {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public static ..ShouldAssertion<TCollection> BeEquivalentTo<TCollection, TItem>(this ..IShouldSource<TCollection> source, .<TItem> expected, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public static ..ShouldAssertion<TCollection> BeEquivalentTo<TCollection, TItem>(this ..IShouldSource<TCollection> source, .<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldIsNotDefaultAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> NotBeDefault<TValue>(this ..IShouldSource<TValue> source)
+            where TValue :  struct { }
+    }
+    public static class ShouldIsNotDefaultNullableAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue?> NotBeDefault<TValue>(this ..IShouldSource<TValue?> source)
+            where TValue :  struct { }
+    }
+    public static class ShouldIsNotDefaultReferenceAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> NotBeDefault<TValue>(this ..IShouldSource<TValue> source)
+            where TValue :  class { }
+    }
+    public static class ShouldJsonElementAssertionExtensions
+    {
+        public static ..ShouldAssertion<.> BeArray(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeBoolean(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeDeepEqualTo(this ..IShouldSource<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.> BeNull(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeNumber(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeObject(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeString(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> HaveProperty(this ..IShouldSource<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ..ShouldAssertion<.> NotBeDeepEqualTo(this ..IShouldSource<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<.> NotBeNull(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> NotHaveProperty(this ..IShouldSource<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+    }
+    public static class ShouldJsonStringAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> BeValidJson(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<string> BeValidJsonArray(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<string> BeValidJsonObject(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<string> NotBeValidJson(this ..IShouldSource<string> source) { }
+    }
+    public static class ShouldLazyAssertionExtensions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<<T>> BeValueCreated<T>(this ..IShouldSource<<T>> source) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<<T>> BeValueNotCreated<T>(this ..IShouldSource<<T>> source) { }
+    }
+    public static class ShouldLongAssertions
+    {
+        public static ..ShouldAssertion<long> BeEven(this ..IShouldSource<long> source) { }
+        public static ..ShouldAssertion<long> BeOdd(this ..IShouldSource<long> source) { }
+        public static ..ShouldAssertion<long> BeZero(this ..IShouldSource<long> source) { }
+        public static ..ShouldAssertion<long> NotBeZero(this ..IShouldSource<long> source) { }
+    }
+    public static class ShouldLongEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<long> BeEqualTo(this ..IShouldSource<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldLongIsCloseToAssertionExtensions
+    {
+        public static ..ShouldAssertion<long> BeCloseTo(this ..IShouldSource<long> source, long expected, long tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
+    }
+    public static class ShouldLongIsWithinPercentOfAssertionExtensions
+    {
+        public static ..ShouldAssertion<long> BeWithinPercentOf(this ..IShouldSource<long> source, long expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
+    }
+    public static class ShouldNotEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<TValue> NotBeEqualTo<TValue>(this ..IShouldSource<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public static class ShouldNotEquivalentToAssertionExtensions
+    {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public static ..ShouldAssertion<TCollection> NotBeEquivalentTo<TCollection, TItem>(this ..IShouldSource<TCollection> source, .<TItem> notExpected, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
+        public static ..ShouldAssertion<TCollection> NotBeEquivalentTo<TCollection, TItem>(this ..IShouldSource<TCollection> source, .<TItem> notExpected, .<TItem> comparer, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
+            where TCollection : .<TItem> { }
+    }
+    public static class ShouldNullAssertionExtension
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeNull<TValue>(this ..IShouldSource<TValue> source) { }
+    }
+    public static class ShouldNullableEquatableAssertionExtensions
+    {
+        public static ..ShouldAssertion<TActual?> BeEquatableTo<TActual, TExpected>(this ..IShouldSource<TActual?> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual :  struct, <TExpected> { }
+    }
+    public static class ShouldRangeAssertionExtensions
+    {
+        [("Use IsFullRange instead.")]
+        public static ..ShouldAssertion<> BeAll(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeFullRange(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveBothIndicesFromEnd(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveEndFromBeginning(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveStartFromBeginning(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldReferenceAssertionExtensions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> BeSameReferenceAs<TValue>(this ..IShouldSource<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<TValue> NotBeSameReferenceAs<TValue>(this ..IShouldSource<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldSbyteAssertions
+    {
+        public static ..ShouldAssertion<sbyte> BeEven(this ..IShouldSource<sbyte> source) { }
+        public static ..ShouldAssertion<sbyte> BeOdd(this ..IShouldSource<sbyte> source) { }
+        public static ..ShouldAssertion<sbyte> BeZero(this ..IShouldSource<sbyte> source) { }
+        public static ..ShouldAssertion<sbyte> NotBeZero(this ..IShouldSource<sbyte> source) { }
+    }
+    public static class ShouldShortAssertions
+    {
+        public static ..ShouldAssertion<short> BeEven(this ..IShouldSource<short> source) { }
+        public static ..ShouldAssertion<short> BeOdd(this ..IShouldSource<short> source) { }
+        public static ..ShouldAssertion<short> BeZero(this ..IShouldSource<short> source) { }
+        public static ..ShouldAssertion<short> NotBeZero(this ..IShouldSource<short> source) { }
+    }
+    public static class ShouldStrictEqualityAssertions
+    {
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> BeStrictlyEqualTo<T>(this ..IShouldSource<T> source, T expected, [.("expected")] string? expectedExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Forwarded from source method")]
+        public static ..ShouldAssertion<T> NotBeStrictlyEqualTo<T>(this ..IShouldSource<T> source, T expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldStringBuilderAssertionExtensions
+    {
+        public static ..ShouldAssertion<.StringBuilder> BeEmpty(this ..IShouldSource<.StringBuilder> source) { }
+        public static ..ShouldAssertion<.StringBuilder> HaveExcessCapacity(this ..IShouldSource<.StringBuilder> source) { }
+        public static ..ShouldAssertion<.StringBuilder> NotBeEmpty(this ..IShouldSource<.StringBuilder> source) { }
+    }
+    public static class ShouldStringContainsAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> Contain(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> Contain(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringDoesNotContainAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> NotContain(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> NotContain(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringDoesNotEndWithAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> NotEndWith(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> NotEndWith(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringDoesNotMatchAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> NotMatch(this ..IShouldSource<string> source, . regex, [.("regex")] string? regexExpression = null) { }
+        public static ..ShouldAssertion<string> NotMatch(this ..IShouldSource<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
+    }
+    public static class ShouldStringDoesNotStartWithAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> NotStartWith(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> NotStartWith(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringEmptyAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> BeEmpty(this ..IShouldSource<string> source) { }
+        public static ..ShouldAssertion<string> NotBeEmpty(this ..IShouldSource<string> source) { }
+    }
+    public static class ShouldStringEndsWithAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> EndWith(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> EndWith(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> BeEqualTo(this ..IShouldSource<string> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> BeEqualTo(this ..IShouldSource<string> source, string? expected, .<string> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static ..ShouldAssertion<string> BeEqualTo(this ..IShouldSource<string> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldStringLengthRangeAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> HaveLengthBetween(this ..IShouldSource<string> source, int minLength, int maxLength, [.("minLength")] string? minLengthExpression = null, [.("maxLength")] string? maxLengthExpression = null) { }
+        public static ..ShouldAssertion<string> HaveMaxLength(this ..IShouldSource<string> source, int maxLength, [.("maxLength")] string? maxLengthExpression = null) { }
+        public static ..ShouldAssertion<string> HaveMinLength(this ..IShouldSource<string> source, int minLength, [.("minLength")] string? minLengthExpression = null) { }
+    }
+    public static class ShouldStringStartsWithAssertionExtensions
+    {
+        public static ..ShouldAssertion<string> StartWith(this ..IShouldSource<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static ..ShouldAssertion<string> StartWith(this ..IShouldSource<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+    }
+    public static class ShouldTimeOnlyAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeAM(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeEndOfHour(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeMidnight(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeNoon(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BePM(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeStartOfHour(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeMidnight(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldTimeOnlyEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldTimeSpanAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeNegative(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeNonNegative(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeNonPositive(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BePositive(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> BeZero(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeZero(this ..IShouldSource<> source) { }
+    }
+    public static class ShouldTimeSpanEqualsAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeEqualTo(this ..IShouldSource<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class ShouldUintAssertions
+    {
+        public static ..ShouldAssertion<uint> BeEven(this ..IShouldSource<uint> source) { }
+        public static ..ShouldAssertion<uint> BeOdd(this ..IShouldSource<uint> source) { }
+        public static ..ShouldAssertion<uint> BeZero(this ..IShouldSource<uint> source) { }
+        public static ..ShouldAssertion<uint> NotBeZero(this ..IShouldSource<uint> source) { }
+    }
+    public static class ShouldUlongAssertions
+    {
+        public static ..ShouldAssertion<ulong> BeEven(this ..IShouldSource<ulong> source) { }
+        public static ..ShouldAssertion<ulong> BeOdd(this ..IShouldSource<ulong> source) { }
+        public static ..ShouldAssertion<ulong> BeZero(this ..IShouldSource<ulong> source) { }
+        public static ..ShouldAssertion<ulong> NotBeZero(this ..IShouldSource<ulong> source) { }
+    }
+    public static class ShouldUshortAssertions
+    {
+        public static ..ShouldAssertion<ushort> BeEven(this ..IShouldSource<ushort> source) { }
+        public static ..ShouldAssertion<ushort> BeOdd(this ..IShouldSource<ushort> source) { }
+        public static ..ShouldAssertion<ushort> BeZero(this ..IShouldSource<ushort> source) { }
+        public static ..ShouldAssertion<ushort> NotBeZero(this ..IShouldSource<ushort> source) { }
+    }
+    public static class ShouldVersionAssertionExtensions
+    {
+        public static ..ShouldAssertion<> BeMajorVersion(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveBuildNumber(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveNoBuildNumber(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveNoRevisionNumber(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> HaveRevisionNumber(this ..IShouldSource<> source) { }
+        public static ..ShouldAssertion<> NotBeMajorVersion(this ..IShouldSource<> source) { }
+    }
+}
+namespace .Should
+{
+    public static class ShouldExtensions
+    {
+        public static ..ShouldDelegateSource<object?> Should(this  action, [.("action")] string? expression = null) { }
+        public static ..ShouldDelegateSource<object?> Should(this <.> action, [.("action")] string? expression = null) { }
+        [.(2)]
+        public static ..ShouldSource<string> Should(this string? value, [.("value")] string? expression = null) { }
+        [.(1)]
+        public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldDelegateSource<T> Should<T>(this <.<T?>> func, [.("func")] string? expression = null) { }
+        public static ..ShouldDelegateSource<T> Should<T>(this <T?> func, [.("func")] string? expression = null) { }
+        public static ..ShouldSource<T> Should<T>(this T? value, [.("value")] string? expression = null) { }
+    }
+}

@@ -173,7 +173,28 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         foreach (var attr in methodSymbol.GetAttributes())
         {
             var attributeClass = attr.AttributeClass;
-            if (attributeClass == null || attributeClass.ContainingNamespace?.ToDisplayString() != "System.Diagnostics.CodeAnalysis")
+            if (attributeClass == null)
+                continue;
+
+            var attrNamespace = attributeClass.ContainingNamespace?.ToDisplayString();
+
+            // Forward [Obsolete] / [EditorBrowsable] to the generated extension method so the
+            // user-visible API surface carries the same deprecation/visibility decisions as the
+            // source-declared method. Without this, [Obsolete] on a [GenerateAssertion] method is
+            // a no-op — the source method is internal (file-scoped or hidden inside the assertion
+            // class), and only the generated extension is callable by users.
+            if (attributeClass.Name == "ObsoleteAttribute" && attrNamespace == "System")
+            {
+                diagnosticAttributesForExtensionMethod.Add(FormatObsoleteAttribute(attr));
+                continue;
+            }
+            if (attributeClass.Name == "EditorBrowsableAttribute" && attrNamespace == "System.ComponentModel")
+            {
+                diagnosticAttributesForExtensionMethod.Add(FormatEditorBrowsableAttribute(attr));
+                continue;
+            }
+
+            if (attrNamespace != "System.Diagnostics.CodeAnalysis")
                 continue;
 
             // Handle UnconditionalSuppressMessage - goes to CheckAsync
@@ -343,6 +364,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static bool IsExtensionMethod(IMethodSymbol methodSymbol) =>
         methodSymbol.IsExtensionMethod ||
         (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
+
+    private static string FormatObsoleteAttribute(AttributeData attr)
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatObsolete(attr);
+
+    private static string FormatEditorBrowsableAttribute(AttributeData attr)
+        => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatEditorBrowsable(attr);
 
     /// <summary>
     /// Checks if a type is file-scoped (has 'file' accessibility)

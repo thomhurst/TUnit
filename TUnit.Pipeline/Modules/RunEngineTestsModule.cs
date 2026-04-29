@@ -16,6 +16,8 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<RunTemplateTestsModule>]
 [DependsOn<RunAspNetTestsModule>(Optional = true)]
 [DependsOn<RunAssertionsTestsModule>]
+[DependsOn<RunAssertionsShouldTestsModule>]
+[DependsOn<RunAssertionsShouldSourceGeneratorTestsModule>]
 [DependsOn<RunPlaywrightTestsModule>(Optional = true)]
 [DependsOn<RunRpcTestsModule>(Optional = true)]
 [DependsOn<RunAssertionsAnalyzersTestsModule>]

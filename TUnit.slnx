@@ -11,6 +11,7 @@
     <Project Path="TUnit.Core/TUnit.Core.csproj" />
     <Project Path="TUnit.Engine/TUnit.Engine.csproj" />
     <Project Path="TUnit.Assertions/TUnit.Assertions.csproj" />
+    <Project Path="TUnit.Assertions.Should/TUnit.Assertions.Should.csproj" />
     <Project Path="TUnit.Assertions.FSharp/TUnit.Assertions.FSharp.fsproj" />
   </Folder>
 
@@ -49,6 +50,7 @@
   <!-- Source generators and Roslyn version variants -->
   <Folder Name="/SourceGenerators/">
     <Project Path="TUnit.Assertions.SourceGenerator/TUnit.Assertions.SourceGenerator.csproj" />
+    <Project Path="TUnit.Assertions.Should.SourceGenerator/TUnit.Assertions.Should.SourceGenerator.csproj" />
     <Project Path="TUnit.Core.SourceGenerator/TUnit.Core.SourceGenerator.csproj" />
     <Project Path="TUnit.Core.SourceGenerator.Roslyn414/TUnit.Core.SourceGenerator.Roslyn414.csproj" />
     <Project Path="TUnit.Core.SourceGenerator.Roslyn44/TUnit.Core.SourceGenerator.Roslyn44.csproj" />
@@ -66,6 +68,8 @@
     <Project Path="TUnit.Assertions.Analyzers.CodeFixers.Tests/TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj" />
     <Project Path="TUnit.Assertions.Analyzers.Tests/TUnit.Assertions.Analyzers.Tests.csproj" />
     <Project Path="TUnit.Assertions.SourceGenerator.Tests/TUnit.Assertions.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Should.SourceGenerator.Tests/TUnit.Assertions.Should.SourceGenerator.Tests.csproj" />
+    <Project Path="TUnit.Assertions.Should.Tests/TUnit.Assertions.Should.Tests.csproj" />
     <Project Path="TUnit.Assertions.Tests/TUnit.Assertions.Tests.csproj" />
     <Project Path="TUnit.Core.SourceGenerator.Tests/TUnit.Core.SourceGenerator.Tests.csproj" />
     <Project Path="TUnit.Engine.Tests/TUnit.Engine.Tests.csproj" />

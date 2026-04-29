@@ -32,17 +32,21 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     /// <inheritdoc cref="AnalyzerVerifier{TAnalyzer, TTest, TVerifier}.VerifyAnalyzerAsync(string, DiagnosticResult[])"/>
     public static async Task VerifyAnalyzerAsync([StringSyntax("c#")] string source, Action<Test> configureTest, params DiagnosticResult[] expected)
     {
+        // Microsoft.Bcl.AsyncInterfaces is required by TUnit.Core.netstandard2.0.dll's typeforward
+        // of IAsyncEnumerable; without it, tests that use IAsyncEnumerable in their source see
+        // CS0012/CS0508 alongside the expected analyzer diagnostic.
         var test = new Test
         {
             TestCode = source,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+                .AddPackages([new PackageIdentity("Microsoft.Bcl.AsyncInterfaces", "9.0.0")]),
             TestState =
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
                     typeof(CircuitState).Assembly.Location,
-                    typeof(ProjectReferenceEnum).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly),
                 },
             },
         };
