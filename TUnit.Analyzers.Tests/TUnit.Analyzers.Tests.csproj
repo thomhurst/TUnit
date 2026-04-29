@@ -12,6 +12,7 @@
     <PackageReference Include="NUnit" />
     <PackageReference Include="xunit.v3.extensibility.core" />
     <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
@@ -37,6 +38,11 @@
           Visible="false" />
     <None Include="..\TUnit.TestProject.Library\bin\$(Configuration)\netstandard2.0\TUnit.TestProject.Library.dll"
           Link="TUnit.TestProject.Library.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
+          Condition="'$(TargetFramework)' == 'net8.0'"
+          Link="System.Text.Json.9.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"

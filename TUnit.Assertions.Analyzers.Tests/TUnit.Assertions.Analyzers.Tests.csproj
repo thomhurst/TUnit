@@ -28,6 +28,11 @@
           Link="TUnit.Assertions.Should.netstandard2.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
+    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
+          Condition="'$(TargetFramework)' == 'net8.0'"
+          Link="System.Text.Json.9.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
              Link="Shared\AnalyzerTestCompatibility.cs" />
   </ItemGroup>
@@ -38,6 +43,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="xunit.v3.assert" />
   </ItemGroup>
 

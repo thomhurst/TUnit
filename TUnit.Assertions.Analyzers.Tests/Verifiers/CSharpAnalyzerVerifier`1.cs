@@ -50,6 +50,9 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly),
+#if NET8_0
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath(),
+#endif
                 },
             },
             CompilerDiagnostics = CompilerDiagnostics.None

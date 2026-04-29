@@ -35,6 +35,9 @@ public static class AnalyzerTestHelpers
             .AddRange(
                 [
                     MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+#if NET8_0
+                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
+#endif
                     MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
                     MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
                 ]
@@ -146,6 +149,9 @@ public static class AnalyzerTestHelpers
         test.TestState.AdditionalReferences
             .AddRange([
                 MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
+#if NET8_0
+                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
+#endif
                 MetadataReference.CreateFromFile(typeof(CircuitState).Assembly.Location),
                 MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.TestProject.Library", typeof(ProjectReferenceEnum).Assembly))
             ]);

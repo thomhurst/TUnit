@@ -45,4 +45,19 @@ internal static class AnalyzerTestCompatibility
 
         return ns20Path;
     }
+
+    public static string GetSystemTextJson9DllPath()
+    {
+        const string fileName = "System.Text.Json.9.0.dll";
+        var path = Path.Combine(AppContext.BaseDirectory, fileName);
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException(
+                $"System.Text.Json 9.0 reference not found at '{path}'. " +
+                "Run 'dotnet build' before running analyzer tests.",
+                path);
+        }
+
+        return path;
+    }
 }
