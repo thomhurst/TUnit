@@ -110,6 +110,9 @@ internal static class NameConjugator
     private static bool IsVowel(char c)
         => c is 'a' or 'e' or 'i' or 'o' or 'u' or 'A' or 'E' or 'I' or 'O' or 'U';
 
+    private static bool IsVowelOrY(char c)
+        => IsVowel(c) || c is 'y' or 'Y';
+
     /// <summary>
     /// Returns how many trailing letters of the first word should be removed: 2 for an English
     /// <c>-es</c> 3rd-person ending where the stem ends in a sibilant (<c>ch</c>, <c>sh</c>,
@@ -121,9 +124,15 @@ internal static class NameConjugator
         if (firstWordEnd >= 3 && name[firstWordEnd - 2] == 'e')
         {
             var c = name[firstWordEnd - 3];
-            if (c == 'x' || c == 'z' || c == 'o')
+            if (c == 'x' || c == 'o')
             {
                 return 2;
+            }
+            if (c == 'z')
+            {
+                // "buzzes" adds -es to a z-ending stem, but "normalizes" is
+                // "normalize" + s; keep the stem's silent e when z follows a vowel-like char.
+                return firstWordEnd >= 4 && IsVowelOrY(name[firstWordEnd - 4]) ? 1 : 2;
             }
             if (firstWordEnd >= 4)
             {

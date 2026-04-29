@@ -21,6 +21,10 @@ public partial class Tests
 
 #if NET
     [Test]
+    public Task Should_Library_Has_No_API_Changes()
+        => VerifyPublicApi(typeof(Assertions.Should.ShouldExtensions).Assembly);
+
+    [Test]
     public Task OpenTelemetry_Library_Has_No_API_Changes()
         => VerifyPublicApi(typeof(TUnit.OpenTelemetry.TUnitOpenTelemetry).Assembly);
 #endif
