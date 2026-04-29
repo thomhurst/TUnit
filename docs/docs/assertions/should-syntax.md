@@ -95,8 +95,8 @@ await list.Should().Contain(2);
 Action act = () => throw new InvalidOperationException();
 await act.Should().Throw<InvalidOperationException>();
 
-Func<Task<int>> async = () => Task.FromResult(42);
-await async.Should().BeEqualTo(42);
+Func<Task<int>> asyncFunc = () => Task.FromResult(42);
+await asyncFunc.Should().BeEqualTo(42);
 ```
 
 ## Chaining

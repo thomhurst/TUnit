@@ -32,7 +32,7 @@ public static class ShouldExtensions
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         var sb = BuildExpression(expression);
-        return new ShouldSource<string>(new AssertionContext<string>(value!, sb));
+        return new ShouldSource<string>(new AssertionContext<string>(value, sb));
     }
 
     /// <summary>
