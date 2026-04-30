@@ -7,7 +7,7 @@ sidebar_position: 5
 # MockCreation Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-04-29** from the latest CI run.
+This benchmark was automatically generated on **2026-04-30** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.203
 :::
@@ -18,12 +18,12 @@ Mock instance creation performance:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 27.63 ns | 0.253 ns | 0.224 ns | 192 B |
-| Imposter | 101.38 ns | 0.253 ns | 0.224 ns | 440 B |
-| Mockolate | 71.58 ns | 0.188 ns | 0.157 ns | 384 B |
-| Moq | 1,275.47 ns | 19.742 ns | 17.501 ns | 2048 B |
-| NSubstitute | 1,768.84 ns | 9.955 ns | 9.312 ns | 5000 B |
-| FakeItEasy | 1,692.52 ns | 32.779 ns | 32.193 ns | 2715 B |
+| **TUnit.Mocks** | 25.25 ns | 0.277 ns | 0.260 ns | 192 B |
+| Imposter | 94.35 ns | 1.920 ns | 2.285 ns | 440 B |
+| Mockolate | 68.90 ns | 1.425 ns | 2.641 ns | 384 B |
+| Moq | 1,332.59 ns | 13.554 ns | 11.318 ns | 2048 B |
+| NSubstitute | 1,912.63 ns | 14.622 ns | 13.677 ns | 5000 B |
+| FakeItEasy | 1,793.11 ns | 35.474 ns | 57.283 ns | 2715 B |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Mock instance creation performance:
 xychart-beta
   title "MockCreation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2123
-  bar [27.63, 101.38, 71.58, 1275.47, 1768.84, 1692.52]
+  y-axis "Time (ns)" 0 --> 2296
+  bar [25.25, 94.35, 68.9, 1332.59, 1912.63, 1793.11]
 ```
 
 ---
@@ -59,12 +59,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 27.11 ns | 0.606 ns | 0.567 ns | 192 B |
-| Imposter | 158.61 ns | 0.751 ns | 0.703 ns | 696 B |
-| Mockolate | 72.85 ns | 0.970 ns | 0.860 ns | 384 B |
-| Moq | 1,239.28 ns | 9.312 ns | 7.776 ns | 1912 B |
-| NSubstitute | 1,769.66 ns | 13.072 ns | 10.916 ns | 5000 B |
-| FakeItEasy | 1,746.41 ns | 9.410 ns | 7.858 ns | 2715 B |
+| **TUnit.Mocks** | 27.21 ns | 0.515 ns | 0.457 ns | 192 B |
+| Imposter | 146.98 ns | 2.978 ns | 2.785 ns | 696 B |
+| Mockolate | 68.03 ns | 1.225 ns | 1.146 ns | 384 B |
+| Moq | 1,363.17 ns | 12.657 ns | 11.840 ns | 1912 B |
+| NSubstitute | 1,887.11 ns | 18.188 ns | 17.013 ns | 5000 B |
+| FakeItEasy | 1,777.38 ns | 34.237 ns | 50.184 ns | 2715 B |
 
 ```mermaid
 %%{init: {
@@ -90,8 +90,8 @@ xychart-beta
 xychart-beta
   title "MockCreation (Repository) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2124
-  bar [27.11, 158.61, 72.85, 1239.28, 1769.66, 1746.41]
+  y-axis "Time (ns)" 0 --> 2265
+  bar [27.21, 146.98, 68.03, 1363.17, 1887.11, 1777.38]
 ```
 
 ## 🎯 Key Insights
@@ -104,4 +104,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-04-29T03:24:49.990Z*
+*Last generated: 2026-04-30T03:25:10.403Z*
