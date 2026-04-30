@@ -173,6 +173,13 @@ namespace TUnit.Mocks.Generated
             return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
         }
 
+        /// <summary>Configure the mock setup for <c>GetValue</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static IFoo_GetValue_M1_MockCall GetValue(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<string?>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
+            return new IFoo_GetValue_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
+        }
+
         public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.Arg<string> nonNull, global::TUnit.Mocks.Arguments.Arg<string?> nullable, global::TUnit.Mocks.Arguments.Arg<object?> obj)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { nonNull.Matcher, nullable.Matcher, obj.Matcher };
@@ -230,6 +237,13 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Arguments.Arg<string?> __fa_nullable = nullable;
             global::TUnit.Mocks.Arguments.Arg<object?> __fa_obj = obj;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_nonNull.Matcher, __fa_nullable.Matcher, __fa_obj.Matcher };
+            return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
+        }
+
+        /// <summary>Configure the mock setup for <c>Process</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static IFoo_Process_M2_MockCall Process(this global::TUnit.Mocks.Mock<global::IFoo> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<string>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<string?>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<object?>.Instance };
             return new IFoo_Process_M2_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Process", matchers);
         }
 

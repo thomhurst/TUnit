@@ -134,6 +134,13 @@ namespace TUnit.Mocks.Generated
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_class.Matcher, __fa_return.Matcher };
             return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
         }
+
+        /// <summary>Configure the mock setup for <c>Get</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static ITest_Get_M1_MockCall Get(this global::TUnit.Mocks.Mock<global::ITest> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<string>.Instance };
+            return new ITest_Get_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Get", matchers);
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]

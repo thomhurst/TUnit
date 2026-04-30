@@ -15,6 +15,7 @@ TUnit.Mocks automatically imports the `Arg` class via `global using static`, so 
 | Matcher | Matches |
 |---|---|
 | `Any()` / `Any<T>()` | Any value of type T (including null) |
+| `AnyArgs()` | Shortcut for matching every argument with `Any()` (only on uniquely named methods) |
 | `Is<T>(value)` | Exact equality |
 | `Is<T>(predicate)` | Values satisfying a predicate |
 | Raw value (e.g. `42`, `"hello"`) | Exact equality (implicit conversion) |
@@ -46,6 +47,33 @@ mock.GetUser(Any()).Returns(new User("Default"));
 svc.GetUser(1);    // matches
 svc.GetUser(999);  // matches
 ```
+
+### AnyArgs — match every parameter with one token
+
+When you only care that a method was called and don't want to constrain any of its arguments, repeating `Any()` for each parameter gets noisy:
+
+```csharp
+mock.Compute(Any(), Any(), Any(), Any(), Any()).Returns(42);
+```
+
+`AnyArgs()` is a shortcut that fills every matchable parameter with `Any<T>()` in one token:
+
+```csharp
+mock.Compute(AnyArgs()).Returns(42);
+
+mock.Log(AnyArgs()).Throws<InvalidOperationException>();
+
+// Works for verification too
+mock.Compute(AnyArgs()).WasCalled(Times.Exactly(2));
+```
+
+The two forms are equivalent — `AnyArgs()` simply expands to one `Arg.Any<T>()` per parameter.
+
+:::note When the shortcut is generated
+The `AnyArgs()` overload is only emitted when the method's name is unique on the mocked type. If the type has overloads of the same name (for example `Sum(int, int)` and `Sum(int, int, int)`), the shortcut would be ambiguous, so the generator omits it for those methods — use the explicit per-parameter form instead.
+
+The shortcut is also skipped for methods with `out`, `ref`, or ref-struct parameters, and for methods with fewer than two matchable parameters (where it would save nothing).
+:::
 
 ### Exact Value
 

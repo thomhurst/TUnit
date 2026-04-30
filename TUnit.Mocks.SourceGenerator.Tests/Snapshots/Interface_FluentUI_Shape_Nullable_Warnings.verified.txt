@@ -338,6 +338,13 @@ namespace TUnit.Mocks.Generated
             return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers);
         }
 
+        /// <summary>Configure the mock setup for <c>UpdateDialogAsync</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference?> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.AnyArgs _) where TData : class
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<string>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<global::DialogParameters<TData>>.Instance };
+            return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers);
+        }
+
         public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<object> data, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> parameters) where TDialog : global::IDialogContentComponent
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher, parameters.Matcher };
@@ -363,6 +370,13 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data;
             global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher, __fa_parameters.Matcher };
+            return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers);
+        }
+
+        /// <summary>Configure the mock setup for <c>ShowDialogAsync</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.AnyArgs _) where TDialog : global::IDialogContentComponent
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<object>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<global::DialogParameters>.Instance };
             return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers);
         }
 

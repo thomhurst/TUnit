@@ -676,6 +676,8 @@ internal static class MockMembersBuilder
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
         }
+
+        EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: false, receiverIsThis: false);
     }
 
     private static void GenerateGenericMethodExtensionBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
@@ -716,6 +718,8 @@ internal static class MockMembersBuilder
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
         }
+
+        EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: false);
     }
 
     internal static void GenerateGenericMethodMembersForWrapper(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
@@ -735,6 +739,8 @@ internal static class MockMembersBuilder
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
         }
+
+        EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: true);
     }
 
     /// <summary>
@@ -869,23 +875,98 @@ internal static class MockMembersBuilder
                 writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
-            if (useTypedWrapper)
+            EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
+        }
+    }
+
+    /// <summary>
+    /// Emits the dispatch tail shared by every setup overload: build a return statement constructing
+    /// the right wrapper / mock-call type given the matchers array already in scope as <c>matchers</c>.
+    /// </summary>
+    private static void EmitReturnConstruction(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, bool useTypedWrapper, string setupReturnType)
+    {
+        if (useTypedWrapper)
+        {
+            var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
+            writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+        }
+        else if (method.IsVoid || method.IsRefStructReturn)
+        {
+            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+        }
+        else if (method.IsReturnTypeStaticAbstractInterface)
+        {
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+        }
+        else
+        {
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+        }
+    }
+
+    /// <summary>
+    /// Emits a single-argument shortcut overload that accepts <c>AnyArgs</c> and fills every
+    /// matchable parameter slot with <c>AnyMatcher&lt;T&gt;.Instance</c>. Skipped when the shortcut
+    /// would be ambiguous (the method name is not unique on the model), unhelpful (zero or one
+    /// matchable parameter), or unsafe to mirror at this layer (out / ref / ref-struct params).
+    /// </summary>
+    private static void EmitAnyArgsOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, bool captureModelTypeParameters, bool receiverIsThis)
+    {
+        // Out, ref, and ref-struct params change matcher arity or signature shape; rather than
+        // try to mirror those variations through the AnyArgs path, defer to the explicit form.
+        foreach (var p in method.Parameters)
+        {
+            if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref) return;
+            if (p.IsRefStruct) return;
+        }
+
+        // After the early-return loop above, every parameter is matchable.
+        if (method.Parameters.Length < 2) return;
+
+        // Name uniqueness: same set of methods that drive extension-method emission.
+        int sameNameCount = 0;
+        foreach (var m in model.Methods)
+        {
+            if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
+            if (m.Name == method.Name) sameNameCount++;
+        }
+        if (sameNameCount > 1) return;
+
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
+
+        var typeParams = captureModelTypeParameters
+            ? MockImplBuilder.GetTypeParameterList(method)
+            : GetCombinedTypeParameterList(model, method);
+        var constraints = captureModelTypeParameters
+            ? MockImplBuilder.GetConstraintClauses(method)
+            : GetCombinedConstraintClauses(model, method);
+
+        var safeMemberName = GetSafeMemberName(method.Name);
+        var paramListInner = "global::TUnit.Mocks.Arguments.AnyArgs _";
+        var fullParamList = captureModelTypeParameters
+            ? paramListInner
+            : BuildExtensionMethodParameterList(model, paramListInner);
+
+        var methodDeclarationPrefix = captureModelTypeParameters ? "public" : "public static";
+
+        writer.AppendLine();
+        writer.AppendLine($"/// <summary>Configure the mock setup for <c>{method.Name}</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>");
+        using (writer.Block($"{methodDeclarationPrefix} {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        {
+            if (receiverIsThis)
             {
-                var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
-                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+                writer.AppendLine("var mock = this;");
             }
-            else if (method.IsVoid || method.IsRefStructReturn)
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
-            else if (method.IsReturnTypeStaticAbstractInterface)
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
-            else
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
+
+            // AnyMatcher<T>.Instance is stateless and shared — unlike Arg.Any<T>(), it skips the
+            // CapturingMatcher wrap, so the AnyArgs path doesn't accumulate captured values per call.
+            var matcherArgs = string.Join(", ", method.Parameters.Select(p =>
+                $"global::TUnit.Mocks.Matchers.AnyMatcher<{p.FullyQualifiedType}>.Instance"));
+            writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
+
+            EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
     }
 
@@ -1029,24 +1110,7 @@ internal static class MockMembersBuilder
                 writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherExprs)} }};");
             }
 
-            // Return statement
-            if (useTypedWrapper)
-            {
-                var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
-                writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
-            else if (method.IsVoid || method.IsRefStructReturn)
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
-            else if (method.IsReturnTypeStaticAbstractInterface)
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
-            else
-            {
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
-            }
+            EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
     }
 

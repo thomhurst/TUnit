@@ -15,6 +15,13 @@ public static class Arg
     /// <summary>Matches any value — type is inferred from the parameter position.</summary>
     public static AnyArg Any() => AnyArg.Instance;
 
+    /// <summary>
+    /// Shortcut for setting up or verifying a mocked method when every argument should match
+    /// <see cref="Any{T}"/>. Equivalent to passing <c>Any()</c> for each parameter.
+    /// Only available on methods whose name is unique on the mocked type.
+    /// </summary>
+    public static AnyArgs AnyArgs() => Arguments.AnyArgs.Instance;
+
     /// <summary>Matches using exact equality.</summary>
     public static Arg<T> Is<T>(T value) => new(new ExactMatcher<T>(value));
 
