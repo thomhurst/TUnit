@@ -17,14 +17,18 @@ internal sealed class AnyMatcher : IArgumentMatcher
 
 /// <summary>
 /// An argument matcher that matches any value of the specified type, including null.
+/// Public for source-generator access; not intended for direct use — call <see cref="Arg.Any{T}"/> instead.
 /// </summary>
-internal sealed class AnyMatcher<T> : IArgumentMatcher<T>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class AnyMatcher<T> : IArgumentMatcher<T>
 {
     /// <summary>
     /// Cached singleton — <see cref="AnyMatcher{T}"/> is stateless, so a single instance per closed
     /// generic type avoids a per-call allocation on the common <see cref="Arg.Any{T}"/> path.
     /// </summary>
     public static readonly AnyMatcher<T> Instance = new();
+
+    private AnyMatcher() { }
 
     public bool Matches(T? value) => true;
 
