@@ -32,16 +32,12 @@ namespace .
         public .<T?> GetAwaiter() { }
     }
     [..ShouldGeneratePartial(typeof(.<!0>))]
-    public sealed class ShouldCollectionSource<TItem> : ..IShouldSource, ..IShouldSource<.<TItem>>
+    public sealed class ShouldCollectionSource<TItem> : ..ShouldEnumerableSourceBase<.<TItem>, TItem, ..ShouldCollectionSource<TItem>>
     {
         public ShouldCollectionSource(.<TItem>? value, string? expression) { }
-        public .<.<TItem>> Context { get; }
-        public ..ShouldAssertion<.<TItem>> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public ..ShouldAssertion<.<TItem>> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> BeEmpty() { }
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
-        public ..ShouldCollectionSource<TItem> Because(string message) { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
@@ -51,7 +47,6 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
-        public ..ShouldAssertion<.<TItem>> HaveSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
@@ -60,6 +55,19 @@ namespace .
         public ShouldContinuation(.<T> context) { }
         public .<T> Context { get; }
         public ..ShouldContinuation<T> Because(string message) { }
+    }
+    public readonly struct ShouldDelegateCollectionSource<TItem> : ..IShouldSource, ..IShouldSource<.<TItem>>
+    {
+        public ShouldDelegateCollectionSource(.<.<TItem>> context) { }
+        public .<.<TItem>> Context { get; }
+        public ..ShouldDelegateCollectionSource<TItem> Because(string message) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<TException> Throw<TException>()
+            where TException :  { }
+        public ..ShouldAssertion<TException> ThrowExactly<TException>()
+            where TException :  { }
     }
     public readonly struct ShouldDelegateSource<T> : ..IShouldSource, ..IShouldSource<T>
     {
@@ -70,6 +78,115 @@ namespace .
             where TException :  { }
         public ..ShouldAssertion<TException> ThrowExactly<TException>()
             where TException :  { }
+    }
+    [..ShouldGeneratePartial(typeof(.<!0, !1>))]
+    public sealed class ShouldDictionarySource<TKey, TValue> : ..ShouldEnumerableSourceBase<.<TKey, TValue>, .<TKey, TValue>, ..ShouldDictionarySource<TKey, TValue>>
+        where TKey :  notnull
+    {
+        public ShouldDictionarySource(.<TKey, TValue>? value, string? expression) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AnyValue(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeInOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems(.<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+    }
+    public abstract class ShouldEnumerableSourceBase<TCollection, TItem, TSelf> : ..ShouldSourceBase<TCollection, TSelf>
+        where TCollection : .<TItem>
+        where TSelf : ..ShouldEnumerableSourceBase<TCollection, TItem, TSelf>
+    {
+        protected ShouldEnumerableSourceBase(.<TCollection> context) { }
+        public ..ShouldAssertion<TCollection> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<TCollection> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        protected TAssertion ApplyBecause<TAssertion>(TAssertion assertion)
+            where TAssertion : .<TCollection> { }
+        public ..ShouldAssertion<TCollection> HaveSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+    }
+    public sealed class ShouldHashSetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldHashSetSource<TItem>>
+    {
+        public ShouldHashSetSource(.<TItem>? value, string? expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    [..ShouldGeneratePartial(typeof(.<!0, !1>))]
+    public sealed class ShouldMutableDictionarySource<TKey, TValue> : ..ShouldEnumerableSourceBase<.<TKey, TValue>, .<TKey, TValue>, ..ShouldMutableDictionarySource<TKey, TValue>>
+        where TKey :  notnull
+    {
+        public ShouldMutableDictionarySource(.<TKey, TValue>? value, string? expression) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> AnyValue(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> BeInOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> ContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems(.<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+    }
+    public sealed class ShouldReadOnlySetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldReadOnlySetSource<TItem>>
+    {
+        public ShouldReadOnlySetSource(.<TItem>? value, string? expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    public abstract class ShouldSetSourceBase<TSet, TItem, TSelf> : ..ShouldEnumerableSourceBase<TSet, TItem, TSelf>
+        where TSet : .<TItem>
+        where TSelf : ..ShouldSetSourceBase<TSet, TItem, TSelf>
+    {
+        protected ShouldSetSourceBase(.<TSet> context) { }
+        public ..ShouldAssertion<TSet> BeProperSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public ..ShouldAssertion<TSet> BeProperSupersetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public ..ShouldAssertion<TSet> BeSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        public ..ShouldAssertion<TSet> BeSupersetOf(.<TItem> other, [.("other")] string? expression = null) { }
+        protected abstract .<TItem> CreateSetAdapter(TSet value);
+        public ..ShouldAssertion<TSet> NotOverlap(.<TItem> other, [.("other")] string? expression = null) { }
+        public ..ShouldAssertion<TSet> Overlap(.<TItem> other, [.("other")] string? expression = null) { }
+        public ..ShouldAssertion<TSet> SetEquals(.<TItem> other, [.("other")] string? expression = null) { }
+    }
+    public sealed class ShouldSetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldSetSource<TItem>>
+    {
+        public ShouldSetSource(.<TItem>? value, string? expression) { }
+        protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+    }
+    public abstract class ShouldSourceBase<TValue, TSelf> : ..IShouldSource, ..IShouldSource<TValue>
+        where TSelf : ..ShouldSourceBase<TValue, TSelf>
+    {
+        protected ShouldSourceBase(.<TValue> context) { }
+        public .<TValue> Context { get; }
+        public TSelf Because(string message) { }
+        protected string? ConsumeBecauseMessage() { }
+        protected void ResetShouldExpression(string? expression) { }
     }
     public readonly struct ShouldSource<T> : ..IShouldSource, ..IShouldSource<T>
     {
@@ -751,9 +868,26 @@ namespace .Should
         public static ..ShouldDelegateSource<object?> Should(this  action, [.("action")] string? expression = null) { }
         public static ..ShouldDelegateSource<object?> Should(this <.> action, [.("action")] string? expression = null) { }
         public static ..ShouldSource<string> Should(this string? value, [.("value")] string? expression = null) { }
+        public static ..ShouldHashSetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldSource<.<TItem>> Should<TItem>(this .<TItem> value, string? expression = null) { }
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldReadOnlySetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldSetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        public static ..ShouldDelegateCollectionSource<T> Should<T>(this <.<T>?> func, [.("func")] string? expression = null) { }
+        public static ..ShouldDelegateCollectionSource<T> Should<T>(this <.<.<T>?>> func, [.("func")] string? expression = null) { }
         public static ..ShouldDelegateSource<T> Should<T>(this <.<T?>> func, [.("func")] string? expression = null) { }
         public static ..ShouldDelegateSource<T> Should<T>(this <T?> func, [.("func")] string? expression = null) { }
+        public static ..ShouldSource<<TItem>> Should<TItem>(this <TItem> value, string? expression = null) { }
+        public static ..ShouldSource<<TItem>> Should<TItem>(this <TItem> value, string? expression = null) { }
         public static ..ShouldSource<T> Should<T>(this T? value, [.("value")] string? expression = null) { }
+        public static ..ShouldCollectionSource<T> Should<T>(this T[]? value, [.("value")] string? expression = null) { }
+        public static ..ShouldMutableDictionarySource<TKey, TValue> Should<TKey, TValue>(this .<TKey, TValue>? value, [.("value")] string? expression = null)
+            where TKey :  notnull { }
+        public static ..ShouldDictionarySource<TKey, TValue> Should<TKey, TValue>(this .<TKey, TValue>? value, [.("value")] string? expression = null)
+            where TKey :  notnull { }
     }
 }

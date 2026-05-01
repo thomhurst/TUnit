@@ -30,6 +30,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private const string AssertionSourceFullName = "TUnit.Assertions.Core.IAssertionSource`1";
     private const string AssertionBaseFullName = "TUnit.Assertions.Core.Assertion`1";
     private const string AssertionContextFullName = "TUnit.Assertions.Core.AssertionContext`1";
+    private const string AssertFullName = "TUnit.Assertions.Assert";
+    private const string CallerArgumentExpressionAttributeFullName = "System.Runtime.CompilerServices.CallerArgumentExpressionAttribute";
     private const string ShouldExtensionsNamespace = "TUnit.Assertions.Should.Extensions";
     private const string ShouldNameAttributeFullName = "TUnit.Assertions.Should.Attributes.ShouldNameAttribute";
     private const string CallerArgumentExpressionAttributeName = "CallerArgumentExpressionAttribute";
@@ -62,6 +64,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(provider, static (ctx, payload) =>
         {
             var emittedHints = new HashSet<string>(StringComparer.Ordinal);
+
+            if (payload.Entries.Length > 0)
+            {
+                EmitShouldEntries(ctx, payload.Entries.ToArray(), emittedHints);
+            }
 
             // Wrappers first: they own the return types they cover, and their method names
             // win over extension methods at call sites anyway.
@@ -101,7 +108,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private sealed record ReferenceData(
         EquatableArray<MethodData> Methods,
         EquatableArray<WrapperData> Wrappers,
-        EquatableArray<string> AlreadyBakedNames);
+        EquatableArray<ShouldEntryData> Entries,
+        EquatableArray<string> AlreadyBakedNames,
+        EquatableArray<string> BakedShouldEntryKeys);
 
     private static GeneratorPayload Collect(Compilation compilation)
     {
@@ -110,12 +119,14 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var assertionContext = compilation.GetTypeByMetadataName(AssertionContextFullName);
         var shouldNameAttr = compilation.GetTypeByMetadataName(ShouldNameAttributeFullName);
         var partialMarker = compilation.GetTypeByMetadataName(ShouldGeneratePartialAttributeFullName);
+        var assertType = compilation.GetTypeByMetadataName(AssertFullName);
 
         if (assertionSource is null || assertionBase is null || assertionContext is null)
         {
             return new GeneratorPayload(
                 new EquatableArray<MethodData>(Array.Empty<MethodData>()),
-                new EquatableArray<WrapperData>(Array.Empty<WrapperData>()));
+                new EquatableArray<WrapperData>(Array.Empty<WrapperData>()),
+                new EquatableArray<ShouldEntryData>(Array.Empty<ShouldEntryData>()));
         }
 
         // Phase 1 — per-reference scan, cached by MetadataReference identity.
@@ -131,7 +142,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                 continue;
             }
             refResults.Add(GetOrComputeReferenceData(
-                compilation, refAssembly, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker));
+                compilation, refAssembly, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType));
         }
 
         // Phase 2 — union dedup sets across all references.
@@ -162,6 +173,24 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             WalkForWrappers(compilation.Assembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, localWrappers, isCurrentAssembly: true);
         }
 
+        var localEntries = ImmutableArray.CreateBuilder<ShouldEntryData>();
+        if (assertType is not null && SymbolEqualityComparer.Default.Equals(assertType.ContainingAssembly, compilation.Assembly))
+        {
+            CollectShouldEntries(assertType, assertionSource, assertionBase, assertionContext, localEntries);
+        }
+
+        var currentShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+        CollectExistingShouldEntryKeys(compilation.Assembly.GlobalNamespace, currentShouldEntryKeys);
+
+        var bakedReferencedShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var r in refResults)
+        {
+            foreach (var bakedKey in r.BakedShouldEntryKeys)
+            {
+                bakedReferencedShouldEntryKeys.Add(bakedKey);
+            }
+        }
+
         // Phase 4 — merge and apply post-walk dedup. Wrapper instance methods and Should-flavored
         // extensions co-exist by design: the wrapper's [ShouldGeneratePartial] only emits methods
         // whose source overload exactly matches a public ctor on the inner assertion (the simple-
@@ -186,9 +215,31 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
+        var allEntries = ImmutableArray.CreateBuilder<ShouldEntryData>();
+        foreach (var entry in localEntries)
+        {
+            if (!currentShouldEntryKeys.Contains(entry.SignatureKey))
+            {
+                allEntries.Add(entry);
+            }
+        }
+        foreach (var r in refResults)
+        {
+            foreach (var entry in r.Entries)
+            {
+                var signatureKey = entry.SignatureKey;
+                if (!currentShouldEntryKeys.Contains(signatureKey)
+                    && !bakedReferencedShouldEntryKeys.Contains(signatureKey))
+                {
+                    allEntries.Add(entry);
+                }
+            }
+        }
+
         return new GeneratorPayload(
-            new EquatableArray<MethodData>(allMethods.ToArray()),
-            new EquatableArray<WrapperData>(localWrappers.ToArray()));
+            new EquatableArray<MethodData>(DeduplicateMethods(allMethods.ToArray())),
+            new EquatableArray<WrapperData>(localWrappers.ToArray()),
+            new EquatableArray<ShouldEntryData>(DeduplicateEntries(allEntries.ToArray())));
     }
 
     /// <summary>
@@ -204,12 +255,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol assertionBase,
         INamedTypeSymbol assertionContext,
         INamedTypeSymbol? shouldNameAttr,
-        INamedTypeSymbol? partialMarker)
+        INamedTypeSymbol? partialMarker,
+        INamedTypeSymbol? assertType)
     {
         var metadataRef = compilation.GetMetadataReference(refAssembly);
         if (metadataRef is null)
         {
-            return ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker);
+            return ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType);
         }
 
         if (s_referenceCache.TryGetValue(metadataRef, out var cached))
@@ -217,7 +269,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             return cached;
         }
 
-        var fresh = ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker);
+        var fresh = ScanReference(refAssembly, compilation, assertionSource, assertionBase, assertionContext, shouldNameAttr, partialMarker, assertType);
 
         // Concurrent races between two compilations seeing the same uncached MetadataReference
         // are harmless — both compute the same ReferenceData; first writer wins. Catching
@@ -240,7 +292,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol assertionBase,
         INamedTypeSymbol assertionContext,
         INamedTypeSymbol? shouldNameAttr,
-        INamedTypeSymbol? partialMarker)
+        INamedTypeSymbol? partialMarker,
+        INamedTypeSymbol? assertType)
     {
         var methods = ImmutableArray.CreateBuilder<MethodData>();
         var ctx = new CollectionContext(
@@ -259,6 +312,12 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             WalkForWrappers(refAssembly.GlobalNamespace, partialMarker, assertionBase, assertionContext, wrappers, isCurrentAssembly: false);
         }
 
+        var entries = ImmutableArray.CreateBuilder<ShouldEntryData>();
+        if (assertType is not null && SymbolEqualityComparer.Default.Equals(assertType.ContainingAssembly, refAssembly))
+        {
+            CollectShouldEntries(assertType, assertionSource, assertionBase, assertionContext, entries);
+        }
+
         var bakedNames = new List<string>();
         var bakedNs = LookupNamespace(refAssembly.GlobalNamespace, ShouldExtensionsNamespace);
         if (bakedNs is not null)
@@ -269,10 +328,15 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             }
         }
 
+        var bakedShouldEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+        CollectExistingShouldEntryKeys(refAssembly.GlobalNamespace, bakedShouldEntryKeys);
+
         return new ReferenceData(
-            new EquatableArray<MethodData>(methods.ToArray()),
+            new EquatableArray<MethodData>(DeduplicateMethods(methods.ToArray())),
             new EquatableArray<WrapperData>(wrappers.ToArray()),
-            new EquatableArray<string>(bakedNames.ToArray()));
+            new EquatableArray<ShouldEntryData>(entries.ToArray()),
+            new EquatableArray<string>(bakedNames.ToArray()),
+            new EquatableArray<string>(bakedShouldEntryKeys.ToArray()));
     }
 
     private static void WalkForWrappers(
@@ -338,11 +402,17 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         // The IsCurrentAssembly flag on WrapperData controls whether the emission step actually
         // generates partial methods (only true for wrappers in this compilation).
         var methods = ImmutableArray.CreateBuilder<WrapperMethodData>();
+        var existingWrapperMethodKeys = isCurrentAssembly
+            ? CollectExistingWrapperMethodKeys(type)
+            : null;
         foreach (var sourceMember in EnumerateInstanceMethods(wrappedType))
         {
             if (TryDescribeWrapperMethod(sourceMember, wrappedAssertionTypeArg, assertionBase, assertionContext, out var data))
             {
-                methods.Add(data);
+                if (existingWrapperMethodKeys is null || existingWrapperMethodKeys.Add(GetWrapperMethodKey(data)))
+                {
+                    methods.Add(data);
+                }
             }
         }
 
@@ -479,6 +549,50 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                                           ?? TryGetRucMessage(returnType.GetAttributes())
                                           ?? TryGetRucMessageFromConstructors(returnType));
         return true;
+    }
+
+    private static HashSet<string> CollectExistingWrapperMethodKeys(INamedTypeSymbol type)
+    {
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var method in type.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (method.MethodKind != MethodKind.Ordinary || method.IsStatic)
+            {
+                continue;
+            }
+
+            keys.Add(GetWrapperMethodKey(method));
+        }
+
+        return keys;
+    }
+
+    private static string GetWrapperMethodKey(WrapperMethodData method)
+    {
+        var sb = new StringBuilder(NameConjugator.Conjugate(method.SourceMethodName))
+            .Append('|')
+            .Append('0');
+
+        foreach (var parameter in method.Parameters)
+        {
+            sb.Append('|').Append(parameter.TypeName);
+        }
+
+        return sb.ToString();
+    }
+
+    private static string GetWrapperMethodKey(IMethodSymbol method)
+    {
+        var sb = new StringBuilder(method.Name)
+            .Append('|')
+            .Append(method.TypeParameters.Length);
+
+        foreach (var parameter in method.Parameters)
+        {
+            sb.Append('|').Append(parameter.Type.ToDisplayString(NoGlobalFormat));
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>
@@ -1106,9 +1220,517 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     private static string FormatGenericArgs(EquatableArray<string> args)
         => args.Length == 0 ? string.Empty : "<" + string.Join(", ", args) + ">";
 
+    private static MethodData[] DeduplicateMethods(MethodData[] methods)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<MethodData>(methods.Length);
+        foreach (var method in methods)
+        {
+            if (seen.Add(GetMethodKey(method)))
+            {
+                result.Add(method);
+            }
+        }
+
+        return result.ToArray();
+    }
+
+    private static string GetMethodKey(MethodData method)
+    {
+        var sb = new StringBuilder(method.ContainerName)
+            .Append('|')
+            .Append(method.MethodName)
+            .Append('|')
+            .Append(method.SourceTypeArgDisplay)
+            .Append('|')
+            .Append(method.AssertionTypeArgDisplay)
+            .Append('|')
+            .Append(method.ReturnTypeFullName)
+            .Append('|')
+            .Append(method.MethodGenericParams.Length);
+
+        foreach (var typeArg in method.ReturnTypeGenericArgs)
+        {
+            sb.Append('|').Append(typeArg);
+        }
+
+        foreach (var parameter in method.Parameters)
+        {
+            sb.Append('|')
+                .Append(parameter.TypeName)
+                .Append(':')
+                .Append(parameter.Name)
+                .Append(':')
+                .Append(parameter.CallerArgumentExpressionTarget);
+        }
+
+        return sb.ToString();
+    }
+
+    private static ShouldEntryData[] DeduplicateEntries(ShouldEntryData[] entries)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<ShouldEntryData>(entries.Length);
+        foreach (var entry in entries)
+        {
+            if (seen.Add(GetShouldEntryKey(entry)))
+            {
+                result.Add(entry);
+            }
+        }
+
+        return result.ToArray();
+    }
+
+    private static string GetShouldEntryKey(ShouldEntryData entry)
+    {
+        var sb = new StringBuilder(entry.ReceiverTypeName)
+            .Append('|')
+            .Append(entry.ReceiverTypeName)
+            .Append('|')
+            .Append(entry.Priority)
+            .Append('|')
+            .Append(entry.MethodGenericParams.Length);
+
+        foreach (var p in entry.Parameters)
+        {
+            sb.Append('|').Append(p.TypeName).Append(':').Append(p.Name);
+        }
+
+        return sb.ToString();
+    }
+
+    private static void CollectExistingShouldEntryKeys(INamespaceSymbol ns, HashSet<string> keys)
+    {
+        foreach (var type in ns.GetTypeMembers())
+        {
+            CollectExistingShouldEntryKeys(type, keys);
+        }
+
+        foreach (var nested in ns.GetNamespaceMembers())
+        {
+            CollectExistingShouldEntryKeys(nested, keys);
+        }
+    }
+
+    private static void CollectExistingShouldEntryKeys(INamedTypeSymbol type, HashSet<string> keys)
+    {
+        foreach (var nested in type.GetTypeMembers())
+        {
+            CollectExistingShouldEntryKeys(nested, keys);
+        }
+
+        if (!string.Equals(type.Name, "ShouldExtensions", StringComparison.Ordinal)
+            || type.DeclaredAccessibility != Accessibility.Public
+            || !type.IsStatic)
+        {
+            return;
+        }
+
+        var containingNamespace = type.ContainingNamespace?.ToDisplayString(NoGlobalFormat) ?? string.Empty;
+        if (!string.Equals(containingNamespace, "TUnit.Assertions.Should", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        foreach (var method in type.GetMembers("Should").OfType<IMethodSymbol>())
+        {
+            if (!method.IsExtensionMethod || method.Parameters.Length == 0)
+            {
+                continue;
+            }
+
+            keys.Add(CreateShouldMethodSignatureKey(method));
+        }
+    }
+
+    private static string CreateShouldMethodSignatureKey(IMethodSymbol method, string? methodNameOverride = null)
+    {
+        var typeParameterOrdinals = new Dictionary<ITypeParameterSymbol, int>(SymbolEqualityComparer.Default);
+        for (var i = 0; i < method.TypeParameters.Length; i++)
+        {
+            typeParameterOrdinals[method.TypeParameters[i]] = i;
+        }
+
+        var sb = new StringBuilder(methodNameOverride ?? method.Name).Append('|');
+        AppendTypeSignatureKey(sb, method.Parameters[0].Type, typeParameterOrdinals);
+        sb.Append('|').Append(method.TypeParameters.Length);
+
+        foreach (var parameter in method.Parameters.Skip(1))
+        {
+            sb.Append('|');
+            AppendTypeSignatureKey(sb, parameter.Type, typeParameterOrdinals);
+        }
+
+        return sb.ToString();
+    }
+
+    private static void AppendTypeSignatureKey(
+        StringBuilder sb,
+        ITypeSymbol type,
+        Dictionary<ITypeParameterSymbol, int> typeParameterOrdinals)
+    {
+        switch (type)
+        {
+            case ITypeParameterSymbol typeParameter:
+                if (typeParameterOrdinals.TryGetValue(typeParameter, out var ordinal))
+                {
+                    sb.Append('!').Append(ordinal);
+                }
+                else
+                {
+                    sb.Append('!').Append(typeParameter.Ordinal);
+                }
+                return;
+
+            case IArrayTypeSymbol arrayType:
+                AppendTypeSignatureKey(sb, arrayType.ElementType, typeParameterOrdinals);
+                sb.Append('[');
+                if (arrayType.Rank > 1)
+                {
+                    sb.Append(',', arrayType.Rank - 1);
+                }
+                sb.Append(']');
+                return;
+
+            case IPointerTypeSymbol pointerType:
+                AppendTypeSignatureKey(sb, pointerType.PointedAtType, typeParameterOrdinals);
+                sb.Append('*');
+                return;
+
+            case INamedTypeSymbol namedType:
+                var originalDefinition = namedType.OriginalDefinition;
+
+                if (originalDefinition.ContainingType is not null)
+                {
+                    AppendTypeSignatureKey(sb, originalDefinition.ContainingType, typeParameterOrdinals);
+                    sb.Append('+');
+                }
+                else if (!originalDefinition.ContainingNamespace.IsGlobalNamespace)
+                {
+                    sb.Append(originalDefinition.ContainingNamespace.ToDisplayString()).Append('.');
+                }
+
+                sb.Append(originalDefinition.MetadataName);
+                if (namedType.TypeArguments.Length > 0)
+                {
+                    sb.Append('<');
+                    for (var i = 0; i < namedType.TypeArguments.Length; i++)
+                    {
+                        if (i > 0)
+                        {
+                            sb.Append(',');
+                        }
+
+                        AppendTypeSignatureKey(sb, namedType.TypeArguments[i], typeParameterOrdinals);
+                    }
+                    sb.Append('>');
+                }
+                return;
+
+            default:
+                sb.Append(type.ToDisplayString(NoGlobalFormat));
+                return;
+        }
+    }
+
+    private static void CollectShouldEntries(
+        INamedTypeSymbol assertType,
+        INamedTypeSymbol assertionSource,
+        INamedTypeSymbol assertionBase,
+        INamedTypeSymbol assertionContext,
+        ImmutableArray<ShouldEntryData>.Builder builder)
+    {
+        foreach (var member in assertType.GetMembers("That").OfType<IMethodSymbol>())
+        {
+            if (TryDescribeShouldEntry(member, assertionSource, out var entry))
+            {
+                builder.Add(entry);
+            }
+        }
+    }
+
+    private static bool TryDescribeShouldEntry(
+        IMethodSymbol method,
+        INamedTypeSymbol assertionSource,
+        out ShouldEntryData data)
+    {
+        data = null!;
+
+        if (method.DeclaredAccessibility != Accessibility.Public
+            || !method.IsStatic
+            || method.Parameters.Length == 0
+            || method.ReturnType is not INamedTypeSymbol returnType)
+        {
+            return false;
+        }
+
+        if (!ImplementsAssertionSource(returnType, assertionSource, out var sourceTypeArg))
+        {
+            return false;
+        }
+
+        if (!ShouldGenerateEntryForReceiver(method.Parameters[0].Type))
+        {
+            return false;
+        }
+
+        var receiver = method.Parameters[0];
+        if (TryGetCallerArgumentExpressionTarget(method.Parameters[^1]) is null)
+        {
+            return false;
+        }
+
+        var paramData = ImmutableArray.CreateBuilder<ParameterData>();
+        for (var i = 1; i < method.Parameters.Length; i++)
+        {
+            var p = method.Parameters[i];
+            var caeTarget = TryGetCallerArgumentExpressionTarget(p);
+            paramData.Add(new ParameterData(
+                Name: p.Name,
+                TypeName: p.Type.ToDisplayString(NoGlobalFormat),
+                HasDefaultValue: p.HasExplicitDefaultValue,
+                DefaultValueLiteral: p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null,
+                CallerArgumentExpressionTarget: caeTarget));
+        }
+
+        var genericParams = ImmutableArray.CreateBuilder<GenericParamData>();
+        foreach (var tp in method.TypeParameters)
+        {
+            genericParams.Add(GenericParamData.From(tp, NoGlobalFormat));
+        }
+
+        var priority = TryGetOverloadResolutionPriority(method.GetAttributes());
+
+        data = new ShouldEntryData(
+            ReceiverTypeName: receiver.Type.ToDisplayString(NoGlobalFormat),
+            SourceTypeArgDisplay: sourceTypeArg.ToDisplayString(NoGlobalFormat),
+            MethodGenericParams: new EquatableArray<GenericParamData>(genericParams),
+            Parameters: new EquatableArray<ParameterData>(paramData),
+            SignatureKey: CreateShouldMethodSignatureKey(method, "Should"),
+            Priority: priority,
+            RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
+                                          ?? TryGetRucMessage(returnType.GetAttributes())
+                                          ?? TryGetRucMessageFromConstructors(returnType),
+            SuppressedTrimWarnings: new EquatableArray<string>(CollectSuppressedTrimWarnings(method.GetAttributes())),
+            ForwardedAttributes: new EquatableArray<string>(CollectForwardedAttributes(method.GetAttributes())));
+        return true;
+    }
+
+    private static bool ShouldGenerateEntryForReceiver(ITypeSymbol receiverType)
+    {
+        if (receiverType is IArrayTypeSymbol)
+        {
+            return true;
+        }
+
+        if (receiverType is not INamedTypeSymbol named)
+        {
+            return false;
+        }
+
+        return IsOriginalDefinition(named, "System.Collections.Generic.IReadOnlyDictionary`2")
+            || IsOriginalDefinition(named, "System.Collections.Generic.IDictionary`2")
+            || IsOriginalDefinition(named, "System.Collections.Generic.ISet`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.IReadOnlySet`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.IList`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.IReadOnlyList`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.HashSet`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.Dictionary`2")
+            || IsOriginalDefinition(named, "System.Memory`1")
+            || IsOriginalDefinition(named, "System.ReadOnlyMemory`1")
+            || IsOriginalDefinition(named, "System.Collections.Generic.IAsyncEnumerable`1")
+            || IsFuncReturningEnumerable(named)
+            || IsFuncReturningTaskOfEnumerable(named);
+    }
+
+    private static bool IsOriginalDefinition(INamedTypeSymbol type, string fullMetadataName)
+    {
+        var original = type.OriginalDefinition;
+        var ns = original.ContainingNamespace?.ToDisplayString();
+        return string.Equals($"{ns}.{original.MetadataName}", fullMetadataName, StringComparison.Ordinal);
+    }
+
+    private static bool IsFuncReturningEnumerable(INamedTypeSymbol type)
+    {
+        return IsOriginalDefinition(type, "System.Func`1")
+            && type.TypeArguments.Length == 1
+            && type.TypeArguments[0] is INamedTypeSymbol returnType
+            && IsOriginalDefinition(returnType, "System.Collections.Generic.IEnumerable`1");
+    }
+
+    private static bool IsFuncReturningTaskOfEnumerable(INamedTypeSymbol type)
+    {
+        return IsOriginalDefinition(type, "System.Func`1")
+            && type.TypeArguments.Length == 1
+            && type.TypeArguments[0] is INamedTypeSymbol taskType
+            && IsOriginalDefinition(taskType, "System.Threading.Tasks.Task`1")
+            && taskType.TypeArguments.Length == 1
+            && taskType.TypeArguments[0] is INamedTypeSymbol enumerableType
+            && IsOriginalDefinition(enumerableType, "System.Collections.Generic.IEnumerable`1");
+    }
+
+    private static bool ImplementsAssertionSource(
+        INamedTypeSymbol type,
+        INamedTypeSymbol assertionSource,
+        out ITypeSymbol sourceTypeArg)
+    {
+        if (IsAssertionSourceInterface(type, assertionSource))
+        {
+            sourceTypeArg = type.TypeArguments[0];
+            return true;
+        }
+
+        foreach (var iface in type.AllInterfaces)
+        {
+            if (IsAssertionSourceInterface(iface, assertionSource))
+            {
+                sourceTypeArg = iface.TypeArguments[0];
+                return true;
+            }
+        }
+
+        sourceTypeArg = null!;
+        return false;
+    }
+
+    private static int TryGetOverloadResolutionPriority(ImmutableArray<AttributeData> attrs)
+    {
+        foreach (var attr in attrs)
+        {
+            if (attr.AttributeClass?.Name == "OverloadResolutionPriorityAttribute"
+                && attr.ConstructorArguments.Length == 1
+                && attr.ConstructorArguments[0].Value is int priority)
+            {
+                return priority;
+            }
+        }
+
+        return 0;
+    }
+
+    private static void EmitShouldEntries(SourceProductionContext ctx, ShouldEntryData[] entries, HashSet<string> emittedHints)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Runtime.CompilerServices;");
+        sb.AppendLine("using TUnit.Assertions;");
+        sb.AppendLine("using TUnit.Assertions.Should.Core;");
+        sb.AppendLine();
+        sb.AppendLine("namespace TUnit.Assertions.Should;");
+        sb.AppendLine();
+        sb.AppendLine("public static partial class ShouldExtensions");
+        sb.AppendLine("{");
+
+        foreach (var entry in entries)
+        {
+            EmitShouldEntry(sb, entry);
+        }
+
+        sb.AppendLine("}");
+
+        var hint = "ShouldExtensions.Generated.g.cs";
+        var suffix = 0;
+        while (!emittedHints.Add(hint))
+        {
+            hint = $"ShouldExtensions.Generated_{++suffix}.g.cs";
+        }
+
+        ctx.AddSource(hint, sb.ToString());
+    }
+
+    private static void EmitShouldEntry(StringBuilder sb, ShouldEntryData entry)
+    {
+        var genericList = entry.MethodGenericParams.Length > 0
+            ? "<" + string.Join(", ", entry.MethodGenericParams.Select(p =>
+                p.DynamicallyAccessedMembersAttribute is null
+                    ? p.Name
+                    : $"{p.DynamicallyAccessedMembersAttribute} {p.Name}")) + ">"
+            : string.Empty;
+
+        var constraints = string.Join(" ", entry.MethodGenericParams
+            .Select(p => p.ConstraintClause)
+            .Where(c => c is not null));
+
+        sb.AppendLine();
+        if (entry.Priority != 0)
+        {
+            sb.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({entry.Priority})]");
+        }
+        if (!string.IsNullOrEmpty(entry.RequiresUnreferencedCodeMessage))
+        {
+            var escaped = entry.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
+        }
+        foreach (var code in entry.SuppressedTrimWarnings)
+        {
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"{code}\", Justification = \"Forwarded from source method\")]");
+        }
+        foreach (var attr in entry.ForwardedAttributes)
+        {
+            sb.AppendLine($"    {attr}");
+        }
+
+        sb.Append($"    public static global::TUnit.Assertions.Should.Core.ShouldSource<{entry.SourceTypeArgDisplay}> Should{genericList}(this {entry.ReceiverTypeName} value");
+        foreach (var p in entry.Parameters)
+        {
+            sb.Append($", {p.TypeName} {p.Name}");
+            if (p.HasDefaultValue)
+            {
+                sb.Append(" = ").Append(p.DefaultValueLiteral);
+            }
+        }
+        sb.Append(')');
+
+        if (!string.IsNullOrEmpty(constraints))
+        {
+            sb.AppendLine();
+            sb.Append("        ").Append(constraints);
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("    {");
+        sb.Append("        var source = global::TUnit.Assertions.Assert.That").Append(genericList).Append("(value");
+        foreach (var p in entry.Parameters)
+        {
+            sb.Append(", ").Append(p.Name);
+        }
+        sb.AppendLine(");");
+        sb.AppendLine($"        var innerContext = ((global::TUnit.Assertions.Core.IAssertionSource<{entry.SourceTypeArgDisplay}>)source).Context;");
+        sb.AppendLine("        innerContext.ExpressionBuilder.Clear();");
+
+        var expressionParam = entry.Parameters.LastOrDefault(p => p.CallerArgumentExpressionTarget == "value");
+        if (expressionParam is null)
+        {
+            sb.AppendLine("        innerContext.ExpressionBuilder.Append(\"?.Should()\");");
+        }
+        else
+        {
+            sb.AppendLine($"        innerContext.ExpressionBuilder.Append({expressionParam.Name} ?? \"?\").Append(\".Should()\");");
+        }
+
+        sb.AppendLine($"        return new global::TUnit.Assertions.Should.Core.ShouldSource<{entry.SourceTypeArgDisplay}>(innerContext);");
+        sb.AppendLine("    }");
+    }
+
     private sealed record GeneratorPayload(
         EquatableArray<MethodData> Methods,
-        EquatableArray<WrapperData> Wrappers);
+        EquatableArray<WrapperData> Wrappers,
+        EquatableArray<ShouldEntryData> Entries);
+
+    private sealed record ShouldEntryData(
+        string ReceiverTypeName,
+        string SourceTypeArgDisplay,
+        EquatableArray<GenericParamData> MethodGenericParams,
+        EquatableArray<ParameterData> Parameters,
+        string SignatureKey,
+        int Priority,
+        string? RequiresUnreferencedCodeMessage,
+        EquatableArray<string> SuppressedTrimWarnings,
+        EquatableArray<string> ForwardedAttributes);
 
     private sealed record WrapperData(
         string ContainingNamespace,

@@ -97,6 +97,32 @@ public class CollectionTests
     }
 
     [Test]
+    public async Task Dictionary_ContainKeyWithValue()
+    {
+        IReadOnlyDictionary<string, int> dict = new Dictionary<string, int>
+        {
+            ["one"] = 1,
+            ["two"] = 2,
+        };
+
+        await dict.Should().ContainKeyWithValue("one", 1);
+    }
+
+    [Test]
+    public async Task HashSet_BeSupersetOf()
+    {
+        var set = new HashSet<string> { "apple", "banana", "cherry" };
+        await set.Should().BeSupersetOf(["banana"]);
+    }
+
+    [Test]
+    public async Task Func_collection_HaveAtLeast()
+    {
+        Func<int[]> func = () => [1, 2];
+        await func.Should().HaveAtLeast(2);
+    }
+
+    [Test]
     public async Task Contain_predicate()
     {
         var list = new List<int> { 1, 2, 3 };

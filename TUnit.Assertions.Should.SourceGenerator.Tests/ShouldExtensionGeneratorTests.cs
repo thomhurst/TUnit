@@ -240,6 +240,84 @@ public class ShouldExtensionGeneratorTests
         await Assert.That(output).Contains("CallerArgumentExpression(\"max\")");
     }
 
+    [Test]
+    public async Task Assert_That_dictionary_specialization_emits_matching_Should_overload()
+    {
+        var output = await RunGenerator("""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace TUnit.Assertions;
+
+            public class DictionaryAssertion<TKey, TValue> : IAssertionSource<IReadOnlyDictionary<TKey, TValue>>
+                where TKey : notnull
+            {
+                public AssertionContext<IReadOnlyDictionary<TKey, TValue>> Context { get; }
+                public DictionaryAssertion(IReadOnlyDictionary<TKey, TValue>? value, string? expression)
+                    => Context = new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value!, new System.Text.StringBuilder());
+                public TypeOfAssertion<IReadOnlyDictionary<TKey, TValue>, TExpected> IsTypeOf<TExpected>() => throw new System.NotImplementedException();
+                public IsNotTypeOfAssertion<IReadOnlyDictionary<TKey, TValue>, TExpected> IsNotTypeOf<TExpected>() => throw new System.NotImplementedException();
+                public IsAssignableToAssertion<TExpected, IReadOnlyDictionary<TKey, TValue>> IsAssignableTo<TExpected>() => throw new System.NotImplementedException();
+                public IsNotAssignableToAssertion<TExpected, IReadOnlyDictionary<TKey, TValue>> IsNotAssignableTo<TExpected>() => throw new System.NotImplementedException();
+                public IsAssignableFromAssertion<TExpected, IReadOnlyDictionary<TKey, TValue>> IsAssignableFrom<TExpected>() => throw new System.NotImplementedException();
+                public IsNotAssignableFromAssertion<TExpected, IReadOnlyDictionary<TKey, TValue>> IsNotAssignableFrom<TExpected>() => throw new System.NotImplementedException();
+            }
+
+            public static class Assert
+            {
+                [OverloadResolutionPriority(2)]
+                public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+                    IReadOnlyDictionary<TKey, TValue>? value,
+                    [CallerArgumentExpression(nameof(value))] string? expression = null)
+                    where TKey : notnull
+                    => new(value, expression);
+            }
+            """);
+
+        await Assert.That(output).Contains("public static global::TUnit.Assertions.Should.Core.ShouldSource<System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>> Should<TKey, TValue>(this System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>? value");
+        await Assert.That(output).Contains("Assert.That<TKey, TValue>(value, expression)");
+        await Assert.That(output).Contains("Append(expression ?? \"?\").Append(\".Should()\")");
+    }
+
+    [Test]
+    public async Task Assert_That_set_specialization_emits_matching_Should_overload()
+    {
+        var output = await RunGenerator("""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace TUnit.Assertions;
+
+            public class SetAssertion<TItem> : IAssertionSource<ISet<TItem>>
+            {
+                public AssertionContext<ISet<TItem>> Context { get; }
+                public SetAssertion(ISet<TItem>? value, string? expression)
+                    => Context = new AssertionContext<ISet<TItem>>(value!, new System.Text.StringBuilder());
+                public TypeOfAssertion<ISet<TItem>, TExpected> IsTypeOf<TExpected>() => throw new System.NotImplementedException();
+                public IsNotTypeOfAssertion<ISet<TItem>, TExpected> IsNotTypeOf<TExpected>() => throw new System.NotImplementedException();
+                public IsAssignableToAssertion<TExpected, ISet<TItem>> IsAssignableTo<TExpected>() => throw new System.NotImplementedException();
+                public IsNotAssignableToAssertion<TExpected, ISet<TItem>> IsNotAssignableTo<TExpected>() => throw new System.NotImplementedException();
+                public IsAssignableFromAssertion<TExpected, ISet<TItem>> IsAssignableFrom<TExpected>() => throw new System.NotImplementedException();
+                public IsNotAssignableFromAssertion<TExpected, ISet<TItem>> IsNotAssignableFrom<TExpected>() => throw new System.NotImplementedException();
+            }
+
+            public static class Assert
+            {
+                [OverloadResolutionPriority(3)]
+                public static SetAssertion<TItem> That<TItem>(
+                    ISet<TItem>? value,
+                    [CallerArgumentExpression(nameof(value))] string? expression = null)
+                    => new(value, expression);
+            }
+            """);
+
+        await Assert.That(output).Contains("public static global::TUnit.Assertions.Should.Core.ShouldSource<System.Collections.Generic.ISet<TItem>> Should<TItem>(this System.Collections.Generic.ISet<TItem>? value");
+        await Assert.That(output).Contains("OverloadResolutionPriority(3)");
+        await Assert.That(output).Contains("Assert.That<TItem>(value, expression)");
+    }
+
     /// <summary>
     /// Compiles <paramref name="userSource"/> with the Should-generator's input dependencies,
     /// runs <see cref="ShouldExtensionGenerator"/>, snapshots the full generated source via
