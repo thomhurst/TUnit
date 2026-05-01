@@ -116,6 +116,13 @@ public class CollectionTests
     }
 
     [Test]
+    public async Task HashSet_HaveCount()
+    {
+        var set = new HashSet<string> { "apple", "banana", "cherry" };
+        await set.Should().HaveCount(3);
+    }
+
+    [Test]
     public async Task Func_collection_HaveAtLeast()
     {
         Func<int[]> func = () => [1, 2];

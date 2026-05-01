@@ -1273,31 +1273,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         var result = new List<ShouldEntryData>(entries.Length);
         foreach (var entry in entries)
         {
-            if (seen.Add(GetShouldEntryKey(entry)))
+            if (seen.Add(entry.SignatureKey))
             {
                 result.Add(entry);
             }
         }
 
         return result.ToArray();
-    }
-
-    private static string GetShouldEntryKey(ShouldEntryData entry)
-    {
-        var sb = new StringBuilder(entry.ReceiverTypeName)
-            .Append('|')
-            .Append(entry.ReceiverTypeName)
-            .Append('|')
-            .Append(entry.Priority)
-            .Append('|')
-            .Append(entry.MethodGenericParams.Length);
-
-        foreach (var p in entry.Parameters)
-        {
-            sb.Append('|').Append(p.TypeName).Append(':').Append(p.Name);
-        }
-
-        return sb.ToString();
     }
 
     private static void CollectExistingShouldEntryKeys(INamespaceSymbol ns, HashSet<string> keys)

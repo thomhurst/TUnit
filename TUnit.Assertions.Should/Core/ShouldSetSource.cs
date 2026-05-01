@@ -4,10 +4,13 @@ using System.Text;
 using TUnit.Assertions.Adapters;
 using TUnit.Assertions.Abstractions;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Should.Attributes;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Should.Core;
 
-public sealed class ShouldSetSource<TItem> : ShouldSetSourceBase<ISet<TItem>, TItem, ShouldSetSource<TItem>>
+[ShouldGeneratePartial(typeof(SetAssertion<>))]
+public sealed partial class ShouldSetSource<TItem> : ShouldSetSourceBase<ISet<TItem>, TItem, ShouldSetSource<TItem>>
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldSetSource(ISet<TItem>? value, string? expression)
@@ -31,7 +34,8 @@ public sealed class ShouldSetSource<TItem> : ShouldSetSourceBase<ISet<TItem>, TI
 }
 
 #if NET5_0_OR_GREATER
-public sealed class ShouldReadOnlySetSource<TItem> : ShouldSetSourceBase<IReadOnlySet<TItem>, TItem, ShouldReadOnlySetSource<TItem>>
+[ShouldGeneratePartial(typeof(ReadOnlySetAssertion<>))]
+public sealed partial class ShouldReadOnlySetSource<TItem> : ShouldSetSourceBase<IReadOnlySet<TItem>, TItem, ShouldReadOnlySetSource<TItem>>
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldReadOnlySetSource(IReadOnlySet<TItem>? value, string? expression)
@@ -55,7 +59,8 @@ public sealed class ShouldReadOnlySetSource<TItem> : ShouldSetSourceBase<IReadOn
 }
 #endif
 
-public sealed class ShouldHashSetSource<TItem> : ShouldSetSourceBase<HashSet<TItem>, TItem, ShouldHashSetSource<TItem>>
+[ShouldGeneratePartial(typeof(HashSetAssertion<>))]
+public sealed partial class ShouldHashSetSource<TItem> : ShouldSetSourceBase<HashSet<TItem>, TItem, ShouldHashSetSource<TItem>>
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldHashSetSource(HashSet<TItem>? value, string? expression)

@@ -120,10 +120,25 @@ namespace .
             where TAssertion : .<TCollection> { }
         public ..ShouldAssertion<TCollection> HaveSingleItem(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
     }
+    [..ShouldGeneratePartial(typeof(.<!0>))]
     public sealed class ShouldHashSetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldHashSetSource<TItem>>
     {
         public ShouldHashSetSource(.<TItem>? value, string? expression) { }
+        public ..ShouldAssertion<.<TItem>> BeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TItem>> BeInOrder() { }
+        public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     [..ShouldGeneratePartial(typeof(.<!0, !1>))]
     public sealed class ShouldMutableDictionarySource<TKey, TValue> : ..ShouldEnumerableSourceBase<.<TKey, TValue>, .<TKey, TValue>, ..ShouldMutableDictionarySource<TKey, TValue>>
@@ -155,10 +170,25 @@ namespace .
         public ..ShouldAssertion<.<TKey, TValue>> NotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
     }
+    [..ShouldGeneratePartial(typeof(.<!0>))]
     public sealed class ShouldReadOnlySetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldReadOnlySetSource<TItem>>
     {
         public ShouldReadOnlySetSource(.<TItem>? value, string? expression) { }
+        public ..ShouldAssertion<.<TItem>> BeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TItem>> BeInOrder() { }
+        public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     public abstract class ShouldSetSourceBase<TSet, TItem, TSelf> : ..ShouldEnumerableSourceBase<TSet, TItem, TSelf>
         where TSet : .<TItem>
@@ -174,10 +204,25 @@ namespace .
         public ..ShouldAssertion<TSet> Overlap(.<TItem> other, [.("other")] string? expression = null) { }
         public ..ShouldAssertion<TSet> SetEquals(.<TItem> other, [.("other")] string? expression = null) { }
     }
+    [..ShouldGeneratePartial(typeof(.<!0>))]
     public sealed class ShouldSetSource<TItem> : ..ShouldSetSourceBase<.<TItem>, TItem, ..ShouldSetSource<TItem>>
     {
         public ShouldSetSource(.<TItem>? value, string? expression) { }
+        public ..ShouldAssertion<.<TItem>> BeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
+        public ..ShouldAssertion<.<TItem>> BeInOrder() { }
+        public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems() { }
+        public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
+        public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     public abstract class ShouldSourceBase<TValue, TSelf> : ..IShouldSource, ..IShouldSource<TValue>
         where TSelf : ..ShouldSourceBase<TValue, TSelf>
