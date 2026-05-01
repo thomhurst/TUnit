@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Should.Attributes;
@@ -16,7 +15,7 @@ public sealed partial class ShouldDictionarySource<TKey, TValue>
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldDictionarySource(IReadOnlyDictionary<TKey, TValue>? value, string? expression)
-        : base(new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value!, BuildExpression(expression)))
+        : base(new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value!, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
@@ -118,13 +117,6 @@ public sealed partial class ShouldDictionarySource<TKey, TValue>
         var inner = ApplyBecause(new DictionaryAnyValueAssertion<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>(Context, predicate));
         return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
     }
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
-    }
 }
 
 [ShouldGeneratePartial(typeof(MutableDictionaryAssertion<,>))]
@@ -134,7 +126,7 @@ public sealed partial class ShouldMutableDictionarySource<TKey, TValue>
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldMutableDictionarySource(IDictionary<TKey, TValue>? value, string? expression)
-        : base(new AssertionContext<IDictionary<TKey, TValue>>(value!, BuildExpression(expression)))
+        : base(new AssertionContext<IDictionary<TKey, TValue>>(value!, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
@@ -235,12 +227,5 @@ public sealed partial class ShouldMutableDictionarySource<TKey, TValue>
         Context.ExpressionBuilder.Append(".AnyValue(").Append(expression).Append(')');
         var inner = ApplyBecause(new MutableDictionaryAnyValueAssertion<IDictionary<TKey, TValue>, TKey, TValue>(Context, predicate));
         return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
-    }
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
     }
 }

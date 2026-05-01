@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Should.Attributes;
@@ -25,18 +24,12 @@ public sealed partial class ShouldCollectionSource<TItem> : ShouldEnumerableSour
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldCollectionSource(IEnumerable<TItem>? value, string? expression)
-        : base(new AssertionContext<IEnumerable<TItem>>(value, BuildExpression(expression)))
+        : base(new AssertionContext<IEnumerable<TItem>>(value, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
     internal ShouldCollectionSource(AssertionContext<IEnumerable<TItem>> context)
         : base(context)
     {
-    }
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
     }
 }

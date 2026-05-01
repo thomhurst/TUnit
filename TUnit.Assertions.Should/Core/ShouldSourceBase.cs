@@ -1,10 +1,21 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 using TUnit.Assertions.Abstractions;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Should.Core;
+
+internal static class ShouldExpressionBuilder
+{
+    internal static StringBuilder Build(string? expression)
+    {
+        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
+        sb.Append(expression ?? "?").Append(".Should()");
+        return sb;
+    }
+}
 
 public abstract class ShouldSourceBase<TValue, TSelf> : IShouldSource<TValue>
     where TSelf : ShouldSourceBase<TValue, TSelf>

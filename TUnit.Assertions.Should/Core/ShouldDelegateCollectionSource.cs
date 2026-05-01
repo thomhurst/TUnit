@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -24,6 +23,12 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
         _becauseMessage = becauseMessage;
     }
 
+    /// <summary>
+    /// Attaches a human-readable reason to the next assertion in the chain. Returns a NEW struct —
+    /// because <see cref="ShouldDelegateCollectionSource{TItem}"/> is a <c>readonly struct</c>, the
+    /// result MUST be consumed inline (e.g. <c>source.Because("...").HaveAtLeast(2)</c>). Assigning
+    /// it to a variable and continuing on the original copy silently drops the message.
+    /// </summary>
     public ShouldDelegateCollectionSource<TItem> Because(string message)
         => new(Context, message.Trim());
 
@@ -62,7 +67,7 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
 
     public ShouldAssertion<TException> Throw<TException>() where TException : Exception
     {
-        Context.ExpressionBuilder.Append($".Throw<{FormatTypeName(typeof(TException))}>()");
+        Context.ExpressionBuilder.Append($".Throw<{DelegateExceptionTypeFormatter.FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
         var inner = new ThrowsAssertion<TException>(mapped);
         ApplyBecause(inner);
@@ -71,7 +76,7 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
 
     public ShouldAssertion<TException> ThrowExactly<TException>() where TException : Exception
     {
-        Context.ExpressionBuilder.Append($".ThrowExactly<{FormatTypeName(typeof(TException))}>()");
+        Context.ExpressionBuilder.Append($".ThrowExactly<{DelegateExceptionTypeFormatter.FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
         var inner = new ThrowsExactlyAssertion<TException>(mapped);
         ApplyBecause(inner);
@@ -86,26 +91,9 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
         }
     }
 
-    private static string FormatTypeName(Type t)
-    {
-        if (!t.IsGenericType)
-        {
-            return t.Name;
-        }
-
-        var name = t.Name;
-        var tickIndex = name.IndexOf('`');
-        if (tickIndex > 0)
-        {
-            name = name.Substring(0, tickIndex);
-        }
-
-        return $"{name}<{string.Join(", ", t.GenericTypeArguments.Select(FormatTypeName))}>";
-    }
-
     internal static AssertionContext<IEnumerable<TItem>> CreateContext(Func<IEnumerable<TItem>?> func, string? expression)
     {
-        var expressionBuilder = BuildExpression(expression);
+        var expressionBuilder = ShouldExpressionBuilder.Build(expression);
         var evaluationContext = new EvaluationContext<IEnumerable<TItem>>(() =>
         {
             try
@@ -122,7 +110,7 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
 
     internal static AssertionContext<IEnumerable<TItem>> CreateContext(Func<Task<IEnumerable<TItem>?>> func, string? expression)
     {
-        var expressionBuilder = BuildExpression(expression);
+        var expressionBuilder = ShouldExpressionBuilder.Build(expression);
         var evaluationContext = new EvaluationContext<IEnumerable<TItem>>(async () =>
         {
             try
@@ -135,12 +123,5 @@ public readonly struct ShouldDelegateCollectionSource<TItem> : IShouldSource<IEn
             }
         });
         return new AssertionContext<IEnumerable<TItem>>(evaluationContext, expressionBuilder);
-    }
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
     }
 }

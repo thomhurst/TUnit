@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Text;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Should.Core;
 
@@ -18,7 +17,7 @@ public static partial class ShouldExtensions
         this T? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        var sb = BuildExpression(expression);
+        var sb = ShouldExpressionBuilder.Build(expression);
         return new ShouldSource<T>(new AssertionContext<T>(value, sb));
     }
 
@@ -33,7 +32,7 @@ public static partial class ShouldExtensions
         this string? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        var sb = BuildExpression(expression);
+        var sb = ShouldExpressionBuilder.Build(expression);
         return new ShouldSource<string>(new AssertionContext<string>(value, sb));
     }
 
@@ -179,12 +178,5 @@ public static partial class ShouldExtensions
 
     private static ShouldDelegateSource<T> CreateDelegateSource<T>(
         string? expression, Func<Task<(T?, Exception?)>> evaluator)
-        => new(new AssertionContext<T>(new EvaluationContext<T>(evaluator), BuildExpression(expression)));
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
-    }
+        => new(new AssertionContext<T>(new EvaluationContext<T>(evaluator), ShouldExpressionBuilder.Build(expression)));
 }

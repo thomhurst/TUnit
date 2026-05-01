@@ -569,6 +569,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
     private static string GetWrapperMethodKey(WrapperMethodData method)
     {
+        // Type-parameter count is always 0 here: TryDescribeWrapperMethod rejects methods with
+        // method-level type parameters, so WrapperMethodData never carries them. Keep the literal
+        // in lockstep with the IMethodSymbol overload's "method.TypeParameters.Length" segment.
         var sb = new StringBuilder(NameConjugator.Conjugate(method.SourceMethodName))
             .Append('|')
             .Append('0');

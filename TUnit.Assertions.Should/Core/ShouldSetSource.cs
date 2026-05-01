@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using TUnit.Assertions.Adapters;
 using TUnit.Assertions.Abstractions;
 using TUnit.Assertions.Core;
@@ -14,7 +13,7 @@ public sealed partial class ShouldSetSource<TItem> : ShouldSetSourceBase<ISet<TI
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldSetSource(ISet<TItem>? value, string? expression)
-        : base(new AssertionContext<ISet<TItem>>(value!, BuildExpression(expression)))
+        : base(new AssertionContext<ISet<TItem>>(value!, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
@@ -24,13 +23,6 @@ public sealed partial class ShouldSetSource<TItem> : ShouldSetSourceBase<ISet<TI
     }
 
     protected override ISetAdapter<TItem> CreateSetAdapter(ISet<TItem> value) => new SetAdapter<TItem>(value);
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
-    }
 }
 
 #if NET5_0_OR_GREATER
@@ -39,7 +31,7 @@ public sealed partial class ShouldReadOnlySetSource<TItem> : ShouldSetSourceBase
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldReadOnlySetSource(IReadOnlySet<TItem>? value, string? expression)
-        : base(new AssertionContext<IReadOnlySet<TItem>>(value!, BuildExpression(expression)))
+        : base(new AssertionContext<IReadOnlySet<TItem>>(value!, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
@@ -49,13 +41,6 @@ public sealed partial class ShouldReadOnlySetSource<TItem> : ShouldSetSourceBase
     }
 
     protected override ISetAdapter<TItem> CreateSetAdapter(IReadOnlySet<TItem> value) => new ReadOnlySetAdapter<TItem>(value);
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
-    }
 }
 #endif
 
@@ -64,7 +49,7 @@ public sealed partial class ShouldHashSetSource<TItem> : ShouldSetSourceBase<Has
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public ShouldHashSetSource(HashSet<TItem>? value, string? expression)
-        : base(new AssertionContext<HashSet<TItem>>(value!, BuildExpression(expression)))
+        : base(new AssertionContext<HashSet<TItem>>(value!, ShouldExpressionBuilder.Build(expression)))
     {
     }
 
@@ -74,11 +59,4 @@ public sealed partial class ShouldHashSetSource<TItem> : ShouldSetSourceBase<Has
     }
 
     protected override ISetAdapter<TItem> CreateSetAdapter(HashSet<TItem> value) => new SetAdapter<TItem>(value);
-
-    private static StringBuilder BuildExpression(string? expression)
-    {
-        var sb = new StringBuilder((expression?.Length ?? 1) + 16);
-        sb.Append(expression ?? "?").Append(".Should()");
-        return sb;
-    }
 }

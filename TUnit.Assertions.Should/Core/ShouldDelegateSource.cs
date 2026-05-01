@@ -5,6 +5,36 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Should.Core;
 
+internal static class DelegateExceptionTypeFormatter
+{
+    /// <summary>
+    /// Renders a type's display name for the assertion's expression-builder string. Strips the
+    /// backtick-arity suffix and recurses into generic arguments so that
+    /// <c>typeof(MyException&lt;int&gt;)</c> appears as <c>MyException&lt;Int32&gt;</c> in
+    /// failure messages rather than the raw <c>MyException`1</c> that <see cref="System.Type.Name"/>
+    /// returns. Note: this runs at runtime (no Roslyn) so primitive aliases come through as their
+    /// CLR names (<c>Int32</c>, not <c>int</c>); the source-generator's emit path uses Roslyn's
+    /// display format and produces <c>int</c>. The asymmetry is acceptable for failure messages
+    /// — exception types are rarely generic and almost never primitive — but is worth noting.
+    /// </summary>
+    internal static string FormatTypeName(System.Type t)
+    {
+        if (!t.IsGenericType)
+        {
+            return t.Name;
+        }
+
+        var name = t.Name;
+        var tickIndex = name.IndexOf('`');
+        if (tickIndex > 0)
+        {
+            name = name.Substring(0, tickIndex);
+        }
+
+        return $"{name}<{string.Join(", ", t.GenericTypeArguments.Select(FormatTypeName))}>";
+    }
+}
+
 /// <summary>
 /// Should-flavored entry wrapper for delegates and async functions. Surfaces
 /// <c>Throw&lt;TException&gt;</c> / <c>ThrowExactly&lt;TException&gt;</c> instance methods
@@ -27,6 +57,12 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
         _becauseMessage = becauseMessage;
     }
 
+    /// <summary>
+    /// Attaches a human-readable reason to the next assertion in the chain. Returns a NEW struct —
+    /// because <see cref="ShouldDelegateSource{T}"/> is a <c>readonly struct</c>, the result MUST
+    /// be consumed inline (e.g. <c>source.Because("...").Throw&lt;E&gt;()</c>). Assigning it to a
+    /// variable and continuing on the original copy silently drops the message.
+    /// </summary>
     public ShouldDelegateSource<T> Because(string message)
         => new(Context, message.Trim());
 
@@ -38,7 +74,7 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
     /// </summary>
     public ShouldAssertion<TException> Throw<TException>() where TException : Exception
     {
-        Context.ExpressionBuilder.Append($".Throw<{FormatTypeName(typeof(TException))}>()");
+        Context.ExpressionBuilder.Append($".Throw<{DelegateExceptionTypeFormatter.FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
         var inner = new ThrowsAssertion<TException>(mapped);
         ApplyBecause(inner);
@@ -50,7 +86,7 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
     /// </summary>
     public ShouldAssertion<TException> ThrowExactly<TException>() where TException : Exception
     {
-        Context.ExpressionBuilder.Append($".ThrowExactly<{FormatTypeName(typeof(TException))}>()");
+        Context.ExpressionBuilder.Append($".ThrowExactly<{DelegateExceptionTypeFormatter.FormatTypeName(typeof(TException))}>()");
         var mapped = Context.MapException<TException>();
         var inner = new ThrowsExactlyAssertion<TException>(mapped);
         ApplyBecause(inner);
@@ -63,32 +99,5 @@ public readonly struct ShouldDelegateSource<T> : IShouldSource<T>
         {
             assertion.Because(_becauseMessage);
         }
-    }
-
-    /// <summary>
-    /// Renders a type's display name for the assertion's expression-builder string. Strips the
-    /// backtick-arity suffix and recurses into generic arguments so that
-    /// <c>typeof(MyException&lt;int&gt;)</c> appears as <c>MyException&lt;Int32&gt;</c> in
-    /// failure messages rather than the raw <c>MyException`1</c> that <see cref="System.Type.Name"/>
-    /// returns. Note: this runs at runtime (no Roslyn) so primitive aliases come through as their
-    /// CLR names (<c>Int32</c>, not <c>int</c>); the source-generator's emit path uses Roslyn's
-    /// display format and produces <c>int</c>. The asymmetry is acceptable for failure messages
-    /// — exception types are rarely generic and almost never primitive — but is worth noting.
-    /// </summary>
-    private static string FormatTypeName(System.Type t)
-    {
-        if (!t.IsGenericType)
-        {
-            return t.Name;
-        }
-
-        var name = t.Name;
-        var tickIndex = name.IndexOf('`');
-        if (tickIndex > 0)
-        {
-            name = name.Substring(0, tickIndex);
-        }
-
-        return $"{name}<{string.Join(", ", t.GenericTypeArguments.Select(FormatTypeName))}>";
     }
 }
