@@ -274,7 +274,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             hookExecutor,
             afterHookPairTracker,
             staticPropertyHandler,
-            dynamicTestQueue));
+            dynamicTestQueue,
+            notInParallelLock));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,

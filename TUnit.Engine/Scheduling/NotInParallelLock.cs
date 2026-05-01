@@ -13,6 +13,11 @@ namespace TUnit.Engine.Scheduling;
 /// Acquisition must happen <em>after</em> dependency recursion, otherwise a
 /// global-NIP test that depends on a Parallel test would deadlock against its
 /// own dependency.
+///
+/// Suites with no global <c>[NotInParallel]</c> tests pay no overhead: the lock
+/// stays disabled and Enter/Exit short-circuit. <see cref="TestScheduler"/>
+/// flips the flag via <see cref="Enable"/> as soon as grouping reports any
+/// global-NIP test (initial set or dynamic batch).
 /// </summary>
 internal sealed class NotInParallelLock : IDisposable
 {
@@ -20,10 +25,22 @@ internal sealed class NotInParallelLock : IDisposable
     private readonly Lock _stateLock = new();
     private int _activeReaders;
     private TaskCompletionSource? _drainTcs;
+    private volatile bool _enabled;
+
+    public void Enable() => _enabled = true;
 
     public void Dispose() => _writerGate.Dispose();
 
-    public async ValueTask<Scope> EnterAsync(bool exclusive, CancellationToken cancellationToken)
+    public ValueTask<Scope> EnterAsync(bool exclusive, CancellationToken cancellationToken)
+    {
+        if (!_enabled)
+        {
+            return new ValueTask<Scope>(default(Scope));
+        }
+        return EnterEnabledAsync(exclusive, cancellationToken);
+    }
+
+    private async ValueTask<Scope> EnterEnabledAsync(bool exclusive, CancellationToken cancellationToken)
     {
         if (exclusive)
         {
@@ -111,10 +128,14 @@ internal sealed class NotInParallelLock : IDisposable
         _writerGate.Release();
     }
 
-    internal readonly struct Scope(NotInParallelLock owner, bool exclusive) : IDisposable
+    internal readonly struct Scope(NotInParallelLock? owner, bool exclusive) : IDisposable
     {
         public void Dispose()
         {
+            if (owner is null)
+            {
+                return;
+            }
             if (exclusive)
             {
                 owner.ExitExclusive();

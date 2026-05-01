@@ -22,6 +22,8 @@ namespace TUnit.TestProject.Bugs._5800;
 [EngineTest(ExpectedResult.Pass)]
 public class Repro5800
 {
+    // Static fields are safe here: the engine test invokes Repro5800 in a
+    // dedicated subprocess, so there is no cross-run state contamination.
     private static int _activeSiblings;
     private static int _maxSiblingsObservedDuringLonely;
     private static readonly TaskCompletionSource SiblingLive = new(TaskCreationOptions.RunContinuationsAsynchronously);
