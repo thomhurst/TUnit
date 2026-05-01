@@ -12,12 +12,13 @@ namespace TUnit.TestProject.Bugs._5800;
 /// mid–parallel-phase via dependency recursion in <c>TestRunner</c>, where it
 /// then ran alongside its parallel siblings.
 ///
-/// The rendezvous keeps the test deterministic: LonelyTest only starts checking
-/// after at least one ParallelSibling has acquired its shared slot. With the
-/// runtime <c>NotInParallelLock</c>, LonelyTest's exclusive acquisition drains
-/// all readers first — so <c>_activeSiblings</c> is provably zero throughout
-/// LonelyTest's body. Without the fix, sibling activity overlaps LonelyTest and
-/// the assertion fails.
+/// LonelyTest samples <c>_activeSiblings</c> throughout its body. With the
+/// runtime <c>NotInParallelLock</c>, exclusive acquisition drains all readers
+/// first AND blocks new readers until LonelyTest exits — so the count stays
+/// provably zero. Without the fix, sibling activity overlaps and the count is
+/// non-zero. No rendezvous is used: a rendezvous would deadlock under the fix
+/// when LonelyTest's exclusive acquire wins the dispatch race against siblings'
+/// shared acquire (siblings are then blocked from signalling).
 /// </summary>
 [EngineTest(ExpectedResult.Pass)]
 public class Repro5800
@@ -26,28 +27,21 @@ public class Repro5800
     // dedicated subprocess, so there is no cross-run state contamination.
     private static int _activeSiblings;
     private static int _maxSiblingsObservedDuringLonely;
-    private static readonly TaskCompletionSource SiblingLive = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-    // Generous because Repro5800 runs inside the engine-test subprocess populated
-    // with every [EngineTest=Pass] test in the suite. Sibling dispatch can be
-    // delayed by the saturated parallel queue. A real bug — global NIP exclusion
-    // not enforced — surfaces as a non-zero observed sibling count, not a timeout.
-    private static readonly TimeSpan RendezvousTimeout = TimeSpan.FromSeconds(60);
 
     [Test, NotInParallel]
     public async Task LonelyTest()
     {
-        using var cts = new CancellationTokenSource(RendezvousTimeout);
-        await SiblingLive.Task.WaitAsync(cts.Token);
-
-        for (var i = 0; i < 10; i++)
+        // Sample over a window long enough that any concurrently-dispatched
+        // sibling (held for SiblingHoldMs) would be observed if exclusion is
+        // broken. Under the fix siblings are gated out and the count stays 0.
+        for (var i = 0; i < 50; i++)
         {
             var snapshot = Volatile.Read(ref _activeSiblings);
             if (snapshot > _maxSiblingsObservedDuringLonely)
             {
                 _maxSiblingsObservedDuringLonely = snapshot;
             }
-            await Task.Delay(10);
+            await Task.Delay(20);
         }
 
         await Assert.That(_maxSiblingsObservedDuringLonely)
@@ -67,15 +61,14 @@ public class Repro5800
     [Arguments(3)]
     [Arguments(4)]
     [Arguments(5)]
-    public async Task ParallelSibling(int n)
+    public async Task ParallelSibling(int _)
     {
         Interlocked.Increment(ref _activeSiblings);
         try
         {
-            SiblingLive.TrySetResult();
             // Hold long enough for dep-recursion to surface LonelyTest while siblings
             // are still live (if exclusion is broken).
-            await Task.Delay(800);
+            await Task.Delay(1500);
         }
         finally
         {

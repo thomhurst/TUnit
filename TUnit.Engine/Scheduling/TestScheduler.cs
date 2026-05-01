@@ -147,10 +147,7 @@ internal sealed class TestScheduler : ITestScheduler
         // Suites with no global [NotInParallel] tests skip the runtime exclusion
         // lock entirely. Once enabled, the flag is monotonic — dynamic batches
         // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
-        if (groupedTests.NotInParallel.Length > 0)
-        {
-            _notInParallelLock.Enable();
-        }
+        MarkGlobalNotInParallelTests(groupedTests);
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
@@ -320,11 +317,23 @@ internal sealed class TestScheduler : ITestScheduler
         // tests with [NotInParallel(key)], [ParallelGroup(...)] etc. honour their constraints
         // instead of being silently dropped.
         var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTests.ToArray()).ConfigureAwait(false);
-        if (groupedDynamicTests.NotInParallel.Length > 0)
-        {
-            _notInParallelLock.Enable();
-        }
+        MarkGlobalNotInParallelTests(groupedDynamicTests);
         await ExecuteAllPhasesAsync(groupedDynamicTests, cancellationToken).ConfigureAwait(false);
+    }
+
+    private void MarkGlobalNotInParallelTests(GroupedTests grouped)
+    {
+        if (grouped.NotInParallel.Length == 0)
+        {
+            return;
+        }
+
+        _notInParallelLock.Enable();
+
+        for (var i = 0; i < grouped.NotInParallel.Length; i++)
+        {
+            grouped.NotInParallel[i].RequiresGlobalNotInParallelLock = true;
+        }
     }
 
 #if NET

@@ -115,7 +115,7 @@ public sealed class TestRunner
             // recursion so a global-NIP test depending on a Parallel test does not
             // deadlock against its own dependency.
             using var lockScope = await _notInParallelLock
-                .EnterAsync(RequiresGlobalExclusion(test), cancellationToken)
+                .EnterAsync(test.RequiresGlobalNotInParallelLock, cancellationToken)
                 .ConfigureAwait(false);
 
             // Acquired here (not in the scheduler) so the limit is enforced
@@ -176,32 +176,4 @@ public sealed class TestRunner
     /// Gets the first exception that triggered fail-fast cancellation.
     /// </summary>
     public Exception? GetFirstFailFastException() => _firstFailFastException;
-
-    /// <summary>
-    /// True if a test must hold the global "run alone" lock — i.e. it has
-    /// <c>[NotInParallel]</c> with no keys and no <c>[ParallelGroup]</c>.
-    /// Mirrors the bucketing in <see cref="Services.TestGroupingService"/>: only tests that land in
-    /// <c>GroupedTests.NotInParallel</c> need global mutual exclusion. Tests with keys
-    /// or a ParallelGroup are serialized via the constraint-key scheduler instead.
-    /// </summary>
-    private static bool RequiresGlobalExclusion(AbstractExecutableTest test)
-    {
-        NotInParallelConstraint? notInParallel = null;
-        var hasParallelGroup = false;
-        var constraints = test.Context.ParallelConstraints;
-        for (var i = 0; i < constraints.Count; i++)
-        {
-            switch (constraints[i])
-            {
-                case NotInParallelConstraint nip:
-                    notInParallel = nip;
-                    break;
-                case ParallelGroupConstraint:
-                    hasParallelGroup = true;
-                    break;
-            }
-        }
-
-        return notInParallel is { NotInParallelConstraintKeys.Count: 0 } && !hasParallelGroup;
-    }
 }

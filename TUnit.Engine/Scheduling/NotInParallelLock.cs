@@ -101,6 +101,7 @@ internal sealed class NotInParallelLock : IDisposable
             _drainTcs = drainTcs;
         }
 
+        var drained = false;
         try
         {
             using (cancellationToken.Register(static state =>
@@ -108,18 +109,21 @@ internal sealed class NotInParallelLock : IDisposable
             {
                 await drainTcs.Task.ConfigureAwait(false);
             }
+            drained = true;
         }
-        catch
+        finally
         {
-            lock (_stateLock)
+            if (!drained)
             {
-                if (ReferenceEquals(_drainTcs, drainTcs))
+                lock (_stateLock)
                 {
-                    _drainTcs = null;
+                    if (ReferenceEquals(_drainTcs, drainTcs))
+                    {
+                        _drainTcs = null;
+                    }
                 }
+                _writerGate.Release();
             }
-            _writerGate.Release();
-            throw;
         }
     }
 
