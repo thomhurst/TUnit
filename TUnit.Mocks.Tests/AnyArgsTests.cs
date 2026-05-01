@@ -27,6 +27,11 @@ public interface IOverloadedSumService
     void Notify(string source, string message);
 }
 
+public interface IGenericAnyArgsService
+{
+    T Pick<T>(T left, T right);
+}
+
 public class AnyArgsTests
 {
     [Test]
@@ -117,13 +122,25 @@ public class AnyArgsTests
         await Assert.That(HasAnyArgsOverload("TUnit_Mocks_Tests_IFiveParamService_MockMemberExtensions", "Log")).IsTrue();
     }
 
+    [Test]
+    public async Task AnyArgs_NotEmitted_For_Generic_Methods()
+    {
+        await Assert.That(HasAnyArgsOverload("TUnit_Mocks_Tests_IGenericAnyArgsService_MockMemberExtensions", "Pick")).IsFalse();
+    }
+
     // The generated extension class lives in TUnit.Mocks.Generated and is named
     // <safe-type-name>_MockMemberExtensions; the AnyArgs overload appears as a 2-param
-    // extension method whose second parameter is typed AnyArgs.
+    // extension method whose second parameter is typed AnyArgs. Keep these literal class
+    // names in sync with MockImplBuilder.GetSafeName.
     private static bool HasAnyArgsOverload(string extensionsTypeName, string methodName)
     {
         var extensionsType = typeof(AnyArgsTests).Assembly.GetTypes()
-            .Single(t => t.Name == extensionsTypeName);
+            .SingleOrDefault(t => t.Name == extensionsTypeName);
+        if (extensionsType is null)
+        {
+            return false;
+        }
+
         return extensionsType.GetMethods()
             .Where(m => m.Name == methodName)
             .Any(m =>

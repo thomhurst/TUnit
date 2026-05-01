@@ -909,11 +909,16 @@ internal static class MockMembersBuilder
     /// Emits a single-argument shortcut overload that accepts <c>AnyArgs</c> and fills every
     /// matchable parameter slot with <c>AnyMatcher&lt;T&gt;.Instance</c>. Skipped when the shortcut
     /// would be ambiguous (the method name is not unique on the model), unhelpful (zero or one
-    /// matchable parameter), or unsafe to mirror at this layer (out / ref / ref-struct params).
+    /// matchable parameter), unable to infer method type parameters, or unsafe to mirror at this
+    /// layer (out / ref / ref-struct params).
     /// </summary>
     private static void EmitAnyArgsOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
         string safeName, bool captureModelTypeParameters, bool receiverIsThis)
     {
+        // AnyArgs carries no typed argument information, so generic method type parameters
+        // cannot be inferred at the call site. Defer to the explicit per-parameter overload.
+        if (method.IsGenericMethod) return;
+
         // Out, ref, and ref-struct params change matcher arity or signature shape; rather than
         // try to mirror those variations through the AnyArgs path, defer to the explicit form.
         foreach (var p in method.Parameters)

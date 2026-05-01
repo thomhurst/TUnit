@@ -72,7 +72,7 @@ The two forms are equivalent — `AnyArgs()` simply expands to one `Arg.Any<T>()
 :::note When the shortcut is generated
 The `AnyArgs()` overload is only emitted when the method's name is unique on the mocked type. If the type has overloads of the same name (for example `Sum(int, int)` and `Sum(int, int, int)`), the shortcut would be ambiguous, so the generator omits it for those methods — use the explicit per-parameter form instead.
 
-The shortcut is also skipped for methods with `out`, `ref`, or ref-struct parameters, and for methods with fewer than two matchable parameters (where it would save nothing).
+The shortcut is also skipped for generic methods, methods with `out`, `ref`, or ref-struct parameters, and methods with fewer than two matchable parameters. Generic methods need typed arguments so C# can infer their method type parameters, and single-parameter methods are already as short with `Any()`.
 :::
 
 ### Exact Value
