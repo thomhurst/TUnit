@@ -100,6 +100,7 @@ public class AnyArgsTests
     }
 
     [Test]
+    [SkipIfNotDynamicCodeSupported("Inspects generated extension class metadata via reflection; trimmer removes it under PublishTrimmed.")]
     public async Task AnyArgs_NotEmitted_For_Overloaded_Method_Names()
     {
         var mock = IOverloadedSumService.Mock();
@@ -116,6 +117,7 @@ public class AnyArgsTests
     }
 
     [Test]
+    [SkipIfNotDynamicCodeSupported("Inspects generated extension class metadata via reflection; trimmer removes it under PublishTrimmed.")]
     public async Task AnyArgs_Emitted_For_Unique_Method_Names()
     {
         await Assert.That(HasAnyArgsOverload("TUnit_Mocks_Tests_IFiveParamService_MockMemberExtensions", "Compute")).IsTrue();
@@ -123,6 +125,7 @@ public class AnyArgsTests
     }
 
     [Test]
+    [SkipIfNotDynamicCodeSupported("Inspects generated extension class metadata via reflection; trimmer removes it under PublishTrimmed.")]
     public async Task AnyArgs_NotEmitted_For_Generic_Methods()
     {
         await Assert.That(HasAnyArgsOverload("TUnit_Mocks_Tests_IGenericAnyArgsService_MockMemberExtensions", "Pick")).IsFalse();
