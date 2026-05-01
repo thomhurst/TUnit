@@ -198,8 +198,9 @@ internal sealed class TestScheduler : ITestScheduler
         // only block other tests sharing a key (per docs/parallelism.md). Running them
         // sequentially makes a `[Test] T1` always run before `[Test, NotInParallel("k")] T2`
         // which is observable as "Test1 never overlaps Test2" (discussion #5700). Run them
-        // concurrently instead. ParallelGroups still serialize (cross-group exclusion) and
-        // global NotInParallel still drains last (must run alone).
+        // concurrently instead. ParallelGroups still serialize (cross-group exclusion).
+        // Global NotInParallel runs last in declared [NotInParallel(Order)] order; the
+        // "alone" semantic is enforced at runtime by NotInParallelLock, not by this phase.
         Task? parallelPhase = null;
         if (groupedTests.Parallel.Length > 0)
         {
