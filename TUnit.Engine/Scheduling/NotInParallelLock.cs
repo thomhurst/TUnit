@@ -14,12 +14,14 @@ namespace TUnit.Engine.Scheduling;
 /// global-NIP test that depends on a Parallel test would deadlock against its
 /// own dependency.
 /// </summary>
-internal sealed class NotInParallelLock
+internal sealed class NotInParallelLock : IDisposable
 {
     private readonly SemaphoreSlim _writerGate = new(1, 1);
     private readonly Lock _stateLock = new();
     private int _activeReaders;
     private TaskCompletionSource? _drainTcs;
+
+    public void Dispose() => _writerGate.Dispose();
 
     public async ValueTask<Scope> EnterAsync(bool exclusive, CancellationToken cancellationToken)
     {
@@ -74,6 +76,8 @@ internal sealed class NotInParallelLock
         {
             if (_activeReaders == 0)
             {
+                // Already drained — keep _writerGate held until ExitExclusive so new
+                // readers stay blocked while the writer's body runs.
                 return;
             }
             drainTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
