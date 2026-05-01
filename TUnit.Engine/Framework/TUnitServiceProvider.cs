@@ -237,6 +237,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
         FailFastCancellationSource = Register(new CancellationTokenSource());
 
+        var notInParallelLock = Register(new NotInParallelLock());
+
         var testRunner = Register(
             new TestRunner(
                 testCoordinator,
@@ -245,7 +247,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 FailFastCancellationSource,
                 Logger,
                 testStateManager,
-                ParallelLimitLockProvider));
+                ParallelLimitLockProvider,
+                notInParallelLock));
 
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
