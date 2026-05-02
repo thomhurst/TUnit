@@ -4,9 +4,10 @@ namespace TUnit.Example.Asp.Net.TestProject;
 /// Tests verifying the execution order of WebApplicationFactory methods
 /// relative to WebApplicationTest hooks.
 ///
-/// Factory methods run after SetupAsync but before test-specific configuration:
-/// - Factory.ConfigureWebHost (order 3)
-/// - Factory.ConfigureStartupConfiguration (order 4)
+/// Factory methods are called when the shared factory is initialized.
+/// Per-test web host builder configuration runs after SetupAsync but before
+/// test-specific configuration:
+/// - ConfigureWebHostBuilder (order 3)
 ///
 /// This allows:
 /// - Factory to provide base configuration shared across tests
@@ -35,19 +36,18 @@ public class FactoryMethodOrderTests : TestsBase
     }
 
     [Test]
-    [DisplayName("Factory.ConfigureWebHost runs after SetupAsync")]
-    public async Task Factory_ConfigureWebHost_Runs_After_SetupAsync()
+    [DisplayName("ConfigureWebHostBuilder runs after SetupAsync")]
+    public async Task ConfigureWebHostBuilder_Runs_After_SetupAsync()
     {
         _ = Factory.CreateClient();
 
-        // Note: Factory order tracking only works reliably when this test triggers factory initialization
-        // If factory was already initialized, these values are from a previous test's counter
-        if (FactoryConfigureWebHostCalledOrder > 0)
-        {
-            await Assert.That(FactoryConfigureWebHostCalledOrder)
-                .IsGreaterThan(SetupCalledOrder)
-                .Because("Factory methods run after SetupAsync (during factory access)");
-        }
+        await Assert.That(GlobalFactory.ConfigureWebHostCallCount)
+            .IsGreaterThan(0)
+            .Because("ConfigureWebHost should be called when the shared factory is initialized");
+
+        await Assert.That(ConfigureWebHostBuilderCalledOrder)
+            .IsGreaterThan(SetupCalledOrder)
+            .Because("Per-test web host builder configuration runs after SetupAsync");
     }
 
     [Test]
