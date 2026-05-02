@@ -20,7 +20,7 @@ public class TestRunnerTests
     }
 
     [Test]
-    public async Task ExecuteTestAsync_WithNoDependenciesAndExistingExecutionTask_AwaitsExistingTask()
+    public async Task ExecuteTestAsync_WithNoDependenciesAndExistingExecutionTask_IgnoresSchedulerTask()
     {
         var runner = CreateRunner(out var coordinator);
         var test = CreateTest("existing-execution-task");
@@ -29,13 +29,10 @@ public class TestRunnerTests
 
         var execution = runner.ExecuteTestAsync(test, CancellationToken.None);
 
-        await Assert.That(execution.IsCompleted).IsFalse();
-
-        existingExecution.SetResult();
         await execution;
 
         await Assert.That(runner.ExecutingTestsCount).IsEqualTo(0);
-        await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(0);
+        await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(1);
     }
 
     [Test]

@@ -54,11 +54,6 @@ public sealed class TestRunner
     {
         if (!test.RequiresExecutionDedup)
         {
-            if (test.ExecutionTask is { } executionTask)
-            {
-                return new ValueTask(executionTask);
-            }
-
             return ExecuteTestInternalAsync(test, cancellationToken);
         }
 
@@ -71,7 +66,7 @@ public sealed class TestRunner
         {
             return new ValueTask(existingTcs.Task);
         }
-        var tcs = new TaskCompletionSource<bool>();
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         existingTcs = _executingTests.GetOrAdd(test.TestId, tcs);
 
         if (existingTcs != tcs)

@@ -458,9 +458,14 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async ValueTask ExecuteScheduledTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Scheduler grouping partitions each batch, so each test reaches this path once.
-        // Dependency recursion is the re-entrant path and those tests are marked for the
-        // TestRunner dedup ledger before scheduling begins.
+        if (!test.RequiresExecutionDedup)
+        {
+            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        // Dependency recursion is the re-entrant path. Only those tests reuse the
+        // scheduler task slot; independent tests may also use it for constraint wrappers.
         test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
         await test.ExecutionTask.ConfigureAwait(false);
     }
