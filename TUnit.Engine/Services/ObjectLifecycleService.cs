@@ -250,7 +250,9 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>(objectsAtLevel.Count);
             foreach (var obj in objectsAtLevel)
             {
-                tasks.Add(InitializeTrackedObjectWithSpanAsync(obj, testContext, cancellationToken));
+                // Tracked objects were discovered before execution and are already
+                // ordered deepest-first, so nested graph traversal would be redundant.
+                tasks.Add(InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken));
             }
 
             if (tasks.Count > 0)
@@ -264,16 +266,6 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         // GetSharedType returns null → defaults to per-test scope automatically.
         var classInstance = testContext.Metadata.TestDetails.ClassInstance;
         await InitializeObjectWithSpanAsync(classInstance, testContext, cancellationToken);
-    }
-
-    /// <summary>
-    /// Initializes a tracked object, wrapped in a scope-aware OpenTelemetry span.
-    /// Nested object graph discovery is skipped because tracked objects are already initialized
-    /// deepest-first from <see cref="TestContext.TrackedObjects"/>.
-    /// </summary>
-    private Task InitializeTrackedObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
-    {
-        return InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken);
     }
 
     /// <summary>
