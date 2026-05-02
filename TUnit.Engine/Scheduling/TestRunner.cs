@@ -48,6 +48,8 @@ public sealed class TestRunner
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
     private Exception? _firstFailFastException;
 
+    internal int ExecutingTestsCount => _executingTests.Count;
+
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         if (!test.RequiresExecutionDedup)

@@ -324,8 +324,11 @@ internal sealed class TestScheduler : ITestScheduler
         await ExecuteAllPhasesAsync(groupedDynamicTests, cancellationToken).ConfigureAwait(false);
     }
 
-    private static void MarkDependencyRelatedTestsForExecutionDedup(IEnumerable<AbstractExecutableTest> tests)
+    internal static void MarkDependencyRelatedTestsForExecutionDedup(IEnumerable<AbstractExecutableTest> tests)
     {
+        HashSet<AbstractExecutableTest>? visitedDependencyTargets = null;
+        Stack<AbstractExecutableTest>? pendingDependencyTargets = null;
+
         foreach (var test in tests)
         {
             if (test.Dependencies.Length == 0)
@@ -335,9 +338,29 @@ internal sealed class TestScheduler : ITestScheduler
 
             test.RequiresExecutionDedup = true;
 
+            visitedDependencyTargets ??= [];
+            pendingDependencyTargets ??= [];
+
             foreach (var dependency in test.Dependencies)
             {
-                dependency.Test.RequiresExecutionDedup = true;
+                pendingDependencyTargets.Push(dependency.Test);
+            }
+
+            while (pendingDependencyTargets.Count > 0)
+            {
+                var dependencyTarget = pendingDependencyTargets.Pop();
+
+                if (!visitedDependencyTargets.Add(dependencyTarget))
+                {
+                    continue;
+                }
+
+                dependencyTarget.RequiresExecutionDedup = true;
+
+                foreach (var nestedDependency in dependencyTarget.Dependencies)
+                {
+                    pendingDependencyTargets.Push(nestedDependency.Test);
+                }
             }
         }
     }
@@ -383,8 +406,7 @@ internal sealed class TestScheduler : ITestScheduler
     {
         foreach (var test in tests)
         {
-            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
-            await test.ExecutionTask.ConfigureAwait(false);
+            await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -402,8 +424,7 @@ internal sealed class TestScheduler : ITestScheduler
             },
             async (test, ct) =>
             {
-                test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
-                await test.ExecutionTask.ConfigureAwait(false);
+                await ExecuteScheduledTestAsync(test, ct).ConfigureAwait(false);
             }
         );
     }
@@ -423,8 +444,7 @@ internal sealed class TestScheduler : ITestScheduler
                 await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
-                    await test.ExecutionTask.ConfigureAwait(false);
+                    await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -435,6 +455,15 @@ internal sealed class TestScheduler : ITestScheduler
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 #endif
+
+    private async ValueTask ExecuteScheduledTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        // Scheduler grouping partitions each batch, so each test reaches this path once.
+        // Dependency recursion is the re-entrant path and those tests are marked for the
+        // TestRunner dedup ledger before scheduling begins.
+        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
+        await test.ExecutionTask.ConfigureAwait(false);
+    }
 
     // The cancellation token is forwarded only so WaitForTasksWithFailFastHandling can
     // distinguish a fail-fast cancellation from a normal task fault when both phases run.

@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Reflection;
 using TUnit.Core;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Scheduling;
@@ -17,7 +15,7 @@ public class TestRunnerTests
 
         await runner.ExecuteTestAsync(test, CancellationToken.None);
 
-        await Assert.That(GetExecutingTestsCount(runner)).IsEqualTo(0);
+        await Assert.That(runner.ExecutingTestsCount).IsEqualTo(0);
         await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(1);
     }
 
@@ -36,7 +34,7 @@ public class TestRunnerTests
         existingExecution.SetResult();
         await execution;
 
-        await Assert.That(GetExecutingTestsCount(runner)).IsEqualTo(0);
+        await Assert.That(runner.ExecutingTestsCount).IsEqualTo(0);
         await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(0);
     }
 
@@ -44,23 +42,25 @@ public class TestRunnerTests
     public async Task ExecuteTestAsync_WithDependencies_UsesExecutingTestsLedger()
     {
         var runner = CreateRunner(out _);
-        var dependency = CreateTest("dependency", requiresExecutionDedup: true);
+        var dependency = CreateTest("dependency");
         var test = CreateTest("with-dependencies", [dependency]);
+        TestScheduler.MarkDependencyRelatedTestsForExecutionDedup([test]);
 
         await runner.ExecuteTestAsync(test, CancellationToken.None);
 
-        await Assert.That(GetExecutingTestsCount(runner)).IsEqualTo(2);
+        await Assert.That(runner.ExecutingTestsCount).IsEqualTo(2);
     }
 
     [Test]
     public async Task ExecuteTestAsync_WithNoDependenciesButDependencyTarget_UsesExecutingTestsLedger()
     {
         var runner = CreateRunner(out var coordinator);
-        var test = CreateTest("dependency-target", requiresExecutionDedup: true);
+        var test = CreateTest("dependency-target");
+        test.RequiresExecutionDedup = true;
 
         await runner.ExecuteTestAsync(test, CancellationToken.None);
 
-        await Assert.That(GetExecutingTestsCount(runner)).IsEqualTo(1);
+        await Assert.That(runner.ExecutingTestsCount).IsEqualTo(1);
         await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(1);
     }
 
@@ -68,8 +68,9 @@ public class TestRunnerTests
     public async Task ExecuteTestAsync_WithDependencies_DeduplicatesConcurrentAttempts()
     {
         var runner = CreateRunner(out var coordinator);
-        var dependency = CreateTest("dependency", requiresExecutionDedup: true);
+        var dependency = CreateTest("dependency");
         var test = CreateTest("with-dependencies", [dependency]);
+        TestScheduler.MarkDependencyRelatedTestsForExecutionDedup([test]);
         var releaseExecution = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         coordinator.SetExecutionTask(test, releaseExecution.Task);
@@ -81,7 +82,21 @@ public class TestRunnerTests
         await Task.WhenAll(first.AsTask(), second.AsTask());
 
         await Assert.That(coordinator.GetCallCount(test)).IsEqualTo(1);
-        await Assert.That(GetExecutingTestsCount(runner)).IsEqualTo(2);
+        await Assert.That(runner.ExecutingTestsCount).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task MarkDependencyRelatedTestsForExecutionDedup_MarksTransitiveDependencyTargetsOutsideBatch()
+    {
+        var leaf = CreateTest("leaf");
+        var middle = CreateTest("middle", [leaf]);
+        var root = CreateTest("root", [middle]);
+
+        TestScheduler.MarkDependencyRelatedTestsForExecutionDedup([root]);
+
+        await Assert.That(root.RequiresExecutionDedup).IsTrue();
+        await Assert.That(middle.RequiresExecutionDedup).IsTrue();
+        await Assert.That(leaf.RequiresExecutionDedup).IsTrue();
     }
 
     private static TestRunner CreateRunner(out FakeTestCoordinator coordinator)
@@ -101,8 +116,7 @@ public class TestRunnerTests
 
     private static AbstractExecutableTest CreateTest(
         string testId,
-        AbstractExecutableTest[]? dependencies = null,
-        bool requiresExecutionDedup = false)
+        AbstractExecutableTest[]? dependencies = null)
     {
         var metadata = CreateMetadata(testId);
         var beforeDiscoveryContext = new BeforeTestDiscoveryContext { TestFilter = null };
@@ -138,13 +152,6 @@ public class TestRunnerTests
                 Metadata = TestDependency.FromMethodName(dependency.Metadata.TestMethodName)
             }).ToArray() ?? []
         };
-
-        test.RequiresExecutionDedup = requiresExecutionDedup || test.Dependencies.Length > 0;
-
-        foreach (var dependency in test.Dependencies)
-        {
-            dependency.Test.RequiresExecutionDedup = true;
-        }
 
         return test;
     }
@@ -189,13 +196,6 @@ public class TestRunnerTests
             ClassDataSources = [],
             PropertyDataSources = []
         };
-    }
-
-    private static int GetExecutingTestsCount(TestRunner runner)
-    {
-        var field = typeof(TestRunner).GetField("_executingTests", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var executingTests = (ConcurrentDictionary<string, TaskCompletionSource<bool>>)field.GetValue(runner)!;
-        return executingTests.Count;
     }
 
     private sealed class StubExecutableTest : AbstractExecutableTest
