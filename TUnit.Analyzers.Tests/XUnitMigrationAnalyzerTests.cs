@@ -1488,6 +1488,86 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task Assert_Throws_Sync_Delegate_Stays_Sync()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public void MyTest()
+                    {
+                        Assert.Throws<ArgumentException>(() => ThrowException());
+                    }
+
+                    private void ThrowException() => throw new ArgumentException();
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyTest()
+                    {
+                        Assert.Throws<ArgumentException>(() => ThrowException());
+                    }
+
+                    private void ThrowException() => throw new ArgumentException();
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
+    public async Task Assert_ThrowsAsync_Async_Delegate_Stays_Async()
+    {
+        await CodeFixer
+            .VerifyCodeFixAsync(
+                """
+                {|#0:using System;
+                using System.Threading.Tasks;
+                using Xunit;
+
+                public class MyClass
+                {
+                    [Fact]
+                    public async Task MyTest()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => ThrowExceptionAsync());
+                    }
+
+                    private Task ThrowExceptionAsync() => Task.FromException(new ArgumentException());
+                }|}
+                """,
+                Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+                """
+                using System;
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyTest()
+                    {
+                        await Assert.ThrowsAsync<ArgumentException>(() => ThrowExceptionAsync());
+                    }
+
+                    private Task ThrowExceptionAsync() => Task.FromException(new ArgumentException());
+                }
+                """,
+                ConfigureXUnitTest
+            );
+    }
+
+    [Test]
     public async Task Assert_Throws_With_Message_Contains_Can_Be_Converted()
     {
         await CodeFixer
