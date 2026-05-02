@@ -85,6 +85,53 @@ public class ShouldExtensionGeneratorTests
     }
 
     [Test]
+    public async Task Overload_with_trailing_optional_constructor_parameter_is_emitted()
+    {
+        var output = await RunGenerator("""
+            using System;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class ExceptionMessageEqualsAssertion<TException> : Assertion<TException>
+                where TException : Exception
+            {
+                public ExceptionMessageEqualsAssertion(
+                    AssertionContext<TException> context,
+                    string expectedMessage,
+                    StringComparison comparison = StringComparison.Ordinal)
+                    : base(context) { }
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to have message";
+            }
+
+            public static class ExceptionExtensions
+            {
+                public static ExceptionMessageEqualsAssertion<TException> WithMessage<TException>(
+                    this IAssertionSource<TException> source,
+                    string expectedMessage,
+                    [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+                    where TException : Exception
+                    => new(source.Context, expectedMessage);
+
+                public static ExceptionMessageEqualsAssertion<TException> WithMessage<TException>(
+                    this IAssertionSource<TException> source,
+                    string expectedMessage,
+                    StringComparison comparison,
+                    [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+                    where TException : Exception
+                    => new(source.Context, expectedMessage, comparison);
+            }
+            """);
+
+        await Assert.That(output).Contains("WithMessage<TException>(this global::TUnit.Assertions.Should.Core.IShouldSource<TException> source, string expectedMessage, [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"expectedMessage\")] string? expression = null)");
+        await Assert.That(output).Contains("WithMessage<TException>(this global::TUnit.Assertions.Should.Core.IShouldSource<TException> source, string expectedMessage, System.StringComparison comparison, [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"expectedMessage\")] string? expression = null)");
+        await Assert.That(output).Contains("new global::MyNamespace.ExceptionMessageEqualsAssertion<TException>(innerContext, expectedMessage)");
+    }
+
+    [Test]
     public async Task ShouldNameAttribute_overrides_conjugation()
     {
         var output = await RunGenerator("""

@@ -39,6 +39,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
@@ -48,6 +49,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     public readonly struct ShouldContinuation<T> : ..IShouldSource, ..IShouldSource<T>
@@ -91,6 +93,7 @@ namespace .
         public ..ShouldAssertion<.<TKey, TValue>> BeEmpty() { }
         public ..ShouldAssertion<.<TKey, TValue>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TKey, TValue>> BeInOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> Contain(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
@@ -105,6 +108,7 @@ namespace .
         public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems(.<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TKey, TValue>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
@@ -128,6 +132,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
@@ -138,6 +143,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     [..ShouldGeneratePartial(typeof(.<!0, !1>))]
@@ -152,6 +158,7 @@ namespace .
         public ..ShouldAssertion<.<TKey, TValue>> BeEmpty() { }
         public ..ShouldAssertion<.<TKey, TValue>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TKey, TValue>> BeInOrder() { }
+        public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> Contain(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> Contain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> ContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
@@ -166,6 +173,7 @@ namespace .
         public ..ShouldAssertion<.<TKey, TValue>> HaveDistinctItems(.<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TKey, TValue>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContain(.<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public ..ShouldAssertion<.<TKey, TValue>> NotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
@@ -178,6 +186,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
@@ -188,6 +197,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     public abstract class ShouldSetSourceBase<TSet, TItem, TSelf> : ..ShouldEnumerableSourceBase<TSet, TItem, TSelf>
@@ -212,6 +222,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> BeInDescendingOrder() { }
         public ..ShouldAssertion<.<TItem>> BeInOrder() { }
         public ..ShouldAssertion<.<TItem>> Contain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public ..ShouldAssertion<.<TItem>> Contain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> Contain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
         public ..ShouldAssertion<.<TItem>> HaveAtLeast(int minCount, [.("minCount")] string? expression = null) { }
@@ -222,6 +233,7 @@ namespace .
         public ..ShouldAssertion<.<TItem>> HaveDistinctItems(.<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
         public ..ShouldAssertion<.<TItem>> HaveSingleItem() { }
         public ..ShouldAssertion<.<TItem>> NotBeEmpty() { }
+        public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, [.("expected")] string? expression = null) { }
         public ..ShouldAssertion<.<TItem>> NotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
     public abstract class ShouldSourceBase<TValue, TSelf> : ..IShouldSource, ..IShouldSource<TValue>
@@ -283,11 +295,17 @@ namespace .
         public static ..ShouldAssertion<TValue> Eventually<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         [("Use Length().IsEqualTo(expectedLength) instead.")]
         public static ..ShouldAssertion<string> HaveLength(this ..IShouldSource<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
+        public static ..ShouldAssertion<TException> HaveMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
         public static ..ShouldAssertion<TException> HaveMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> HaveMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
         public static ..ShouldAssertion<TException> HaveMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
+        public static ..ShouldAssertion<TValue> HaveMessageEqualTo<TValue>(this ..IShouldSource<TValue> source, string expectedMessage) { }
         public static ..ShouldAssertion<TValue> HaveMessageEqualTo<TValue>(this ..IShouldSource<TValue> source, string expectedMessage,  comparison) { }
+        public static ..ShouldAssertion<TValue> HaveMessageStartingWith<TValue>(this ..IShouldSource<TValue> source, string expectedPrefix) { }
         public static ..ShouldAssertion<TValue> HaveMessageStartingWith<TValue>(this ..IShouldSource<TValue> source, string expectedPrefix,  comparison) { }
         public static ..ShouldAssertion<TEnum> NotBeDefined<TEnum>(this ..IShouldSource<TEnum> source)
             where TEnum :  struct,  { }
@@ -298,7 +316,11 @@ namespace .
         public static ..ShouldAssertion<TException> WithInnerException<TException, TInnerException>(this ..IShouldSource<TException> source)
             where TException : 
             where TInnerException :  { }
+        public static ..ShouldAssertion<TException> WithMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
         public static ..ShouldAssertion<TException> WithMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
         public static ..ShouldAssertion<TException> WithMessageContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
@@ -306,7 +328,11 @@ namespace .
             where TException :  { }
         public static ..ShouldAssertion<TException> WithMessageMatching<TException>(this ..IShouldSource<TException> source, string pattern, [.("pattern")] string? expression = null)
             where TException :  { }
+        public static ..ShouldAssertion<TException> WithMessageNotContaining<TException>(this ..IShouldSource<TException> source, string notExpectedSubstring, [.("notExpectedSubstring")] string? expression = null)
+            where TException :  { }
         public static ..ShouldAssertion<TException> WithMessageNotContaining<TException>(this ..IShouldSource<TException> source, string notExpectedSubstring,  comparison, [.("notExpectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static ..ShouldAssertion<TException> WithStackTraceContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
         public static ..ShouldAssertion<TException> WithStackTraceContaining<TException>(this ..IShouldSource<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
             where TException :  { }

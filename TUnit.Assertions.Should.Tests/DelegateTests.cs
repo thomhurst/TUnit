@@ -44,6 +44,15 @@ public class DelegateTests
     }
 
     [Test]
+    public async Task Throw_WithMessage_without_StringComparison()
+    {
+        Action act = () => throw new InvalidOperationException("data is empty.");
+        await act.Should()
+            .Throw<InvalidOperationException>()
+            .WithMessage("data is empty.");
+    }
+
+    [Test]
     public async Task FuncTaskT_NotThrow_returns_value()
     {
         Func<Task<int>> f = () => Task.FromResult(42);

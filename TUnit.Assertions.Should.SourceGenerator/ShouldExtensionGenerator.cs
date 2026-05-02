@@ -830,11 +830,12 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol assertionContextSymbol,
         List<IParameterSymbol> ctorCandidates)
     {
+        var minimumParameterCount = ctorCandidates.Count + 1;
         foreach (var ctor in returnType.Constructors)
         {
             if (ctor.DeclaredAccessibility != Accessibility.Public
                 || ctor.IsStatic
-                || ctor.Parameters.Length != ctorCandidates.Count + 1)
+                || ctor.Parameters.Length < minimumParameterCount)
             {
                 continue;
             }
@@ -857,9 +858,27 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                     break;
                 }
             }
+
+            // Source overloads may intentionally omit simple constructor defaults, such as
+            // StringComparison or comparer parameters. Do not infer hidden boolean/string state:
+            // generated negation and expression parameters require body knowledge to forward.
+            for (var i = minimumParameterCount; allMatch && i < ctor.Parameters.Length; i++)
+            {
+                if (!CanOmitConstructorParameter(ctor.Parameters[i]))
+                {
+                    allMatch = false;
+                }
+            }
             if (allMatch) return true;
         }
         return false;
+    }
+
+    private static bool CanOmitConstructorParameter(IParameterSymbol parameter)
+    {
+        return parameter.HasExplicitDefaultValue
+               && parameter.Type.SpecialType != SpecialType.System_Boolean
+               && parameter.Type.SpecialType != SpecialType.System_String;
     }
 
     private static string? TryGetShouldNameOverride(INamedTypeSymbol returnType, INamedTypeSymbol? shouldNameAttr)
