@@ -250,7 +250,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             var tasks = new List<Task>(objectsAtLevel.Count);
             foreach (var obj in objectsAtLevel)
             {
-                tasks.Add(InitializeObjectWithSpanAsync(obj, testContext, cancellationToken));
+                tasks.Add(InitializeTrackedObjectWithSpanAsync(obj, testContext, cancellationToken));
             }
 
             if (tasks.Count > 0)
@@ -267,13 +267,31 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     }
 
     /// <summary>
+    /// Initializes a tracked object, wrapped in a scope-aware OpenTelemetry span.
+    /// Nested object graph discovery is skipped because tracked objects are already initialized
+    /// deepest-first from <see cref="TestContext.TrackedObjects"/>.
+    /// </summary>
+    private Task InitializeTrackedObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
+    {
+        return InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken);
+    }
+
+    /// <summary>
     /// Initializes an object and its nested objects, wrapped in a scope-aware OpenTelemetry span.
+    /// Used for objects outside the tracked graph, such as the test class instance.
     /// </summary>
     private async Task InitializeObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
     {
-        // First initialize nested objects depth-first
         await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+        await InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken);
+    }
 
+    /// <summary>
+    /// Initializes only the supplied object, wrapped in a scope-aware OpenTelemetry span.
+    /// Callers that use this directly must initialize nested dependencies first.
+    /// </summary>
+    private async Task InitializeObjectOnlyWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
+    {
 #if NET
         var sharedType = TraceScopeRegistry.GetSharedType(obj);
         var activitySource = TUnitActivitySource.GetSourceForSharedType(sharedType);
