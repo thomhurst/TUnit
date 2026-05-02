@@ -252,7 +252,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             {
                 // Tracked objects were discovered before execution and are already
                 // ordered deepest-first, so nested graph traversal would be redundant.
-                tasks.Add(InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken));
+                tasks.Add(InitializeObjectWithSpanAsync(obj, testContext, cancellationToken, includeNestedObjects: false));
             }
 
             if (tasks.Count > 0)
@@ -272,18 +272,17 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
     /// Initializes an object and its nested objects, wrapped in a scope-aware OpenTelemetry span.
     /// Used for objects outside the tracked graph, such as the test class instance.
     /// </summary>
-    private async Task InitializeObjectWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
+    private async Task InitializeObjectWithSpanAsync(
+        object obj,
+        TestContext testContext,
+        CancellationToken cancellationToken,
+        bool includeNestedObjects = true)
     {
-        await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
-        await InitializeObjectOnlyWithSpanAsync(obj, testContext, cancellationToken);
-    }
+        if (includeNestedObjects)
+        {
+            await InitializeNestedObjectsForExecutionAsync(obj, cancellationToken);
+        }
 
-    /// <summary>
-    /// Initializes only the supplied object, wrapped in a scope-aware OpenTelemetry span.
-    /// Callers that use this directly must initialize nested dependencies first.
-    /// </summary>
-    private async Task InitializeObjectOnlyWithSpanAsync(object obj, TestContext testContext, CancellationToken cancellationToken)
-    {
 #if NET
         var sharedType = TraceScopeRegistry.GetSharedType(obj);
         var activitySource = TUnitActivitySource.GetSourceForSharedType(sharedType);
