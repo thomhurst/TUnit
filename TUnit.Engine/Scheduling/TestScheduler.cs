@@ -144,6 +144,8 @@ internal sealed class TestScheduler : ITestScheduler
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
+        MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+
         // Suites with no global [NotInParallel] tests skip the runtime exclusion
         // lock entirely. Once enabled, the flag is monotonic — dynamic batches
         // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
@@ -317,8 +319,27 @@ internal sealed class TestScheduler : ITestScheduler
         // tests with [NotInParallel(key)], [ParallelGroup(...)] etc. honour their constraints
         // instead of being silently dropped.
         var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTests.ToArray()).ConfigureAwait(false);
+        MarkDependencyRelatedTestsForExecutionDedup(dynamicTests);
         MarkGlobalNotInParallelTests(groupedDynamicTests);
         await ExecuteAllPhasesAsync(groupedDynamicTests, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static void MarkDependencyRelatedTestsForExecutionDedup(IEnumerable<AbstractExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            if (test.Dependencies.Length == 0)
+            {
+                continue;
+            }
+
+            test.RequiresExecutionDedup = true;
+
+            foreach (var dependency in test.Dependencies)
+            {
+                dependency.Test.RequiresExecutionDedup = true;
+            }
+        }
     }
 
     private void MarkGlobalNotInParallelTests(GroupedTests grouped)
