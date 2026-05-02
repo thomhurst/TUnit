@@ -21,10 +21,11 @@ internal class FilterParser
     }
 
 #pragma warning disable TPEXP
-    public static string? StringifyFilter(ITestExecutionFilter filter)
+    public static string? StringifyFilter(ITestExecutionFilter? filter)
     {
         return filter switch
         {
+            null => null,
             NopFilter => null,
             TestNodeUidListFilter testNodeUidListFilter => string.Join(',',
                 testNodeUidListFilter.TestNodeUids.Select(x => x.Value)),

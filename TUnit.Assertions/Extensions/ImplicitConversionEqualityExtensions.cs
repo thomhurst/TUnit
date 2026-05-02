@@ -1,3 +1,8 @@
+// Gated to .NET 9+ because these overloads rely on [OverloadResolutionPriority] to
+// lose to the source-generated single-generic IsEqualTo / IsNotEqualTo on same-type
+// calls, and that attribute is silently dropped on net8.0 / netstandard2.0 (Polyfill
+// does not supply it), causing CS0121. See issue #5765.
+#if NET9_0_OR_GREATER
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -146,3 +151,4 @@ internal static class ImplicitConversionCache
         return null;
     }
 }
+#endif

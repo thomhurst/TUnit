@@ -11,6 +11,9 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 /// <typeparam name="TItem">The type of items in the set.</typeparam>
 public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssertionSource<ISet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<ISet<TItem>, SetAssertion<TItem>>
+#endif
 {
     /// <summary>
     /// Creates a new SetAssertion for the given set.
@@ -34,6 +37,10 @@ public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssert
     /// <inheritdoc />
     AssertionContext<ISet<TItem>> IAssertionSource<ISet<TItem>>.Context => Context;
 
+#if !NETSTANDARD2_0
+    public static SetAssertion<TItem> Create(ISet<TItem> item, string label) => new(item, label);
+#endif
+
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
         var builder = new StringBuilder();
@@ -49,6 +56,9 @@ public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssert
 /// </summary>
 /// <typeparam name="TItem">The type of items in the set.</typeparam>
 public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>, TItem>, IAssertionSource<IReadOnlySet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IReadOnlySet<TItem>, ReadOnlySetAssertion<TItem>>
+#endif
 {
     /// <summary>
     /// Creates a new ReadOnlySetAssertion for the given read-only set.
@@ -72,6 +82,10 @@ public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>,
     /// <inheritdoc />
     AssertionContext<IReadOnlySet<TItem>> IAssertionSource<IReadOnlySet<TItem>>.Context => Context;
 
+#if !NETSTANDARD2_0
+    public static ReadOnlySetAssertion<TItem> Create(IReadOnlySet<TItem> item, string label) => new(item, label);
+#endif
+
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
         var builder = new StringBuilder();
@@ -87,6 +101,9 @@ public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>,
 /// </summary>
 /// <typeparam name="TItem">The type of items in the set.</typeparam>
 public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, IAssertionSource<HashSet<TItem>>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<HashSet<TItem>, HashSetAssertion<TItem>>
+#endif
 {
     /// <summary>
     /// Creates a new HashSetAssertion for the given hash set.
@@ -109,6 +126,10 @@ public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, 
 
     /// <inheritdoc />
     AssertionContext<HashSet<TItem>> IAssertionSource<HashSet<TItem>>.Context => Context;
+
+#if !NETSTANDARD2_0
+    public static HashSetAssertion<TItem> Create(HashSet<TItem> item, string label) => new(item, label);
+#endif
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {

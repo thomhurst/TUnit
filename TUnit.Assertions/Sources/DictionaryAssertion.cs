@@ -11,12 +11,19 @@ namespace TUnit.Assertions.Sources;
 /// plus collection methods (Contains, IsEmpty, All, etc.) since dictionaries are collections of KeyValuePair items.
 /// </summary>
 public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IReadOnlyDictionary<TKey, TValue>, DictionaryAssertion<TKey, TValue>>
+#endif
     where TKey : notnull
 {
     public DictionaryAssertion(IReadOnlyDictionary<TKey, TValue>? value, string? expression)
         : base(CreateContext(value, expression))
     {
     }
+
+#if !NETSTANDARD2_0
+    public static DictionaryAssertion<TKey, TValue> Create(IReadOnlyDictionary<TKey, TValue> item, string label) => new(item, label);
+#endif
 
     private static AssertionContext<IReadOnlyDictionary<TKey, TValue>> CreateContext(
         IReadOnlyDictionary<TKey, TValue>? value,

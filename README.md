@@ -139,6 +139,7 @@ See the [documentation](https://tunit.dev/docs/getting-started/attributes) for m
 | `TUnit.Core` | Shared test library components without an execution engine |
 | `TUnit.Engine` | Execution engine for test projects |
 | `TUnit.Assertions` | Standalone assertions — works with other test frameworks too |
+| `TUnit.Assertions.Should` | Optional FluentAssertions-style `value.Should().BeEqualTo(...)` syntax over `TUnit.Assertions` (beta) |
 | `TUnit.Playwright` | Playwright integration with automatic browser lifecycle management |
 
 ## Migrating from xUnit, NUnit, or MSTest?

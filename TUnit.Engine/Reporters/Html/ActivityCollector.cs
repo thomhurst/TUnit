@@ -67,6 +67,7 @@ internal sealed class ActivityCollector : IDisposable
     // so that subsequent activities on the same trace avoid cross-class dictionary checks.
     private readonly ConcurrentDictionary<string, byte> _knownTraceIds = new(StringComparer.OrdinalIgnoreCase);
     private ActivityListener? _listener;
+    private Action<SpanData>? _externalSinkDelegate;
 
     public void Start()
     {
@@ -74,6 +75,8 @@ internal sealed class ActivityCollector : IDisposable
         // test runs, so this slot is claimed for the rest of the session. Later ad-hoc
         // collectors (e.g. created from a test) don't race-steal the global pointer.
         Interlocked.CompareExchange(ref _current, this, null);
+        _externalSinkDelegate = IngestExternalSpan;
+        ExternalSpanSink.Register(_externalSinkDelegate);
         // Listen to ALL sources so we can capture child spans from HttpClient, ASP.NET Core,
         // EF Core, etc. The Sample callback uses smart filtering to avoid overhead: only spans
         // belonging to known test traces are fully recorded; everything else gets PropagationData
@@ -155,6 +158,11 @@ internal sealed class ActivityCollector : IDisposable
     public void Stop()
     {
         Interlocked.CompareExchange(ref _current, null, this);
+        if (_externalSinkDelegate is { } sink)
+        {
+            ExternalSpanSink.Unregister(sink);
+            _externalSinkDelegate = null;
+        }
         _listener?.Dispose();
         _listener = null;
     }

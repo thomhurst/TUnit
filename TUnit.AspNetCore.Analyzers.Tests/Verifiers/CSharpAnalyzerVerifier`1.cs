@@ -33,12 +33,13 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
         var test = new Test
         {
             TestCode = source,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+                .AddPackages([new PackageIdentity("Microsoft.Bcl.AsyncInterfaces", "9.0.0")]),
             TestState =
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnit.Core.TUnitAttribute).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnit.Core.TUnitAttribute).Assembly),
                 },
             },
         };

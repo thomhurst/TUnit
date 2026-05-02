@@ -87,6 +87,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         return methods[0];
     }
 
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(CancellationTokenArbitrary))]
     private Config CreateConfig()
     {
         var config = Config.QuickThrowOnFailure
@@ -105,10 +106,12 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
             }
         }
 
-        if (_propertyAttribute.Arbitrary != null && _propertyAttribute.Arbitrary.Length > 0)
-        {
-            config = config.WithArbitrary(_propertyAttribute.Arbitrary);
-        }
+        // Register a default Arbitrary<CancellationToken> that surfaces TestContext's
+        // timeout-backed token. User-supplied arbitraries are listed first; FsCheck's
+        // WithArbitrary resolves the first type in the list as highest priority, so
+        // user registrations override the default for conflicting types.
+        config = config.WithArbitrary(
+            (_propertyAttribute.Arbitrary ?? []).Append(typeof(CancellationTokenArbitrary)));
 
         return config;
     }

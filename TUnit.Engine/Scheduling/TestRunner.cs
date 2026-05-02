@@ -20,6 +20,7 @@ public sealed class TestRunner
     private readonly TUnitFrameworkLogger _logger;
     private readonly TestStateManager _testStateManager;
     private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
+    private readonly NotInParallelLock _notInParallelLock;
 
     internal TestRunner(
         ITestCoordinator testCoordinator,
@@ -28,7 +29,8 @@ public sealed class TestRunner
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
         TestStateManager testStateManager,
-        ParallelLimitLockProvider parallelLimitLockProvider)
+        ParallelLimitLockProvider parallelLimitLockProvider,
+        NotInParallelLock notInParallelLock)
     {
         _testCoordinator = testCoordinator;
         _tunitMessageBus = tunitMessageBus;
@@ -37,6 +39,7 @@ public sealed class TestRunner
         _logger = logger;
         _testStateManager = testStateManager;
         _parallelLimitLockProvider = parallelLimitLockProvider;
+        _notInParallelLock = notInParallelLock;
     }
 
     // Dedup ledger for re-entrant ExecuteTestAsync calls (dependency recursion, scheduler races).
@@ -105,6 +108,15 @@ public sealed class TestRunner
                     return;
                 }
             }
+
+            // Global [NotInParallel] must run alone — phase ordering alone is not
+            // sufficient because a Parallel-bucket dependent's DependsOn recursion
+            // can surface the NIP test mid–parallel-phase. Acquired after dep
+            // recursion so a global-NIP test depending on a Parallel test does not
+            // deadlock against its own dependency.
+            using var lockScope = await _notInParallelLock
+                .EnterAsync(test.RequiresGlobalNotInParallelLock, cancellationToken)
+                .ConfigureAwait(false);
 
             // Acquired here (not in the scheduler) so the limit is enforced
             // regardless of entry point — scheduler or dependency recursion.

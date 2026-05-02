@@ -8,6 +8,9 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 /// <typeparam name="TItem">The type of items in the read-only list</typeparam>
 public class ReadOnlyListAssertion<TItem> : ReadOnlyListAssertionBase<IReadOnlyList<TItem>, TItem>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IReadOnlyList<TItem>, ReadOnlyListAssertion<TItem>>
+#endif
 {
     public ReadOnlyListAssertion(IReadOnlyList<TItem>? value, string? expression)
         : base(CreateContext(value, expression))
@@ -18,6 +21,10 @@ public class ReadOnlyListAssertion<TItem> : ReadOnlyListAssertionBase<IReadOnlyL
         : base(context)
     {
     }
+
+#if !NETSTANDARD2_0
+    public static ReadOnlyListAssertion<TItem> Create(IReadOnlyList<TItem> item, string label) => new(item, label);
+#endif
 
     private static AssertionContext<IReadOnlyList<TItem>> CreateContext(
         IReadOnlyList<TItem>? value,

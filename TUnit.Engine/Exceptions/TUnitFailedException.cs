@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Engine.CommandLineProviders;
 
@@ -6,8 +7,11 @@ namespace TUnit.Engine.Exceptions;
 
 public abstract class TUnitFailedException : TUnitException
 {
+    public Exception? WrappedException { get; }
+
     protected TUnitFailedException(Exception exception) : base($"{exception.GetType().Name}: {exception.Message}", exception.InnerException)
     {
+        WrappedException = exception;
         StackTrace = FilterStackTrace(exception.StackTrace);
     }
 
@@ -17,6 +21,16 @@ public abstract class TUnitFailedException : TUnitException
     }
 
     public override string StackTrace { get; }
+
+    [return: NotNullIfNotNull(nameof(exception))]
+    public static Exception? Unwrap(Exception? exception)
+    {
+        while (exception is TUnitFailedException { WrappedException: { } wrapped })
+        {
+            exception = wrapped;
+        }
+        return exception;
+    }
 
     // The hint only mentions --detailed-stacktrace because filtering is bypassed
     // entirely when --log-level Debug/Trace is set (see TUnitMessageBus.SimplifyStacktrace),

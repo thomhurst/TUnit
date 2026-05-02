@@ -252,17 +252,10 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<object, byte> visitedObjects,
         CancellationToken cancellationToken)
     {
-        // First check if the property already has a value - skip if it does
-        // This handles nested objects that were already constructed with their properties set
         var property = GetCachedPropertyInfo(metadata.ContainingType, metadata.PropertyName);
-        if (property != null && property.CanRead)
+        if (IsPropertyAlreadyPopulated(property, instance))
         {
-            var existingValue = property.GetValue(instance);
-            if (existingValue != null)
-            {
-                // Property already has a value, don't overwrite it
-                return;
-            }
+            return;
         }
 
         var testContext = TestContext.Current;
@@ -329,6 +322,11 @@ internal sealed class PropertyInjector
         ConcurrentDictionary<object, byte> visitedObjects,
         CancellationToken cancellationToken)
     {
+        if (IsPropertyAlreadyPopulated(property, instance))
+        {
+            return;
+        }
+
         var testContext = TestContext.Current;
         var propertySetter = PropertySetterFactory.CreateSetter(property);
 
@@ -348,6 +346,16 @@ internal sealed class PropertyInjector
         resolvedValue = CastHelper.CastIfNeeded(property.PropertyType, resolvedValue);
 
         propertySetter(instance, resolvedValue);
+    }
+
+    private static bool IsPropertyAlreadyPopulated(PropertyInfo? property, object instance)
+    {
+        if (property is null || !property.CanRead || property.PropertyType.IsValueType)
+        {
+            return false;
+        }
+
+        return property.GetValue(instance) is not null;
     }
 
     private Task RecurseIntoNestedPropertiesAsync(

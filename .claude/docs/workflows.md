@@ -24,7 +24,7 @@ dotnet test TUnit.Core.SourceGenerator.Tests
 dotnet test TUnit.PublicAPI
 
 # Run specific test
-dotnet test -- --treenode-filter "/*/*/ClassName/*"
+dotnet test --treenode-filter "/*/*/ClassName/*"
 
 # Build release
 dotnet build -c Release
@@ -87,8 +87,8 @@ OR patterns (`Pattern1|Pattern2`) can match thousands of unintended tests.
 --treenode-filter "/*/*/ClassA/*|/*/*/ClassB/*"
 
 # Correct - separate commands
-dotnet run -- --treenode-filter "/*/*/ClassA/*"
-dotnet run -- --treenode-filter "/*/*/ClassB/*"
+dotnet test --treenode-filter "/*/*/ClassA/*"
+dotnet test --treenode-filter "/*/*/ClassB/*"
 ```
 
 ---

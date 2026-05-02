@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

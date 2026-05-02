@@ -129,6 +129,13 @@ namespace TUnit.Mocks.Generated
             return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
         }
 
+        /// <summary>Configure the mock setup for <c>Add</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
+            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
+        }
+
         public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
@@ -154,6 +161,13 @@ namespace TUnit.Mocks.Generated
             global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
             global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
+            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+        }
+
+        /// <summary>Configure the mock setup for <c>Subtract</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
             return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
         }
 

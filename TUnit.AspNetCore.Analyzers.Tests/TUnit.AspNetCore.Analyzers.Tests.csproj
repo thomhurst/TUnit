@@ -20,5 +20,16 @@
     <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
   </ItemGroup>
 
+  <!-- Copy netstandard2.0 build of TUnit.Core into the test bin so Net90 ref assemblies don't
+       trigger CS1705 against the test process's net10.0 build. -->
+  <ItemGroup>
+    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="TUnit.Core.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
+  </ItemGroup>
+
   <Import Project="..\TestProject.targets" />
 </Project>

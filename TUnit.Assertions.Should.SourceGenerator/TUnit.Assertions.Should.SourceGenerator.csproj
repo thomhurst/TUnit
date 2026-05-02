@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Polyfill.targets" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <RootNamespace>TUnit.Assertions.Should.SourceGenerator</RootNamespace>
+    <PackageId>TUnit.Assertions.Should.SourceGenerator</PackageId>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\TUnit.Assertions.SourceGenerator\Generators\CovarianceHelper.cs" Link="Shared\CovarianceHelper.cs" />
+    <Compile Include="..\TUnit.Assertions.SourceGenerator\Shared\AttributeForwardingFormatters.cs" Link="Shared\AttributeForwardingFormatters.cs" />
+    <Compile Include="..\TUnit.Core.SourceGenerator\Models\EquatableArray.cs" Link="Shared\EquatableArray.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TUnit.Assertions.Should.SourceGenerator.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+</Project>

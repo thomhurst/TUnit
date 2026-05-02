@@ -11,6 +11,9 @@ namespace TUnit.Assertions.Sources;
 /// that persist through And/Or continuations.
 /// </summary>
 public class CollectionAssertion<TItem> : CollectionAssertionBase<IEnumerable<TItem>, TItem>
+#if !NETSTANDARD2_0
+    , IAssertionSourceFor<IEnumerable<TItem>, CollectionAssertion<TItem>>
+#endif
 {
     public CollectionAssertion(IEnumerable<TItem> value, string? expression)
         : base(new AssertionContext<IEnumerable<TItem>>(value, CreateExpressionBuilder(expression)))
@@ -21,6 +24,10 @@ public class CollectionAssertion<TItem> : CollectionAssertionBase<IEnumerable<TI
         : base(context)
     {
     }
+
+#if !NETSTANDARD2_0
+    public static CollectionAssertion<TItem> Create(IEnumerable<TItem> item, string label) => new(item, label);
+#endif
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {

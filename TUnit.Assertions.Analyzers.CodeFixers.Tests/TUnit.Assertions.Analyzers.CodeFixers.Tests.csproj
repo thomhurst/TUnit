@@ -5,6 +5,24 @@
         <ProjectReference Include="..\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj" />
         <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
     </ItemGroup>
+
+    <!-- Copy netstandard2.0 builds of TUnit.Core / TUnit.Assertions into the test bin so the
+         analyzer-test framework's net9.0 reference assemblies don't trigger CS1705 against the
+         net10.0 builds otherwise loaded via typeof(...).Assembly.Location. CS1705 is suppressed
+         silently by CompilerDiagnostics.None and the resulting symbol-resolution failures
+         appear as analyzers/codefixers seeing zero diagnostics. -->
+    <ItemGroup>
+        <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+              Link="TUnit.Core.netstandard2.0.dll"
+              CopyToOutputDirectory="PreserveNewest"
+              Visible="false" />
+        <None Include="..\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll"
+              Link="TUnit.Assertions.netstandard2.0.dll"
+              CopyToOutputDirectory="PreserveNewest"
+              Visible="false" />
+        <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+                 Link="Shared\AnalyzerTestCompatibility.cs" />
+    </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />

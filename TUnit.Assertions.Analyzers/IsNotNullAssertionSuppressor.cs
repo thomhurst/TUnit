@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using TUnit.Assertions.Analyzers.Extensions;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -81,6 +82,11 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         };
     }
 
+    // Statement-order match only — not control-flow aware. An assertion inside an `if (cond)` or
+    // `try`/`catch` branch suppresses warnings on subsequent uses even when the assertion may not
+    // have run on every path. Accepting that imprecision keeps the analyzer cheap; the alternative
+    // (full dataflow analysis via Roslyn's IFlowAnalysis) is significant complexity for a niche
+    // false-suppression case. See AwaitAssertionAnalyzer for the symmetric awaitedness check.
     private bool WasAssertedNotNull(
         ExpressionSyntax targetExpression,
         SemanticModel semanticModel,
@@ -140,37 +146,31 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
-        // Pattern: await Assert.That(variable).IsNotNull()
-        // or: await Assert.That(variable).Contains("test").And.IsNotNull()
-        // or: Assert.That(variable).IsNotNull().GetAwaiter().GetResult()
+        // Patterns recognised:
+        //   await Assert.That(variable).IsNotNull()
+        //   await Assert.That(variable).Contains("test").And.IsNotNull()
+        //   Assert.That(variable).IsNotNull().GetAwaiter().GetResult()
+        //   await variable.Should().NotBeNull()
+        //   await variable.Should().Contain("test").And.NotBeNull()
 
         var invocations = statement.DescendantNodes().OfType<InvocationExpressionSyntax>();
 
         foreach (var invocation in invocations)
         {
-            // Check if this is a call to IsNotNull()
-            if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: "IsNotNull" })
+            if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var calledName })
             {
                 continue;
             }
 
-            // Walk up the expression chain to find Assert.That() call
-            var assertThatCall = FindAssertThatInChain(invocation);
-            if (assertThatCall is null)
+            ExpressionSyntax? targetArgument = calledName switch
             {
-                continue;
-            }
+                "IsNotNull" => GetAssertThatArgument(invocation, semanticModel, cancellationToken),
+                "NotBeNull" => GetShouldReceiver(invocation, semanticModel, cancellationToken),
+                _ => null,
+            };
 
-            // Get the argument to Assert.That()
-            if (assertThatCall.ArgumentList.Arguments.Count != 1)
-            {
-                continue;
-            }
-
-            var argument = assertThatCall.ArgumentList.Arguments[0].Expression;
-
-            // Check if the argument matches the target expression
-            if (ExpressionsMatch(argument, targetExpression, semanticModel, cancellationToken))
+            if (targetArgument is not null
+                && ExpressionsMatch(targetArgument, targetExpression, semanticModel, cancellationToken))
             {
                 return true;
             }
@@ -178,6 +178,48 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
 
         return false;
     }
+
+    private static ExpressionSyntax? GetAssertThatArgument(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var assertThatCall = FindAssertThatInChain(invocation);
+        if (assertThatCall is null
+            || assertThatCall.ArgumentList.Arguments.Count != 1
+            || !IsTUnitMethod(assertThatCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Assert.That"))
+        {
+            return null;
+        }
+
+        return assertThatCall.ArgumentList.Arguments[0].Expression;
+    }
+
+    private static ExpressionSyntax? GetShouldReceiver(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var shouldCall = FindShouldInChain(invocation);
+        if (shouldCall is null
+            || !IsTUnitMethod(shouldCall, semanticModel, cancellationToken, "global::TUnit.Assertions.Should.ShouldExtensions.Should"))
+        {
+            return null;
+        }
+
+        // Should is an extension method — its receiver is the value being asserted.
+        return shouldCall.Expression is MemberAccessExpressionSyntax memberAccess
+            ? memberAccess.Expression
+            : null;
+    }
+
+    private static bool IsTUnitMethod(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken,
+        string fullyQualifiedNonGenericName)
+        => semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol symbol
+           && symbol.GloballyQualifiedNonGeneric() == fullyQualifiedNonGenericName;
 
     private bool ExpressionsMatch(
         ExpressionSyntax assertArgument,
@@ -215,31 +257,44 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         return symbol1 is not null && SymbolEqualityComparer.Default.Equals(symbol1, symbol2);
     }
 
-    private InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
+    private static InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
+        => FindInvocationInChain(invocation, identifierName: "That", parentName: "Assert");
+
+    // Should() is an extension method, so its receiver is the asserted value (any expression).
+    // parentName MUST stay null — constraining it would break the suppressor for user-defined
+    // assertion entry points and for Should() reached via using-aliases / namespace imports.
+    private static InvocationExpressionSyntax? FindShouldInChain(InvocationExpressionSyntax invocation)
+        => FindInvocationInChain(invocation, identifierName: "Should", parentName: null);
+
+    /// <summary>
+    /// Walks up an expression chain looking for an invocation whose member-access name is
+    /// <paramref name="identifierName"/>. When <paramref name="parentName"/> is non-null the
+    /// invocation must also be of the form <c>{parentName}.{identifierName}(...)</c>; for
+    /// extension methods (<c>Should</c>) the receiver is arbitrary so parentName is null.
+    /// </summary>
+    private static InvocationExpressionSyntax? FindInvocationInChain(
+        InvocationExpressionSyntax invocation,
+        string identifierName,
+        string? parentName)
     {
-        // Walk up the expression chain looking for Assert.That()
         var current = invocation.Expression;
 
         while (current is not null)
         {
             if (current is InvocationExpressionSyntax invocationExpr)
             {
-                // Check if this is Assert.That()
-                if (invocationExpr.Expression is MemberAccessExpressionSyntax
-                    {
-                        Name.Identifier.Text: "That",
-                        Expression: IdentifierNameSyntax { Identifier.Text: "Assert" }
-                    })
+                if (invocationExpr.Expression is MemberAccessExpressionSyntax memberExpr
+                    && memberExpr.Name.Identifier.Text == identifierName
+                    && (parentName is null
+                        || (memberExpr.Expression is IdentifierNameSyntax id && id.Identifier.Text == parentName)))
                 {
                     return invocationExpr;
                 }
 
-                // Continue walking up from this invocation
                 current = invocationExpr.Expression;
             }
             else if (current is MemberAccessExpressionSyntax memberAccess)
             {
-                // Move to the expression being accessed
                 current = memberAccess.Expression;
             }
             else

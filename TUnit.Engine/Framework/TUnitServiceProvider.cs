@@ -170,7 +170,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
-        ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
+        ContextProvider = Register(new ContextProvider(this, TestSessionId, FilterParser.StringifyFilter(Filter)));
 
         var hookExecutor = Register(new HookExecutor(HookDelegateBuilder, ContextProvider, EventReceiverOrchestrator));
         var lifecycleCoordinator = Register(new TestLifecycleCoordinator());
@@ -237,6 +237,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var isFailFastEnabled = CommandLineOptions.TryGetOptionArgumentList(FailFastCommandProvider.FailFast, out _);
         FailFastCancellationSource = Register(new CancellationTokenSource());
 
+        var notInParallelLock = Register(new NotInParallelLock());
+
         var testRunner = Register(
             new TestRunner(
                 testCoordinator,
@@ -245,7 +247,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 FailFastCancellationSource,
                 Logger,
                 testStateManager,
-                ParallelLimitLockProvider));
+                ParallelLimitLockProvider,
+                notInParallelLock));
 
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
@@ -271,7 +274,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             hookExecutor,
             afterHookPairTracker,
             staticPropertyHandler,
-            dynamicTestQueue));
+            dynamicTestQueue,
+            notInParallelLock));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,

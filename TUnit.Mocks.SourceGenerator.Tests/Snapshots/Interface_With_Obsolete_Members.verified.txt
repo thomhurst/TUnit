@@ -423,6 +423,13 @@ namespace TUnit.Mocks.Generated
             return new IDialogService_Show_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Show", matchers);
         }
 
+        /// <summary>Configure the mock setup for <c>Show</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static IDialogService_Show_M0_MockCall Show(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<string?>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<string?>.Instance };
+            return new IDialogService_Show_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Show", matchers);
+        }
+
         public static global::TUnit.Mocks.MockMethodCall<string?> ShowPanel<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<TData?> data) where TData : class
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };

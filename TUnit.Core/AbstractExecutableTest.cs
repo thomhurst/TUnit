@@ -24,6 +24,12 @@ public abstract class AbstractExecutableTest
     // Using object to avoid type dependency on Microsoft.Testing.Platform.Extensions.Messages.PropertyBag
     internal object? CachedPropertyBag { get; set; }
 
+    // Set once at grouping time for tests landing in GroupedTests.NotInParallel
+    // (global [NotInParallel], no keys, no ParallelGroup). TestRunner reads this
+    // per-execution to decide whether to acquire the global exclusion lock —
+    // avoiding a per-test scan over ParallelConstraints in the hot path.
+    internal bool RequiresGlobalNotInParallelLock { get; set; }
+
     public required TestContext Context
     {
         get;

@@ -155,6 +155,13 @@ namespace TUnit.Mocks.Generated
             return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
         }
 
+        /// <summary>Configure the mock setup for <c>namespace</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+        public static IEscapedNames_namespace_M3_MockCall @namespace(this global::TUnit.Mocks.Mock<global::IEscapedNames> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
+            return new IEscapedNames_namespace_M3_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "namespace", matchers);
+        }
+
         extension(global::TUnit.Mocks.Mock<global::IEscapedNames> mock)
         {
             public global::TUnit.Mocks.PropertyMockCall<int> @class

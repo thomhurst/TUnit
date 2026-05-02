@@ -60,8 +60,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                 },
             },
         };
@@ -102,8 +102,8 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                 },
             },
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,

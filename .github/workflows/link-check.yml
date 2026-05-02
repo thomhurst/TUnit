@@ -1,0 +1,54 @@
+name: Documentation Link Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/docs/**'
+      - 'docs/docusaurus.config.ts'
+      - 'docs/sidebars.ts'
+      - 'docs/lychee.toml'
+      - '.github/workflows/link-check.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/docs/**'
+      - 'docs/docusaurus.config.ts'
+      - 'docs/sidebars.ts'
+      - 'docs/lychee.toml'
+      - '.github/workflows/link-check.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-links:
+    name: Check links in Markdown sources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Restore lychee cache
+        uses: actions/cache@v5
+        with:
+          path: .lycheecache
+          key: lychee-markdown-${{ hashFiles('docs/docs/**/*.md', 'docs/docs/**/*.mdx', 'docs/lychee.toml') }}
+          restore-keys: lychee-markdown-
+
+      - name: Run lychee on Markdown sources
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --config ./docs/lychee.toml
+            --base-url https://tunit.dev
+            --no-progress
+            'docs/docs/**/*.md'
+            'docs/docs/**/*.mdx'
+          fail: true

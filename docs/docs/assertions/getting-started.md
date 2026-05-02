@@ -33,6 +33,8 @@ Assert.That(result).IsEqualTo(42);
 
 A built-in analyzer warns if you forget. See [Awaiting Assertions](awaiting.md) for more examples and design rationale.
 
+> Prefer `value.Should().BeEqualTo(...)`? Install the optional [`TUnit.Assertions.Should`](should-syntax.md) package — it layers a FluentAssertions-style entry surface on top of the same assertion infrastructure. Both syntaxes coexist in the same project.
+
 ## Assertion Categories
 
 TUnit provides assertions for all common scenarios:

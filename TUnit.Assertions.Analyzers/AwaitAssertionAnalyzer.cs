@@ -7,8 +7,8 @@ using TUnit.Assertions.Analyzers.Extensions;
 namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
-/// A sample analyzer that reports the company name being used in class declarations.
-/// Traverses through the Syntax Tree and checks the name (identifier) of each class node.
+/// Reports <c>Assert.That(...)</c> / <c>value.Should()</c> assertion entries that aren't awaited
+/// (which silently no-op) and <c>Assert.Multiple()</c> calls without a <c>using</c> declaration.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
@@ -37,7 +37,8 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
             CheckMultipleInvocation(context, invocationOperation);
         }
 
-        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That")
+        if (fullyQualifiedNonGenericMethodName is "global::TUnit.Assertions.Assert.That"
+                                                 or "global::TUnit.Assertions.Should.ShouldExtensions.Should")
         {
             CheckAssertInvocation(context, invocationOperation);
         }
@@ -67,6 +68,16 @@ public class AwaitAssertionAnalyzer : ConcurrentDiagnosticAnalyzer
         );
     }
 
+    // Walks the syntactic parent chain. Stops at IBlockOperation/IDelegateCreationOperation as
+    // negative answers — that means the invocation was used as a statement / lambda body without
+    // an enclosing await. This catches the common `value.Should();` mistake but produces a false
+    // positive for split-variable patterns:
+    //   var src = Assert.That(value);   // ← walk hits the declaration's block before any await
+    //   await src.IsEqualTo(...);       //   even though the chain IS awaited here
+    // The same applies to `var src = value.Should(); await src.X();`. Both Assert.That and
+    // Should() share this limitation by design — fixing requires usage-site dataflow analysis,
+    // which is significant complexity for a niche style. Left as a known imprecision so users who
+    // hit it know it's not their code.
     private static bool IsAwaited(IInvocationOperation invocationOperation)
     {
         var parent = invocationOperation.Parent;

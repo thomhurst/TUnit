@@ -2,6 +2,7 @@ using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Settings;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
@@ -150,7 +151,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                         {
                             _testInitializer.PrepareTest(test);
                             test.Context.RestoreExecutionContext();
-                            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+                            var testTimeout = ResolveAndPropagateTestTimeout(test);
                             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
                         }
                         finally
@@ -373,13 +374,27 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             _testInitializer.PrepareTest(test);
             test.Context.RestoreExecutionContext();
-            var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+            var testTimeout = ResolveAndPropagateTestTimeout(test);
             await _testExecutor.ExecuteAsync(test, _testInitializer, cancellationToken, testTimeout).ConfigureAwait(false);
         }
         finally
         {
             await DisposeTestInstanceWithSpanAsync(test).ConfigureAwait(false);
         }
+    }
+
+    // Propagation is required so TUnitMessageBus.GetFailureStateProperty (which gates on
+    // TestDetails.Timeout != null) classifies a DefaultTestTimeout-triggered failure as
+    // TimeoutTestNodeStateProperty rather than a generic error.
+    private static TimeSpan? ResolveAndPropagateTestTimeout(AbstractExecutableTest test)
+    {
+        var details = test.Context.Metadata.TestDetails;
+        var testTimeout = TUnitSettings.Default.Timeouts.GetEffectiveTestTimeout(details.Timeout);
+        if (testTimeout is not null && details.Timeout is null)
+        {
+            details.Timeout = testTimeout;
+        }
+        return testTimeout;
     }
 
     /// <summary>

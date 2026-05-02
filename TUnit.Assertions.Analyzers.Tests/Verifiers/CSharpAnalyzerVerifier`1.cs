@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
+using TUnit.Assertions;
+using TUnit.Core;
 
 namespace TUnit.Assertions.Analyzers.Tests.Verifiers;
 
@@ -45,8 +47,12 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
             {
                 AdditionalReferences =
                 {
-                    typeof(TUnitAttribute).Assembly.Location,
-                    typeof(Assert).Assembly.Location,
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly),
+#if NET8_0
+                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath(),
+#endif
                 },
             },
             CompilerDiagnostics = CompilerDiagnostics.None

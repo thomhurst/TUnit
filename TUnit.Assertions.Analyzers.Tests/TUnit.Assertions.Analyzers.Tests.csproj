@@ -4,6 +4,37 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.Should\TUnit.Assertions.Should.csproj" />
+  </ItemGroup>
+
+  <!-- Copy the netstandard2.0 builds of TUnit.Core / TUnit.Assertions / TUnit.Assertions.Should
+       into the test bin. The analyzer-test framework (Microsoft.CodeAnalysis.Testing 1.1.2)
+       targets net9.0 reference assemblies; loading the test process's net10.0 builds via
+       typeof(...).Assembly.Location triggers CS1705 against System.Runtime v10, which the
+       framework's "CompilerDiagnostics = None" suppresses — silently breaking IsEqualTo and
+       every other assertion extension at the analyzer's symbol-resolution stage. The netstandard2.0
+       builds reference netstandard 2.0, which both Net90 ref assemblies and the test runtime can
+       load. -->
+  <ItemGroup>
+    <None Include="..\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="TUnit.Core.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll"
+          Link="TUnit.Assertions.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\TUnit.Assertions.Should\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Should.dll"
+          Link="TUnit.Assertions.Should.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
+          Condition="'$(TargetFramework)' == 'net8.0'"
+          Link="System.Text.Json.9.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -12,6 +43,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeRefactoring.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="xunit.v3.assert" />
   </ItemGroup>
 
