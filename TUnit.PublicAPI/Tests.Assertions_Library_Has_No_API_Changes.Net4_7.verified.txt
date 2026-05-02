@@ -3360,9 +3360,6 @@ namespace .Extensions
     {
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expectedExpression = null) { }
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, .<TValue> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-        [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
-            "efined operators.")]
-        [.(-1)]
         public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class EquatableAssertionExtensions
@@ -4192,9 +4189,6 @@ namespace .Extensions
     public static class NotEqualsAssertionExtensions
     {
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-        [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
-            "efined operators.")]
-        [.(-1)]
         public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null) { }
     }
     public static class NotEquivalentToAssertionExtensions

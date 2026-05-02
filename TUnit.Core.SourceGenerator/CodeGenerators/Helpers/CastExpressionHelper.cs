@@ -153,6 +153,11 @@ internal static class CastExpressionHelper
             return $"({targetGQ}){argsExpression}";
         }
 
+        if (IsDecimalLike(targetType) && !IsDecimalLike(sourceType))
+        {
+            return $"global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>({argsExpression})";
+        }
+
         // Check if compiler can resolve conversion
         var conversion = compilation.ClassifyConversion(sourceType, targetType);
 
@@ -175,5 +180,19 @@ internal static class CastExpressionHelper
 
         // No known conversion → CastHelper fallback
         return $"global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>({argsExpression})";
+    }
+
+    private static bool IsDecimalLike(ITypeSymbol type)
+    {
+        if (type.SpecialType == SpecialType.System_Decimal)
+        {
+            return true;
+        }
+
+        return type is INamedTypeSymbol
+        {
+            ConstructedFrom.SpecialType: SpecialType.System_Nullable_T,
+            TypeArguments: [{ SpecialType: SpecialType.System_Decimal }]
+        };
     }
 }
