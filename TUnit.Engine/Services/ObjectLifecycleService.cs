@@ -308,6 +308,7 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
             await ObjectInitializer.InitializeAsync(obj, cancellationToken);
         }
 #else
+        _ = testContext;
         await ObjectInitializer.InitializeAsync(obj, cancellationToken);
 #endif
     }
