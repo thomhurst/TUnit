@@ -68,9 +68,19 @@ public abstract class SnapshotTestBase
         }
 
         return runResult.GeneratedTrees
-            .OrderBy(t => t.FilePath, StringComparer.Ordinal)
+            .OrderBy(t => GetGeneratedTreeSortKey(t.FilePath), StringComparer.Ordinal)
             .Select(t => t.GetText().ToString())
             .ToArray();
+    }
+
+    private static string GetGeneratedTreeSortKey(string filePath)
+    {
+        var normalizedPath = filePath.Replace('\\', '/');
+        var fileNameStart = normalizedPath.LastIndexOf('/');
+
+        return fileNameStart >= 0
+            ? normalizedPath[(fileNameStart + 1)..]
+            : normalizedPath;
     }
 
     /// <summary>
