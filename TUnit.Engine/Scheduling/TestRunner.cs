@@ -54,6 +54,21 @@ public sealed class TestRunner
     {
         if (!test.RequiresExecutionDedup)
         {
+            if (test.ExecutionTask is { } executionTask)
+            {
+                return new ValueTask(executionTask);
+            }
+
+            return ExecuteTestInternalAsync(test, cancellationToken);
+        }
+
+        return ExecuteTestWithDependenciesAsync(test, cancellationToken);
+    }
+
+    internal ValueTask ExecuteTestWithoutExecutionTaskAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        if (!test.RequiresExecutionDedup)
+        {
             return ExecuteTestInternalAsync(test, cancellationToken);
         }
 
@@ -66,6 +81,8 @@ public sealed class TestRunner
         {
             return new ValueTask(existingTcs.Task);
         }
+        // Continuations may re-enter scheduling paths; keep them off the thread
+        // that publishes ledger completion.
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         existingTcs = _executingTests.GetOrAdd(test.TestId, tcs);
 

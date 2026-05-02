@@ -339,6 +339,8 @@ internal sealed class TestScheduler : ITestScheduler
             test.RequiresExecutionDedup = true;
 
             visitedDependencyTargets ??= [];
+            // Shared across roots so a common dependency target is marked once even
+            // when multiple scheduled tests reference it.
             pendingDependencyTargets ??= [];
 
             foreach (var dependency in test.Dependencies)

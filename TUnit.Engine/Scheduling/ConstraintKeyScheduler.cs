@@ -145,7 +145,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
     {
         try
         {
-            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
