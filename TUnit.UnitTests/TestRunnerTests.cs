@@ -216,7 +216,12 @@ public class TestRunnerTests
     {
         public override Task<object> CreateInstanceAsync() => Task.FromResult<object>(new object());
 
-        public override Task InvokeTestAsync(object instance, CancellationToken cancellationToken) => Task.CompletedTask;
+        public override Task InvokeTestAsync(object instance, CancellationToken cancellationToken)
+        {
+            _ = instance;
+            _ = cancellationToken;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeTestCoordinator : ITestCoordinator
@@ -243,6 +248,8 @@ public class TestRunnerTests
 
         public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
         {
+            _ = cancellationToken;
+
             Task? executionTask;
             lock (_lock)
             {
@@ -268,23 +275,60 @@ public class TestRunnerTests
 
     private sealed class FakeMessageBus : ITUnitMessageBus
     {
-        public ValueTask Discovered(TestContext testContext) => default;
+        public ValueTask Discovered(TestContext testContext)
+        {
+            _ = testContext;
+            return default;
+        }
 
-        public ValueTask InProgress(TestContext testContext) => default;
+        public ValueTask InProgress(TestContext testContext)
+        {
+            _ = testContext;
+            return default;
+        }
 
-        public ValueTask Passed(TestContext testContext, DateTimeOffset start) => default;
+        public ValueTask Passed(TestContext testContext, DateTimeOffset start)
+        {
+            _ = testContext;
+            _ = start;
+            return default;
+        }
 
-        public ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start) => default;
+        public ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start)
+        {
+            _ = testContext;
+            _ = exception;
+            _ = start;
+            return default;
+        }
 
-        public ValueTask Skipped(TestContext testContext, string reason) => default;
+        public ValueTask Skipped(TestContext testContext, string reason)
+        {
+            _ = testContext;
+            _ = reason;
+            return default;
+        }
 
-        public ValueTask Cancelled(TestContext testContext, DateTimeOffset start) => default;
+        public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
+        {
+            _ = testContext;
+            _ = start;
+            return default;
+        }
 
-        public ValueTask SessionArtifact(Artifact artifact) => default;
+        public ValueTask SessionArtifact(Artifact artifact)
+        {
+            _ = artifact;
+            return default;
+        }
     }
 
     private sealed class FakeServiceProvider : IServiceProvider
     {
-        public object? GetService(Type serviceType) => null;
+        public object? GetService(Type serviceType)
+        {
+            _ = serviceType;
+            return null;
+        }
     }
 }
