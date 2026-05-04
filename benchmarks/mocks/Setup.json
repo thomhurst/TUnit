@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-03T03:31:53.295Z",
+  "timestamp": "2026-05-04T03:27:14.154Z",
   "category": "Setup",
   "description": "Mock behavior configuration (returns, matchers)",
   "environment": {
@@ -10,120 +10,108 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "438.7 ns",
-      "Error": "6.67 ns",
-      "StdDev": "5.57 ns",
-      "Median": "440.1 ns",
+      "Mean": "445.0 ns",
+      "Error": "8.92 ns",
+      "StdDev": "11.91 ns",
       "Gen0": "0.1225",
       "Gen1": "0.0005",
       "Allocated": "2.01 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "822.1 ns",
-      "Error": "16.38 ns",
-      "StdDev": "40.79 ns",
-      "Median": "807.0 ns",
+      "Mean": "842.6 ns",
+      "Error": "16.50 ns",
+      "StdDev": "27.11 ns",
       "Gen0": "0.3738",
       "Gen1": "0.0076",
       "Allocated": "6.12 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "367.8 ns",
-      "Error": "6.94 ns",
-      "StdDev": "7.12 ns",
-      "Median": "366.2 ns",
+      "Mean": "364.0 ns",
+      "Error": "5.84 ns",
+      "StdDev": "5.46 ns",
       "Gen0": "0.1025",
       "Gen1": "0.0005",
       "Allocated": "1.68 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "432,404.8 ns",
-      "Error": "2,180.01 ns",
-      "StdDev": "1,820.41 ns",
-      "Median": "432,088.8 ns",
+      "Mean": "427,515.9 ns",
+      "Error": "2,142.03 ns",
+      "StdDev": "1,898.86 ns",
       "Gen0": "0.9766",
       "Gen1": "-",
-      "Allocated": "28.67 KB"
+      "Allocated": "28.6 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "6,012.0 ns",
-      "Error": "88.30 ns",
-      "StdDev": "82.60 ns",
-      "Median": "6,002.9 ns",
+      "Mean": "5,761.0 ns",
+      "Error": "67.82 ns",
+      "StdDev": "63.44 ns",
       "Gen0": "0.5493",
-      "Gen1": "-",
-      "Allocated": "9.01 KB"
+      "Gen1": "0.0076",
+      "Allocated": "9.06 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "8,634.9 ns",
-      "Error": "35.43 ns",
-      "StdDev": "29.58 ns",
-      "Median": "8,647.2 ns",
+      "Mean": "8,288.3 ns",
+      "Error": "44.02 ns",
+      "StdDev": "39.02 ns",
       "Gen0": "0.6256",
       "Gen1": "0.0153",
       "Allocated": "10.45 KB"
     },
     {
       "Method": "'TUnit.Mocks (Multiple)'",
-      "Mean": "654.5 ns",
-      "Error": "11.22 ns",
-      "StdDev": "10.49 ns",
-      "Median": "655.6 ns",
+      "Mean": "643.0 ns",
+      "Error": "12.56 ns",
+      "StdDev": "17.19 ns",
       "Gen0": "0.1574",
       "Gen1": "0.0010",
       "Allocated": "2.59 KB"
     },
     {
       "Method": "'Imposter (Multiple)'",
-      "Mean": "1,420.9 ns",
-      "Error": "13.56 ns",
-      "StdDev": "12.02 ns",
-      "Median": "1,419.0 ns",
+      "Mean": "1,423.6 ns",
+      "Error": "27.85 ns",
+      "StdDev": "28.60 ns",
       "Gen0": "0.6485",
       "Gen1": "0.0248",
       "Allocated": "10.59 KB"
     },
     {
       "Method": "'Mockolate (Multiple)'",
-      "Mean": "631.3 ns",
-      "Error": "7.40 ns",
-      "StdDev": "6.92 ns",
-      "Median": "629.7 ns",
+      "Mean": "658.6 ns",
+      "Error": "11.05 ns",
+      "StdDev": "9.80 ns",
       "Gen0": "0.1726",
       "Gen1": "0.0010",
       "Allocated": "2.82 KB"
     },
     {
       "Method": "'Moq (Multiple)'",
-      "Mean": "116,852.6 ns",
-      "Error": "464.54 ns",
-      "StdDev": "411.80 ns",
-      "Median": "116,884.1 ns",
+      "Mean": "116,178.4 ns",
+      "Error": "975.27 ns",
+      "StdDev": "912.27 ns",
       "Gen0": "0.9766",
       "Gen1": "0.7324",
-      "Allocated": "16.53 KB"
+      "Allocated": "16.64 KB"
     },
     {
       "Method": "'NSubstitute (Multiple)'",
-      "Mean": "12,773.1 ns",
-      "Error": "173.55 ns",
-      "StdDev": "144.92 ns",
-      "Median": "12,744.6 ns",
+      "Mean": "12,327.7 ns",
+      "Error": "84.31 ns",
+      "StdDev": "78.86 ns",
       "Gen0": "1.2207",
       "Gen1": "-",
-      "Allocated": "20.5 KB"
+      "Allocated": "20.34 KB"
     },
     {
       "Method": "'FakeItEasy (Multiple)'",
-      "Mean": "7,948.2 ns",
-      "Error": "61.47 ns",
-      "StdDev": "47.99 ns",
-      "Median": "7,945.5 ns",
+      "Mean": "8,025.4 ns",
+      "Error": "60.87 ns",
+      "StdDev": "53.96 ns",
       "Gen0": "0.6714",
       "Gen1": "0.0610",
       "Allocated": "11.71 KB"
