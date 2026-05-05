@@ -77,9 +77,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     public string MethodNameProvidingDataSource { get; }
 
     /// <summary>
-    /// Gets or sets an AOT-safe factory function for providing test data programmatically.
-    /// When set, this factory is used instead of reflection-based member lookup.
+    /// Gets or sets an AOT-safe factory function that provides test data without reflection.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This property is <strong>automatically populated by the TUnit source generator</strong> at compile time
+    /// and is not intended to be set manually in attribute syntax. Because C# attributes only support
+    /// literal values as arguments, a <see cref="Func{T,TResult}"/> cannot be assigned in an attribute
+    /// declaration.
+    /// </para>
+    /// <para>
+    /// When the source generator processes a <c>[MethodDataSource]</c> attribute, it emits code that
+    /// sets this property to a generated delegate that invokes the named method directly — bypassing
+    /// reflection and enabling compatibility with Native AOT and IL trimming.
+    /// </para>
+    /// </remarks>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
     /// <summary>
