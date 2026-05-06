@@ -4,6 +4,12 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Playwright;
 
+/// <summary>
+/// The injected <see cref="ContextFixture"/> defaults to <see cref="SharedType.None"/> (a fresh
+/// context per <see cref="PageFixture"/>). Two <c>[ClassDataSource&lt;PageFixture&gt;]</c>
+/// properties on the same test class therefore yield two isolated browser contexts while
+/// sharing the underlying <see cref="BrowserFixture"/> at <see cref="SharedType.PerTestSession"/>.
+/// </summary>
 public class PageFixture : IAsyncInitializer, IAsyncDisposable
 {
     [ClassDataSource<ContextFixture>]
