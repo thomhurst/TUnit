@@ -31,6 +31,7 @@ internal static class PlaywrightServiceConnector
             Headers = new Dictionary<string, string> { ["Authorization"] = $"Bearer {accessToken}" }
         };
 
+        // BrowserTypeLaunchOptions are local-process only; remote connect uses BrowserTypeConnectOptions.
         return await browserType.ConnectAsync(wsEndpoint, connectOptions).ConfigureAwait(false);
     }
 }

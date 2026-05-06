@@ -1,6 +1,17 @@
 [assembly: .(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 namespace 
 {
+    public class BrowserFixture : , .
+    {
+        public BrowserFixture() { }
+        public .IBrowser Browser { get; }
+        public virtual string BrowserName { get; }
+        [.ClassDataSourceAttribute<.PlaywrightFixture>(Shared=.)]
+        public required .PlaywrightFixture PlaywrightFixture { get; init; }
+        public virtual . DisposeAsync() { }
+        protected virtual .BrowserTypeLaunchOptions GetLaunchOptions() { }
+        public virtual . InitializeAsync() { }
+    }
     public class BrowserTest : .PlaywrightTest
     {
         public BrowserTest() { }
@@ -12,6 +23,17 @@ namespace
         [.After(., "", 0)]
         public . BrowserTearDown(.TestContext testContext) { }
         public .<.IBrowserContext> NewContext(.BrowserNewContextOptions options) { }
+    }
+    public class ContextFixture : , .
+    {
+        public ContextFixture() { }
+        [.ClassDataSourceAttribute<.BrowserFixture>(Shared=.)]
+        public required .BrowserFixture BrowserFixture { get; init; }
+        public .IBrowserContext Context { get; }
+        protected virtual bool PropagateTraceContext { get; }
+        public virtual . DisposeAsync() { }
+        protected virtual .BrowserNewContextOptions GetContextOptions() { }
+        public virtual . InitializeAsync() { }
     }
     public class ContextTest : .BrowserTest
     {
@@ -32,6 +54,15 @@ namespace
         . DisposeAsync();
         . ResetAsync();
     }
+    public class PageFixture : , .
+    {
+        public PageFixture() { }
+        [.ClassDataSourceAttribute<.ContextFixture>]
+        public required .ContextFixture ContextFixture { get; init; }
+        public .IPage Page { get; }
+        public virtual . DisposeAsync() { }
+        public virtual . InitializeAsync() { }
+    }
     public class PageTest : .ContextTest
     {
         public PageTest() { }
@@ -39,6 +70,17 @@ namespace
         public .IPage Page { get; }
         [.Before(., "", 0)]
         public . PageSetup() { }
+    }
+    public class PlaywrightFixture : , .
+    {
+        public PlaywrightFixture() { }
+        public .IPlaywright Playwright { get; }
+        protected virtual string TestIdAttribute { get; }
+        public virtual . DisposeAsync() { }
+        public .IAPIResponseAssertions Expect(.IAPIResponse response) { }
+        public .ILocatorAssertions Expect(.ILocator locator) { }
+        public .IPageAssertions Expect(.IPage page) { }
+        public virtual . InitializeAsync() { }
     }
     public class PlaywrightSkipAttribute : .SkipAttribute
     {
