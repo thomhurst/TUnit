@@ -16,6 +16,13 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
 
     public IBrowserContext Context { get; private set; } = null!;
 
+    /// <summary>
+    /// Returns the options used when creating each <see cref="IBrowserContext"/>. Defaults
+    /// match <see cref="ContextTest.ContextOptions"/> — pinned <c>Locale = "en-US"</c> and
+    /// <c>ColorScheme = Light</c> for deterministic cross-platform rendering. Override to
+    /// match your application's locale or to restore browser-default behaviour
+    /// (<c>new BrowserNewContextOptions()</c>).
+    /// </summary>
     protected virtual BrowserNewContextOptions GetContextOptions() =>
         new() { Locale = "en-US", ColorScheme = ColorScheme.Light };
 
