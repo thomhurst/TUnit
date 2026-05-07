@@ -68,6 +68,11 @@ internal static class TraceRegistry
     /// <paramref name="sourceTraceId"/>. Useful for messaging/queue consumers that start
     /// a new trace but keep a causal link to the original test trace via OTEL span links.
     /// </summary>
+    /// <returns>
+    /// <c>true</c> when the derived trace was associated with at least one test from the
+    /// source trace, or when both trace IDs are the same and the source trace is already
+    /// registered; otherwise, <c>false</c>.
+    /// </returns>
     internal static bool TryRegisterDerivedTrace(string derivedTraceId, string sourceTraceId)
     {
         if (string.Equals(derivedTraceId, sourceTraceId, StringComparison.OrdinalIgnoreCase))

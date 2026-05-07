@@ -11,6 +11,8 @@ namespace TUnit.OpenTelemetry.Tests;
 
 public class OtlpReceiverIngestionTests
 {
+    private const ulong SpanKindConsumer = 5;
+
     [Test]
     public async Task Receiver_ParsedTrace_ReachesActivityCollector()
     {
@@ -58,10 +60,10 @@ public class OtlpReceiverIngestionTests
         receiver.Start();
 
         var linkedContext = Activity.Current!.Context;
-        var traceId = Guid.NewGuid().ToString("N");
+        var derivedTraceId = Guid.NewGuid().ToString("N");
         var spanId = "0123456789abcdef";
         var body = BuildLinkedTraceExportRequest(
-            traceId,
+            derivedTraceId,
             spanId,
             "sut-linked-op",
             linkedContext.TraceId.ToString(),
@@ -76,11 +78,11 @@ public class OtlpReceiverIngestionTests
         await receiver.WhenIdle();
 
         var span = collector!.GetAllSpans().FirstOrDefault(s =>
-            s.TraceId == traceId && s.Name == "sut-linked-op");
+            s.TraceId == derivedTraceId && s.Name == "sut-linked-op");
 
         await Assert.That(span).IsNotNull();
-        await Assert.That(TraceRegistry.IsRegistered(traceId)).IsTrue();
-        await Assert.That(TraceRegistry.GetContextId(traceId)).IsEqualTo(TestContext.Current!.Id);
+        await Assert.That(TraceRegistry.IsRegistered(derivedTraceId)).IsTrue();
+        await Assert.That(TraceRegistry.GetContextId(derivedTraceId)).IsEqualTo(TestContext.Current!.Id);
     }
 
     private static byte[] BuildLinkedTraceExportRequest(
@@ -123,9 +125,9 @@ public class OtlpReceiverIngestionTests
         WriteField(stream, 1, Convert.FromHexString(traceId));
         WriteField(stream, 2, Convert.FromHexString(spanId));
         WriteStringField(stream, 5, spanName);
-        WriteVarintField(stream, 6, 5); // CONSUMER
-        WriteFixed64Field(stream, 7, 1);
-        WriteFixed64Field(stream, 8, 2);
+        WriteVarintField(stream, 6, SpanKindConsumer);
+        WriteFixed64Field(stream, 7, 1); // start_time_unix_nano
+        WriteFixed64Field(stream, 8, 2); // end_time_unix_nano
         WriteField(stream, 13, BuildSpanLink(linkedTraceId, linkedSpanId));
         return stream.ToArray();
     }
