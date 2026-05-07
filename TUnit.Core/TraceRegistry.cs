@@ -64,6 +64,36 @@ internal static class TraceRegistry
     }
 
     /// <summary>
+    /// Associates <paramref name="derivedTraceId"/> with the same test(s) as
+    /// <paramref name="sourceTraceId"/>. Useful for messaging/queue consumers that start
+    /// a new trace but keep a causal link to the original test trace via OTEL span links.
+    /// </summary>
+    internal static bool TryRegisterDerivedTrace(string derivedTraceId, string sourceTraceId)
+    {
+        if (string.Equals(derivedTraceId, sourceTraceId, StringComparison.OrdinalIgnoreCase))
+        {
+            return IsRegistered(sourceTraceId);
+        }
+
+        if (!TraceToTests.TryGetValue(sourceTraceId, out var testNodeUids))
+        {
+            return false;
+        }
+
+        foreach (var testNodeUid in testNodeUids.Keys)
+        {
+            Register(derivedTraceId, testNodeUid);
+        }
+
+        if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
+        {
+            TraceToContextId[derivedTraceId] = contextId;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Gets all trace IDs registered for the given test node UID.
     /// Used by HtmlReporter to populate additional trace IDs on test results.
     /// </summary>

@@ -230,7 +230,24 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
         foreach (var span in spans)
         {
+            RegisterDerivedTrace(span);
             sink(ToSpanData(span));
+        }
+    }
+
+    private static void RegisterDerivedTrace(OtlpSpanRecord span)
+    {
+        if (TraceRegistry.IsRegistered(span.TraceId))
+        {
+            return;
+        }
+
+        foreach (var link in span.Links)
+        {
+            if (TraceRegistry.TryRegisterDerivedTrace(span.TraceId, link.TraceId))
+            {
+                return;
+            }
         }
     }
 
