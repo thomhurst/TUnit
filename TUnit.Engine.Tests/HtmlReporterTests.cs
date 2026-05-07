@@ -113,6 +113,38 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void OrderTestsForDisplay_SortsByStartTime_ThenName()
+    {
+        var later = CreateReportTestResult("Later", "2026-05-07T09:26:25.0000000Z");
+        var earlier = CreateReportTestResult("Earlier", "2026-05-07T09:26:24.0000000Z");
+        var sameTimeButLaterName = CreateReportTestResult("Zeta", "2026-05-07T09:26:24.0000000Z");
+
+        var ordered = HtmlReporter.OrderTestsForDisplay([later, sameTimeButLaterName, earlier]);
+
+        ordered.Select(static test => test.DisplayName).ShouldBe(["Earlier", "Zeta", "Later"]);
+    }
+
+    [Test]
+    public void GenerateHtml_Includes_ClassTimeline_TestCaseRendering()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldContain("function collapseTestBodySpans(spans)");
+        html.ShouldContain("const filtered = collapseTestBodySpans(getDescendants(allSpans, suite.spanId));");
+    }
+
+    [Test]
     public async Task PublishArtifactAsync_Publishes_With_Correct_SessionUid()
     {
         var reporter = new HtmlReporter(new MockExtension());
@@ -133,4 +165,17 @@ public class HtmlReporterTests
             File.Delete(tempFile);
         }
     }
+
+    private static ReportTestResult CreateReportTestResult(string displayName, string? startTime) => new()
+    {
+        Id = displayName,
+        DisplayName = displayName,
+        MethodName = displayName,
+        ClassName = "SampleTests",
+        Status = "passed",
+        DurationMs = 1,
+        StartTime = startTime,
+        EndTime = startTime,
+        RetryAttempt = 0,
+    };
 }

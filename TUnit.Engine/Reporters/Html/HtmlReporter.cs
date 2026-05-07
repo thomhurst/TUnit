@@ -336,7 +336,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 ClassName = kvp.Key,
                 Namespace = groupNamespaces.GetValueOrDefault(kvp.Key, ""),
                 Summary = groupSummary,
-                Tests = kvp.Value.ToArray()
+                Tests = OrderTestsForDisplay(kvp.Value)
             };
         }
 
@@ -464,6 +464,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         return filtered.Count == allTraceIds.Length ? allTraceIds : filtered.ToArray();
     }
 #endif
+
+    internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
+    {
+        return tests
+            .OrderBy(static test => test.StartTime is null ? 1 : 0)
+            .ThenBy(static test => test.StartTime, StringComparer.Ordinal)
+            .ThenBy(static test => test.DisplayName, StringComparer.Ordinal)
+            .ToArray();
+    }
 
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
     {
