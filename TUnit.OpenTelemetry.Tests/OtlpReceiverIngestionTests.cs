@@ -88,16 +88,16 @@ public class OtlpReceiverIngestionTests
     }
 
     private static byte[] BuildLinkedTraceExportRequest(
-        string traceId,
-        string spanId,
+        string derivedTraceId,
+        string derivedSpanId,
         string spanName,
-        string linkedTraceId,
-        string linkedSpanId)
+        string sourceTraceId,
+        string sourceSpanId)
     {
         using var exportStream = new MemoryStream();
         var resourceSpans = BuildResourceSpans(
             BuildScopeSpans(
-                BuildSpan(traceId, spanId, spanName, linkedTraceId, linkedSpanId)));
+                BuildSpan(derivedTraceId, derivedSpanId, spanName, sourceTraceId, sourceSpanId)));
         WriteField(exportStream, 1, resourceSpans);
         return exportStream.ToArray();
     }
@@ -117,20 +117,20 @@ public class OtlpReceiverIngestionTests
     }
 
     private static byte[] BuildSpan(
-        string traceId,
-        string spanId,
+        string derivedTraceId,
+        string derivedSpanId,
         string spanName,
-        string linkedTraceId,
-        string linkedSpanId)
+        string sourceTraceId,
+        string sourceSpanId)
     {
         using var stream = new MemoryStream();
-        WriteField(stream, 1, Convert.FromHexString(traceId));
-        WriteField(stream, 2, Convert.FromHexString(spanId));
+        WriteField(stream, 1, Convert.FromHexString(derivedTraceId));
+        WriteField(stream, 2, Convert.FromHexString(derivedSpanId));
         WriteStringField(stream, 5, spanName);
         WriteVarintField(stream, 6, SpanKindConsumer);
         WriteFixed64Field(stream, 7, TestStartTimeUnixNano); // start_time_unix_nano
         WriteFixed64Field(stream, 8, TestEndTimeUnixNano); // end_time_unix_nano
-        WriteField(stream, 13, BuildSpanLink(linkedTraceId, linkedSpanId));
+        WriteField(stream, 13, BuildSpanLink(sourceTraceId, sourceSpanId));
         return stream.ToArray();
     }
 
@@ -173,6 +173,8 @@ public class OtlpReceiverIngestionTests
 
     private static void WriteVarint(MemoryStream stream, ulong value)
     {
+        // Protobuf varints encode integers in 7-bit chunks; the high bit marks
+        // that another byte follows.
         do
         {
             var current = (byte)(value & 0x7F);
