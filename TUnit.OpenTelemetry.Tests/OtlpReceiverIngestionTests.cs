@@ -11,7 +11,7 @@ namespace TUnit.OpenTelemetry.Tests;
 
 public class OtlpReceiverIngestionTests
 {
-    private const ulong SpanKindConsumer = 5;
+    private const ulong SpanKindConsumer = 5; // OTLP SpanKind.CONSUMER
     private const string TestSpanId = "0123456789abcdef";
     private const ulong TestStartTimeUnixNano = 1;
     private const ulong TestEndTimeUnixNano = 2;
@@ -173,6 +173,8 @@ public class OtlpReceiverIngestionTests
 
     private static void WriteVarint(MemoryStream stream, ulong value)
     {
+        // Manual protobuf encoding keeps this regression test self-contained and avoids
+        // introducing a protobuf dependency just to build one OTLP payload.
         // Standard protobuf wire-format varint encoding: integers are emitted in
         // 7-bit chunks and the high bit marks that another byte follows.
         do

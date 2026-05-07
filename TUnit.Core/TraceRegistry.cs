@@ -75,6 +75,8 @@ internal static class TraceRegistry
     /// </returns>
     internal static bool TryRegisterDerivedTrace(string derivedTraceId, string sourceTraceId)
     {
+        // Fast path: if both IDs are the same we only need to report whether the source
+        // trace is already registered — no dictionary updates required.
         if (string.Equals(derivedTraceId, sourceTraceId, StringComparison.OrdinalIgnoreCase))
         {
             return IsRegistered(sourceTraceId);
