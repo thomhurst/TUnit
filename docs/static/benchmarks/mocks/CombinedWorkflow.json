@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-06T03:25:44.139Z",
+  "timestamp": "2026-05-07T03:27:11.074Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
@@ -10,57 +10,57 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "1.941 μs",
-      "Error": "0.0141 μs",
-      "StdDev": "0.0132 μs",
-      "Gen0": "0.2365",
-      "Gen1": "0.0038",
+      "Mean": "1.683 μs",
+      "Error": "0.0114 μs",
+      "StdDev": "0.0101 μs",
+      "Gen0": "0.3548",
+      "Gen1": "0.0057",
       "Allocated": "5.8 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "3.112 μs",
-      "Error": "0.0617 μs",
-      "StdDev": "0.0633 μs",
-      "Gen0": "0.6409",
-      "Gen1": "0.0267",
+      "Mean": "2.704 μs",
+      "Error": "0.0536 μs",
+      "StdDev": "0.0835 μs",
+      "Gen0": "0.9613",
+      "Gen1": "0.0458",
       "Allocated": "15.71 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "2.406 μs",
-      "Error": "0.0264 μs",
-      "StdDev": "0.0247 μs",
-      "Gen0": "0.3510",
-      "Gen1": "0.0038",
+      "Mean": "2.317 μs",
+      "Error": "0.0459 μs",
+      "StdDev": "0.0564 μs",
+      "Gen0": "0.5264",
+      "Gen1": "0.0076",
       "Allocated": "8.61 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "313.029 μs",
-      "Error": "1.5935 μs",
-      "StdDev": "1.4126 μs",
-      "Gen0": "0.9766",
-      "Gen1": "-",
-      "Allocated": "36.33 KB"
+      "Mean": "406.590 μs",
+      "Error": "2.0552 μs",
+      "StdDev": "1.9224 μs",
+      "Gen0": "1.9531",
+      "Gen1": "0.9766",
+      "Allocated": "36.35 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "17.050 μs",
-      "Error": "0.0795 μs",
-      "StdDev": "0.0621 μs",
-      "Gen0": "1.0681",
+      "Mean": "17.535 μs",
+      "Error": "0.1478 μs",
+      "StdDev": "0.1311 μs",
+      "Gen0": "1.6174",
       "Gen1": "0.0305",
       "Allocated": "26.72 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "17.629 μs",
-      "Error": "0.0694 μs",
-      "StdDev": "0.0649 μs",
-      "Gen0": "1.0376",
+      "Mean": "18.353 μs",
+      "Error": "0.0673 μs",
+      "StdDev": "0.0562 μs",
+      "Gen0": "1.5564",
       "Gen1": "0.0305",
-      "Allocated": "25.61 KB"
+      "Allocated": "25.52 KB"
     }
   ]
 }
