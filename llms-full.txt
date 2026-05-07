@@ -25777,22 +25777,52 @@ Benefits over non-generic version:
 
 The generic version ensures type safety when referencing data source classes.
 
+`ClassDataSource<T>` injects a single instance of `T` into the test — it does **not** enumerate `T`. For per-row data (multiple test invocations), use [`MethodDataSource`](./method-data-source.md) or a custom `DataSourceGeneratorAttribute<T>` instead.
+
 ```csharp
-public class UserTestData : IEnumerable<User>
+public class DatabaseFixture : IAsyncInitializer, IAsyncDisposable
 {
-    public IEnumerator<User> GetEnumerator()
+    public DbConnection Connection { get; private set; } = null!;
+
+    public async Task InitializeAsync()
+    {
+        Connection = await OpenConnectionAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Connection.DisposeAsync();
+    }
+}
+
+public class UserRepositoryTests
+{
+    [Test]
+    [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerClass)]
+    public async Task FindUser_ReturnsExpected(DatabaseFixture fixture)
+    {
+        var user = await fixture.Connection.QueryUserAsync(id: 1);
+        await Assert.That(user.Name).IsEqualTo("Alice");
+    }
+}
+```
+
+For data rows from a class that exposes a sequence, use `MethodDataSource` against a method/property on that class:
+
+```csharp
+public class UserTestData
+{
+    public static IEnumerable<User> All()
     {
         yield return new User { Id = 1, Name = "Alice" };
         yield return new User { Id = 2, Name = "Bob" };
     }
-    
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
 public class UserTests
 {
     [Test]
-    [ClassDataSource<UserTestData>]
+    [MethodDataSource<UserTestData>(nameof(UserTestData.All))]
     public async Task ValidateUser_ShouldPass(User user)
     {
         var isValid = await UserValidator.ValidateAsync(user);
