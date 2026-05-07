@@ -115,9 +115,9 @@ public class HtmlReporterTests
     [Test]
     public void OrderTestsForDisplay_SortsByStartTime_ThenName()
     {
-        var later = CreateReportTestResult("Later", "2026-05-07T09:26:25.0000000Z");
-        var earlier = CreateReportTestResult("Earlier", "2026-05-07T09:26:24.0000000Z");
-        var sameTimeButLaterName = CreateReportTestResult("Zeta", "2026-05-07T09:26:24.0000000Z");
+        var later = CreateTestResultWithStartTime("Later", "2026-05-07T09:26:25.0000000Z");
+        var earlier = CreateTestResultWithStartTime("Earlier", "2026-05-07T09:26:24.0000000Z");
+        var sameTimeButLaterName = CreateTestResultWithStartTime("Zeta", "2026-05-07T09:26:24.0000000Z");
 
         var ordered = HtmlReporter.OrderTestsForDisplay([later, sameTimeButLaterName, earlier]);
 
@@ -166,7 +166,7 @@ public class HtmlReporterTests
         }
     }
 
-    private static ReportTestResult CreateReportTestResult(string displayName, string? startTime) => new()
+    private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
     {
         Id = displayName,
         DisplayName = displayName,
