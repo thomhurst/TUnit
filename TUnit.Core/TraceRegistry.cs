@@ -85,9 +85,9 @@ internal static class TraceRegistry
             return false;
         }
 
-        foreach (var testNodeUid in testNodeUids.Keys)
+        foreach (var testNodeUid in testNodeUids)
         {
-            Register(derivedTraceId, testNodeUid);
+            Register(derivedTraceId, testNodeUid.Key);
         }
 
         if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))

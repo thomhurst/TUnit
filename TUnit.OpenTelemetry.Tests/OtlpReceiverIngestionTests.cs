@@ -173,8 +173,8 @@ public class OtlpReceiverIngestionTests
 
     private static void WriteVarint(MemoryStream stream, ulong value)
     {
-        // Protobuf varints encode integers in 7-bit chunks; the high bit marks
-        // that another byte follows.
+        // Standard protobuf wire-format varint encoding: integers are emitted in
+        // 7-bit chunks and the high bit marks that another byte follows.
         do
         {
             var current = (byte)(value & 0x7F);
