@@ -92,7 +92,7 @@ internal static class TraceRegistry
 
         if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
         {
-            TraceToContextId[derivedTraceId] = contextId;
+            TraceToContextId.TryAdd(derivedTraceId, contextId);
         }
 
         return true;

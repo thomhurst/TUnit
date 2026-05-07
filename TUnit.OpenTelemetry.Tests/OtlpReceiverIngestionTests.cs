@@ -12,6 +12,9 @@ namespace TUnit.OpenTelemetry.Tests;
 public class OtlpReceiverIngestionTests
 {
     private const ulong SpanKindConsumer = 5;
+    private const string TestSpanId = "0123456789abcdef";
+    private const ulong TestStartTimeUnixNano = 1;
+    private const ulong TestEndTimeUnixNano = 2;
 
     [Test]
     public async Task Receiver_ParsedTrace_ReachesActivityCollector()
@@ -61,10 +64,9 @@ public class OtlpReceiverIngestionTests
 
         var linkedContext = Activity.Current!.Context;
         var derivedTraceId = Guid.NewGuid().ToString("N");
-        var spanId = "0123456789abcdef";
         var body = BuildLinkedTraceExportRequest(
             derivedTraceId,
-            spanId,
+            TestSpanId,
             "sut-linked-op",
             linkedContext.TraceId.ToString(),
             linkedContext.SpanId.ToString());
@@ -126,8 +128,8 @@ public class OtlpReceiverIngestionTests
         WriteField(stream, 2, Convert.FromHexString(spanId));
         WriteStringField(stream, 5, spanName);
         WriteVarintField(stream, 6, SpanKindConsumer);
-        WriteFixed64Field(stream, 7, 1); // start_time_unix_nano
-        WriteFixed64Field(stream, 8, 2); // end_time_unix_nano
+        WriteFixed64Field(stream, 7, TestStartTimeUnixNano); // start_time_unix_nano
+        WriteFixed64Field(stream, 8, TestEndTimeUnixNano); // end_time_unix_nano
         WriteField(stream, 13, BuildSpanLink(linkedTraceId, linkedSpanId));
         return stream.ToArray();
     }
