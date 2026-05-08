@@ -20,7 +20,7 @@ public class ContextTest : BrowserTest
         return new()
         {
             Locale = "en-US", ColorScheme = ColorScheme.Light,
-            IgnoreHTTPSErrors = PlaywrightSettingsExtensions.Default.DefaultIgnoreHttpsErrors,
+            IgnoreHTTPSErrors = TUnitPlaywrightSettings.Default.DefaultIgnoreHttpsErrors,
         };
     }
 

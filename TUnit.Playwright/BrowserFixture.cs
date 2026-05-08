@@ -20,7 +20,7 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
 
     protected virtual BrowserTypeLaunchOptions GetLaunchOptions() => new()
     {
-        Headless = PlaywrightSettingsExtensions.Default.DefaultHeadless,
+        Headless = TUnitPlaywrightSettings.Default.DefaultHeadless,
     };
 
     public virtual async Task InitializeAsync()

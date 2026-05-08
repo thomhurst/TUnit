@@ -7,7 +7,7 @@ public class BrowserTest : PlaywrightTest
 {
     public BrowserTest() : this(new BrowserTypeLaunchOptions
     {
-        Headless = PlaywrightSettingsExtensions.Default.DefaultHeadless,
+        Headless = TUnitPlaywrightSettings.Default.DefaultHeadless,
     })
     {
     }

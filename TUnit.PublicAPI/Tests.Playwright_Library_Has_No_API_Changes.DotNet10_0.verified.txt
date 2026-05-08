@@ -122,9 +122,8 @@ namespace
     }
     public class TUnitPlaywrightSettings
     {
-        public TUnitPlaywrightSettings() { }
-        public bool DefaultHeadless { get; set; }
-        public bool DefaultIgnoreHttpsErrors { get; set; }
+        public bool? DefaultHeadless { get; set; }
+        public bool? DefaultIgnoreHttpsErrors { get; set; }
     }
     public class WorkerAwareTest : ., .
     {

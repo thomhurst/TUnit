@@ -19,5 +19,5 @@ public class TUnitPlaywrightSettings
     }
 
     public bool? DefaultHeadless { get; set; } = null;
-    public bool DefaultIgnoreHttpsErrors { get; set; }
+    public bool? DefaultIgnoreHttpsErrors { get; set; } = null;
 }

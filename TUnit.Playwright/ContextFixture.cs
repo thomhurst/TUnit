@@ -27,7 +27,7 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
         new()
         {
             Locale = "en-US", ColorScheme = ColorScheme.Light,
-            IgnoreHTTPSErrors = PlaywrightSettingsExtensions.Default.DefaultIgnoreHttpsErrors,
+            IgnoreHTTPSErrors = TUnitPlaywrightSettings.Default.DefaultIgnoreHttpsErrors,
         };
 
     /// <summary>
