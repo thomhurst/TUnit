@@ -122,8 +122,8 @@ namespace
     }
     public class TUnitPlaywrightSettings
     {
-        public bool? DefaultHeadless { get; set; }
-        public bool? DefaultIgnoreHttpsErrors { get; set; }
+        public .BrowserNewContextOptions? DefaultBrowserNewContextOptions { get; set; }
+        public .BrowserTypeLaunchOptions? DefaultBrowserTypeLaunchOptions { get; set; }
     }
     public class WorkerAwareTest : ., .
     {
