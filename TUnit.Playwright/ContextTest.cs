@@ -17,7 +17,11 @@ public class ContextTest : BrowserTest
 
     public virtual BrowserNewContextOptions ContextOptions(TestContext testContext)
     {
-        return new() { Locale = "en-US", ColorScheme = ColorScheme.Light, };
+        return new()
+        {
+            Locale = "en-US", ColorScheme = ColorScheme.Light,
+            IgnoreHTTPSErrors = PlaywrightSettingsExtensions.Default.DefaultIgnoreHttpsErrors,
+        };
     }
 
     [Before(HookType.Test, "", 0)]
