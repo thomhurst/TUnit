@@ -36,4 +36,18 @@
         <Using Include="TUnit.Assertions" />
         <Using Include="TUnit.Assertions.Extensions" />
     </ItemGroup>
+
+    <!-- During solution builds, swap TUnit.Playwright NuGet package for local project reference
+         so newly-added API in the same PR is visible to the template smoke test. End-user
+         template instantiations match a different MSBuild path and keep the PackageReference.
+         Also import TUnit.props directly — NuGet auto-imports build/TUnit.props for package
+         consumers, but ProjectReference doesn't propagate it; without this the project compiles
+         but `dotnet run` fails with "test framework adapter has not been registered". -->
+    <Import Project="$(MSBuildThisFileDirectory)..\..\TUnit\TUnit.props"
+            Condition="$(MSBuildProjectDirectory.Contains('TUnit.Templates')) And $(MSBuildProjectDirectory.Contains('TUnit.Playwright'))" />
+    <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('TUnit.Templates')) And $(MSBuildProjectDirectory.Contains('TUnit.Playwright'))">
+        <PackageReference Remove="TUnit.Playwright" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\TUnit.Playwright\TUnit.Playwright.csproj" />
+    </ItemGroup>
 </Project>
+

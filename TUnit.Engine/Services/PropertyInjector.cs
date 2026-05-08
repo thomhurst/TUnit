@@ -263,9 +263,11 @@ internal sealed class PropertyInjector
 
         // Use a composite key to avoid conflicts when nested classes have properties with the same name
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
+        var useTestClassPropertyCache = testContext?.Metadata.TestDetails.ClassType.IsInstanceOfType(instance) == true;
 
         // Check if property was pre-resolved during registration
-        if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) != true)
+        if (!useTestClassPropertyCache ||
+            testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(cacheKey, out resolvedValue) != true)
         {
             // Resolve the property value from the data source
             resolvedValue = await ResolvePropertyDataAsync(
@@ -290,9 +292,9 @@ internal sealed class PropertyInjector
         // Store the converted value for potential reuse (e.g., retries).
         // Use indexer to overwrite any pre-resolved unconverted value so that
         // SetCachedPropertiesOnInstance can use the value directly without re-converting.
-        if (testContext != null)
+        if (useTestClassPropertyCache)
         {
-            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments()[cacheKey] = resolvedValue;
+            testContext!.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments()[cacheKey] = resolvedValue;
         }
     }
 
