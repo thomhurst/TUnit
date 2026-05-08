@@ -41,7 +41,7 @@ public class TestTraceExporterTests
         var endpoint = new Uri($"http://127.0.0.1:{server.Port}");
 
         var builder = Sdk.CreateTracerProviderBuilder().AddSource(sourceName);
-        TestTraceExporter.AddToBuilder(builder, GetCurrentSessionContext(), endpoint);
+        TestTraceExporter.AddToBuilder(builder, endpoint);
 
         using (var activitySource = new ActivitySource(sourceName))
         using (var provider = builder.Build())
@@ -64,10 +64,5 @@ public class TestTraceExporterTests
         var tracesEndpoint = TestTraceExporter.GetTracesEndpoint(endpoint);
 
         await Assert.That(tracesEndpoint.ToString()).IsEqualTo("http://127.0.0.1:5341/ingest/otlp/v1/traces");
-    }
-
-    private static TestSessionContext GetCurrentSessionContext()
-    {
-        return TestContext.Current!.ClassContext.AssemblyContext.TestSessionContext;
     }
 }
