@@ -77,6 +77,12 @@ public class GlobalTestHooksAnalyzer : ConcurrentDiagnosticAnalyzer
                 switch (parameterStatus)
                 {
                     case HookParameterStatus.NoParameters:
+                        // TestSession/TestDiscovery hooks rarely need their context — don't nudge.
+                        // Test/Class/Assembly still get the info-level suggestion.
+                        if (hookLevel is HookLevel.TestSession or HookLevel.TestDiscovery)
+                        {
+                            break;
+                        }
                         context.ReportDiagnostic(Diagnostic.Create(
                             Rules.HookContextParameterOptional,
                             methodSymbol.Locations.FirstOrDefault(),
