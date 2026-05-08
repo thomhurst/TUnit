@@ -18,7 +18,10 @@ public class BrowserFixture : IAsyncInitializer, IAsyncDisposable
 
     public virtual string BrowserName => Microsoft.Playwright.BrowserType.Chromium;
 
-    protected virtual BrowserTypeLaunchOptions GetLaunchOptions() => new();
+    protected virtual BrowserTypeLaunchOptions GetLaunchOptions() => new()
+    {
+        Headless = TUnitPlaywrightSettings.Default.DefaultHeadless,
+    };
 
     public virtual async Task InitializeAsync()
     {

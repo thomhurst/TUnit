@@ -24,7 +24,11 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
     /// (<c>new BrowserNewContextOptions()</c>).
     /// </summary>
     protected virtual BrowserNewContextOptions GetContextOptions() =>
-        new() { Locale = "en-US", ColorScheme = ColorScheme.Light };
+        new()
+        {
+            Locale = "en-US", ColorScheme = ColorScheme.Light,
+            IgnoreHTTPSErrors = TUnitPlaywrightSettings.Default.DefaultIgnoreHttpsErrors,
+        };
 
     /// <summary>
     /// When <c>true</c>, seeds the context with W3C trace propagation headers from

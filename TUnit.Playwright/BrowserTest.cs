@@ -5,7 +5,10 @@ namespace TUnit.Playwright;
 
 public class BrowserTest : PlaywrightTest
 {
-    public BrowserTest() : this(new BrowserTypeLaunchOptions())
+    public BrowserTest() : this(new BrowserTypeLaunchOptions
+    {
+        Headless = TUnitPlaywrightSettings.Default.DefaultHeadless,
+    })
     {
     }
 
