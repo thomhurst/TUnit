@@ -159,7 +159,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 // TUnit.Aspire on every ProjectResource).
                 Interlocked.Increment(ref _diagnostics.GrpcRejected);
                 Interlocked.Increment(ref _diagnostics.TotalRequests);
-                _diagnostics.RecordUnknownPath(path);
+                // Only record the path under "unknown" when path itself triggered detection;
+                // otherwise we'd add /v1/traces to the unknown-paths map on every gRPC-by-
+                // content-type rejection, which is actively misleading in the dump.
+                if (path.StartsWith("/opentelemetry.proto.collector.", StringComparison.Ordinal))
+                {
+                    _diagnostics.RecordUnknownPath(path);
+                }
+
                 response.StatusCode = 415;
                 response.ContentType = "text/plain";
                 ReadOnlySpan<byte> msg = "TUnit OTLP receiver does not support gRPC. Set OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf.\n"u8;
@@ -271,9 +278,20 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
         Interlocked.Add(ref diag.TracesSpansParsed, spans.Count);
 
+        // Dedupe registration attempts per batch — without this, every span in an
+        // already-known trace would bump the diagnostic counter, making
+        // "50 spans, all in a known trace" indistinguishable from "50 spans, 50 misses".
+        var registrationAttempted = spans.Count > 1
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : null;
+
         foreach (var span in spans)
         {
-            RegisterDerivedTrace(span, diag);
+            if (registrationAttempted is null || registrationAttempted.Add(span.TraceId))
+            {
+                RegisterDerivedTrace(span, diag);
+            }
+
             sink(ToSpanData(span));
         }
     }
@@ -282,7 +300,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     {
         if (TraceRegistry.IsRegistered(span.TraceId))
         {
-            Interlocked.Increment(ref diag.TracesSpansTraceAlreadyRegistered);
+            Interlocked.Increment(ref diag.TracesAlreadyRegistered);
             return;
         }
 
@@ -290,12 +308,12 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         {
             if (TraceRegistry.TryRegisterDerivedTrace(span.TraceId, link.TraceId))
             {
-                Interlocked.Increment(ref diag.TracesSpansLinkRegistered);
+                Interlocked.Increment(ref diag.TracesRegisteredViaLink);
                 return;
             }
         }
 
-        Interlocked.Increment(ref diag.TracesSpansNoMatchingTrace);
+        Interlocked.Increment(ref diag.TracesNoMatch);
     }
 
     private static SpanData ToSpanData(OtlpSpanRecord span)
@@ -573,26 +591,33 @@ internal sealed class OtlpReceiverDiagnostics
 
     private readonly ConcurrentDictionary<string, int> _unknownPaths = new(StringComparer.Ordinal);
 
-    public int TotalRequests;
-    public int LogsRequests;
-    public int TracesRequests;
-    public int MetricsRequests;
-    public int OtherRequests;
-    public int GrpcRejected;
+    // Counters are mutated via Interlocked from the listener task and read at session end.
+    // No snapshot consistency across fields — readers may observe a partially-updated batch.
+    // Acceptable for a best-effort diagnostic dump; do not use for live decision-making.
+    // Fields are internal (rather than public) because ref access requires assembly-internal
+    // visibility at most, and OtlpReceiver lives in the same assembly.
+    internal int TotalRequests;
+    internal int LogsRequests;
+    internal int TracesRequests;
+    internal int MetricsRequests;
+    internal int OtherRequests;
+    internal int GrpcRejected;
 
-    public int LogsParseFailures;
-    public int LogsRecordsParsed;
-    public int LogsRecordsNoTraceId;
-    public int LogsRecordsTraceNotRegistered;
-    public int LogsRecordsTestContextMissing;
-    public int LogsRecordsRouted;
+    internal int LogsParseFailures;
+    internal int LogsRecordsParsed;
+    internal int LogsRecordsNoTraceId;
+    internal int LogsRecordsTraceNotRegistered;
+    internal int LogsRecordsTestContextMissing;
+    internal int LogsRecordsRouted;
 
-    public int TracesNoSink;
-    public int TracesParseFailures;
-    public int TracesSpansParsed;
-    public int TracesSpansTraceAlreadyRegistered;
-    public int TracesSpansLinkRegistered;
-    public int TracesSpansNoMatchingTrace;
+    internal int TracesNoSink;
+    internal int TracesParseFailures;
+    internal int TracesSpansParsed;
+    // Per-trace (deduped per batch): how many distinct traces fell into each bucket
+    // when ProcessTraces attempted registration.
+    internal int TracesAlreadyRegistered;
+    internal int TracesRegisteredViaLink;
+    internal int TracesNoMatch;
 
     /// <summary>
     /// Records a request path that didn't match any known OTLP signal endpoint. Caps the
@@ -637,9 +662,9 @@ internal sealed class OtlpReceiverDiagnostics
         sb.AppendLine($"  traces.no_sink_registered            = {TracesNoSink}");
         sb.AppendLine($"  traces.parse_failures                = {TracesParseFailures}");
         sb.AppendLine($"  traces.spans_parsed                  = {TracesSpansParsed}");
-        sb.AppendLine($"  traces.spans_trace_already_registered= {TracesSpansTraceAlreadyRegistered}");
-        sb.AppendLine($"  traces.spans_registered_via_link     = {TracesSpansLinkRegistered}");
-        sb.AppendLine($"  traces.spans_no_matching_trace       = {TracesSpansNoMatchingTrace}");
+        sb.AppendLine($"  traces.unique_already_registered     = {TracesAlreadyRegistered}");
+        sb.AppendLine($"  traces.unique_registered_via_link    = {TracesRegisteredViaLink}");
+        sb.AppendLine($"  traces.unique_no_match               = {TracesNoMatch}");
         return sb.ToString();
     }
 }

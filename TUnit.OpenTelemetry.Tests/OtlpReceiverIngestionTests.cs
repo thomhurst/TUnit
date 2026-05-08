@@ -108,6 +108,36 @@ public class OtlpReceiverIngestionTests
         await Assert.That((int)pathResponse.StatusCode).IsEqualTo(415);
         await Assert.That(receiver.Diagnostics.GrpcRejected).IsEqualTo(2);
         await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(0);
+
+        // Content-type-triggered rejection must NOT pollute the unknown-paths map with
+        // /v1/traces — only the path-triggered rejection should record its path.
+        var summary = receiver.Diagnostics.FormatSummary(receiver.Port);
+        await Assert.That(summary).DoesNotContain("other_path[/v1/traces]");
+        await Assert.That(summary).Contains("other_path[/opentelemetry.proto.collector.trace.v1.TraceService/Export]");
+    }
+
+    [Test]
+    public async Task Receiver_BatchOfSameTrace_CountsRegistrationOncePerTrace()
+    {
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        // Register a fake trace so all three spans hit the "already registered" path.
+        var traceId = Guid.NewGuid().ToString("N");
+        TraceRegistry.Register(traceId, "fake-test-context-id");
+
+        var body = BuildMultiSpanBatch(traceId, spanCount: 3);
+
+        using var client = new HttpClient();
+        using var content = new ByteArrayContent(body);
+        content.Headers.ContentType = new("application/x-protobuf");
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
+
+        await receiver.WhenIdle();
+
+        await Assert.That(receiver.Diagnostics.TracesSpansParsed).IsEqualTo(3);
+        await Assert.That(receiver.Diagnostics.TracesAlreadyRegistered).IsEqualTo(1);
+        await Assert.That(receiver.Diagnostics.TracesNoMatch).IsEqualTo(0);
     }
 
     [Test]
@@ -142,6 +172,32 @@ public class OtlpReceiverIngestionTests
         await Assert.That(span).IsNotNull();
         await Assert.That(TraceRegistry.IsRegistered(derivedTraceId)).IsTrue();
         await Assert.That(TraceRegistry.GetContextId(derivedTraceId)).IsEqualTo(TestContext.Current!.Id);
+    }
+
+    private static byte[] BuildMultiSpanBatch(string traceId, int spanCount)
+    {
+        // Build N sibling spans that all share traceId but have distinct spanIds. This
+        // exercises the per-batch dedupe in ProcessTraces — each span should NOT bump
+        // the registration counter.
+        using var scopeStream = new MemoryStream();
+        for (var i = 0; i < spanCount; i++)
+        {
+            var spanId = i.ToString("X16");
+            using var spanStream = new MemoryStream();
+            WriteField(spanStream, 1, Convert.FromHexString(traceId));
+            WriteField(spanStream, 2, Convert.FromHexString(spanId));
+            WriteStringField(spanStream, 5, $"sut-batch-op-{i}");
+            WriteVarintField(spanStream, 6, SpanKindConsumer);
+            WriteFixed64Field(spanStream, 7, TestStartTimeUnixNano);
+            WriteFixed64Field(spanStream, 8, TestEndTimeUnixNano);
+            WriteField(scopeStream, 2, spanStream.ToArray());
+        }
+
+        using var resourceStream = new MemoryStream();
+        WriteField(resourceStream, 2, scopeStream.ToArray());
+        using var exportStream = new MemoryStream();
+        WriteField(exportStream, 1, resourceStream.ToArray());
+        return exportStream.ToArray();
     }
 
     private static byte[] BuildLinkedTraceExportRequest(
