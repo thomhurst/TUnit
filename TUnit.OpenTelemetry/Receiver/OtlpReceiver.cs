@@ -32,10 +32,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cts = new();
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
+    private readonly OtlpReceiverDiagnostics _diagnostics = new();
     private string? _upstreamEndpoint;
     private Task? _listenTask;
     private int _taskIdCounter;
-    private int _requestCount;
 
     /// <summary>
     /// The port the receiver is listening on.
@@ -45,7 +45,13 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// <summary>
     /// The number of POST requests successfully processed.
     /// </summary>
-    internal int RequestCount => _requestCount;
+    internal int RequestCount => _diagnostics.TotalRequests;
+
+    /// <summary>
+    /// Per-counter snapshot of receiver activity. Useful in tests and when diagnosing
+    /// silent drops in user environments via <see cref="WriteDiagnosticsSummary"/>.
+    /// </summary>
+    internal OtlpReceiverDiagnostics Diagnostics => _diagnostics;
 
     /// <summary>
     /// Creates a new OTLP receiver.
@@ -141,6 +147,28 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 return;
             }
 
+            var path = request.Url?.AbsolutePath ?? "";
+
+            if (LooksLikeGrpc(request.ContentType, path))
+            {
+                // HttpListener is HTTP/1.1-only — most gRPC clients won't even reach us, but
+                // h2c-fallback or grpc-web requests can. Reject explicitly with 415 so the
+                // SUT exporter logs an error instead of silently retrying, and surface the
+                // mismatch in the diagnostic dump. Fix is to set
+                // OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf (already injected by
+                // TUnit.Aspire on every ProjectResource).
+                Interlocked.Increment(ref _diagnostics.GrpcRejected);
+                Interlocked.Increment(ref _diagnostics.TotalRequests);
+                _diagnostics.RecordUnknownPath(path);
+                response.StatusCode = 415;
+                response.ContentType = "text/plain";
+                ReadOnlySpan<byte> msg = "TUnit OTLP receiver does not support gRPC. Set OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf.\n"u8;
+                response.ContentLength64 = msg.Length;
+                response.OutputStream.Write(msg);
+                response.Close();
+                return;
+            }
+
             // ContentLength64 is -1 for chunked; size-known path avoids MemoryStream growth copies.
             byte[] body;
             if (request.ContentLength64 >= 0)
@@ -170,15 +198,26 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 body = ms.ToArray();
             }
 
-            var path = request.Url?.AbsolutePath ?? "";
-
             if (path == "/v1/logs")
             {
-                ProcessLogs(body);
+                Interlocked.Increment(ref _diagnostics.LogsRequests);
+                ProcessLogs(body, _diagnostics);
             }
             else if (path == "/v1/traces")
             {
-                ProcessTraces(body);
+                Interlocked.Increment(ref _diagnostics.TracesRequests);
+                ProcessTraces(body, _diagnostics);
+            }
+            else if (path == "/v1/metrics")
+            {
+                // Standard OTLP/HTTP signal — accepted and forwarded upstream, but we don't
+                // render metrics in the report so there's nothing to parse.
+                Interlocked.Increment(ref _diagnostics.MetricsRequests);
+            }
+            else
+            {
+                Interlocked.Increment(ref _diagnostics.OtherRequests);
+                _diagnostics.RecordUnknownPath(path);
             }
 
             var upstream = Volatile.Read(ref _upstreamEndpoint);
@@ -187,7 +226,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 TrackTask(ForwardAsync(upstream, path, body, request.ContentType));
             }
 
-            Interlocked.Increment(ref _requestCount);
+            Interlocked.Increment(ref _diagnostics.TotalRequests);
 
             response.StatusCode = 200;
             response.ContentType = "application/x-protobuf";
@@ -209,11 +248,12 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
     }
 
-    private static void ProcessTraces(byte[] body)
+    private static void ProcessTraces(byte[] body, OtlpReceiverDiagnostics diag)
     {
         var sink = ExternalSpanSink.Current;
         if (sink is null)
         {
+            Interlocked.Increment(ref diag.TracesNoSink);
             return;
         }
 
@@ -224,21 +264,25 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
         catch (Exception ex)
         {
+            Interlocked.Increment(ref diag.TracesParseFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/traces body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 
+        Interlocked.Add(ref diag.TracesSpansParsed, spans.Count);
+
         foreach (var span in spans)
         {
-            RegisterDerivedTrace(span);
+            RegisterDerivedTrace(span, diag);
             sink(ToSpanData(span));
         }
     }
 
-    private static void RegisterDerivedTrace(OtlpSpanRecord span)
+    private static void RegisterDerivedTrace(OtlpSpanRecord span, OtlpReceiverDiagnostics diag)
     {
         if (TraceRegistry.IsRegistered(span.TraceId))
         {
+            Interlocked.Increment(ref diag.TracesSpansTraceAlreadyRegistered);
             return;
         }
 
@@ -246,9 +290,12 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         {
             if (TraceRegistry.TryRegisterDerivedTrace(span.TraceId, link.TraceId))
             {
+                Interlocked.Increment(ref diag.TracesSpansLinkRegistered);
                 return;
             }
         }
+
+        Interlocked.Increment(ref diag.TracesSpansNoMatchingTrace);
     }
 
     private static SpanData ToSpanData(OtlpSpanRecord span)
@@ -350,7 +397,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             ? ((ActivityStatusCode)code).ToString()
             : nameof(ActivityStatusCode.Unset);
 
-    private static void ProcessLogs(byte[] body)
+    private static void ProcessLogs(byte[] body, OtlpReceiverDiagnostics diag)
     {
         List<OtlpLogRecord> records;
         try
@@ -359,14 +406,18 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
         catch (Exception ex)
         {
+            Interlocked.Increment(ref diag.LogsParseFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/logs body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
+
+        Interlocked.Add(ref diag.LogsRecordsParsed, records.Count);
 
         foreach (var record in records)
         {
             if (string.IsNullOrEmpty(record.TraceId))
             {
+                Interlocked.Increment(ref diag.LogsRecordsNoTraceId);
                 continue;
             }
 
@@ -374,12 +425,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var contextId = TraceRegistry.GetContextId(record.TraceId);
             if (contextId is null)
             {
+                Interlocked.Increment(ref diag.LogsRecordsTraceNotRegistered);
                 continue;
             }
 
             var testContext = TestContext.GetById(contextId);
             if (testContext is null)
             {
+                Interlocked.Increment(ref diag.LogsRecordsTestContextMissing);
                 continue;
             }
 
@@ -390,6 +443,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 : $"[{record.ResourceName}] ";
 
             testContext.Output.WriteLine($"{prefix}[{severity}] {record.Body}");
+            Interlocked.Increment(ref diag.LogsRecordsRouted);
         }
     }
 
@@ -450,7 +504,55 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             // Best effort — individual failures already logged via Trace.WriteLine
         }
 
+        // Distinguish "SUT didn't export anything" from "SUT exported but TUnit dropped it
+        // on the floor" — opt-in via TUNIT_OTLP_DEBUG=1 so production runs stay quiet.
+        if (IsDiagnosticsDumpEnabled())
+        {
+            try
+            {
+                Console.Error.WriteLine(_diagnostics.FormatSummary(Port));
+            }
+            catch
+            {
+                // Best effort — Console may be redirected/closed in some hosts
+            }
+        }
+
         _cts.Dispose();
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> if a request looks like gRPC — either by content-type
+    /// (<c>application/grpc</c>, <c>application/grpc-web</c>, <c>application/grpc+proto</c>)
+    /// or by an OTLP gRPC service path (<c>/opentelemetry.proto.collector.{trace,logs,metrics}.v1.*Service/Export</c>).
+    /// </summary>
+    private static bool LooksLikeGrpc(string? contentType, string path)
+    {
+        if (contentType is not null && contentType.StartsWith("application/grpc", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        // OTLP gRPC service paths all live under /opentelemetry.proto.collector. We don't
+        // need to match the full service+method to recognise the misroute.
+        return path.StartsWith("/opentelemetry.proto.collector.", StringComparison.Ordinal);
+    }
+
+    private static bool IsDiagnosticsDumpEnabled()
+    {
+        var value = Environment.GetEnvironmentVariable("TUNIT_OTLP_DEBUG");
+        return !string.IsNullOrEmpty(value)
+            && !string.Equals(value, "0", StringComparison.Ordinal)
+            && !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Writes a one-line-per-counter summary of receiver activity. Intended for the
+    /// diagnostic dump path — call manually from a test to inspect counters.
+    /// </summary>
+    internal void WriteDiagnosticsSummary(TextWriter writer)
+    {
+        writer.Write(_diagnostics.FormatSummary(Port));
     }
 
     /// <summary>
@@ -458,6 +560,88 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// handle the TOCTOU window between discovering a free port and binding to it.
     /// </summary>
     private static (HttpListener Listener, int Port) CreateListener() => LoopbackHttpListenerFactory.Create();
+}
+
+/// <summary>
+/// Counter snapshot for an <see cref="OtlpReceiver"/>. Helps diagnose silent drops by
+/// distinguishing between requests that never arrived, parse failures, and spans/logs
+/// that arrived but didn't match any registered test trace.
+/// </summary>
+internal sealed class OtlpReceiverDiagnostics
+{
+    private const int MaxTrackedUnknownPaths = 16;
+
+    private readonly ConcurrentDictionary<string, int> _unknownPaths = new(StringComparer.Ordinal);
+
+    public int TotalRequests;
+    public int LogsRequests;
+    public int TracesRequests;
+    public int MetricsRequests;
+    public int OtherRequests;
+    public int GrpcRejected;
+
+    public int LogsParseFailures;
+    public int LogsRecordsParsed;
+    public int LogsRecordsNoTraceId;
+    public int LogsRecordsTraceNotRegistered;
+    public int LogsRecordsTestContextMissing;
+    public int LogsRecordsRouted;
+
+    public int TracesNoSink;
+    public int TracesParseFailures;
+    public int TracesSpansParsed;
+    public int TracesSpansTraceAlreadyRegistered;
+    public int TracesSpansLinkRegistered;
+    public int TracesSpansNoMatchingTrace;
+
+    /// <summary>
+    /// Records a request path that didn't match any known OTLP signal endpoint. Caps the
+    /// distinct-path set at <see cref="MaxTrackedUnknownPaths"/> to avoid unbounded growth
+    /// if a misbehaving client cycles through generated URLs.
+    /// </summary>
+    public void RecordUnknownPath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            path = "(empty)";
+        }
+
+        if (_unknownPaths.ContainsKey(path) || _unknownPaths.Count < MaxTrackedUnknownPaths)
+        {
+            _unknownPaths.AddOrUpdate(path, 1, static (_, c) => c + 1);
+        }
+    }
+
+    public string FormatSummary(int port)
+    {
+        // Keep the layout grep-friendly so users can quickly paste a snippet into an issue.
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"[TUnit.OpenTelemetry] OtlpReceiver diagnostics summary (port {port}):");
+        sb.AppendLine($"  requests.total                       = {TotalRequests}");
+        sb.AppendLine($"  requests.v1_logs                     = {LogsRequests}");
+        sb.AppendLine($"  requests.v1_traces                   = {TracesRequests}");
+        sb.AppendLine($"  requests.v1_metrics                  = {MetricsRequests}");
+        sb.AppendLine($"  requests.grpc_rejected               = {GrpcRejected}");
+        sb.AppendLine($"  requests.other_path                  = {OtherRequests}");
+        foreach (var entry in _unknownPaths)
+        {
+            sb.AppendLine($"    other_path[{entry.Key}] = {entry.Value}");
+        }
+
+        sb.AppendLine($"  logs.parse_failures                  = {LogsParseFailures}");
+        sb.AppendLine($"  logs.records_parsed                  = {LogsRecordsParsed}");
+        sb.AppendLine($"  logs.records_no_trace_id             = {LogsRecordsNoTraceId}");
+        sb.AppendLine($"  logs.records_trace_not_registered    = {LogsRecordsTraceNotRegistered}");
+        sb.AppendLine($"  logs.records_test_context_missing    = {LogsRecordsTestContextMissing}");
+        sb.AppendLine($"  logs.records_routed_to_test          = {LogsRecordsRouted}");
+        sb.AppendLine($"  traces.no_sink_registered            = {TracesNoSink}");
+        sb.AppendLine($"  traces.parse_failures                = {TracesParseFailures}");
+        sb.AppendLine($"  traces.spans_parsed                  = {TracesSpansParsed}");
+        sb.AppendLine($"  traces.spans_trace_already_registered= {TracesSpansTraceAlreadyRegistered}");
+        sb.AppendLine($"  traces.spans_registered_via_link     = {TracesSpansLinkRegistered}");
+        sb.AppendLine($"  traces.spans_no_matching_trace       = {TracesSpansNoMatchingTrace}");
+        return sb.ToString();
+    }
 }
 
 /// <summary>

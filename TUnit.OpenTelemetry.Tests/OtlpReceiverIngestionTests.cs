@@ -54,6 +54,63 @@ public class OtlpReceiverIngestionTests
     }
 
     [Test]
+    public async Task Receiver_Diagnostics_ClassifiesEachRequestPath()
+    {
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        using var client = new HttpClient();
+        using var emptyTraces = new ByteArrayContent(Array.Empty<byte>());
+        using var emptyLogs = new ByteArrayContent(Array.Empty<byte>());
+        using var emptyMetrics = new ByteArrayContent(Array.Empty<byte>());
+        using var emptyOther = new ByteArrayContent(Array.Empty<byte>());
+
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", emptyTraces);
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", emptyLogs);
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/metrics", emptyMetrics);
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/some/other/path", emptyOther);
+
+        await receiver.WhenIdle();
+
+        var diag = receiver.Diagnostics;
+        await Assert.That(diag.TracesRequests).IsEqualTo(1);
+        await Assert.That(diag.LogsRequests).IsEqualTo(1);
+        await Assert.That(diag.MetricsRequests).IsEqualTo(1);
+        await Assert.That(diag.OtherRequests).IsEqualTo(1);
+        await Assert.That(diag.TotalRequests).IsEqualTo(4);
+
+        var summary = diag.FormatSummary(receiver.Port);
+        await Assert.That(summary).Contains("requests.v1_traces                   = 1");
+        await Assert.That(summary).Contains("requests.v1_metrics                  = 1");
+        await Assert.That(summary).Contains("other_path[/some/other/path] = 1");
+    }
+
+    [Test]
+    public async Task Receiver_GrpcRequest_RejectedWith415AndCounted()
+    {
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        using var client = new HttpClient();
+
+        using var grpcByContentType = new ByteArrayContent(Array.Empty<byte>());
+        grpcByContentType.Headers.TryAddWithoutValidation("Content-Type", "application/grpc");
+        var contentTypeResponse = await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", grpcByContentType);
+
+        using var grpcByPath = new ByteArrayContent(Array.Empty<byte>());
+        var pathResponse = await client.PostAsync(
+            $"http://127.0.0.1:{receiver.Port}/opentelemetry.proto.collector.trace.v1.TraceService/Export",
+            grpcByPath);
+
+        await receiver.WhenIdle();
+
+        await Assert.That((int)contentTypeResponse.StatusCode).IsEqualTo(415);
+        await Assert.That((int)pathResponse.StatusCode).IsEqualTo(415);
+        await Assert.That(receiver.Diagnostics.GrpcRejected).IsEqualTo(2);
+        await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(0);
+    }
+
+    [Test]
     public async Task Receiver_ParsedLinkedTrace_RegistersAgainstOwningTest()
     {
         var collector = ActivityCollector.Current;
