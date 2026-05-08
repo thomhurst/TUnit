@@ -4,16 +4,20 @@ namespace TUnit.Playwright;
 
 public static class PlaywrightSettingsExtensions
 {
-    internal static readonly TUnitPlaywrightSettings Default = new();
-
     extension(TUnitSettings settings)
     {
-        public TUnitPlaywrightSettings PlaywrightSettings => Default;
+        public TUnitPlaywrightSettings PlaywrightSettings => TUnitPlaywrightSettings.Default;
     }
 }
 
 public class TUnitPlaywrightSettings
 {
-    public bool DefaultHeadless { get; set; }
+    internal static readonly TUnitPlaywrightSettings Default = new();
+
+    internal TUnitPlaywrightSettings()
+    {
+    }
+
+    public bool? DefaultHeadless { get; set; } = null;
     public bool DefaultIgnoreHttpsErrors { get; set; }
 }
