@@ -17,10 +17,9 @@ public class ContextTest : BrowserTest
 
     public virtual BrowserNewContextOptions ContextOptions(TestContext testContext)
     {
-        return new()
+        return TUnitPlaywrightSettings.Default.DefaultBrowserNewContextOptions ?? new BrowserNewContextOptions
         {
             Locale = "en-US", ColorScheme = ColorScheme.Light,
-            IgnoreHTTPSErrors = TUnitPlaywrightSettings.Default.DefaultIgnoreHttpsErrors,
         };
     }
 

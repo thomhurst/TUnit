@@ -24,10 +24,9 @@ public class ContextFixture : IAsyncInitializer, IAsyncDisposable
     /// (<c>new BrowserNewContextOptions()</c>).
     /// </summary>
     protected virtual BrowserNewContextOptions GetContextOptions() =>
-        new()
+        TUnitPlaywrightSettings.Default.DefaultBrowserNewContextOptions ?? new BrowserNewContextOptions
         {
             Locale = "en-US", ColorScheme = ColorScheme.Light,
-            IgnoreHTTPSErrors = TUnitPlaywrightSettings.Default.DefaultIgnoreHttpsErrors,
         };
 
     /// <summary>
