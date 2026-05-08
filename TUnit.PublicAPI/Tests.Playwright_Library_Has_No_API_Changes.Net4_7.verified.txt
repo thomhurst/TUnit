@@ -82,6 +82,13 @@ namespace
         public .IPageAssertions Expect(.IPage page) { }
         public virtual . InitializeAsync() { }
     }
+    public static class PlaywrightSettingsExtensions
+    {
+        extension(. settings)
+        {
+            public .TUnitPlaywrightSettings PlaywrightSettings { get; }
+        }
+    }
     public class PlaywrightSkipAttribute : .SkipAttribute
     {
         public PlaywrightSkipAttribute(params .[] combinations) { }
@@ -112,6 +119,12 @@ namespace
         [.Before(., "", 0)]
         public static . PlaywrightSetup() { }
         public static void SetDefaultExpectTimeout(float timeout) { }
+    }
+    public class TUnitPlaywrightSettings
+    {
+        public TUnitPlaywrightSettings() { }
+        public bool DefaultHeadless { get; set; }
+        public bool DefaultIgnoreHttpsErrors { get; set; }
     }
     public class WorkerAwareTest : ., .
     {
