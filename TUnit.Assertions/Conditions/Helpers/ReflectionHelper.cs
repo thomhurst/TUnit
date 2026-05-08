@@ -35,17 +35,52 @@ internal static class ReflectionHelper
         var members = new List<MemberInfo>();
 
         // Filter out indexed properties (properties with parameters like this[int index])
+        // and members whose type is a ref struct (IsByRefLike). Ref structs cannot be boxed,
+        // so PropertyInfo.GetValue / FieldInfo.GetValue throws NotSupportedException on them.
+        // Common offender: ReadOnlyMemory<T>.Span returns ReadOnlySpan<T>.
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         foreach (var prop in properties)
         {
-            if (prop.GetIndexParameters().Length == 0 && prop.CanRead && prop.GetMethod?.IsPublic == true)
+            if (prop.GetIndexParameters().Length == 0
+                && prop.CanRead
+                && prop.GetMethod?.IsPublic == true
+                && !IsByRefLike(prop.PropertyType))
             {
                 members.Add(prop);
             }
         }
 
-        members.AddRange(type.GetFields(BindingFlags.Public | BindingFlags.Instance));
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (!IsByRefLike(field.FieldType))
+            {
+                members.Add(field);
+            }
+        }
+
         return members.ToArray();
+    }
+
+    private static bool IsByRefLike(Type type)
+    {
+#if NET5_0_OR_GREATER
+        return type.IsByRefLike;
+#else
+        if (!type.IsValueType)
+        {
+            return false;
+        }
+
+        foreach (var attr in type.GetCustomAttributesData())
+        {
+            if (attr.AttributeType.FullName == "System.Runtime.CompilerServices.IsByRefLikeAttribute")
+            {
+                return true;
+            }
+        }
+
+        return false;
+#endif
     }
 
     /// <summary>
