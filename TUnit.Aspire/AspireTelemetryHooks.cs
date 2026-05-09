@@ -12,7 +12,7 @@ namespace TUnit.Aspire;
 public static class AspireTelemetryHooks
 {
     [Before(HookType.TestDiscovery, Order = AutoStart.AutoStartOrder - 1)]
-    public static void RegisterAspireExporter(TestSessionContext context)
+    public static void RegisterAspireExporter()
     {
         var endpoint = TestTraceExporter.TryGetDashboardEndpoint();
         if (endpoint is null)
@@ -21,6 +21,6 @@ public static class AspireTelemetryHooks
         }
 
         TUnitOpenTelemetry.Configure(builder =>
-            TestTraceExporter.AddToBuilder(builder, context, endpoint));
+            TestTraceExporter.AddToBuilder(builder, endpoint));
     }
 }

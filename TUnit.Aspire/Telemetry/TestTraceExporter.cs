@@ -2,7 +2,6 @@ using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using TUnit.Core;
 
 namespace TUnit.Aspire.Telemetry;
 
@@ -14,15 +13,16 @@ namespace TUnit.Aspire.Telemetry;
 internal static class TestTraceExporter
 {
     private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string ServiceNameEnvVar = "OTEL_SERVICE_NAME";
     private const string DefaultServiceName = "TUnit.Tests";
 
     internal static Uri? TryGetDashboardEndpoint()
         => TryParseDashboardEndpoint(Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar));
 
-    internal static void AddToBuilder(TracerProviderBuilder builder, TestSessionContext context, Uri endpoint)
+    internal static void AddToBuilder(TracerProviderBuilder builder, Uri endpoint)
     {
         builder
-            .SetResourceBuilder(CreateResourceBuilder(context))
+            .SetResourceBuilder(CreateResourceBuilder())
             .AddOtlpExporter(options =>
             {
                 options.Endpoint = GetTracesEndpoint(endpoint);
@@ -57,26 +57,24 @@ internal static class TestTraceExporter
         return builder.Uri;
     }
 
-    private static ResourceBuilder CreateResourceBuilder(TestSessionContext context)
+    private static ResourceBuilder CreateResourceBuilder()
     {
-        var serviceName = GetServiceName(context);
+        var serviceName = GetServiceName();
         var serviceVersion = typeof(TestTraceExporter).Assembly.GetName().Version?.ToString();
 
         return ResourceBuilder.CreateDefault()
             .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
     }
 
-    private static string GetServiceName(TestSessionContext context)
+    private static string GetServiceName()
     {
-        var assemblyNames = context.Assemblies
-            .Select(static assemblyContext => assemblyContext.Assembly.GetName().Name)
-            .Where(static name => !string.IsNullOrWhiteSpace(name))
-            .Distinct(StringComparer.Ordinal)
-            .Take(2)
-            .ToArray();
+        var fromEnv = Environment.GetEnvironmentVariable(ServiceNameEnvVar);
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+        {
+            return fromEnv!;
+        }
 
-        return assemblyNames.Length == 1
-            ? assemblyNames[0]!
-            : DefaultServiceName;
+        return System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
+            ?? DefaultServiceName;
     }
 }

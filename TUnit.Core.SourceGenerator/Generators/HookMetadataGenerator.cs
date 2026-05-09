@@ -114,7 +114,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var hookAttribute = context.Attributes[0];
         var hookType = GetHookType(hookAttribute);
 
-        if (!IsValidHookMethod(methodSymbol, hookType))
+        if (!IsValidHookMethod(methodSymbol, hookType, hookKind))
         {
             return null;
         }
@@ -244,7 +244,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static bool IsValidHookMethod(IMethodSymbol method, string hookType)
+    private static bool IsValidHookMethod(IMethodSymbol method, string hookType, string hookKind)
     {
         var returnType = method.ReturnType;
         if (returnType.SpecialType != SpecialType.System_Void &&
@@ -271,20 +271,16 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 return method.Parameters.Length == 1;
             }
 
+            var isBefore = hookKind is "Before" or "BeforeEvery";
             var expectedContextType = hookType switch
             {
                 "Test" => "TestContext",
                 "Class" => "ClassHookContext",
                 "Assembly" => "AssemblyHookContext",
                 "TestSession" => "TestSessionContext",
-                "TestDiscovery" => "TestDiscoveryContext",
+                "TestDiscovery" => isBefore ? "BeforeTestDiscoveryContext" : "TestDiscoveryContext",
                 _ => null
             };
-
-            if (hookType == "TestDiscovery" && method.Name.Contains("Before"))
-            {
-                expectedContextType = "BeforeTestDiscoveryContext";
-            }
 
             if (expectedContextType == null || firstParamNamespace != "TUnit.Core" || firstParamTypeName != expectedContextType)
             {
