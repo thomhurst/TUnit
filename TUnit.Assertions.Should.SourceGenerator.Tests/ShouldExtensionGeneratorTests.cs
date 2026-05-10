@@ -132,6 +132,58 @@ public class ShouldExtensionGeneratorTests
     }
 
     [Test]
+    public async Task RequiresUnreferencedCode_is_not_forwarded_to_overloads_with_AOT_safe_ctor()
+    {
+        // The reflection-based ctor carries [RequiresUnreferencedCode]; the
+        // IEqualityComparer<T> overload doesn't. RUC must attach only to the
+        // overload whose dispatch target actually reflects.
+        var output = await RunGenerator("""
+            using System;
+            using System.Collections.Generic;
+            using System.Diagnostics.CodeAnalysis;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class EquivalentToAssertion<TItem> : Assertion<IEnumerable<TItem>>
+            {
+                [RequiresUnreferencedCode("Reflection-based equivalency")]
+                public EquivalentToAssertion(AssertionContext<IEnumerable<TItem>> context, IEnumerable<TItem> expected)
+                    : base(context) { }
+
+                public EquivalentToAssertion(AssertionContext<IEnumerable<TItem>> context, IEnumerable<TItem> expected, IEqualityComparer<TItem> comparer)
+                    : base(context) { }
+
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to be equivalent";
+            }
+
+            public static class EquivalentExtensions
+            {
+                [RequiresUnreferencedCode("Reflection-based equivalency")]
+                public static EquivalentToAssertion<TItem> IsEquivalentTo<TItem>(
+                    this IAssertionSource<IEnumerable<TItem>> source,
+                    IEnumerable<TItem> expected,
+                    [CallerArgumentExpression(nameof(expected))] string? expression = null)
+                    => new(source.Context, expected);
+
+                public static EquivalentToAssertion<TItem> IsEquivalentTo<TItem>(
+                    this IAssertionSource<IEnumerable<TItem>> source,
+                    IEnumerable<TItem> expected,
+                    IEqualityComparer<TItem> comparer,
+                    [CallerArgumentExpression(nameof(expected))] string? expression = null)
+                    => new(source.Context, expected, comparer);
+            }
+            """);
+
+        var comparerSig = "BeEquivalentTo<TItem>(this global::TUnit.Assertions.Should.Core.IShouldSource<System.Collections.Generic.IEnumerable<TItem>> source, System.Collections.Generic.IEnumerable<TItem> expected, System.Collections.Generic.IEqualityComparer<TItem> comparer";
+        await Assert.That(output).Contains(comparerSig);
+        await Assert.That(CountOccurrences(output, "RequiresUnreferencedCode(\"Reflection-based equivalency\")")).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task ShouldNameAttribute_overrides_conjugation()
     {
         var output = await RunGenerator("""

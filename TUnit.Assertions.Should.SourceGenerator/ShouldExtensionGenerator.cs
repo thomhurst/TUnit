@@ -535,7 +535,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             if (caeTarget is null) ctorCandidates.Add(p);
         }
 
-        if (!HasMatchingConstructor(returnType, assertionTypeArg, assertionContext, ctorCandidates))
+        var matchedCtor = TryFindMatchingConstructor(returnType, assertionTypeArg, assertionContext, ctorCandidates);
+        if (matchedCtor is null)
         {
             return false;
         }
@@ -547,7 +548,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             ReturnTypeGenericArgs: new EquatableArray<string>(returnType.TypeArguments.Select(a => a.ToDisplayString(NoGlobalFormat)).ToList()),
             RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
                                           ?? TryGetRucMessage(returnType.GetAttributes())
-                                          ?? TryGetRucMessageFromConstructors(returnType));
+                                          ?? TryGetRucMessage(matchedCtor.GetAttributes()));
         return true;
     }
 
@@ -732,7 +733,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         // Find a public ctor on the return type whose param list (after the leading
         // AssertionContext<assertionTypeArg>) matches our ctor candidates by type.
-        if (!HasMatchingConstructor(returnType, assertionTypeArg, ctx.AssertionContext, ctorCandidates))
+        var matchedCtor = TryFindMatchingConstructor(returnType, assertionTypeArg, ctx.AssertionContext, ctorCandidates);
+        if (matchedCtor is null)
         {
             return;
         }
@@ -745,7 +747,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var rucMessage = TryGetRucMessage(method.GetAttributes())
                        ?? TryGetRucMessage(returnType.GetAttributes())
-                       ?? TryGetRucMessageFromConstructors(returnType);
+                       ?? TryGetRucMessage(matchedCtor.GetAttributes());
 
         var suppressedTrimWarnings = CollectSuppressedTrimWarnings(method.GetAttributes());
 
@@ -819,12 +821,13 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Returns true when <paramref name="returnType"/> has a public ctor whose parameters,
-    /// after a leading <c>AssertionContext&lt;assertionTypeArg&gt;</c>, match
-    /// <paramref name="ctorCandidates"/> by type. This guards the "simple factory" template
-    /// against extension methods that map context or otherwise transform before construction.
+    /// Returns the public ctor on <paramref name="returnType"/> whose parameters, after a
+    /// leading <c>AssertionContext&lt;assertionTypeArg&gt;</c>, match
+    /// <paramref name="ctorCandidates"/> by type — or null if none match. Guards the
+    /// "simple factory" template against extension methods that map context or otherwise
+    /// transform before construction.
     /// </summary>
-    private static bool HasMatchingConstructor(
+    private static IMethodSymbol? TryFindMatchingConstructor(
         INamedTypeSymbol returnType,
         ITypeSymbol assertionTypeArg,
         INamedTypeSymbol assertionContextSymbol,
@@ -869,9 +872,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                     allMatch = false;
                 }
             }
-            if (allMatch) return true;
+            if (allMatch) return ctor;
         }
-        return false;
+        return null;
     }
 
     private static bool CanOmitConstructorParameter(IParameterSymbol parameter)
@@ -942,16 +945,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             {
                 return a.ConstructorArguments[0].Value as string;
             }
-        }
-        return null;
-    }
-
-    private static string? TryGetRucMessageFromConstructors(INamedTypeSymbol type)
-    {
-        foreach (var ctor in type.Constructors)
-        {
-            var msg = TryGetRucMessage(ctor.GetAttributes());
-            if (msg is not null) return msg;
         }
         return null;
     }
@@ -1516,8 +1509,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             SignatureKey: CreateShouldMethodSignatureKey(method, "Should"),
             Priority: priority,
             RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
-                                          ?? TryGetRucMessage(returnType.GetAttributes())
-                                          ?? TryGetRucMessageFromConstructors(returnType),
+                                          ?? TryGetRucMessage(returnType.GetAttributes()),
             SuppressedTrimWarnings: new EquatableArray<string>(CollectSuppressedTrimWarnings(method.GetAttributes())),
             ForwardedAttributes: new EquatableArray<string>(CollectForwardedAttributes(method.GetAttributes())));
         return true;
