@@ -26,15 +26,22 @@ public sealed class RequestMatcher
     /// <summary>Match requests to the exact path.</summary>
     public RequestMatcher Path(string path)
     {
-        _exactPath = path;
+        _exactPath = NormalizePath(path);
         return this;
     }
 
     /// <summary>Match requests whose path starts with the specified prefix.</summary>
     public RequestMatcher PathStartsWith(string prefix)
     {
-        _pathPrefix = prefix;
+        _pathPrefix = NormalizePath(prefix);
         return this;
+    }
+
+    private static string NormalizePath(string value)
+    {
+        if (string.IsNullOrEmpty(value) || value[0] == '/') return value;
+        if (Uri.TryCreate(value, UriKind.Absolute, out _)) return value;
+        return "/" + value;
     }
 
     /// <summary>Match requests whose path matches the regex pattern.</summary>
