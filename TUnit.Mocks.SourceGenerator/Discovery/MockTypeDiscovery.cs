@@ -83,8 +83,9 @@ internal static class MockTypeDiscovery
         if (namedType.TypeKind == TypeKind.Error)
             return ImmutableArray<MockTypeModel>.Empty;
 
-        // Get the compilation assembly for accessibility checks on external types
-        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
+        // Get the compilation and assembly for accessibility checks and namespace conflict detection
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
 
         // Delegate mocking
         if (isDelegateMock)
@@ -92,7 +93,7 @@ internal static class MockTypeDiscovery
             if (namedType.TypeKind != TypeKind.Delegate)
                 return ImmutableArray<MockTypeModel>.Empty;
 
-            var delegateModel = BuildDelegateTypeModel(namedType);
+            var delegateModel = BuildDelegateTypeModel(namedType, compilation);
             return delegateModel is not null
                 ? ImmutableArray.Create(delegateModel)
                 : ImmutableArray<MockTypeModel>.Empty;
@@ -106,7 +107,7 @@ internal static class MockTypeDiscovery
                 return ImmutableArray<MockTypeModel>.Empty;
 
             // Wrap uses the same model as partial mock but with IsWrapMock flag
-            var wrapModel = BuildSingleTypeModel(namedType, isPartialMock: true, compilationAssembly);
+            var wrapModel = BuildSingleTypeModel(namedType, isPartialMock: true, compilationAssembly, compilation);
             if (wrapModel is null)
                 return ImmutableArray<MockTypeModel>.Empty;
 
@@ -127,7 +128,7 @@ internal static class MockTypeDiscovery
 
         if (method.TypeArguments.Length == 1)
         {
-            return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly);
+            return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly, compilation);
         }
 
         // Multi-type mock: validate additional type args are all interfaces
@@ -142,7 +143,7 @@ internal static class MockTypeDiscovery
         }
 
         // Build single-type model for primary type (generates setup/verify/raise)
-        var singleTypeModel = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
+        var singleTypeModel = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly, compilation);
         if (singleTypeModel is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
@@ -175,7 +176,9 @@ internal static class MockTypeDiscovery
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
             Constructors = singleTypeModel.Constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
-            IsPublic = IsEffectivelyPublic(namedType)
+            IsPublic = IsEffectivelyPublic(namedType),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
+                compilation, namedType, hasEvents: events.Length > 0)
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
@@ -186,7 +189,7 @@ internal static class MockTypeDiscovery
     /// generated for auto-mocking support. Recurses up to maxDepth levels.
     /// </summary>
     private static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
-        INamedTypeSymbol type, HashSet<string> visited, int maxDepth, IAssemblySymbol? compilationAssembly)
+        INamedTypeSymbol type, HashSet<string> visited, int maxDepth, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var results = new List<MockTypeModel>();
         if (maxDepth <= 0) return results;
@@ -242,12 +245,12 @@ internal static class MockTypeDiscovery
             if (visited.Contains(returnFqn)) continue;
             visited.Add(returnFqn);
 
-            var model = BuildSingleTypeModel(namedReturn, isPartialMock: false, compilationAssembly);
+            var model = BuildSingleTypeModel(namedReturn, isPartialMock: false, compilationAssembly, compilation);
             if (model is null) continue;
 
             results.Add(model);
             // Recurse into the transitive type's members
-            results.AddRange(DiscoverTransitiveInterfaceTypes(namedReturn, visited, maxDepth - 1, compilationAssembly));
+            results.AddRange(DiscoverTransitiveInterfaceTypes(namedReturn, visited, maxDepth - 1, compilationAssembly, compilation));
         }
 
         return results;
@@ -303,7 +306,7 @@ internal static class MockTypeDiscovery
         return false;
     }
 
-    private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType)
+    private static MockTypeModel? BuildDelegateTypeModel(INamedTypeSymbol delegateType, Compilation compilation)
     {
         var invokeMethod = delegateType.DelegateInvokeMethod;
         if (invokeMethod is null)
@@ -328,18 +331,20 @@ internal static class MockTypeDiscovery
             Events = EquatableArray<MockEventModel>.Empty,
             AllInterfaces = EquatableArray<string>.Empty,
             IsPublic = IsEffectivelyPublic(delegateType),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
+                compilation, delegateType, hasEvents: false),
         };
     }
 
     private static ImmutableArray<MockTypeModel> BuildModelWithTransitiveDependencies(
-        INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly)
+        INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
-        var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly);
+        var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly, compilation);
         if (model is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
         var visited = new HashSet<string>();
-        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly);
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly, compilation);
 
         if (transitiveModels.Count == 0)
             return ImmutableArray.Create(model);
@@ -350,7 +355,7 @@ internal static class MockTypeDiscovery
         return builder.MoveToImmutable();
     }
 
-    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly)
+    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly);
 
@@ -379,7 +384,9 @@ internal static class MockTypeDiscovery
             ),
             Constructors = constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
-            IsPublic = IsEffectivelyPublic(namedType)
+            IsPublic = IsEffectivelyPublic(namedType),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
+                compilation, namedType, hasEvents: events.Length > 0)
         };
     }
 
@@ -539,8 +546,9 @@ internal static class MockTypeDiscovery
             return ImmutableArray<MockTypeModel>.Empty;
 
         var isPartialMock = namedType.TypeKind == TypeKind.Class;
-        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
-        return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly);
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
+        return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly, compilation);
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
@@ -554,7 +562,8 @@ internal static class MockTypeDiscovery
     {
         // The target symbol for an assembly attribute is the assembly itself
         // The attribute constructor argument is typeof(T)
-        var compilationAssembly = context.SemanticModel.Compilation.Assembly;
+        var compilation = context.SemanticModel.Compilation;
+        var compilationAssembly = compilation.Assembly;
         foreach (var attr in context.Attributes)
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
@@ -578,7 +587,8 @@ internal static class MockTypeDiscovery
             return BuildModelWithTransitiveDependencies(
                 NormalizeSingleMockType(namedType),
                 isPartialMock: namedType.TypeKind == TypeKind.Class,
-                compilationAssembly);
+                compilationAssembly,
+                compilation);
         }
 
         return ImmutableArray<MockTypeModel>.Empty;
