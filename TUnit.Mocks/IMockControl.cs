@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
@@ -8,10 +7,9 @@ namespace TUnit.Mocks;
 /// Strongly-typed framework operations for a <see cref="Mock{T}"/>.
 /// Implemented explicitly on <see cref="Mock{T}"/> so the members never appear as instance candidates
 /// during overload resolution — preventing them from shadowing source-generated extension methods
-/// whose names happen to match. Reach these operations via the static helpers on <see cref="Mock"/>.
+/// whose names happen to match. Reached via the static helpers on <see cref="Mock"/>.
 /// </summary>
-[EditorBrowsable(EditorBrowsableState.Never)]
-public interface IMockControl<T> : IMock where T : class
+internal interface IMockControl<T> : IMock where T : class
 {
     /// <summary>The mock object that implements T.</summary>
     T Object { get; }

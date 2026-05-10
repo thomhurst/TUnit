@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
@@ -16,6 +17,9 @@ internal static class MockMembersBuilder
 {
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
+
+    private const string PriorityMinusOneAttribute =
+        "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]";
 
     // Closed, structural collision set. Framework operations on Mock<T> live on the
     // IMockControl<T> explicit interface — they are NOT instance members on Mock<T> and
@@ -197,31 +201,40 @@ internal static class MockMembersBuilder
 
     private static string GetSafeMemberName(string name, MockTypeModel model)
     {
-        if (ObjectMemberDisambiguations.TryGetValue(name, out var renamed))
+        // Only escalate when we've actually renamed away from `name`. A passthrough name IS the
+        // user member's own name; comparing it against the user-name set always self-collides.
+        if (ObjectMemberDisambiguations.TryGetValue(name, out var disambiguated))
         {
-            return EscapeIdentifier(EscalateUntilUnique(renamed, model));
+            return EscapeIdentifier(EscalateUntilUnique(disambiguated, GetUserMemberNames(model)));
         }
         if (MockMemberNames.Contains(name))
         {
-            return EscapeIdentifier(EscalateUntilUnique(name + "_", model));
+            return EscapeIdentifier(EscalateUntilUnique(name + "_", GetUserMemberNames(model)));
         }
         return EscapeIdentifier(name);
     }
 
-    // Iteratively append "_" until the candidate name does not collide with any other
-    // member of the mocked type (and its base interfaces). Guards against the
-    // "Object" + "Object_" trailing-underscore overflow case raised in discussion #4981.
-    private static string EscalateUntilUnique(string candidate, MockTypeModel model)
+    // Iteratively append "_" until the candidate doesn't collide with another member of the
+    // mocked type. Guards against the "Object" + "Object_" trailing-underscore overflow from
+    // discussion #4981.
+    private static string EscalateUntilUnique(string candidate, HashSet<string> userMemberNames)
     {
-        var userNames = GetUserMemberNames(model);
-        while (userNames.Contains(candidate))
+        while (userMemberNames.Contains(candidate))
         {
             candidate += "_";
         }
         return candidate;
     }
 
+    // Cached per MockTypeModel instance via ConditionalWeakTable. Build() and its many helpers
+    // call GetUserMemberNames repeatedly across one generator pass; computing once and reusing
+    // avoids ~N HashSet allocations per emitted type.
+    private static readonly ConditionalWeakTable<MockTypeModel, HashSet<string>> _userMemberNamesCache = new();
+
     private static HashSet<string> GetUserMemberNames(MockTypeModel model)
+        => _userMemberNamesCache.GetValue(model, BuildUserMemberNames);
+
+    private static HashSet<string> BuildUserMemberNames(MockTypeModel model)
     {
         var set = new HashSet<string>(System.StringComparer.Ordinal);
         foreach (var m in model.Methods) set.Add(m.Name);
@@ -1268,7 +1281,7 @@ internal static class MockMembersBuilder
             if (!first) writer.AppendLine();
             first = false;
             var paramList = string.IsNullOrEmpty(parms) ? receiverParam : $"{receiverParam}, {parms}";
-            writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+            writer.AppendLine(PriorityMinusOneAttribute);
             writer.AppendLine($"public static {ret} {name}{typeParams}({paramList}){constraints}");
             writer.AppendLine($"    => global::TUnit.Mocks.Mock.{name}(mock{fwd});");
         }
@@ -1278,7 +1291,7 @@ internal static class MockMembersBuilder
         {
             if (!first) writer.AppendLine();
             first = false;
-            writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+            writer.AppendLine(PriorityMinusOneAttribute);
             writer.AppendLine($"public static void InState{typeParams}({receiverParam}, string stateName, global::System.Action<global::TUnit.Mocks.Mock<{mockableType}>> configure){constraints}");
             writer.AppendLine($"    => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);");
         }
@@ -1296,21 +1309,21 @@ internal static class MockMembersBuilder
                 bool firstProp = true;
                 if (hasInvocations)
                 {
-                    writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+                    writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);");
                     firstProp = false;
                 }
                 if (hasBehavior)
                 {
                     if (!firstProp) writer.AppendLine();
-                    writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+                    writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);");
                     firstProp = false;
                 }
                 if (hasDefaultValueProvider)
                 {
                     if (!firstProp) writer.AppendLine();
-                    writer.AppendLine("[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+                    writer.AppendLine(PriorityMinusOneAttribute);
                     using (writer.Block("public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider"))
                     {
                         writer.AppendLine("get => global::TUnit.Mocks.Mock.DefaultValueProvider(mock);");
