@@ -132,8 +132,7 @@ internal static class MockMembersBuilder
                 // setup/verify extensions. When the mocked interface already declares a member of
                 // that name, we skip the corresponding polyfill to avoid a CS0111 duplicate — the
                 // framework operation is still reachable via the static helper (Mock.Reset(m), …).
-                if (!firstMember) writer.AppendLine();
-                GenerateMockControlPolyfills(writer, model);
+                GenerateMockControlPolyfills(writer, model, isFirstMember: firstMember);
             }
 
             // Generate unified sealed classes for qualifying methods
@@ -1263,7 +1262,7 @@ internal static class MockMembersBuilder
         ("SetState", "void", "string? stateName", ", stateName"),
     };
 
-    private static void GenerateMockControlPolyfills(CodeWriter writer, MockTypeModel model)
+    private static void GenerateMockControlPolyfills(CodeWriter writer, MockTypeModel model, bool isFirstMember)
     {
         var userNames = GetUserMemberNames(model);
 
@@ -1276,8 +1275,8 @@ internal static class MockMembersBuilder
         var emitBehavior = !userNames.Contains("Behavior");
         var emitDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
 
-        // Skip entirely when every polyfill name collides with a user member — keeps callers
-        // from emitting a stray blank line before an empty #if/#endif block.
+        // Skip entirely when every polyfill name collides with a user member — keeps the
+        // separator blank line (below) and the surrounding #if/#endif from being emitted.
         if (emitMethods.Length == 0 && !emitInState
             && !emitInvocations && !emitBehavior && !emitDefaultValueProvider)
         {
@@ -1289,6 +1288,7 @@ internal static class MockMembersBuilder
         var constraints = MockImplBuilder.GetConstraintClauses(model);
         var receiverParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
 
+        if (!isFirstMember) writer.AppendLine();
         writer.AppendLine("#if NET9_0_OR_GREATER");
 
         bool first = true;
