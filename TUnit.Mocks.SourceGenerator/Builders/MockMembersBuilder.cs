@@ -124,7 +124,7 @@ internal static class MockMembersBuilder
             foreach (var method in model.Methods)
             {
                 if (method.ExplicitInterfaceName is not null && !method.IsStaticAbstract) continue;
-                if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
+                if (!ShouldGenerateTypedWrapper(method, model, hasEvents)) continue;
                 writer.AppendLine();
                 EmitNonSpanRefStructSetterDelegates(writer, model, method);
                 GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility, model);
@@ -169,7 +169,7 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static bool ShouldGenerateTypedWrapper(MockMemberModel method, bool hasEvents)
+    private static bool ShouldGenerateTypedWrapper(MockMemberModel method, MockTypeModel model, bool hasEvents)
     {
         if (method.IsGenericMethod) return false;
 
@@ -180,10 +180,13 @@ internal static class MockMembersBuilder
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0)
         {
-            // Include span-type ref struct out/ref params (array conversion path) and
-            // non-span ref struct out/ref params (delegate-setter path).
+            // Include out/ref params we can actually plumb: span (array conversion) or non-span
+            // ref struct when the delegate-setter path is available. Don't generate a wrapper
+            // solely for a non-span ref struct out/ref param we'd then have to silently skip.
+            var canEmitRefStructSetter = MockImplBuilder.SupportsClosedRefStructSetter(model, method);
             var hasOutRefParams = method.Parameters.Any(p =>
-                p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
+                (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref) &&
+                (!p.IsNonSpanRefStruct || canEmitRefStructSetter));
             // Span return types need a typed wrapper for the generated Returns(SpanType) method
             var hasSpanReturn = method.SpanReturnElementType is not null;
             return hasEvents || hasOutRefParams || hasSpanReturn;
@@ -825,7 +828,7 @@ internal static class MockMembersBuilder
             : method.ReturnType;
 
         var hasEvents = model.Events.Any(e => !e.IsStaticAbstract);
-        var useTypedWrapper = ShouldGenerateTypedWrapper(method, hasEvents);
+        var useTypedWrapper = ShouldGenerateTypedWrapper(method, model, hasEvents);
 
         string returnType;
         if (useTypedWrapper)

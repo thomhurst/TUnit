@@ -30,6 +30,15 @@ public interface IMixedRefStruct
     void DoMixed(out int count, out Marker marker, ref ReadOnlySpan<byte> buffer);
 }
 
+// Generic interface with a non-span ref struct out param — the closed-signature delegate
+// setter can't be emitted here (would need `allows ref struct` on a generic delegate),
+// so SetsOutMarker is intentionally not generated. The fluent wrapper for this method
+// is suppressed entirely (matching pre-feature behavior for this shape).
+public interface IGenericProducer<T>
+{
+    void Produce(out Marker marker);
+}
+
 public class NonSpanRefStructOutRefTests
 {
     [Test]
@@ -116,6 +125,23 @@ public class NonSpanRefStructOutRefTests
     {
         var mock = IMarkerProducer.Mock();
         mock.Produce().Returns();
+
+        mock.Object.Produce(out var marker);
+        var value = marker.Value;
+        var tag = marker.Tag;
+
+        await Assert.That(value).IsEqualTo(0);
+        await Assert.That(tag).IsEqualTo((byte)0);
+    }
+
+    // Pins the generic-mock boundary: the source generator cannot emit a closed-signature
+    // delegate setter for a non-span ref struct out/ref param on a generic mock type
+    // (would require `allows ref struct` on a generic delegate). The mock still works,
+    // the out param just falls through to its default value with no way to override it.
+    [Test]
+    public async Task Out_NonSpanRefStruct_OnGenericMock_LeavesDefault()
+    {
+        var mock = IGenericProducer<int>.Mock();
 
         mock.Object.Produce(out var marker);
         var value = marker.Value;
