@@ -9,7 +9,7 @@ namespace TUnit.Mocks.SourceGenerator.Tests;
 /// whether placing a generated mock alongside its target type would collide with an
 /// existing user-declared type in the same namespace.
 /// </summary>
-public class MockNamespaceConflictTests
+public class MockNamespaceConflictTests : SnapshotTestBase
 {
     [Test]
     public async Task NoConflict_ReturnsFalse()
@@ -102,14 +102,60 @@ public class MockNamespaceConflictTests
         await Assert.That(result).IsTrue();
     }
 
+    [Test]
+    public async Task NestedNamespace_ChecksDeepPath()
+    {
+        var (compilation, type) = CompileAndGetType("""
+            namespace A.B.C;
+            public interface IGreeter { string Greet(string name); }
+            public class IGreeterMock { }
+            """, "A.B.C.IGreeter");
+
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(
+            compilation, type, hasEvents: false)).IsTrue();
+    }
+
+    [Test]
+    public async Task GenericType_DetectsCollisionByBareName()
+    {
+        var (compilation, type) = CompileAndGetType("""
+            namespace MyApp;
+            public interface IGreeter<T> { T Greet(string name); }
+            public class IGreeterMock { }
+            """, "MyApp.IGreeter`1");
+
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(
+            compilation, type, hasEvents: false)).IsTrue();
+    }
+
+    [Test]
+    public async Task ExternalAssemblyType_WithoutCollisionInConsumer_ReturnsFalse()
+    {
+        // Documents the cross-assembly contract: types referenced from another assembly
+        // are checked against the consumer's compilation. Absence of a colliding type in
+        // the consumer's view of that namespace returns false (no conflict).
+        var externalRef = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+            public interface IGreeter { string Greet(string name); }
+            """, assemblyName: "ExtLib");
+
+        // Consumer source declares NO ExternalLib namespace at all.
+        var tree = CSharpSyntaxTree.ParseText("class C {}",
+            CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview));
+        var compilation = CSharpCompilation.Create(
+            "Consumer", [tree], GetCachedReferences().Append(externalRef));
+
+        var type = compilation.GetTypeByMetadataName("ExternalLib.IGreeter")!;
+
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(
+            compilation, type, hasEvents: false)).IsFalse();
+    }
+
     private static (Compilation, INamedTypeSymbol) CompileAndGetType(string source, string fullyQualifiedName)
     {
         var tree = CSharpSyntaxTree.ParseText(source,
             CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview));
-        var refs = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
-            .Select(a => MetadataReference.CreateFromFile(a.Location));
-        var compilation = CSharpCompilation.Create("Test", [tree], refs);
+        var compilation = CSharpCompilation.Create("Test", [tree], GetCachedReferences());
         var type = compilation.GetTypeByMetadataName(fullyQualifiedName)
             ?? throw new InvalidOperationException($"Type not found: {fullyQualifiedName}");
         return (compilation, type);

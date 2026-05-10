@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Mocks.SourceGenerator.Discovery;
@@ -64,11 +63,20 @@ internal static class MockNamespaceConflictDetector
         INamespaceSymbol? current = compilation.GlobalNamespace;
         foreach (var part in namespaceName.Split('.'))
         {
-            current = current!.GetNamespaceMembers().FirstOrDefault(n => n.Name == part);
-            if (current is null)
+            INamespaceSymbol? next = null;
+            foreach (var child in current!.GetNamespaceMembers())
+            {
+                if (child.Name == part)
+                {
+                    next = child;
+                    break;
+                }
+            }
+            if (next is null)
             {
                 return null;
             }
+            current = next;
         }
         return current;
     }
