@@ -39,9 +39,8 @@ public sealed class RequestMatcher
 
     private static string NormalizePath(string value)
     {
-        if (string.IsNullOrEmpty(value)) return value;
-        if (value[0] == '/') return value;
-        if (value.Contains("://", StringComparison.Ordinal)) return value;
+        if (string.IsNullOrEmpty(value) || value[0] == '/') return value;
+        if (Uri.TryCreate(value, UriKind.Absolute, out _)) return value;
         return "/" + value;
     }
 
