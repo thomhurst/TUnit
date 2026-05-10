@@ -324,9 +324,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
-    // Reflection's MethodBase.Invoke does not auto-fill optional parameters the way a C# call site does.
-    // The source generator emits a direct C# call (compiler fills defaults) but the reflection fallback
-    // — used for [InheritsTests] generic abstract bases (issue #5879) — must build the args array itself.
+    // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.
     private static object?[] BuildInvokeArgs(MethodInfo methodInfo, object?[] suppliedArguments)
     {
         var parameters = methodInfo.GetParameters();
