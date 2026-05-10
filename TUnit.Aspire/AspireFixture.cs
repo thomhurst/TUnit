@@ -361,6 +361,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// </summary>
     public virtual async ValueTask DisposeAsync()
     {
+        if (_otlpReceiver is not null && _app is not null)
+        {
+            // Give the SUT's BatchSpanProcessor a chance to flush trailing spans while the
+            // AppHost is still up. Without this, fast tests stop the app before the worker's
+            // exporter ticks (default 1s after our OTEL_BSP_SCHEDULE_DELAY override) and the
+            // last set of spans never reaches us.
+            LogProgress("Draining OTLP receiver...");
+            await _otlpReceiver.DrainAsync();
+        }
+
         if (_app is not null)
         {
             LogProgress("Stopping application...");
@@ -386,6 +396,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     // --- OTLP Telemetry ---
 
     private const string DashboardOtlpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string DashboardOtlpHttpEndpointEnvVar = "DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL";
+    private const string OtelExporterHeadersEnvVar = "OTEL_EXPORTER_OTLP_HEADERS";
     private const string OtelExporterProtocolEnvVar = "OTEL_EXPORTER_OTLP_PROTOCOL";
     private const string OtelServiceNameEnvVar = "OTEL_SERVICE_NAME";
     private const string OtelBlrpScheduleDelayEnvVar = "OTEL_BLRP_SCHEDULE_DELAY";
@@ -393,11 +405,54 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     private void StartOtlpReceiver()
     {
-        // Check if there's an existing upstream OTLP endpoint (e.g., Aspire dashboard)
-        // that we should forward to after processing.
-        var upstreamEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
-        _otlpReceiver = new OtlpReceiver(upstreamEndpoint);
+        // Prefer the dashboard's HTTP/protobuf endpoint — the receiver only forwards
+        // http/protobuf, not gRPC, so DOTNET_DASHBOARD_OTLP_ENDPOINT_URL (which is gRPC by
+        // default) would fail every forward. Fall back to the gRPC endpoint only as a
+        // last resort so users with a custom dashboard config still see *something*.
+        var upstreamEndpoint = Environment.GetEnvironmentVariable(DashboardOtlpHttpEndpointEnvVar)
+            ?? Environment.GetEnvironmentVariable(DashboardOtlpEndpointEnvVar);
+
+        _otlpReceiver = new OtlpReceiver(upstreamEndpoint)
+        {
+            UpstreamHeaders = ParseOtlpHeaders(Environment.GetEnvironmentVariable(OtelExporterHeadersEnvVar)),
+        };
         _otlpReceiver.Start();
+    }
+
+    /// <summary>
+    /// Parses the <c>OTEL_EXPORTER_OTLP_HEADERS</c> format (<c>key1=value1,key2=value2</c>)
+    /// into a header list. The Aspire dashboard requires <c>x-otlp-api-key</c> on its OTLP
+    /// endpoints when auth is enabled (the default since Aspire 9), so without forwarding
+    /// these the dashboard rejects every proxied span.
+    /// </summary>
+    private static IReadOnlyDictionary<string, string>? ParseOtlpHeaders(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            // Split on the first '=' only — base64 tokens (api keys) commonly carry trailing
+            // '=' padding that must stay in the value, and the OTEL spec permits empty values
+            // (key=) so we don't reject them.
+            var eq = pair.IndexOf('=');
+            if (eq <= 0)
+            {
+                continue;
+            }
+
+            var key = pair[..eq].Trim();
+            var value = pair[(eq + 1)..].Trim();
+            if (key.Length > 0)
+            {
+                result[key] = value;
+            }
+        }
+
+        return result.Count == 0 ? null : result;
     }
 
     private void ConfigureOtlpEndpoints(IDistributedApplicationTestingBuilder builder)

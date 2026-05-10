@@ -186,7 +186,12 @@ internal sealed class ActivityCollector : IDisposable
     {
         if (!_knownTraceIds.ContainsKey(span.TraceId))
         {
-            return;
+            if (!TraceRegistry.IsRegistered(span.TraceId))
+            {
+                return;
+            }
+
+            _knownTraceIds.TryAdd(span.TraceId, 0);
         }
 
         // Prefer per-test cap when the span's direct parent is a known test case span.

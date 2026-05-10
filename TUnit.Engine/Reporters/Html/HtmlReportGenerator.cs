@@ -1610,6 +1610,34 @@ function getDescendants(traceSpans, rootId) {
     return traceSpans.filter(s => included.has(s.spanId));
 }
 
+// 'test body' must match TUnitActivitySource.SpanTestBody in C#.
+// Used by renderTrace (per-test view, always) and by renderSuiteTrace only when
+// data.expandClassTimeline is true. The default class-timeline branch excludes
+// test-case spans + their entire subtrees, so no test-body span survives to collapse.
+function collapseTestBodySpans(spans) {
+    if (!spans || !spans.length) return [];
+    const byId = {};
+    spans.forEach(function(s) { byId[s.spanId] = s; });
+    const testBodyIds = new Set(
+        spans
+            .filter(function(s) { return s.name === 'test body'; })
+            .map(function(s) { return s.spanId; })
+    );
+    if (!testBodyIds.size) return spans;
+    return spans
+        .filter(function(s) { return !testBodyIds.has(s.spanId); })
+        .map(function(s) {
+            if (!s.parentSpanId || !testBodyIds.has(s.parentSpanId)) return s;
+            const testBody = byId[s.parentSpanId];
+            // testBody.parentSpanId is the test-case span in TUnit's model — null fallback
+            // is defensive only; a parentless test-body span shouldn't occur in practice.
+            return {
+                ...s,
+                parentSpanId: testBody && testBody.parentSpanId ? testBody.parentSpanId : null
+            };
+        });
+}
+
 // Render a span waterfall from a filtered list of spans
 function renderSpanRows(sp, uid) {
     if (!sp || !sp.length) return '';
@@ -1653,14 +1681,8 @@ function renderSpanRows(sp, uid) {
 function renderTrace(tid, rootSpanId) {
     const allSpans = spansByTrace[tid];
     if (!allSpans || !allSpans.length) return '';
-    let sp = getDescendants(allSpans, rootSpanId);
+    let sp = collapseTestBodySpans(getDescendants(allSpans, rootSpanId));
     if (!sp.length) return '';
-    // 'test body' must match TUnitActivitySource.SpanTestBody in C#
-    const directChildren = sp.filter(s => s.parentSpanId === rootSpanId);
-    if (directChildren.length === 1 && directChildren[0].name === 'test body') {
-        const tbId = directChildren[0].spanId;
-        sp = sp.filter(s => s.spanId !== tbId).map(s => s.parentSpanId === tbId ? {...s, parentSpanId: rootSpanId} : s);
-    }
     if (sp.length <= 1) return '';
     return '<div class="d-sec"><div class="d-lbl">Trace Timeline</div>' + renderSpanRows(sp, 't-' + rootSpanId) + '</div>';
 }
@@ -1720,11 +1742,20 @@ function renderSuiteTrace(className) {
     const allSpans = spansByTrace[suite.traceId];
     if (!allSpans) return '';
     const all = getDescendants(allSpans, suite.spanId);
-    const testCaseIds = new Set();
-    all.forEach(s => { if (s.spanType === 'test case') testCaseIds.add(s.spanId); });
-    const tcDescendants = new Set();
-    testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
-    const filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
+    let filtered;
+    if (data.expandClassTimeline) {
+        // BDD/DependsOn mode: include test-case spans and their non-'test body' children
+        // so multi-step flows are visible at the class level.
+        filtered = collapseTestBodySpans(all);
+    } else {
+        // Default: drop test-case spans and their full subtrees so the class timeline
+        // shows only class-level infrastructure (suite, init/dispose, parallel coordination).
+        const testCaseIds = new Set();
+        all.forEach(s => { if (s.spanType === 'test case') testCaseIds.add(s.spanId); });
+        const tcDescendants = new Set();
+        testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
+        filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
+    }
     // Include parent spans (assembly, session) for context
     let ancestor = suite.parentSpanId ? bySpanId[suite.parentSpanId] : null;
     while (ancestor) {

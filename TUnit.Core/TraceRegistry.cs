@@ -1,5 +1,6 @@
 #if NET
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace TUnit.Core;
 
@@ -61,6 +62,59 @@ internal static class TraceRegistry
     internal static string? GetContextId(string traceId)
     {
         return TraceToContextId.GetValueOrDefault(traceId);
+    }
+
+    /// <summary>
+    /// Associates <paramref name="derivedTraceId"/> with the same test(s) as
+    /// <paramref name="sourceTraceId"/>. Useful for messaging/queue consumers that start
+    /// a new trace but keep a causal link to the original test trace via OTEL span links.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> when the derived trace was associated with at least one test from the
+    /// source trace (span correlation), or when both trace IDs are the same and the source
+    /// trace is already registered; otherwise, <c>false</c>.
+    /// <para>
+    /// A <c>true</c> result does NOT guarantee log routing — if the source trace has no
+    /// context-id mapping (only added by the 3-arg <see cref="Register(string,string,string)"/>),
+    /// span correlation succeeds but log records for the derived trace fall through
+    /// <see cref="GetContextId"/> and are dropped. The case is logged via
+    /// <see cref="Trace.WriteLine"/>.
+    /// </para>
+    /// </returns>
+    internal static bool TryRegisterDerivedTrace(string derivedTraceId, string sourceTraceId)
+    {
+        // Fast path: if both IDs are the same we only need to report whether the source
+        // trace is already registered — no dictionary updates required.
+        if (string.Equals(derivedTraceId, sourceTraceId, StringComparison.OrdinalIgnoreCase))
+        {
+            return IsRegistered(sourceTraceId);
+        }
+
+        if (!TraceToTests.TryGetValue(sourceTraceId, out var testNodeUids))
+        {
+            return false;
+        }
+
+        foreach (var testNodeUid in testNodeUids)
+        {
+            Register(derivedTraceId, testNodeUid.Key);
+        }
+
+        if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
+        {
+            TraceToContextId.TryAdd(derivedTraceId, contextId);
+        }
+        else
+        {
+            // Source trace had test associations but no context-id mapping. The derived
+            // trace's TraceToTests entry will work for span correlation, but log routing
+            // through GetContextId will return null and ProcessLogs will silently drop
+            // records. Surface that here so a missing log line in the report points at a
+            // concrete cause instead of "nothing happened".
+            Trace.WriteLine($"[TUnit.Core] TraceRegistry.TryRegisterDerivedTrace: source trace {sourceTraceId} has no context-id mapping; logs for derived trace {derivedTraceId} will not be routed to a test.");
+        }
+
+        return true;
     }
 
     /// <summary>

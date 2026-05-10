@@ -1,8 +1,12 @@
 #pragma warning disable TPEXP
 
+using System.IO.Compression;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
+using TUnit.Core;
 using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.Engine.Tests;
@@ -113,6 +117,75 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void OrderTestsForDisplay_SortsByStartTime_ThenName()
+    {
+        var later = CreateTestResultWithStartTime("Later", "2026-05-07T09:26:25.0000000Z");
+        var earlier = CreateTestResultWithStartTime("Earlier", "2026-05-07T09:26:24.0000000Z");
+        var sameTimeButLaterName = CreateTestResultWithStartTime("Zeta", "2026-05-07T09:26:24.0000000Z");
+
+        var ordered = HtmlReporter.OrderTestsForDisplay([later, sameTimeButLaterName, earlier]);
+
+        ordered.Select(static test => test.DisplayName).ShouldBe(["Earlier", "Zeta", "Later"]);
+    }
+
+    [Test]
+    public void GenerateHtml_RoundTrips_TestBodySpans_AndChildren_Through_EmbeddedData()
+    {
+        // Server-side data path only — the client-side collapseTestBodySpans JS runs in the
+        // browser and is not exercised here. This test pins down the contract the JS relies
+        // on: a 'test body' span with children survives serialisation into the embedded
+        // JSON so the JS can re-parent children to the test-case span at render time.
+        const string traceId = "0123456789abcdef0123456789abcdef";
+        var spans = new[]
+        {
+            new SpanData
+            {
+                TraceId = traceId, SpanId = "aaaaaaaaaaaaaaaa", Name = "test body",
+                Source = "TUnit", Kind = "Internal", Status = "Ok",
+            },
+            new SpanData
+            {
+                TraceId = traceId, SpanId = "bbbbbbbbbbbbbbbb", ParentSpanId = "aaaaaaaaaaaaaaaa",
+                Name = "wiremock-call", Source = "TUnit", Kind = "Client", Status = "Ok",
+            },
+        };
+
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+            Spans = spans,
+        });
+
+        var embedded = ExtractEmbeddedReportJson(html);
+        embedded.ShouldContain("\"name\":\"test body\"");
+        embedded.ShouldContain("\"name\":\"wiremock-call\"");
+        embedded.ShouldContain("\"parentSpanId\":\"aaaaaaaaaaaaaaaa\"");
+    }
+
+    private static string ExtractEmbeddedReportJson(string html)
+    {
+        // The renderer embeds ReportData as gzip+base64 inside <script id="test-data" ...>.
+        var match = Regex.Match(
+            html,
+            "<script id=\"test-data\"[^>]*>(?<payload>[A-Za-z0-9+/=]+)</script>",
+            RegexOptions.Singleline);
+        match.Success.ShouldBeTrue("Expected embedded test-data script in rendered HTML.");
+        var compressed = Convert.FromBase64String(match.Groups["payload"].Value);
+        using var ms = new MemoryStream(compressed);
+        using var gz = new GZipStream(ms, CompressionMode.Decompress);
+        using var reader = new StreamReader(gz, Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
+    [Test]
     public async Task PublishArtifactAsync_Publishes_With_Correct_SessionUid()
     {
         var reporter = new HtmlReporter(new MockExtension());
@@ -133,4 +206,17 @@ public class HtmlReporterTests
             File.Delete(tempFile);
         }
     }
+
+    private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
+    {
+        Id = displayName,
+        DisplayName = displayName,
+        MethodName = displayName,
+        ClassName = "SampleTests",
+        Status = "passed",
+        DurationMs = 1,
+        StartTime = startTime,
+        EndTime = startTime,
+        RetryAttempt = 0,
+    };
 }

@@ -38,4 +38,9 @@ public sealed class TUnitSettings
     /// Controls test run behavior.
     /// </summary>
     public ExecutionSettings Execution { get; } = new();
+
+    /// <summary>
+    /// Controls HTML report rendering.
+    /// </summary>
+    public ReportSettings Report { get; } = new();
 }

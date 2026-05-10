@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -11,6 +12,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
@@ -336,7 +338,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 ClassName = kvp.Key,
                 Namespace = groupNamespaces.GetValueOrDefault(kvp.Key, ""),
                 Summary = groupSummary,
-                Tests = kvp.Value.ToArray()
+                Tests = OrderTestsForDisplay(kvp.Value)
             };
         }
 
@@ -376,7 +378,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CommitSha = commitSha,
             Branch = branch,
             PullRequestNumber = prNumber,
-            RepositorySlug = repoSlug
+            RepositorySlug = repoSlug,
+            ExpandClassTimeline = TUnitSettings.Default.Report.ExpandClassTimeline,
         };
     }
 
@@ -465,6 +468,24 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     }
 #endif
 
+    internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
+    {
+        // Parse to DateTimeOffset so the sort works regardless of how the caller formatted
+        // StartTime — production writes UTC ISO-8601, but tests construct ReportTestResult
+        // directly via InternalsVisibleTo and could pass non-UTC offsets.
+        return tests
+            .OrderBy(static test => ParseStartTimeForSort(test.StartTime))
+            .ThenBy(static test => test.DisplayName, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static DateTimeOffset ParseStartTimeForSort(string? raw)
+    {
+        return DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed)
+            ? parsed
+            : DateTimeOffset.MaxValue;
+    }
+
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
     {
         IProperty? stateProperty = null;
@@ -533,8 +554,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ClassName = className,
             Status = status,
             DurationMs = durationMs,
-            StartTime = startTime?.ToString("o"),
-            EndTime = endTime?.ToString("o"),
+            StartTime = startTime?.ToUniversalTime().ToString("o"),
+            EndTime = endTime?.ToUniversalTime().ToString("o"),
             Exception = exception,
             Output = stdOut,
             ErrorOutput = stdErr,
