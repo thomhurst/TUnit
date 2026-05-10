@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
@@ -138,6 +139,88 @@ public class OtlpReceiverIngestionTests
         await Assert.That(receiver.Diagnostics.TracesSpansParsed).IsEqualTo(3);
         await Assert.That(receiver.Diagnostics.TracesAlreadyRegistered).IsEqualTo(1);
         await Assert.That(receiver.Diagnostics.TracesNoMatch).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Receiver_Forwarding_PropagatesHeadersAndCountsSuccess()
+    {
+        // Mock upstream stands in for the Aspire dashboard — gates on the api-key header
+        // so we can prove the receiver actually propagated it instead of just dropping body
+        // bytes onto a permissive endpoint.
+        using var upstreamListener = new HttpListener();
+        var upstreamPort = FindFreeLoopbackPort();
+        upstreamListener.Prefixes.Add($"http://127.0.0.1:{upstreamPort}/");
+        upstreamListener.Start();
+
+        var receivedAuth = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var listenerTask = Task.Run(async () =>
+        {
+            var ctx = await upstreamListener.GetContextAsync();
+            receivedAuth.TrySetResult(ctx.Request.Headers["x-otlp-api-key"]);
+            ctx.Response.StatusCode = 200;
+            ctx.Response.Close();
+        });
+
+        await using var receiver = new OtlpReceiver($"http://127.0.0.1:{upstreamPort}")
+        {
+            UpstreamHeaders = [new KeyValuePair<string, string>("x-otlp-api-key", "test-token-abc")],
+        };
+        receiver.Start();
+
+        using var client = new HttpClient();
+        using var content = new ByteArrayContent(Array.Empty<byte>());
+        content.Headers.ContentType = new("application/x-protobuf");
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
+
+        await receiver.DrainAsync(TimeSpan.FromSeconds(3));
+
+        var auth = await receivedAuth.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        upstreamListener.Stop();
+        await listenerTask;
+
+        await Assert.That(auth).IsEqualTo("test-token-abc");
+        await Assert.That(receiver.Diagnostics.UpstreamForwardSuccess).IsEqualTo(1);
+        await Assert.That(receiver.Diagnostics.UpstreamForwardFailures).IsEqualTo(0);
+    }
+
+    private static int FindFreeLoopbackPort()
+    {
+        using var probe = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+        probe.Start();
+        var port = ((System.Net.IPEndPoint)probe.LocalEndpoint).Port;
+        probe.Stop();
+        return port;
+    }
+
+    [Test]
+    public async Task Receiver_DrainAsync_WaitsForLatePostBeforeReturning()
+    {
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        // Simulate a SUT exporter that flushes a couple hundred ms after the test logic
+        // would finish — without DrainAsync, AspireFixture would tear down the AppHost
+        // and the late POST would fail / be dropped.
+        var latePost = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            using var client = new HttpClient();
+            using var content = new ByteArrayContent(Array.Empty<byte>());
+            await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
+        });
+
+        var drainStart = DateTime.UtcNow;
+        await receiver.DrainAsync(TimeSpan.FromSeconds(3));
+        var drainElapsed = DateTime.UtcNow - drainStart;
+
+        await latePost;
+
+        await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
+        // The drain must have observed the late request — i.e., it didn't return at the
+        // 250ms stable window before the 200ms-delayed POST landed.
+        await Assert.That(drainElapsed).IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(400));
+        // And it must respect the cap — no point waiting indefinitely once quiet.
+        await Assert.That(drainElapsed).IsLessThan(TimeSpan.FromSeconds(3));
     }
 
     [Test]

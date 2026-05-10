@@ -467,6 +467,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
     {
+        // StartTime is normalized to UTC and round-trip-formatted ("o" → ...+00:00) before reaching
+        // this method, so ordinal string comparison sorts chronologically across all rows.
         return tests
             .OrderBy(static test => test.StartTime is null ? 1 : 0)
             .ThenBy(static test => test.StartTime, StringComparer.Ordinal)
@@ -542,8 +544,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ClassName = className,
             Status = status,
             DurationMs = durationMs,
-            StartTime = startTime?.ToString("o"),
-            EndTime = endTime?.ToString("o"),
+            StartTime = startTime?.ToUniversalTime().ToString("o"),
+            EndTime = endTime?.ToUniversalTime().ToString("o"),
             Exception = exception,
             Output = stdOut,
             ErrorOutput = stdErr,

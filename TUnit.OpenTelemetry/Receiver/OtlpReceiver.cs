@@ -34,6 +34,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
     private readonly OtlpReceiverDiagnostics _diagnostics = new();
     private string? _upstreamEndpoint;
+    private IReadOnlyList<KeyValuePair<string, string>>? _upstreamHeaders;
     private Task? _listenTask;
     private int _taskIdCounter;
 
@@ -78,6 +79,17 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     }
 
     /// <summary>
+    /// Optional headers attached to upstream forwarded requests. The Aspire dashboard
+    /// gates its OTLP endpoints on an <c>x-otlp-api-key</c> header; without it, forwarding
+    /// returns 401 and the dashboard never sees the SUT's spans.
+    /// </summary>
+    public IReadOnlyList<KeyValuePair<string, string>>? UpstreamHeaders
+    {
+        get => Volatile.Read(ref _upstreamHeaders);
+        set => Volatile.Write(ref _upstreamHeaders, value);
+    }
+
+    /// <summary>
     /// Starts accepting OTLP requests.
     /// </summary>
     public void Start()
@@ -111,6 +123,79 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// Returns a task that completes when all in-flight request processing has finished.
     /// </summary>
     internal Task WhenIdle() => Task.WhenAll(_inflightTasks.Values);
+
+    /// <summary>
+    /// Waits for the receiver to go quiet — no in-flight tasks and no new POSTs for a short
+    /// stable window — up to <paramref name="window"/>. Intended for the session-end boundary
+    /// where the SUT's <c>BatchSpanProcessor</c> may still have unflushed spans queued; without
+    /// this, fast tests can finish and tear down their AppHost before exporters drain, dropping
+    /// the trailing telemetry the report is meant to show.
+    /// </summary>
+    /// <param name="window">Maximum total time to wait. Defaults to <see cref="DefaultDrainWindow"/>.</param>
+    /// <param name="cancellationToken">Stops the wait early.</param>
+    public async Task DrainAsync(TimeSpan? window = null, CancellationToken cancellationToken = default)
+    {
+        var stableFor = TimeSpan.FromMilliseconds(250);
+        var deadline = DateTime.UtcNow + (window ?? DefaultDrainWindow);
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var beforeCount = Volatile.Read(ref _diagnostics.TotalRequests);
+
+            try
+            {
+                await WhenIdle().ConfigureAwait(false);
+            }
+            catch
+            {
+                // Individual request failures already logged via Trace.WriteLine; the drain
+                // is best-effort and shouldn't surface them.
+            }
+
+            var remaining = deadline - DateTime.UtcNow;
+            if (remaining <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            try
+            {
+                await Task.Delay(stableFor < remaining ? stableFor : remaining, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            var afterCount = Volatile.Read(ref _diagnostics.TotalRequests);
+            if (afterCount == beforeCount && _inflightTasks.IsEmpty)
+            {
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Default drain window applied by <see cref="DrainAsync"/> when no value is supplied.
+    /// Honours the <c>TUNIT_OTLP_DRAIN_MS</c> environment variable so users with slow exporters
+    /// can extend the wait without recompiling.
+    /// </summary>
+    public static TimeSpan DefaultDrainWindow
+    {
+        get
+        {
+            var raw = Environment.GetEnvironmentVariable("TUNIT_OTLP_DRAIN_MS");
+            if (!string.IsNullOrEmpty(raw)
+                && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var ms)
+                && ms >= 0)
+            {
+                return TimeSpan.FromMilliseconds(ms);
+            }
+
+            return TimeSpan.FromSeconds(2);
+        }
+    }
 
     private void TrackTask(Task task)
     {
@@ -230,7 +315,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var upstream = Volatile.Read(ref _upstreamEndpoint);
             if (upstream is not null)
             {
-                TrackTask(ForwardAsync(upstream, path, body, request.ContentType));
+                TrackTask(ForwardAsync(upstream, Volatile.Read(ref _upstreamHeaders), path, body, request.ContentType, _diagnostics));
             }
 
             Interlocked.Increment(ref _diagnostics.TotalRequests);
@@ -465,22 +550,48 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
     }
 
-    private static async Task ForwardAsync(string upstream, string path, byte[] body, string? contentType)
+    private static async Task ForwardAsync(
+        string upstream,
+        IReadOnlyList<KeyValuePair<string, string>>? headers,
+        string path,
+        byte[] body,
+        string? contentType,
+        OtlpReceiverDiagnostics diag)
     {
         try
         {
-            using var content = new ByteArrayContent(body);
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{upstream}{path}");
+            request.Content = new ByteArrayContent(body);
             if (contentType is not null)
             {
-                content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+                request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
             }
 
-            await s_forwardingClient.PostAsync(
-                $"{upstream}{path}",
-                content).ConfigureAwait(false);
+            if (headers is not null)
+            {
+                foreach (var header in headers)
+                {
+                    // Auth-style headers like x-otlp-api-key live on the request, not the
+                    // content. TryAddWithoutValidation skips strict header-name checks so
+                    // user-supplied values flow through.
+                    request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+            }
+
+            using var response = await s_forwardingClient.SendAsync(request).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                Interlocked.Increment(ref diag.UpstreamForwardSuccess);
+            }
+            else
+            {
+                Interlocked.Increment(ref diag.UpstreamForwardFailures);
+                Trace.WriteLine($"[TUnit.OpenTelemetry] Upstream {path} returned {(int)response.StatusCode} {response.ReasonPhrase}.");
+            }
         }
         catch (Exception ex)
         {
+            Interlocked.Increment(ref diag.UpstreamForwardFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] OTLP forwarding to upstream failed: {ex.Message}");
         }
     }
@@ -619,6 +730,12 @@ internal sealed class OtlpReceiverDiagnostics
     internal int TracesRegisteredViaLink;
     internal int TracesNoMatch;
 
+    // Upstream forwarding (Aspire dashboard etc.) — distinguish "didn't try" from
+    // "tried and the dashboard rejected" so users can tell whether the proxy step
+    // is actually reaching the dashboard.
+    internal int UpstreamForwardSuccess;
+    internal int UpstreamForwardFailures;
+
     /// <summary>
     /// Records a request path that didn't match any known OTLP signal endpoint. Caps the
     /// distinct-path set at <see cref="MaxTrackedUnknownPaths"/> to avoid unbounded growth
@@ -631,6 +748,9 @@ internal sealed class OtlpReceiverDiagnostics
             path = "(empty)";
         }
 
+        // Soft cap: ContainsKey/Count are checked outside the dictionary lock, so concurrent
+        // callers may push a few entries past MaxTrackedUnknownPaths under a burst. Acceptable
+        // for a diagnostic-only path — exact enforcement isn't worth the contention.
         if (_unknownPaths.ContainsKey(path) || _unknownPaths.Count < MaxTrackedUnknownPaths)
         {
             _unknownPaths.AddOrUpdate(path, 1, static (_, c) => c + 1);
@@ -665,6 +785,8 @@ internal sealed class OtlpReceiverDiagnostics
         sb.AppendLine($"  traces.unique_already_registered     = {TracesAlreadyRegistered}");
         sb.AppendLine($"  traces.unique_registered_via_link    = {TracesRegisteredViaLink}");
         sb.AppendLine($"  traces.unique_no_match               = {TracesNoMatch}");
+        sb.AppendLine($"  upstream.forward_success             = {UpstreamForwardSuccess}");
+        sb.AppendLine($"  upstream.forward_failures            = {UpstreamForwardFailures}");
         return sb.ToString();
     }
 }
