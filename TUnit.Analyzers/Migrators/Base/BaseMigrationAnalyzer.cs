@@ -208,7 +208,10 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         foreach (var invocation in invocationExpressions)
         {
             var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation);
-            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            var methodSymbol = symbolInfo.Symbol as IMethodSymbol
+                ?? symbolInfo.CandidateSymbols.OfType<IMethodSymbol>().FirstOrDefault();
+
+            if (methodSymbol != null)
             {
                 var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString();
 
@@ -228,22 +231,24 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                     return true;
                 }
             }
-            else if (symbolInfo.Symbol == null)
+            else if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
             {
-                // Fallback: if symbol resolution fails completely, check the syntax directly
-                // This handles cases where the semantic model hasn't fully resolved types
-                // Note: If TUnit is available, we already returned false above, so this only
-                // runs when TUnit is not present (pure source framework project).
-                if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+                // Method symbol couldn't be resolved (e.g. overload removed across framework
+                // versions). Try the receiver: if it resolves to a framework type, treat the
+                // call as framework usage.
+                var receiverSymbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression).Symbol;
+                if (receiverSymbol is INamedTypeSymbol receiverType && IsFrameworkType(receiverType))
                 {
-                    var typeExpression = memberAccess.Expression.ToString();
+                    return true;
+                }
 
-                    // For framework-specific types, only flag if the framework is still available
-                    // This prevents flagging after migration when the framework assembly has been removed
-                    if (IsFrameworkTypeName(typeExpression) && IsFrameworkAvailable(context.SemanticModel.Compilation))
-                    {
-                        return true;
-                    }
+                // Final fallback: pure syntactic match for framework-specific type names.
+                // Only flag when the framework assembly is still available, to avoid false
+                // positives after migration has removed it.
+                var typeExpression = memberAccess.Expression.ToString();
+                if (IsFrameworkTypeName(typeExpression) && IsFrameworkAvailable(context.SemanticModel.Compilation))
+                {
+                    return true;
                 }
             }
         }
