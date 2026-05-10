@@ -148,7 +148,7 @@ public class OtlpReceiverIngestionTests
         // so we can prove the receiver actually propagated it instead of just dropping body
         // bytes onto a permissive endpoint.
         using var upstreamListener = new HttpListener();
-        var upstreamPort = FindFreeLoopbackPort();
+        var upstreamPort = LoopbackHttpListenerFactory.FindFreePort();
         upstreamListener.Prefixes.Add($"http://127.0.0.1:{upstreamPort}/");
         upstreamListener.Start();
 
@@ -161,35 +161,36 @@ public class OtlpReceiverIngestionTests
             ctx.Response.Close();
         });
 
-        await using var receiver = new OtlpReceiver($"http://127.0.0.1:{upstreamPort}")
+        try
         {
-            UpstreamHeaders = [new KeyValuePair<string, string>("x-otlp-api-key", "test-token-abc")],
-        };
-        receiver.Start();
+            await using var receiver = new OtlpReceiver($"http://127.0.0.1:{upstreamPort}")
+            {
+                UpstreamHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["x-otlp-api-key"] = "test-token-abc",
+                },
+            };
+            receiver.Start();
 
-        using var client = new HttpClient();
-        using var content = new ByteArrayContent(Array.Empty<byte>());
-        content.Headers.ContentType = new("application/x-protobuf");
-        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
+            using var client = new HttpClient();
+            using var content = new ByteArrayContent(Array.Empty<byte>());
+            content.Headers.ContentType = new("application/x-protobuf");
+            await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
 
-        await receiver.DrainAsync(TimeSpan.FromSeconds(3));
+            await receiver.DrainAsync(TimeSpan.FromSeconds(3));
 
-        var auth = await receivedAuth.Task.WaitAsync(TimeSpan.FromSeconds(2));
-        upstreamListener.Stop();
-        await listenerTask;
+            var auth = await receivedAuth.Task.WaitAsync(TimeSpan.FromSeconds(2));
 
-        await Assert.That(auth).IsEqualTo("test-token-abc");
-        await Assert.That(receiver.Diagnostics.UpstreamForwardSuccess).IsEqualTo(1);
-        await Assert.That(receiver.Diagnostics.UpstreamForwardFailures).IsEqualTo(0);
-    }
-
-    private static int FindFreeLoopbackPort()
-    {
-        using var probe = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
-        probe.Start();
-        var port = ((System.Net.IPEndPoint)probe.LocalEndpoint).Port;
-        probe.Stop();
-        return port;
+            await Assert.That(auth).IsEqualTo("test-token-abc");
+            await Assert.That(receiver.Diagnostics.UpstreamForwardSuccess).IsEqualTo(1);
+            await Assert.That(receiver.Diagnostics.UpstreamForwardFailures).IsEqualTo(0);
+        }
+        finally
+        {
+            upstreamListener.Stop();
+            // Ignore — listener context may already be torn down on assertion failure.
+            try { await listenerTask; } catch { }
+        }
     }
 
     [Test]

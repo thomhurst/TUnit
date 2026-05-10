@@ -425,14 +425,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// endpoints when auth is enabled (the default since Aspire 9), so without forwarding
     /// these the dashboard rejects every proxied span.
     /// </summary>
-    private static IReadOnlyList<KeyValuePair<string, string>>? ParseOtlpHeaders(string? raw)
+    private static IReadOnlyDictionary<string, string>? ParseOtlpHeaders(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
         {
             return null;
         }
 
-        var result = new List<KeyValuePair<string, string>>();
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var pair in raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             var eq = pair.IndexOf('=');
@@ -445,7 +445,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             var value = pair[(eq + 1)..].Trim();
             if (key.Length > 0)
             {
-                result.Add(new KeyValuePair<string, string>(key, value));
+                result[key] = value;
             }
         }
 

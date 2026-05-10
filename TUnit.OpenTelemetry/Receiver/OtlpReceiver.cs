@@ -26,6 +26,8 @@ namespace TUnit.OpenTelemetry.Receiver;
 internal sealed class OtlpReceiver : IAsyncDisposable
 {
     private const long MaxBodyBytes = 16 * 1024 * 1024; // 16 MB
+    private const string DrainWindowEnvVar = "TUNIT_OTLP_DRAIN_MS";
+    private const string DiagnosticsDumpEnvVar = "TUNIT_OTLP_DEBUG";
 
     private static readonly HttpClient s_forwardingClient = new();
 
@@ -34,7 +36,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
     private readonly OtlpReceiverDiagnostics _diagnostics = new();
     private string? _upstreamEndpoint;
-    private IReadOnlyList<KeyValuePair<string, string>>? _upstreamHeaders;
+    private IReadOnlyDictionary<string, string>? _upstreamHeaders;
     private Task? _listenTask;
     private int _taskIdCounter;
 
@@ -83,7 +85,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// gates its OTLP endpoints on an <c>x-otlp-api-key</c> header; without it, forwarding
     /// returns 401 and the dashboard never sees the SUT's spans.
     /// </summary>
-    public IReadOnlyList<KeyValuePair<string, string>>? UpstreamHeaders
+    public IReadOnlyDictionary<string, string>? UpstreamHeaders
     {
         get => Volatile.Read(ref _upstreamHeaders);
         set => Volatile.Write(ref _upstreamHeaders, value);
@@ -136,7 +138,8 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     public async Task DrainAsync(TimeSpan? window = null, CancellationToken cancellationToken = default)
     {
         var stableFor = TimeSpan.FromMilliseconds(250);
-        var deadline = DateTime.UtcNow + (window ?? DefaultDrainWindow);
+        var totalWindow = window ?? DefaultDrainWindow;
+        var clock = Stopwatch.StartNew();
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -152,7 +155,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 // is best-effort and shouldn't surface them.
             }
 
-            var remaining = deadline - DateTime.UtcNow;
+            var remaining = totalWindow - clock.Elapsed;
             if (remaining <= TimeSpan.Zero)
             {
                 return;
@@ -185,7 +188,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     {
         get
         {
-            var raw = Environment.GetEnvironmentVariable("TUNIT_OTLP_DRAIN_MS");
+            var raw = Environment.GetEnvironmentVariable(DrainWindowEnvVar);
             if (!string.IsNullOrEmpty(raw)
                 && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var ms)
                 && ms >= 0)
@@ -315,7 +318,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var upstream = Volatile.Read(ref _upstreamEndpoint);
             if (upstream is not null)
             {
-                TrackTask(ForwardAsync(upstream, Volatile.Read(ref _upstreamHeaders), path, body, request.ContentType, _diagnostics));
+                TrackTask(ForwardAsync(upstream, path, body, request.ContentType));
             }
 
             Interlocked.Increment(ref _diagnostics.TotalRequests);
@@ -550,13 +553,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
     }
 
-    private static async Task ForwardAsync(
-        string upstream,
-        IReadOnlyList<KeyValuePair<string, string>>? headers,
-        string path,
-        byte[] body,
-        string? contentType,
-        OtlpReceiverDiagnostics diag)
+    private async Task ForwardAsync(string upstream, string path, byte[] body, string? contentType)
     {
         try
         {
@@ -567,31 +564,31 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
             }
 
+            var headers = Volatile.Read(ref _upstreamHeaders);
             if (headers is not null)
             {
                 foreach (var header in headers)
                 {
-                    // Auth-style headers like x-otlp-api-key live on the request, not the
-                    // content. TryAddWithoutValidation skips strict header-name checks so
-                    // user-supplied values flow through.
                     request.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
             }
 
-            using var response = await s_forwardingClient.SendAsync(request).ConfigureAwait(false);
+            using var response = await s_forwardingClient
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
+                .ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
-                Interlocked.Increment(ref diag.UpstreamForwardSuccess);
+                Interlocked.Increment(ref _diagnostics.UpstreamForwardSuccess);
             }
             else
             {
-                Interlocked.Increment(ref diag.UpstreamForwardFailures);
+                Interlocked.Increment(ref _diagnostics.UpstreamForwardFailures);
                 Trace.WriteLine($"[TUnit.OpenTelemetry] Upstream {path} returned {(int)response.StatusCode} {response.ReasonPhrase}.");
             }
         }
         catch (Exception ex)
         {
-            Interlocked.Increment(ref diag.UpstreamForwardFailures);
+            Interlocked.Increment(ref _diagnostics.UpstreamForwardFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] OTLP forwarding to upstream failed: {ex.Message}");
         }
     }
@@ -669,7 +666,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
     private static bool IsDiagnosticsDumpEnabled()
     {
-        var value = Environment.GetEnvironmentVariable("TUNIT_OTLP_DEBUG");
+        var value = Environment.GetEnvironmentVariable(DiagnosticsDumpEnvVar);
         return !string.IsNullOrEmpty(value)
             && !string.Equals(value, "0", StringComparison.Ordinal)
             && !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
@@ -821,7 +818,7 @@ internal static class LoopbackHttpListenerFactory
         throw new InvalidOperationException($"Could not bind loopback HttpListener after {MaxPortBindingAttempts} attempts.");
     }
 
-    private static int FindFreePort()
+    internal static int FindFreePort()
     {
         using var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
