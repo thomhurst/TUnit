@@ -97,6 +97,52 @@ public static class IDialogReference_MockMemberExtensions
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
         return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetReturnValueAsync", matchers);
     }
+
+    #if NET9_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void Reset(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+        => global::TUnit.Mocks.Mock.Reset(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+        => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetState(this global::TUnit.Mocks.Mock<global::IDialogReference> mock, string? stateName)
+        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void InState(this global::TUnit.Mocks.Mock<global::IDialogReference> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::IDialogReference>> configure)
+        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+    extension(global::TUnit.Mocks.Mock<global::IDialogReference> mock)
+    {
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        {
+            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+        }
+    }
+    #endif
 }
 
 
@@ -358,6 +404,52 @@ public static class IDialogService_MockMemberExtensions
     {
         ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("OnShow", (object?)new object?[] { arg1, arg2, arg3, arg4 });
     }
+
+    #if NET9_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void Reset(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
+        => global::TUnit.Mocks.Mock.Reset(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
+        => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
+        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
+        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::IDialogService> mock)
+        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetState(this global::TUnit.Mocks.Mock<global::IDialogService> mock, string? stateName)
+        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void InState(this global::TUnit.Mocks.Mock<global::IDialogService> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::IDialogService>> configure)
+        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+    extension(global::TUnit.Mocks.Mock<global::IDialogService> mock)
+    {
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        {
+            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+        }
+    }
+    #endif
 }
 
 

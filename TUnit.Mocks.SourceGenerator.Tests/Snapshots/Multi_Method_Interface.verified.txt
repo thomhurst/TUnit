@@ -171,6 +171,48 @@ public static class ICalculator_MockMemberExtensions
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
         return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Reset", matchers);
     }
+
+    #if NET9_0_OR_GREATER
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+        => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void SetState(this global::TUnit.Mocks.Mock<global::ICalculator> mock, string? stateName)
+        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public static void InState(this global::TUnit.Mocks.Mock<global::ICalculator> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::ICalculator>> configure)
+        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+    extension(global::TUnit.Mocks.Mock<global::ICalculator> mock)
+    {
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        {
+            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+        }
+    }
+    #endif
 }
 
 [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
