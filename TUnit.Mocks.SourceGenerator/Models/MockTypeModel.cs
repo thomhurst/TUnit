@@ -33,6 +33,13 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     /// </summary>
     public bool IsPublic { get; init; } = true;
 
+    /// <summary>
+    /// True when generation must fall back to <c>TUnit.Mocks.Generated[.{Namespace}]</c>
+    /// because the original namespace already declares a type whose name would collide
+    /// with one of the generator's emitted public type names.
+    /// </summary>
+    public bool UseFallbackNamespace { get; init; }
+
     /// <summary>The C# visibility keyword to emit on generated wrapper/extension types.</summary>
     public string Visibility => IsPublic ? "public" : "internal";
 
@@ -49,6 +56,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && IsDelegateType == other.IsDelegateType
             && IsWrapMock == other.IsWrapMock
             && IsPublic == other.IsPublic
+            && UseFallbackNamespace == other.UseFallbackNamespace
             && TypeParameters.Equals(other.TypeParameters)
             && Methods.Equals(other.Methods)
             && Properties.Equals(other.Properties)
@@ -70,6 +78,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + IsDelegateType.GetHashCode();
             hash = hash * 31 + IsWrapMock.GetHashCode();
             hash = hash * 31 + IsPublic.GetHashCode();
+            hash = hash * 31 + UseFallbackNamespace.GetHashCode();
             hash = hash * 31 + TypeParameters.GetHashCode();
             hash = hash * 31 + Methods.GetHashCode();
             hash = hash * 31 + Properties.GetHashCode();

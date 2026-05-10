@@ -12,14 +12,14 @@ internal static class MockStaticExtensionBuilder
             return string.Empty;
 
         var shortName = MockImplBuilder.GetCompositeShortSafeName(model);
-        var mockNamespace = MockImplBuilder.GetMockNamespace(model);
+        var globalPrefix = MockImplBuilder.GetGlobalMockNamespacePrefix(model);
 
         return BuildCore(model, (writer, mockableType, visibility) =>
         {
-            using (writer.Block($"{visibility} static global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)} Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
+            using (writer.Block($"{visibility} static {globalPrefix}{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)} Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
             {
-                var generatedMockType = $"global::{mockNamespace}.{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
-                var factoryType = $"global::{mockNamespace}.{shortName}MockFactory";
+                var generatedMockType = $"{globalPrefix}{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
+                var factoryType = $"{globalPrefix}{shortName}MockFactory";
                 var typeArguments = MockImplBuilder.GetTypeParameterList(model);
 
                 writer.AppendLine($"return ({generatedMockType}){factoryType}.CreateAutoMock{typeArguments}(behavior);");

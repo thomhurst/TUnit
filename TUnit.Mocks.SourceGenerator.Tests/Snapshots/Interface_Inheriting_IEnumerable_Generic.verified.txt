@@ -2,18 +2,15 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public sealed class ITestEnum_T_Mock<T> : global::TUnit.Mocks.Mock<global::ITestEnum<T>>, global::ITestEnum<T>
 {
-    public sealed class ITestEnum_T_Mock<T> : global::TUnit.Mocks.Mock<global::ITestEnum<T>>, global::ITestEnum<T>
-    {
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal ITestEnum_T_Mock(global::ITestEnum<T> mockObject, global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> engine)
-            : base(mockObject, engine) { }
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    internal ITestEnum_T_Mock(global::ITestEnum<T> mockObject, global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> engine)
+        : base(mockObject, engine) { }
 
-        global::System.Collections.Generic.IEnumerator<T> global::System.Collections.Generic.IEnumerable<T>.GetEnumerator() => Object.GetEnumerator();
+    global::System.Collections.Generic.IEnumerator<T> global::System.Collections.Generic.IEnumerable<T>.GetEnumerator() => Object.GetEnumerator();
 
-        global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)Object).GetEnumerator();
-    }
+    global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => ((global::System.Collections.IEnumerable)Object).GetEnumerator();
 }
 
 
@@ -23,55 +20,52 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+file sealed class ITestEnum_T_MockImpl<T> : global::ITestEnum<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    file sealed class ITestEnum_T_MockImpl<T> : global::ITestEnum<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    private readonly global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> _engine;
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
+
+    internal ITestEnum_T_MockImpl(global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> engine)
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> _engine;
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
-
-        internal ITestEnum_T_MockImpl(global::TUnit.Mocks.MockEngine<global::ITestEnum<T>> engine)
-        {
-            _engine = engine;
-        }
-
-        public global::System.Collections.Generic.IEnumerator<T> GetEnumerator()
-        {
-            return _engine.HandleCallWithReturn<global::System.Collections.Generic.IEnumerator<T>>(0, "GetEnumerator", global::System.Array.Empty<object?>(), default!);
-        }
-
-        global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public void RaiseEvent(string eventName, object? args)
-        {
-            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
-        }
+        _engine = engine;
     }
 
-    internal static class ITestEnum_T_MockFactory
+    public global::System.Collections.Generic.IEnumerator<T> GetEnumerator()
     {
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
-        internal static void Register()
-        {
-            global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
-                typeof(global::ITestEnum<>),
-                typeof(ITestEnum_T_MockImpl<>),
-                typeof(ITestEnum_T_Mock<>));
-        }
-
-        internal static global::TUnit.Mocks.Mock<global::ITestEnum<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
-        {
-            var engine = new global::TUnit.Mocks.MockEngine<global::ITestEnum<T>>(behavior);
-            var impl = new ITestEnum_T_MockImpl<T>(engine);
-            engine.Raisable = impl;
-            var mock = new ITestEnum_T_Mock<T>(impl, engine);
-            return mock;
-        }
-
+        return _engine.HandleCallWithReturn<global::System.Collections.Generic.IEnumerator<T>>(0, "GetEnumerator", global::System.Array.Empty<object?>(), default!);
     }
+
+    global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public void RaiseEvent(string eventName, object? args)
+    {
+        throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+    }
+}
+
+internal static class ITestEnum_T_MockFactory
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Register()
+    {
+        global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
+            typeof(global::ITestEnum<>),
+            typeof(ITestEnum_T_MockImpl<>),
+            typeof(ITestEnum_T_Mock<>));
+    }
+
+    internal static global::TUnit.Mocks.Mock<global::ITestEnum<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+    {
+        var engine = new global::TUnit.Mocks.MockEngine<global::ITestEnum<T>>(behavior);
+        var impl = new ITestEnum_T_MockImpl<T>(engine);
+        engine.Raisable = impl;
+        var mock = new ITestEnum_T_Mock<T>(impl, engine);
+        return mock;
+    }
+
 }
 
 
@@ -81,15 +75,12 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public static class ITestEnum_T__MockMemberExtensions
 {
-    public static class ITestEnum_T__MockMemberExtensions
+    public static global::TUnit.Mocks.MockMethodCall<global::System.Collections.Generic.IEnumerator<T>> GetEnumerator<T>(this global::TUnit.Mocks.Mock<global::ITestEnum<T>> mock)
     {
-        public static global::TUnit.Mocks.MockMethodCall<global::System.Collections.Generic.IEnumerator<T>> GetEnumerator<T>(this global::TUnit.Mocks.Mock<global::ITestEnum<T>> mock)
-        {
-            var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.MockMethodCall<global::System.Collections.Generic.IEnumerator<T>>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetEnumerator", matchers);
-        }
+        var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
+        return new global::TUnit.Mocks.MockMethodCall<global::System.Collections.Generic.IEnumerator<T>>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetEnumerator", matchers);
     }
 }
 
@@ -106,9 +97,9 @@ namespace TUnit.Mocks
     {
         extension<T>(global::ITestEnum<T> _)
         {
-            public static global::TUnit.Mocks.Generated.ITestEnum_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::ITestEnum_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ITestEnum_T_Mock<T>)global::TUnit.Mocks.Generated.ITestEnum_T_MockFactory.CreateAutoMock<T>(behavior);
+                return (global::ITestEnum_T_Mock<T>)global::ITestEnum_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

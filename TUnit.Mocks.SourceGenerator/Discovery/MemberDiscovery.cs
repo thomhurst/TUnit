@@ -19,7 +19,7 @@ internal static class MemberDiscovery
     private static readonly (int Index, ITypeSymbol? ReturnType) NonMockableEntry = (-1, null);
 
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
-        DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
+        DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
@@ -40,7 +40,7 @@ internal static class MemberDiscovery
         // If it's a class, also include its own members
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
-            ProcessClassMembers(typeSymbol, compilationAssembly, methods, properties, events,
+            ProcessClassMembers(typeSymbol, compilationAssembly, compilation, methods, properties, events,
                 seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
         }
 
@@ -53,7 +53,7 @@ internal static class MemberDiscovery
             {
                 if (member.IsStatic)
                 {
-                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
                     continue;
                 }
 
@@ -86,13 +86,13 @@ internal static class MemberDiscovery
                             // the explicit impl's return type (e.g. IEnumerator<T> : IEnumerator).
                             var canDelegate = existing.ReturnType is not null
                                 && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation));
                         }
                         else
                         {
                             seenMethods[key] = (methods.Count, method.ReturnType);
                             seenFullMethods.Add(GetFullMethodKey(method));
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilation: compilation));
                         }
                         break;
                     }
@@ -109,7 +109,7 @@ internal static class MemberDiscovery
                                 if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
                                 {
                                     // Signature collision with different return type → explicit interface impl
-                                    properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly));
+                                    properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation));
                                 }
                                 else
                                 {
@@ -120,7 +120,7 @@ internal static class MemberDiscovery
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly));
+                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly, compilation));
                         }
                         break;
                     }
@@ -139,7 +139,7 @@ internal static class MemberDiscovery
                         else
                         {
                             seenProperties[key] = properties.Count;
-                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly));
+                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly, compilation));
                         }
                         break;
                     }
@@ -171,7 +171,7 @@ internal static class MemberDiscovery
     /// <see cref="TryCollectStaticAbstractFromInterface"/> TypeKind guard is genuinely required.
     /// </summary>
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
-        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols, IAssemblySymbol? compilationAssembly = null)
+        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var methods = new List<MockMemberModel>();
         var properties = new List<MockMemberModel>();
@@ -199,7 +199,7 @@ internal static class MemberDiscovery
                 {
                     if (member.IsStatic)
                     {
-                        TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+                        TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
                         continue;
                     }
 
@@ -216,14 +216,14 @@ internal static class MemberDiscovery
                                 var canDelegate = existing.ReturnType is not null
                                     && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
                                 methods.Add(CreateMethodModel(method, ref memberIdCounter,
-                                    interfaceFqn, declaringInterfaceName: interfaceFqn, explicitInterfaceCanDelegate: canDelegate));
+                                    interfaceFqn, declaringInterfaceName: interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation));
                             }
                             else
                             {
                                 seenMethods[key] = (methods.Count, method.ReturnType);
                                 seenFullMethods.Add(GetFullMethodKey(method));
                                 methods.Add(CreateMethodModel(method, ref memberIdCounter,
-                                    null, declaringInterfaceName: interfaceFqn));
+                                    null, declaringInterfaceName: interfaceFqn, compilation: compilation));
                             }
                             break;
                         }
@@ -238,7 +238,7 @@ internal static class MemberDiscovery
                                     var existingProp = properties[existingIndex.Value];
                                     if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
                                     {
-                                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
+                                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
                                     }
                                     else
                                     {
@@ -249,7 +249,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
                             }
                             break;
                         }
@@ -268,7 +268,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
                             }
                             break;
                         }
@@ -295,6 +295,7 @@ internal static class MemberDiscovery
     private static void ProcessClassMembers(
         ITypeSymbol typeSymbol,
         IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
         List<MockMemberModel> methods,
         List<MockMemberModel> properties,
         List<MockEventModel> events,
@@ -362,7 +363,7 @@ internal static class MemberDiscovery
                         {
                             if (seenMethods.ContainsKey(key)) continue;
                             seenMethods[key] = (methods.Count, method.ReturnType);
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, compilation: compilation));
                         }
                         else
                         {
@@ -386,7 +387,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, compilationAssembly: compilationAssembly));
+                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, compilationAssembly: compilationAssembly, compilation: compilation));
                             }
                         }
                         else if (!seenProperties.ContainsKey(key))
@@ -412,7 +413,7 @@ internal static class MemberDiscovery
                             else
                             {
                                 seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, compilationAssembly: compilationAssembly));
+                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, compilationAssembly: compilationAssembly, compilation: compilation));
                             }
                         }
                         else if (!seenProperties.ContainsKey(key))
@@ -553,12 +554,12 @@ internal static class MemberDiscovery
     /// <summary>
     /// Creates a MockMemberModel from a delegate type's Invoke method.
     /// </summary>
-    public static MockMemberModel CreateDelegateInvokeModel(IMethodSymbol invokeMethod, ref int memberIdCounter)
+    public static MockMemberModel CreateDelegateInvokeModel(IMethodSymbol invokeMethod, ref int memberIdCounter, Compilation compilation)
     {
-        return CreateMethodModel(invokeMethod, ref memberIdCounter, null);
+        return CreateMethodModel(invokeMethod, ref memberIdCounter, null, compilation: compilation);
     }
 
-    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false)
+    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false, Compilation compilation = null!)
     {
         var returnType = method.ReturnType;
         var isAsync = returnType.IsAsyncReturnType();
@@ -571,7 +572,7 @@ internal static class MemberDiscovery
         var effectiveReturnTypeSymbol = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
         var returnTypeHasStaticAbstract = !isVoid && IsInterfaceWithStaticAbstractMembers(effectiveReturnTypeSymbol);
         var autoMockFactoryMethod = !isVoid
-            ? GetAutoMockFactoryMethod(effectiveReturnTypeSymbol)
+            ? GetAutoMockFactoryMethod(effectiveReturnTypeSymbol, compilation)
             : null;
 
         return new MockMemberModel
@@ -658,7 +659,7 @@ internal static class MemberDiscovery
     private static bool IsAccessorAccessible(IMethodSymbol? accessor, IAssemblySymbol? compilationAssembly)
         => accessor is not null && IsMemberAccessible(accessor, compilationAssembly);
 
-    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
+    private static MockMemberModel CreatePropertyModel(IPropertySymbol property, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!)
     {
         var hasGetter = IsAccessorAccessible(property.GetMethod, compilationAssembly);
         var hasSetter = IsAccessorAccessible(property.SetMethod, compilationAssembly);
@@ -687,7 +688,7 @@ internal static class MemberDiscovery
             IsProtected = property.DeclaredAccessibility == Accessibility.Protected
                        || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
             IsRefStructReturn = property.Type.IsRefLikeType,
-            AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type),
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type, compilation),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null,
             ObsoleteAttribute = propertyObsolete,
@@ -747,7 +748,7 @@ internal static class MemberDiscovery
         return new EquatableArray<MockConstructorModel>(constructors.ToImmutableArray());
     }
 
-    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
+    private static MockMemberModel CreateIndexerModel(IPropertySymbol indexer, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!)
     {
         var hasGetter = IsAccessorAccessible(indexer.GetMethod, compilationAssembly);
         var hasSetter = IsAccessorAccessible(indexer.SetMethod, compilationAssembly);
@@ -781,14 +782,14 @@ internal static class MemberDiscovery
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
-            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type),
+            AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type, compilation),
             ObsoleteAttribute = indexerObsolete,
             GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.GetMethod),
             SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.SetMethod)
         };
     }
 
-    private static string? GetAutoMockFactoryMethod(ITypeSymbol returnType)
+    private static string? GetAutoMockFactoryMethod(ITypeSymbol returnType, Compilation compilation)
     {
         var effectiveReturnType = returnType.GetAsyncInnerTypeSymbol() ?? returnType;
         if (effectiveReturnType is not INamedTypeSymbol namedType)
@@ -809,15 +810,16 @@ internal static class MemberDiscovery
             return null;
 
         var baseName = namedType.OriginalDefinition.GetGeneratedMockBaseName();
-        var factoryNamespace = namedType.OriginalDefinition.GetGeneratedMockNamespace();
+        var factoryNamespace = namedType.OriginalDefinition.GetGeneratedMockNamespace(compilation);
+        var globalPrefix = Builders.MockImplBuilder.ToGlobalPrefix(factoryNamespace);
 
         if (!namedType.IsGenericType)
         {
-            return $"global::{factoryNamespace}.{baseName}MockFactory.CreateAutoMock";
+            return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock";
         }
 
         var typeArguments = string.Join(", ", namedType.TypeArguments.Select(x => x.GetFullyQualifiedNameWithNullability()));
-        return $"global::{factoryNamespace}.{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
+        return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
     }
 
     private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)
@@ -1087,12 +1089,13 @@ internal static class MemberDiscovery
         Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
-        ref int memberIdCounter)
+        ref int memberIdCounter,
+        Compilation compilation)
     {
         if (!member.IsAbstract) return;
         if (!ShouldCollectStaticAbstractFromInterfaces(typeSymbol)) return;
 
-        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter);
+        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
     }
 
     /// <summary>
@@ -1128,7 +1131,8 @@ internal static class MemberDiscovery
         Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
         Dictionary<string, int?> seenProperties,
         HashSet<string> seenEvents,
-        ref int memberIdCounter)
+        ref int memberIdCounter,
+        Compilation compilation)
     {
         switch (member)
         {
@@ -1138,7 +1142,7 @@ internal static class MemberDiscovery
                 if (seenMethods.ContainsKey(key)) break;
                 seenMethods[key] = (methods.Count, method.ReturnType);
 
-                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn) with
+                var model = CreateMethodModel(method, ref memberIdCounter, interfaceFqn, compilation: compilation) with
                 {
                     IsStaticAbstract = true
                 };
@@ -1152,7 +1156,7 @@ internal static class MemberDiscovery
                 if (seenProperties.ContainsKey(key)) break;
 
                 seenProperties[key] = properties.Count;
-                var model = CreatePropertyModel(property, ref memberIdCounter, interfaceFqn) with
+                var model = CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, compilation: compilation) with
                 {
                     IsStaticAbstract = true
                 };

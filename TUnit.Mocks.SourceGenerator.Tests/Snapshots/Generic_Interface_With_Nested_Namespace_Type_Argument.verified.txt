@@ -2,7 +2,7 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.Sandbox
+namespace Sandbox
 {
     public sealed class IService_T_Mock<T> : global::TUnit.Mocks.Mock<global::Sandbox.IService<T>>, global::Sandbox.IService<T>
     {
@@ -26,7 +26,7 @@ namespace TUnit.Mocks.Generated.Sandbox
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.Sandbox
+namespace Sandbox
 {
     file sealed class IService_T_MockImpl<T> : global::Sandbox.IService<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
@@ -87,7 +87,7 @@ namespace TUnit.Mocks.Generated.Sandbox
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+namespace Sandbox
 {
     public static class Sandbox_IService_T__MockMemberExtensions
     {
@@ -205,9 +205,9 @@ namespace TUnit.Mocks
     {
         extension<T>(global::Sandbox.IService<T> _)
         {
-            public static global::TUnit.Mocks.Generated.Sandbox.IService_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::Sandbox.IService_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IService_T_Mock<T>)global::TUnit.Mocks.Generated.Sandbox.IService_T_MockFactory.CreateAutoMock<T>(behavior);
+                return (global::Sandbox.IService_T_Mock<T>)global::Sandbox.IService_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

@@ -14,6 +14,13 @@ public abstract class SnapshotTestBase
     private static readonly Lazy<List<PortableExecutableReference>> _references = new(LoadReferences);
     private static readonly UTF8Encoding SnapshotEncoding = new(encoderShouldEmitUTF8Identifier: false);
 
+    /// <summary>
+    /// Returns the shared, lazily-loaded set of metadata references used by the test compilations
+    /// (current AppDomain assemblies plus the <c>ref/TUnit.Mocks.dll</c> if present). Derived
+    /// test classes should reuse this instead of re-discovering references per test invocation.
+    /// </summary>
+    protected static IEnumerable<MetadataReference> GetCachedReferences() => _references.Value;
+
     private static List<PortableExecutableReference> LoadReferences()
     {
         var refs = AppDomain.CurrentDomain.GetAssemblies()
