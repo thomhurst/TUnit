@@ -22,12 +22,13 @@ namespace .
         .<T> Context { get; }
         string? ConsumeBecauseMessage();
     }
-    public sealed class ShouldAssertion<T> : ..IShouldSource, ..IShouldSource<T>
+    public sealed class ShouldAssertion<T> : ., ..IShouldSource, ..IShouldSource<T>
     {
         public ShouldAssertion(.<T> context, .<T> inner) { }
         public ..ShouldContinuation<T> And { get; }
         public .<T> Context { get; }
         public ..ShouldContinuation<T> Or { get; }
+        public .<T?> AssertAsync() { }
         public ..ShouldAssertion<T> Because(string message) { }
         public .<T?> GetAwaiter() { }
     }
