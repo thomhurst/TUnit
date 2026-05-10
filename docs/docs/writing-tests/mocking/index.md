@@ -8,23 +8,19 @@ TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framew
 
 While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
-:::note Beta
-TUnit.Mocks is currently in **beta**. The API may change before the stable release.
-:::
-
 ## Installation
 
 Add the NuGet package to your test project:
 
 ```bash
-dotnet add package TUnit.Mocks --prerelease
+dotnet add package TUnit.Mocks
 ```
 
 For HTTP mocking or logging helpers, also add:
 
 ```bash
-dotnet add package TUnit.Mocks.Http --prerelease
-dotnet add package TUnit.Mocks.Logging --prerelease
+dotnet add package TUnit.Mocks.Http
+dotnet add package TUnit.Mocks.Logging
 ```
 
 :::warning C# 14 Required

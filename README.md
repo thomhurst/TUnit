@@ -140,6 +140,11 @@ See the [documentation](https://tunit.dev/docs/getting-started/attributes) for m
 | `TUnit.Engine` | Execution engine for test projects |
 | `TUnit.Assertions` | Standalone assertions — works with other test frameworks too |
 | `TUnit.Assertions.Should` | Optional FluentAssertions-style `value.Should().BeEqualTo(...)` syntax over `TUnit.Assertions` (beta) |
+| `TUnit.Mocks` | Source-generated, AOT-compatible mocking framework — works with any test runner |
+| `TUnit.Mocks.Http` | `HttpClient` mocking helpers built on `TUnit.Mocks` |
+| `TUnit.Mocks.Logging` | `ILogger` capture/verification helpers built on `TUnit.Mocks` |
+| `TUnit.AspNetCore` | ASP.NET Core integration — `WebApplicationFactory`-based test fixtures |
+| `TUnit.Aspire` | .NET Aspire integration — distributed app host fixtures with OpenTelemetry capture |
 | `TUnit.Playwright` | Playwright integration with automatic browser lifecycle management |
 
 ## Migrating from xUnit, NUnit, or MSTest?
