@@ -1611,9 +1611,10 @@ function getDescendants(traceSpans, rootId) {
 }
 
 // 'test body' must match TUnitActivitySource.SpanTestBody in C#.
-// Used by renderTrace (per-test view, always) and by renderSuiteTrace only when
-// data.expandClassTimeline is true. The default class-timeline branch excludes
-// test-case spans + their entire subtrees, so no test-body span survives to collapse.
+// Used by renderTrace (per-test view, always) and by renderSuiteTrace only when the
+// class opts in via [ClassTimeline(TimelineMode.FullExecution)]. The default
+// class-timeline branch excludes test-case spans + their entire subtrees, so no
+// test-body span survives to collapse.
 function collapseTestBodySpans(spans) {
     if (!spans || !spans.length) return [];
     const byId = {};
@@ -1736,14 +1737,25 @@ function renderClassSummary(g, ft) {
     return h;
 }
 
-function renderSuiteTrace(className) {
+// Per-class opt-in: [ClassTimeline(TimelineMode.FullExecution)] writes 'tunit.report.timeline'
+// onto every test in the class via DiscoveredTestContext.AddProperty.
+// Key/value strings must match ClassTimelineAttribute.ClassTimelinePropertyKey
+// and nameof(TimelineMode.FullExecution) in C#.
+function isClassTimelineFullExecution(group) {
+    const test = group.tests && group.tests[0];
+    if (!test || !test.customProperties) return false;
+    return test.customProperties.some(p => p.key === 'tunit.report.timeline' && p.value === 'FullExecution');
+}
+
+function renderSuiteTrace(group) {
+    const className = group.className;
     const suite = suiteSpanByClass[className];
     if (!suite) return '';
     const allSpans = spansByTrace[suite.traceId];
     if (!allSpans) return '';
     const all = getDescendants(allSpans, suite.spanId);
     let filtered;
-    if (data.expandClassTimeline) {
+    if (isClassTimelineFullExecution(group)) {
         // BDD/DependsOn mode: include test-case spans and their non-'test body' children
         // so multi-step flows are visible at the class level.
         filtered = collapseTestBodySpans(all);
@@ -1901,7 +1913,7 @@ function render() {
         html += '<div class="grp-body"><div class="grp-body-inner"><div class="grp-body-pad">';
         if (groupMode === 'class') {
             html += renderClassSummary(g, ft);
-            html += renderSuiteTrace(g.className);
+            html += renderSuiteTrace(g);
         }
         ft.forEach((t,ti)=>{
             html += '<div class="t-row" id="test-'+t.id+'" data-gi="'+gi+'" data-ti="'+ti+'" data-tid="'+t.id+'" style="--row-idx:'+Math.min(ti,7)+'">';

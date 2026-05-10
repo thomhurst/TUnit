@@ -18,7 +18,6 @@ public class TUnitSettingsTests
     private int? _savedMaximumParallelTests;
     private bool _savedDetailedStackTrace;
     private bool _savedFailFast;
-    private bool _savedExpandClassTimeline;
 
     [Before(HookType.Test)]
     public void SnapshotSettings()
@@ -30,7 +29,6 @@ public class TUnitSettingsTests
         _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
         _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
         _savedFailFast = TUnitSettings.Default.Execution.FailFast;
-        _savedExpandClassTimeline = TUnitSettings.Default.Report.ExpandClassTimeline;
     }
 
     [After(HookType.Test)]
@@ -43,7 +41,6 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
         TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
         TUnitSettings.Default.Execution.FailFast = _savedFailFast;
-        TUnitSettings.Default.Report.ExpandClassTimeline = _savedExpandClassTimeline;
     }
 
     [Test]
@@ -56,7 +53,6 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
         await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
-        await Assert.That(TUnitSettings.Default.Report.ExpandClassTimeline).IsFalse();
     }
 
     [Test]

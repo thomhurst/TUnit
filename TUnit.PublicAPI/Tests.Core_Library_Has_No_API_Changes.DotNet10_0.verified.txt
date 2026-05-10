@@ -381,6 +381,15 @@ namespace
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
         public static .ClassMetadata GetOrAdd(string name, .ClassMetadata value) { }
     }
+    [(.Assembly | .Class)]
+    public sealed class ClassTimelineAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    {
+        public ClassTimelineAttribute(. mode) { }
+        public . Mode { get; }
+        public int Order { get; }
+        public  ScopeType { get; }
+        public . OnTestDiscovered(.DiscoveredTestContext context) { }
+    }
     [(.Class | .Method)]
     public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute
     {
@@ -1934,6 +1943,11 @@ namespace .Enums
         Generated = 2,
         Derived = 3,
     }
+    public enum TimelineMode
+    {
+        Collapsed = 0,
+        FullExecution = 1,
+    }
 }
 namespace .Events
 {
@@ -2975,16 +2989,11 @@ namespace .Settings
     {
         public int? MaximumParallelTests { get; set; }
     }
-    public sealed class ReportSettings
-    {
-        public bool ExpandClassTimeline { get; set; }
-    }
     public sealed class TUnitSettings
     {
         public . Display { get; }
         public . Execution { get; }
         public . Parallelism { get; }
-        public . Report { get; }
         public . Timeouts { get; }
     }
     public sealed class TimeoutSettings

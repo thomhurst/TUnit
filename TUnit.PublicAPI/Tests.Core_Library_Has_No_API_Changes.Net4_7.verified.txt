@@ -228,6 +228,15 @@ namespace
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     [(.Assembly | .Class)]
+    public sealed class ClassTimelineAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    {
+        public ClassTimelineAttribute(. mode) { }
+        public . Mode { get; }
+        public int Order { get; }
+        public  ScopeType { get; }
+        public . OnTestDiscovered(.DiscoveredTestContext context) { }
+    }
+    [(.Assembly | .Class)]
     public class ClassConstructorAttribute : .TUnitAttribute
     {
         public ClassConstructorAttribute( classConstructorType) { }
@@ -1872,6 +1881,11 @@ namespace .Enums
         Generated = 2,
         Derived = 3,
     }
+    public enum TimelineMode
+    {
+        Collapsed = 0,
+        FullExecution = 1,
+    }
 }
 namespace .Events
 {
@@ -2896,16 +2910,11 @@ namespace .Settings
     {
         public int? MaximumParallelTests { get; set; }
     }
-    public sealed class ReportSettings
-    {
-        public bool ExpandClassTimeline { get; set; }
-    }
     public sealed class TUnitSettings
     {
         public . Display { get; }
         public . Execution { get; }
         public . Parallelism { get; }
-        public . Report { get; }
         public . Timeouts { get; }
     }
     public sealed class TimeoutSettings
