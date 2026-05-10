@@ -196,7 +196,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 instance = await GetOrCreateInstanceAsync(dataGeneratorMetadata, targetType);
             }
 
-            methodResult = methodInfo.Invoke(instance, Arguments);
+            methodResult = methodInfo.Invoke(instance, BuildInvokeArgs(methodInfo, Arguments));
         }
         else
         {
@@ -322,6 +322,41 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
+    }
+
+    // Reflection's MethodBase.Invoke does not auto-fill optional parameters the way a C# call site does.
+    // The source generator emits a direct C# call (compiler fills defaults) but the reflection fallback
+    // — used for [InheritsTests] generic abstract bases (issue #5879) — must build the args array itself.
+    private static object?[] BuildInvokeArgs(MethodInfo methodInfo, object?[] suppliedArguments)
+    {
+        var parameters = methodInfo.GetParameters();
+        if (parameters.Length == suppliedArguments.Length)
+        {
+            return suppliedArguments;
+        }
+
+        var args = new object?[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (i < suppliedArguments.Length)
+            {
+                args[i] = suppliedArguments[i];
+            }
+            else if (parameters[i].HasDefaultValue)
+            {
+                args[i] = parameters[i].DefaultValue;
+            }
+            else if (parameters[i].ParameterType == typeof(CancellationToken))
+            {
+                args[i] = CancellationToken.None;
+            }
+            else
+            {
+                // More required params than supplied — fall back so Invoke surfaces the original mismatch.
+                return suppliedArguments;
+            }
+        }
+        return args;
     }
 
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)
