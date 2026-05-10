@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TUnit.Mocks.SourceGenerator.Discovery;
 
 namespace TUnit.Mocks.SourceGenerator.Extensions;
 
@@ -86,12 +87,22 @@ internal static class TypeSymbolExtensions
         return builder.ToString();
     }
 
-    public static string GetGeneratedMockNamespace(this INamedTypeSymbol type)
+    public static string GetGeneratedMockNamespace(this INamedTypeSymbol type, Compilation compilation)
     {
         var namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
+        var hasEvents = type.GetMembers().OfType<IEventSymbol>().Any();
+        var fallback = MockNamespaceConflictDetector.HasConflict(compilation, type, hasEvents);
+
+        if (fallback)
+        {
+            return string.IsNullOrEmpty(namespaceName) || namespaceName == "<global namespace>"
+                ? "TUnit.Mocks.Generated"
+                : $"TUnit.Mocks.Generated.{namespaceName}";
+        }
+
         return string.IsNullOrEmpty(namespaceName) || namespaceName == "<global namespace>"
-            ? "TUnit.Mocks.Generated"
-            : $"TUnit.Mocks.Generated.{namespaceName}";
+            ? ""
+            : namespaceName;
     }
 
     public static string GetGeneratedMockBaseName(this INamedTypeSymbol type)

@@ -149,7 +149,7 @@ internal static class MockTypeDiscovery
 
         // Build multi-type model (generates impl + factory only)
         var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes, compilationAssembly);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes, compilationAssembly, compilation);
 
         var additionalInterfaceNames = ImmutableArray.CreateBuilder<string>(additionalTypes.Count);
         foreach (var t in additionalTypes)
@@ -312,7 +312,7 @@ internal static class MockTypeDiscovery
             return null;
 
         int memberIdCounter = 0;
-        var methodModel = MemberDiscovery.CreateDelegateInvokeModel(invokeMethod, ref memberIdCounter);
+        var methodModel = MemberDiscovery.CreateDelegateInvokeModel(invokeMethod, ref memberIdCounter, compilation);
 
         return new MockTypeModel
         {
@@ -356,7 +356,7 @@ internal static class MockTypeDiscovery
 
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
-        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly);
+        var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly, compilation);
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class

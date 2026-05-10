@@ -1653,14 +1653,21 @@ internal static class MockImplBuilder
 
     /// <summary>
     /// Gets the generated namespace for mock types.
-    /// Types in the global namespace go to TUnit.Mocks.Generated;
-    /// namespaced types go to TUnit.Mocks.Generated.{OriginalNamespace}.
+    /// Default: emit into the same namespace as the mocked type. For global-namespace
+    /// types, returns an empty string — callers must skip the <c>namespace { }</c> block.
+    /// Fallback (when <see cref="MockTypeModel.UseFallbackNamespace"/> is true): emit
+    /// into <c>TUnit.Mocks.Generated</c> or <c>TUnit.Mocks.Generated.{Namespace}</c>.
     /// </summary>
     public static string GetMockNamespace(MockTypeModel model)
     {
-        return IsGlobalNamespace(model.Namespace)
-            ? "TUnit.Mocks.Generated"
-            : $"TUnit.Mocks.Generated.{model.Namespace}";
+        if (model.UseFallbackNamespace)
+        {
+            return IsGlobalNamespace(model.Namespace)
+                ? "TUnit.Mocks.Generated"
+                : $"TUnit.Mocks.Generated.{model.Namespace}";
+        }
+
+        return IsGlobalNamespace(model.Namespace) ? "" : model.Namespace;
     }
 
     /// <summary>
