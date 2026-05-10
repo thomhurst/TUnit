@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace TUnit.Mocks.SourceGenerator.Discovery;
@@ -18,7 +17,7 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// </remarks>
 internal static class MockNamespaceConflictDetector
 {
-    public static bool HasConflict(Compilation compilation, INamedTypeSymbol target, bool hasEvents)
+    internal static bool HasConflict(Compilation compilation, INamedTypeSymbol target, bool hasEvents)
     {
         var nsName = target.ContainingNamespace?.ToDisplayString() ?? "";
         var ns = ResolveNamespaceInCompilation(compilation, nsName);
@@ -28,29 +27,33 @@ internal static class MockNamespaceConflictDetector
         }
 
         var typeName = target.Name;
-
-        var collidingNames = new HashSet<string>(System.StringComparer.Ordinal)
-        {
-            $"{typeName}Mock",
-            $"{typeName}Mockable",
-            $"{typeName}MockFactory",
-            $"{typeName}_MockStaticExtension",
-            $"{typeName}_MockMemberExtensions",
-        };
-        if (hasEvents)
-        {
-            collidingNames.Add($"{typeName}_MockEvents");
-            collidingNames.Add($"{typeName}_MockEventsExtensions");
-        }
-
         foreach (var existing in ns.GetTypeMembers())
         {
-            if (collidingNames.Contains(existing.Name))
+            if (IsCollidingName(existing.Name, typeName, hasEvents))
             {
                 return true;
             }
         }
         return false;
+    }
+
+    private static bool IsCollidingName(string existingName, string typeName, bool hasEvents)
+    {
+        if (existingName.Length <= typeName.Length
+            || !existingName.StartsWith(typeName, System.StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var suffix = existingName.AsSpan(typeName.Length);
+        return suffix.SequenceEqual("Mock".AsSpan())
+            || suffix.SequenceEqual("Mockable".AsSpan())
+            || suffix.SequenceEqual("MockFactory".AsSpan())
+            || suffix.SequenceEqual("_MockStaticExtension".AsSpan())
+            || suffix.SequenceEqual("_MockMemberExtensions".AsSpan())
+            || (hasEvents
+                && (suffix.SequenceEqual("_MockEvents".AsSpan())
+                    || suffix.SequenceEqual("_MockEventsExtensions".AsSpan())));
     }
 
     private static INamespaceSymbol? ResolveNamespaceInCompilation(Compilation compilation, string namespaceName)

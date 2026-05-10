@@ -1648,8 +1648,27 @@ internal static class MockImplBuilder
         return sb.ToString();
     }
 
-    private static bool IsGlobalNamespace(string ns)
+    /// <summary>
+    /// Root namespace for fallback-mode mock emission, used when the original namespace
+    /// already contains a colliding type. Forms either <c>TUnit.Mocks.Generated</c>
+    /// (global-namespace targets) or <c>TUnit.Mocks.Generated.{Namespace}</c>.
+    /// </summary>
+    internal const string FallbackNamespaceRoot = "TUnit.Mocks.Generated";
+
+    internal static bool IsGlobalNamespace(string ns)
         => string.IsNullOrEmpty(ns) || ns == "<global namespace>";
+
+    internal static string SelectMockNamespace(string originalNamespace, bool useFallback)
+    {
+        if (useFallback)
+        {
+            return IsGlobalNamespace(originalNamespace)
+                ? FallbackNamespaceRoot
+                : $"{FallbackNamespaceRoot}.{originalNamespace}";
+        }
+
+        return IsGlobalNamespace(originalNamespace) ? "" : originalNamespace;
+    }
 
     /// <summary>
     /// Gets the generated namespace for mock types.
@@ -1659,16 +1678,7 @@ internal static class MockImplBuilder
     /// into <c>TUnit.Mocks.Generated</c> or <c>TUnit.Mocks.Generated.{Namespace}</c>.
     /// </summary>
     public static string GetMockNamespace(MockTypeModel model)
-    {
-        if (model.UseFallbackNamespace)
-        {
-            return IsGlobalNamespace(model.Namespace)
-                ? "TUnit.Mocks.Generated"
-                : $"TUnit.Mocks.Generated.{model.Namespace}";
-        }
-
-        return IsGlobalNamespace(model.Namespace) ? "" : model.Namespace;
-    }
+        => SelectMockNamespace(model.Namespace, model.UseFallbackNamespace);
 
     /// <summary>
     /// Returns a <c>global::</c>-rooted namespace prefix suitable for prepending to a
@@ -1679,10 +1689,10 @@ internal static class MockImplBuilder
     /// for globally-namespaced mock targets.
     /// </summary>
     public static string GetGlobalMockNamespacePrefix(MockTypeModel model)
-    {
-        var ns = GetMockNamespace(model);
-        return ns.Length == 0 ? "global::" : $"global::{ns}.";
-    }
+        => ToGlobalPrefix(GetMockNamespace(model));
+
+    internal static string ToGlobalPrefix(string mockNamespace)
+        => mockNamespace.Length == 0 ? "global::" : $"global::{mockNamespace}.";
 
     /// <summary>
     /// Gets the fully qualified type name to use as a generic type argument.

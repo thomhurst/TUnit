@@ -811,15 +811,15 @@ internal static class MemberDiscovery
 
         var baseName = namedType.OriginalDefinition.GetGeneratedMockBaseName();
         var factoryNamespace = namedType.OriginalDefinition.GetGeneratedMockNamespace(compilation);
-        var nsPrefix = factoryNamespace.Length == 0 ? "" : factoryNamespace + ".";
+        var globalPrefix = Builders.MockImplBuilder.ToGlobalPrefix(factoryNamespace);
 
         if (!namedType.IsGenericType)
         {
-            return $"global::{nsPrefix}{baseName}MockFactory.CreateAutoMock";
+            return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock";
         }
 
         var typeArguments = string.Join(", ", namedType.TypeArguments.Select(x => x.GetFullyQualifiedNameWithNullability()));
-        return $"global::{nsPrefix}{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
+        return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
     }
 
     private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)

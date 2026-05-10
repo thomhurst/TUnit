@@ -90,19 +90,17 @@ internal static class TypeSymbolExtensions
     public static string GetGeneratedMockNamespace(this INamedTypeSymbol type, Compilation compilation)
     {
         var namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
-        var hasEvents = type.GetMembers().OfType<IEventSymbol>().Any();
-        var fallback = MockNamespaceConflictDetector.HasConflict(compilation, type, hasEvents);
-
-        if (fallback)
+        var hasEvents = false;
+        foreach (var member in type.GetMembers())
         {
-            return string.IsNullOrEmpty(namespaceName) || namespaceName == "<global namespace>"
-                ? "TUnit.Mocks.Generated"
-                : $"TUnit.Mocks.Generated.{namespaceName}";
+            if (member is IEventSymbol)
+            {
+                hasEvents = true;
+                break;
+            }
         }
-
-        return string.IsNullOrEmpty(namespaceName) || namespaceName == "<global namespace>"
-            ? ""
-            : namespaceName;
+        var fallback = MockNamespaceConflictDetector.HasConflict(compilation, type, hasEvents);
+        return Builders.MockImplBuilder.SelectMockNamespace(namespaceName, fallback);
     }
 
     public static string GetGeneratedMockBaseName(this INamedTypeSymbol type)
