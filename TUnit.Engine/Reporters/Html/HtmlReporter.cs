@@ -365,7 +365,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             AssemblyName = assemblyName,
             MachineName = Environment.MachineName,
-            Timestamp = FormatTimestamp(DateTimeOffset.UtcNow),
+            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'", CultureInfo.InvariantCulture),
             TUnitVersion = tunitVersion,
             OperatingSystem = RuntimeInformation.OSDescription,
             RuntimeVersion = RuntimeInformation.FrameworkDescription,
@@ -413,15 +413,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 
         return (commitSha, branch, prNumber, repoSlug);
-    }
-
-    private static string FormatTimestamp(DateTimeOffset value)
-    {
-        // Both 'R' and 'u' are culture-invariant by spec; branching is purely for English-reader aesthetics.
-        var utc = value.ToUniversalTime();
-        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en"
-            ? utc.ToString("R")
-            : utc.ToString("u");
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
