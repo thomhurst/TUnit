@@ -366,7 +366,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             AssemblyName = assemblyName,
             MachineName = Environment.MachineName,
-            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'"),
+            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'", CultureInfo.InvariantCulture),
             TUnitVersion = tunitVersion,
             OperatingSystem = RuntimeInformation.OSDescription,
             RuntimeVersion = RuntimeInformation.FrameworkDescription,
