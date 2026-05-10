@@ -217,17 +217,17 @@ internal static class MockImplBuilder
             {
                 // Abstract methods: dispatch through engine (wrapped instance can't have abstract methods by definition,
                 // but we still handle it for consistency)
-                GenerateEngineDispatchBody(writer, method);
+                GenerateEngineDispatchBody(writer, method, model);
             }
             else
             {
                 // Virtual/override methods: try engine first, fall back to wrapped instance
-                GenerateWrapMethodBody(writer, method);
+                GenerateWrapMethodBody(writer, method, model);
             }
         }
     }
 
-    private static void GenerateWrapMethodBody(CodeWriter writer, MockMemberModel method)
+    private static void GenerateWrapMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         // Initialize out parameters
         foreach (var p in method.Parameters)
@@ -249,7 +249,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -260,7 +260,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             if (method.IsValueTask)
             {
                 writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -288,7 +288,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
             }
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             if (method.IsValueTask)
             {
                 writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -308,11 +308,11 @@ internal static class MockImplBuilder
             writer.IncreaseIndent();
             if (method.SpanReturnElementType is not null)
             {
-                EmitSpanReturnReadback(writer, method);
+                EmitSpanReturnReadback(writer, method, model);
             }
             else
             {
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return default;");
             }
             writer.DecreaseIndent();
@@ -325,7 +325,7 @@ internal static class MockImplBuilder
             writer.AppendLine("{");
             writer.IncreaseIndent();
             writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -336,7 +336,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, "__result", autoMockFactory)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -571,7 +571,7 @@ internal static class MockImplBuilder
                 // Return types are incompatible — dispatch through the engine with a dedicated member id.
                 using (writer.Block($"{signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
                 {
-                    GenerateEngineDispatchBody(writer, method);
+                    GenerateEngineDispatchBody(writer, method, model);
                 }
             }
             return;
@@ -579,7 +579,7 @@ internal static class MockImplBuilder
 
         using (writer.Block($"public {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
         {
-            GenerateEngineDispatchBody(writer, method);
+            GenerateEngineDispatchBody(writer, method, model);
         }
     }
 
@@ -599,17 +599,17 @@ internal static class MockImplBuilder
             if (method.IsAbstractMember)
             {
                 // Abstract methods: same as interface methods - dispatch through engine
-                GenerateEngineDispatchBody(writer, method);
+                GenerateEngineDispatchBody(writer, method, model);
             }
             else
             {
                 // Virtual/override methods: try engine first, fall back to base
-                GeneratePartialMethodBody(writer, method);
+                GeneratePartialMethodBody(writer, method, model);
             }
         }
     }
 
-    private static void GeneratePartialMethodBody(CodeWriter writer, MockMemberModel method)
+    private static void GeneratePartialMethodBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         // Initialize out parameters
         foreach (var p in method.Parameters)
@@ -632,7 +632,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -644,7 +644,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             EmitRawReturnCheck(writer, method);
             if (method.IsValueTask)
             {
@@ -674,7 +674,7 @@ internal static class MockImplBuilder
                 writer.AppendLine("{");
                 writer.IncreaseIndent();
             }
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             EmitRawReturnCheck(writer, method);
             if (method.IsValueTask)
             {
@@ -696,11 +696,11 @@ internal static class MockImplBuilder
             writer.IncreaseIndent();
             if (method.SpanReturnElementType is not null)
             {
-                EmitSpanReturnReadback(writer, method);
+                EmitSpanReturnReadback(writer, method, model);
             }
             else
             {
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return default;");
             }
             writer.DecreaseIndent();
@@ -713,7 +713,7 @@ internal static class MockImplBuilder
             writer.AppendLine("{");
             writer.IncreaseIndent();
             writer.AppendLine($"var __result = ({method.ReturnType})__rawResult!;");
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -725,7 +725,7 @@ internal static class MockImplBuilder
             writer.AppendLine($"if ({EmitTryHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, "__result", autoMockFactory)})");
             writer.AppendLine("{");
             writer.IncreaseIndent();
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
             writer.DecreaseIndent();
             writer.AppendLine("}");
@@ -733,7 +733,7 @@ internal static class MockImplBuilder
         }
     }
 
-    private static void GenerateEngineDispatchBody(CodeWriter writer, MockMemberModel method)
+    private static void GenerateEngineDispatchBody(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         // Initialize out parameters
         foreach (var p in method.Parameters)
@@ -754,7 +754,7 @@ internal static class MockImplBuilder
         {
             // Pure void method
             writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)};");
-            EmitOutRefReadback(writer, method);
+            EmitOutRefReadback(writer, method, model);
         }
         else if (method.IsVoid && method.IsAsync)
         {
@@ -762,7 +762,7 @@ internal static class MockImplBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)};");
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
                 {
@@ -800,7 +800,7 @@ internal static class MockImplBuilder
                 {
                     writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, autoMockFactory)};");
                 }
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
                 {
@@ -832,11 +832,11 @@ internal static class MockImplBuilder
             if (method.SpanReturnElementType is not null)
             {
                 // Span return: read back out/ref params AND extract return value from OutRefContext index -1
-                EmitSpanReturnReadback(writer, method);
+                EmitSpanReturnReadback(writer, method, model);
             }
             else
             {
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return default;");
             }
         }
@@ -847,7 +847,7 @@ internal static class MockImplBuilder
             if (hasOutRef)
             {
                 writer.AppendLine($"var __result = ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null")}!;");
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return __result;");
             }
             else
@@ -861,7 +861,7 @@ internal static class MockImplBuilder
             if (hasOutRef)
             {
                 writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory)};");
-                EmitOutRefReadback(writer, method);
+                EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return __result;");
             }
             else
@@ -1413,14 +1413,14 @@ internal static class MockImplBuilder
     /// <summary>
     /// Emits code to read back out/ref parameter values from OutRefContext after an engine call.
     /// </summary>
-    internal static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method)
+    internal static void EmitOutRefReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         if (!HasOutRefParams(method)) return;
 
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            EmitOutRefParamAssignments(writer, method);
+            EmitOutRefParamAssignments(writer, method, model);
         }
     }
 
@@ -1446,12 +1446,12 @@ internal static class MockImplBuilder
     /// read back out/ref params, extract span return value, and return.
     /// Always ends with "return default;" as fallback.
     /// </summary>
-    private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method)
+    private static void EmitSpanReturnReadback(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         writer.AppendLine("var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();");
         using (writer.Block("if (__outRef is not null)"))
         {
-            EmitOutRefParamAssignments(writer, method);
+            EmitOutRefParamAssignments(writer, method, model);
             writer.AppendLine($"if (__outRef.TryGetValue(global::TUnit.Mocks.Setup.OutRefContext.SpanReturnValueIndex, out var __spanRet)) return new {method.ReturnType}(({method.SpanReturnElementType}[])__spanRet!);");
         }
         writer.AppendLine("return default;");
@@ -1461,26 +1461,44 @@ internal static class MockImplBuilder
     /// Emits individual out/ref parameter assignments from the __outRef dictionary.
     /// Shared by <see cref="EmitOutRefReadback"/> and <see cref="EmitSpanReturnReadback"/>.
     /// </summary>
-    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method)
+    private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
+        var canInvokeRefStructSetter = SupportsClosedRefStructSetter(model, method);
+        string? safeName = null;
+        string? nsPrefix = null;
+
         for (int i = 0; i < method.Parameters.Length; i++)
         {
             var p = method.Parameters[i];
-            if (p.IsRefStruct && p.SpanElementType is null) continue; // non-span ref structs can't be cast from object
-            if (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref)
+            if (p.Direction != ParameterDirection.Out && p.Direction != ParameterDirection.Ref) continue;
+
+            if (p.IsNonSpanRefStruct)
             {
-                if (p.SpanElementType is not null)
-                {
-                    // Span types: reconstruct from stored array
-                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
-                }
-                else
-                {
-                    writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
-                }
+                if (!canInvokeRefStructSetter) continue;
+                safeName ??= GetCompositeShortSafeName(model);
+                nsPrefix ??= GetGlobalMockNamespacePrefix(model);
+                var delegateFqn = nsPrefix + GetOutRefSetterDelegateName(safeName, method, p);
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {p.Name});");
+            }
+            else if (p.SpanElementType is not null)
+            {
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
+            }
+            else
+            {
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = ({p.FullyQualifiedType})__v{i}!;");
             }
         }
     }
+
+    /// <summary>
+    /// True when the generator can emit a closed-signature delegate setter for non-span ref
+    /// struct out/ref params. Generic mock types and generic methods are excluded — their
+    /// param types may reference type parameters that aren't fully bound at delegate-decl
+    /// time and would require an <c>allows ref struct</c> constraint (C# 13, net9.0+ runtime).
+    /// </summary>
+    internal static bool SupportsClosedRefStructSetter(MockTypeModel model, MockMemberModel method)
+        => !method.IsGenericMethod && model.TypeParameters.Length == 0;
 
     internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {
@@ -1570,6 +1588,18 @@ internal static class MockImplBuilder
 
         return SanitizeIdentifier(name);
     }
+
+    /// <summary>Unqualified name of the generated delegate type used to plumb a non-span ref-struct out/ref value.</summary>
+    public static string GetOutRefSetterDelegateName(MockTypeModel model, MockMemberModel method, MockParameterModel param)
+        => GetOutRefSetterDelegateName(GetCompositeShortSafeName(model), method, param);
+
+    /// <summary>Variant that reuses a precomputed safe name to avoid recomputing it per param.</summary>
+    public static string GetOutRefSetterDelegateName(string safeName, MockMemberModel method, MockParameterModel param)
+        => $"{safeName}_{method.Name}_M{method.MemberId}_{MockMembersBuilder.ToPascalCase(param.Name)}_{param.Direction.PascalLabel()}Setter";
+
+    /// <summary>Fully qualified (<c>global::</c>-rooted) reference to the delegate.</summary>
+    public static string GetOutRefSetterDelegateFqn(MockTypeModel model, MockMemberModel method, MockParameterModel param)
+        => GetGlobalMockNamespacePrefix(model) + GetOutRefSetterDelegateName(model, method, param);
 
     /// <summary>
     /// Gets a composite short safe name that includes additional interfaces for multi-interface mocks.

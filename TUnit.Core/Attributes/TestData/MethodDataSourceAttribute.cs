@@ -196,7 +196,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 instance = await GetOrCreateInstanceAsync(dataGeneratorMetadata, targetType);
             }
 
-            methodResult = methodInfo.Invoke(instance, Arguments);
+            methodResult = methodInfo.Invoke(instance, BuildInvokeArgs(methodInfo, Arguments));
         }
         else
         {
@@ -322,6 +322,38 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
+    }
+
+    // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.
+    private static object?[] BuildInvokeArgs(MethodInfo methodInfo, object?[] suppliedArguments)
+    {
+        var parameters = methodInfo.GetParameters();
+        if (parameters.Length <= suppliedArguments.Length)
+        {
+            // Exact match passes through; surplus supplied args are left to Invoke to surface as a mismatch.
+            return suppliedArguments;
+        }
+
+        var args = new object?[parameters.Length];
+        Array.Copy(suppliedArguments, args, suppliedArguments.Length);
+        for (var i = suppliedArguments.Length; i < parameters.Length; i++)
+        {
+            var p = parameters[i];
+            if (p.HasDefaultValue)
+            {
+                args[i] = Type.Missing;
+            }
+            else if (p.ParameterType == typeof(CancellationToken))
+            {
+                args[i] = CancellationToken.None;
+            }
+            else
+            {
+                // Required param missing — fall back so Invoke surfaces the original mismatch.
+                return suppliedArguments;
+            }
+        }
+        return args;
     }
 
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)
