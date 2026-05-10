@@ -1,5 +1,6 @@
 #if NET
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace TUnit.Core;
 
@@ -95,6 +96,15 @@ internal static class TraceRegistry
         if (TraceToContextId.TryGetValue(sourceTraceId, out var contextId))
         {
             TraceToContextId.TryAdd(derivedTraceId, contextId);
+        }
+        else
+        {
+            // Source trace had test associations but no context-id mapping. The derived
+            // trace's TraceToTests entry will work for span correlation, but log routing
+            // through GetContextId will return null and ProcessLogs will silently drop
+            // records. Surface that here so a missing log line in the report points at a
+            // concrete cause instead of "nothing happened".
+            Trace.WriteLine($"[TUnit.Core] TraceRegistry.TryRegisterDerivedTrace: source trace {sourceTraceId} has no context-id mapping; logs for derived trace {derivedTraceId} will not be routed to a test.");
         }
 
         return true;

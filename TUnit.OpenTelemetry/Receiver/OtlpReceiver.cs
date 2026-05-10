@@ -133,6 +133,13 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// this, fast tests can finish and tear down their AppHost before exporters drain, dropping
     /// the trailing telemetry the report is meant to show.
     /// </summary>
+    /// <remarks>
+    /// Best-effort heuristic: the drain returns as soon as no new requests arrive for the
+    /// stable window. Spans the SUT exports after the drain returns can still be missed —
+    /// this isn't an explicit OTel flush, since exporters in another process can't be
+    /// signalled directly. Increase <c>TUNIT_OTLP_DRAIN_MS</c> if your exporter's batch
+    /// schedule is longer than the default 2s.
+    /// </remarks>
     /// <param name="window">Maximum total time to wait. Defaults to <see cref="DefaultDrainWindow"/>.</param>
     /// <param name="cancellationToken">Stops the wait early.</param>
     public async Task DrainAsync(TimeSpan? window = null, CancellationToken cancellationToken = default)
@@ -181,23 +188,22 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
     /// <summary>
     /// Default drain window applied by <see cref="DrainAsync"/> when no value is supplied.
-    /// Honours the <c>TUNIT_OTLP_DRAIN_MS</c> environment variable so users with slow exporters
-    /// can extend the wait without recompiling.
+    /// Honours the <c>TUNIT_OTLP_DRAIN_MS</c> environment variable, captured once at type
+    /// init so repeated reads don't pay env-var lookup cost.
     /// </summary>
-    public static TimeSpan DefaultDrainWindow
-    {
-        get
-        {
-            var raw = Environment.GetEnvironmentVariable(DrainWindowEnvVar);
-            if (!string.IsNullOrEmpty(raw)
-                && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var ms)
-                && ms >= 0)
-            {
-                return TimeSpan.FromMilliseconds(ms);
-            }
+    public static TimeSpan DefaultDrainWindow { get; } = ResolveDefaultDrainWindow();
 
-            return TimeSpan.FromSeconds(2);
+    private static TimeSpan ResolveDefaultDrainWindow()
+    {
+        var raw = Environment.GetEnvironmentVariable(DrainWindowEnvVar);
+        if (!string.IsNullOrEmpty(raw)
+            && int.TryParse(raw, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var ms)
+            && ms >= 0)
+        {
+            return TimeSpan.FromMilliseconds(ms);
         }
+
+        return TimeSpan.FromSeconds(2);
     }
 
     private void TrackTask(Task task)

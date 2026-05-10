@@ -131,9 +131,10 @@ public class HtmlReporterTests
     [Test]
     public void GenerateHtml_RoundTrips_TestBodySpans_AndChildren_Through_EmbeddedData()
     {
-        // Exercise the data path the class timeline depends on: a 'test body' span with
-        // children must reach the report's embedded JSON so the client-side collapse logic
-        // has the data it needs to re-parent children to the test-case span.
+        // Server-side data path only — the client-side collapseTestBodySpans JS runs in the
+        // browser and is not exercised here. This test pins down the contract the JS relies
+        // on: a 'test body' span with children survives serialisation into the embedded
+        // JSON so the JS can re-parent children to the test-case span at render time.
         const string traceId = "0123456789abcdef0123456789abcdef";
         var spans = new[]
         {

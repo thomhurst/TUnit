@@ -1610,6 +1610,7 @@ function getDescendants(traceSpans, rootId) {
     return traceSpans.filter(s => included.has(s.spanId));
 }
 
+// 'test body' must match TUnitActivitySource.SpanTestBody in C#.
 function collapseTestBodySpans(spans) {
     if (!spans || !spans.length) return [];
     const byId = {};

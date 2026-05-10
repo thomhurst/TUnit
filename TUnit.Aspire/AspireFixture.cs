@@ -435,8 +435,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var pair in raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
+            // Split on the first '=' only — base64 tokens (api keys) commonly carry trailing
+            // '=' padding that must stay in the value, and the OTEL spec permits empty values
+            // (key=) so we don't reject them.
             var eq = pair.IndexOf('=');
-            if (eq <= 0 || eq == pair.Length - 1)
+            if (eq <= 0)
             {
                 continue;
             }
