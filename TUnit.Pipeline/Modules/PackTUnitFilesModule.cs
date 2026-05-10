@@ -22,10 +22,6 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
     // Remove entries from this set once a package is considered stable.
     private static readonly HashSet<string> BetaPackages =
     [
-        "TUnit.Mocks",
-        "TUnit.Mocks.Assertions",
-        "TUnit.Mocks.Http",
-        "TUnit.Mocks.Logging",
         "TUnit.Assertions.Should"
     ];
 

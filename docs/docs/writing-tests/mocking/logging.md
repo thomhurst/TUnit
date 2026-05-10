@@ -7,7 +7,7 @@ sidebar_position: 7
 `TUnit.Mocks.Logging` provides `MockLogger` — a simple `ILogger` implementation that captures log entries for inspection and verification.
 
 ```bash
-dotnet add package TUnit.Mocks.Logging --prerelease
+dotnet add package TUnit.Mocks.Logging
 ```
 
 :::tip No Source Generation Needed

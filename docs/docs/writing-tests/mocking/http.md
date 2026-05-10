@@ -7,7 +7,7 @@ sidebar_position: 6
 `TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.
 
 ```bash
-dotnet add package TUnit.Mocks.Http --prerelease
+dotnet add package TUnit.Mocks.Http
 ```
 
 ## Getting Started
