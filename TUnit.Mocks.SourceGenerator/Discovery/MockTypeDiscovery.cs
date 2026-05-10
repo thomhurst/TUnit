@@ -177,8 +177,7 @@ internal static class MockTypeDiscovery
             Constructors = singleTypeModel.Constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
             IsPublic = IsEffectivelyPublic(namedType),
-            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
-                compilation, namedType, hasEvents: events.Length > 0)
+            UseFallbackNamespace = singleTypeModel.UseFallbackNamespace
         };
 
         return ImmutableArray.Create(singleTypeModel, multiTypeModel);
