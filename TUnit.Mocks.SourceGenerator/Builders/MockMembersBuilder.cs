@@ -135,23 +135,23 @@ internal static class MockMembersBuilder
     }
 
     /// <summary>
-    /// Emits namespace-scoped delegate types for non-span ref struct out/ref parameters.
-    /// These cannot be boxed into the <see cref="System.Collections.Generic.Dictionary{Int32, Object}"/>
-    /// used by <c>OutRefContext</c>, so the typed setter accepts a delegate instead and the
-    /// generated mock implementation invokes the delegate on the actual <c>out</c>/<c>ref</c> slot.
+    /// Emits namespace-scoped delegate types so non-span ref struct out/ref values can travel
+    /// through <c>OutRefContext</c>'s <c>object?</c> dictionary — the delegate is the reference
+    /// type that gets boxed; the ref struct itself never is.
     /// </summary>
     private static void EmitNonSpanRefStructSetterDelegates(CodeWriter writer, MockTypeModel model, MockMemberModel method)
     {
-        if (method.IsGenericMethod || model.TypeParameters.Length > 0) return;
+        if (!MockImplBuilder.SupportsClosedRefStructSetter(model, method)) return;
 
+        string? safeName = null;
         foreach (var param in method.Parameters)
         {
             if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref) continue;
-            if (!param.IsRefStruct || param.SpanElementType is not null) continue;
+            if (!param.IsNonSpanRefStruct) continue;
 
-            var name = MockImplBuilder.GetOutRefSetterDelegateName(model, method, param);
-            var dir = param.Direction == ParameterDirection.Out ? "out" : "ref";
-            writer.AppendLine($"{model.Visibility} delegate void {name}({dir} {param.FullyQualifiedType} value);");
+            safeName ??= MockImplBuilder.GetCompositeShortSafeName(model);
+            var name = MockImplBuilder.GetOutRefSetterDelegateName(safeName, method, param);
+            writer.AppendLine($"{model.Visibility} delegate void {name}({param.Direction.RefKeyword()} {param.FullyQualifiedType} value);");
         }
     }
 
@@ -622,42 +622,29 @@ internal static class MockMembersBuilder
 
     private static void GenerateTypedOutRefMethods(CodeWriter writer, EquatableArray<MockParameterModel> allParameters, string wrapperName, MockTypeModel model, MockMemberModel method)
     {
-        var canEmitRefStructSetter = !method.IsGenericMethod && model.TypeParameters.Length == 0;
+        var canEmitRefStructSetter = MockImplBuilder.SupportsClosedRefStructSetter(model, method);
+        string? safeName = null;
+        string? nsPrefix = null;
 
         for (int i = 0; i < allParameters.Length; i++)
         {
             var param = allParameters[i];
-            if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref)
-            {
-                continue;
-            }
+            if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref) continue;
+            if (param.IsNonSpanRefStruct && !canEmitRefStructSetter) continue;
 
-            // Non-span ref structs can't be boxed: only emit when we can plumb a typed delegate
-            // (closed-signature, declared at namespace scope, referenced from the impl/bridge).
-            // Skip generic mock types and generic methods for now — those would require generic
-            // delegate types with `allows ref struct` constraints (C# 13) which the netstandard2.0
-            // target can't reliably emit.
-            if (param.IsRefStruct && param.SpanElementType is null && !canEmitRefStructSetter)
-            {
-                continue;
-            }
-
-            var prefix = param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef";
-            var methodName = prefix + ToPascalCase(param.Name);
-            var dirLabel = param.Direction == ParameterDirection.Out ? "out" : "ref";
+            var methodName = (param.Direction == ParameterDirection.Out ? "SetsOut" : "SetsRef") + ToPascalCase(param.Name);
+            var dirLabel = param.Direction.RefKeyword();
 
             writer.AppendLine($"/// <summary>Sets the '{param.Name}' {dirLabel} parameter to the specified value when this setup matches.</summary>");
             if (param.SpanElementType is not null)
             {
-                // Span types: convert to array for storage, reconstruct at invocation time
                 writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}.ToArray()); return this; }}");
             }
             else if (param.IsRefStruct)
             {
-                // Non-span ref structs: accept a typed delegate (closed signature) declared at
-                // namespace scope. The delegate itself is a reference type, so the existing
-                // `Dictionary<int, object?>` storage in OutRefContext accepts it unchanged.
-                var delegateFqn = MockImplBuilder.GetOutRefSetterDelegateFqn(model, method, param);
+                safeName ??= MockImplBuilder.GetCompositeShortSafeName(model);
+                nsPrefix ??= MockImplBuilder.GetGlobalMockNamespacePrefix(model);
+                var delegateFqn = nsPrefix + MockImplBuilder.GetOutRefSetterDelegateName(safeName, method, param);
                 writer.AppendLine($"public {wrapperName} {methodName}({delegateFqn} setter) {{ EnsureSetup().SetsOutParameter({i}, setter); return this; }}");
             }
             else
@@ -667,7 +654,7 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static string ToPascalCase(string name)
+    internal static string ToPascalCase(string name)
     {
         if (name.StartsWith("@")) name = name[1..];
         return string.IsNullOrEmpty(name) ? name : char.ToUpperInvariant(name[0]) + name[1..];

@@ -1463,25 +1463,25 @@ internal static class MockImplBuilder
     /// </summary>
     private static void EmitOutRefParamAssignments(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
-        var canInvokeRefStructSetter = !method.IsGenericMethod && model.TypeParameters.Length == 0;
+        var canInvokeRefStructSetter = SupportsClosedRefStructSetter(model, method);
+        string? safeName = null;
+        string? nsPrefix = null;
 
         for (int i = 0; i < method.Parameters.Length; i++)
         {
             var p = method.Parameters[i];
             if (p.Direction != ParameterDirection.Out && p.Direction != ParameterDirection.Ref) continue;
 
-            if (p.IsRefStruct && p.SpanElementType is null)
+            if (p.IsNonSpanRefStruct)
             {
-                // Non-span ref structs can't be stored as object — the setter site instead
-                // accepts a typed delegate; invoke it directly on the out/ref slot.
                 if (!canInvokeRefStructSetter) continue;
-                var delegateFqn = GetOutRefSetterDelegateFqn(model, method, p);
-                var dirKeyword = p.Direction == ParameterDirection.Out ? "out" : "ref";
-                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({dirKeyword} {p.Name});");
+                safeName ??= GetCompositeShortSafeName(model);
+                nsPrefix ??= GetGlobalMockNamespacePrefix(model);
+                var delegateFqn = nsPrefix + GetOutRefSetterDelegateName(safeName, method, p);
+                writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i}) && __v{i} is {delegateFqn} __d{i}) __d{i}({p.Direction.RefKeyword()} {p.Name});");
             }
             else if (p.SpanElementType is not null)
             {
-                // Span types: reconstruct from stored array
                 writer.AppendLine($"if (__outRef.TryGetValue({i}, out var __v{i})) {p.Name} = new {p.FullyQualifiedType}(({p.SpanElementType}[])__v{i}!);");
             }
             else
@@ -1490,6 +1490,15 @@ internal static class MockImplBuilder
             }
         }
     }
+
+    /// <summary>
+    /// True when the generator can emit a closed-signature delegate setter for non-span ref
+    /// struct out/ref params. Generic mock types and generic methods are excluded — their
+    /// param types may reference type parameters that aren't fully bound at delegate-decl
+    /// time and would require an <c>allows ref struct</c> constraint (C# 13, net9.0+ runtime).
+    /// </summary>
+    internal static bool SupportsClosedRefStructSetter(MockTypeModel model, MockMemberModel method)
+        => !method.IsGenericMethod && model.TypeParameters.Length == 0;
 
     internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {
@@ -1580,34 +1589,17 @@ internal static class MockImplBuilder
         return SanitizeIdentifier(name);
     }
 
-    /// <summary>
-    /// Returns the unqualified name of the generated delegate type used to plumb a non-span
-    /// ref-struct <c>out</c>/<c>ref</c> parameter value across the mock setup/invocation boundary.
-    /// The delegate is declared at namespace scope in the <c>_MockMembers.g.cs</c> file with a
-    /// matching closed signature, and referenced from the impl/bridge readback code by its
-    /// fully-qualified name (see <see cref="GetOutRefSetterDelegateFqn"/>).
-    /// </summary>
+    /// <summary>Unqualified name of the generated delegate type used to plumb a non-span ref-struct out/ref value.</summary>
     public static string GetOutRefSetterDelegateName(MockTypeModel model, MockMemberModel method, MockParameterModel param)
-    {
-        var safeName = GetCompositeShortSafeName(model);
-        var dir = param.Direction == ParameterDirection.Out ? "Out" : "Ref";
-        var paramPart = ToPascalCaseSetter(param.Name);
-        return $"{safeName}_{method.Name}_M{method.MemberId}_{paramPart}_{dir}Setter";
-    }
+        => GetOutRefSetterDelegateName(GetCompositeShortSafeName(model), method, param);
 
-    /// <summary>
-    /// Fully qualified (<c>global::</c>-rooted) reference to the delegate emitted by
-    /// <see cref="GetOutRefSetterDelegateName"/> — suitable for use in any generated file
-    /// that shares the mock namespace.
-    /// </summary>
+    /// <summary>Variant that reuses a precomputed safe name to avoid recomputing it per param.</summary>
+    public static string GetOutRefSetterDelegateName(string safeName, MockMemberModel method, MockParameterModel param)
+        => $"{safeName}_{method.Name}_M{method.MemberId}_{MockMembersBuilder.ToPascalCase(param.Name)}_{param.Direction.PascalLabel()}Setter";
+
+    /// <summary>Fully qualified (<c>global::</c>-rooted) reference to the delegate.</summary>
     public static string GetOutRefSetterDelegateFqn(MockTypeModel model, MockMemberModel method, MockParameterModel param)
         => GetGlobalMockNamespacePrefix(model) + GetOutRefSetterDelegateName(model, method, param);
-
-    private static string ToPascalCaseSetter(string name)
-    {
-        if (name.Length > 0 && name[0] == '@') name = name.Substring(1);
-        return name.Length == 0 ? name : char.ToUpperInvariant(name[0]) + name.Substring(1);
-    }
 
     /// <summary>
     /// Gets a composite short safe name that includes additional interfaces for multi-interface mocks.

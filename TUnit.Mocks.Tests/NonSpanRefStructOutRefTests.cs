@@ -30,12 +30,6 @@ public interface IMixedRefStruct
     void DoMixed(out int count, out Marker marker, ref ReadOnlySpan<byte> buffer);
 }
 
-/// <summary>
-/// Tests for non-span ref struct out/ref parameters. These cannot be boxed for
-/// storage in <c>OutRefContext</c>, so the source generator emits a typed
-/// delegate setter and invokes the delegate on the actual out/ref slot at
-/// invocation time.
-/// </summary>
 public class NonSpanRefStructOutRefTests
 {
     [Test]
@@ -45,6 +39,7 @@ public class NonSpanRefStructOutRefTests
         mock.Produce().SetsOutMarker((out Marker m) => m = new Marker { Value = 42, Tag = 0xAB });
 
         mock.Object.Produce(out var marker);
+        // Hoist before any await — ref structs can't cross an async state-machine boundary.
         var value = marker.Value;
         var tag = marker.Tag;
 
