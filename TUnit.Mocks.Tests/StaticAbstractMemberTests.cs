@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Mocks;
 using TUnit.Mocks.Generated;
-using TUnit.Mocks.Generated.TUnit.Mocks.Tests;
 
 // Discovery: typeof() does not trigger CS8920, so this is safe for interfaces
 // with static abstract members. The generator produces a bridge interface
