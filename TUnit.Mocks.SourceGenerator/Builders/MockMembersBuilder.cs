@@ -1267,14 +1267,22 @@ internal static class MockMembersBuilder
     {
         var userNames = GetUserMemberNames(model);
 
+        // Cache one Contains() per polyfill name and reuse for both the early-return guard and
+        // the emission below. Each `emitX` is true when the corresponding polyfill SHOULD emit
+        // (i.e. user doesn't already declare that name).
+        var emitMethods = MethodPolyfills.Where(p => !userNames.Contains(p.Name)).ToArray();
+        var emitInState = !userNames.Contains("InState");
+        var emitInvocations = !userNames.Contains("Invocations");
+        var emitBehavior = !userNames.Contains("Behavior");
+        var emitDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
+
         // Skip entirely when every polyfill name collides with a user member — keeps callers
         // from emitting a stray blank line before an empty #if/#endif block.
-        var anyMethod = MethodPolyfills.Any(p => !userNames.Contains(p.Name))
-            || !userNames.Contains("InState");
-        var anyProperty = !userNames.Contains("Invocations")
-            || !userNames.Contains("Behavior")
-            || !userNames.Contains("DefaultValueProvider");
-        if (!anyMethod && !anyProperty) return;
+        if (emitMethods.Length == 0 && !emitInState
+            && !emitInvocations && !emitBehavior && !emitDefaultValueProvider)
+        {
+            return;
+        }
 
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
@@ -1285,9 +1293,8 @@ internal static class MockMembersBuilder
 
         bool first = true;
 
-        foreach (var (name, ret, parms, fwd) in MethodPolyfills)
+        foreach (var (name, ret, parms, fwd) in emitMethods)
         {
-            if (userNames.Contains(name)) continue;
             if (!first) writer.AppendLine();
             first = false;
             var paramList = string.IsNullOrEmpty(parms) ? receiverParam : $"{receiverParam}, {parms}";
@@ -1297,7 +1304,7 @@ internal static class MockMembersBuilder
         }
 
         // InState takes an Action<Mock<T>> — emit separately so the generic argument is correct.
-        if (!userNames.Contains("InState"))
+        if (emitInState)
         {
             if (!first) writer.AppendLine();
             first = false;
@@ -1306,31 +1313,28 @@ internal static class MockMembersBuilder
             writer.AppendLine($"    => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);");
         }
 
-        // Property polyfills — emit only if at least one is reachable. Uses C# 14 extension
-        // block syntax so users can write mock.Invocations rather than mock.Invocations().
-        bool hasInvocations = !userNames.Contains("Invocations");
-        bool hasBehavior = !userNames.Contains("Behavior");
-        bool hasDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
-        if (hasInvocations || hasBehavior || hasDefaultValueProvider)
+        // Property polyfills via C# 14 extension block so users write mock.Invocations rather
+        // than mock.Invocations().
+        if (emitInvocations || emitBehavior || emitDefaultValueProvider)
         {
             if (!first) writer.AppendLine();
             using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> mock){constraints}"))
             {
                 bool firstProp = true;
-                if (hasInvocations)
+                if (emitInvocations)
                 {
                     writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);");
                     firstProp = false;
                 }
-                if (hasBehavior)
+                if (emitBehavior)
                 {
                     if (!firstProp) writer.AppendLine();
                     writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);");
                     firstProp = false;
                 }
-                if (hasDefaultValueProvider)
+                if (emitDefaultValueProvider)
                 {
                     if (!firstProp) writer.AppendLine();
                     writer.AppendLine(PriorityMinusOneAttribute);
