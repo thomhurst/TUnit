@@ -46,7 +46,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     public int Port { get; }
 
     /// <summary>
-    /// The number of POST requests successfully processed.
+    /// Total POST requests received, including those rejected (e.g. gRPC content-type)
+    /// before signal-specific processing. Use the per-signal counters
+    /// (<c>LogsRequests</c>, <c>TracesRequests</c>, <c>MetricsRequests</c>, <c>GrpcRejected</c>)
+    /// on <see cref="OtlpReceiverDiagnostics"/> for finer-grained breakdown.
     /// </summary>
     internal int RequestCount => _diagnostics.TotalRequests;
 

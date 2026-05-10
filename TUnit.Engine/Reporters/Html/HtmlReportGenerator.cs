@@ -1629,6 +1629,8 @@ function collapseTestBodySpans(spans) {
         .map(function(s) {
             if (!s.parentSpanId || !testBodyIds.has(s.parentSpanId)) return s;
             const testBody = byId[s.parentSpanId];
+            // testBody.parentSpanId is the test-case span in TUnit's model — null fallback
+            // is defensive only; a parentless test-body span shouldn't occur in practice.
             return {
                 ...s,
                 parentSpanId: testBody && testBody.parentSpanId ? testBody.parentSpanId : null

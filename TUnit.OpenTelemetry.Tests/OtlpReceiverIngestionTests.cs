@@ -217,9 +217,11 @@ public class OtlpReceiverIngestionTests
         await latePost;
 
         await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
-        // The drain must have observed the late request — i.e., it didn't return at the
-        // 250ms stable window before the 200ms-delayed POST landed.
-        await Assert.That(drainElapsed).IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(400));
+        // The drain must have waited past the first 250ms stable window — otherwise the
+        // 200ms-delayed POST would have landed after the drain returned. Lower bound is
+        // 350ms to leave headroom for CI scheduling jitter; the real invariant is "drain
+        // didn't return at ~250ms".
+        await Assert.That(drainElapsed).IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(350));
         // And it must respect the cap — no point waiting indefinitely once quiet.
         await Assert.That(drainElapsed).IsLessThan(TimeSpan.FromSeconds(3));
     }
