@@ -139,6 +139,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// this isn't an explicit OTel flush, since exporters in another process can't be
     /// signalled directly. Increase <c>TUNIT_OTLP_DRAIN_MS</c> if your exporter's batch
     /// schedule is longer than the default 2s.
+    /// <para>
+    /// The internal stable window (250&#160;ms of inactivity) is fixed; only the total cap
+    /// is configurable via <c>TUNIT_OTLP_DRAIN_MS</c>.
+    /// </para>
     /// </remarks>
     /// <param name="window">Maximum total time to wait. Defaults to <see cref="DefaultDrainWindow"/>.</param>
     /// <param name="cancellationToken">Stops the wait early.</param>

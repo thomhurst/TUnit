@@ -1611,6 +1611,9 @@ function getDescendants(traceSpans, rootId) {
 }
 
 // 'test body' must match TUnitActivitySource.SpanTestBody in C#.
+// Used by renderTrace (per-test view, always) and by renderSuiteTrace only when
+// data.expandClassTimeline is true. The default class-timeline branch excludes
+// test-case spans + their entire subtrees, so no test-body span survives to collapse.
 function collapseTestBodySpans(spans) {
     if (!spans || !spans.length) return [];
     const byId = {};

@@ -71,8 +71,15 @@ internal static class TraceRegistry
     /// </summary>
     /// <returns>
     /// <c>true</c> when the derived trace was associated with at least one test from the
-    /// source trace, or when both trace IDs are the same and the source trace is already
-    /// registered; otherwise, <c>false</c>.
+    /// source trace (span correlation), or when both trace IDs are the same and the source
+    /// trace is already registered; otherwise, <c>false</c>.
+    /// <para>
+    /// A <c>true</c> result does NOT guarantee log routing — if the source trace has no
+    /// context-id mapping (only added by the 3-arg <see cref="Register(string,string,string)"/>),
+    /// span correlation succeeds but log records for the derived trace fall through
+    /// <see cref="GetContextId"/> and are dropped. The case is logged via
+    /// <see cref="Trace.WriteLine"/>.
+    /// </para>
     /// </returns>
     internal static bool TryRegisterDerivedTrace(string derivedTraceId, string sourceTraceId)
     {

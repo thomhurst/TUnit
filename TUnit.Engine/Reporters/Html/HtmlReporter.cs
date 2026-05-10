@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -469,13 +470,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
     {
-        // StartTime is normalized to UTC and round-trip-formatted ("o" → ...+00:00) before reaching
-        // this method, so ordinal string comparison sorts chronologically across all rows.
+        // Parse to DateTimeOffset so the sort works regardless of how the caller formatted
+        // StartTime — production writes UTC ISO-8601, but tests construct ReportTestResult
+        // directly via InternalsVisibleTo and could pass non-UTC offsets.
         return tests
-            .OrderBy(static test => test.StartTime is null ? 1 : 0)
-            .ThenBy(static test => test.StartTime, StringComparer.Ordinal)
+            .OrderBy(static test => ParseStartTimeForSort(test.StartTime))
             .ThenBy(static test => test.DisplayName, StringComparer.Ordinal)
             .ToArray();
+    }
+
+    private static DateTimeOffset ParseStartTimeForSort(string? raw)
+    {
+        return DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed)
+            ? parsed
+            : DateTimeOffset.MaxValue;
     }
 
     private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
