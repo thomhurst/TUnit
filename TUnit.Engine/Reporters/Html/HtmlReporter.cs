@@ -11,6 +11,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Services;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Settings;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
@@ -377,7 +378,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Branch = branch,
             PullRequestNumber = prNumber,
             RepositorySlug = repoSlug,
-            ExpandClassTimeline = TUnit.Core.Settings.TUnitSettings.Default.Report.ExpandClassTimeline,
+            ExpandClassTimeline = TUnitSettings.Default.Report.ExpandClassTimeline,
         };
     }
 
