@@ -328,8 +328,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     private static object?[] BuildInvokeArgs(MethodInfo methodInfo, object?[] suppliedArguments)
     {
         var parameters = methodInfo.GetParameters();
-        if (parameters.Length == suppliedArguments.Length)
+        if (parameters.Length <= suppliedArguments.Length)
         {
+            // Exact match passes through; surplus supplied args are left to Invoke to surface as a mismatch.
             return suppliedArguments;
         }
 
