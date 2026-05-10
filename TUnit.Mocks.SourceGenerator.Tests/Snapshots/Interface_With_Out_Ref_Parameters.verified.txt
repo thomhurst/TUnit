@@ -313,9 +313,9 @@ namespace TUnit.Mocks
     {
         extension(global::IDictionary _)
         {
-            public static global::.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::.IDictionaryMock)global::.IDictionaryMockFactory.CreateAutoMock(behavior);
+                return (global::IDictionaryMock)global::IDictionaryMockFactory.CreateAutoMock(behavior);
             }
         }
     }

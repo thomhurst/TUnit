@@ -97,9 +97,9 @@ namespace TUnit.Mocks
     {
         extension<T>(global::ITestEnum<T> _)
         {
-            public static global::.ITestEnum_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::ITestEnum_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::.ITestEnum_T_Mock<T>)global::.ITestEnum_T_MockFactory.CreateAutoMock<T>(behavior);
+                return (global::ITestEnum_T_Mock<T>)global::ITestEnum_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

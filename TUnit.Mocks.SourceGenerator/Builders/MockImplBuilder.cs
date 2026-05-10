@@ -1671,6 +1671,20 @@ internal static class MockImplBuilder
     }
 
     /// <summary>
+    /// Returns a <c>global::</c>-rooted namespace prefix suitable for prepending to a
+    /// type name. Yields <c>"global::"</c> when the mock namespace is empty (global
+    /// namespace) and <c>"global::{ns}."</c> otherwise. Use everywhere a builder
+    /// concatenates a namespace with a type name — concatenating directly with
+    /// <see cref="GetMockNamespace"/> produces invalid <c>global::.TypeName</c>
+    /// for globally-namespaced mock targets.
+    /// </summary>
+    public static string GetGlobalMockNamespacePrefix(MockTypeModel model)
+    {
+        var ns = GetMockNamespace(model);
+        return ns.Length == 0 ? "global::" : $"global::{ns}.";
+    }
+
+    /// <summary>
     /// Gets the fully qualified type name to use as a generic type argument.
     /// For types with static abstract members, returns the bridge interface FQN
     /// (which resolves CS8920 by providing DIMs for all static abstract members).
@@ -1680,8 +1694,8 @@ internal static class MockImplBuilder
     {
         if (!model.HasStaticAbstractMembers) return model.FullyQualifiedName;
         var shortName = GetCompositeShortSafeName(model);
-        var ns = GetMockNamespace(model);
-        return $"global::{ns}.{GetGeneratedTypeName($"{shortName}Mockable", model)}";
+        var globalPrefix = GetGlobalMockNamespacePrefix(model);
+        return $"{globalPrefix}{GetGeneratedTypeName($"{shortName}Mockable", model)}";
     }
 
     /// <summary>

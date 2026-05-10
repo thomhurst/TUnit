@@ -293,9 +293,9 @@ namespace TUnit.Mocks
     {
         extension<T>(global::IRepository<T> _)
         {
-            public static global::.IRepository_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IRepository_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::.IRepository_T_Mock<T>)global::.IRepository_T_MockFactory.CreateAutoMock<T>(behavior);
+                return (global::IRepository_T_Mock<T>)global::IRepository_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

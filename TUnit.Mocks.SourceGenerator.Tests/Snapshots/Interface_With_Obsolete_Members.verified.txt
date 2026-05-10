@@ -635,9 +635,9 @@ namespace TUnit.Mocks
     {
         extension(global::IDialogService _)
         {
-            public static global::.IDialogServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IDialogServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::.IDialogServiceMock)global::.IDialogServiceMockFactory.CreateAutoMock(behavior);
+                return (global::IDialogServiceMock)global::IDialogServiceMockFactory.CreateAutoMock(behavior);
             }
         }
     }

@@ -1498,4 +1498,57 @@ public class MockGeneratorTests : SnapshotTestBase
 
         return VerifyGeneratorOutput(source);
     }
+
+    [Test]
+    public void Global_Namespace_Mock_Does_Not_Emit_Empty_Namespace_Prefix()
+    {
+        // Regression: when an interface lives in the global namespace, the
+        // builders previously emitted `global::.IGreeterMock` because they
+        // unconditionally interpolated `$"global::{mockNamespace}.{TypeName}"`
+        // and `mockNamespace` is "" for global-namespace types in
+        // non-fallback mode. That syntax fails to compile (CS1001).
+        //
+        // We assert the textual form rather than calling AssertGeneratedCodeCompiles
+        // because the generated `extension(...)` blocks are not parseable by the
+        // test-pinned Roslyn (see SnapshotTestBase.AssertGeneratedCodeHasNoNullableWarnings
+        // remarks). Searching for the broken `global::.` substring directly catches
+        // the regression no matter where it surfaces (MockStaticExtensionBuilder,
+        // MockMembersBuilder, GetMockableTypeName, etc.).
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IGreeter
+            {
+                string Greet(string name);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IGreeter>();
+                    _ = mock.Greet("hi");
+                }
+            }
+            """;
+
+        var generated = RunGenerator(source);
+        var combined = string.Join("\n", generated);
+
+        if (combined.Contains("global::."))
+        {
+            var lines = combined.Split('\n')
+                .Select((line, idx) => (line, idx))
+                .Where(t => t.line.Contains("global::."))
+                .Select(t => $"  line {t.idx + 1}: {t.line.Trim()}")
+                .ToList();
+
+            throw new InvalidOperationException(
+                "Generated code contains invalid 'global::.' (empty-namespace) prefix. "
+                + "A builder is concatenating `$\"global::{ns}.{Name}\"` without guarding "
+                + "for empty `ns`. Use `MockImplBuilder.GetGlobalMockNamespacePrefix(model)` "
+                + "instead.\nOffending lines:\n"
+                + string.Join("\n", lines));
+        }
+    }
 }

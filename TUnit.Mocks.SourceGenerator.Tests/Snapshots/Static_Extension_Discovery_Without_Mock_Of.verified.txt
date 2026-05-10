@@ -202,9 +202,9 @@ namespace TUnit.Mocks
     {
         extension(global::INotifier _)
         {
-            public static global::.INotifierMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::INotifierMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::.INotifierMock)global::.INotifierMockFactory.CreateAutoMock(behavior);
+                return (global::INotifierMock)global::INotifierMockFactory.CreateAutoMock(behavior);
             }
         }
     }

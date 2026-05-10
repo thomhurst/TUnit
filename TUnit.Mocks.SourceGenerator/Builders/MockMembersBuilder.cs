@@ -695,7 +695,7 @@ internal static class MockMembersBuilder
         if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
         {
             var wrapperSafeName = MockImplBuilder.GetCompositeShortSafeName(model);
-            var wrapperTypeName = $"global::{MockImplBuilder.GetMockNamespace(model)}.{MockImplBuilder.GetGeneratedTypeName($"{wrapperSafeName}Mock", model)}";
+            var wrapperTypeName = $"{MockImplBuilder.GetGlobalMockNamespacePrefix(model)}{MockImplBuilder.GetGeneratedTypeName($"{wrapperSafeName}Mock", model)}";
             using (writer.Block($"extension{modelTypeParams}({wrapperTypeName} mock){modelConstraints}"))
             {
                 GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
