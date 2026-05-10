@@ -49,9 +49,6 @@ internal sealed class ReportData
 
     [JsonPropertyName("repositorySlug")]
     public string? RepositorySlug { get; init; }
-
-    [JsonPropertyName("expandClassTimeline")]
-    public bool ExpandClassTimeline { get; init; }
 }
 
 internal sealed class ReportSummary

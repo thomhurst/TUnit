@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Core;
+using TUnit.Core.Enums;
 using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.Engine.Tests;
@@ -205,6 +206,60 @@ public class HtmlReporterTests
         {
             File.Delete(tempFile);
         }
+    }
+
+    [Test]
+    public void ClassTimelineAttribute_Exposes_Mode_And_ScopeType()
+    {
+        var full = new ClassTimelineAttribute(TimelineMode.FullExecution);
+        full.Mode.ShouldBe(TimelineMode.FullExecution);
+        full.ScopeType.ShouldBe(typeof(ClassTimelineAttribute));
+
+        var collapsed = new ClassTimelineAttribute(TimelineMode.Collapsed);
+        collapsed.Mode.ShouldBe(TimelineMode.Collapsed);
+    }
+
+    [Test]
+    public void GenerateHtml_RoundTrips_ClassTimeline_CustomProperty_OnTest()
+    {
+        // The JS reads group.tests[0].customProperties for tunit.report.timeline; this
+        // pins the contract that the property survives serialisation into the embedded JSON.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "BddFlow",
+                    Namespace = "Sample",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "BddFlow", Status = "passed",
+                            CustomProperties =
+                            [
+                                new ReportKeyValue { Key = ClassTimelineAttribute.ClassTimelinePropertyKey, Value = nameof(TimelineMode.FullExecution) }
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        var embedded = ExtractEmbeddedReportJson(html);
+        embedded.ShouldContain("\"key\":\"tunit.report.timeline\"");
+        embedded.ShouldContain("\"value\":\"FullExecution\"");
     }
 
     private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
