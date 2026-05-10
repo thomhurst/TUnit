@@ -719,16 +719,13 @@ public class MSTestMigrationAnalyzerTests
     [Test]
     public async Task MSTest_Assertions_With_FormatStrings_Converted()
     {
-        // Note: The diagnostic is on [TestMethod] because Assert.AreEqual with format strings
-        // isn't a valid MSTest overload, so semantic model doesn't resolve it.
-        // The analyzer detects the method attribute instead of the Assert call.
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-                public class MyClass
+                {|#0:public class MyClass|}
                 {
-                    {|#0:[TestMethod]|}
+                    [TestMethod]
                     public void TestWithFormatStrings()
                     {
                         int x = 5;
@@ -761,16 +758,14 @@ public class MSTestMigrationAnalyzerTests
     {
         // When a comparer is detected (via semantic or syntax-based detection),
         // a TODO comment is added explaining that TUnit uses different comparison semantics.
-        // Note: The diagnostic is on [TestMethod] because Assert.AreEqual with comparer
-        // isn't a valid MSTest overload, so semantic model doesn't resolve it.
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
                 using System.Collections.Generic;
 
-                public class MyClass
+                {|#0:public class MyClass|}
                 {
-                    {|#0:[TestMethod]|}
+                    [TestMethod]
                     public void TestWithComparer()
                     {
                         var comparer = StringComparer.OrdinalIgnoreCase;
