@@ -26,7 +26,7 @@ internal static class MockBridgeBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block($"namespace {mockNamespace}"))
+        using (writer.OptionalNamespaceBlock(mockNamespace))
         {
             BuildBridgeInterface(writer, model, safeName, staticEngineTypeName);
             writer.AppendLine();

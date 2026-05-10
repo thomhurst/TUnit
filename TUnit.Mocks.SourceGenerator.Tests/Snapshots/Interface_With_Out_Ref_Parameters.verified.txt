@@ -2,20 +2,17 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public sealed class IDictionaryMock : global::TUnit.Mocks.Mock<global::IDictionary>, global::IDictionary
 {
-    public sealed class IDictionaryMock : global::TUnit.Mocks.Mock<global::IDictionary>, global::IDictionary
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    internal IDictionaryMock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
+        : base(mockObject, engine) { }
+
+    bool global::IDictionary.TryGetValue(string key, out string value) => Object.TryGetValue(key, out value);
+
+    void global::IDictionary.Swap(ref int a, ref int b)
     {
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IDictionaryMock(global::IDictionary mockObject, global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
-            : base(mockObject, engine) { }
-
-        bool global::IDictionary.TryGetValue(string key, out string value) => Object.TryGetValue(key, out value);
-
-        void global::IDictionary.Swap(ref int a, ref int b)
-        {
-            Object.Swap(ref a, ref b);
-        }
+        Object.Swap(ref a, ref b);
     }
 }
 
@@ -26,76 +23,73 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+file sealed class IDictionaryMockImpl : global::IDictionary, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    file sealed class IDictionaryMockImpl : global::IDictionary, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    private readonly global::TUnit.Mocks.MockEngine<global::IDictionary> _engine;
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
+
+    internal IDictionaryMockImpl(global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::IDictionary> _engine;
+        _engine = engine;
+    }
 
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
-
-        internal IDictionaryMockImpl(global::TUnit.Mocks.MockEngine<global::IDictionary> engine)
+    public bool TryGetValue(string key, out string value)
+    {
+        value = default!;
+        var __result = _engine.HandleCallWithReturn<bool, string>(0, "TryGetValue", key, default);
+        var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
+        if (__outRef is not null)
         {
-            _engine = engine;
+            if (__outRef.TryGetValue(1, out var __v1)) value = (string)__v1!;
         }
+        return __result;
+    }
 
-        public bool TryGetValue(string key, out string value)
+    public void Swap(ref int a, ref int b)
+    {
+        _engine.HandleCall<int, int>(1, "Swap", a, b);
+        var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
+        if (__outRef is not null)
         {
-            value = default!;
-            var __result = _engine.HandleCallWithReturn<bool, string>(0, "TryGetValue", key, default);
-            var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
-            if (__outRef is not null)
-            {
-                if (__outRef.TryGetValue(1, out var __v1)) value = (string)__v1!;
-            }
-            return __result;
-        }
-
-        public void Swap(ref int a, ref int b)
-        {
-            _engine.HandleCall<int, int>(1, "Swap", a, b);
-            var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
-            if (__outRef is not null)
-            {
-                if (__outRef.TryGetValue(0, out var __v0)) a = (int)__v0!;
-                if (__outRef.TryGetValue(1, out var __v1)) b = (int)__v1!;
-            }
-        }
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public void RaiseEvent(string eventName, object? args)
-        {
-            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+            if (__outRef.TryGetValue(0, out var __v0)) a = (int)__v0!;
+            if (__outRef.TryGetValue(1, out var __v1)) b = (int)__v1!;
         }
     }
 
-    internal static class IDictionaryMockFactory
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public void RaiseEvent(string eventName, object? args)
     {
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
-        internal static void Register()
-        {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::IDictionary>(Create);
-        }
+        throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+    }
+}
 
-        internal static global::TUnit.Mocks.Mock<global::IDictionary> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
-        {
-            var engine = new global::TUnit.Mocks.MockEngine<global::IDictionary>(behavior);
-            var impl = new IDictionaryMockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new IDictionaryMock(impl, engine);
-            return mock;
-        }
+internal static class IDictionaryMockFactory
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Register()
+    {
+        global::TUnit.Mocks.MockRegistry.RegisterFactory<global::IDictionary>(Create);
+    }
 
-        internal static global::TUnit.Mocks.Mock<global::IDictionary> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
-        {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IDictionary' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::IDictionary>(behavior);
-            var impl = new IDictionaryMockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new IDictionaryMock(impl, engine);
-            return mock;
-        }
+    internal static global::TUnit.Mocks.Mock<global::IDictionary> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
+    {
+        var engine = new global::TUnit.Mocks.MockEngine<global::IDictionary>(behavior);
+        var impl = new IDictionaryMockImpl(engine);
+        engine.Raisable = impl;
+        var mock = new IDictionaryMock(impl, engine);
+        return mock;
+    }
+
+    internal static global::TUnit.Mocks.Mock<global::IDictionary> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+    {
+        if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IDictionary' does not support constructor arguments, but {constructorArgs.Length} were provided.");
+        var engine = new global::TUnit.Mocks.MockEngine<global::IDictionary>(behavior);
+        var impl = new IDictionaryMockImpl(engine);
+        engine.Raisable = impl;
+        var mock = new IDictionaryMock(impl, engine);
+        return mock;
     }
 }
 
@@ -106,207 +100,204 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public static class IDictionary_MockMemberExtensions
 {
-    public static class IDictionary_MockMemberExtensions
+    public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
     {
-        public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher };
-            return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
-        }
-
-        public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::System.Func<string, bool> key)
-        {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
-            return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
-        }
-
-        public static IDictionary_Swap_M1_MockCall Swap(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            return new IDictionary_Swap_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Swap", matchers);
-        }
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher };
+        return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IDictionary_TryGetValue_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public static IDictionary_TryGetValue_M0_MockCall TryGetValue(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::System.Func<string, bool> key)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>? _builder;
-
-        internal IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Returns(bool value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Returns(global::System.Func<bool> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall ReturnsSequentially(params bool[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IDictionary_TryGetValue_M0_MockCall Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public IDictionary_TryGetValue_M0_MockCall Returns(global::System.Func<string, bool> factory)
-        {
-            EnsureSetup().Returns(args => factory((string)args[0]!));
-            return this;
-        }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action<string> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
-            return this;
-        }
-
-        /// <summary>Sets the 'value' out parameter to the specified value when this setup matches.</summary>
-        public IDictionary_TryGetValue_M0_MockCall SetsOutValue(string value) { EnsureSetup().SetsOutParameter(1, value); return this; }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
+        return new IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryGetValue", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IDictionary_Swap_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public static IDictionary_Swap_M1_MockCall Swap(this global::TUnit.Mocks.Mock<global::IDictionary> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
-
-        internal IDictionary_Swap_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-            _ = EnsureSetup();
-        }
-
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Returns() { EnsureSetup().Returns(); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IDictionary_Swap_M1_MockCall Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public IDictionary_Swap_M1_MockCall Callback(global::System.Action<int, int> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public IDictionary_Swap_M1_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
-            return this;
-        }
-
-        /// <summary>Sets the 'a' ref parameter to the specified value when this setup matches.</summary>
-        public IDictionary_Swap_M1_MockCall SetsRefA(int a) { EnsureSetup().SetsOutParameter(0, a); return this; }
-        /// <summary>Sets the 'b' ref parameter to the specified value when this setup matches.</summary>
-        public IDictionary_Swap_M1_MockCall SetsRefB(int b) { EnsureSetup().SetsOutParameter(1, b); return this; }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
+        return new IDictionary_Swap_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Swap", matchers);
     }
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class IDictionary_TryGetValue_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>? _builder;
+
+    internal IDictionary_TryGetValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<bool> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<bool>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Returns(bool value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Returns(global::System.Func<bool> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall ReturnsSequentially(params bool[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public IDictionary_TryGetValue_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public IDictionary_TryGetValue_M0_MockCall Returns(global::System.Func<string, bool> factory)
+    {
+        EnsureSetup().Returns(args => factory((string)args[0]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public IDictionary_TryGetValue_M0_MockCall Callback(global::System.Action<string> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public IDictionary_TryGetValue_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
+        return this;
+    }
+
+    /// <summary>Sets the 'value' out parameter to the specified value when this setup matches.</summary>
+    public IDictionary_TryGetValue_M0_MockCall SetsOutValue(string value) { EnsureSetup().SetsOutParameter(1, value); return this; }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class IDictionary_Swap_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
+
+    internal IDictionary_Swap_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _ = EnsureSetup();
+    }
+
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall Returns() { EnsureSetup().Returns(); return this; }
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public IDictionary_Swap_M1_MockCall Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public IDictionary_Swap_M1_MockCall Callback(global::System.Action<int, int> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public IDictionary_Swap_M1_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
+        return this;
+    }
+
+    /// <summary>Sets the 'a' ref parameter to the specified value when this setup matches.</summary>
+    public IDictionary_Swap_M1_MockCall SetsRefA(int a) { EnsureSetup().SetsOutParameter(0, a); return this; }
+    /// <summary>Sets the 'b' ref parameter to the specified value when this setup matches.</summary>
+    public IDictionary_Swap_M1_MockCall SetsRefB(int b) { EnsureSetup().SetsOutParameter(1, b); return this; }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
 }
 
 
@@ -322,9 +313,9 @@ namespace TUnit.Mocks
     {
         extension(global::IDictionary _)
         {
-            public static global::TUnit.Mocks.Generated.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::.IDictionaryMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IDictionaryMock)global::TUnit.Mocks.Generated.IDictionaryMockFactory.CreateAutoMock(behavior);
+                return (global::.IDictionaryMock)global::.IDictionaryMockFactory.CreateAutoMock(behavior);
             }
         }
     }

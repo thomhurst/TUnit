@@ -2,22 +2,19 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public sealed class ICalculatorMock : global::TUnit.Mocks.Mock<global::ICalculator>, global::ICalculator
 {
-    public sealed class ICalculatorMock : global::TUnit.Mocks.Mock<global::ICalculator>, global::ICalculator
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    internal ICalculatorMock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
+        : base(mockObject, engine) { }
+
+    int global::ICalculator.Add(int a, int b) => Object.Add(a, b);
+
+    int global::ICalculator.Subtract(int a, int b) => Object.Subtract(a, b);
+
+    void global::ICalculator.Reset()
     {
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal ICalculatorMock(global::ICalculator mockObject, global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
-            : base(mockObject, engine) { }
-
-        int global::ICalculator.Add(int a, int b) => Object.Add(a, b);
-
-        int global::ICalculator.Subtract(int a, int b) => Object.Subtract(a, b);
-
-        void global::ICalculator.Reset()
-        {
-            Object.Reset();
-        }
+        Object.Reset();
     }
 }
 
@@ -28,68 +25,65 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+file sealed class ICalculatorMockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    file sealed class ICalculatorMockImpl : global::ICalculator, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    private readonly global::TUnit.Mocks.MockEngine<global::ICalculator> _engine;
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
+
+    internal ICalculatorMockImpl(global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::ICalculator> _engine;
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
-
-        internal ICalculatorMockImpl(global::TUnit.Mocks.MockEngine<global::ICalculator> engine)
-        {
-            _engine = engine;
-        }
-
-        public int Add(int a, int b)
-        {
-            return _engine.HandleCallWithReturn<int, int, int>(0, "Add", a, b, default);
-        }
-
-        public int Subtract(int a, int b)
-        {
-            return _engine.HandleCallWithReturn<int, int, int>(1, "Subtract", a, b, default);
-        }
-
-        public void Reset()
-        {
-            _engine.HandleCall(2, "Reset", global::System.Array.Empty<object?>());
-        }
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public void RaiseEvent(string eventName, object? args)
-        {
-            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
-        }
+        _engine = engine;
     }
 
-    internal static class ICalculatorMockFactory
+    public int Add(int a, int b)
     {
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
-        internal static void Register()
-        {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::ICalculator>(Create);
-        }
+        return _engine.HandleCallWithReturn<int, int, int>(0, "Add", a, b, default);
+    }
 
-        internal static global::TUnit.Mocks.Mock<global::ICalculator> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
-        {
-            var engine = new global::TUnit.Mocks.MockEngine<global::ICalculator>(behavior);
-            var impl = new ICalculatorMockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new ICalculatorMock(impl, engine);
-            return mock;
-        }
+    public int Subtract(int a, int b)
+    {
+        return _engine.HandleCallWithReturn<int, int, int>(1, "Subtract", a, b, default);
+    }
 
-        internal static global::TUnit.Mocks.Mock<global::ICalculator> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
-        {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::ICalculator' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::ICalculator>(behavior);
-            var impl = new ICalculatorMockImpl(engine);
-            engine.Raisable = impl;
-            var mock = new ICalculatorMock(impl, engine);
-            return mock;
-        }
+    public void Reset()
+    {
+        _engine.HandleCall(2, "Reset", global::System.Array.Empty<object?>());
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public void RaiseEvent(string eventName, object? args)
+    {
+        throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+    }
+}
+
+internal static class ICalculatorMockFactory
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Register()
+    {
+        global::TUnit.Mocks.MockRegistry.RegisterFactory<global::ICalculator>(Create);
+    }
+
+    internal static global::TUnit.Mocks.Mock<global::ICalculator> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
+    {
+        var engine = new global::TUnit.Mocks.MockEngine<global::ICalculator>(behavior);
+        var impl = new ICalculatorMockImpl(engine);
+        engine.Raisable = impl;
+        var mock = new ICalculatorMock(impl, engine);
+        return mock;
+    }
+
+    internal static global::TUnit.Mocks.Mock<global::ICalculator> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+    {
+        if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::ICalculator' does not support constructor arguments, but {constructorArgs.Length} were provided.");
+        var engine = new global::TUnit.Mocks.MockEngine<global::ICalculator>(behavior);
+        var impl = new ICalculatorMockImpl(engine);
+        engine.Raisable = impl;
+        var mock = new ICalculatorMock(impl, engine);
+        return mock;
     }
 }
 
@@ -100,266 +94,263 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public static class ICalculator_MockMemberExtensions
 {
-    public static class ICalculator_MockMemberExtensions
+    public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
     {
-        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
-        }
-
-        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
-            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
-        }
-
-        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
-            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
-        }
-
-        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
-            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
-        }
-
-        /// <summary>Configure the mock setup for <c>Add</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
-        public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
-            return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
-        }
-
-        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
-            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
-        }
-
-        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
-            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
-        }
-
-        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
-            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
-        }
-
-        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
-            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
-        }
-
-        /// <summary>Configure the mock setup for <c>Subtract</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
-        public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
-            return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
-        }
-
-        public static global::TUnit.Mocks.VoidMockMethodCall Reset(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
-        {
-            var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-            return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Reset", matchers);
-        }
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
+        return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class ICalculator_Add_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
-
-        internal ICalculator_Add_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Returns(global::System.Func<int> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall ReturnsSequentially(params int[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public ICalculator_Add_M0_MockCall Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public ICalculator_Add_M0_MockCall Returns(global::System.Func<int, int, int> factory)
-        {
-            EnsureSetup().Returns(args => factory((int)args[0]!, (int)args[1]!));
-            return this;
-        }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public ICalculator_Add_M0_MockCall Callback(global::System.Action<int, int> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public ICalculator_Add_M0_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
-            return this;
-        }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
+        return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class ICalculator_Subtract_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+    public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
-
-        internal ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Returns(global::System.Func<int> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall ReturnsSequentially(params int[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public ICalculator_Subtract_M1_MockCall Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public ICalculator_Subtract_M1_MockCall Returns(global::System.Func<int, int, int> factory)
-        {
-            EnsureSetup().Returns(args => factory((int)args[0]!, (int)args[1]!));
-            return this;
-        }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public ICalculator_Subtract_M1_MockCall Callback(global::System.Action<int, int> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public ICalculator_Subtract_M1_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
-            return this;
-        }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
+        return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
     }
+
+    public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
+    {
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
+        return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
+    }
+
+    /// <summary>Configure the mock setup for <c>Add</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+    public static ICalculator_Add_M0_MockCall Add(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+    {
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
+        return new ICalculator_Add_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Add", matchers);
+    }
+
+    public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::TUnit.Mocks.Arguments.Arg<int> b)
+    {
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, b.Matcher };
+        return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+    }
+
+    public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::TUnit.Mocks.Arguments.Arg<int> b)
+    {
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, b.Matcher };
+        return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+    }
+
+    public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.Arg<int> a, global::System.Func<int, bool> b)
+    {
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { a.Matcher, __fa_b.Matcher };
+        return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+    }
+
+    public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::System.Func<int, bool> a, global::System.Func<int, bool> b)
+    {
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_a = a;
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_b = b;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_a.Matcher, __fa_b.Matcher };
+        return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+    }
+
+    /// <summary>Configure the mock setup for <c>Subtract</c> with every argument matched as <c>Any&lt;T&gt;()</c>.</summary>
+    public static ICalculator_Subtract_M1_MockCall Subtract(this global::TUnit.Mocks.Mock<global::ICalculator> mock, global::TUnit.Mocks.Arguments.AnyArgs _)
+    {
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance, global::TUnit.Mocks.Matchers.AnyMatcher<int>.Instance };
+        return new ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Subtract", matchers);
+    }
+
+    public static global::TUnit.Mocks.VoidMockMethodCall Reset(this global::TUnit.Mocks.Mock<global::ICalculator> mock)
+    {
+        var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
+        return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Reset", matchers);
+    }
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class ICalculator_Add_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
+
+    internal ICalculator_Add_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Returns(global::System.Func<int> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall ReturnsSequentially(params int[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public ICalculator_Add_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public ICalculator_Add_M0_MockCall Returns(global::System.Func<int, int, int> factory)
+    {
+        EnsureSetup().Returns(args => factory((int)args[0]!, (int)args[1]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public ICalculator_Add_M0_MockCall Callback(global::System.Action<int, int> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public ICalculator_Add_M0_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class ICalculator_Subtract_M1_MockCall : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int>? _builder;
+
+    internal ICalculator_Subtract_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<int> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<int>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Returns(int value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Returns(global::System.Func<int> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall ReturnsSequentially(params int[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public ICalculator_Subtract_M1_MockCall Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public ICalculator_Subtract_M1_MockCall Returns(global::System.Func<int, int, int> factory)
+    {
+        EnsureSetup().Returns(args => factory((int)args[0]!, (int)args[1]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public ICalculator_Subtract_M1_MockCall Callback(global::System.Action<int, int> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public ICalculator_Subtract_M1_MockCall Throws(global::System.Func<int, int, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((int)args[0]!, (int)args[1]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
 }
 
 
@@ -375,9 +366,9 @@ namespace TUnit.Mocks
     {
         extension(global::ICalculator _)
         {
-            public static global::TUnit.Mocks.Generated.ICalculatorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::.ICalculatorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.ICalculatorMock)global::TUnit.Mocks.Generated.ICalculatorMockFactory.CreateAutoMock(behavior);
+                return (global::.ICalculatorMock)global::.ICalculatorMockFactory.CreateAutoMock(behavior);
             }
         }
     }

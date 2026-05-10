@@ -2,20 +2,17 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public sealed class IRepository_T_Mock<T> : global::TUnit.Mocks.Mock<global::IRepository<T>>, global::IRepository<T>
 {
-    public sealed class IRepository_T_Mock<T> : global::TUnit.Mocks.Mock<global::IRepository<T>>, global::IRepository<T>
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    internal IRepository_T_Mock(global::IRepository<T> mockObject, global::TUnit.Mocks.MockEngine<global::IRepository<T>> engine)
+        : base(mockObject, engine) { }
+
+    T global::IRepository<T>.GetById(int id) => Object.GetById(id);
+
+    void global::IRepository<T>.Save(T entity)
     {
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IRepository_T_Mock(global::IRepository<T> mockObject, global::TUnit.Mocks.MockEngine<global::IRepository<T>> engine)
-            : base(mockObject, engine) { }
-
-        T global::IRepository<T>.GetById(int id) => Object.GetById(id);
-
-        void global::IRepository<T>.Save(T entity)
-        {
-            Object.Save(entity);
-        }
+        Object.Save(entity);
     }
 }
 
@@ -26,58 +23,55 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+file sealed class IRepository_T_MockImpl<T> : global::IRepository<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
 {
-    file sealed class IRepository_T_MockImpl<T> : global::IRepository<T>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    private readonly global::TUnit.Mocks.MockEngine<global::IRepository<T>> _engine;
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
+
+    internal IRepository_T_MockImpl(global::TUnit.Mocks.MockEngine<global::IRepository<T>> engine)
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::IRepository<T>> _engine;
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
-
-        internal IRepository_T_MockImpl(global::TUnit.Mocks.MockEngine<global::IRepository<T>> engine)
-        {
-            _engine = engine;
-        }
-
-        public T GetById(int id)
-        {
-            return _engine.HandleCallWithReturn<T, int>(0, "GetById", id, default!);
-        }
-
-        public void Save(T entity)
-        {
-            _engine.HandleCall<T>(1, "Save", entity);
-        }
-
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public void RaiseEvent(string eventName, object? args)
-        {
-            throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
-        }
+        _engine = engine;
     }
 
-    internal static class IRepository_T_MockFactory
+    public T GetById(int id)
     {
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
-        internal static void Register()
-        {
-            global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
-                typeof(global::IRepository<>),
-                typeof(IRepository_T_MockImpl<>),
-                typeof(IRepository_T_Mock<>));
-        }
-
-        internal static global::TUnit.Mocks.Mock<global::IRepository<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
-        {
-            var engine = new global::TUnit.Mocks.MockEngine<global::IRepository<T>>(behavior);
-            var impl = new IRepository_T_MockImpl<T>(engine);
-            engine.Raisable = impl;
-            var mock = new IRepository_T_Mock<T>(impl, engine);
-            return mock;
-        }
-
+        return _engine.HandleCallWithReturn<T, int>(0, "GetById", id, default!);
     }
+
+    public void Save(T entity)
+    {
+        _engine.HandleCall<T>(1, "Save", entity);
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public void RaiseEvent(string eventName, object? args)
+    {
+        throw new global::System.InvalidOperationException($"No event named '{eventName}' exists on this mock.");
+    }
+}
+
+internal static class IRepository_T_MockFactory
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Register()
+    {
+        global::TUnit.Mocks.MockRegistry.RegisterOpenGenericFactory(
+            typeof(global::IRepository<>),
+            typeof(IRepository_T_MockImpl<>),
+            typeof(IRepository_T_Mock<>));
+    }
+
+    internal static global::TUnit.Mocks.Mock<global::IRepository<T>> CreateAutoMock<T>(global::TUnit.Mocks.MockBehavior behavior)
+    {
+        var engine = new global::TUnit.Mocks.MockEngine<global::IRepository<T>>(behavior);
+        var impl = new IRepository_T_MockImpl<T>(engine);
+        engine.Raisable = impl;
+        var mock = new IRepository_T_Mock<T>(impl, engine);
+        return mock;
+    }
+
 }
 
 
@@ -87,206 +81,203 @@ namespace TUnit.Mocks.Generated
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+public static class IRepository_T__MockMemberExtensions
 {
-    public static class IRepository_T__MockMemberExtensions
+    public static IRepository_T__GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::TUnit.Mocks.Arguments.Arg<int> id)
     {
-        public static IRepository_T__GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::TUnit.Mocks.Arguments.Arg<int> id)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
-            return new IRepository_T__GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers);
-        }
-
-        public static IRepository_T__GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<int, bool> id)
-        {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
-            return new IRepository_T__GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers);
-        }
-
-        public static IRepository_T__Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::TUnit.Mocks.Arguments.Arg<T> entity)
-        {
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { entity.Matcher };
-            return new IRepository_T__Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers);
-        }
-
-        public static IRepository_T__Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<T, bool> entity)
-        {
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_entity = entity;
-            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_entity.Matcher };
-            return new IRepository_T__Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers);
-        }
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
+        return new IRepository_T__GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IRepository_T__GetById_M0_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+    public static IRepository_T__GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<int, bool> id)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T>? _builder;
-
-        internal IRepository_T__GetById_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-        }
-
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T>(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Returns(T value) { EnsureSetup().Returns(value); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Returns(global::System.Func<T> factory) { EnsureSetup().Returns(factory); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> ReturnsSequentially(params T[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IRepository_T__GetById_M0_MockCall<T> Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public IRepository_T__GetById_M0_MockCall<T> Returns(global::System.Func<int, T> factory)
-        {
-            EnsureSetup().Returns(args => factory((int)args[0]!));
-            return this;
-        }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public IRepository_T__GetById_M0_MockCall<T> Callback(global::System.Action<int> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public IRepository_T__GetById_M0_MockCall<T> Throws(global::System.Func<int, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((int)args[0]!));
-            return this;
-        }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
+        return new IRepository_T__GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers);
     }
 
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class IRepository_T__Save_M1_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+    public static IRepository_T__Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::TUnit.Mocks.Arguments.Arg<T> entity)
     {
-        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-        private readonly int _memberId;
-        private readonly string _memberName;
-        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
-
-        internal IRepository_T__Save_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
-        {
-            _engine = engine;
-            _memberId = memberId;
-            _memberName = memberName;
-            _matchers = matchers;
-            _ = EnsureSetup();
-        }
-
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
-        {
-            var existing = global::System.Threading.Volatile.Read(ref _builder);
-            if (existing is not null) return existing;
-            return EnsureSetupSlow();
-        }
-
-        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
-        {
-            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-            var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
-            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-            if (prev is not null) return prev;
-            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-            // so a concurrent loser observing the builder before registration is benign.
-            _engine.AddSetup(setup);
-            return fresh;
-        }
-
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> Returns() { EnsureSetup().Returns(); return this; }
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-        /// <inheritdoc />
-        public IRepository_T__Save_M1_MockCall<T> Then() { EnsureSetup().Then(); return this; }
-
-        /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public IRepository_T__Save_M1_MockCall<T> Callback(global::System.Action<T> callback)
-        {
-            EnsureSetup().Callback(callback);
-            return this;
-        }
-
-        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public IRepository_T__Save_M1_MockCall<T> Throws(global::System.Func<T, global::System.Exception> exceptionFactory)
-        {
-            EnsureSetup().Throws(args => exceptionFactory((T)args[0]!));
-            return this;
-        }
-
-        // ICallVerification
-        /// <inheritdoc />
-        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-        /// <inheritdoc />
-        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-        /// <inheritdoc />
-        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-        /// <inheritdoc />
-        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-        /// <inheritdoc />
-        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { entity.Matcher };
+        return new IRepository_T__Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers);
     }
+
+    public static IRepository_T__Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<T, bool> entity)
+    {
+        global::TUnit.Mocks.Arguments.Arg<T> __fa_entity = entity;
+        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_entity.Matcher };
+        return new IRepository_T__Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers);
+    }
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class IRepository_T__GetById_M0_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T>? _builder;
+
+    internal IRepository_T__GetById_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Returns(T value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Returns(global::System.Func<T> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> ReturnsSequentially(params T[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public IRepository_T__GetById_M0_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public IRepository_T__GetById_M0_MockCall<T> Returns(global::System.Func<int, T> factory)
+    {
+        EnsureSetup().Returns(args => factory((int)args[0]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public IRepository_T__GetById_M0_MockCall<T> Callback(global::System.Action<int> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public IRepository_T__GetById_M0_MockCall<T> Throws(global::System.Func<int, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((int)args[0]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class IRepository_T__Save_M1_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
+
+    internal IRepository_T__Save_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _ = EnsureSetup();
+    }
+
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+        var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> Returns() { EnsureSetup().Returns(); return this; }
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public IRepository_T__Save_M1_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public IRepository_T__Save_M1_MockCall<T> Callback(global::System.Action<T> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public IRepository_T__Save_M1_MockCall<T> Throws(global::System.Func<T, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((T)args[0]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
 }
 
 
@@ -302,9 +293,9 @@ namespace TUnit.Mocks
     {
         extension<T>(global::IRepository<T> _)
         {
-            public static global::TUnit.Mocks.Generated.IRepository_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::.IRepository_T_Mock<T> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.IRepository_T_Mock<T>)global::TUnit.Mocks.Generated.IRepository_T_MockFactory.CreateAutoMock<T>(behavior);
+                return (global::.IRepository_T_Mock<T>)global::.IRepository_T_MockFactory.CreateAutoMock<T>(behavior);
             }
         }
     }

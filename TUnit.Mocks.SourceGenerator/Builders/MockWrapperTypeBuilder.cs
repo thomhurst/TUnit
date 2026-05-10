@@ -39,7 +39,7 @@ internal static class MockWrapperTypeBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block($"namespace {mockNamespace}"))
+        using (writer.OptionalNamespaceBlock(mockNamespace))
         {
             using (writer.Block($"{model.Visibility} sealed class {safeName}Mock{typeParams} : global::TUnit.Mocks.Mock<{mockableType}>, {model.FullyQualifiedName}{constraints}"))
             {

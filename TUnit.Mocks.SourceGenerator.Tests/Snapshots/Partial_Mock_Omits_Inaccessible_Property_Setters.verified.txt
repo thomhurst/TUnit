@@ -2,7 +2,7 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.ExternalLib
+namespace ExternalLib
 {
     file sealed class ExternalResponseMockImpl : global::ExternalLib.ExternalResponse, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
@@ -93,7 +93,7 @@ namespace TUnit.Mocks.Generated.ExternalLib
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+namespace ExternalLib
 {
     public static class ExternalLib_ExternalResponse_MockMemberExtensions
     {

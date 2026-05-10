@@ -175,7 +175,7 @@ public class MockGenerator : IIncrementalGenerator
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block($"namespace {mockNamespace}"))
+        using (writer.OptionalNamespaceBlock(mockNamespace))
         {
             MockImplBuilder.BuildInto(writer, model);
             writer.AppendLine();

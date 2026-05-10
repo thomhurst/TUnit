@@ -2,7 +2,7 @@
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.Sandbox
+namespace Sandbox
 {
     public sealed class IMapper_TIn_TOut_Mock<TIn, TOut> : global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>>, global::Sandbox.IMapper<TIn, TOut>
     {
@@ -21,7 +21,7 @@ namespace TUnit.Mocks.Generated.Sandbox
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.Sandbox
+namespace Sandbox
 {
     file sealed class IMapper_TIn_TOut_MockImpl<TIn, TOut> : global::Sandbox.IMapper<TIn, TOut>, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
@@ -77,7 +77,7 @@ namespace TUnit.Mocks.Generated.Sandbox
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated
+namespace Sandbox
 {
     public static class Sandbox_IMapper_TIn_TOut__MockMemberExtensions
     {
@@ -199,9 +199,9 @@ namespace TUnit.Mocks
     {
         extension<TIn, TOut>(global::Sandbox.IMapper<TIn, TOut> _)
         {
-            public static global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
             {
-                return (global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut>)global::TUnit.Mocks.Generated.Sandbox.IMapper_TIn_TOut_MockFactory.CreateAutoMock<TIn, TOut>(behavior);
+                return (global::Sandbox.IMapper_TIn_TOut_Mock<TIn, TOut>)global::Sandbox.IMapper_TIn_TOut_MockFactory.CreateAutoMock<TIn, TOut>(behavior);
             }
         }
     }

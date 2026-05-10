@@ -18,7 +18,7 @@ internal static class MockDelegateFactoryBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.Block($"namespace {mockNamespace}"))
+        using (writer.OptionalNamespaceBlock(mockNamespace))
         {
             using (writer.Block($"file static class {safeName}MockDelegateFactory"))
             {
