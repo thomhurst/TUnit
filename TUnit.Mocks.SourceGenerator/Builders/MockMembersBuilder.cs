@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
@@ -17,11 +18,18 @@ internal static class MockMembersBuilder
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
-    // Two distinct shadowing problems below — different fixes because the kinds collide differently.
+    private const string PriorityMinusOneAttribute =
+        "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]";
 
-    // "Object" clashes with the Mock<T>.Object PROPERTY (member-kind collision: property vs.
-    // generated method/property). A trailing underscore is enough since nothing on object
-    // is named "Object_".
+    // Closed, structural collision set. Framework operations on Mock<T> live on the
+    // IMockControl<T> explicit interface — they are NOT instance members on Mock<T> and
+    // therefore cannot shadow generated extensions. The only names that can ever collide
+    // are the four below: "Object" (the one deliberately-public instance property kept
+    // for ergonomics) plus the three inherited object instance methods.
+
+    // "Object" clashes with the Mock<T>.Object PROPERTY. Trailing underscore is the
+    // primary rename; if the user interface declares the suffixed form too, the iterative
+    // suffix in GetSafeMemberName escalates (_, __, ___, …).
     private static readonly HashSet<string> MockMemberNames = new(System.StringComparer.Ordinal)
     {
         "Object",
@@ -116,6 +124,15 @@ internal static class MockMembersBuilder
                     firstMember = false;
                     GenerateRaiseExtensionMethods(writer, model);
                 }
+
+                // net9.0+ ergonomic polyfills: restore instance-style mock.Reset() /
+                // mock.VerifyAll() / mock.Invocations etc. for users via low-priority extensions
+                // emitted into THIS static class. [OverloadResolutionPriority] only ranks within a
+                // single containing type, so the polyfills must live alongside the generated
+                // setup/verify extensions. When the mocked interface already declares a member of
+                // that name, we skip the corresponding polyfill to avoid a CS0111 duplicate — the
+                // framework operation is still reachable via the static helper (Mock.Reset(m), …).
+                GenerateMockControlPolyfills(writer, model, isFirstMember: firstMember);
             }
 
             // Generate unified sealed classes for qualifying methods
@@ -206,11 +223,48 @@ internal static class MockMembersBuilder
     private static string GetWrapperName(string safeName, MockMemberModel method)
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
 
-    private static string GetSafeMemberName(string name)
+    private static string GetSafeMemberName(string name, MockTypeModel model)
     {
-        if (ObjectMemberDisambiguations.TryGetValue(name, out var renamed))
-            return renamed;
-        return EscapeIdentifier(MockMemberNames.Contains(name) ? name + "_" : name);
+        // Only escalate when we've actually renamed away from `name`. A passthrough name IS the
+        // user member's own name; comparing it against the user-name set always self-collides.
+        if (ObjectMemberDisambiguations.TryGetValue(name, out var disambiguated))
+        {
+            return EscapeIdentifier(EscalateUntilUnique(disambiguated, GetUserMemberNames(model)));
+        }
+        if (MockMemberNames.Contains(name))
+        {
+            return EscapeIdentifier(EscalateUntilUnique(name + "_", GetUserMemberNames(model)));
+        }
+        return EscapeIdentifier(name);
+    }
+
+    // Iteratively append "_" until the candidate doesn't collide with another member of the
+    // mocked type. Guards against the "Object" + "Object_" trailing-underscore overflow from
+    // discussion #4981.
+    private static string EscalateUntilUnique(string candidate, HashSet<string> userMemberNames)
+    {
+        while (userMemberNames.Contains(candidate))
+        {
+            candidate += "_";
+        }
+        return candidate;
+    }
+
+    // Cached per MockTypeModel instance via ConditionalWeakTable. Build() and its many helpers
+    // call GetUserMemberNames repeatedly across one generator pass; computing once and reusing
+    // avoids ~N HashSet allocations per emitted type.
+    private static readonly ConditionalWeakTable<MockTypeModel, HashSet<string>> _userMemberNamesCache = new();
+
+    private static HashSet<string> GetUserMemberNames(MockTypeModel model)
+        => _userMemberNamesCache.GetValue(model, BuildUserMemberNames);
+
+    private static HashSet<string> BuildUserMemberNames(MockTypeModel model)
+    {
+        var set = new HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var m in model.Methods) set.Add(m.Name);
+        foreach (var p in model.Properties) set.Add(p.Name);
+        foreach (var e in model.Events) set.Add(e.Name);
+        return set;
     }
 
     private static string GetCombinedTypeParameterList(MockTypeModel model, MockMemberModel method)
@@ -863,7 +917,7 @@ internal static class MockMembersBuilder
             ? MockImplBuilder.GetConstraintClauses(method)
             : GetCombinedConstraintClauses(model, method);
 
-        var safeMemberName = GetSafeMemberName(method.Name);
+        var safeMemberName = GetSafeMemberName(method.Name, model);
         var fullParamList = captureModelTypeParameters
             ? paramList
             : BuildExtensionMethodParameterList(model, paramList);
@@ -977,7 +1031,7 @@ internal static class MockMembersBuilder
             ? MockImplBuilder.GetConstraintClauses(method)
             : GetCombinedConstraintClauses(model, method);
 
-        var safeMemberName = GetSafeMemberName(method.Name);
+        var safeMemberName = GetSafeMemberName(method.Name, model);
         var paramListInner = "global::TUnit.Mocks.Arguments.AnyArgs _";
         var fullParamList = captureModelTypeParameters
             ? paramListInner
@@ -1089,7 +1143,7 @@ internal static class MockMembersBuilder
             ? MockImplBuilder.GetConstraintClauses(method)
             : GetCombinedConstraintClauses(model, method);
 
-        var safeMemberName = GetSafeMemberName(method.Name);
+        var safeMemberName = GetSafeMemberName(method.Name, model);
         var fullParamList = captureModelTypeParameters
             ? paramList
             : BuildExtensionMethodParameterList(model, paramList);
@@ -1166,7 +1220,7 @@ internal static class MockMembersBuilder
                 var hasGetter = prop.HasGetter ? "true" : "false";
                 var hasSetter = prop.HasSetter ? "true" : "false";
 
-                var safePropName = GetSafeMemberName(prop.Name);
+                var safePropName = GetSafeMemberName(prop.Name, model);
 
                 writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
                 writer.AppendLine($"    => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
@@ -1220,6 +1274,107 @@ internal static class MockMembersBuilder
                 writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {indexer.SetterMemberId}, \"set_Item\", matchers);");
             }
         }
+    }
+
+    // Methods polyfilled with instance-style ergonomics on net9.0+. Each entry: (member name,
+    // return type, parameter list excluding `this Mock<T>`, argument list forwarded to the
+    // matching Mock static helper).
+    private static readonly (string Name, string ReturnType, string Parameters, string ForwardArgs)[] MethodPolyfills =
+    {
+        ("Reset", "void", "", ""),
+        ("VerifyAll", "void", "", ""),
+        ("VerifyNoOtherCalls", "void", "", ""),
+        ("SetupAllProperties", "void", "", ""),
+        ("GetDiagnostics", "global::TUnit.Mocks.Diagnostics.MockDiagnostics", "", ""),
+        ("SetState", "void", "string? stateName", ", stateName"),
+    };
+
+    private static void GenerateMockControlPolyfills(CodeWriter writer, MockTypeModel model, bool isFirstMember)
+    {
+        var userNames = GetUserMemberNames(model);
+
+        // Cache one Contains() per polyfill name and reuse for both the early-return guard and
+        // the emission below. Each `emitX` is true when the corresponding polyfill SHOULD emit
+        // (i.e. user doesn't already declare that name).
+        var emitMethods = MethodPolyfills.Where(p => !userNames.Contains(p.Name)).ToArray();
+        var emitInState = !userNames.Contains("InState");
+        var emitInvocations = !userNames.Contains("Invocations");
+        var emitBehavior = !userNames.Contains("Behavior");
+        var emitDefaultValueProvider = !userNames.Contains("DefaultValueProvider");
+
+        // Skip entirely when every polyfill name collides with a user member — keeps the
+        // separator blank line (below) and the surrounding #if/#endif from being emitted.
+        if (emitMethods.Length == 0 && !emitInState
+            && !emitInvocations && !emitBehavior && !emitDefaultValueProvider)
+        {
+            return;
+        }
+
+        var mockableType = MockImplBuilder.GetMockableTypeName(model);
+        var typeParams = MockImplBuilder.GetTypeParameterList(model);
+        var constraints = MockImplBuilder.GetConstraintClauses(model);
+        var receiverParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
+
+        if (!isFirstMember) writer.AppendLine();
+        writer.AppendLine("#if NET9_0_OR_GREATER");
+
+        bool first = true;
+
+        foreach (var (name, ret, parms, fwd) in emitMethods)
+        {
+            if (!first) writer.AppendLine();
+            first = false;
+            var paramList = string.IsNullOrEmpty(parms) ? receiverParam : $"{receiverParam}, {parms}";
+            writer.AppendLine(PriorityMinusOneAttribute);
+            writer.AppendLine($"public static {ret} {name}{typeParams}({paramList}){constraints}");
+            writer.AppendLine($"    => global::TUnit.Mocks.Mock.{name}(mock{fwd});");
+        }
+
+        // InState takes an Action<Mock<T>> — emit separately so the generic argument is correct.
+        if (emitInState)
+        {
+            if (!first) writer.AppendLine();
+            first = false;
+            writer.AppendLine(PriorityMinusOneAttribute);
+            writer.AppendLine($"public static void InState{typeParams}({receiverParam}, string stateName, global::System.Action<global::TUnit.Mocks.Mock<{mockableType}>> configure){constraints}");
+            writer.AppendLine($"    => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);");
+        }
+
+        // Property polyfills via C# 14 extension block so users write mock.Invocations rather
+        // than mock.Invocations().
+        if (emitInvocations || emitBehavior || emitDefaultValueProvider)
+        {
+            if (!first) writer.AppendLine();
+            using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> mock){constraints}"))
+            {
+                bool firstProp = true;
+                if (emitInvocations)
+                {
+                    writer.AppendLine(PriorityMinusOneAttribute);
+                    writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);");
+                    firstProp = false;
+                }
+                if (emitBehavior)
+                {
+                    if (!firstProp) writer.AppendLine();
+                    writer.AppendLine(PriorityMinusOneAttribute);
+                    writer.AppendLine("public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);");
+                    firstProp = false;
+                }
+                if (emitDefaultValueProvider)
+                {
+                    if (!firstProp) writer.AppendLine();
+                    writer.AppendLine(PriorityMinusOneAttribute);
+                    using (writer.Block("public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider"))
+                    {
+                        writer.AppendLine("get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);");
+                        writer.AppendLine("set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);");
+                    }
+                }
+            }
+        }
+
+        writer.AppendLine("#endif");
     }
 
     private static void GenerateRaiseExtensionMethods(CodeWriter writer, MockTypeModel model)

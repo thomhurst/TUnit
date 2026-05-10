@@ -1,3 +1,4 @@
+using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
@@ -44,7 +45,7 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
     {
         var mock = Of<T>(behavior);
-        mock.DefaultValueProvider = defaultValueProvider;
+        ((IMockControl<T>)mock).DefaultValueProvider = defaultValueProvider;
         return mock;
     }
 
@@ -185,4 +186,55 @@ public static class Mock
     {
         OrderedVerification.Verify(verificationActions);
     }
+
+    /// <summary>All calls made to <paramref name="mock"/>, in order.</summary>
+    public static IReadOnlyList<CallRecord> Invocations<T>(Mock<T> mock) where T : class
+        => ((IMockControl<T>)mock).Invocations;
+
+    /// <summary>The mock behavior (Loose or Strict).</summary>
+    public static MockBehavior Behavior<T>(Mock<T> mock) where T : class
+        => ((IMockControl<T>)mock).Behavior;
+
+    /// <summary>Gets the custom default-value provider, or null if none is configured.</summary>
+    public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
+        => ((IMockControl<T>)mock).DefaultValueProvider;
+
+    /// <summary>Sets the custom default-value provider.</summary>
+    public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
+        => ((IMockControl<T>)mock).DefaultValueProvider = provider;
+
+    /// <summary>Enables auto-tracking for all properties on <paramref name="mock"/>.</summary>
+    public static void SetupAllProperties<T>(Mock<T> mock) where T : class
+        => ((IMockControl<T>)mock).SetupAllProperties();
+
+    /// <summary>Clears all setups and call history on <paramref name="mock"/>.</summary>
+    public static void Reset<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).Reset();
+
+    /// <summary>
+    /// Verifies that every setup registered on <paramref name="mock"/> was invoked at least once.
+    /// </summary>
+    public static void VerifyAll<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyAll();
+
+    /// <summary>
+    /// Fails if any recorded call on <paramref name="mock"/> was not matched by a prior verification.
+    /// </summary>
+    public static void VerifyNoOtherCalls<T>(Mock<T> mock) where T : class
+        => ((IMock)mock).VerifyNoOtherCalls();
+
+    /// <summary>Returns a diagnostic report of setup coverage and call matching for <paramref name="mock"/>.</summary>
+    public static MockDiagnostics GetDiagnostics<T>(Mock<T> mock) where T : class
+        => ((IMockControl<T>)mock).GetDiagnostics();
+
+    /// <summary>Sets the current state for state-machine mocking on <paramref name="mock"/>. Null clears.</summary>
+    public static void SetState<T>(Mock<T> mock, string? stateName) where T : class
+        => ((IMockControl<T>)mock).SetState(stateName);
+
+    /// <summary>
+    /// Registers setups scoped to <paramref name="stateName"/>. Setups created inside
+    /// <paramref name="configure"/> only match when the engine is in that state.
+    /// </summary>
+    public static void InState<T>(Mock<T> mock, string stateName, Action<Mock<T>> configure) where T : class
+        => ((IMockControl<T>)mock).InState(stateName, configure);
 }
