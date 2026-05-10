@@ -376,7 +376,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CommitSha = commitSha,
             Branch = branch,
             PullRequestNumber = prNumber,
-            RepositorySlug = repoSlug
+            RepositorySlug = repoSlug,
+            ExpandClassTimeline = TUnit.Core.Settings.TUnitSettings.Default.Report.ExpandClassTimeline,
         };
     }
 

@@ -1736,7 +1736,21 @@ function renderSuiteTrace(className) {
     if (!suite) return '';
     const allSpans = spansByTrace[suite.traceId];
     if (!allSpans) return '';
-    const filtered = collapseTestBodySpans(getDescendants(allSpans, suite.spanId));
+    const all = getDescendants(allSpans, suite.spanId);
+    let filtered;
+    if (data.expandClassTimeline) {
+        // BDD/DependsOn mode: include test-case spans and their non-'test body' children
+        // so multi-step flows are visible at the class level.
+        filtered = collapseTestBodySpans(all);
+    } else {
+        // Default: drop test-case spans and their full subtrees so the class timeline
+        // shows only class-level infrastructure (suite, init/dispose, parallel coordination).
+        const testCaseIds = new Set();
+        all.forEach(s => { if (s.spanType === 'test case') testCaseIds.add(s.spanId); });
+        const tcDescendants = new Set();
+        testCaseIds.forEach(id => { getDescendants(all, id).forEach(s => { if (s.spanId !== id) tcDescendants.add(s.spanId); }); });
+        filtered = all.filter(s => !tcDescendants.has(s.spanId) && !testCaseIds.has(s.spanId));
+    }
     // Include parent spans (assembly, session) for context
     let ancestor = suite.parentSpanId ? bySpanId[suite.parentSpanId] : null;
     while (ancestor) {

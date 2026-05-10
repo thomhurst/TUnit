@@ -229,6 +229,7 @@ public class OtlpReceiverIngestionTests
     {
         var collector = ActivityCollector.Current;
         await Assert.That(collector).IsNotNull();
+        await Assert.That(Activity.Current).IsNotNull();
 
         await using var receiver = new OtlpReceiver();
         receiver.Start();

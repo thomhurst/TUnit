@@ -589,7 +589,11 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             else
             {
                 Interlocked.Increment(ref _diagnostics.UpstreamForwardFailures);
-                Trace.WriteLine($"[TUnit.OpenTelemetry] Upstream {path} returned {(int)response.StatusCode} {response.ReasonPhrase}.");
+                // Strip CR/LF from ReasonPhrase before logging — it's an HTTP response header
+                // value and could otherwise inject newlines into the trace output, breaking
+                // log parsing tools (CodeQL log-injection rule).
+                var safePhrase = response.ReasonPhrase?.Replace('\r', ' ').Replace('\n', ' ');
+                Trace.WriteLine($"[TUnit.OpenTelemetry] Upstream {path} returned {(int)response.StatusCode} {safePhrase}.");
             }
         }
         catch (Exception ex)
