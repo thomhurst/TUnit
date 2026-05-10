@@ -335,23 +335,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
 
         var args = new object?[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
+        Array.Copy(suppliedArguments, args, suppliedArguments.Length);
+        for (var i = suppliedArguments.Length; i < parameters.Length; i++)
         {
-            if (i < suppliedArguments.Length)
+            var p = parameters[i];
+            if (p.HasDefaultValue)
             {
-                args[i] = suppliedArguments[i];
+                args[i] = Type.Missing;
             }
-            else if (parameters[i].HasDefaultValue)
-            {
-                args[i] = parameters[i].DefaultValue;
-            }
-            else if (parameters[i].ParameterType == typeof(CancellationToken))
+            else if (p.ParameterType == typeof(CancellationToken))
             {
                 args[i] = CancellationToken.None;
             }
             else
             {
-                // More required params than supplied — fall back so Invoke surfaces the original mismatch.
+                // Required param missing — fall back so Invoke surfaces the original mismatch.
                 return suppliedArguments;
             }
         }
