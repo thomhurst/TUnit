@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -364,7 +365,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             AssemblyName = assemblyName,
             MachineName = Environment.MachineName,
-            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'"),
+            Timestamp = FormatTimestamp(DateTimeOffset.UtcNow),
             TUnitVersion = tunitVersion,
             OperatingSystem = RuntimeInformation.OSDescription,
             RuntimeVersion = RuntimeInformation.FrameworkDescription,
@@ -412,6 +413,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 
         return (commitSha, branch, prNumber, repoSlug);
+    }
+
+    private static string FormatTimestamp(DateTimeOffset value)
+    {
+        // Both 'R' and 'u' are culture-invariant by spec; branching is purely for English-reader aesthetics.
+        var utc = value.ToUniversalTime();
+        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en"
+            ? utc.ToString("R")
+            : utc.ToString("u");
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
