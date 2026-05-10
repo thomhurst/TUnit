@@ -27899,7 +27899,7 @@ The `Describe()` method is used in verification failure messages to explain what
 `TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.
 
 ```bash
-dotnet add package TUnit.Mocks.Http --prerelease
+dotnet add package TUnit.Mocks.Http
 ```
 
 ## Getting Started
@@ -28144,23 +28144,19 @@ TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framew
 
 While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
-:::note Beta
-TUnit.Mocks is currently in **beta**. The API may change before the stable release.
-:::
-
 ## Installation
 
 Add the NuGet package to your test project:
 
 ```bash
-dotnet add package TUnit.Mocks --prerelease
+dotnet add package TUnit.Mocks
 ```
 
 For HTTP mocking or logging helpers, also add:
 
 ```bash
-dotnet add package TUnit.Mocks.Http --prerelease
-dotnet add package TUnit.Mocks.Logging --prerelease
+dotnet add package TUnit.Mocks.Http
+dotnet add package TUnit.Mocks.Logging
 ```
 
 :::warning C# 14 Required
@@ -28328,7 +28324,7 @@ See [Argument Matchers](argument-matchers) for the full API.
 `TUnit.Mocks.Logging` provides `MockLogger` — a simple `ILogger` implementation that captures log entries for inspection and verification.
 
 ```bash
-dotnet add package TUnit.Mocks.Logging --prerelease
+dotnet add package TUnit.Mocks.Logging
 ```
 
 :::tip No Source Generation Needed
