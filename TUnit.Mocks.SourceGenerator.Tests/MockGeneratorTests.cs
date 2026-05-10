@@ -1551,4 +1551,26 @@ public class MockGeneratorTests : SnapshotTestBase
                 + string.Join("\n", lines));
         }
     }
+
+    [Test]
+    public Task Conflict_With_Existing_Type_Falls_Back_To_Generated_Namespace()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            namespace MyApp;
+
+            public interface IGreeter { string Greet(string name); }
+
+            // User already has a class named IGreeterMock — generator must fall back.
+            public class IGreeterMock { }
+
+            public class TestUsage
+            {
+                void M() { var mock = Mock.Of<IGreeter>(); }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
 }
