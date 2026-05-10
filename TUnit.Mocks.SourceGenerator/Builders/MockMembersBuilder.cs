@@ -126,11 +126,33 @@ internal static class MockMembersBuilder
                 if (method.ExplicitInterfaceName is not null && !method.IsStaticAbstract) continue;
                 if (!ShouldGenerateTypedWrapper(method, hasEvents)) continue;
                 writer.AppendLine();
+                EmitNonSpanRefStructSetterDelegates(writer, model, method);
                 GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility, model);
             }
         }
 
         return writer.ToString();
+    }
+
+    /// <summary>
+    /// Emits namespace-scoped delegate types for non-span ref struct out/ref parameters.
+    /// These cannot be boxed into the <see cref="System.Collections.Generic.Dictionary{Int32, Object}"/>
+    /// used by <c>OutRefContext</c>, so the typed setter accepts a delegate instead and the
+    /// generated mock implementation invokes the delegate on the actual <c>out</c>/<c>ref</c> slot.
+    /// </summary>
+    private static void EmitNonSpanRefStructSetterDelegates(CodeWriter writer, MockTypeModel model, MockMemberModel method)
+    {
+        if (method.IsGenericMethod || model.TypeParameters.Length > 0) return;
+
+        foreach (var param in method.Parameters)
+        {
+            if (param.Direction != ParameterDirection.Out && param.Direction != ParameterDirection.Ref) continue;
+            if (!param.IsRefStruct || param.SpanElementType is not null) continue;
+
+            var name = MockImplBuilder.GetOutRefSetterDelegateName(model, method, param);
+            var dir = param.Direction == ParameterDirection.Out ? "out" : "ref";
+            writer.AppendLine($"{model.Visibility} delegate void {name}({dir} {param.FullyQualifiedType} value);");
+        }
     }
 
     private static void EmitOutParamDefaults(CodeWriter writer, MockMemberModel method)
@@ -158,10 +180,10 @@ internal static class MockMembersBuilder
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         if (matchableParams.Count == 0)
         {
-            // Include span-type ref struct out/ref params (supported via array conversion)
+            // Include span-type ref struct out/ref params (array conversion path) and
+            // non-span ref struct out/ref params (delegate-setter path).
             var hasOutRefParams = method.Parameters.Any(p =>
-                (!p.IsRefStruct || p.SpanElementType is not null) &&
-                (p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref));
+                p.Direction == ParameterDirection.Out || p.Direction == ParameterDirection.Ref);
             // Span return types need a typed wrapper for the generated Returns(SpanType) method
             var hasSpanReturn = method.SpanReturnElementType is not null;
             return hasEvents || hasOutRefParams || hasSpanReturn;
@@ -227,18 +249,18 @@ internal static class MockMembersBuilder
         // Ref struct returns use the void wrapper (can't use ref structs as generic type args)
         if (method.IsVoid || method.IsRefStructReturn)
         {
-            GenerateVoidUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, visibility, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, method.SpanReturnElementType, method.ReturnType,
+            GenerateVoidUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, visibility, matchableParams, events, method.Parameters, hasRefStructParams, allNonOutParams, model, method, method.SpanReturnElementType, method.ReturnType,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask);
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
             // Static-abstract interface returns can't be used as generic type args (CS8920)
             // Use object? to preserve .Returns() capability
-            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams, visibility);
+            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, "object?", events, method.Parameters, hasRefStructParams, allNonOutParams, visibility, model, method);
         }
         else
         {
-            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams, visibility,
+            GenerateReturnUnifiedClass(writer, wrapperName, wrapperTypeName, typeConstraints, matchableParams, setupReturnType, events, method.Parameters, hasRefStructParams, allNonOutParams, visibility, model, method,
                 isAsync: method.IsAsync, isValueTask: method.IsValueTask, fullReturnType: method.ReturnType);
         }
     }
@@ -246,7 +268,7 @@ internal static class MockMembersBuilder
     private static void GenerateReturnUnifiedClass(CodeWriter writer, string wrapperCtorName, string wrapperTypeName, string typeConstraints,
         List<MockParameterModel> nonOutParams, string returnType, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
-        string visibility,
+        string visibility, MockTypeModel model, MockMemberModel method,
         bool isAsync = false, bool isValueTask = false, string? fullReturnType = null)
     {
         var builderType = $"global::TUnit.Mocks.Setup.MethodSetupBuilder<{returnType}>";
@@ -325,7 +347,7 @@ internal static class MockMembersBuilder
             if (hasOutRef)
             {
                 writer.AppendLine();
-                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName);
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName, model, method);
             }
 
             // Typed event raises
@@ -356,6 +378,7 @@ internal static class MockMembersBuilder
     private static void GenerateVoidUnifiedClass(CodeWriter writer, string wrapperCtorName, string wrapperTypeName, string typeConstraints, string visibility,
         List<MockParameterModel> nonOutParams, EquatableArray<MockEventModel> events,
         EquatableArray<MockParameterModel> allParameters, bool hasRefStructParams, List<MockParameterModel> allNonOutParams,
+        MockTypeModel model, MockMemberModel method,
         string? spanReturnElementType = null, string? spanReturnType = null,
         bool isAsync = false, bool isValueTask = false)
     {
@@ -450,7 +473,7 @@ internal static class MockMembersBuilder
             if (hasOutRef)
             {
                 writer.AppendLine();
-                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName);
+                GenerateTypedOutRefMethods(writer, allParameters, wrapperTypeName, model, method);
             }
 
             // Typed event raises
@@ -597,8 +620,10 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static void GenerateTypedOutRefMethods(CodeWriter writer, EquatableArray<MockParameterModel> allParameters, string wrapperName)
+    private static void GenerateTypedOutRefMethods(CodeWriter writer, EquatableArray<MockParameterModel> allParameters, string wrapperName, MockTypeModel model, MockMemberModel method)
     {
+        var canEmitRefStructSetter = !method.IsGenericMethod && model.TypeParameters.Length == 0;
+
         for (int i = 0; i < allParameters.Length; i++)
         {
             var param = allParameters[i];
@@ -607,8 +632,12 @@ internal static class MockMembersBuilder
                 continue;
             }
 
-            // Skip non-span ref structs (can't be boxed)
-            if (param.IsRefStruct && param.SpanElementType is null)
+            // Non-span ref structs can't be boxed: only emit when we can plumb a typed delegate
+            // (closed-signature, declared at namespace scope, referenced from the impl/bridge).
+            // Skip generic mock types and generic methods for now — those would require generic
+            // delegate types with `allows ref struct` constraints (C# 13) which the netstandard2.0
+            // target can't reliably emit.
+            if (param.IsRefStruct && param.SpanElementType is null && !canEmitRefStructSetter)
             {
                 continue;
             }
@@ -622,6 +651,14 @@ internal static class MockMembersBuilder
             {
                 // Span types: convert to array for storage, reconstruct at invocation time
                 writer.AppendLine($"public {wrapperName} {methodName}({param.FullyQualifiedType} {param.Name}) {{ EnsureSetup().SetsOutParameter({i}, {param.Name}.ToArray()); return this; }}");
+            }
+            else if (param.IsRefStruct)
+            {
+                // Non-span ref structs: accept a typed delegate (closed signature) declared at
+                // namespace scope. The delegate itself is a reference type, so the existing
+                // `Dictionary<int, object?>` storage in OutRefContext accepts it unchanged.
+                var delegateFqn = MockImplBuilder.GetOutRefSetterDelegateFqn(model, method, param);
+                writer.AppendLine($"public {wrapperName} {methodName}({delegateFqn} setter) {{ EnsureSetup().SetsOutParameter({i}, setter); return this; }}");
             }
             else
             {

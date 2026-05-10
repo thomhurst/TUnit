@@ -52,7 +52,7 @@ internal static class MockBridgeBuilder
                 if (!method.IsStaticAbstract) continue;
                 if (!first) writer.AppendLine();
                 first = false;
-                GenerateStaticMethodDim(writer, method, staticEngineTypeName);
+                GenerateStaticMethodDim(writer, method, staticEngineTypeName, model);
             }
 
             // Static abstract properties — provide DIM implementations
@@ -92,7 +92,7 @@ internal static class MockBridgeBuilder
         }
     }
 
-    private static void GenerateStaticMethodDim(CodeWriter writer, MockMemberModel method, string staticEngineTypeName)
+    private static void GenerateStaticMethodDim(CodeWriter writer, MockMemberModel method, string staticEngineTypeName, MockTypeModel model)
     {
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = MockImplBuilder.GetParameterList(method);
@@ -103,7 +103,7 @@ internal static class MockBridgeBuilder
 
         using (writer.Block($"static {signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints}"))
         {
-            GenerateStaticEngineDispatchBody(writer, method, staticEngineTypeName);
+            GenerateStaticEngineDispatchBody(writer, method, staticEngineTypeName, model);
         }
     }
 
@@ -155,7 +155,7 @@ internal static class MockBridgeBuilder
         writer.CloseBrace();
     }
 
-    private static void GenerateStaticEngineDispatchBody(CodeWriter writer, MockMemberModel method, string staticEngineTypeName)
+    private static void GenerateStaticEngineDispatchBody(CodeWriter writer, MockMemberModel method, string staticEngineTypeName, MockTypeModel model)
     {
         writer.AppendLine($"var __engine = {staticEngineTypeName}.Engine;");
 
@@ -174,7 +174,7 @@ internal static class MockBridgeBuilder
         {
             writer.AppendLine("if (__engine is null) return;");
             writer.AppendLine($"__engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
-            MockImplBuilder.EmitOutRefReadback(writer, method);
+            MockImplBuilder.EmitOutRefReadback(writer, method, model);
         }
         else if (method.IsVoid && method.IsAsync)
         {
@@ -190,7 +190,7 @@ internal static class MockBridgeBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"__engine.HandleCall({method.MemberId}, \"{method.Name}\", {argsArray});");
-                MockImplBuilder.EmitOutRefReadback(writer, method);
+                MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
@@ -228,7 +228,7 @@ internal static class MockBridgeBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"var __result = ({method.UnwrappedReturnType})__engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null)!;");
-                MockImplBuilder.EmitOutRefReadback(writer, method);
+                MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -264,7 +264,7 @@ internal static class MockBridgeBuilder
             using (writer.Block("try"))
             {
                 writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.UnwrappedReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.UnwrappedSmartDefault});");
-                MockImplBuilder.EmitOutRefReadback(writer, method);
+                MockImplBuilder.EmitOutRefReadback(writer, method, model);
                 if (method.IsValueTask)
                 {
                     writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask<{method.UnwrappedReturnType}>(__result);");
@@ -292,14 +292,14 @@ internal static class MockBridgeBuilder
             // Use object? and cast instead.
             writer.AppendLine("if (__engine is null) return default!;");
             writer.AppendLine($"var __result = __engine.HandleCallWithReturn<object?>({method.MemberId}, \"{method.Name}\", {argsArray}, null);");
-            MockImplBuilder.EmitOutRefReadback(writer, method);
+            MockImplBuilder.EmitOutRefReadback(writer, method, model);
             writer.AppendLine($"return ({method.ReturnType})__result!;");
         }
         else
         {
             writer.AppendLine("if (__engine is null) return default!;");
             writer.AppendLine($"var __result = __engine.HandleCallWithReturn<{method.ReturnType}>({method.MemberId}, \"{method.Name}\", {argsArray}, {method.SmartDefault});");
-            MockImplBuilder.EmitOutRefReadback(writer, method);
+            MockImplBuilder.EmitOutRefReadback(writer, method, model);
             writer.AppendLine("return __result;");
         }
     }
