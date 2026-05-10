@@ -90,16 +90,7 @@ internal static class TypeSymbolExtensions
     public static string GetGeneratedMockNamespace(this INamedTypeSymbol type, Compilation compilation)
     {
         var namespaceName = type.ContainingNamespace?.ToDisplayString() ?? "";
-        var hasEvents = false;
-        foreach (var member in type.GetMembers())
-        {
-            if (member is IEventSymbol)
-            {
-                hasEvents = true;
-                break;
-            }
-        }
-        var fallback = MockNamespaceConflictDetector.HasConflict(compilation, type, hasEvents);
+        var fallback = MockNamespaceConflictDetector.HasConflict(compilation, type);
         return Builders.MockImplBuilder.SelectMockNamespace(namespaceName, fallback);
     }
 

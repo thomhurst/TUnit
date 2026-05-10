@@ -330,8 +330,7 @@ internal static class MockTypeDiscovery
             Events = EquatableArray<MockEventModel>.Empty,
             AllInterfaces = EquatableArray<string>.Empty,
             IsPublic = IsEffectivelyPublic(delegateType),
-            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
-                compilation, delegateType, hasEvents: false),
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, delegateType),
         };
     }
 
@@ -384,8 +383,7 @@ internal static class MockTypeDiscovery
             Constructors = constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
             IsPublic = IsEffectivelyPublic(namedType),
-            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(
-                compilation, namedType, hasEvents: events.Length > 0)
+            UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, namedType)
         };
     }
 

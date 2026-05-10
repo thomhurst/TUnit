@@ -14,10 +14,15 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 /// <paramref name="target"/> comes from a referenced assembly: the namespace symbol on
 /// the target only exposes types from that assembly, but the same namespace name may
 /// have additional types declared in the consumer's compilation.
+/// All seven generator-emitted suffixes are always checked. The events-extensions pair
+/// is included unconditionally even though it only ships when the target has events —
+/// keeping the rule symmetric guarantees both call sites (model construction and
+/// auto-mock factory references) reach the same fallback decision regardless of how
+/// they derive their event lists.
 /// </remarks>
 internal static class MockNamespaceConflictDetector
 {
-    internal static bool HasConflict(Compilation compilation, INamedTypeSymbol target, bool hasEvents)
+    internal static bool HasConflict(Compilation compilation, INamedTypeSymbol target)
     {
         var nsName = target.ContainingNamespace?.ToDisplayString() ?? "";
         var ns = ResolveNamespaceInCompilation(compilation, nsName);
@@ -29,7 +34,7 @@ internal static class MockNamespaceConflictDetector
         var typeName = target.Name;
         foreach (var existing in ns.GetTypeMembers())
         {
-            if (IsCollidingName(existing.Name, typeName, hasEvents))
+            if (IsCollidingName(existing.Name, typeName))
             {
                 return true;
             }
@@ -37,7 +42,7 @@ internal static class MockNamespaceConflictDetector
         return false;
     }
 
-    private static bool IsCollidingName(string existingName, string typeName, bool hasEvents)
+    private static bool IsCollidingName(string existingName, string typeName)
     {
         if (existingName.Length <= typeName.Length
             || !existingName.StartsWith(typeName, System.StringComparison.Ordinal))
@@ -51,9 +56,8 @@ internal static class MockNamespaceConflictDetector
             || suffix.SequenceEqual("MockFactory".AsSpan())
             || suffix.SequenceEqual("_MockStaticExtension".AsSpan())
             || suffix.SequenceEqual("_MockMemberExtensions".AsSpan())
-            || (hasEvents
-                && (suffix.SequenceEqual("_MockEvents".AsSpan())
-                    || suffix.SequenceEqual("_MockEventsExtensions".AsSpan())));
+            || suffix.SequenceEqual("_MockEvents".AsSpan())
+            || suffix.SequenceEqual("_MockEventsExtensions".AsSpan());
     }
 
     private static INamespaceSymbol? ResolveNamespaceInCompilation(Compilation compilation, string namespaceName)

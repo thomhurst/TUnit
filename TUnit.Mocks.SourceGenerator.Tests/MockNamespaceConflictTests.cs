@@ -26,7 +26,7 @@ public class MockNamespaceConflictTests : SnapshotTestBase
 
         var (compilation, target) = CompileAndGetType(source, "MyApp.IGreeter");
 
-        var result = MockNamespaceConflictDetector.HasConflict(compilation, target, hasEvents: false);
+        var result = MockNamespaceConflictDetector.HasConflict(compilation, target);
 
         await Assert.That(result).IsFalse();
     }
@@ -50,14 +50,18 @@ public class MockNamespaceConflictTests : SnapshotTestBase
 
         var (compilation, target) = CompileAndGetType(source, "MyApp.IGreeter");
 
-        var result = MockNamespaceConflictDetector.HasConflict(compilation, target, hasEvents: false);
+        var result = MockNamespaceConflictDetector.HasConflict(compilation, target);
 
         await Assert.That(result).IsTrue();
     }
 
     [Test]
-    public async Task EventsExtensionsCollision_OnlyFlaggedWhenTypeHasEvents()
+    public async Task EventsExtensionsCollision_AlwaysFlagged()
     {
+        // The detector treats every emitted-suffix collision as a conflict, regardless
+        // of whether the target type actually has events. Keeping the rule symmetric
+        // ensures both call sites — model construction and auto-mock factory references
+        // — reach the same fallback decision without re-deriving event lists.
         var source = """
             namespace MyApp
             {
@@ -74,11 +78,9 @@ public class MockNamespaceConflictTests : SnapshotTestBase
 
         var (compilation, target) = CompileAndGetType(source, "MyApp.IGreeter");
 
-        var withoutEvents = MockNamespaceConflictDetector.HasConflict(compilation, target, hasEvents: false);
-        var withEvents = MockNamespaceConflictDetector.HasConflict(compilation, target, hasEvents: true);
+        var result = MockNamespaceConflictDetector.HasConflict(compilation, target);
 
-        await Assert.That(withoutEvents).IsFalse();
-        await Assert.That(withEvents).IsTrue();
+        await Assert.That(result).IsTrue();
     }
 
     [Test]
@@ -97,7 +99,7 @@ public class MockNamespaceConflictTests : SnapshotTestBase
 
         var (compilation, target) = CompileAndGetType(source, "IGreeter");
 
-        var result = MockNamespaceConflictDetector.HasConflict(compilation, target, hasEvents: false);
+        var result = MockNamespaceConflictDetector.HasConflict(compilation, target);
 
         await Assert.That(result).IsTrue();
     }
@@ -111,8 +113,7 @@ public class MockNamespaceConflictTests : SnapshotTestBase
             public class IGreeterMock { }
             """, "A.B.C.IGreeter");
 
-        await Assert.That(MockNamespaceConflictDetector.HasConflict(
-            compilation, type, hasEvents: false)).IsTrue();
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(compilation, type)).IsTrue();
     }
 
     [Test]
@@ -124,8 +125,7 @@ public class MockNamespaceConflictTests : SnapshotTestBase
             public class IGreeterMock { }
             """, "MyApp.IGreeter`1");
 
-        await Assert.That(MockNamespaceConflictDetector.HasConflict(
-            compilation, type, hasEvents: false)).IsTrue();
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(compilation, type)).IsTrue();
     }
 
     [Test]
@@ -147,8 +147,7 @@ public class MockNamespaceConflictTests : SnapshotTestBase
 
         var type = compilation.GetTypeByMetadataName("ExternalLib.IGreeter")!;
 
-        await Assert.That(MockNamespaceConflictDetector.HasConflict(
-            compilation, type, hasEvents: false)).IsFalse();
+        await Assert.That(MockNamespaceConflictDetector.HasConflict(compilation, type)).IsFalse();
     }
 
     private static (Compilation, INamedTypeSymbol) CompileAndGetType(string source, string fullyQualifiedName)
