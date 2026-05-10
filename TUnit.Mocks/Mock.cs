@@ -196,11 +196,11 @@ public static class Mock
         => ((IMockControl<T>)mock).Behavior;
 
     /// <summary>Gets the custom default-value provider, or null if none is configured.</summary>
-    public static IDefaultValueProvider? DefaultValueProvider<T>(Mock<T> mock) where T : class
+    public static IDefaultValueProvider? GetDefaultValueProvider<T>(Mock<T> mock) where T : class
         => ((IMockControl<T>)mock).DefaultValueProvider;
 
     /// <summary>Sets the custom default-value provider.</summary>
-    public static void DefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
+    public static void SetDefaultValueProvider<T>(Mock<T> mock, IDefaultValueProvider? provider) where T : class
         => ((IMockControl<T>)mock).DefaultValueProvider = provider;
 
     /// <summary>Enables auto-tracking for all properties on <paramref name="mock"/>.</summary>

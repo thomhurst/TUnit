@@ -9,6 +9,14 @@ namespace TUnit.Mocks;
 /// during overload resolution — preventing them from shadowing source-generated extension methods
 /// whose names happen to match. Reached via the static helpers on <see cref="Mock"/>.
 /// </summary>
+/// <remarks>
+/// <see cref="IMock"/> carries the non-generic subset (<see cref="IMock.Reset"/>,
+/// <see cref="IMock.VerifyAll"/>, <see cref="IMock.VerifyNoOtherCalls"/>, <c>ObjectInstance</c>)
+/// because <see cref="MockRepository"/> needs to iterate mocks as a heterogeneous
+/// <see cref="IMock"/>[] for batch operations. The typed members that depend on <c>T</c>
+/// (<see cref="Invocations"/>, <see cref="GetDiagnostics"/>, the typed <see cref="Object"/>,
+/// state-machine helpers) only make sense in the generic shape and live here.
+/// </remarks>
 internal interface IMockControl<T> : IMock where T : class
 {
     /// <summary>The mock object that implements T.</summary>

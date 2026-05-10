@@ -374,9 +374,9 @@ public class MockDefaultValueProviderPropertyTests
         var mock = IGreeter.Mock();
         var provider = new FixedStringProvider();
 
-        Mock.DefaultValueProvider(mock, provider);
+        Mock.SetDefaultValueProvider(mock, provider);
 
-        await Assert.That(Mock.DefaultValueProvider(mock)).IsEqualTo(provider);
+        await Assert.That(Mock.GetDefaultValueProvider(mock)).IsEqualTo(provider);
     }
 
     [Test]

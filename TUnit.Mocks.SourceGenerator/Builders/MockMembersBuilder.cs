@@ -1266,6 +1266,16 @@ internal static class MockMembersBuilder
     private static void GenerateMockControlPolyfills(CodeWriter writer, MockTypeModel model)
     {
         var userNames = GetUserMemberNames(model);
+
+        // Skip entirely when every polyfill name collides with a user member — keeps callers
+        // from emitting a stray blank line before an empty #if/#endif block.
+        var anyMethod = MethodPolyfills.Any(p => !userNames.Contains(p.Name))
+            || !userNames.Contains("InState");
+        var anyProperty = !userNames.Contains("Invocations")
+            || !userNames.Contains("Behavior")
+            || !userNames.Contains("DefaultValueProvider");
+        if (!anyMethod && !anyProperty) return;
+
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
         var constraints = MockImplBuilder.GetConstraintClauses(model);
@@ -1326,8 +1336,8 @@ internal static class MockMembersBuilder
                     writer.AppendLine(PriorityMinusOneAttribute);
                     using (writer.Block("public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider"))
                     {
-                        writer.AppendLine("get => global::TUnit.Mocks.Mock.DefaultValueProvider(mock);");
-                        writer.AppendLine("set => global::TUnit.Mocks.Mock.DefaultValueProvider(mock, value);");
+                        writer.AppendLine("get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);");
+                        writer.AppendLine("set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);");
                     }
                 }
             }
