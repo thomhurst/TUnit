@@ -202,28 +202,27 @@ public class OtlpReceiverIngestionTests
         // Simulate a SUT exporter that flushes a couple hundred ms after the test logic
         // would finish — without DrainAsync, AspireFixture would tear down the AppHost
         // and the late POST would fail / be dropped.
+        var latePostCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var latePost = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromMilliseconds(200));
             using var client = new HttpClient();
             using var content = new ByteArrayContent(Array.Empty<byte>());
             await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
+            latePostCompleted.SetResult(true);
         });
 
-        var drainStart = DateTime.UtcNow;
         await receiver.DrainAsync(TimeSpan.FromSeconds(3));
-        var drainElapsed = DateTime.UtcNow - drainStart;
+
+        // Asserts the real contract directly: drain returned only after the late POST
+        // had been issued and acknowledged. Wall-clock floors (the previous approach)
+        // failed on macOS arm64 because Task.Delay scheduling jitter could push the
+        // late POST inside the synchronous prefix of DrainAsync, making the elapsed
+        // measurement misrepresent the actual invariant the drain must hold.
+        await Assert.That(latePostCompleted.Task.IsCompleted).IsTrue();
+        await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
 
         await latePost;
-
-        await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
-        // The drain must have waited past the first 250ms stable window — otherwise the
-        // 200ms-delayed POST would have landed after the drain returned. Lower bound is
-        // 350ms to leave headroom for CI scheduling jitter; the real invariant is "drain
-        // didn't return at ~250ms".
-        await Assert.That(drainElapsed).IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(350));
-        // And it must respect the cap — no point waiting indefinitely once quiet.
-        await Assert.That(drainElapsed).IsLessThan(TimeSpan.FromSeconds(3));
     }
 
     [Test]

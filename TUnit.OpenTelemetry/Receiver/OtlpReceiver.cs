@@ -155,6 +155,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         var totalWindow = window ?? DefaultDrainWindow;
         var clock = Stopwatch.StartNew();
 
+        // A request that's been sent over TCP but not yet pulled by GetContextAsync is
+        // invisible to both _inflightTasks and _diagnostics.TotalRequests — there's no
+        // hook between kernel TCP queue and HttpListener's accept loop. A single 250ms
+        // idle window can therefore return while a request is still on the wire. Require
+        // two consecutive idle windows (~500ms) so an in-transit POST has a chance to
+        // surface before drain declares quiet.
+        var consecutiveIdleWindows = 0;
+
         while (!cancellationToken.IsCancellationRequested)
         {
             var beforeCount = Volatile.Read(ref _diagnostics.TotalRequests);
@@ -188,7 +196,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var afterCount = Volatile.Read(ref _diagnostics.TotalRequests);
             if (afterCount == beforeCount && _inflightTasks.IsEmpty)
             {
-                return;
+                if (++consecutiveIdleWindows >= 2)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                consecutiveIdleWindows = 0;
             }
         }
     }
