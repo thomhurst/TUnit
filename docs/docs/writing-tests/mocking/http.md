@@ -237,6 +237,33 @@ Each `CapturedRequest` provides:
 | `Matched` | Whether a setup matched this request |
 | `Timestamp` | When the request was captured |
 
+## Mocking `IHttpClientFactory`
+
+When the system under test consumes `IHttpClientFactory` and uses `using var client = factory.CreateClient()`, returning a single shared `HttpClient` will fail on the second call with `ObjectDisposedException`. `Mock.HttpClientFactory()` solves this by returning a fresh non-disposing `HttpClient` per call, all sharing one `MockHttpHandler` so captured requests survive across `using` blocks.
+
+```csharp
+var factory = Mock.HttpClientFactory();
+factory.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
+
+var sut = new Sut(factory);
+await sut.DoWork(); // SUT may call CreateClient() any number of times
+
+factory.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Once);
+```
+
+### Named clients
+
+For typed/named clients registered via `services.AddHttpClient("users")`, assign a dedicated handler per name. Unregistered names fall back to `factory.Handler`.
+
+```csharp
+var factory = Mock.HttpClientFactory()
+    .WithHandler("users", Mock.HttpHandler())
+    .WithHandler("orders", Mock.HttpHandler());
+
+factory.HandlerFor("users").OnGet("/").RespondWithJson("""[]""");
+factory.HandlerFor("orders").OnPost("/").Respond(HttpStatusCode.Created);
+```
+
 ## Reset
 
 ```csharp

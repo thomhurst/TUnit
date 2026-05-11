@@ -24,5 +24,17 @@ public static class MockExtensions
         /// Use <c>.Handler</c> on the returned client to configure setups and verify calls.
         /// </summary>
         public static Http.MockHttpClient HttpClient(string baseAddress) => new(baseAddress);
+
+        /// <summary>
+        /// Creates a mock <see cref="IHttpClientFactory"/> backed by a fresh <see cref="Http.MockHttpHandler"/>.
+        /// Each <c>CreateClient</c> call returns a new <see cref="System.Net.Http.HttpClient"/> sharing the
+        /// same handler, with handler disposal disabled — safe to use in <c>using</c> blocks.
+        /// </summary>
+        public static Http.MockHttpClientFactory HttpClientFactory() => new();
+
+        /// <summary>
+        /// Creates a mock <see cref="IHttpClientFactory"/> backed by the supplied default handler.
+        /// </summary>
+        public static Http.MockHttpClientFactory HttpClientFactory(Http.MockHttpHandler handler) => new(handler);
     }
 }
