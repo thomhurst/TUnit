@@ -1,20 +1,19 @@
 using System.Net;
 using TUnit.Mocks;
-using TUnit.Mocks.Http;
 
 namespace TUnit.Mocks.Http.Tests;
 
 public class MockHttpClientFactoryTests
 {
+    private const string ClientName = "test-client";
+
     [Test]
     public async Task CreateClient_ReturnsConfiguredResponseFromDefaultHandler()
     {
-        var factory = Mock.HttpClientFactory();
+        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
 
-        using var client = factory.CreateClient("any");
-        client.BaseAddress = new Uri("http://localhost");
-
+        using var client = factory.CreateClient(ClientName);
         var response = await client.GetAsync("/api/users");
         var body = await response.Content.ReadAsStringAsync();
 
@@ -25,13 +24,12 @@ public class MockHttpClientFactoryTests
     [Test]
     public async Task CreateClient_SurvivesUsingBlockDisposal()
     {
-        var factory = Mock.HttpClientFactory();
+        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 
         for (var i = 0; i < 3; i++)
         {
-            using var client = factory.CreateClient("default");
-            client.BaseAddress = new Uri("http://localhost");
+            using var client = factory.CreateClient(ClientName);
             var response = await client.GetAsync("/ping");
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         }
@@ -44,8 +42,8 @@ public class MockHttpClientFactoryTests
     {
         var factory = Mock.HttpClientFactory();
 
-        var a = factory.CreateClient("x");
-        var b = factory.CreateClient("x");
+        var a = factory.CreateClient(ClientName);
+        var b = factory.CreateClient(ClientName);
 
         await Assert.That(a).IsNotSameReferenceAs(b);
     }
@@ -60,15 +58,14 @@ public class MockHttpClientFactoryTests
         ordersHandler.OnGet("/").RespondWithJson("""{"who":"orders"}""");
 
         var factory = Mock.HttpClientFactory()
+            .WithBaseAddress("http://localhost")
             .WithHandler("users", usersHandler)
             .WithHandler("orders", ordersHandler);
 
         using var usersClient = factory.CreateClient("users");
-        usersClient.BaseAddress = new Uri("http://localhost");
         var usersBody = await (await usersClient.GetAsync("/")).Content.ReadAsStringAsync();
 
         using var ordersClient = factory.CreateClient("orders");
-        ordersClient.BaseAddress = new Uri("http://localhost");
         var ordersBody = await (await ordersClient.GetAsync("/")).Content.ReadAsStringAsync();
 
         await Assert.That(usersBody).Contains("users");
@@ -82,37 +79,34 @@ public class MockHttpClientFactoryTests
     {
         var factory = Mock.HttpClientFactory();
 
-        var handler = factory.HandlerFor("unregistered");
+        await Assert.That(factory.HandlerFor("unregistered")).IsSameReferenceAs(factory.Handler);
+    }
 
-        await Assert.That(handler).IsSameReferenceAs(factory.Handler);
+    [Test]
+    public async Task CreateClient_NameIsCaseInsensitive()
+    {
+        var namedHandler = Mock.HttpHandler();
+        var factory = Mock.HttpClientFactory().WithHandler("Users", namedHandler);
+
+        await Assert.That(factory.HandlerFor("USERS")).IsSameReferenceAs(namedHandler);
+        await Assert.That(factory.HandlerFor("users")).IsSameReferenceAs(namedHandler);
     }
 
     [Test]
     public async Task Verify_TracksRequestsAcrossMultipleClientLifetimes()
     {
-        var factory = Mock.HttpClientFactory();
+        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnGet("/api/data").Respond(HttpStatusCode.OK);
 
-        using (var c1 = factory.CreateClient("default"))
+        using (var c1 = factory.CreateClient(ClientName))
         {
-            c1.BaseAddress = new Uri("http://localhost");
             await c1.GetAsync("/api/data");
         }
-        using (var c2 = factory.CreateClient("default"))
+        using (var c2 = factory.CreateClient(ClientName))
         {
-            c2.BaseAddress = new Uri("http://localhost");
             await c2.GetAsync("/api/data");
         }
 
         factory.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/data"), Times.Exactly(2));
-    }
-
-    [Test]
-    public async Task Constructor_UsesSuppliedDefaultHandler()
-    {
-        var handler = Mock.HttpHandler();
-        var factory = Mock.HttpClientFactory(handler);
-
-        await Assert.That(factory.Handler).IsSameReferenceAs(handler);
     }
 }

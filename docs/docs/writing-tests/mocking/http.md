@@ -239,10 +239,10 @@ Each `CapturedRequest` provides:
 
 ## Mocking `IHttpClientFactory`
 
-When the system under test consumes `IHttpClientFactory` and uses `using var client = factory.CreateClient()`, returning a single shared `HttpClient` will fail on the second call with `ObjectDisposedException`. `Mock.HttpClientFactory()` solves this by returning a fresh non-disposing `HttpClient` per call, all sharing one `MockHttpHandler` so captured requests survive across `using` blocks.
+`Mock.HttpClientFactory()` returns a factory whose `CreateClient` produces non-disposing `HttpClient`s sharing one `MockHttpHandler`, so captured requests survive `using` blocks in the system under test.
 
 ```csharp
-var factory = Mock.HttpClientFactory();
+var factory = Mock.HttpClientFactory().WithBaseAddress("https://api.example.com");
 factory.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
 
 var sut = new Sut(factory);
@@ -253,12 +253,14 @@ factory.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.O
 
 ### Named clients
 
-For typed/named clients registered via `services.AddHttpClient("users")`, assign a dedicated handler per name. Unregistered names fall back to `factory.Handler`.
+For typed/named clients registered via `services.AddHttpClient("users")`, assign a dedicated handler (and optionally base address) per name. Name lookups are case-insensitive, matching `IHttpClientFactory` semantics. Unregistered names fall back to `factory.Handler`.
 
 ```csharp
 var factory = Mock.HttpClientFactory()
     .WithHandler("users", Mock.HttpHandler())
-    .WithHandler("orders", Mock.HttpHandler());
+    .WithHandler("orders", Mock.HttpHandler())
+    .WithBaseAddress("users", "https://users.example.com")
+    .WithBaseAddress("orders", "https://orders.example.com");
 
 factory.HandlerFor("users").OnGet("/").RespondWithJson("""[]""");
 factory.HandlerFor("orders").OnPost("/").Respond(HttpStatusCode.Created);
