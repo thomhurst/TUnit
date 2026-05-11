@@ -95,6 +95,63 @@ public class CorrelationProcessorTests
     }
 
     [Test]
+    public async Task ScopedProcessor_DoesNotTag_ActivitiesFromOtherFactories()
+    {
+        // Regression for the OptOut_DoesNotTag_AspNetCoreSpans cross-factory leak:
+        // factory A's processor must skip activities that factory B's request pipeline
+        // tagged with B's factory id, even when the TraceRegistry fallback would happily
+        // resolve a TestId from somewhere.
+        using var listener = AttachPermissiveListener("CorrelationProcessorTests.ScopedAlien");
+        var scopeA = new CorrelationScope();
+        var scopeB = new CorrelationScope();
+        var processorA = new TUnitTestCorrelationProcessor(scopeA);
+
+        var previous = Activity.Current;
+        Activity.Current = null;
+        try
+        {
+            using var alien = new ActivitySource("CorrelationProcessorTests.ScopedAlien").StartActivity("alien")!;
+            alien.AddBaggage(CorrelationScope.FactoryIdBaggageKey, scopeB.FactoryId);
+            // A trace registry hit would otherwise satisfy the existing fallback path —
+            // include it so the test proves the per-factory guard is what blocks tagging.
+            TraceRegistry.Register(alien.TraceId.ToString(), testNodeUid: "node-x", contextId: "ctx-x");
+
+            processorA.OnEnd(alien);
+
+            await Assert.That(alien.GetTagItem("tunit.test.id")).IsNull();
+        }
+        finally
+        {
+            Activity.Current = previous;
+        }
+    }
+
+    [Test]
+    public async Task ScopedProcessor_Tags_ActivitiesFromOwnFactory()
+    {
+        using var listener = AttachPermissiveListener("CorrelationProcessorTests.ScopedOwn");
+        var scope = new CorrelationScope();
+        var processor = new TUnitTestCorrelationProcessor(scope);
+
+        var previous = Activity.Current;
+        Activity.Current = null;
+        try
+        {
+            using var own = new ActivitySource("CorrelationProcessorTests.ScopedOwn").StartActivity("own")!;
+            own.AddBaggage(CorrelationScope.FactoryIdBaggageKey, scope.FactoryId);
+            TraceRegistry.Register(own.TraceId.ToString(), testNodeUid: "node-y", contextId: "ctx-y");
+
+            processor.OnEnd(own);
+
+            await Assert.That(own.GetTagItem("tunit.test.id")).IsEqualTo("ctx-y");
+        }
+        finally
+        {
+            Activity.Current = previous;
+        }
+    }
+
+    [Test]
     public async Task Processor_NoOp_WhenNoBaggage()
     {
         using var listener = AttachPermissiveListener("CorrelationProcessorTests.NoBaggage");
