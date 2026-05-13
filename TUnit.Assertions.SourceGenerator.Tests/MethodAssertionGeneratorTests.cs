@@ -53,6 +53,11 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).IsNotNull();
             await Assert.That(mainFile!).Contains("IsPositiveAsync_Assertion");
             await Assert.That(mainFile!).Contains("var result = await"); // Awaits Task<bool>
+            // The Task<bool> branch's failure-return must terminate with a single `);` —
+            // a `));` (two closing parens) is a literal C# syntax error that pins this
+            // assertion against the regression where the emit had an extra closing paren.
+            await Assert.That(mainFile!).DoesNotContain("Failed($\"found {value}\"));");
+            await Assert.That(mainFile!).Contains("Failed($\"found {value}\");");
         });
 
     [Test]

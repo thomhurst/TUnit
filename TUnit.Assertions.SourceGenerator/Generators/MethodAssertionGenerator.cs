@@ -840,7 +840,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 sb.AppendLine($"        var result = await {methodCall};");
                 sb.AppendLine("        return result");
                 sb.AppendLine("            ? AssertionResult.Passed");
-                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\"));");
+                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\");");
                 break;
 
             case ReturnTypeKind.TaskAssertionResult:
