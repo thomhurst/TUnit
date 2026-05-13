@@ -210,4 +210,27 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             var callerExprCount = System.Text.RegularExpressions.Regex.Matches(extensionFile!, "CallerArgumentExpression").Count;
             await Assert.That(callerExprCount).IsGreaterThanOrEqualTo(2);
         });
+
+    [Test]
+    public Task ValueTypeDefaultParameter() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "AssertionExtensionValueTypeDefaultParameterAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var extensionFile = generatedFiles.First();
+            await Assert.That(extensionFile).IsNotNull();
+
+            // A non-nullable value-type constructor parameter declared with `= default` must
+            // render as the bare `default` literal, not `= null`. The literal `null` is invalid
+            // for a non-nullable value type and produces CS1750. The trailing comma anchors the
+            // assertion to bare `default`, ruling out the longer `default(TypeName)` form.
+            await Assert.That(extensionFile).Contains("CancellationToken token = default,");
+            await Assert.That(extensionFile).DoesNotContain("CancellationToken token = null");
+
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
 }

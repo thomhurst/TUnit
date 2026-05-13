@@ -141,7 +141,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             IsInterpolatedStringHandler = IsInterpolatedStringHandler(p.Type),
             SimpleTypeName = GetSimpleTypeName(p.Type),
             HasExplicitDefaultValue = p.HasExplicitDefaultValue,
-            DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null,
+            DefaultValueExpression = p.HasExplicitDefaultValue ? DefaultValueFormatter.FormatDefaultValue(p.ExplicitDefaultValue, p.Type, useFullyQualifiedEnumName: true) : null,
         }).ToImmutableEquatableArray();
 
         // Extract custom expectation message and inlining preference if provided
@@ -1197,46 +1197,6 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         return simpleName;
-    }
-
-    private static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
-    {
-        if (defaultValue == null)
-        {
-            return "null";
-        }
-
-        if (type.TypeKind == TypeKind.Enum && type is INamedTypeSymbol enumType)
-        {
-            foreach (var member in enumType.GetMembers())
-            {
-                if (member is IFieldSymbol { HasConstantValue: true } field &&
-                    field.ConstantValue != null &&
-                    field.ConstantValue.Equals(defaultValue))
-                {
-                    return $"{enumType.ToDisplayString()}.{field.Name}";
-                }
-            }
-
-            return $"({enumType.ToDisplayString()})({defaultValue})";
-        }
-
-        if (defaultValue is string str)
-        {
-            return $"\"{str.Replace("\"", "\\\"")}\"";
-        }
-
-        if (defaultValue is bool b)
-        {
-            return b ? "true" : "false";
-        }
-
-        if (defaultValue is char c)
-        {
-            return $"'{c}'";
-        }
-
-        return defaultValue.ToString() ?? "null";
     }
 
     /// <summary>

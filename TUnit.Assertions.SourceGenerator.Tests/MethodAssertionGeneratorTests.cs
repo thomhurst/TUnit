@@ -224,6 +224,29 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("bool exact = true");
         });
 
+    [Test]
+    public Task ValueTypeDefaultParameter() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "ValueTypeDefaultParameterAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // A non-nullable value-type parameter declared with `= default` must render as
+            // the bare `default` literal, not `= null`. The literal `null` is invalid for a
+            // non-nullable value type and produces CS1750. The trailing comma anchors the
+            // assertion to bare `default`, ruling out the longer `default(TypeName)` form.
+            await Assert.That(mainFile).Contains("CancellationToken token = default,");
+            await Assert.That(mainFile).DoesNotContain("CancellationToken token = null");
+
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
+
 #if NET8_0_OR_GREATER
     [Test]
     public Task RefStructParameter() => RunTest(
