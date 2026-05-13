@@ -384,11 +384,22 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
 
         sourceBuilder.Append($"    public static {returnType} {methodName}");
+
+        // Merge the covariant receiver-type parameter (if any) with the assertion class's own
+        // type parameters into a single generic parameter list. Emitting them as two adjacent
+        // <X><Y> blocks produces invalid C# when both are present (e.g. an Assertion<Concrete>
+        // subclass that also declares its own <T>: the receiver-type covariance adds TActual,
+        // the class adds T, and the method signature must be <TActual, T>, not <TActual><T>).
+        var methodGenericParams = new List<string>();
         if (genericTypeParam != null)
         {
-            sourceBuilder.Append($"<{genericTypeParam}>");
+            methodGenericParams.Add(genericTypeParam);
         }
-        sourceBuilder.Append(genericParamsString);
+        methodGenericParams.AddRange(genericParams);
+        if (methodGenericParams.Count > 0)
+        {
+            sourceBuilder.Append($"<{string.Join(", ", methodGenericParams)}>");
+        }
         sourceBuilder.Append("(");
         sourceBuilder.Append($"this {sourceType} source");
 
