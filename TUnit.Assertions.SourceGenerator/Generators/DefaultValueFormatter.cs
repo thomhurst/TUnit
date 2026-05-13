@@ -5,27 +5,41 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 /// <summary>
 /// Shared default-value emit for both assertion source generators. Renders a parameter's
 /// Roslyn-reported default value as the C# literal that goes after <c>=</c> in the generated
-/// method signature.
+/// method signature. The two public entry points differ only in how they format enum members:
+/// <see cref="FormatDefaultValue"/> emits the short form (<c>Enum.Member</c>), suitable for
+/// generators that rely on <c>using</c> directives at the top of the generated file;
+/// <see cref="FormatDefaultValueFullyQualified"/> emits the namespace-prefixed form
+/// (<c>Namespace.Enum.Member</c>), suitable for generators that emit fully-qualified type
+/// names throughout the produced source.
 /// </summary>
 internal static class DefaultValueFormatter
 {
     /// <summary>
     /// Formats <paramref name="defaultValue"/> as a C# default-literal expression for a
-    /// parameter of <paramref name="type"/>.
+    /// parameter of <paramref name="type"/>, emitting enum members in the short form
+    /// (<c>Enum.Member</c>) that depends on a <c>using</c> directive to resolve the type name.
     /// </summary>
     /// <param name="defaultValue">The constant value Roslyn reported for the parameter's
     /// explicit default, or <see langword="null"/> if the parameter was declared with the
     /// <c>default</c> keyword (which Roslyn surfaces as a null constant).</param>
     /// <param name="type">The parameter's declared type.</param>
-    /// <param name="useFullyQualifiedEnumName">
-    /// When <see langword="true"/>, enum members are emitted as <c>Namespace.Enum.Member</c>
-    /// (used by <c>MethodAssertionGenerator</c>, which emits fully-qualified type names in
-    /// the generated extension). When <see langword="false"/>, enum members are emitted as
-    /// <c>Enum.Member</c> without the namespace prefix (used by
-    /// <c>AssertionExtensionGenerator</c>, which relies on <c>using</c> directives at the
-    /// top of the generated file to resolve the short name).
-    /// </param>
-    public static string FormatDefaultValue(object? defaultValue, ITypeSymbol type, bool useFullyQualifiedEnumName)
+    public static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
+        => FormatDefaultValueCore(defaultValue, type, useFullyQualifiedEnumName: false);
+
+    /// <summary>
+    /// Formats <paramref name="defaultValue"/> as a C# default-literal expression for a
+    /// parameter of <paramref name="type"/>, emitting enum members in the fully-qualified form
+    /// (<c>Namespace.Enum.Member</c>) so the result resolves regardless of <c>using</c>
+    /// directives at the top of the generated file.
+    /// </summary>
+    /// <param name="defaultValue">The constant value Roslyn reported for the parameter's
+    /// explicit default, or <see langword="null"/> if the parameter was declared with the
+    /// <c>default</c> keyword (which Roslyn surfaces as a null constant).</param>
+    /// <param name="type">The parameter's declared type.</param>
+    public static string FormatDefaultValueFullyQualified(object? defaultValue, ITypeSymbol type)
+        => FormatDefaultValueCore(defaultValue, type, useFullyQualifiedEnumName: true);
+
+    private static string FormatDefaultValueCore(object? defaultValue, ITypeSymbol type, bool useFullyQualifiedEnumName)
     {
         if (defaultValue == null)
         {

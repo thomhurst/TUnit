@@ -411,7 +411,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             // Add default value if present
             if (param.HasExplicitDefaultValue)
             {
-                var defaultValue = DefaultValueFormatter.FormatDefaultValue(param.ExplicitDefaultValue, param.Type, useFullyQualifiedEnumName: false);
+                var defaultValue = DefaultValueFormatter.FormatDefaultValue(param.ExplicitDefaultValue, param.Type);
                 sourceBuilder.Append($" = {defaultValue}");
             }
         }

@@ -141,7 +141,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             IsInterpolatedStringHandler = IsInterpolatedStringHandler(p.Type),
             SimpleTypeName = GetSimpleTypeName(p.Type),
             HasExplicitDefaultValue = p.HasExplicitDefaultValue,
-            DefaultValueExpression = p.HasExplicitDefaultValue ? DefaultValueFormatter.FormatDefaultValue(p.ExplicitDefaultValue, p.Type, useFullyQualifiedEnumName: true) : null,
+            DefaultValueExpression = p.HasExplicitDefaultValue ? DefaultValueFormatter.FormatDefaultValueFullyQualified(p.ExplicitDefaultValue, p.Type) : null,
         }).ToImmutableEquatableArray();
 
         // Extract custom expectation message and inlining preference if provided
