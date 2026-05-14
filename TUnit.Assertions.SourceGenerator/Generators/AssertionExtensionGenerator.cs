@@ -411,7 +411,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             // Add default value if present
             if (param.HasExplicitDefaultValue)
             {
-                var defaultValue = FormatDefaultValue(param.ExplicitDefaultValue, param.Type);
+                var defaultValue = DefaultValueFormatter.FormatDefaultValue(param.ExplicitDefaultValue, param.Type);
                 sourceBuilder.Append($" = {defaultValue}");
             }
         }
@@ -494,48 +494,6 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         sourceBuilder.AppendLine(");");
         sourceBuilder.AppendLine("    }");
-    }
-
-    private static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
-    {
-        if (defaultValue == null)
-        {
-            return "null";
-        }
-
-        if (type.TypeKind == TypeKind.Enum && type is INamedTypeSymbol enumType)
-        {
-            // Find the enum member that matches the default value
-            foreach (var member in enumType.GetMembers())
-            {
-                if (member is IFieldSymbol { HasConstantValue: true } field &&
-                    field.ConstantValue != null &&
-                    field.ConstantValue.Equals(defaultValue))
-                {
-                    // Use just the enum name without namespace since we have using TUnit.Assertions.Enums;
-                    return $"{enumType.Name}.{field.Name}";
-                }
-            }
-            // Fallback if no matching member found
-            return $"({enumType.ToDisplayString()})({defaultValue})";
-        }
-
-        if (defaultValue is string str)
-        {
-            return $"\"{str.Replace("\"", "\\\"")}\"";
-        }
-
-        if (defaultValue is bool b)
-        {
-            return b ? "true" : "false";
-        }
-
-        if (defaultValue is char c)
-        {
-            return $"'{c}'";
-        }
-
-        return defaultValue.ToString() ?? "null";
     }
 
     private record AssertionExtensionData(
