@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Http" />
     </ItemGroup>
 
     <Import Project="..\Library.targets" />

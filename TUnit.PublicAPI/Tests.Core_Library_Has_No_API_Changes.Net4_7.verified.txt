@@ -228,15 +228,6 @@ namespace
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     [(.Assembly | .Class)]
-    public sealed class ClassTimelineAttribute : .TUnitAttribute, .IScopedAttribute, ., .
-    {
-        public ClassTimelineAttribute(. mode) { }
-        public . Mode { get; }
-        public int Order { get; }
-        public  ScopeType { get; }
-        public . OnTestDiscovered(.DiscoveredTestContext context) { }
-    }
-    [(.Assembly | .Class)]
     public class ClassConstructorAttribute : .TUnitAttribute
     {
         public ClassConstructorAttribute( classConstructorType) { }
@@ -369,6 +360,15 @@ namespace
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
         public static .ClassMetadata GetOrAdd(string name, .ClassMetadata value) { }
+    }
+    [(.Assembly | .Class)]
+    public sealed class ClassTimelineAttribute : .TUnitAttribute, .IScopedAttribute, ., .
+    {
+        public ClassTimelineAttribute(. mode) { }
+        public . Mode { get; }
+        public int Order { get; }
+        public  ScopeType { get; }
+        public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     [(.Class | .Method)]
     public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute
