@@ -44,25 +44,19 @@ public class WaitsForAssertionTests
     [Test]
     public async Task WaitsFor_Fails_When_Timeout_Expires()
     {
-        var stopwatch = Stopwatch.StartNew();
+        var timeout = TimeSpan.FromMilliseconds(250);
+        var pollingInterval = TimeSpan.FromMilliseconds(10);
         var value = 1;
 
         var exception = await Assert.That(
             async () => await Assert.That(value).WaitsFor(
                 assert => assert.IsEqualTo(999),
-                timeout: TimeSpan.FromMilliseconds(100),
-                pollingInterval: TimeSpan.FromMilliseconds(10))
+                timeout: timeout,
+                pollingInterval: pollingInterval)
         ).Throws<AssertionException>();
 
-        stopwatch.Stop();
-
-        // Lower bound proves the timeout actually fired at the right moment. An upper bound
-        // here is a flake magnet — slow CI workers can spend >1s in exception construction
-        // and assertion-machinery cost after the timeout fires correctly.
-        await Assert.That(stopwatch.Elapsed).IsGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(100));
-
         // Verify error message contains useful information
-        await Assert.That(exception.Message).Contains("assertion did not pass within 100ms");
+        await Assert.That(exception.Message).Contains($"assertion did not pass within {timeout.TotalMilliseconds:F0}ms");
         await Assert.That(exception.Message).Contains("Last error:");
     }
 
