@@ -10,7 +10,7 @@ public class MockHttpClientFactoryTests
     [Test]
     public async Task CreateClient_ReturnsConfiguredResponseFromDefaultHandler()
     {
-        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
+        using var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
 
         using var client = factory.CreateClient(ClientName);
@@ -22,9 +22,21 @@ public class MockHttpClientFactoryTests
     }
 
     [Test]
+    public async Task CreateClient_EmptyNameFallsBackToDefaultHandler()
+    {
+        using var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
+        factory.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
+
+        using var client = factory.CreateClient(string.Empty);
+        var response = await client.GetAsync("/");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+
+    [Test]
     public async Task CreateClient_SurvivesUsingBlockDisposal()
     {
-        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
+        using var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 
         for (var i = 0; i < 3; i++)
@@ -40,10 +52,10 @@ public class MockHttpClientFactoryTests
     [Test]
     public async Task CreateClient_ReturnsFreshInstanceEachCall()
     {
-        var factory = Mock.HttpClientFactory();
+        using var factory = Mock.HttpClientFactory();
 
-        var a = factory.CreateClient(ClientName);
-        var b = factory.CreateClient(ClientName);
+        using var a = factory.CreateClient(ClientName);
+        using var b = factory.CreateClient(ClientName);
 
         await Assert.That(a).IsNotSameReferenceAs(b);
     }
@@ -57,7 +69,7 @@ public class MockHttpClientFactoryTests
         var ordersHandler = Mock.HttpHandler();
         ordersHandler.OnGet("/").RespondWithJson("""{"who":"orders"}""");
 
-        var factory = Mock.HttpClientFactory()
+        using var factory = Mock.HttpClientFactory()
             .WithBaseAddress("http://localhost")
             .WithHandler("users", usersHandler)
             .WithHandler("orders", ordersHandler);
@@ -77,7 +89,7 @@ public class MockHttpClientFactoryTests
     [Test]
     public async Task HandlerFor_FallsBackToDefaultWhenNameNotRegistered()
     {
-        var factory = Mock.HttpClientFactory();
+        using var factory = Mock.HttpClientFactory();
 
         await Assert.That(factory.HandlerFor("unregistered")).IsSameReferenceAs(factory.Handler);
     }
@@ -86,16 +98,26 @@ public class MockHttpClientFactoryTests
     public async Task CreateClient_NameIsCaseInsensitive()
     {
         var namedHandler = Mock.HttpHandler();
-        var factory = Mock.HttpClientFactory().WithHandler("Users", namedHandler);
+        using var factory = Mock.HttpClientFactory().WithHandler("Users", namedHandler);
 
         await Assert.That(factory.HandlerFor("USERS")).IsSameReferenceAs(namedHandler);
         await Assert.That(factory.HandlerFor("users")).IsSameReferenceAs(namedHandler);
     }
 
     [Test]
+    public void Dispose_PreventsFurtherUse()
+    {
+        var factory = Mock.HttpClientFactory();
+
+        factory.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => factory.CreateClient(ClientName));
+    }
+
+    [Test]
     public async Task Verify_TracksRequestsAcrossMultipleClientLifetimes()
     {
-        var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
+        using var factory = Mock.HttpClientFactory().WithBaseAddress("http://localhost");
         factory.Handler.OnGet("/api/data").Respond(HttpStatusCode.OK);
 
         using (var c1 = factory.CreateClient(ClientName))
