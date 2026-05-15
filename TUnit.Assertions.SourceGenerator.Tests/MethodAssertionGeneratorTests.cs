@@ -395,4 +395,27 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             // that a content-only assertion cannot see.
             await CompileChecker.AssertNoErrors(generatedFiles);
         });
+
+    [Test]
+    public Task MethodOnConcreteNonSealedReceiver() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "MethodOnConcreteNonSealedReceiver.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // The generated extension method must declare a single type parameter (T from the
+            // source method) and target the exact receiver type. Prepending the covariant
+            // receiver-type parameter (TActual) for this shape produces a two-type-parameter
+            // signature that callers cannot satisfy via partial type-argument specification,
+            // breaking call sites like .HasItem<int>(42) with CS1929.
+            await Assert.That(mainFile).Contains("HasItem<T>(this IAssertionSource<TUnit.Assertions.Tests.TestData.MethodOnConcreteNonSealedReceiver> source");
+            await Assert.That(mainFile).DoesNotContain("HasItem<TActual, T>");
+            await Assert.That(mainFile).DoesNotContain("where TActual :");
+        });
 }
