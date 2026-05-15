@@ -7,7 +7,7 @@ sidebar_position: 4
 # Invocation Benchmark
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-05-14** from the latest CI run.
+This benchmark was automatically generated on **2026-05-15** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.300
 :::
@@ -18,12 +18,12 @@ Calling methods on mock objects:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 256.6 ns | 66.95 ns | 3.67 ns | 120 B |
-| Imposter | 302.7 ns | 74.46 ns | 4.08 ns | 168 B |
-| Mockolate | 108.1 ns | 18.49 ns | 1.01 ns | 84 B |
-| Moq | 838.3 ns | 626.28 ns | 34.33 ns | 376 B |
-| NSubstitute | 733.4 ns | 206.80 ns | 11.34 ns | 304 B |
-| FakeItEasy | 1,846.6 ns | 917.95 ns | 50.32 ns | 944 B |
+| **TUnit.Mocks** | 246.76 ns | 42.510 ns | 2.330 ns | 120 B |
+| Imposter | 280.67 ns | 115.600 ns | 6.336 ns | 168 B |
+| Mockolate | 94.58 ns | 3.811 ns | 0.209 ns | 84 B |
+| Moq | 751.58 ns | 262.652 ns | 14.397 ns | 376 B |
+| NSubstitute | 663.39 ns | 84.461 ns | 4.630 ns | 304 B |
+| FakeItEasy | 1,579.88 ns | 250.137 ns | 13.711 ns | 944 B |
 
 ```mermaid
 %%{init: {
@@ -49,8 +49,8 @@ Calling methods on mock objects:
 xychart-beta
   title "Invocation Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 2216
-  bar [256.6, 302.7, 108.1, 838.3, 733.4, 1846.6]
+  y-axis "Time (ns)" 0 --> 1896
+  bar [246.76, 280.67, 94.58, 751.58, 663.39, 1579.88]
 ```
 
 ---
@@ -59,12 +59,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 158.3 ns | 57.57 ns | 3.16 ns | 88 B |
-| Imposter | 298.9 ns | 75.07 ns | 4.11 ns | 168 B |
-| Mockolate | 104.9 ns | 70.09 ns | 3.84 ns | 60 B |
-| Moq | 546.4 ns | 50.57 ns | 2.77 ns | 296 B |
-| NSubstitute | 693.2 ns | 334.09 ns | 18.31 ns | 328 B |
-| FakeItEasy | 1,585.0 ns | 377.74 ns | 20.71 ns | 776 B |
+| **TUnit.Mocks** | 143.92 ns | 84.343 ns | 4.623 ns | 88 B |
+| Imposter | 276.18 ns | 62.487 ns | 3.425 ns | 168 B |
+| Mockolate | 86.59 ns | 15.620 ns | 0.856 ns | 60 B |
+| Moq | 496.26 ns | 189.695 ns | 10.398 ns | 296 B |
+| NSubstitute | 554.51 ns | 171.490 ns | 9.400 ns | 272 B |
+| FakeItEasy | 1,440.96 ns | 179.695 ns | 9.850 ns | 776 B |
 
 ```mermaid
 %%{init: {
@@ -90,8 +90,8 @@ xychart-beta
 xychart-beta
   title "Invocation (String) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 1902
-  bar [158.3, 298.9, 104.9, 546.4, 693.2, 1585]
+  y-axis "Time (ns)" 0 --> 1730
+  bar [143.92, 276.18, 86.59, 496.26, 554.51, 1440.96]
 ```
 
 ---
@@ -100,12 +100,12 @@ xychart-beta
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 25,534.5 ns | 10,874.64 ns | 596.08 ns | 11936 B |
-| Imposter | 29,698.5 ns | 7,874.65 ns | 431.64 ns | 16800 B |
-| Mockolate | 11,329.0 ns | 7,752.97 ns | 424.97 ns | 8400 B |
-| Moq | 80,134.7 ns | 33,184.21 ns | 1,818.94 ns | 37600 B |
-| NSubstitute | 77,699.9 ns | 118,763.40 ns | 6,509.82 ns | 30848 B |
-| FakeItEasy | 179,977.1 ns | 7,621.18 ns | 417.74 ns | 94400 B |
+| **TUnit.Mocks** | 24,135.17 ns | 7,418.313 ns | 406.623 ns | 11936 B |
+| Imposter | 26,597.38 ns | 6,974.438 ns | 382.292 ns | 16800 B |
+| Mockolate | 9,475.17 ns | 3,637.234 ns | 199.369 ns | 8400 B |
+| Moq | 75,449.56 ns | 18,088.406 ns | 991.487 ns | 37600 B |
+| NSubstitute | 66,891.38 ns | 20,753.102 ns | 1,137.548 ns | 30848 B |
+| FakeItEasy | 163,499.26 ns | 87,814.269 ns | 4,813.396 ns | 94400 B |
 
 ```mermaid
 %%{init: {
@@ -131,8 +131,8 @@ xychart-beta
 xychart-beta
   title "Invocation (100 calls) Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 215973
-  bar [25534.5, 29698.5, 11329, 80134.7, 77699.9, 179977.1]
+  y-axis "Time (ns)" 0 --> 196200
+  bar [24135.17, 26597.38, 9475.17, 75449.56, 66891.38, 163499.26]
 ```
 
 ## 🎯 Key Insights
@@ -145,4 +145,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-05-14T03:27:14.658Z*
+*Last generated: 2026-05-15T03:27:25.234Z*
