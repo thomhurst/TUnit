@@ -15,17 +15,20 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
     private readonly Func<IAssertionSource<TValue>, Assertion<TValue>> _assertionBuilder;
     private readonly TimeSpan _timeout;
     private readonly TimeSpan _pollingInterval;
+    private readonly CancellationToken _cancellationToken;
 
     public WaitsForAssertion(
         AssertionContext<TValue> context,
         Func<IAssertionSource<TValue>, Assertion<TValue>> assertionBuilder,
         TimeSpan timeout,
-        TimeSpan? pollingInterval = null)
+        TimeSpan? pollingInterval = null,
+        CancellationToken cancellationToken = default)
         : base(context)
     {
         _assertionBuilder = assertionBuilder ?? throw new ArgumentNullException(nameof(assertionBuilder));
         _timeout = timeout;
         _pollingInterval = pollingInterval ?? TimeSpan.FromMilliseconds(10);
+        _cancellationToken = cancellationToken;
 
         if (_timeout <= TimeSpan.Zero)
         {
@@ -44,10 +47,23 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
         Exception? lastException = null;
         var attemptCount = 0;
 
-        using var cts = new CancellationTokenSource(_timeout);
+        // Link the supplied cancellation token with an internal timeout source so the polling
+        // loop honours both: external cancellation propagates as OperationCanceledException,
+        // and the internal timeout still produces the standard AssertionResult.Failed path.
+        // When the caller did not supply a cancellable token, the linking step is skipped to
+        // avoid the registration overhead.
+        using var linkedCts = _cancellationToken.CanBeCanceled
+            ? CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken)
+            : new CancellationTokenSource();
+        linkedCts.CancelAfter(_timeout);
 
         while (stopwatch.Elapsed < _timeout)
         {
+            // Honour external cancellation between iterations: a pre-cancelled token, or a token
+            // cancelled during the previous Task.Delay, exits the loop without invoking the
+            // predicate. Internal-timeout cancellation falls through to AssertionResult.Failed.
+            _cancellationToken.ThrowIfCancellationRequested();
+
             attemptCount++;
 
             try
@@ -71,10 +87,17 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
 
                 try
                 {
-                    await Task.Delay(_pollingInterval, cts.Token);
+                    await Task.Delay(_pollingInterval, linkedCts.Token);
+                }
+                catch (OperationCanceledException) when (_cancellationToken.IsCancellationRequested)
+                {
+                    // External cancellation during the poll sleep. Propagate.
+                    throw;
                 }
                 catch (OperationCanceledException)
                 {
+                    // Internal timeout cancelled the linked source. Fall through to the
+                    // standard AssertionResult.Failed path below.
                     break;
                 }
             }
