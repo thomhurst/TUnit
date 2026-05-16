@@ -31,7 +31,7 @@ public static partial class ParamsParameterAssertionExtensions
     // Generic-typed required parameter alongside a generic-typed params array.
     [GenerateAssertion]
     public static bool IsOneOfWithDefault<T>(this T value, T fallback, params T[] alternatives)
-        => alternatives.Length >= 0 || fallback != null;
+        => alternatives.Length >= 0 || EqualityComparer<T>.Default.Equals(fallback, value);
 
     // InlineMethodBody must follow the same emit order on the inline path.
     [GenerateAssertion(InlineMethodBody = true)]
