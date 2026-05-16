@@ -1042,25 +1042,39 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var sourceTypeName = isCovariant ? covariantParam! : targetTypeName;
         sb.Append($"this IAssertionSource<{sourceTypeName}> source");
 
-        // Additional parameters
+        // Non-params source parameters first, then their CallerArgumentExpression diagnostic
+        // parameters, then any params parameter last. The compiler requires params to be the
+        // final entry in the list (CS0231), so the CallerArgumentExpression block must precede
+        // it instead of trailing the whole signature.
         foreach (var param in data.AdditionalParameters)
         {
-            var paramsModifier = param.IsParams ? "params " : "";
-            sb.Append($", {paramsModifier}{param.Type} {param.Name}");
+            if (param.IsParams)
+            {
+                continue;
+            }
+            sb.Append($", {param.Type} {param.Name}");
             if (param.HasExplicitDefaultValue)
             {
                 sb.Append($" = {param.DefaultValueExpression}");
             }
         }
 
-        // CallerArgumentExpression parameters (skip for params since params must be last)
-        for (int i = 0; i < data.AdditionalParameters.Count; i++)
+        foreach (var param in data.AdditionalParameters)
         {
-            var param = data.AdditionalParameters[i];
+            if (param.IsParams)
+            {
+                continue;
+            }
+            sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+        }
+
+        foreach (var param in data.AdditionalParameters)
+        {
             if (!param.IsParams)
             {
-                sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+                continue;
             }
+            sb.Append($", params {param.Type} {param.Name}");
         }
 
         sb.AppendLine(")");
