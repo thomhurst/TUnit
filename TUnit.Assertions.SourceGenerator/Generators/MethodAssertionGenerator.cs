@@ -996,7 +996,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var targetTypeName = data.TargetType.TypeName;
         var methodName = data.Method.Name;
         var genericParams = data.Method.GenericTypeParameters;
-        var isCovariant = data.TargetType.IsCovariantCandidate;
+        // Suppress receiver-type covariance when the source method has its own type
+        // parameters. With covariance, the extension prepends a TActual parameter so a
+        // more-derived static receiver can bind; but the resulting two-parameter signature
+        // cannot accept a call site that names the method's own type arguments explicitly
+        // (e.g. `.MyMethod<int>(...)`) because C# does not allow partial type-argument
+        // specification, so the call fails with CS1929. The dominant call shape supplies
+        // the method's own arguments; a more-derived static receiver can upcast.
+        var isCovariant = data.TargetType.IsCovariantCandidate && genericParams.Count == 0;
 
         // Pick a covariant type param name that doesn't collide with existing generic params
         var covariantParam = isCovariant ? CovarianceHelper.GetCovariantTypeParamName(genericParams) : null;
@@ -1042,25 +1049,39 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var sourceTypeName = isCovariant ? covariantParam! : targetTypeName;
         sb.Append($"this IAssertionSource<{sourceTypeName}> source");
 
-        // Additional parameters
+        // Non-params source parameters first, then their CallerArgumentExpression diagnostic
+        // parameters, then any params parameter last. The compiler requires params to be the
+        // final entry in the list (CS0231), so the CallerArgumentExpression block must precede
+        // it instead of trailing the whole signature.
         foreach (var param in data.AdditionalParameters)
         {
-            var paramsModifier = param.IsParams ? "params " : "";
-            sb.Append($", {paramsModifier}{param.Type} {param.Name}");
+            if (param.IsParams)
+            {
+                continue;
+            }
+            sb.Append($", {param.Type} {param.Name}");
             if (param.HasExplicitDefaultValue)
             {
                 sb.Append($" = {param.DefaultValueExpression}");
             }
         }
 
-        // CallerArgumentExpression parameters (skip for params since params must be last)
-        for (int i = 0; i < data.AdditionalParameters.Count; i++)
+        foreach (var param in data.AdditionalParameters)
         {
-            var param = data.AdditionalParameters[i];
+            if (param.IsParams)
+            {
+                continue;
+            }
+            sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+        }
+
+        foreach (var param in data.AdditionalParameters)
+        {
             if (!param.IsParams)
             {
-                sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+                continue;
             }
+            sb.Append($", params {param.Type} {param.Name}");
         }
 
         sb.AppendLine(")");

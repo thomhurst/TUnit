@@ -4626,10 +4626,10 @@ domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.4.3, dompurify@^3.3.1:
-  version "3.4.3"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.3.tgz#3ef336e7a757c3bf1efbd3781afb149a3ae5cfa4"
-  integrity sha512-VVwJidIJcp1hpg2OMXML3ZVRPYSZiq4aX7qBh83BSIpOaRDqI+qxhXjjIWnpzkOXhmp0L81lnoME1mnCc9H48A==
+dompurify@3.4.4, dompurify@^3.3.1:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.4.tgz#48c45295bbbb2c68f9fa45568ce685f7b154a21a"
+  integrity sha512-r8K7KGKEcztXfA/nfabSYB2hg9tDphORJTdf8xprN/luSLGmNhOBN8dm1/SYjqLLet6YUFEXOcrdTuwryp/Bew==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -8073,10 +8073,10 @@ pupa@^3.1.0:
   dependencies:
     escape-goat "^4.0.0"
 
-qs@6.15.1, qs@~6.14.0:
-  version "6.15.1"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.15.1.tgz#bdb55aed06bfac257a90c44a446a73fba5575c8f"
-  integrity sha512-6YHEFRL9mfgcAvql/XhwTvf5jKcOiiupt2FiJxHkiX1z4j7WL8J/jRHYLluORvc1XxB5rV20KoeK00gVJamspg==
+qs@6.15.2, qs@~6.14.0:
+  version "6.15.2"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.15.2.tgz#fd55426d710403ddccc45e0f9eab16db7727ece9"
+  integrity sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==
   dependencies:
     side-channel "^1.1.0"
 

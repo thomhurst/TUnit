@@ -339,4 +339,83 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile!).Contains("IAssertionSource<string[]>");
             await Assert.That(mainFile!).Contains("StringArray_ContainsMessage_String_Bool_Assertion");
         });
+
+    [Test]
+    public Task ParamsParameter() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "ParamsParameterAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // Edge 1: canonical CS0231 shape: required parameter followed by params.
+            // The [CallerArgumentExpression(nameof(label))] block must sit BEFORE the
+            // params array; if the order ever regresses, this single substring fails
+            // ahead of the compile-clean gate below.
+            await Assert.That(mainFile).Contains(
+                "ContainsAny(this IAssertionSource<string> source, string label, [CallerArgumentExpression(nameof(label))] string? labelExpression = null, params string[] candidates)");
+
+            // Edge 2: multiple required parameters preceding params. Every diagnostic
+            // parameter is emitted, in source order, ahead of the params array.
+            await Assert.That(mainFile).Contains(
+                "IsBetweenExcluding(this IAssertionSource<int> source, int min, int max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null, params int[] excluded)");
+
+            // Edge 3: optional defaulted parameter before params. The default value
+            // is preserved and the diagnostic parameter still precedes params.
+            await Assert.That(mainFile).Contains(
+                "MeetsLength(this IAssertionSource<string> source, int minLength = 1, [CallerArgumentExpression(nameof(minLength))] string? minLengthExpression = null, params string[] suffixes)");
+
+            // Edge 4: generic-typed parameters. The generic substitutions are
+            // preserved and the diagnostic for the required generic param precedes
+            // the generic params array.
+            await Assert.That(mainFile).Contains(
+                "IsOneOfWithDefault<T>(this IAssertionSource<T> source, T fallback, [CallerArgumentExpression(nameof(fallback))] string? fallbackExpression = null, params T[] alternatives)");
+
+            // Edge 5: InlineMethodBody path. The same emit ordering applies when
+            // the body is inlined (not delegated through a stored helper).
+            await Assert.That(mainFile).Contains(
+                "StartsWithAny(this IAssertionSource<string> source, string prefix, [CallerArgumentExpression(nameof(prefix))] string? prefixExpression = null, params string[] suffixes)");
+
+            // Edge 6: params-only. Byte-identical to the pre-fix shape used by
+            // IsIn/IsNotIn in production. No diagnostic parameter is emitted at
+            // all because the params parameter itself cannot be auto-supplied,
+            // and there is no preceding non-params parameter that could.
+            await Assert.That(mainFile).Contains(
+                "ContainsExactly(this IAssertionSource<string> source, params string[] required)");
+            await Assert.That(mainFile).DoesNotContain("requiredExpression");
+
+            // Structural gate: parse the emitted code as C# and fail on any error
+            // diagnostic. This is the regression sentinel for CS0231 plus any other
+            // emit defect (mis-paired brackets, invalid generic argument lists, etc.)
+            // that a content-only assertion cannot see.
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
+
+    [Test]
+    public Task MethodOnConcreteNonSealedReceiver() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "MethodOnConcreteNonSealedReceiver.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // The generated extension method must declare a single type parameter (T from the
+            // source method) and target the exact receiver type. Prepending the covariant
+            // receiver-type parameter (TActual) for this shape produces a two-type-parameter
+            // signature that callers cannot satisfy via partial type-argument specification,
+            // breaking call sites like .HasItem<int>(42) with CS1929.
+            await Assert.That(mainFile).Contains("HasItem<T>(this IAssertionSource<TUnit.Assertions.Tests.TestData.MethodOnConcreteNonSealedReceiver> source");
+            await Assert.That(mainFile).DoesNotContain("HasItem<TActual, T>");
+            await Assert.That(mainFile).DoesNotContain("where TActual :");
+        });
 }
