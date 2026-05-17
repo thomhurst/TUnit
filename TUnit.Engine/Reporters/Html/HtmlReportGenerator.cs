@@ -215,9 +215,11 @@ internal static class HtmlReportGenerator
         w.WriteEndArray();
 
         w.WriteString("stdout", t.Output ?? string.Empty);
-        // Surface skip reasons in stderr so the Output tab has something useful to show
-        // for skipped tests that otherwise had no captured output.
-        w.WriteString("stderr", t.ErrorOutput ?? t.SkipReason ?? string.Empty);
+        // Engine-emitted advisories (e.g. "[TUnit] External span cap reached...") are written
+        // to Console.Error and end up in whichever test was running. They aren't test failures,
+        // so strip them before the renderer counts them in the "N err" tab badge.
+        var stderr = FilterEngineNotices(t.ErrorOutput) ?? t.SkipReason ?? string.Empty;
+        w.WriteString("stderr", stderr);
 
         if (t.Exception is not null)
         {
@@ -398,6 +400,21 @@ internal static class HtmlReportGenerator
         "cancelled" => "cancel",
         _ => "skip",
     };
+
+    private static string? FilterEngineNotices(string? stderr)
+    {
+        if (string.IsNullOrEmpty(stderr)) return stderr;
+        if (stderr!.IndexOf("[TUnit]", StringComparison.Ordinal) < 0) return stderr;
+        var lines = stderr.Replace("\r\n", "\n").Split('\n');
+        var sb = new StringBuilder(stderr.Length);
+        foreach (var line in lines)
+        {
+            if (line.TrimStart().StartsWith("[TUnit]", StringComparison.Ordinal)) continue;
+            if (sb.Length > 0) sb.Append('\n');
+            sb.Append(line);
+        }
+        return sb.Length == 0 ? null : sb.ToString();
+    }
 
     private static long? TryParseUnixMs(string? iso)
     {

@@ -369,7 +369,7 @@
   .test-dur { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); white-space: nowrap; }
 
   /* ---- right detail ---- */
-  .detail { overflow-y: auto; min-width: 0; background: var(--bg); }
+  .detail { overflow-y: auto; overflow-x: hidden; min-width: 0; background: var(--bg); }
   .detail-empty {
     display: grid; place-items: center; height: 100%;
     color: var(--text-dim); padding: 40px;
@@ -840,12 +840,14 @@
     position: fixed; z-index: 100; pointer-events: none;
     background: var(--surface); color: var(--text); border: 1px solid var(--border-strong);
     border-radius: 8px; padding: 10px 12px; font-size: 11px; box-shadow: var(--shadow-pop);
-    max-width: 360px; opacity: 0; transition: opacity 80ms;
+    width: max-content; max-width: 360px; opacity: 0; transition: opacity 80ms;
+    overflow-wrap: anywhere; word-break: break-word;
   }
   .tt[data-show="true"] { opacity: 1; }
-  .tt .title { font-weight: 600; margin-bottom: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; word-break: break-word; }
-  .tt .row { display: flex; justify-content: space-between; gap: 14px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
-  .tt .row b { color: var(--text); font-weight: 500; }
+  .tt .title { font-weight: 600; margin-bottom: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .tt .row { display: flex; justify-content: space-between; gap: 14px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); min-width: 0; }
+  .tt .row > span { flex-shrink: 0; }
+  .tt .row b { color: var(--text); font-weight: 500; min-width: 0; text-align: right; }
 
   /* kbd hint */
   .kbd-hint {
@@ -1814,7 +1816,11 @@ function filteredTests() {
 }
 
 function groupTests(list) {
-  if (STATE.group === 'none') return [{ key: '_all', title: 'All tests', ns: '', tests: list }];
+  if (STATE.group === 'none') {
+    const flat = list.slice();
+    sortTests(flat);
+    return [{ key: '_all', title: 'All tests', ns: '', tests: flat }];
+  }
   const buckets = new Map();
   list.forEach(t => {
     if (STATE.group === 'category') {
@@ -2692,6 +2698,24 @@ function switchView(v) {
   STATE.view = v;
   $$('.view').forEach(el => el.classList.toggle('active', el.id === 'view-' + v));
   $$('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  // When the tests view becomes visible the rail list finally has a non-zero clientHeight,
+  // so any earlier renderRailWindow() that ran while hidden (e.g. from a Run-view click
+  // calling selectTest before switchView) computed an empty visible range. Re-render now.
+  if (v === 'tests') {
+    requestAnimationFrame(() => {
+      const list = $('#railList');
+      if (STATE.selectedId && RAIL.layout) {
+        const entry = RAIL.layout.find(e => e.kind === 'test' && e.t.id === STATE.selectedId);
+        if (entry && list) {
+          const top = entry.top, bot = top + entry.h;
+          if (top < list.scrollTop || bot > list.scrollTop + list.clientHeight) {
+            list.scrollTop = Math.max(0, top - 60);
+          }
+        }
+      }
+      renderRailWindow();
+    });
+  }
 }
 
 /* ---------- keyboard ---------- */
