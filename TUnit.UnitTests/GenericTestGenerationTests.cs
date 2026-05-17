@@ -1,5 +1,7 @@
 namespace TUnit.UnitTests;
 
+[Category("Discovery")]
+[Category("Generics")]
 public class GenericTestGenerationTests
 {
 

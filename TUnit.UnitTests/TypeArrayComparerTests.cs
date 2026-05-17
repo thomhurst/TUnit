@@ -3,6 +3,7 @@ namespace TUnit.UnitTests;
 /// <summary>
 /// Tests for TypeArrayComparer functionality
 /// </summary>
+[Category("Internals")]
 public class TypeArrayComparerTests
 {
     [Test]

@@ -1,5 +1,7 @@
 ﻿namespace TUnit.TestProject;
 
+[Category("Lifecycle")]
+[Category("Async")]
 public class AsyncDisposableTests : IAsyncDisposable
 {
     [Test]

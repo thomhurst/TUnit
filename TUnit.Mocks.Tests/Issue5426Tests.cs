@@ -7,6 +7,7 @@ namespace TUnit.Mocks.Tests;
 //
 // These tests are *compile-time* regressions: if the source generator emits `public` for any of
 // the types below, this file fails to compile and the test project will not build.
+[Category("Regression")]
 public class Issue5426Tests
 {
     internal interface IInternalDatabaseService

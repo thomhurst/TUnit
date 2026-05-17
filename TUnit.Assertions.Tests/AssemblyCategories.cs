@@ -1,0 +1,1 @@
+[assembly: Category("Assertions")]

@@ -7,6 +7,7 @@ namespace TUnit.Mocks.Tests;
 // EntityEntry implements IInfrastructure<InternalEntityEntry> where InternalEntityEntry is
 // internal to EF Core. The generated override for `Instance` referenced that internal type,
 // producing CS0115 "no suitable method found to override" in external assemblies.
+[Category("Regression")]
 public class Issue5673Tests
 {
     [Test]

@@ -2,6 +2,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
 
+[Category("Collections")]
 public class ArrayAssertionTests
 {
     [Test]

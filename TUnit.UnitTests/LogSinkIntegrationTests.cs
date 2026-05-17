@@ -6,6 +6,9 @@ namespace TUnit.UnitTests;
 /// Integration tests that verify the end-to-end flow from DefaultLogger through LogSinkRouter to registered sinks.
 /// </summary>
 [NotInParallel]
+[Category("Logging")]
+[Category("Integration")]
+[Property("Owner", "Logging")]
 public class LogSinkIntegrationTests
 {
     private RecordingSink _sink = null!;

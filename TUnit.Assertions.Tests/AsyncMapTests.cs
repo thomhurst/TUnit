@@ -8,6 +8,8 @@ using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Tests;
 
+[Category("Async")]
+[Category("Composition")]
 public class AsyncMapTests
 {
 #if !NET472

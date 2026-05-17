@@ -1,6 +1,7 @@
 ﻿namespace TUnit.TestProject;
 
 [RetryOperationCancelledException(3)]
+[Category("Retry")]
 public class CustomRetryTests
 {
     public static int ExecutionCount1 { get; private set; }

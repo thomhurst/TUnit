@@ -20,6 +20,7 @@ public interface IAsyncService
 /// Verifies that async methods (Task{T}, ValueTask{T}, Task) can be
 /// configured with unwrapped return types: .Returns(5) instead of .Returns(Task.FromResult(5)).
 /// </summary>
+[Category("Async")]
 public class AsyncTests
 {
     [Test]

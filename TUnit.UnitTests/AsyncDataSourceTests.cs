@@ -1,5 +1,7 @@
 namespace TUnit.UnitTests;
 
+[Category("DataSource")]
+[Category("Async")]
 public class AsyncDataSourceTests
 {
     // Sync data source for comparison

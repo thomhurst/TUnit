@@ -2,6 +2,7 @@ using System.Net;
 
 namespace TUnit.Assertions.Tests.Bugs;
 
+[Category("Regression")]
 public class Issue5765Tests
 {
     [Test]

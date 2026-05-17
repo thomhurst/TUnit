@@ -2,6 +2,7 @@
 namespace TUnit.Assertions.Tests;
 
 [UnconditionalSuppressMessage("Usage", "TUnitAssertions0005:Assert.That(...) should not be used with a constant value")]
+[Category("Composition")]
 public class AssertMultipleTests
 {
     [Test]

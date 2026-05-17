@@ -1,5 +1,7 @@
 namespace TUnit.TestProject;
 
+[Category("Hooks")]
+[Category("Lifecycle")]
 public class HookExecutionOrderTest
 {
     private static readonly List<string> ExecutionOrder = new();

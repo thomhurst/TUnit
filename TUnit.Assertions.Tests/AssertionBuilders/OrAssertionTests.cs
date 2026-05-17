@@ -1,5 +1,6 @@
 ﻿namespace TUnit.Assertions.Tests.AssertionBuilders;
 
+[Category("Composition")]
 public sealed class OrAssertionTests
 {
     [Test]

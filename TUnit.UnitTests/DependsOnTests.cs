@@ -1,5 +1,7 @@
 namespace TUnit.UnitTests;
 
+[Category("Discovery")]
+[Category("DependsOn")]
 public class DependsOnTests
 {
     private static TestMetadata<T> CreateTestMetadata<T>(string testId, string methodName, int parameterCount = 0, Type[]? parameterTypes = null) where T : class

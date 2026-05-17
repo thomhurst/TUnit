@@ -5,6 +5,8 @@ namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
 [Retry(3)]
+[Category("Parallelism")]
+[Category("Retry")]
 public class KeyedNotInParallelTests
 {
     private static readonly ConcurrentBag<ConstraintDateTimeRange> TestDateTimeRanges = [];

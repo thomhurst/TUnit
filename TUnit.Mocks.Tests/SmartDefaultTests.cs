@@ -19,6 +19,7 @@ public interface IDefaultsService
 /// <summary>
 /// US6 Integration Tests: Smart defaults — unconfigured methods return sensible defaults based on type.
 /// </summary>
+[Category("SmartDefaults")]
 public class SmartDefaultTests
 {
     [Test]

@@ -43,6 +43,9 @@ public abstract class DatabaseTestBase
 }
 
 [InheritsTests]
+[Category("Documentation")]
+[Category("Inheritance")]
+[Category("DependsOn")]
 public class UserRepositoryTests : DatabaseTestBase
 {
     [Test]
@@ -60,6 +63,9 @@ public class UserRepositoryTests : DatabaseTestBase
 }
 
 [InheritsTests]
+[Category("Documentation")]
+[Category("Inheritance")]
+[Category("DependsOn")]
 public class ProductRepositoryTests : DatabaseTestBase
 {
     [Test]
@@ -103,6 +109,9 @@ public abstract class RepositoryTestBase<T> where T : class, new()
 }
 
 [InheritsTests]
+[Category("Documentation")]
+[Category("Inheritance")]
+[Category("Generics")]
 public class CustomerRepositoryTests : RepositoryTestBase<Customer>
 {
     [Test]

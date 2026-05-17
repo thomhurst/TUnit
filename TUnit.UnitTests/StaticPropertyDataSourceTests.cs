@@ -2,6 +2,8 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.UnitTests;
 
+[Category("DataSource")]
+[Category("PropertyInjection")]
 public class StaticPropertyDataSourceTests
 {
     // Static property with Arguments attribute

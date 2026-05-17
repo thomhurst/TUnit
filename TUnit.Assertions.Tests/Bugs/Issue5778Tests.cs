@@ -5,6 +5,8 @@ namespace TUnit.Assertions.Tests.Bugs;
 /// LastItem(...).Satisfies(...) should preserve specialised assertion sources for
 /// collection-like item values instead of exposing only IAssertionSource&lt;TItem&gt;.
 /// </summary>
+[Category("Regression")]
+[Category("Collections")]
 public class Issue5778Tests
 {
     [Test]

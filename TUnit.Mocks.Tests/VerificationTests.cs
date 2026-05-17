@@ -7,6 +7,7 @@ namespace TUnit.Mocks.Tests;
 /// <summary>
 /// US2 Integration Tests: Verification — verify method calls were made with expected arguments and counts.
 /// </summary>
+[Category("Verification")]
 public class VerificationTests
 {
     [Test]

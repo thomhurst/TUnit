@@ -136,6 +136,8 @@ public class OrderService
 /// commonly found in production codebases: repository/UoW, DI orchestration,
 /// multi-interface coordination, complex return types, and nullable handling.
 /// </summary>
+[Category("Integration")]
+[Category("RealWorld")]
 public class RealWorldScenarioTests
 {
     // ───────────────────────────────────────────────────────────

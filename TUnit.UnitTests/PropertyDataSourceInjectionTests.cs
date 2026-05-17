@@ -4,6 +4,8 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.UnitTests;
 
+[Category("DataSource")]
+[Category("PropertyInjection")]
 public class PropertyDataSourceInjectionTests
 {
     // Property with Arguments attribute

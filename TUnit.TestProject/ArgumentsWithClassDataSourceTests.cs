@@ -8,6 +8,7 @@ namespace TUnit.TestProject;
 [Arguments(2)]
 [ClassDataSource(typeof(IntDataSource1))]
 [ClassDataSource(typeof(IntDataSource2))]
+[Category("DataSource")]
 public class ArgumentsWithClassDataSourceTests(int classArg)
 {
     private static readonly ConcurrentBag<string> ExecutedTests =

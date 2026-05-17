@@ -1,5 +1,6 @@
 ﻿namespace TUnit.TestProject;
 
+[Category("Smoke")]
 public class BasicTests
 {
     [Test]

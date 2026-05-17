@@ -3,6 +3,7 @@ using TUnit.Core.Logging;
 namespace TUnit.UnitTests;
 
 [NotInParallel]
+[Category("Logging")]
 public class TUnitLoggerFactoryTests
 {
     [Before(Test)]

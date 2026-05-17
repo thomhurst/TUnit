@@ -4,6 +4,7 @@ namespace TUnit.Mocks.Tests;
 // CS9338 / CS0051: a public generic interface closed over an internal type argument
 // (e.g. ILogger<InternalClass>) used to emit a `public` mock wrapper, leaking the
 // internal type through the wrapper's base signature.
+[Category("Regression")]
 public class Issue5453Tests
 {
     internal sealed class InternalConsumer

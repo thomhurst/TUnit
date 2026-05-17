@@ -8,6 +8,7 @@ namespace TUnit.UnitTests;
 /// produced by CreateTestVariantInternal for different test method return types.
 /// Regression tests for https://github.com/thomhurst/TUnit/issues/5093
 /// </summary>
+[Category("Internals")]
 public class ExpressionHelperTests
 {
     // Dummy test class used as expression target

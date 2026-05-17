@@ -5,6 +5,7 @@ namespace TUnit.Mocks.Tests;
 // Regression: https://github.com/thomhurst/TUnit/issues/5455
 // Azure.Response.IsError is `public virtual bool IsError { get; internal set; }` — the internal
 // setter is invisible to external assemblies, so the generated override must not emit it.
+[Category("Regression")]
 public class Issue5455Tests
 {
     [Test]

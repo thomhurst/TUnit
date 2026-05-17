@@ -16,6 +16,7 @@ namespace TUnit.Assertions.Tests.Bugs;
 /// SetAssertion, etc.) so the failure message also keeps the
 /// specialised assertion's expectation rather than a generic wrapper.
 /// </summary>
+[Category("Regression")]
 public class Issue5707Tests
 {
     [Test]

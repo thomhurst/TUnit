@@ -3,6 +3,8 @@
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
+[Category("Hooks")]
+[Category("Lifecycle")]
 public class ClassHooksExecutionCountTests
 {
     private static int _beforeClassCalls;

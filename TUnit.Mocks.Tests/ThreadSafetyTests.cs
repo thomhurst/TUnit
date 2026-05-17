@@ -6,6 +6,8 @@ namespace TUnit.Mocks.Tests;
 /// <summary>
 /// T071 Integration Tests: Thread safety — concurrent mock usage, setup, and verification.
 /// </summary>
+[Category("Concurrency")]
+[Category("ThreadSafety")]
 public class ThreadSafetyTests
 {
     [Test]

@@ -1,6 +1,8 @@
 #if NET5_0_OR_GREATER
 namespace TUnit.Assertions.Tests;
 
+[Category("Async")]
+[Category("Collections")]
 public class AsyncEnumerableAssertionTests
 {
     // IsEmpty tests

@@ -3,6 +3,8 @@ using TUnit.Mocks.Assertions;
 
 namespace TUnit.Mocks.Tests;
 
+[Category("Async")]
+[Category("Verification")]
 public class AsyncVerificationTests
 {
     [Test]

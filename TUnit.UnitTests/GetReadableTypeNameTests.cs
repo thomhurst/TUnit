@@ -3,6 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.UnitTests;
 
+[Category("Internals")]
 public class GetReadableTypeNameTests
 {
     [Test]

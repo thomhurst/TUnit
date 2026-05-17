@@ -6,6 +6,7 @@ namespace TUnit.Mocks.Tests;
 /// <summary>
 /// US6 Integration Tests: Strict mode behavior — unconfigured calls throw MockStrictBehaviorException.
 /// </summary>
+[Category("StrictMode")]
 public class StrictModeTests
 {
     [Test]

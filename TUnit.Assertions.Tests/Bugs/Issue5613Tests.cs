@@ -10,6 +10,7 @@ namespace TUnit.Assertions.Tests.Bugs;
 /// Fix: instance methods on AsyncDelegateAssertion that forward to the
 /// IAssertionSource&lt;Task&gt; interface.
 /// </summary>
+[Category("Regression")]
 public class Issue5613Tests
 {
     [Test]

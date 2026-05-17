@@ -2,6 +2,8 @@
 
 namespace TUnit.TestProject;
 
+[Category("DataSource")]
+[Category("AutoData")]
 public class AutoDataTests
 {
     [AutoData]

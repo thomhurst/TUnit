@@ -12,6 +12,7 @@ namespace TUnit.Mocks.Tests;
 /// - Fast-path verification when no argument matchers are present
 /// - Lock-based call recording thread safety
 /// </summary>
+[Category("Performance")]
 public class PerformanceOptimizationTests
 {
     // ========================================================================

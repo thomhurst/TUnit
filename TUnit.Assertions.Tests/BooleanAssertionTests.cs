@@ -3,6 +3,7 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
 
+[Category("Primitives")]
 public class BooleanAssertionTests
 {
     [Test]

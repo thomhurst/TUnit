@@ -27,6 +27,7 @@ public class Order
 /// <summary>
 /// US7 Integration Tests: Generic method support in mock generation.
 /// </summary>
+[Category("Generics")]
 public class GenericTests
 {
     [Test]

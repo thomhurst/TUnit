@@ -3,6 +3,8 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.UnitTests;
 
+[Category("Isolation")]
+[Category("Concurrency")]
 public class TestIsolationTests
 {
     [Test]

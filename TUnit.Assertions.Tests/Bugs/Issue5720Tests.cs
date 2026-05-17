@@ -18,6 +18,7 @@ namespace TUnit.Assertions.Tests.Bugs;
 /// adds <c>IsEqualTo&lt;TValue, TOther&gt;</c> overloads that detect a user-defined
 /// implicit operator at runtime and compare the converted values.
 /// </summary>
+[Category("Regression")]
 public class Issue5720Tests
 {
     public sealed record ProductCode(string Value)

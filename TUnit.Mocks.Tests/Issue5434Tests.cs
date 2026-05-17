@@ -8,6 +8,7 @@ namespace TUnit.Mocks.Tests;
 // BlobClient: CS0111 duplicate GenerateSasUri / GenerateUserDelegationSasUri members in generated extensions.
 // TableClient: CS0411 type inference failures for generic methods (GetEntity<T>, GetEntityAsync<T>,
 // GetEntityIfExists<T>, GetEntityIfExistsAsync<T>, Query<T>, QueryAsync<T>) in generated impl factory.
+[Category("Regression")]
 public class Issue5434Tests
 {
     [Test]

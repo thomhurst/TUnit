@@ -1,5 +1,6 @@
 namespace TUnit.Assertions.Tests;
 
+[Category("Async")]
 public class AsyncMemberTests
 {
     private sealed class MyObject

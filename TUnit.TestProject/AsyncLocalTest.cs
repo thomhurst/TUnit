@@ -4,6 +4,8 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
+[Category("Async")]
+[Category("Context")]
 public class AsyncLocalTest
 {
     private readonly AsyncLocal<string> _asyncLocalValue = new();

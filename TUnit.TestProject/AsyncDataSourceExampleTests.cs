@@ -73,6 +73,8 @@ public class AsyncUntypedDataSource : AsyncUntypedDataSourceGeneratorAttribute
     }
 }
 
+[Category("DataSource")]
+[Category("Async")]
 public class AsyncDataSourceExampleTests
 {
     [Test]

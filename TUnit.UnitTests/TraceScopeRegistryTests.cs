@@ -5,6 +5,8 @@ using TUnit.Core;
 
 namespace TUnit.UnitTests;
 
+[Category("Tracing")]
+[Category("Infrastructure")]
 public class TraceScopeRegistryTests
 {
     [Test]

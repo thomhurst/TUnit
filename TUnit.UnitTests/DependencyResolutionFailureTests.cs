@@ -5,6 +5,7 @@ namespace TUnit.UnitTests;
 /// <summary>
 /// Tests to verify that dependency resolution failures don't abort the entire test run
 /// </summary>
+[Category("Discovery")]
 public class DependencyResolutionFailureTests
 {
     [Test]

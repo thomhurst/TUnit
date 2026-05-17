@@ -12,6 +12,8 @@ internal class TestableContext : Context
     internal override void SetAsyncLocalContext() { }
 }
 
+[Category("Concurrency")]
+[Category("ThreadSafety")]
 public class ContextThreadSafetyTests
 {
     [Test]

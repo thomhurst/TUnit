@@ -2,6 +2,9 @@ using TUnit.Core;
 
 namespace TUnit.UnitTests;
 
+[Category("Discovery")]
+[Category("Generics")]
+[Category("Inheritance")]
 public class ComplexGenericInheritanceTests
 {
     private static TestMetadata<T> CreateTestMetadata<T>(string testId, string methodName) where T : class

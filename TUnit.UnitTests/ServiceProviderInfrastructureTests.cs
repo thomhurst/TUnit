@@ -6,6 +6,7 @@ namespace TUnit.UnitTests;
 /// <summary>
 /// Tests for service provider infrastructure and dependency injection
 /// </summary>
+[Category("Infrastructure")]
 public class ServiceProviderInfrastructureTests
 {
     [Test]

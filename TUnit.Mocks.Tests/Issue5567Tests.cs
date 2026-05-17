@@ -14,6 +14,7 @@ public interface IIssue5567Enumerable<T> : IEnumerable<T>
     T? GetValue();
 }
 
+[Category("Regression")]
 public class Issue5567Tests
 {
     [Test]

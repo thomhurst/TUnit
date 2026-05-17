@@ -1,6 +1,8 @@
 ﻿namespace TUnit.TestProject;
 
 [Repeat(15)]
+[Category("Output")]
+[Category("Reporting")]
 public class CaptureOutputTests
 {
     private readonly MyClass _myClass = new();

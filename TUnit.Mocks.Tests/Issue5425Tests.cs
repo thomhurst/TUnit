@@ -25,6 +25,7 @@ namespace TUnit.Mocks.Tests;
 // If the source generator stops preserving nullability on event handler types,
 // the generated mock will mismatch these source declarations and this file will
 // fail to compile.
+[Category("Regression")]
 public class Issue5425Tests
 {
     public interface IWithNullableTypeArg

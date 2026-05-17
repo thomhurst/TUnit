@@ -5,6 +5,7 @@ namespace TUnit.UnitTests;
 /// These tests verify that empty data sources behave consistently with NoDataSource by yielding
 /// exactly one empty result, rather than zero results.
 /// </summary>
+[Category("DataSource")]
 public class EmptyDataSourceTests
 {
     /// <summary>

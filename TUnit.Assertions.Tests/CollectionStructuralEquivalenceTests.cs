@@ -6,6 +6,8 @@ namespace TUnit.Assertions.Tests;
 /// <summary>
 /// Tests for issue #3454: Collection IsEquivalentTo should use structural equality for complex objects
 /// </summary>
+[Category("Collections")]
+[Category("Equivalence")]
 public class CollectionStructuralEquivalenceTests
 {
     [Test]

@@ -1,5 +1,6 @@
 namespace TUnit.Assertions.Tests;
 
+[Category("Composition")]
 public class AssertionGroupTests
 {
     [Test]

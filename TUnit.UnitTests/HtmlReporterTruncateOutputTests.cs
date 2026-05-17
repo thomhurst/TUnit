@@ -2,6 +2,8 @@ using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.UnitTests;
 
+[Category("Reporting")]
+[Category("Html")]
 public class HtmlReporterTruncateOutputTests
 {
     [Test]

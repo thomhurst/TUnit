@@ -4,6 +4,8 @@ namespace TUnit.TestProject;
 /// Tests for hook timeout attribute functionality.
 /// This class tests that [Timeout] attribute on hooks is properly respected.
 /// </summary>
+[Category("Hooks")]
+[Category("Timeout")]
 public class HookTimeoutTests
 {
     /// <summary>

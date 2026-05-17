@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace TUnit.TestProject;
 
+[Category("Parallelism")]
+[Category("Concurrency")]
 public class AdaptiveParallelismTests
 {
     private static int _currentlyRunning;

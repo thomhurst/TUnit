@@ -4,6 +4,7 @@ using TUnit.TestProject.Library.Models;
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
+[Category("DataSource")]
 public class ClassDataSourceDrivenTests
 {
     [Test]

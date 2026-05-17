@@ -3,6 +3,8 @@ using TUnit.Core;
 namespace TUnit.UnitTests.TestConstructorTests;
 
 // Test case 1: Single constructor (no change in behavior)
+[Category("Discovery")]
+[Category("Construction")]
 public class SingleConstructorTest
 {
     [Test]

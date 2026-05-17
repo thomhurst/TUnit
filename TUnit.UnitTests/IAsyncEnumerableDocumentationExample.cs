@@ -40,6 +40,9 @@ public static class AsyncTestDataSources
     }
 }
 
+[Category("Documentation")]
+[Category("Async")]
+[Category("DataSource")]
 public class IAsyncEnumerableDocumentationExample
 {
     [Test]

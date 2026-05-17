@@ -23,6 +23,7 @@ public interface IEventService
 /// <summary>
 /// US5 Integration Tests: Event raising.
 /// </summary>
+[TUnit.Core.Category("Events")]
 public class EventTests
 {
     [Test]
