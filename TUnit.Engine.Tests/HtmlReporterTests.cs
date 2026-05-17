@@ -262,6 +262,43 @@ public class HtmlReporterTests
         embedded.ShouldContain("\"value\":\"FullExecution\"");
     }
 
+    [Test]
+    public void ExtractTestResult_SortsTestMetadataProperty_Into_Categories_And_CustomProperties()
+    {
+        // Regression: Microsoft.Testing.Platform's VSTestBridge convention emits categories as
+        // TestMetadataProperty(name, "") — the category name lives in Key, Value is empty.
+        // Traits/custom properties use the (key, value) form with a non-empty Value.
+        // Earlier code keyed off IsNullOrEmpty(Key), which inverted both branches and silently
+        // misclassified every category as a custom property — leaving the HTML report's
+        // category-pill UI permanently empty.
+        var node = new TestNode
+        {
+            Uid = new TestNodeUid("extract-1"),
+            DisplayName = "Test",
+            Properties = new PropertyBag(
+                PassedTestNodeStateProperty.CachedInstance,
+                new TestMethodIdentifierProperty(
+                    @namespace: "TestNamespace",
+                    assemblyFullName: "TestAssembly",
+                    typeName: "SampleTests",
+                    methodName: "Test",
+                    parameterTypeFullNames: [],
+                    returnTypeFullName: "System.Void",
+                    methodArity: 0),
+                new TestMetadataProperty("Async", string.Empty),
+                new TestMetadataProperty("Integration", string.Empty),
+                new TestMetadataProperty("Owner", "TeamA"))
+        };
+
+        var result = HtmlReporter.ExtractTestResult("extract-1", node, traceId: null, spanId: null, retryAttempt: 0, additionalTraceIds: null);
+
+        result.Categories.ShouldBe(["Async", "Integration"], ignoreOrder: true);
+        result.CustomProperties.ShouldNotBeNull();
+        result.CustomProperties!.Length.ShouldBe(1);
+        result.CustomProperties[0].Key.ShouldBe("Owner");
+        result.CustomProperties[0].Value.ShouldBe("TeamA");
+    }
+
     private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
     {
         Id = displayName,

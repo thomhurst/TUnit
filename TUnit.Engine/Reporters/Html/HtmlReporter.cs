@@ -484,7 +484,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             : DateTimeOffset.MaxValue;
     }
 
-    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -518,10 +518,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     stdErr = TruncateOutput(e.StandardError);
                     break;
                 case TestMetadataProperty meta:
-                    if (string.IsNullOrEmpty(meta.Key))
+                    // MTP convention (matches Microsoft.Testing.Extensions.VSTestBridge): categories are
+                    // emitted as TestMetadataProperty(category, "") — name in Key, empty Value. Traits/
+                    // custom properties use (key, value) with a non-empty Value.
+                    if (string.IsNullOrEmpty(meta.Value))
                     {
                         categories ??= [];
-                        categories.Add(meta.Value);
+                        categories.Add(meta.Key);
                     }
                     else
                     {
