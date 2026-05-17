@@ -183,9 +183,215 @@ internal static class HtmlReportGenerator
             }
             w.WriteEndArray();
 
+            WriteTimelines(w, data, spansByTrace, runStartMs);
+
             w.WriteEndObject();
         }
         return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+    }
+
+    // The old report had two trace views the per-test Trace tab doesn't cover:
+    //   • Global "Execution Timeline" — session/assembly/suite + shared init/dispose spans
+    //   • Per-class timeline — opt-in via [ClassTimeline(...)] on the class
+    // We re-emit both as top-level JSON so the renderer can show them in the Run view.
+    private static void WriteTimelines(Utf8JsonWriter w, ReportData data, Dictionary<string, List<SpanData>>? spansByTrace, long runStartMs)
+    {
+        if (spansByTrace is null || spansByTrace.Count == 0) return;
+
+        // Flatten and index spans across all traces.
+        var allSpans = new List<SpanData>();
+        foreach (var bucket in spansByTrace.Values) allSpans.AddRange(bucket);
+        if (allSpans.Count == 0) return;
+
+        var bySpanId = new Dictionary<string, SpanData>(allSpans.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var s in allSpans)
+        {
+            bySpanId[s.SpanId] = s;
+        }
+
+        // Global timeline: session/assembly/suite spans plus init/dispose with non-test scope.
+        var globalSpans = new List<SpanData>();
+        foreach (var s in allSpans)
+        {
+            if (IsGlobalTimelineSpan(s)) globalSpans.Add(s);
+        }
+
+        w.WritePropertyName("globalSpans");
+        w.WriteStartArray();
+        foreach (var s in globalSpans) WriteSpan(w, s, runStartMs);
+        w.WriteEndArray();
+
+        // Per-class timeline: classes that opted in via [ClassTimeline] carry the
+        // "tunit.report.timeline" custom property on every test in that class.
+        var classModes = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var g in data.Groups)
+        {
+            foreach (var t in g.Tests)
+            {
+                if (t.CustomProperties is null) continue;
+                foreach (var p in t.CustomProperties)
+                {
+                    if (string.Equals(p.Key, "tunit.report.timeline", StringComparison.Ordinal))
+                    {
+                        classModes[g.ClassName] = p.Value;
+                        break;
+                    }
+                }
+                if (classModes.ContainsKey(g.ClassName)) break;
+            }
+        }
+
+        var suiteByClass = new Dictionary<string, SpanData>(StringComparer.Ordinal);
+        foreach (var s in allSpans)
+        {
+            if (!string.Equals(s.SpanType, "test suite", StringComparison.Ordinal)) continue;
+            var cls = FindTagValue(s, "tunit.test.class") ?? s.Name;
+            if (!string.IsNullOrEmpty(cls) && !suiteByClass.ContainsKey(cls)) suiteByClass[cls] = s;
+        }
+
+        w.WritePropertyName("classTimelines");
+        w.WriteStartObject();
+        foreach (var kv in classModes)
+        {
+            if (!suiteByClass.TryGetValue(kv.Key, out var suite)) continue;
+            if (!spansByTrace.TryGetValue(suite.TraceId, out var traceSpans)) continue;
+
+            var classSpans = BuildClassTimeline(traceSpans, suite.SpanId, kv.Value);
+            if (classSpans.Count == 0) continue;
+
+            w.WritePropertyName(kv.Key);
+            w.WriteStartObject();
+            w.WriteString("mode", kv.Value);
+            w.WritePropertyName("spans");
+            w.WriteStartArray();
+            foreach (var s in classSpans) WriteSpan(w, s, runStartMs);
+            w.WriteEndArray();
+            w.WriteEndObject();
+        }
+        w.WriteEndObject();
+    }
+
+    private static bool IsGlobalTimelineSpan(SpanData s)
+    {
+        var t = s.SpanType ?? string.Empty;
+        if (t is "test session" or "test assembly" or "test suite") return true;
+        if (t.StartsWith("initialize ", StringComparison.Ordinal) || t.StartsWith("dispose ", StringComparison.Ordinal))
+        {
+            var scope = FindTagValue(s, "tunit.trace.scope");
+            return !string.Equals(scope, "test", StringComparison.Ordinal);
+        }
+        return false;
+    }
+
+    private static List<SpanData> BuildClassTimeline(List<SpanData> traceSpans, string suiteSpanId, string mode)
+    {
+        var bySpanId = new Dictionary<string, SpanData>(traceSpans.Count, StringComparer.OrdinalIgnoreCase);
+        var byParent = new Dictionary<string, List<SpanData>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var s in traceSpans)
+        {
+            bySpanId[s.SpanId] = s;
+            if (s.ParentSpanId is null) continue;
+            if (!byParent.TryGetValue(s.ParentSpanId, out var kids))
+            {
+                kids = new List<SpanData>();
+                byParent[s.ParentSpanId] = kids;
+            }
+            kids.Add(s);
+        }
+
+        var descendants = new List<SpanData>();
+        var stack = new Stack<string>();
+        stack.Push(suiteSpanId);
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        while (stack.Count > 0)
+        {
+            var id = stack.Pop();
+            if (!visited.Add(id)) continue;
+            if (byParent.TryGetValue(id, out var kids))
+            {
+                foreach (var k in kids)
+                {
+                    descendants.Add(k);
+                    stack.Push(k.SpanId);
+                }
+            }
+        }
+
+        var result = new List<SpanData>();
+        if (bySpanId.TryGetValue(suiteSpanId, out var suite)) result.Add(suite);
+
+        if (string.Equals(mode, "FullExecution", StringComparison.Ordinal))
+        {
+            // Include test-case spans and their non-'test body' children, with
+            // 'test body' wrappers collapsed (children re-parented to the owning
+            // test-case) so the timeline isn't dominated by plumbing nodes.
+            var testBodyIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var s in descendants)
+                if (string.Equals(s.Name, "test body", StringComparison.Ordinal)) testBodyIds.Add(s.SpanId);
+            foreach (var s in descendants)
+            {
+                if (testBodyIds.Contains(s.SpanId)) continue;
+                if (s.ParentSpanId is not null && testBodyIds.Contains(s.ParentSpanId))
+                {
+                    var newParent = bySpanId.TryGetValue(s.ParentSpanId, out var body) ? body.ParentSpanId : null;
+                    result.Add(WithParent(s, newParent));
+                }
+                else
+                {
+                    result.Add(s);
+                }
+            }
+        }
+        else
+        {
+            // Default: class-level infrastructure only — drop test-case spans and
+            // everything beneath them so the timeline shows suite + init/dispose only.
+            var testCaseIds = new List<string>();
+            foreach (var s in descendants)
+                if (string.Equals(s.SpanType, "test case", StringComparison.Ordinal)) testCaseIds.Add(s.SpanId);
+            var excluded = new HashSet<string>(testCaseIds, StringComparer.OrdinalIgnoreCase);
+            foreach (var tcId in testCaseIds)
+            {
+                var inner = new Stack<string>();
+                inner.Push(tcId);
+                while (inner.Count > 0)
+                {
+                    var id = inner.Pop();
+                    if (!byParent.TryGetValue(id, out var kids)) continue;
+                    foreach (var k in kids) { if (excluded.Add(k.SpanId)) inner.Push(k.SpanId); }
+                }
+            }
+            foreach (var s in descendants)
+                if (!excluded.Contains(s.SpanId)) result.Add(s);
+        }
+
+        return result;
+    }
+
+    private static SpanData WithParent(SpanData s, string? parentSpanId) => new()
+    {
+        TraceId = s.TraceId,
+        SpanId = s.SpanId,
+        ParentSpanId = parentSpanId,
+        Name = s.Name,
+        SpanType = s.SpanType,
+        Source = s.Source,
+        Kind = s.Kind,
+        StartTimeMs = s.StartTimeMs,
+        DurationMs = s.DurationMs,
+        Status = s.Status,
+        StatusMessage = s.StatusMessage,
+        Tags = s.Tags,
+        Events = s.Events,
+        Links = s.Links,
+    };
+
+    private static string? FindTagValue(SpanData s, string key)
+    {
+        if (s.Tags is null) return null;
+        foreach (var t in s.Tags)
+            if (string.Equals(t.Key, key, StringComparison.Ordinal)) return t.Value;
+        return null;
     }
 
     private static void WriteTest(
@@ -253,14 +459,36 @@ internal static class HtmlReportGenerator
             w.WriteNumber("retryCount", t.RetryAttempt);
         }
 
+        if (t.Attempts is { Length: > 1 } atts)
+        {
+            w.WritePropertyName("attempts");
+            w.WriteStartArray();
+            foreach (var a in atts)
+            {
+                w.WriteStartObject();
+                w.WriteString("status", MapStatus(a.Status));
+                w.WriteNumber("duration", a.DurationMs);
+                if (!string.IsNullOrEmpty(a.ExceptionType) || !string.IsNullOrEmpty(a.ExceptionMessage))
+                {
+                    w.WritePropertyName("error");
+                    w.WriteStartObject();
+                    if (!string.IsNullOrEmpty(a.ExceptionType)) w.WriteString("type", a.ExceptionType!);
+                    if (!string.IsNullOrEmpty(a.ExceptionMessage)) w.WriteString("message", a.ExceptionMessage!);
+                    w.WriteEndObject();
+                }
+                w.WriteEndObject();
+            }
+            w.WriteEndArray();
+        }
+
         w.WritePropertyName("spans");
         w.WriteStartArray();
         if (spansByTrace is not null)
         {
-            WriteTraceSpans(w, t.TraceId, runStartMs, spansByTrace);
+            WriteTraceSpans(w, t.TraceId, runStartMs, spansByTrace, linked: false);
             if (t.AdditionalTraceIds is { Length: > 0 } extra)
             {
-                foreach (var tid in extra) WriteTraceSpans(w, tid, runStartMs, spansByTrace);
+                foreach (var tid in extra) WriteTraceSpans(w, tid, runStartMs, spansByTrace, linked: true);
             }
         }
         w.WriteEndArray();
@@ -272,17 +500,18 @@ internal static class HtmlReportGenerator
         Utf8JsonWriter w,
         string? traceId,
         long runStartMs,
-        Dictionary<string, List<SpanData>> spansByTrace)
+        Dictionary<string, List<SpanData>> spansByTrace,
+        bool linked = false)
     {
         if (string.IsNullOrEmpty(traceId)) return;
         if (!spansByTrace.TryGetValue(traceId!, out var list)) return;
         foreach (var s in list)
         {
-            WriteSpan(w, s, runStartMs);
+            WriteSpan(w, s, runStartMs, linked);
         }
     }
 
-    private static void WriteSpan(Utf8JsonWriter w, SpanData s, long runStartMs)
+    private static void WriteSpan(Utf8JsonWriter w, SpanData s, long runStartMs, bool linked = false)
     {
         w.WriteStartObject();
         w.WriteString("id", s.SpanId);
@@ -314,6 +543,7 @@ internal static class HtmlReportGenerator
         {
             w.WriteString("status", s.Status);
         }
+        if (linked) w.WriteBoolean("linked", true);
         w.WriteEndObject();
     }
 

@@ -248,24 +248,40 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 spanId = spanInfo.SpanId;
             }
 
-            // Track retry attempts by counting final-state updates.
-            // A non-retried test has exactly 1 final-state update; each retry adds another.
+            // Walk all updates in order so we capture each retry attempt's status and
+            // timing — not just the count. The renderer's flaky/retry UI needs the
+            // per-attempt list, and we have all of it sitting on the update messages.
+            ReportAttempt[]? attempts = null;
             var retryAttempt = 0;
             if (_updates.TryGetValue(kvp.Key, out var allUpdates))
             {
-                var finalStateCount = 0;
+                List<ReportAttempt>? attemptList = null;
                 foreach (var update in allUpdates)
                 {
                     var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                    if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+                    if (state is null or InProgressTestNodeStateProperty or DiscoveredTestNodeStateProperty)
                     {
-                        finalStateCount++;
+                        continue;
                     }
+
+                    var (attemptStatus, attemptException, _) = ExtractStatus(state);
+                    var attemptDuration = update.TestNode.Properties.AsEnumerable()
+                        .OfType<TimingProperty>()
+                        .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
+                    attemptList ??= new List<ReportAttempt>();
+                    attemptList.Add(new ReportAttempt
+                    {
+                        Status = attemptStatus,
+                        DurationMs = attemptDuration,
+                        ExceptionType = attemptException?.Type,
+                        ExceptionMessage = attemptException?.Message,
+                    });
                 }
 
-                if (finalStateCount > 1)
+                if (attemptList is { Count: > 1 })
                 {
-                    retryAttempt = finalStateCount - 1;
+                    retryAttempt = attemptList.Count - 1;
+                    attempts = attemptList.ToArray();
                 }
             }
 
@@ -276,7 +292,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             string[]? additionalTraceIdsForResult = null;
 #endif
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult);
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts);
 
             AccumulateStatus(summary, testResult);
 
@@ -484,7 +500,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             : DateTimeOffset.MaxValue;
     }
 
-    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -566,6 +582,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             LineNumber = fileLocation?.LineSpan.Start.Line,
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
+            Attempts = attempts,
             TraceId = traceId,
             SpanId = spanId,
             AdditionalTraceIds = additionalTraceIds

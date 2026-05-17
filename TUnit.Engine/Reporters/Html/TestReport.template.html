@@ -518,6 +518,27 @@
   .span-dur { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-align: right; }
   .trace-axis { display: flex; justify-content: space-between; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); padding: 6px 0 8px 290px; border-bottom: 1px dashed var(--border); margin-bottom: 8px; }
 
+  /* class timelines (run view) */
+  details.class-timeline { border-top: 1px solid var(--border); padding: 10px 0; }
+  details.class-timeline:first-of-type { border-top: none; padding-top: 0; }
+  details.class-timeline > summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);
+    padding: 4px 0;
+  }
+  details.class-timeline > summary::-webkit-details-marker { display: none; }
+  details.class-timeline .chev-sm {
+    display: inline-block; width: 10px; text-align: center; color: var(--text-dim);
+    transition: transform 120ms; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1;
+  }
+  details.class-timeline[open] > summary .chev-sm { transform: rotate(90deg); }
+  details.class-timeline .meta-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim);
+    padding: 1px 7px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--border);
+  }
+  details.class-timeline .span-count { margin-left: auto; font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  .class-timeline-body { padding-top: 10px; }
+
   /* properties */
   .prop-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
   @media (max-width: 800px) { .prop-cols { grid-template-columns: 1fr; } }
@@ -729,6 +750,24 @@
   details.collapsible.stack .error-stack {
     margin-top: 0; padding: 0; background: transparent; border: none;
     max-height: 280px;
+  }
+
+  /* inner exception chain */
+  details.inner-ex { margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+  details.inner-ex > summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);
+  }
+  details.inner-ex > summary::-webkit-details-marker { display: none; }
+  details.inner-ex[open] .chev-sm { transform: rotate(90deg); }
+  details.inner-ex .inner-ex-body { padding-top: 10px; }
+  details.inner-ex .error-msg { font-size: 12px; color: var(--text); margin-bottom: 8px; }
+  details.inner-ex .error-stack { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: pre-wrap; max-height: 220px; overflow: auto; }
+
+  /* linked trace tag (Trace tab toolbar) */
+  .linked-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted);
+    padding: 1px 7px; background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: 999px;
   }
 
   /* same-failure banner in detail view */
@@ -1196,6 +1235,22 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="card" id="globalTimelinePanel" style="display:none; margin-bottom: 16px;">
+      <div class="panel-head">
+        <h2>Execution timeline</h2>
+        <span class="count" id="globalTimelineCount">—</span>
+      </div>
+      <div class="panel-body" id="globalTimelineBody"></div>
+    </div>
+
+    <div class="card" id="classTimelinesPanel" style="display:none; margin-bottom: 16px;">
+      <div class="panel-head">
+        <h2>Class timelines</h2>
+        <span class="count" id="classTimelinesCount">—</span>
+      </div>
+      <div class="panel-body" id="classTimelinesBody"></div>
     </div>
 
     <div class="card" style="margin-bottom: 16px;">
@@ -2305,6 +2360,18 @@ function attemptsHTML(attempts) {
 
 function errorBlockHTML(error) {
   const hasDiff = error.expected != null && error.actual != null;
+  const inners = [];
+  let cur = error.innerException;
+  while (cur) { inners.push(cur); cur = cur.innerException; }
+  const innerHTML = inners.map((e, i) => `
+    <details class="collapsible inner-ex" ${i === 0 ? 'open' : ''}>
+      <summary><span class="chev-sm">›</span>Inner exception<span class="meta-tag">${esc(e.type)}</span></summary>
+      <div class="inner-ex-body">
+        <div class="error-msg">${esc(e.message)}</div>
+        ${e.stack ? `<div class="error-stack">${esc(e.stack).replace(/(\/[^\s]+\.cs):line (\d+)/g, '<span class="src">$1:$2</span>')}</div>` : ''}
+      </div>
+    </details>
+  `).join('');
   return `
     <div class="error-block">
       <div class="error-type">${esc(error.type)}</div>
@@ -2325,6 +2392,7 @@ function errorBlockHTML(error) {
         <summary><span class="chev-sm">›</span>Stack trace<span class="meta-tag">${(error.stack||'').split('\n').length} frames</span></summary>
         <div class="error-stack">${esc(error.stack).replace(/(\/[^\s]+\.cs):line (\d+)/g, '<span class="src">$1:$2</span>')}</div>
       </details>
+      ${innerHTML}
     </div>
   `;
 }
@@ -2462,10 +2530,13 @@ function traceHTML(t) {
   const svcs = [...new Set(spans.map(s => s.service))];
   const legend = svcs.map(s => `<span class="legend-svc"><span class="sw" style="background:${SERVICE_COLORS[s]||'var(--text-muted)'}"></span>${s}</span>`).join('');
 
+  const linkedCount = spans.filter(s => s.linked).length;
+  const linkedTag = linkedCount > 0 ? `<span class="linked-tag" title="Spans from traces linked to this test, e.g. via [LinkedTrace] or background work">${linkedCount} linked</span>` : '';
   return `
     <div class="trace">
       <div class="trace-toolbar">
         <span><b>${spans.length}</b> spans across <b>${svcs.length}</b> services</span>
+        ${linkedTag}
         ${legend}
       </div>
       <div class="trace-axis">${axisHtml.join('')}</div>
@@ -2624,6 +2695,10 @@ function renderRun() {
     el.addEventListener('click', () => { selectTest(t.id); switchView('tests'); });
   });
 
+  // global and per-class timelines
+  renderGlobalTimeline();
+  renderClassTimelines();
+
   // flaky-in-this-run
   renderInsights();
   const flaky = tests.filter(t => t.attempts && t.attempts.length > 1 && t.status === 'pass');
@@ -2682,6 +2757,63 @@ function renderRun() {
     });
   });
   }
+}
+
+/* ---------- timelines (run view) ---------- */
+function timelineWaterfall(spans) {
+  if (!spans || !spans.length) return '<div class="empty-state"><div class="title">No spans captured</div></div>';
+  const byId = new Map(spans.map(s => [s.id, s]));
+  const depthCache = new Map();
+  function depth(id, seen) {
+    if (depthCache.has(id)) return depthCache.get(id);
+    const s = byId.get(id);
+    if (!s || !s.parent || !byId.has(s.parent)) { depthCache.set(id, 0); return 0; }
+    if (seen && seen.has(id)) return 0;
+    const next = new Set(seen || []); next.add(id);
+    const d = 1 + depth(s.parent, next);
+    depthCache.set(id, d); return d;
+  }
+  const mn = Math.min(...spans.map(s => s.start));
+  const mx = Math.max(...spans.map(s => s.start + s.dur));
+  const tot = mx - mn || 1;
+  const sorted = [...spans].sort((a, b) => a.start - b.start);
+  return '<div class="trace">' + sorted.map(s => {
+    const d = depth(s.id);
+    const left = ((s.start - mn) / tot) * 100;
+    const width = Math.max(0.2, (s.dur / tot) * 100);
+    const color = SERVICE_COLORS[s.service] || 'var(--text-muted)';
+    return `<div class="span-row">
+      <div class="span-label" title="${esc(s.name)}"><span class="depth">${'&nbsp;&nbsp;'.repeat(d)}</span><span class="svc" style="background:${color}"></span>${esc(s.name)}</div>
+      <div class="span-track"><div class="span-bar" data-id="${s.id}" style="left:${left}%; width:${width}%; background:${color}"></div></div>
+      <div class="span-dur">${fmtDur(s.dur)}</div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function renderGlobalTimeline() {
+  const panel = $('#globalTimelinePanel');
+  if (!panel) return;
+  const spans = REPORT.globalSpans || [];
+  if (!spans.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  $('#globalTimelineCount').textContent = spans.length + ' spans';
+  $('#globalTimelineBody').innerHTML = timelineWaterfall(spans);
+}
+
+function renderClassTimelines() {
+  const panel = $('#classTimelinesPanel');
+  if (!panel) return;
+  const ct = REPORT.classTimelines || {};
+  const entries = Object.entries(ct).filter(([, v]) => v && v.spans && v.spans.length);
+  if (!entries.length) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  $('#classTimelinesCount').textContent = entries.length + ' classes';
+  $('#classTimelinesBody').innerHTML = entries.map(([cls, data]) => `
+    <details class="class-timeline">
+      <summary><span class="chev-sm">›</span>${esc(cls)}<span class="meta-tag">${esc(data.mode)}</span><span class="span-count">${data.spans.length} spans</span></summary>
+      <div class="class-timeline-body">${timelineWaterfall(data.spans)}</div>
+    </details>
+  `).join('');
 }
 
 /* ---------- tooltip ---------- */
