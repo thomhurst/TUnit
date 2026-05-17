@@ -132,10 +132,9 @@ public class HtmlReporterTests
     [Test]
     public void GenerateHtml_RoundTrips_TestBodySpans_AndChildren_Through_EmbeddedData()
     {
-        // Server-side data path only — the client-side collapseTestBodySpans JS runs in the
-        // browser and is not exercised here. This test pins down the contract the JS relies
-        // on: a 'test body' span with children survives serialisation into the embedded
-        // JSON so the JS can re-parent children to the test-case span at render time.
+        // Pins the renderer's data contract: a "test body" span with a child span survives
+        // serialisation into the embedded JSON under the owning test (matched by traceId),
+        // with the design's per-test `spans[]` shape (`parent` rather than `parentSpanId`).
         const string traceId = "0123456789abcdef0123456789abcdef";
         var spans = new[]
         {
@@ -161,25 +160,44 @@ public class HtmlReporterTests
             RuntimeVersion = ".NET 10.0",
             TotalDurationMs = 0,
             Summary = new ReportSummary(),
-            Groups = [],
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "SampleTests",
+                    Namespace = "Tests",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "SampleTests", Status = "passed",
+                            TraceId = traceId,
+                        },
+                    ],
+                },
+            ],
             Spans = spans,
         });
 
         var embedded = ExtractEmbeddedReportJson(html);
         embedded.ShouldContain("\"name\":\"test body\"");
         embedded.ShouldContain("\"name\":\"wiremock-call\"");
-        embedded.ShouldContain("\"parentSpanId\":\"aaaaaaaaaaaaaaaa\"");
+        embedded.ShouldContain("\"parent\":\"aaaaaaaaaaaaaaaa\"");
     }
 
     private static string ExtractEmbeddedReportJson(string html)
     {
-        // The renderer embeds ReportData as gzip+base64 inside <script id="test-data" ...>.
+        // The renderer reads gzipped+base64 JSON from <script id="report-data" type="application/octet-stream">
+        // so the embedded data stays small for large suites.
         var match = Regex.Match(
             html,
-            "<script id=\"test-data\"[^>]*>(?<payload>[A-Za-z0-9+/=]+)</script>",
+            "<script id=\"report-data\"[^>]*>(?<payload>.*?)</script>",
             RegexOptions.Singleline);
-        match.Success.ShouldBeTrue("Expected embedded test-data script in rendered HTML.");
-        var compressed = Convert.FromBase64String(match.Groups["payload"].Value);
+        match.Success.ShouldBeTrue("Expected embedded report-data script in rendered HTML.");
+        var payload = match.Groups["payload"].Value.Trim();
+        var compressed = Convert.FromBase64String(payload);
         using var ms = new MemoryStream(compressed);
         using var gz = new GZipStream(ms, CompressionMode.Decompress);
         using var reader = new StreamReader(gz, Encoding.UTF8);
@@ -258,8 +276,7 @@ public class HtmlReporterTests
         });
 
         var embedded = ExtractEmbeddedReportJson(html);
-        embedded.ShouldContain("\"key\":\"tunit.report.timeline\"");
-        embedded.ShouldContain("\"value\":\"FullExecution\"");
+        embedded.ShouldContain("\"tunit.report.timeline\":\"FullExecution\"");
     }
 
     [Test]
