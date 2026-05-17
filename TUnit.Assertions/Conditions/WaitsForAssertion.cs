@@ -59,9 +59,6 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
 
         while (stopwatch.Elapsed < _timeout)
         {
-            // Honour external cancellation between iterations: a pre-cancelled token, or a token
-            // cancelled during the previous Task.Delay, exits the loop without invoking the
-            // predicate. Internal-timeout cancellation falls through to AssertionResult.Failed.
             _cancellationToken.ThrowIfCancellationRequested();
 
             attemptCount++;
@@ -91,13 +88,10 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
                 }
                 catch (OperationCanceledException) when (_cancellationToken.IsCancellationRequested)
                 {
-                    // External cancellation during the poll sleep. Propagate.
                     throw;
                 }
                 catch (OperationCanceledException)
                 {
-                    // Internal timeout cancelled the linked source. Fall through to the
-                    // standard AssertionResult.Failed path below.
                     break;
                 }
             }

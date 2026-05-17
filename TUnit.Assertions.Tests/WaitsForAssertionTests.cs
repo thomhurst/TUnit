@@ -425,7 +425,6 @@ public class WaitsForAssertionTests
 
         stopwatch.Stop();
 
-        // External cancel must abort the loop well before the 30s internal timeout.
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
     }
 
@@ -447,7 +446,7 @@ public class WaitsForAssertionTests
     public async Task WaitsFor_Honours_PreCancelled_Token_Before_First_Poll()
     {
         using var cts = new CancellationTokenSource();
-        await cts.CancelAsync();
+        cts.Cancel();
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -461,16 +460,12 @@ public class WaitsForAssertionTests
 
         stopwatch.Stop();
 
-        // Pre-cancelled token must exit the loop on the first iteration, well before any
-        // poll sleep would matter; the 5s internal timeout must not have elapsed.
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
     }
 
     [Test]
     public async Task Eventually_PropagatesExternalCancellation_Before_Internal_Timeout()
     {
-        // Alias symmetry: the same cancellation contract holds for Eventually as for
-        // WaitsFor, since Eventually forwards to WaitsFor.
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromMilliseconds(100));
 
@@ -492,9 +487,6 @@ public class WaitsForAssertionTests
     [Test]
     public async Task WaitsFor_Propagates_OCE_When_Predicate_Observes_Supplied_Token()
     {
-        // When the predicate itself observes the supplied token and throws after the
-        // token is cancelled, the cancellation must propagate out of the polling loop
-        // instead of being swallowed-and-retried until the internal timeout elapses.
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(TimeSpan.FromMilliseconds(50));
 
@@ -516,7 +508,6 @@ public class WaitsForAssertionTests
 
         stopwatch.Stop();
 
-        // Propagation should occur within roughly the cancel delay plus one poll interval.
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
     }
 
