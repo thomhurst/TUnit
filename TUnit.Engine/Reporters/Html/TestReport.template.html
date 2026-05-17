@@ -3,10 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Test Report — CloudShop.Tests</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>__REPORT_TITLE__</title>
 <style>
   /* ============================== tokens ============================== */
   :root[data-theme="light"] {
@@ -996,7 +993,7 @@
   <div class="brand">
     <div class="brand-mark">T</div>
     <div>
-      <div class="brand-name" id="projectName">CloudShop.Tests</div>
+      <div class="brand-name" id="projectName">__REPORT_PROJECT__</div>
       <div class="brand-sub">Test Report</div>
     </div>
   </div>
@@ -1240,7 +1237,7 @@
    (e.g. previewing this template).
    ==================================================================== */
 
-/* ---------- sample data generator ---------- */
+/* SAMPLE_DATA_BEGIN — stripped at report-generation time; only used when previewing this template standalone. */
 function generateSampleData() {
   let seed = 1729;
   const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
@@ -1501,6 +1498,7 @@ function buildSpans(rootName, totalMs, failed, rnd) {
   return spans;
 }
 function pickRnd(rnd, arr) { return arr[Math.floor(rnd() * arr.length)]; }
+/* SAMPLE_DATA_END */
 
 /* ---------- bootstrap ---------- */
 async function loadReportData() {
@@ -1523,7 +1521,13 @@ async function loadReportData() {
   }
 }
 let REPORT = await loadReportData();
-if (!REPORT) REPORT = generateSampleData();
+if (!REPORT) {
+  // generateSampleData() is only present when previewing this template standalone;
+  // the C# generator strips it from shipped reports. Fall back to an empty run.
+  REPORT = (typeof generateSampleData === 'function')
+    ? generateSampleData()
+    : { project: '', when: '', startMs: 0, wallMs: 0, workers: 1, tests: [] };
+}
 
 /* ---------- state ---------- */
 const STATE = {
@@ -1817,9 +1821,8 @@ function filteredTests() {
 
 function groupTests(list) {
   if (STATE.group === 'none') {
-    const flat = list.slice();
-    sortTests(flat);
-    return [{ key: '_all', title: 'All tests', ns: '', tests: flat }];
+    sortTests(list);
+    return [{ key: '_all', title: 'All tests', ns: '', tests: list }];
   }
   const buckets = new Map();
   list.forEach(t => {

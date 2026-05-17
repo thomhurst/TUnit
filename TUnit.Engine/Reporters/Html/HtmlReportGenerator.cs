@@ -11,22 +11,37 @@ internal static class HtmlReportGenerator
 {
     private const string TemplateResourceName = "TUnit.Engine.Reporters.Html.TestReport.template.html";
     private const string DataPlaceholder = "__REPORT_DATA__";
-    // The template ships with a baked-in title from the design preview;
-    // we replace it with the actual assembly name at render time.
-    private const string TemplateTitleMarker = "Test Report — CloudShop.Tests";
+    private const string TitlePlaceholder = "__REPORT_TITLE__";
+    private const string ProjectPlaceholder = "__REPORT_PROJECT__";
+    private const string SampleDataBeginMarker = "/* SAMPLE_DATA_BEGIN";
+    private const string SampleDataEndMarker = "/* SAMPLE_DATA_END */";
 
-    private static readonly Lazy<string> Template = new(LoadTemplate);
+    private static readonly Lazy<string> Template = new(LoadAndStripTemplate);
 
     internal static string GenerateHtml(ReportData data)
     {
         var template = Template.Value;
         var json = SerializeReport(data);
         var compressed = GzipBase64(json);
-        var title = "Test Report — " + WebUtility.HtmlEncode(data.AssemblyName);
+        var encodedName = WebUtility.HtmlEncode(data.AssemblyName);
 
         return template
-            .Replace(TemplateTitleMarker, title)
+            .Replace(TitlePlaceholder, "Test Report — " + encodedName)
+            .Replace(ProjectPlaceholder, encodedName)
             .Replace(DataPlaceholder, compressed);
+    }
+
+    private static string LoadAndStripTemplate()
+    {
+        var raw = LoadTemplate();
+        // The template carries a generateSampleData() block so devs can preview
+        // it standalone in a browser. Strip it from shipped reports — production
+        // reports always have real data and the fallback never fires.
+        var begin = raw.IndexOf(SampleDataBeginMarker, StringComparison.Ordinal);
+        if (begin < 0) return raw;
+        var end = raw.IndexOf(SampleDataEndMarker, begin, StringComparison.Ordinal);
+        if (end < 0) return raw;
+        return raw.Remove(begin, end + SampleDataEndMarker.Length - begin);
     }
 
     private static string GzipBase64(string json)
@@ -192,7 +207,7 @@ internal static class HtmlReportGenerator
         w.WriteNumber("duration", t.DurationMs);
         w.WriteString("worker", "worker-" + (testWorker.GetValueOrDefault(t.Id, 0) + 1));
 
-        // properties — design schema is an object map; dedupe duplicate keys (last wins).
+        // properties — design schema is an object map; dedupe duplicate keys (first wins).
         w.WritePropertyName("properties");
         w.WriteStartObject();
         if (t.CustomProperties is { Length: > 0 } props)
@@ -398,7 +413,9 @@ internal static class HtmlReportGenerator
         "failed" or "error" or "timedOut" => "fail",
         "skipped" => "skip",
         "cancelled" => "cancel",
-        _ => "skip",
+        // Unknown statuses (future engine values, "unknown") map to fail so they
+        // stay visible in the UI rather than being silently buried under skipped.
+        _ => "fail",
     };
 
     private static string? FilterEngineNotices(string? stderr)
