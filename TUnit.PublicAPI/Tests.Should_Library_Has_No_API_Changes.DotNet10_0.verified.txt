@@ -293,7 +293,7 @@ namespace .
         public static ..ShouldAssertion<TValue> BeOfType<TValue>(this ..IShouldSource<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static ..ShouldAssertion<string> BeParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this ..IShouldSource<string> source) { }
         public static ..ShouldAssertion<TValue> EqualTo<TValue>(this ..IShouldSource<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
-        public static ..ShouldAssertion<TValue> Eventually<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
+        public static ..ShouldAssertion<TValue> Eventually<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, .CancellationToken cancellationToken = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         [("Use Length().IsEqualTo(expectedLength) instead.")]
         public static ..ShouldAssertion<string> HaveLength(this ..IShouldSource<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
         public static ..ShouldAssertion<TException> HaveMessage<TException>(this ..IShouldSource<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
@@ -313,7 +313,7 @@ namespace .
         public static ..ShouldAssertion<TValue> NotBeNull<TValue>(this ..IShouldSource<TValue> source)
             where TValue :  class { }
         public static ..ShouldAssertion<string> NotBeParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this ..IShouldSource<string> source) { }
-        public static ..ShouldAssertion<TValue> WaitFor<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
+        public static ..ShouldAssertion<TValue> WaitFor<TValue>(this ..IShouldSource<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, .CancellationToken cancellationToken = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         public static ..ShouldAssertion<TException> WithInnerException<TException, TInnerException>(this ..IShouldSource<TException> source)
             where TException : 
             where TInnerException :  { }
