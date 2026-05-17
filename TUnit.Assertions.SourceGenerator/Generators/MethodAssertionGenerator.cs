@@ -996,7 +996,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var targetTypeName = data.TargetType.TypeName;
         var methodName = data.Method.Name;
         var genericParams = data.Method.GenericTypeParameters;
-        var isCovariant = data.TargetType.IsCovariantCandidate;
+        // Suppress receiver-type covariance when the source method has its own type
+        // parameters. With covariance, the extension prepends a TActual parameter so a
+        // more-derived static receiver can bind; but the resulting two-parameter signature
+        // cannot accept a call site that names the method's own type arguments explicitly
+        // (e.g. `.MyMethod<int>(...)`) because C# does not allow partial type-argument
+        // specification, so the call fails with CS1929. The dominant call shape supplies
+        // the method's own arguments; a more-derived static receiver can upcast.
+        var isCovariant = data.TargetType.IsCovariantCandidate && genericParams.Count == 0;
 
         // Pick a covariant type param name that doesn't collide with existing generic params
         var covariantParam = isCovariant ? CovarianceHelper.GetCovariantTypeParamName(genericParams) : null;
