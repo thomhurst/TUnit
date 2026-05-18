@@ -421,6 +421,35 @@ public class HtmlReporterTests
         embedded.ShouldContain("System.TimeoutException");
     }
 
+    [Test]
+    public void FilterEngineNotices_StripsTUnitPrefixedLines()
+    {
+        // Engine-emitted advisories ("[TUnit] External span cap reached…") are written
+        // to Console.Error and get captured into the running test's stderr. Pin that
+        // the strip removes prefix-matched lines but leaves user output alone.
+        var stderr = "user error before\n[TUnit] External span cap of 100 reached; subsequent spans will be dropped.\nuser error after\nincidental [TUnit] mention in middle";
+        var filtered = HtmlReportGenerator.FilterEngineNotices(stderr);
+        filtered.ShouldBe("user error before\nuser error after\nincidental [TUnit] mention in middle");
+    }
+
+    [Test]
+    public void FilterEngineNotices_ReturnsNull_WhenAllLinesStripped()
+    {
+        // When the test only ever wrote engine-advisory lines, the cleaned stderr
+        // becomes null so the upstream "?? SkipReason ?? string.Empty" fallback fires
+        // instead of an empty error block.
+        var stderr = "[TUnit] notice one\n[TUnit] notice two";
+        HtmlReportGenerator.FilterEngineNotices(stderr).ShouldBeNull();
+    }
+
+    [Test]
+    public void FilterEngineNotices_PassesThroughWhenNoTUnitPrefix()
+    {
+        // Fast-path: no '[TUnit]' substring at all means we return the input unchanged.
+        var stderr = "plain stderr with no engine notices";
+        HtmlReportGenerator.FilterEngineNotices(stderr).ShouldBe(stderr);
+    }
+
     private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
     {
         Id = displayName,

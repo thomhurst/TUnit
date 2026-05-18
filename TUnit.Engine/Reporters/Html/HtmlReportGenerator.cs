@@ -60,7 +60,11 @@ internal static class HtmlReportGenerator
     {
         var bytes = Encoding.UTF8.GetBytes(json);
         using var output = new MemoryStream();
+#if NET
+        using (var gz = new GZipStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
+#else
         using (var gz = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
+#endif
         {
             gz.Write(bytes, 0, bytes.Length);
         }
@@ -478,11 +482,13 @@ internal static class HtmlReportGenerator
         w.WriteStartObject();
         if (t.CustomProperties is { Length: > 0 } props)
         {
-            // First occurrence of a duplicated key wins.
-            var emitted = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var p in props)
+            // First occurrence of a duplicated key wins. Tests typically carry 0–3
+            // custom properties, so a linear "have we seen this?" scan over the
+            // already-written prefix beats allocating a HashSet on the hot path.
+            for (var i = 0; i < props.Length; i++)
             {
-                if (emitted.Add(p.Key)) w.WriteString(p.Key, p.Value);
+                if (IsDuplicateKey(props, i, props[i].Key)) continue;
+                w.WriteString(props[i].Key, props[i].Value);
             }
         }
         w.WriteEndObject();
@@ -592,10 +598,10 @@ internal static class HtmlReportGenerator
         w.WriteStartObject();
         if (s.Tags is { Length: > 0 } tags)
         {
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var tag in tags)
+            for (var i = 0; i < tags.Length; i++)
             {
-                if (seen.Add(tag.Key)) w.WriteString(tag.Key, tag.Value);
+                if (IsDuplicateKey(tags, i, tags[i].Key)) continue;
+                w.WriteString(tags[i].Key, tags[i].Value);
             }
         }
         w.WriteEndObject();
@@ -616,10 +622,10 @@ internal static class HtmlReportGenerator
                 {
                     w.WritePropertyName("attrs");
                     w.WriteStartObject();
-                    var seenEv = new HashSet<string>(StringComparer.Ordinal);
-                    foreach (var t in evTags)
+                    for (var i = 0; i < evTags.Length; i++)
                     {
-                        if (seenEv.Add(t.Key)) w.WriteString(t.Key, t.Value);
+                        if (IsDuplicateKey(evTags, i, evTags[i].Key)) continue;
+                        w.WriteString(evTags[i].Key, evTags[i].Value);
                     }
                     w.WriteEndObject();
                 }
@@ -727,12 +733,26 @@ internal static class HtmlReportGenerator
         "failed" or "error" or "timedOut" => "fail",
         "skipped" => "skip",
         "cancelled" => "cancel",
-        // Unknown statuses (future engine values, "unknown") map to fail so they
-        // stay visible in the UI rather than being silently buried under skipped.
+        // Mid-run snapshots can carry `inProgress` / `unknown` — these are not
+        // failures, just states that didn't reach a verdict. Map to `skip` so
+        // the report doesn't claim phantom failures in dashboards.
+        "inProgress" or "unknown" => "skip",
+        // Anything else is a genuinely unexpected engine value; keep it visible.
         _ => "fail",
     };
 
-    private static string? FilterEngineNotices(string? stderr)
+    // O(n) linear scan over an already-written prefix. Avoids a HashSet allocation
+    // for the common case of small N (tests carry 0–3 properties, spans 0–5 tags).
+    private static bool IsDuplicateKey(ReportKeyValue[] items, int index, string key)
+    {
+        for (var i = 0; i < index; i++)
+        {
+            if (string.Equals(items[i].Key, key, StringComparison.Ordinal)) return true;
+        }
+        return false;
+    }
+
+    internal static string? FilterEngineNotices(string? stderr)
     {
         if (string.IsNullOrEmpty(stderr)) return stderr;
         if (stderr!.IndexOf("[TUnit]", StringComparison.Ordinal) < 0) return stderr;

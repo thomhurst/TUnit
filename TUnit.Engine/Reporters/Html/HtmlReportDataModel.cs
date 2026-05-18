@@ -3,6 +3,10 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Reporters.Html;
 
+// NOTE: the [JsonPropertyName] attributes below are documentation-only. JSON output
+// is hand-written via Utf8JsonWriter in HtmlReportGenerator.SerializeReport; renaming
+// an attribute here will not change the emitted property name. Update the writer.
+
 internal sealed class ReportData
 {
     [JsonPropertyName("assemblyName")]
