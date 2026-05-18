@@ -1582,12 +1582,21 @@ async function loadReportData() {
     return { kind: 'error', message: 'Failed to decode the embedded report data: ' + (e && e.message ? e.message : String(e)) };
   }
 }
-const __loaded = await loadReportData();
-if (__loaded.kind === 'error') {
-  document.body.innerHTML = '<div style="max-width:560px;margin:80px auto;padding:24px 28px;font-family:Inter,system-ui,sans-serif;color:#1c1917;background:#fafaf9;border:1px solid #d6d3d1;border-radius:12px;"><h1 style="margin:0 0 10px;font-size:18px;font-weight:600;">Report could not be loaded</h1><p style="margin:0;font-size:13px;line-height:1.55;color:#57534e;">' + __loaded.message.replace(/</g, '&lt;') + '</p></div>';
-  throw new Error(__loaded.message);
+const loaded = await loadReportData();
+if (loaded.kind === 'error') {
+  const card = document.createElement('div');
+  card.style.cssText = 'max-width:560px;margin:80px auto;padding:24px 28px;font-family:Inter,system-ui,sans-serif;color:#1c1917;background:#fafaf9;border:1px solid #d6d3d1;border-radius:12px;';
+  const h = document.createElement('h1');
+  h.style.cssText = 'margin:0 0 10px;font-size:18px;font-weight:600;';
+  h.textContent = 'Report could not be loaded';
+  const p = document.createElement('p');
+  p.style.cssText = 'margin:0;font-size:13px;line-height:1.55;color:#57534e;';
+  p.textContent = loaded.message;
+  card.append(h, p);
+  document.body.replaceChildren(card);
+  throw new Error(loaded.message);
 }
-let REPORT = __loaded.kind === 'ok' ? __loaded.report : null;
+let REPORT = loaded.kind === 'ok' ? loaded.report : null;
 if (!REPORT) {
   // generateSampleData() is only present when previewing this template standalone;
   // the C# generator strips it from shipped reports. Fall back to an empty run.

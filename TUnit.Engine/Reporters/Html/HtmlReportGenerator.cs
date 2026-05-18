@@ -215,6 +215,14 @@ internal static class HtmlReportGenerator
             }
         }
 
+        // Session/assembly/suite spans are emitted on the LifecycleSource using the
+        // caller's ActivityContext as parent. When Activity.Current is unset at the
+        // moment a hook fires, the parent context falls back to default and the
+        // resulting ParentSpanId may not match any span we collected — leaving the
+        // assembly visually flattened next to its session in the timeline. Repair
+        // the chain so the renderer can draw the session → assembly → suite tree.
+        globalSpans = RepairGlobalTimelineParents(globalSpans);
+
         w.WritePropertyName("globalSpans");
         w.WriteStartArray();
         foreach (var s in globalSpans) WriteSpan(w, s, runStartMs);
@@ -287,6 +295,37 @@ internal static class HtmlReportGenerator
             kids.Add(s);
         }
         return (bySpanId, byParent);
+    }
+
+    private static List<SpanData> RepairGlobalTimelineParents(List<SpanData> spans)
+    {
+        if (spans.Count == 0) return spans;
+
+        SpanData? session = null;
+        SpanData? firstAssembly = null;
+        var presentIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var s in spans)
+        {
+            presentIds.Add(s.SpanId);
+            if (session is null && string.Equals(s.SpanType, TUnitActivitySource.SpanTestSession, StringComparison.Ordinal)) session = s;
+            if (firstAssembly is null && string.Equals(s.SpanType, TUnitActivitySource.SpanTestAssembly, StringComparison.Ordinal)) firstAssembly = s;
+        }
+
+        var repaired = new List<SpanData>(spans.Count);
+        foreach (var s in spans)
+        {
+            if (ReferenceEquals(s, session)
+                || (!string.IsNullOrEmpty(s.ParentSpanId) && presentIds.Contains(s.ParentSpanId)))
+            {
+                repaired.Add(s);
+                continue;
+            }
+            var fallback = string.Equals(s.SpanType, TUnitActivitySource.SpanTestSuite, StringComparison.Ordinal)
+                ? firstAssembly?.SpanId ?? session?.SpanId
+                : session?.SpanId;
+            repaired.Add(fallback is not null ? WithParent(s, fallback) : s);
+        }
+        return repaired;
     }
 
     private static bool IsGlobalTimelineSpan(SpanData s)
