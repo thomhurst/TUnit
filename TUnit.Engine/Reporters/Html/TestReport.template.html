@@ -518,25 +518,10 @@
   .span-dur { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-align: right; }
   .trace-axis { display: flex; justify-content: space-between; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); padding: 6px 0 8px 290px; border-bottom: 1px dashed var(--border); margin-bottom: 8px; }
 
-  /* class timelines (run view) */
-  details.class-timeline { border-top: 1px solid var(--border); padding: 10px 0; }
-  details.class-timeline:first-of-type { border-top: none; padding-top: 0; }
-  details.class-timeline > summary {
-    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);
-    padding: 4px 0;
-  }
-  details.class-timeline > summary::-webkit-details-marker { display: none; }
-  details.class-timeline .chev-sm {
-    display: inline-block; width: 10px; text-align: center; color: var(--text-dim);
-    transition: transform 120ms; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1;
-  }
-  details.class-timeline[open] > summary .chev-sm { transform: rotate(90deg); }
-  details.class-timeline .meta-tag {
-    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim);
-    padding: 1px 7px; background: var(--surface-2); border-radius: 999px; border: 1px solid var(--border);
-  }
-  details.class-timeline .span-count { margin-left: auto; font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  /* class timelines (run view) — extends the .collapsible details pattern */
+  details.collapsible.class-timeline { border-top: 1px solid var(--border); padding: 10px 0; background: transparent; border-left: none; border-right: none; border-bottom: none; border-radius: 0; }
+  details.collapsible.class-timeline:first-of-type { border-top: none; padding-top: 0; }
+  details.collapsible.class-timeline .span-count { margin-left: auto; font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
   .class-timeline-body { padding-top: 10px; }
 
   /* properties */
@@ -2809,7 +2794,7 @@ function renderClassTimelines() {
   panel.style.display = '';
   $('#classTimelinesCount').textContent = entries.length + ' classes';
   $('#classTimelinesBody').innerHTML = entries.map(([cls, data]) => `
-    <details class="class-timeline">
+    <details class="collapsible class-timeline">
       <summary><span class="chev-sm">›</span>${esc(cls)}<span class="meta-tag">${esc(data.mode)}</span><span class="span-count">${data.spans.length} spans</span></summary>
       <div class="class-timeline-body">${timelineWaterfall(data.spans)}</div>
     </details>

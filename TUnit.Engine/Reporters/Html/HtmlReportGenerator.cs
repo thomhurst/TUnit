@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using TUnit.Core;
+using TUnit.Core.Enums;
 
 namespace TUnit.Engine.Reporters.Html;
 
@@ -198,22 +199,20 @@ internal static class HtmlReportGenerator
     {
         if (spansByTrace is null || spansByTrace.Count == 0) return;
 
-        // Flatten and index spans across all traces.
-        var allSpans = new List<SpanData>();
-        foreach (var bucket in spansByTrace.Values) allSpans.AddRange(bucket);
-        if (allSpans.Count == 0) return;
-
-        var bySpanId = new Dictionary<string, SpanData>(allSpans.Count, StringComparer.OrdinalIgnoreCase);
-        foreach (var s in allSpans)
-        {
-            bySpanId[s.SpanId] = s;
-        }
-
-        // Global timeline: session/assembly/suite spans plus init/dispose with non-test scope.
+        // Single pass: collect global-scope spans and the per-class suite anchor map.
         var globalSpans = new List<SpanData>();
-        foreach (var s in allSpans)
+        var suiteByClass = new Dictionary<string, SpanData>(StringComparer.Ordinal);
+        foreach (var bucket in spansByTrace.Values)
         {
-            if (IsGlobalTimelineSpan(s)) globalSpans.Add(s);
+            foreach (var s in bucket)
+            {
+                if (IsGlobalTimelineSpan(s)) globalSpans.Add(s);
+                if (string.Equals(s.SpanType, TUnitActivitySource.SpanTestSuite, StringComparison.Ordinal))
+                {
+                    var cls = FindTagValue(s, TUnitActivitySource.TagTestClass) ?? s.Name;
+                    if (!string.IsNullOrEmpty(cls) && !suiteByClass.ContainsKey(cls)) suiteByClass[cls] = s;
+                }
+            }
         }
 
         w.WritePropertyName("globalSpans");
@@ -222,7 +221,7 @@ internal static class HtmlReportGenerator
         w.WriteEndArray();
 
         // Per-class timeline: classes that opted in via [ClassTimeline] carry the
-        // "tunit.report.timeline" custom property on every test in that class.
+        // ClassTimelineAttribute.ClassTimelinePropertyKey custom property on every test.
         var classModes = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var g in data.Groups)
         {
@@ -231,7 +230,7 @@ internal static class HtmlReportGenerator
                 if (t.CustomProperties is null) continue;
                 foreach (var p in t.CustomProperties)
                 {
-                    if (string.Equals(p.Key, "tunit.report.timeline", StringComparison.Ordinal))
+                    if (string.Equals(p.Key, ClassTimelineAttribute.ClassTimelinePropertyKey, StringComparison.Ordinal))
                     {
                         classModes[g.ClassName] = p.Value;
                         break;
@@ -241,22 +240,23 @@ internal static class HtmlReportGenerator
             }
         }
 
-        var suiteByClass = new Dictionary<string, SpanData>(StringComparer.Ordinal);
-        foreach (var s in allSpans)
-        {
-            if (!string.Equals(s.SpanType, "test suite", StringComparison.Ordinal)) continue;
-            var cls = FindTagValue(s, "tunit.test.class") ?? s.Name;
-            if (!string.IsNullOrEmpty(cls) && !suiteByClass.ContainsKey(cls)) suiteByClass[cls] = s;
-        }
-
         w.WritePropertyName("classTimelines");
         w.WriteStartObject();
+        // Cache the parent/child index per trace so multiple opted-in classes sharing a
+        // trace don't rebuild it each time.
+        var traceIndexCache = new Dictionary<string, (Dictionary<string, SpanData> BySpanId, Dictionary<string, List<SpanData>> ByParent)>(StringComparer.OrdinalIgnoreCase);
         foreach (var kv in classModes)
         {
             if (!suiteByClass.TryGetValue(kv.Key, out var suite)) continue;
             if (!spansByTrace.TryGetValue(suite.TraceId, out var traceSpans)) continue;
 
-            var classSpans = BuildClassTimeline(traceSpans, suite.SpanId, kv.Value);
+            if (!traceIndexCache.TryGetValue(suite.TraceId, out var index))
+            {
+                index = BuildTraceIndex(traceSpans);
+                traceIndexCache[suite.TraceId] = index;
+            }
+
+            var classSpans = BuildClassTimeline(index.BySpanId, index.ByParent, suite.SpanId, kv.Value);
             if (classSpans.Count == 0) continue;
 
             w.WritePropertyName(kv.Key);
@@ -271,19 +271,7 @@ internal static class HtmlReportGenerator
         w.WriteEndObject();
     }
 
-    private static bool IsGlobalTimelineSpan(SpanData s)
-    {
-        var t = s.SpanType ?? string.Empty;
-        if (t is "test session" or "test assembly" or "test suite") return true;
-        if (t.StartsWith("initialize ", StringComparison.Ordinal) || t.StartsWith("dispose ", StringComparison.Ordinal))
-        {
-            var scope = FindTagValue(s, "tunit.trace.scope");
-            return !string.Equals(scope, "test", StringComparison.Ordinal);
-        }
-        return false;
-    }
-
-    private static List<SpanData> BuildClassTimeline(List<SpanData> traceSpans, string suiteSpanId, string mode)
+    private static (Dictionary<string, SpanData> BySpanId, Dictionary<string, List<SpanData>> ByParent) BuildTraceIndex(List<SpanData> traceSpans)
     {
         var bySpanId = new Dictionary<string, SpanData>(traceSpans.Count, StringComparer.OrdinalIgnoreCase);
         var byParent = new Dictionary<string, List<SpanData>>(StringComparer.OrdinalIgnoreCase);
@@ -298,7 +286,25 @@ internal static class HtmlReportGenerator
             }
             kids.Add(s);
         }
+        return (bySpanId, byParent);
+    }
 
+    private static bool IsGlobalTimelineSpan(SpanData s)
+    {
+        var t = s.SpanType ?? string.Empty;
+        if (t == TUnitActivitySource.SpanTestSession
+            || t == TUnitActivitySource.SpanTestAssembly
+            || t == TUnitActivitySource.SpanTestSuite) return true;
+        if (t.StartsWith("initialize ", StringComparison.Ordinal) || t.StartsWith("dispose ", StringComparison.Ordinal))
+        {
+            var scope = FindTagValue(s, TUnitActivitySource.TagTraceScope);
+            return !string.Equals(scope, "test", StringComparison.Ordinal);
+        }
+        return false;
+    }
+
+    private static List<SpanData> BuildClassTimeline(Dictionary<string, SpanData> bySpanId, Dictionary<string, List<SpanData>> byParent, string suiteSpanId, string mode)
+    {
         var descendants = new List<SpanData>();
         var stack = new Stack<string>();
         stack.Push(suiteSpanId);
@@ -320,14 +326,14 @@ internal static class HtmlReportGenerator
         var result = new List<SpanData>();
         if (bySpanId.TryGetValue(suiteSpanId, out var suite)) result.Add(suite);
 
-        if (string.Equals(mode, "FullExecution", StringComparison.Ordinal))
+        if (string.Equals(mode, nameof(TimelineMode.FullExecution), StringComparison.Ordinal))
         {
             // Include test-case spans and their non-'test body' children, with
             // 'test body' wrappers collapsed (children re-parented to the owning
             // test-case) so the timeline isn't dominated by plumbing nodes.
             var testBodyIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var s in descendants)
-                if (string.Equals(s.Name, "test body", StringComparison.Ordinal)) testBodyIds.Add(s.SpanId);
+                if (string.Equals(s.Name, TUnitActivitySource.SpanTestBody, StringComparison.Ordinal)) testBodyIds.Add(s.SpanId);
             foreach (var s in descendants)
             {
                 if (testBodyIds.Contains(s.SpanId)) continue;
@@ -348,7 +354,7 @@ internal static class HtmlReportGenerator
             // everything beneath them so the timeline shows suite + init/dispose only.
             var testCaseIds = new List<string>();
             foreach (var s in descendants)
-                if (string.Equals(s.SpanType, "test case", StringComparison.Ordinal)) testCaseIds.Add(s.SpanId);
+                if (string.Equals(s.SpanType, TUnitActivitySource.SpanTestCase, StringComparison.Ordinal)) testCaseIds.Add(s.SpanId);
             var excluded = new HashSet<string>(testCaseIds, StringComparer.OrdinalIgnoreCase);
             foreach (var tcId in testCaseIds)
             {
