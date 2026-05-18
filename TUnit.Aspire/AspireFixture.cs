@@ -29,7 +29,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 {
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
-    private SocketsHttpHandler? _httpHandler;
 
     /// <summary>
     /// The running Aspire distributed application.
@@ -39,33 +38,15 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         "App not initialized. Ensure InitializeAsync has completed.");
 
     /// <summary>
-    /// Creates an <see cref="HttpClient"/> for the named resource.
-    /// When <see cref="EnableTelemetryCollection"/> is <c>true</c>, the returned client
-    /// automatically propagates W3C <c>traceparent</c> and <c>baggage</c> headers
-    /// (including <c>tunit.test.id</c>) to the SUT for cross-process correlation.
-    /// Otherwise, delegates to Aspire's default <c>CreateHttpClient</c>.
+    /// Creates an <see cref="HttpClient"/> for the named resource via the AppHost's
+    /// <see cref="IHttpClientFactory"/>, so any <see cref="DelegatingHandler"/> registered
+    /// in <see cref="ConfigureBuilder"/> participates in the pipeline.
     /// </summary>
     /// <param name="resourceName">The name of the resource to connect to.</param>
     /// <param name="endpointName">Optional endpoint name if the resource exposes multiple endpoints.</param>
     /// <returns>An <see cref="HttpClient"/> configured to connect to the resource.</returns>
     public HttpClient CreateHttpClient(string resourceName, string? endpointName = null)
-    {
-        if (!EnableTelemetryCollection)
-        {
-            return App.CreateHttpClient(resourceName, endpointName);
-        }
-
-        _httpHandler ??= new SocketsHttpHandler
-        {
-            // Match Aspire's CreateHttpClient behavior: trust dev certs for HTTPS resources
-            SslOptions = { RemoteCertificateValidationCallback = (_, _, _, _) => true },
-        };
-
-        return new HttpClient(_httpHandler, disposeHandler: false)
-        {
-            BaseAddress = App.GetEndpoint(resourceName, endpointName),
-        };
-    }
+        => App.CreateHttpClient(resourceName, endpointName);
 
     /// <summary>
     /// Gets the connection string for the named resource.
@@ -386,9 +367,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             await _otlpReceiver.DisposeAsync();
             _otlpReceiver = null;
         }
-
-        _httpHandler?.Dispose();
-        _httpHandler = null;
 
         GC.SuppressFinalize(this);
     }

@@ -227,6 +227,23 @@ public class OtlpCorrelationIntegrationTests(IntegrationTestFixture fixture)
     }
 
     /// <summary>
+    /// Regression coverage for thomhurst/TUnit#5956 — <c>CreateHttpClient</c> must route through
+    /// the AppHost's <see cref="IHttpClientFactory"/> so that <see cref="DelegatingHandler"/>s
+    /// registered via <c>ConfigureHttpClientDefaults</c> in <c>ConfigureBuilder</c> fire.
+    /// </summary>
+    [Test]
+    public async Task CreateHttpClient_Invokes_Registered_DelegatingHandler()
+    {
+        var before = fixture.HttpHandlerInvocationCount;
+
+        var client = fixture.CreateHttpClient(ServiceName);
+        using var response = await client.GetAsync("/health");
+
+        await Assert.That((int)response.StatusCode).IsEqualTo(200);
+        await Assert.That(fixture.HttpHandlerInvocationCount).IsGreaterThan(before);
+    }
+
+    /// <summary>
     /// Polls <see cref="TestContext.GetStandardOutput"/> until it contains the expected marker
     /// or a timeout is reached. The OTLP SDK batches log exports, so there's inherent latency
     /// between when the SUT logs a message and when it arrives at TUnit's OTLP receiver.
