@@ -1143,14 +1143,14 @@
 <main class="view" id="view-run">
   <div class="run-wrap">
     <div class="meta-strip run-meta">
-      <div class="meta-item"><span class="meta-label">Ran</span><span class="meta-value" id="metaWhen">—</span></div>
-      <div class="meta-item"><span class="meta-label">Runner</span><span class="meta-value">runnervmrw5os</span></div>
-      <div class="meta-item"><span class="meta-label">OS</span><span class="meta-value">Ubuntu 24.04.4 LTS</span></div>
-      <div class="meta-item"><span class="meta-label">Runtime</span><span class="meta-value">.NET 10.0.8</span></div>
-      <div class="meta-item"><span class="meta-label">TUnit</span><span class="meta-value accent">1.0.0</span></div>
-      <div class="meta-item"><span class="meta-label">Branch</span><span class="meta-value">feat/test-categories-demo</span></div>
-      <div class="meta-item"><span class="meta-label">Commit</span><span class="meta-value">3e5d27d</span></div>
-      <div class="meta-item"><span class="meta-label">PR</span><span class="meta-value accent">#5945</span></div>
+      <div class="meta-item" id="metaItemWhen"><span class="meta-label">Ran</span><span class="meta-value" id="metaWhen">—</span></div>
+      <div class="meta-item" id="metaItemRunner"><span class="meta-label">Runner</span><span class="meta-value" id="metaRunner">—</span></div>
+      <div class="meta-item" id="metaItemOs"><span class="meta-label">OS</span><span class="meta-value" id="metaOs">—</span></div>
+      <div class="meta-item" id="metaItemRuntime"><span class="meta-label">Runtime</span><span class="meta-value" id="metaRuntime">—</span></div>
+      <div class="meta-item" id="metaItemTunit"><span class="meta-label">TUnit</span><span class="meta-value accent" id="metaTunit">—</span></div>
+      <div class="meta-item" id="metaItemBranch"><span class="meta-label">Branch</span><span class="meta-value" id="metaBranch">—</span></div>
+      <div class="meta-item" id="metaItemCommit"><span class="meta-label">Commit</span><span class="meta-value" id="metaCommit">—</span></div>
+      <div class="meta-item" id="metaItemPr"><span class="meta-label">PR</span><span class="meta-value accent" id="metaPr">—</span></div>
     </div>
     <div class="run-grid-1">
       <div class="card donut-card">
@@ -2431,7 +2431,7 @@ function errorBlockHTML(error) {
         </div>
       ` : ''}
       <details class="collapsible stack">
-        <summary><span class="chev-sm">›</span>Stack trace<span class="meta-tag">${(error.stack||'').split('\n').length} frames</span></summary>
+        <summary><span class="chev-sm">›</span>Stack trace<span class="meta-tag">${(error.stack||'').split('\n').filter(l => l.trim().startsWith('at ')).length} frames</span></summary>
         <div class="error-stack">${esc(error.stack).replace(/(\/[^\s]+\.cs):line (\d+)/g, '<span class="src">$1:$2</span>')}</div>
       </details>
       ${innerHTML}
@@ -2589,9 +2589,26 @@ function traceHTML(t) {
 
 /* ---------- run view ---------- */
 function renderRun() {
-  // meta strip (now lives in the Run view)
-  const metaWhen = $('#metaWhen');
-  if (metaWhen) metaWhen.textContent = new Date(REPORT.when).toUTCString().replace(' GMT', ' UTC').replace(/^\w+, /, '');
+  // meta strip — populate from REPORT and hide entries with no value so the
+  // hardcoded design-preview values never leak into shipped reports.
+  function setMeta(itemId, valueId, raw) {
+    const item = document.getElementById(itemId);
+    const val = document.getElementById(valueId);
+    if (!item || !val) return;
+    const v = (raw == null || raw === '') ? '' : String(raw);
+    if (v) { val.textContent = v; item.style.display = ''; }
+    else { item.style.display = 'none'; }
+  }
+  const whenIso = REPORT.when;
+  const whenText = whenIso ? new Date(whenIso).toUTCString().replace(' GMT', ' UTC').replace(/^\w+, /, '') : '';
+  setMeta('metaItemWhen',    'metaWhen',    whenText);
+  setMeta('metaItemRunner',  'metaRunner',  REPORT.runner);
+  setMeta('metaItemOs',      'metaOs',      REPORT.os);
+  setMeta('metaItemRuntime', 'metaRuntime', REPORT.runtime);
+  setMeta('metaItemTunit',   'metaTunit',   REPORT.tunit);
+  setMeta('metaItemBranch',  'metaBranch',  REPORT.branch);
+  setMeta('metaItemCommit',  'metaCommit',  REPORT.commit);
+  setMeta('metaItemPr',      'metaPr',      REPORT.pr);
 
   // donut
   const svg = $('#donut');
@@ -2806,14 +2823,30 @@ function timelineWaterfall(spans) {
   if (!spans || !spans.length) return '<div class="empty-state"><div class="title">No spans captured</div></div>';
   const byId = new Map(spans.map(s => [s.id, s]));
   const depthCache = new Map();
-  function depth(id, seen) {
-    if (depthCache.has(id)) return depthCache.get(id);
-    const s = byId.get(id);
-    if (!s || !s.parent || !byId.has(s.parent)) { depthCache.set(id, 0); return 0; }
-    if (seen && seen.has(id)) return 0;
-    const next = new Set(seen || []); next.add(id);
-    const d = 1 + depth(s.parent, next);
-    depthCache.set(id, d); return d;
+  // Iterative parent-walk: collect the chain from leaf upward until we hit either
+  // a cached ancestor or a root, then assign depths counting back down. This
+  // avoids the O(n²) blow-up of allocating a fresh visited-Set per recursive call.
+  function depth(startId) {
+    if (depthCache.has(startId)) return depthCache.get(startId);
+    const path = [];
+    const onPath = new Set();
+    let cur = startId;
+    let baseDepth = -1; // -1 means "path ends at a real root"; otherwise = cached parent's depth.
+    while (true) {
+      if (depthCache.has(cur)) { baseDepth = depthCache.get(cur); break; }
+      if (onPath.has(cur)) { break; } // cycle guard; treat as root.
+      const s = byId.get(cur);
+      onPath.add(cur);
+      path.push(cur);
+      if (!s || !s.parent || !byId.has(s.parent)) break;
+      cur = s.parent;
+    }
+    let d = baseDepth + 1;
+    for (let i = path.length - 1; i >= 0; i--) {
+      depthCache.set(path[i], d);
+      d++;
+    }
+    return depthCache.get(startId);
   }
   const mn = Math.min(...spans.map(s => s.start));
   const mx = Math.max(...spans.map(s => s.start + s.dur));

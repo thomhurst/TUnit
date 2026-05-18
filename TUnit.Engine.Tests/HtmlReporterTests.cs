@@ -339,7 +339,39 @@ public class HtmlReporterTests
         html.ShouldNotContain("SAMPLE_DATA_BEGIN");
         html.ShouldNotContain("SAMPLE_DATA_END");
         html.ShouldNotContain("function generateSampleData()");
+        // Dev-machine / preview-only values must never leak into a shipped report.
+        // These live outside the SAMPLE_DATA markers and used to be hardcoded into
+        // the meta-strip; the JS now populates the strip from REPORT data at runtime.
         html.ShouldNotContain("CloudShop");
+        html.ShouldNotContain("runnervmrw5os");
+        html.ShouldNotContain("Ubuntu 24.04.4 LTS");
+        html.ShouldNotContain("feat/test-categories-demo");
+        html.ShouldNotContain("3e5d27d");
+        html.ShouldNotContain("#5945");
+    }
+
+    [Test]
+    public void GenerateHtml_SubstitutesTitleAndProjectPlaceholders()
+    {
+        // If the placeholders ever drift between template and generator the report
+        // would ship literal "__REPORT_TITLE__" / "__REPORT_PROJECT__" — pin them.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "MyProject.Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldNotContain("__REPORT_TITLE__");
+        html.ShouldNotContain("__REPORT_PROJECT__");
+        html.ShouldContain("<title>Test Report — MyProject.Tests</title>");
+        html.ShouldContain("id=\"projectName\">MyProject.Tests<");
     }
 
     [Test]

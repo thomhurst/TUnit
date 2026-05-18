@@ -38,15 +38,18 @@ internal static class HtmlReportGenerator
         var raw = LoadTemplate();
         // The template carries a generateSampleData() block so devs can preview
         // it standalone in a browser. Strip it from shipped reports — production
-        // reports always have real data and the fallback never fires.
+        // reports always have real data and the fallback never fires. Both
+        // markers must be present and match: silent passthrough here means
+        // hundreds of lines of fixture data ship in every report on disk.
         var begin = raw.IndexOf(SampleDataBeginMarker, StringComparison.Ordinal);
-        if (begin < 0) return raw;
+        if (begin < 0)
+        {
+            throw new InvalidOperationException(
+                $"Template is missing '{SampleDataBeginMarker}' — the sample-data strip would no-op.");
+        }
         var end = raw.IndexOf(SampleDataEndMarker, begin, StringComparison.Ordinal);
         if (end < 0)
         {
-            // If only the begin marker is present the strip would silently ship
-            // the sample block — surface the mismatch instead of producing a
-            // bloated report.
             throw new InvalidOperationException(
                 $"Template has '{SampleDataBeginMarker}' but no matching '{SampleDataEndMarker}'.");
         }
@@ -61,7 +64,7 @@ internal static class HtmlReportGenerator
         {
             gz.Write(bytes, 0, bytes.Length);
         }
-        return Convert.ToBase64String(output.GetBuffer(), 0, (int)output.Length);
+        return Convert.ToBase64String(output.GetBuffer(), 0, checked((int)output.Length));
     }
 
     private static string LoadTemplate()
@@ -199,7 +202,7 @@ internal static class HtmlReportGenerator
 
             w.WriteEndObject();
         }
-        return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+        return Encoding.UTF8.GetString(ms.GetBuffer(), 0, checked((int)ms.Length));
     }
 
     // The old report had two trace views the per-test Trace tab doesn't cover:
