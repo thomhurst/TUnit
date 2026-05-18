@@ -132,10 +132,9 @@ public class HtmlReporterTests
     [Test]
     public void GenerateHtml_RoundTrips_TestBodySpans_AndChildren_Through_EmbeddedData()
     {
-        // Server-side data path only — the client-side collapseTestBodySpans JS runs in the
-        // browser and is not exercised here. This test pins down the contract the JS relies
-        // on: a 'test body' span with children survives serialisation into the embedded
-        // JSON so the JS can re-parent children to the test-case span at render time.
+        // Pins the renderer's data contract: a "test body" span with a child span survives
+        // serialisation into the embedded JSON under the owning test (matched by traceId),
+        // with the design's per-test `spans[]` shape (`parent` rather than `parentSpanId`).
         const string traceId = "0123456789abcdef0123456789abcdef";
         var spans = new[]
         {
@@ -161,25 +160,44 @@ public class HtmlReporterTests
             RuntimeVersion = ".NET 10.0",
             TotalDurationMs = 0,
             Summary = new ReportSummary(),
-            Groups = [],
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "SampleTests",
+                    Namespace = "Tests",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "SampleTests", Status = "passed",
+                            TraceId = traceId,
+                        },
+                    ],
+                },
+            ],
             Spans = spans,
         });
 
         var embedded = ExtractEmbeddedReportJson(html);
         embedded.ShouldContain("\"name\":\"test body\"");
         embedded.ShouldContain("\"name\":\"wiremock-call\"");
-        embedded.ShouldContain("\"parentSpanId\":\"aaaaaaaaaaaaaaaa\"");
+        embedded.ShouldContain("\"parent\":\"aaaaaaaaaaaaaaaa\"");
     }
 
     private static string ExtractEmbeddedReportJson(string html)
     {
-        // The renderer embeds ReportData as gzip+base64 inside <script id="test-data" ...>.
+        // The renderer reads gzipped+base64 JSON from <script id="report-data" type="application/octet-stream">
+        // so the embedded data stays small for large suites.
         var match = Regex.Match(
             html,
-            "<script id=\"test-data\"[^>]*>(?<payload>[A-Za-z0-9+/=]+)</script>",
+            "<script id=\"report-data\"[^>]*>(?<payload>.*?)</script>",
             RegexOptions.Singleline);
-        match.Success.ShouldBeTrue("Expected embedded test-data script in rendered HTML.");
-        var compressed = Convert.FromBase64String(match.Groups["payload"].Value);
+        match.Success.ShouldBeTrue("Expected embedded report-data script in rendered HTML.");
+        var payload = match.Groups["payload"].Value.Trim();
+        var compressed = Convert.FromBase64String(payload);
         using var ms = new MemoryStream(compressed);
         using var gz = new GZipStream(ms, CompressionMode.Decompress);
         using var reader = new StreamReader(gz, Encoding.UTF8);
@@ -258,8 +276,7 @@ public class HtmlReporterTests
         });
 
         var embedded = ExtractEmbeddedReportJson(html);
-        embedded.ShouldContain("\"key\":\"tunit.report.timeline\"");
-        embedded.ShouldContain("\"value\":\"FullExecution\"");
+        embedded.ShouldContain("\"tunit.report.timeline\":\"FullExecution\"");
     }
 
     [Test]
@@ -297,6 +314,140 @@ public class HtmlReporterTests
         result.CustomProperties!.Length.ShouldBe(1);
         result.CustomProperties[0].Key.ShouldBe("Owner");
         result.CustomProperties[0].Value.ShouldBe("TeamA");
+    }
+
+    [Test]
+    public void GenerateHtml_StripsSampleDataGeneratorBlock_FromShippedReports()
+    {
+        // The template carries a generateSampleData() preview block bounded by
+        // /* SAMPLE_DATA_BEGIN ... SAMPLE_DATA_END */ markers; LoadAndStripTemplate
+        // must remove it so the rendered report doesn't ship hundreds of lines of
+        // CloudShop fixture data. This test pins that contract.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldNotContain("SAMPLE_DATA_BEGIN");
+        html.ShouldNotContain("SAMPLE_DATA_END");
+        html.ShouldNotContain("function generateSampleData()");
+        // Dev-machine / preview-only values must never leak into a shipped report.
+        // These live outside the SAMPLE_DATA markers and used to be hardcoded into
+        // the meta-strip; the JS now populates the strip from REPORT data at runtime.
+        html.ShouldNotContain("CloudShop");
+        html.ShouldNotContain("runnervmrw5os");
+        html.ShouldNotContain("Ubuntu 24.04.4 LTS");
+        html.ShouldNotContain("feat/test-categories-demo");
+        html.ShouldNotContain("3e5d27d");
+        html.ShouldNotContain("#5945");
+    }
+
+    [Test]
+    public void GenerateHtml_SubstitutesTitleAndProjectPlaceholders()
+    {
+        // If the placeholders ever drift between template and generator the report
+        // would ship literal "__REPORT_TITLE__" / "__REPORT_PROJECT__" — pin them.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "MyProject.Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldNotContain("__REPORT_TITLE__");
+        html.ShouldNotContain("__REPORT_PROJECT__");
+        html.ShouldContain("<title>Test Report — MyProject.Tests</title>");
+        html.ShouldContain("id=\"projectName\">MyProject.Tests<");
+    }
+
+    [Test]
+    public void GenerateHtml_EmitsAttemptsArray_WhenTestWasRetried()
+    {
+        // Per-attempt status/duration drives the renderer's flaky panel + per-test
+        // Attempts strip. Pin that the array survives serialisation when present.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "FlakyTests",
+                    Namespace = "Sample",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "FlakyTests", Status = "passed",
+                            RetryAttempt = 1,
+                            Attempts =
+                            [
+                                new ReportAttempt { Status = "failed", DurationMs = 120, ExceptionType = "System.TimeoutException", ExceptionMessage = "transient" },
+                                new ReportAttempt { Status = "passed", DurationMs = 200 },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        var embedded = ExtractEmbeddedReportJson(html);
+        embedded.ShouldContain("\"attempts\":[");
+        embedded.ShouldContain("\"status\":\"fail\"");
+        embedded.ShouldContain("\"status\":\"pass\"");
+        embedded.ShouldContain("System.TimeoutException");
+    }
+
+    [Test]
+    public void FilterEngineNotices_StripsTUnitPrefixedLines()
+    {
+        // Engine-emitted advisories ("[TUnit] External span cap reached…") are written
+        // to Console.Error and get captured into the running test's stderr. Pin that
+        // the strip removes prefix-matched lines but leaves user output alone.
+        var stderr = "user error before\n[TUnit] External span cap of 100 reached; subsequent spans will be dropped.\nuser error after\nincidental [TUnit] mention in middle";
+        var filtered = HtmlReportGenerator.FilterEngineNotices(stderr);
+        filtered.ShouldBe("user error before\nuser error after\nincidental [TUnit] mention in middle");
+    }
+
+    [Test]
+    public void FilterEngineNotices_ReturnsNull_WhenAllLinesStripped()
+    {
+        // When the test only ever wrote engine-advisory lines, the cleaned stderr
+        // becomes null so the upstream "?? SkipReason ?? string.Empty" fallback fires
+        // instead of an empty error block.
+        var stderr = "[TUnit] notice one\n[TUnit] notice two";
+        HtmlReportGenerator.FilterEngineNotices(stderr).ShouldBeNull();
+    }
+
+    [Test]
+    public void FilterEngineNotices_PassesThroughWhenNoTUnitPrefix()
+    {
+        // Fast-path: no '[TUnit]' substring at all means we return the input unchanged.
+        var stderr = "plain stderr with no engine notices";
+        HtmlReportGenerator.FilterEngineNotices(stderr).ShouldBe(stderr);
     }
 
     private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()

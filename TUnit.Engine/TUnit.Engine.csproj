@@ -18,6 +18,11 @@
     <PackageReference Include="Microsoft.Testing.Platform" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Reporters\Html\TestReport.template.html">
+      <LogicalName>TUnit.Engine.Reporters.Html.TestReport.template.html</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
   <ItemGroup>
