@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -41,7 +42,14 @@ internal static class HtmlReportGenerator
         var begin = raw.IndexOf(SampleDataBeginMarker, StringComparison.Ordinal);
         if (begin < 0) return raw;
         var end = raw.IndexOf(SampleDataEndMarker, begin, StringComparison.Ordinal);
-        if (end < 0) return raw;
+        if (end < 0)
+        {
+            // If only the begin marker is present the strip would silently ship
+            // the sample block — surface the mismatch instead of producing a
+            // bloated report.
+            throw new InvalidOperationException(
+                $"Template has '{SampleDataBeginMarker}' but no matching '{SampleDataEndMarker}'.");
+        }
         return raw.Remove(begin, end + SampleDataEndMarker.Length - begin);
     }
 
@@ -49,7 +57,7 @@ internal static class HtmlReportGenerator
     {
         var bytes = Encoding.UTF8.GetBytes(json);
         using var output = new MemoryStream();
-        using (var gz = new System.IO.Compression.GZipStream(output, System.IO.Compression.CompressionLevel.Optimal, leaveOpen: true))
+        using (var gz = new GZipStream(output, CompressionLevel.Optimal, leaveOpen: true))
         {
             gz.Write(bytes, 0, bytes.Length);
         }
@@ -73,18 +81,19 @@ internal static class HtmlReportGenerator
             totalTests += g.Tests.Length;
         }
 
-        // 1) First pass: parse each test's unix-ms start, track run bounds, and stash
-        //    raw (id, absStartMs, dur) so the second pass can subtract runStartMs once.
+        // 1) First pass: parse each test's unix-ms start, track run bounds, and
+        //    record the absolute start in a dictionary keyed by test id so the
+        //    later emission pass can look it up directly — without relying on
+        //    enumeration order matching this loop.
         long runStartMs = long.MaxValue;
         long runEndMs = long.MinValue;
-        var rawStarts = new (string Id, long? AbsStartMs, double Dur)[totalTests];
-        var ti = 0;
+        var absStartByTestId = new Dictionary<string, long?>(totalTests, StringComparer.Ordinal);
         foreach (var g in data.Groups)
         {
             foreach (var t in g.Tests)
             {
                 var sms = TryParseUnixMs(t.StartTime);
-                rawStarts[ti++] = (t.Id, sms, t.DurationMs);
+                absStartByTestId[t.Id] = sms;
                 if (sms is { } x)
                 {
                     if (x < runStartMs) runStartMs = x;
@@ -104,10 +113,14 @@ internal static class HtmlReportGenerator
         // TUnit doesn't currently emit worker IDs per test, but the Gantt
         // chart shows per-worker lanes — derive them from start/duration.
         var ordered = new (string Id, long StartRel, double Dur)[totalTests];
-        for (var i = 0; i < totalTests; i++)
+        var oi = 0;
+        foreach (var g in data.Groups)
         {
-            var (id, abs, dur) = rawStarts[i];
-            ordered[i] = (id, abs is { } a ? a - runStartMs : 0L, dur);
+            foreach (var t in g.Tests)
+            {
+                var startRel = absStartByTestId[t.Id] is { } a ? a - runStartMs : 0L;
+                ordered[oi++] = (t.Id, startRel, t.DurationMs);
+            }
         }
         Array.Sort(ordered, static (a, b) => a.StartRel.CompareTo(b.StartRel));
 
@@ -172,13 +185,11 @@ internal static class HtmlReportGenerator
 
             w.WritePropertyName("tests");
             w.WriteStartArray();
-            var idx = 0;
             foreach (var g in data.Groups)
             {
                 foreach (var t in g.Tests)
                 {
-                    var abs = rawStarts[idx++].AbsStartMs;
-                    var startRel = abs is { } a ? a - runStartMs : 0L;
+                    var startRel = absStartByTestId[t.Id] is { } a ? a - runStartMs : 0L;
                     WriteTest(w, t, g, runStartMs, startRel, testWorker, spansByTrace);
                 }
             }

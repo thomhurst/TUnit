@@ -316,6 +316,79 @@ public class HtmlReporterTests
         result.CustomProperties[0].Value.ShouldBe("TeamA");
     }
 
+    [Test]
+    public void GenerateHtml_StripsSampleDataGeneratorBlock_FromShippedReports()
+    {
+        // The template carries a generateSampleData() preview block bounded by
+        // /* SAMPLE_DATA_BEGIN ... SAMPLE_DATA_END */ markers; LoadAndStripTemplate
+        // must remove it so the rendered report doesn't ship hundreds of lines of
+        // CloudShop fixture data. This test pins that contract.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldNotContain("SAMPLE_DATA_BEGIN");
+        html.ShouldNotContain("SAMPLE_DATA_END");
+        html.ShouldNotContain("function generateSampleData()");
+        html.ShouldNotContain("CloudShop");
+    }
+
+    [Test]
+    public void GenerateHtml_EmitsAttemptsArray_WhenTestWasRetried()
+    {
+        // Per-attempt status/duration drives the renderer's flaky panel + per-test
+        // Attempts strip. Pin that the array survives serialisation when present.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "FlakyTests",
+                    Namespace = "Sample",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "FlakyTests", Status = "passed",
+                            RetryAttempt = 1,
+                            Attempts =
+                            [
+                                new ReportAttempt { Status = "failed", DurationMs = 120, ExceptionType = "System.TimeoutException", ExceptionMessage = "transient" },
+                                new ReportAttempt { Status = "passed", DurationMs = 200 },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        var embedded = ExtractEmbeddedReportJson(html);
+        embedded.ShouldContain("\"attempts\":[");
+        embedded.ShouldContain("\"status\":\"fail\"");
+        embedded.ShouldContain("\"status\":\"pass\"");
+        embedded.ShouldContain("System.TimeoutException");
+    }
+
     private static ReportTestResult CreateTestResultWithStartTime(string displayName, string? startTime) => new()
     {
         Id = displayName,
