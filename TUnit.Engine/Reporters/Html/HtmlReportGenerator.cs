@@ -418,6 +418,7 @@ internal static class HtmlReportGenerator
         w.WriteNumber("start", startRel);
         w.WriteNumber("duration", t.DurationMs);
         w.WriteString("worker", "worker-" + (testWorker.GetValueOrDefault(t.Id, 0) + 1));
+        if (!string.IsNullOrEmpty(t.TraceId)) w.WriteString("traceId", t.TraceId);
 
         // properties — design schema is an object map; dedupe duplicate keys (first wins).
         w.WritePropertyName("properties");
@@ -548,6 +549,30 @@ internal static class HtmlReportGenerator
         if (s.Status is { Length: > 0 } && !string.Equals(s.Status, "Unset", StringComparison.Ordinal))
         {
             w.WriteString("status", s.Status);
+        }
+        if (s.Events is { Length: > 0 } events)
+        {
+            w.WritePropertyName("events");
+            w.WriteStartArray();
+            foreach (var ev in events)
+            {
+                w.WriteStartObject();
+                w.WriteString("name", ev.Name);
+                w.WriteNumber("time", ev.TimestampMs - runStartMs);
+                if (ev.Tags is { Length: > 0 } evTags)
+                {
+                    w.WritePropertyName("attrs");
+                    w.WriteStartObject();
+                    var seenEv = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (var t in evTags)
+                    {
+                        if (seenEv.Add(t.Key)) w.WriteString(t.Key, t.Value);
+                    }
+                    w.WriteEndObject();
+                }
+                w.WriteEndObject();
+            }
+            w.WriteEndArray();
         }
         if (linked) w.WriteBoolean("linked", true);
         w.WriteEndObject();

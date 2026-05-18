@@ -160,9 +160,12 @@
     padding: 4px 10px; font-size: 12px; font-weight: 500; cursor: pointer;
     background: transparent; border: none; color: var(--text-muted); border-radius: 6px;
     transition: background 100ms, color 100ms;
+    display: inline-flex; align-items: center; gap: 6px;
   }
   .view-toggle button:hover { color: var(--text); }
   .view-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  .view-toggle button svg { flex-shrink: 0; opacity: 0.8; }
+  .view-toggle button.active svg { opacity: 1; }
 
   .icon-btn {
     width: 30px; height: 30px; border-radius: 7px;
@@ -432,6 +435,14 @@
   .status-badge.skip { color: var(--skip); background: var(--skip-soft); border: 1px solid var(--skip-border); }
   .status-badge.cancel { color: var(--cancel); background: var(--cancel-soft); border: 1px solid var(--cancel-border); }
   .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .trace-id-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); cursor: pointer;
+  }
+  .trace-id-chip:hover { color: var(--text); border-color: var(--border-strong); background: var(--surface-hover); }
+  .trace-id-chip .lbl { text-transform: uppercase; letter-spacing: 0.04em; font-size: 9px; color: var(--text-dim); }
+  .trace-id-chip .v { color: var(--text); }
 
   .detail-body { padding: 22px 28px 80px; }
 
@@ -869,6 +880,10 @@
   .tt .row { display: flex; justify-content: space-between; gap: 14px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); min-width: 0; }
   .tt .row > span { flex-shrink: 0; }
   .tt .row b { color: var(--text); font-weight: 500; min-width: 0; text-align: right; }
+  .tt .evt-head { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-weight: 600; font-size: 11px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .tt .evt-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); padding: 1px 6px; background: var(--surface-2); border-radius: 999px; }
+  .tt .evt-row > span { color: var(--text); }
+  .tt .evt-attr { padding-left: 10px; opacity: 0.85; font-size: 10px; }
 
   /* kbd hint */
   .kbd-hint {
@@ -1037,9 +1052,15 @@
       <input id="searchInput" type="text" placeholder="Search…" autocomplete="off" spellcheck="false">
       <kbd>/</kbd>
     </div>
-    <div class="view-toggle">
-      <button class="active" data-view="tests">Tests</button>
-      <button data-view="run">Run</button>
+    <div class="view-toggle" role="tablist" aria-label="Switch view">
+      <button class="active" data-view="tests" role="tab" aria-selected="true" title="Per-test list with filters and details (keyboard: v)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Tests</span>
+      </button>
+      <button data-view="run" role="tab" aria-selected="false" title="Run summary: donut, duration, failures, timelines, parallelism (keyboard: v)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Overview</span>
+      </button>
     </div>
     <button class="icon-btn" id="themeToggle" title="Toggle theme">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
@@ -1544,23 +1565,29 @@ function pickRnd(rnd, arr) { return arr[Math.floor(rnd() * arr.length)]; }
 async function loadReportData() {
   const el = document.getElementById('report-data');
   const raw = el ? el.textContent.trim() : '';
-  if (!raw || raw.startsWith('__REPORT')) return null;
-  // Plain JSON fallback for debugging / external embedders.
+  if (!raw || raw.startsWith('__REPORT')) return { kind: 'preview' };
   if (raw.charAt(0) === '{') {
-    try { return JSON.parse(raw); } catch (e) { console.warn('report-data JSON parse failed', e); return null; }
+    try { return { kind: 'ok', report: JSON.parse(raw) }; }
+    catch (e) { return { kind: 'error', message: 'Embedded JSON data is corrupt and could not be parsed.' }; }
   }
-  // Default path: gzip + base64. DecompressionStream is supported in all evergreen browsers.
+  if (typeof DecompressionStream === 'undefined') {
+    return { kind: 'error', message: 'This browser does not support DecompressionStream, which is required to read the embedded report data. Please open this report in Chrome 80+, Edge 80+, Firefox 113+, or Safari 16.4+.' };
+  }
   try {
     const bin = Uint8Array.from(atob(raw), c => c.charCodeAt(0));
     const ds = new DecompressionStream('gzip');
     const text = await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();
-    return JSON.parse(text);
+    return { kind: 'ok', report: JSON.parse(text) };
   } catch (e) {
-    console.warn('report-data gzip decode failed', e);
-    return null;
+    return { kind: 'error', message: 'Failed to decode the embedded report data: ' + (e && e.message ? e.message : String(e)) };
   }
 }
-let REPORT = await loadReportData();
+const __loaded = await loadReportData();
+if (__loaded.kind === 'error') {
+  document.body.innerHTML = '<div style="max-width:560px;margin:80px auto;padding:24px 28px;font-family:Inter,system-ui,sans-serif;color:#1c1917;background:#fafaf9;border:1px solid #d6d3d1;border-radius:12px;"><h1 style="margin:0 0 10px;font-size:18px;font-weight:600;">Report could not be loaded</h1><p style="margin:0;font-size:13px;line-height:1.55;color:#57534e;">' + __loaded.message.replace(/</g, '&lt;') + '</p></div>';
+  throw new Error(__loaded.message);
+}
+let REPORT = __loaded.kind === 'ok' ? __loaded.report : null;
 if (!REPORT) {
   // generateSampleData() is only present when previewing this template standalone;
   // the C# generator strips it from shipped reports. Fall back to an empty run.
@@ -2164,6 +2191,7 @@ function renderDetail() {
       <div class="detail-meta">
         <span class="status-badge ${t.status}"><span class="dot"></span>${t.status==='cancel'?'Cancelled':t.status==='pass'?'Passed':t.status==='fail'?'Failed':'Skipped'}</span>
         <span class="detail-sub"><span class="v">${fmtDur(t.duration)}</span><span class="sep">·</span>started <span class="v">${fmtTime(t.start, REPORT.startMs)}</span><span class="sep">·</span><span class="v">${esc(t.worker)}</span></span>
+        ${t.traceId ? `<button class="trace-id-chip" data-copy-text="${esc(t.traceId)}" title="Copy trace ID"><span class="lbl">trace</span><span class="v">${esc(t.traceId.slice(0, 12))}</span></button>` : ''}
       </div>
     </div>
     <div class="detail-body">
@@ -2254,6 +2282,18 @@ function renderDetail() {
     });
   }));
 
+  // trace-id chip: copy full trace ID
+  const tidChip = detail.querySelector('.trace-id-chip');
+  if (tidChip) {
+    tidChip.addEventListener('click', () => {
+      navigator.clipboard.writeText(tidChip.dataset.copyText).then(() => {
+        const orig = tidChip.querySelector('.v').textContent;
+        tidChip.querySelector('.v').textContent = 'copied';
+        setTimeout(() => { tidChip.querySelector('.v').textContent = orig; }, 1100);
+      });
+    });
+  }
+
   // chips: click to filter
   detail.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
     if (ch.classList.contains('cat')) {
@@ -2273,12 +2313,20 @@ function renderDetail() {
     const span = t.spans.find(s => s.id === el.dataset.id);
     el.addEventListener('mouseenter', (e) => {
       const attrLines = Object.entries(span.attrs || {}).map(([k,v]) => `<div class="row"><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join('');
+      const events = span.events || [];
+      const eventsBlock = events.length ? `
+        <div class="evt-head">Events <span class="evt-count">${events.length}</span></div>
+        ${events.map(ev => `
+          <div class="row evt-row"><span>${esc(ev.name)}</span><b>+${fmtDur(Math.max(0, ev.time - span.start))}</b></div>
+          ${ev.attrs ? Object.entries(ev.attrs).map(([k,v]) => `<div class="row evt-attr"><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join('') : ''}
+        `).join('')}` : '';
       showTooltip(e, `
         <div class="title">${esc(span.name)}</div>
         <div class="row"><span>service</span><b style="color:${SERVICE_COLORS[span.service]||'var(--text)'}">${span.service}</b></div>
         <div class="row"><span>duration</span><b>${fmtDur(span.dur)}</b></div>
         <div class="row"><span>start</span><b>+${fmtDur(span.start)}</b></div>
         ${attrLines}
+        ${eventsBlock}
       `);
     });
     el.addEventListener('mousemove', moveTooltip);
@@ -2817,7 +2865,11 @@ function hideTooltip() { tt.dataset.show = 'false'; }
 function switchView(v) {
   STATE.view = v;
   $$('.view').forEach(el => el.classList.toggle('active', el.id === 'view-' + v));
-  $$('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  $$('.view-toggle button').forEach(b => {
+    const on = b.dataset.view === v;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
   // When the tests view becomes visible the rail list finally has a non-zero clientHeight,
   // so any earlier renderRailWindow() that ran while hidden (e.g. from a Run-view click
   // calling selectTest before switchView) computed an empty visible range. Re-render now.
