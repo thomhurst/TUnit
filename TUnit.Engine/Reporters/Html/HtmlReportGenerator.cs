@@ -202,17 +202,27 @@ internal static class HtmlReportGenerator
             }
             w.WriteEndArray();
 
+#if NET
+            // Global / per-class timelines require span-type and tag constants from
+            // TUnitActivitySource, which is `#if NET`. On netstandard2.0 no spans are
+            // collected anyway (ActivityCollector is also `#if NET`), so there's
+            // nothing to emit here.
             WriteTimelines(w, data, spansByTrace, runStartMs);
+#endif
 
             w.WriteEndObject();
         }
         return Encoding.UTF8.GetString(ms.GetBuffer(), 0, checked((int)ms.Length));
     }
 
+#if NET
     // The old report had two trace views the per-test Trace tab doesn't cover:
     //   • Global "Execution Timeline" — session/assembly/suite + shared init/dispose spans
     //   • Per-class timeline — opt-in via [ClassTimeline(...)] on the class
     // We re-emit both as top-level JSON so the renderer can show them in the Run view.
+    // This block (plus FindTagValue / WithParent / BuildTraceIndex) references span-type
+    // and tag constants on TUnitActivitySource, which is itself `#if NET`. The matching
+    // call site in SerializeReport is gated the same way.
     private static void WriteTimelines(Utf8JsonWriter w, ReportData data, Dictionary<string, List<SpanData>>? spansByTrace, long runStartMs)
     {
         if (spansByTrace is null || spansByTrace.Count == 0) return;
@@ -456,6 +466,7 @@ internal static class HtmlReportGenerator
             if (string.Equals(t.Key, key, StringComparison.Ordinal)) return t.Value;
         return null;
     }
+#endif
 
     private static void WriteTest(
         Utf8JsonWriter w,
