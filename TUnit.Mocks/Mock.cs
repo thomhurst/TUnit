@@ -180,7 +180,7 @@ public static class Mock
     /// occurred in the specified order, using global sequence numbers across all mocks.
     /// </summary>
     /// <param name="verificationActions">
-    /// An action that invokes <c>mock.Verify.Method(...).WasCalled()</c> in the expected call order.
+    /// An action that invokes <c>mock.Method(...).WasCalled()</c> in the expected call order.
     /// </param>
     public static void VerifyInOrder(Action verificationActions)
     {

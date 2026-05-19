@@ -2,7 +2,7 @@ namespace TUnit.Mocks.Setup;
 
 /// <summary>
 /// Fluent setup builder for methods with a return value.
-/// Returned by mock.Setup.MethodName(args).
+/// Returned by mock.MethodName(args).
 /// </summary>
 public interface IMethodSetup<TReturn>
 {
