@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -44,6 +45,11 @@ public class DynamicTestsGenerator : IIncrementalGenerator
     /// </summary>
     private static DynamicTestModel? ExtractDynamicTestModel(GeneratorAttributeSyntaxContext context)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(context.SemanticModel.Compilation))
+        {
+            return null;
+        }
+
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
             return null;

@@ -237,6 +237,11 @@ internal sealed class ReflectionHookDiscoveryService
             return false;
         }
 
+        if (AssemblyDiscoveryFilter.IsExcludedFromTestDiscovery(assembly))
+        {
+            return false;
+        }
+
         var referencedAssemblies = AssemblyReferenceCache.GetReferencedAssemblies(assembly);
         var referencesTUnit = false;
         foreach (var refAssembly in referencedAssemblies)

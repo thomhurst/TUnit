@@ -110,6 +110,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(compilationContext.Compilation))
+        {
+            return null;
+        }
+
         var classSyntax = (ClassDeclarationSyntax)context.TargetNode;
 
         if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
@@ -133,6 +138,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(compilationContext.Compilation))
+        {
+            return null;
+        }
+
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
         var methodSymbol = context.TargetSymbol as IMethodSymbol;
 

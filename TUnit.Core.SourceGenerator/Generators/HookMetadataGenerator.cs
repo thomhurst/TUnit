@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 using TUnit.Core.SourceGenerator.Utilities;
@@ -95,6 +96,11 @@ public class HookMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static HookModel? ExtractHookModel(GeneratorAttributeSyntaxContext context, string hookKind)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(context.SemanticModel.Compilation))
+        {
+            return null;
+        }
+
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
             return null;

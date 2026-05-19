@@ -288,6 +288,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
+        if (AssemblyDiscoveryFilter.IsExcludedFromTestDiscovery(assembly))
+        {
+            return false;
+        }
+
         try
         {
             var location = assembly.Location;

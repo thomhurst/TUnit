@@ -686,6 +686,11 @@ namespace
         public .CancellationToken Token { get; }
         public void Dispose() { }
     }
+    [(.Assembly, AllowMultiple=false, Inherited=false)]
+    public sealed class ExcludeFromTestDiscoveryAttribute : 
+    {
+        public ExcludeFromTestDiscoveryAttribute() { }
+    }
     public sealed class ExcludeOnAttribute : .SkipAttribute
     {
         public ExcludeOnAttribute(. OperatingSystem) { }

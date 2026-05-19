@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.CodeGenerators.Equality;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
@@ -52,7 +53,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(assemblyInfoProvider, (sourceContext, data) =>
         {
             var (assemblyInfo, isEnabled) = data;
-            if (!isEnabled)
+            if (!isEnabled || assemblyInfo.IsExcludedFromTestDiscovery)
             {
                 return;
             }
@@ -67,6 +68,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// </summary>
     private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(compilation))
+        {
+            return new AssemblyInfoModel
+            {
+                AssemblyName = compilation.Assembly.Name,
+                TypesToReference = new EquatableArray<string>([]),
+                IsExcludedFromTestDiscovery = true
+            };
+        }
+
         var assembliesToLoad = new List<string>();
 
         // Find TUnit.Core assembly - only assemblies referencing this can contain tests
@@ -117,7 +128,8 @@ public class InfrastructureGenerator : IIncrementalGenerator
         return new AssemblyInfoModel
         {
             AssemblyName = compilation.Assembly.Name,
-            TypesToReference = new EquatableArray<string>([.. assembliesToLoad])
+            TypesToReference = new EquatableArray<string>([.. assembliesToLoad]),
+            IsExcludedFromTestDiscovery = false
         };
     }
 
@@ -188,6 +200,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
 
     private static bool ShouldLoadAssembly(IAssemblySymbol assembly, Compilation compilation)
     {
+        if (AssemblyDiscoveryExclusion.IsExcluded(assembly, compilation))
+        {
+            return false;
+        }
+
         // Skip system assemblies
         if (IsSystemAssembly(assembly))
         {
