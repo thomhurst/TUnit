@@ -45,7 +45,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
     /// </summary>
     private static DynamicTestModel? ExtractDynamicTestModel(GeneratorAttributeSyntaxContext context)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(context.SemanticModel.Compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(context.SemanticModel.Compilation))
         {
             return null;
         }

@@ -11,11 +11,23 @@ public class AssemblyDiscoveryFilterTests
     public async Task IsExcludedFromTestDiscovery_ReturnsTrue_WhenAssemblyHasAttribute()
     {
         var assembly = AssemblyBuilder.DefineDynamicAssembly(
-            new AssemblyName("TUnit.UnitTests.ExcludedFromDiscovery"),
+            new AssemblyName("TUnit.UnitTests.SelfExcludedFromDiscovery"),
             AssemblyBuilderAccess.Run);
 
         var constructor = typeof(ExcludeFromTestDiscoveryAttribute).GetConstructor(Type.EmptyTypes)!;
         assembly.SetCustomAttribute(new CustomAttributeBuilder(constructor, []));
+
+        await Assert.That(AssemblyDiscoveryFilter.IsExcludedFromTestDiscovery(assembly)).IsTrue();
+    }
+
+    [Test]
+    public async Task IsExcludedFromTestDiscovery_ReturnsTrue_WhenAssemblyNameWasRegistered()
+    {
+        var assembly = AssemblyBuilder.DefineDynamicAssembly(
+            new AssemblyName("TUnit.UnitTests.EntryExcludedFromDiscovery"),
+            AssemblyBuilderAccess.Run);
+
+        SourceRegistrar.ExcludeAssemblyFromDiscovery("TUnit.UnitTests.EntryExcludedFromDiscovery");
 
         await Assert.That(AssemblyDiscoveryFilter.IsExcludedFromTestDiscovery(assembly)).IsTrue();
     }

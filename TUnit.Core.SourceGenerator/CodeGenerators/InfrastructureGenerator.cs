@@ -68,12 +68,13 @@ public class InfrastructureGenerator : IIncrementalGenerator
     /// </summary>
     private static AssemblyInfoModel ExtractAssemblyInfo(Compilation compilation)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(compilation))
         {
             return new AssemblyInfoModel
             {
                 AssemblyName = compilation.Assembly.Name,
                 TypesToReference = new EquatableArray<string>([]),
+                ExcludedAssemblyNames = new EquatableArray<string>([]),
                 IsExcludedFromTestDiscovery = true
             };
         }
@@ -129,6 +130,7 @@ public class InfrastructureGenerator : IIncrementalGenerator
         {
             AssemblyName = compilation.Assembly.Name,
             TypesToReference = new EquatableArray<string>([.. assembliesToLoad]),
+            ExcludedAssemblyNames = AssemblyDiscoveryExclusion.GetExcludedAssemblyNames(compilation),
             IsExcludedFromTestDiscovery = false
         };
     }
@@ -200,7 +202,8 @@ public class InfrastructureGenerator : IIncrementalGenerator
 
     private static bool ShouldLoadAssembly(IAssemblySymbol assembly, Compilation compilation)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(assembly, compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(assembly, compilation) ||
+            AssemblyDiscoveryExclusion.IsExcludedByCurrentAssembly(assembly, compilation))
         {
             return false;
         }
@@ -400,6 +403,22 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine("}");
                 sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip source registrar */ }");
                 sourceBuilder.AppendLine();
+
+                foreach (var excludedAssemblyName in model.ExcludedAssemblyNames)
+                {
+                    sourceBuilder.AppendLine("try");
+                    sourceBuilder.AppendLine("{");
+                    sourceBuilder.Indent();
+                    sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.ExcludeAssemblyFromDiscovery(\"{excludedAssemblyName.Replace("\\", "\\\\").Replace("\"", "\\\"")}\");");
+                    sourceBuilder.Unindent();
+                    sourceBuilder.AppendLine("}");
+                    sourceBuilder.AppendLine("catch { /* TUnit.Core not available - skip excluded assembly registration */ }");
+                }
+
+                if (model.ExcludedAssemblyNames.Length > 0)
+                {
+                    sourceBuilder.AppendLine();
+                }
 
                 // Logging is optional - wrap separately so it doesn't prevent other work
                 sourceBuilder.AppendLine("try");

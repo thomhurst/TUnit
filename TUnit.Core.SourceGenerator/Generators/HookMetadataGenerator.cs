@@ -96,7 +96,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static HookModel? ExtractHookModel(GeneratorAttributeSyntaxContext context, string hookKind)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(context.SemanticModel.Compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(context.SemanticModel.Compilation))
         {
             return null;
         }

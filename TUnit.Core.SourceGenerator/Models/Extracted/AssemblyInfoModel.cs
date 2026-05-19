@@ -17,6 +17,8 @@ public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
     /// </summary>
     public required EquatableArray<string> TypesToReference { get; init; }
 
+    public required EquatableArray<string> ExcludedAssemblyNames { get; init; }
+
     public required bool IsExcludedFromTestDiscovery { get; init; }
 
     public bool Equals(AssemblyInfoModel? other)
@@ -33,6 +35,7 @@ public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
 
         return AssemblyName == other.AssemblyName &&
                TypesToReference.Equals(other.TypesToReference) &&
+               ExcludedAssemblyNames.Equals(other.ExcludedAssemblyNames) &&
                IsExcludedFromTestDiscovery == other.IsExcludedFromTestDiscovery;
     }
 
@@ -48,6 +51,7 @@ public sealed class AssemblyInfoModel : IEquatable<AssemblyInfoModel>
             var hash = 17;
             hash = hash * 31 + (AssemblyName?.GetHashCode() ?? 0);
             hash = hash * 31 + TypesToReference.GetHashCode();
+            hash = hash * 31 + ExcludedAssemblyNames.GetHashCode();
             hash = hash * 31 + IsExcludedFromTestDiscovery.GetHashCode();
             return hash;
         }

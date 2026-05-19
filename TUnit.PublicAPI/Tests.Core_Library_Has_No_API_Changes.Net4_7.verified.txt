@@ -686,10 +686,12 @@ namespace
         public .CancellationToken Token { get; }
         public void Dispose() { }
     }
-    [(.Assembly, AllowMultiple=false, Inherited=false)]
+    [(.Assembly, AllowMultiple=true, Inherited=false)]
     public sealed class ExcludeFromTestDiscoveryAttribute : 
     {
         public ExcludeFromTestDiscoveryAttribute() { }
+        public ExcludeFromTestDiscoveryAttribute(params [] assemblyMarkerTypes) { }
+        public [] AssemblyMarkerTypes { get; }
     }
     public sealed class ExcludeOnAttribute : .SkipAttribute
     {
@@ -1259,6 +1261,8 @@ namespace
     {
         public SourceRegistrar() { }
         public static bool IsEnabled { get; set; }
+        public static void ExcludeAssemblyFromDiscovery(.Assembly assembly) { }
+        public static void ExcludeAssemblyFromDiscovery(string assemblyName) { }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
         public static void RegisterDynamic(.IDynamicTestSource testSource) { }
         public static int RegisterEntries<T>(<.TestEntry<T>[]> factory)

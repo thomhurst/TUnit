@@ -16,7 +16,20 @@ namespace TUnit.Core;
 /// </summary>
 public class SourceRegistrar
 {
+    private static readonly ConcurrentDictionary<Assembly, byte> ExcludedAssemblies = new();
+    private static readonly ConcurrentDictionary<string, byte> ExcludedAssemblyNames = new();
+
     public static bool IsEnabled { get; set; }
+
+    public static void ExcludeAssemblyFromDiscovery(string assemblyName)
+    {
+        ExcludedAssemblyNames.TryAdd(assemblyName, 0);
+    }
+
+    public static void ExcludeAssemblyFromDiscovery(Assembly assembly)
+    {
+        ExcludedAssemblies.TryAdd(assembly, 0);
+    }
 
     /// <summary>
     /// Registers an assembly loader.
@@ -40,6 +53,11 @@ public class SourceRegistrar
     /// <param name="testSource">The test source to register.</param>
     public static void RegisterDynamic(IDynamicTestSource testSource)
     {
+        if (IsAssemblyExcludedFromDiscovery(testSource.GetType().Assembly))
+        {
+            return;
+        }
+
         Sources.DynamicTestSources.Enqueue(testSource);
     }
 
@@ -70,6 +88,11 @@ public class SourceRegistrar
     public static int RegisterHook<T>(ConcurrentDictionary<Type, ConcurrentBag<LazyHookEntry<T>>> dictionary, Type key, int registrationIndex, Func<int, T> factory)
         where T : HookMethod
     {
+        if (IsAssemblyExcludedFromDiscovery(key.Assembly))
+        {
+            return 0;
+        }
+
         dictionary.GetOrAdd(key, static _ => new ConcurrentBag<LazyHookEntry<T>>())
             .Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
@@ -84,6 +107,11 @@ public class SourceRegistrar
     public static int RegisterHook<T>(ConcurrentDictionary<Assembly, ConcurrentBag<LazyHookEntry<T>>> dictionary, Assembly key, int registrationIndex, Func<int, T> factory)
         where T : HookMethod
     {
+        if (IsAssemblyExcludedFromDiscovery(key))
+        {
+            return 0;
+        }
+
         dictionary.GetOrAdd(key, static _ => new ConcurrentBag<LazyHookEntry<T>>())
             .Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
@@ -95,9 +123,15 @@ public class SourceRegistrar
     /// module-init cost minimal and to remain AOT compatible.
     /// Returns a dummy value for use as a static field initializer.
     /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static int RegisterHook<T>(ConcurrentBag<LazyHookEntry<T>> bag, int registrationIndex, Func<int, T> factory)
         where T : HookMethod
     {
+        if (IsAssemblyExcludedFromDiscovery(Assembly.GetCallingAssembly()))
+        {
+            return 0;
+        }
+
         bag.Add(new LazyHookEntry<T>(registrationIndex, factory));
         return 0;
     }
@@ -112,6 +146,11 @@ public class SourceRegistrar
     public static int RegisterEntries<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T>(Func<TestEntry<T>[]> factory) where T : class
     {
         var key = typeof(T);
+
+        if (IsAssemblyExcludedFromDiscovery(key.Assembly))
+        {
+            return 0;
+        }
 
         while (true)
         {
@@ -133,6 +172,112 @@ public class SourceRegistrar
             }
 
             // Another thread added between TryGetValue and TryAdd — retry to merge
+        }
+    }
+
+    internal static bool IsAssemblyExcludedFromDiscovery(Assembly assembly)
+    {
+        if (ExcludedAssemblies.ContainsKey(assembly))
+        {
+            return true;
+        }
+
+        var assemblyName = assembly.GetName().Name;
+        if (assemblyName is not null && ExcludedAssemblyNames.ContainsKey(assemblyName))
+        {
+            return true;
+        }
+
+        if (HasSelfExclusionAttribute(assembly))
+        {
+            return true;
+        }
+
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly is null || ReferenceEquals(entryAssembly, assembly))
+        {
+            return false;
+        }
+
+        return EntryAssemblyExcludes(entryAssembly, assembly);
+    }
+
+    private static bool HasSelfExclusionAttribute(Assembly assembly)
+    {
+        try
+        {
+            foreach (var attribute in CustomAttributeData.GetCustomAttributes(assembly))
+            {
+                if (IsExcludeFromDiscoveryAttribute(attribute) && attribute.ConstructorArguments.Count == 0)
+                {
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    private static bool EntryAssemblyExcludes(Assembly entryAssembly, Assembly assembly)
+    {
+        try
+        {
+            foreach (var attribute in CustomAttributeData.GetCustomAttributes(entryAssembly))
+            {
+                if (!IsExcludeFromDiscoveryAttribute(attribute))
+                {
+                    continue;
+                }
+
+                foreach (var markerType in GetAssemblyMarkerTypes(attribute))
+                {
+                    if (AssemblyName.ReferenceMatchesDefinition(markerType.Assembly.GetName(), assembly.GetName()))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    private static bool IsExcludeFromDiscoveryAttribute(CustomAttributeData attribute)
+    {
+        return attribute.AttributeType == typeof(ExcludeFromTestDiscoveryAttribute) ||
+               attribute.AttributeType.FullName == typeof(ExcludeFromTestDiscoveryAttribute).FullName;
+    }
+
+    private static IEnumerable<Type> GetAssemblyMarkerTypes(CustomAttributeData attribute)
+    {
+        foreach (var argument in attribute.ConstructorArguments)
+        {
+            if (argument.ArgumentType == typeof(Type) && argument.Value is Type type)
+            {
+                yield return type;
+                continue;
+            }
+
+            if (!argument.ArgumentType.IsArray || argument.Value is not IEnumerable<CustomAttributeTypedArgument> values)
+            {
+                continue;
+            }
+
+            foreach (var value in values)
+            {
+                if (value.Value is Type markerType)
+                {
+                    yield return markerType;
+                }
+            }
         }
     }
 }

@@ -110,7 +110,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(compilationContext.Compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(compilationContext.Compilation))
         {
             return null;
         }
@@ -138,7 +138,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context, CompilationContext compilationContext)
     {
-        if (AssemblyDiscoveryExclusion.IsExcluded(compilationContext.Compilation))
+        if (AssemblyDiscoveryExclusion.IsSelfExcluded(compilationContext.Compilation))
         {
             return null;
         }
