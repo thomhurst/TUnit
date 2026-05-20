@@ -144,7 +144,7 @@ See the [documentation](https://tunit.dev/docs/getting-started/attributes) for m
 | `TUnit.Mocks.Http` | `HttpClient` mocking helpers built on `TUnit.Mocks` |
 | `TUnit.Mocks.Logging` | `ILogger` capture/verification helpers built on `TUnit.Mocks` |
 | `TUnit.AspNetCore` | ASP.NET Core integration — `WebApplicationFactory`-based test fixtures |
-| `TUnit.Aspire` | .NET Aspire integration — distributed app host fixtures with OpenTelemetry capture |
+| `TUnit.Aspire` | Aspire integration — distributed app host fixtures with OpenTelemetry capture |
 | `TUnit.Playwright` | Playwright integration with automatic browser lifecycle management |
 
 ## Migrating from xUnit, NUnit, or MSTest?
