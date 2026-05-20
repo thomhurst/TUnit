@@ -28580,6 +28580,19 @@ mock.GetValue(Any())
 // 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
 ```
 
+Chained setup behaviors without `.Then()` run together as a single invocation step.
+When multiple return behaviors are chained in one step, the last return wins:
+
+```csharp
+mock.GetValue(Any())
+    .Returns("first")
+    .Returns("second");
+// Every call returns "second"
+```
+
+Use `.Then()` or `.ReturnsSequentially(...)` when each return should apply to a
+different invocation.
+
 ### Void Methods
 
 Void methods support `Callback` and `Throws` (but not `Returns`):
