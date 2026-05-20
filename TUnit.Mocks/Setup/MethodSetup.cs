@@ -31,7 +31,7 @@ public sealed class MethodSetup
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
     /// <remarks>
     /// Not declared volatile to avoid CS0420 with Interlocked.CompareExchange.
-    /// All accesses use Volatile.Read/Write or Interlocked ops for correct ordering.
+    /// Readers use Volatile.Read where they avoid taking BehaviorLock.
     /// </remarks>
     private IBehavior? _singleBehavior;
     /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
@@ -143,16 +143,16 @@ public sealed class MethodSetup
     {
         if (_singleBehavior is null && _behaviors is null)
         {
-            Volatile.Write(ref _singleBehavior, behavior);
+            _singleBehavior = behavior;
             return;
         }
 
         var behaviors = _behaviors;
         if (behaviors is null)
         {
-            behaviors = [Volatile.Read(ref _singleBehavior)!];
-            Volatile.Write(ref _behaviors, behaviors);
-            Volatile.Write(ref _singleBehavior, null);
+            behaviors = [_singleBehavior!];
+            _behaviors = behaviors;
+            _singleBehavior = null;
         }
 
         behaviors.Add(behavior);
@@ -166,7 +166,7 @@ public sealed class MethodSetup
             return;
         }
 
-        Volatile.Write(ref _singleBehavior, CompositeBehavior.Combine(Volatile.Read(ref _singleBehavior)!, behavior));
+        _singleBehavior = CompositeBehavior.Combine(_singleBehavior!, behavior);
     }
 
     public bool Matches(object?[] actualArgs)

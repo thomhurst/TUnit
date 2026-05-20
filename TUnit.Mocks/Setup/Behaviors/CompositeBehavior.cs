@@ -1,5 +1,9 @@
 namespace TUnit.Mocks.Setup.Behaviors;
 
+// Arity coupling: if a new typed mock arity is added, update this interface,
+// CompositeBehavior.Execute<T...>, MockEngine.Typed.ExecuteBehavior<T...>,
+// TypedCallbackBehavior, both setup builders, and the source generator's
+// MaxTypedParams together.
 internal interface ICompositeBehavior : IBehavior
 {
     object? Execute<T1>(T1 arg1);
