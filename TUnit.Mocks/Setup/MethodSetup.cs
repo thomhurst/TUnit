@@ -37,7 +37,8 @@ public sealed class MethodSetup
     /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
     private List<IBehavior>? _behaviors;
     private int _callIndex;
-    private bool _nextBehaviorStartsNewStep = true;
+    /// <summary>True while chained behaviors are being composed into the current invocation step.</summary>
+    private bool _hasOpenBehaviorStep;
 
     public int MemberId { get; }
 
@@ -118,12 +119,14 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
+        // Setup mutation is not a hot path; one lock keeps sequential steps and composed
+        // behavior steps consistent without the previous single-behavior CAS fast path.
         lock (BehaviorLock)
         {
-            if (_nextBehaviorStartsNewStep)
+            if (!_hasOpenBehaviorStep)
             {
                 AddBehaviorStep(behavior);
-                _nextBehaviorStartsNewStep = false;
+                _hasOpenBehaviorStep = true;
                 return;
             }
 
@@ -135,7 +138,7 @@ public sealed class MethodSetup
     {
         lock (BehaviorLock)
         {
-            _nextBehaviorStartsNewStep = true;
+            _hasOpenBehaviorStep = false;
         }
     }
 

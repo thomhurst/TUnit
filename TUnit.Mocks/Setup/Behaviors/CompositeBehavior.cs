@@ -25,28 +25,58 @@ internal interface ICompositeBehavior : IBehavior
 
 internal sealed class CompositeBehavior : ICompositeBehavior
 {
-    private readonly IBehavior[] _behaviors;
+    private readonly Lock _lock = new();
+    private readonly List<IBehavior> _behaviors;
+    private IBehavior[]? _snapshot;
 
-    private CompositeBehavior(IBehavior[] behaviors) => _behaviors = behaviors;
+    private CompositeBehavior(IBehavior first, IBehavior second)
+    {
+        _behaviors = [first, second];
+    }
 
     public static IBehavior Combine(IBehavior first, IBehavior second)
     {
         if (first is CompositeBehavior composite)
         {
-            var combined = new IBehavior[composite._behaviors.Length + 1];
-            composite._behaviors.CopyTo(combined, 0);
-            combined[^1] = second;
-            return new CompositeBehavior(combined);
+            composite.Add(second);
+            return composite;
         }
 
-        return new CompositeBehavior([first, second]);
+        return new CompositeBehavior(first, second);
+    }
+
+    private void Add(IBehavior behavior)
+    {
+        lock (_lock)
+        {
+            _behaviors.Add(behavior);
+            Volatile.Write(ref _snapshot, null);
+        }
+    }
+
+    private IBehavior[] GetSnapshot()
+    {
+        if (Volatile.Read(ref _snapshot) is { } snapshot)
+        {
+            return snapshot;
+        }
+
+        lock (_lock)
+        {
+            if (_snapshot is null)
+            {
+                Volatile.Write(ref _snapshot, _behaviors.ToArray());
+            }
+
+            return _snapshot;
+        }
     }
 
     public object? Execute(object?[] arguments)
     {
         object? result = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior is IArgumentFreeBehavior argumentFree
                 ? argumentFree.Execute()
@@ -66,7 +96,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -89,7 +119,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -112,7 +142,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -135,7 +165,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -158,7 +188,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -181,7 +211,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -204,7 +234,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
@@ -227,7 +257,7 @@ internal sealed class CompositeBehavior : ICompositeBehavior
         object? result = null;
         object?[]? arguments = null;
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in GetSnapshot())
         {
             var behaviorResult = behavior switch
             {
