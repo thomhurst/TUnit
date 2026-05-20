@@ -1,6 +1,25 @@
 namespace TUnit.Mocks.Setup.Behaviors;
 
-internal sealed class CompositeBehavior : IBehavior
+internal interface ICompositeBehavior : IBehavior
+{
+    object? Execute<T1>(T1 arg1);
+
+    object? Execute<T1, T2>(T1 arg1, T2 arg2);
+
+    object? Execute<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3);
+
+    object? Execute<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+
+    object? Execute<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+
+    object? Execute<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
+
+    object? Execute<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
+
+    object? Execute<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
+}
+
+internal sealed class CompositeBehavior : ICompositeBehavior
 {
     private readonly IBehavior[] _behaviors;
 
@@ -38,7 +57,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1>(T1 arg1)
+    public object? Execute<T1>(T1 arg1)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -61,7 +80,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2>(T1 arg1, T2 arg2)
+    public object? Execute<T1, T2>(T1 arg1, T2 arg2)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -84,7 +103,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3)
+    public object? Execute<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -107,7 +126,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    public object? Execute<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -130,7 +149,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    public object? Execute<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -153,7 +172,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    public object? Execute<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -176,7 +195,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    public object? Execute<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
     {
         object? result = null;
         object?[]? arguments = null;
@@ -199,7 +218,7 @@ internal sealed class CompositeBehavior : IBehavior
         return result;
     }
 
-    internal object? Execute<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    public object? Execute<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
     {
         object? result = null;
         object?[]? arguments = null;

@@ -120,7 +120,7 @@ public sealed class MethodSetup
     {
         lock (BehaviorLock)
         {
-            if (_nextBehaviorStartsNewStep || (_singleBehavior is null && _behaviors is null))
+            if (_nextBehaviorStartsNewStep)
             {
                 AddBehaviorStep(behavior);
                 _nextBehaviorStartsNewStep = false;

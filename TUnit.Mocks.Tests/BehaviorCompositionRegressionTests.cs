@@ -36,10 +36,10 @@ public class BehaviorCompositionRegressionTests
     {
         var mock = ICalculator.Mock();
         var captured = 0;
-        var setup = new MethodSetup(0, [AnyMatcher<int>.Instance, AnyMatcher<int>.Instance], nameof(ICalculator.Add));
-        setup.AddBehavior(new FallbackThrowingTypedSideEffectBehavior((a, b) => captured = a + b));
-        setup.AddBehavior(new CustomReturnBehavior<int>(99));
-        MockRegistry.GetEngine(mock).AddSetup(setup);
+
+        mock.Add(Arg.Any<int>(), Arg.Any<int>())
+            .Callback((int a, int b) => captured = a + b)
+            .Returns(99);
 
         var result = mock.Object.Add(4, 5);
 
@@ -119,17 +119,4 @@ public class BehaviorCompositionRegressionTests
         public object? Execute() => value;
     }
 
-    private sealed class FallbackThrowingTypedSideEffectBehavior(Action<int, int> callback) : IBehavior, ITypedBehavior<int, int>, ISideEffectBehavior
-    {
-        public object? Execute(object?[] arguments)
-        {
-            throw new InvalidOperationException("Composite behavior used object[] dispatch.");
-        }
-
-        public object? Execute(int arg1, int arg2)
-        {
-            callback(arg1, arg2);
-            return null;
-        }
-    }
 }

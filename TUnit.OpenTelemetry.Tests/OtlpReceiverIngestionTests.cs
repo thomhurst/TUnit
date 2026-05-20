@@ -205,7 +205,7 @@ public class OtlpReceiverIngestionTests
         var latePostCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var latePost = Task.Run(async () =>
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            await Task.Delay(TimeSpan.FromMilliseconds(50));
             using var client = new HttpClient();
             using var content = new ByteArrayContent(Array.Empty<byte>());
             await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
@@ -215,10 +215,8 @@ public class OtlpReceiverIngestionTests
         await receiver.DrainAsync(TimeSpan.FromSeconds(3));
 
         // Asserts the real contract directly: drain returned only after the late POST
-        // had been issued and acknowledged. Wall-clock floors (the previous approach)
-        // failed on macOS arm64 because Task.Delay scheduling jitter could push the
-        // late POST inside the synchronous prefix of DrainAsync, making the elapsed
-        // measurement misrepresent the actual invariant the drain must hold.
+        // had been issued and acknowledged. Keep the delay well inside DrainAsync's
+        // quiet window so busy CI runners do not turn this into a scheduler test.
         await Assert.That(latePostCompleted.Task.IsCompleted).IsTrue();
         await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
 

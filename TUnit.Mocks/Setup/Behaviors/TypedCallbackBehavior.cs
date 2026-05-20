@@ -3,69 +3,56 @@ using System.ComponentModel;
 namespace TUnit.Mocks.Setup.Behaviors;
 
 /// <summary>
-/// Typed behavior dispatch interfaces. ExecuteBehavior checks for these after IArgumentFreeBehavior,
-/// enabling behaviors to receive typed arguments without boxing into object?[].
-/// Currently implemented by TypedCallbackBehavior; extensible for future typed return behaviors
-/// (e.g. a TypedComputedReturnBehavior that takes Func&lt;T1, TReturn&gt;).
+/// Internal typed behavior dispatch interfaces. ExecuteBehavior checks for these after IArgumentFreeBehavior,
+/// enabling built-in behaviors to receive typed arguments without boxing into object?[].
 /// </summary>
-/// <remarks>
-/// Custom behaviors can implement the matching arity to avoid the object?[] fallback.
-/// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1>
+internal interface ITypedBehavior<T1>
 {
     object? Execute(T1 arg1);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2>
+internal interface ITypedBehavior<T1, T2>
 {
     object? Execute(T1 arg1, T2 arg2);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3>
+internal interface ITypedBehavior<T1, T2, T3>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3, T4>
+internal interface ITypedBehavior<T1, T2, T3, T4>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3, T4, T5>
+internal interface ITypedBehavior<T1, T2, T3, T4, T5>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3, T4, T5, T6>
+internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>
+internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
+internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
 }
-
-// ── ARITY COUPLING (1–8) ──────────────────────────────────────────────
-// If you add an arity (e.g. T9), you MUST also update:
-//   - ITypedBehavior<T1...T9> above
-//   - ExecuteBehavior<T1...T9> in MockEngine.Typed.cs
-//   - Callback<T1...T9> in MethodSetupBuilder.cs and VoidMethodSetupBuilder.cs
-//   - MaxTypedParams in MockMembersBuilder.cs (source generator)
-// ──────────────────────────────────────────────────────────────────────
 
 internal sealed class TypedCallbackBehavior<T1>(Action<T1> callback) : IBehavior, ITypedBehavior<T1>, ISideEffectBehavior
 {
