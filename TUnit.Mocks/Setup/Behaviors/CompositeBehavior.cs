@@ -63,12 +63,14 @@ internal sealed class CompositeBehavior : ICompositeBehavior
 
         lock (_lock)
         {
-            if (_snapshot is null)
+            var currentSnapshot = _snapshot;
+            if (currentSnapshot is null)
             {
-                Volatile.Write(ref _snapshot, _behaviors.ToArray());
+                currentSnapshot = _behaviors.ToArray();
+                Volatile.Write(ref _snapshot, currentSnapshot);
             }
 
-            return _snapshot;
+            return currentSnapshot;
         }
     }
 
