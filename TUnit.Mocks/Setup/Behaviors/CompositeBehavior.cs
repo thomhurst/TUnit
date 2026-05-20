@@ -1,0 +1,279 @@
+namespace TUnit.Mocks.Setup.Behaviors;
+
+// Arity coupling: if a new typed mock arity is added, update this interface,
+// CompositeBehavior.Execute<T...>, MockEngine.Typed.ExecuteBehavior<T...>,
+// TypedCallbackBehavior, both setup builders, and the source generator's
+// MaxTypedParams together.
+internal interface ICompositeBehavior : IBehavior
+{
+    object? Execute<T1>(T1 arg1);
+
+    object? Execute<T1, T2>(T1 arg1, T2 arg2);
+
+    object? Execute<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3);
+
+    object? Execute<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+
+    object? Execute<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+
+    object? Execute<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
+
+    object? Execute<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
+
+    object? Execute<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
+}
+
+internal sealed class CompositeBehavior : ICompositeBehavior
+{
+    private readonly Lock _lock = new();
+    private readonly List<IBehavior> _behaviors;
+    private IBehavior[]? _snapshot;
+
+    private CompositeBehavior(IBehavior first, IBehavior second)
+    {
+        _behaviors = [first, second];
+    }
+
+    public static IBehavior Combine(IBehavior first, IBehavior second)
+    {
+        if (first is CompositeBehavior composite)
+        {
+            composite.Add(second);
+            return composite;
+        }
+
+        return new CompositeBehavior(first, second);
+    }
+
+    private void Add(IBehavior behavior)
+    {
+        lock (_lock)
+        {
+            _behaviors.Add(behavior);
+            Volatile.Write(ref _snapshot, null);
+        }
+    }
+
+    private IBehavior[] GetSnapshot()
+    {
+        if (Volatile.Read(ref _snapshot) is { } snapshot)
+        {
+            return snapshot;
+        }
+
+        lock (_lock)
+        {
+            var currentSnapshot = _snapshot;
+            if (currentSnapshot is null)
+            {
+                currentSnapshot = _behaviors.ToArray();
+                Volatile.Write(ref _snapshot, currentSnapshot);
+            }
+
+            return currentSnapshot;
+        }
+    }
+
+    public object? Execute(object?[] arguments)
+    {
+        object? result = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior is IArgumentFreeBehavior argumentFree
+                ? argumentFree.Execute()
+                : behavior.Execute(arguments);
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1>(T1 arg1)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1> typed => typed.Execute(arg1),
+                _ => behavior.Execute(arguments ??= [arg1])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2>(T1 arg1, T2 arg2)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2> typed => typed.Execute(arg1, arg2),
+                _ => behavior.Execute(arguments ??= [arg1, arg2])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3> typed => typed.Execute(arg1, arg2, arg3),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3, T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3, T4> typed => typed.Execute(arg1, arg2, arg3, arg4),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3, arg4])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3, T4, T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3, T4, T5> typed => typed.Execute(arg1, arg2, arg3, arg4, arg5),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3, arg4, arg5])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3, T4, T5, T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3, T4, T5, T6> typed => typed.Execute(arg1, arg2, arg3, arg4, arg5, arg6),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3, arg4, arg5, arg6])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3, T4, T5, T6, T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3, T4, T5, T6, T7> typed => typed.Execute(arg1, arg2, arg3, arg4, arg5, arg6, arg7),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3, arg4, arg5, arg6, arg7])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+
+    public object? Execute<T1, T2, T3, T4, T5, T6, T7, T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    {
+        object? result = null;
+        object?[]? arguments = null;
+
+        foreach (var behavior in GetSnapshot())
+        {
+            var behaviorResult = behavior switch
+            {
+                IArgumentFreeBehavior argumentFree => argumentFree.Execute(),
+                ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8> typed => typed.Execute(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8),
+                _ => behavior.Execute(arguments ??= [arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8])
+            };
+
+            if (behavior is not ISideEffectBehavior)
+            {
+                result = behaviorResult;
+            }
+        }
+
+        return result;
+    }
+}

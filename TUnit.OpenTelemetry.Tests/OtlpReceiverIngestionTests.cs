@@ -194,35 +194,62 @@ public class OtlpReceiverIngestionTests
     }
 
     [Test]
-    public async Task Receiver_DrainAsync_WaitsForLatePostBeforeReturning()
+    public async Task Receiver_DrainAsync_WaitsForInFlightForwardBeforeReturning()
     {
-        await using var receiver = new OtlpReceiver();
-        receiver.Start();
+        using var upstreamListener = new HttpListener();
+        var upstreamPort = LoopbackHttpListenerFactory.FindFreePort();
+        upstreamListener.Prefixes.Add($"http://127.0.0.1:{upstreamPort}/");
+        upstreamListener.Start();
 
-        // Simulate a SUT exporter that flushes a couple hundred ms after the test logic
-        // would finish — without DrainAsync, AspireFixture would tear down the AppHost
-        // and the late POST would fail / be dropped.
-        var latePostCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var latePost = Task.Run(async () =>
+        var upstreamReceived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseUpstream = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var listenerTask = Task.Run(async () =>
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
-            using var client = new HttpClient();
-            using var content = new ByteArrayContent(Array.Empty<byte>());
-            await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
-            latePostCompleted.SetResult(true);
+            var ctx = await upstreamListener.GetContextAsync();
+            upstreamReceived.TrySetResult();
+
+            await releaseUpstream.Task;
+
+            ctx.Response.StatusCode = 200;
+            ctx.Response.ContentLength64 = 0;
+            ctx.Response.Close();
         });
 
-        await receiver.DrainAsync(TimeSpan.FromSeconds(3));
+        try
+        {
+            await using var receiver = new OtlpReceiver($"http://127.0.0.1:{upstreamPort}");
+            receiver.Start();
 
-        // Asserts the real contract directly: drain returned only after the late POST
-        // had been issued and acknowledged. Wall-clock floors (the previous approach)
-        // failed on macOS arm64 because Task.Delay scheduling jitter could push the
-        // late POST inside the synchronous prefix of DrainAsync, making the elapsed
-        // measurement misrepresent the actual invariant the drain must hold.
-        await Assert.That(latePostCompleted.Task.IsCompleted).IsTrue();
-        await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
+            using var client = new HttpClient();
+            using var content = new ByteArrayContent(Array.Empty<byte>());
+            content.Headers.ContentType = new("application/x-protobuf");
+            var response = await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/traces", content);
 
-        await latePost;
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await upstreamReceived.Task.WaitAsync(TimeSpan.FromSeconds(2));
+
+            var drainTask = receiver.DrainAsync(TimeSpan.FromSeconds(3));
+            var completedBeforeUpstreamReleased = await Task.WhenAny(
+                drainTask,
+                Task.Delay(TimeSpan.FromMilliseconds(750))) == drainTask;
+
+            await Assert.That(completedBeforeUpstreamReleased).IsFalse();
+
+            releaseUpstream.TrySetResult();
+
+            await drainTask.WaitAsync(TimeSpan.FromSeconds(2));
+            await listenerTask.WaitAsync(TimeSpan.FromSeconds(2));
+
+            await Assert.That(receiver.Diagnostics.TracesRequests).IsEqualTo(1);
+            await Assert.That(receiver.Diagnostics.UpstreamForwardSuccess).IsEqualTo(1);
+            await Assert.That(receiver.Diagnostics.UpstreamForwardFailures).IsEqualTo(0);
+        }
+        finally
+        {
+            releaseUpstream.TrySetResult();
+            upstreamListener.Stop();
+            try { await listenerTask; } catch { }
+        }
     }
 
     [Test]

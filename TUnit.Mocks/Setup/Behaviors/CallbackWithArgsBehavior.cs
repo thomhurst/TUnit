@@ -10,7 +10,7 @@ namespace TUnit.Mocks.Setup.Behaviors;
 /// Future optimization: implement ITypedBehavior&lt;T...&gt; to avoid store.ToArray() when args are needed.
 /// </remarks>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed class CallbackWithArgsBehavior : IBehavior
+public sealed class CallbackWithArgsBehavior : IBehavior, ISideEffectBehavior
 {
     private readonly Action<object?[]> _callback;
 
