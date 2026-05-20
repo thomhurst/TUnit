@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace TUnit.Mocks.Setup.Behaviors;
 
 /// <summary>
@@ -7,46 +9,52 @@ namespace TUnit.Mocks.Setup.Behaviors;
 /// (e.g. a TypedComputedReturnBehavior that takes Func&lt;T1, TReturn&gt;).
 /// </summary>
 /// <remarks>
-/// Intentionally internal: the typed dispatch is tightly coupled to the source generator's
-/// knowledge of parameter arity — only generated code knows the concrete types at compile time.
-/// <see cref="IArgumentFreeBehavior"/> is public because any behavior can opt in without type knowledge.
+/// Custom behaviors can implement the matching arity to avoid the object?[] fallback.
 /// </remarks>
-internal interface ITypedBehavior<T1>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1>
 {
     object? Execute(T1 arg1);
 }
 
-internal interface ITypedBehavior<T1, T2>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2>
 {
     object? Execute(T1 arg1, T2 arg2);
 }
 
-internal interface ITypedBehavior<T1, T2, T3>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3);
 }
 
-internal interface ITypedBehavior<T1, T2, T3, T4>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3, T4>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
 }
 
-internal interface ITypedBehavior<T1, T2, T3, T4, T5>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3, T4, T5>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
 }
 
-internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3, T4, T5, T6>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 }
 
-internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
 }
 
-internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
 {
     object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
 }
@@ -59,7 +67,7 @@ internal interface ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
 //   - MaxTypedParams in MockMembersBuilder.cs (source generator)
 // ──────────────────────────────────────────────────────────────────────
 
-internal sealed class TypedCallbackBehavior<T1>(Action<T1> callback) : IBehavior, ITypedBehavior<T1>
+internal sealed class TypedCallbackBehavior<T1>(Action<T1> callback) : IBehavior, ITypedBehavior<T1>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -71,7 +79,7 @@ internal sealed class TypedCallbackBehavior<T1>(Action<T1> callback) : IBehavior
     public object? Execute(T1 arg1) { callback(arg1); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2>(Action<T1, T2> callback) : IBehavior, ITypedBehavior<T1, T2>
+internal sealed class TypedCallbackBehavior<T1, T2>(Action<T1, T2> callback) : IBehavior, ITypedBehavior<T1, T2>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -83,7 +91,7 @@ internal sealed class TypedCallbackBehavior<T1, T2>(Action<T1, T2> callback) : I
     public object? Execute(T1 arg1, T2 arg2) { callback(arg1, arg2); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3>(Action<T1, T2, T3> callback) : IBehavior, ITypedBehavior<T1, T2, T3>
+internal sealed class TypedCallbackBehavior<T1, T2, T3>(Action<T1, T2, T3> callback) : IBehavior, ITypedBehavior<T1, T2, T3>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -95,7 +103,7 @@ internal sealed class TypedCallbackBehavior<T1, T2, T3>(Action<T1, T2, T3> callb
     public object? Execute(T1 arg1, T2 arg2, T3 arg3) { callback(arg1, arg2, arg3); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4>
+internal sealed class TypedCallbackBehavior<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -107,7 +115,7 @@ internal sealed class TypedCallbackBehavior<T1, T2, T3, T4>(Action<T1, T2, T3, T
     public object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4) { callback(arg1, arg2, arg3, arg4); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5>
+internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -119,7 +127,7 @@ internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5>(Action<T1, T2, T
     public object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) { callback(arg1, arg2, arg3, arg4, arg5); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6>
+internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -131,7 +139,7 @@ internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6>(Action<T1, T
     public object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) { callback(arg1, arg2, arg3, arg4, arg5, arg6); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>
+internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6, T7>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {
@@ -143,7 +151,7 @@ internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7>(Action<T
     public object? Execute(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) { callback(arg1, arg2, arg3, arg4, arg5, arg6, arg7); return null; }
 }
 
-internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>
+internal sealed class TypedCallbackBehavior<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> callback) : IBehavior, ITypedBehavior<T1, T2, T3, T4, T5, T6, T7, T8>, ISideEffectBehavior
 {
     public object? Execute(object?[] arguments)
     {

@@ -23,3 +23,9 @@ public interface IArgumentFreeBehavior
 {
     object? Execute();
 }
+
+/// <summary>
+/// Marker interface for behaviors that perform side effects but do not provide the mock return value.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ISideEffectBehavior;

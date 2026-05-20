@@ -37,6 +37,7 @@ public sealed class MethodSetup
     /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
     private List<IBehavior>? _behaviors;
     private int _callIndex;
+    private bool _nextBehaviorStartsNewStep = true;
 
     public int MemberId { get; }
 
@@ -117,41 +118,55 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
-        // Lock-free fast path: CAS for the common single-behavior case.
-        // Avoids allocating the Lock object entirely when only one behavior is registered.
-        // Safety: Interlocked.CompareExchange is a full memory barrier, so a successful CAS
-        // on _singleBehavior is visible to any subsequent Volatile.Read in AddBehaviorSlow.
-        if (Volatile.Read(ref _behaviors) is null
-            && Interlocked.CompareExchange(ref _singleBehavior, behavior, null) is null)
+        lock (BehaviorLock)
         {
-            // Double-check: if a concurrent AddBehaviorSlow promoted to list between our
-            // _behaviors read and the CAS, fall through to slow path to reconcile.
-            if (Volatile.Read(ref _behaviors) is null)
+            if (_nextBehaviorStartsNewStep || (_singleBehavior is null && _behaviors is null))
             {
+                AddBehaviorStep(behavior);
+                _nextBehaviorStartsNewStep = false;
                 return;
             }
-        }
 
-        AddBehaviorSlow(behavior);
+            AppendToCurrentBehaviorStep(behavior);
+        }
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private void AddBehaviorSlow(IBehavior behavior)
+    public void Then()
     {
         lock (BehaviorLock)
         {
-            // Promote to list on second behavior. Write _behaviors before clearing
-            // _singleBehavior so that a lock-free reader in GetNextBehavior that sees
-            // _singleBehavior == null will also see the updated _behaviors reference.
-            if (Volatile.Read(ref _behaviors) is null)
-            {
-                var current = Volatile.Read(ref _singleBehavior);
-                Volatile.Write(ref _behaviors, current is not null ? [current] : []);
-            }
+            _nextBehaviorStartsNewStep = true;
+        }
+    }
 
-            _behaviors!.Add(behavior);
+    private void AddBehaviorStep(IBehavior behavior)
+    {
+        if (_singleBehavior is null && _behaviors is null)
+        {
+            Volatile.Write(ref _singleBehavior, behavior);
+            return;
+        }
+
+        var behaviors = _behaviors;
+        if (behaviors is null)
+        {
+            behaviors = [Volatile.Read(ref _singleBehavior)!];
+            Volatile.Write(ref _behaviors, behaviors);
             Volatile.Write(ref _singleBehavior, null);
         }
+
+        behaviors.Add(behavior);
+    }
+
+    private void AppendToCurrentBehaviorStep(IBehavior behavior)
+    {
+        if (_behaviors is { Count: > 0 } behaviors)
+        {
+            behaviors[^1] = CompositeBehavior.Combine(behaviors[^1], behavior);
+            return;
+        }
+
+        Volatile.Write(ref _singleBehavior, CompositeBehavior.Combine(Volatile.Read(ref _singleBehavior)!, behavior));
     }
 
     public bool Matches(object?[] actualArgs)
