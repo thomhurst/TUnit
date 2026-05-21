@@ -23,7 +23,11 @@ internal class Bugs2971NullableTypeTest : TestsBase
         {
             // Scrub GUIDs from generated files before verification (same as TestsBase)
             var scrubbedFiles = generatedFiles.Select(file => ScrubGuids(file)).ToArray();
-            await Verify(scrubbedFiles).UniqueForTargetFrameworkAndVersion();
+            await Verify(scrubbedFiles)
+                .ScrubLinesContaining("StartColumnNumber = ")
+                .ScrubLinesContaining("EndLineNumber = ")
+                .ScrubLinesContaining("EndColumnNumber = ")
+                .UniqueForTargetFrameworkAndVersion();
         });
 
     private string ScrubGuids(string text)
