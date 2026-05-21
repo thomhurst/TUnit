@@ -375,7 +375,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 #endif
 
-        var (commitSha, branch, prNumber, repoSlug) = GetCiContext();
+        var (commitSha, branch, prNumber, repoSlug, serverUrl) = GetCiContext();
 
         return new ReportData
         {
@@ -394,14 +394,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Branch = branch,
             PullRequestNumber = prNumber,
             RepositorySlug = repoSlug,
+            ServerUrl = serverUrl,
         };
     }
 
-    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug) GetCiContext()
+    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug, string? ServerUrl) GetCiContext()
     {
         if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
         {
-            return (null, null, null, null);
+            return (null, null, null, null, null);
         }
 
         var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
@@ -428,7 +429,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
         }
 
-        return (commitSha, branch, prNumber, repoSlug);
+        var serverUrl = (Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com").TrimEnd('/');
+
+        return (commitSha, branch, prNumber, repoSlug, serverUrl);
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)

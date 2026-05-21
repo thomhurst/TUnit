@@ -1682,7 +1682,7 @@ function loadSourceSnippet(detail) {
   const render = (text) => {
     const lines = text.split('\n');
     const from = Math.max(0, startLine - 1);
-    const to = Math.min(lines.length, endLine);
+    const to = Math.min(lines.length, Math.max(from + 1, endLine));
     const snippet = lines.slice(from, to);
     const fileName = path.split('/').pop();
     container.innerHTML =
@@ -1699,7 +1699,11 @@ function loadSourceSnippet(detail) {
     return;
   }
 
-  const rawUrl = 'https://raw.githubusercontent.com/' + repo + '/' + commit + '/' + path;
+  const serverUrl = REPORT.serverUrl || 'https://github.com';
+  const isGitHubCom = serverUrl === 'https://github.com';
+  const rawUrl = isGitHubCom
+    ? 'https://raw.githubusercontent.com/' + repo + '/' + commit + '/' + path
+    : serverUrl + '/' + repo + '/raw/' + commit + '/' + path;
   fetch(rawUrl).then(r => {
     if (!r.ok) throw new Error(r.status);
     return r.text();
@@ -2337,7 +2341,7 @@ function renderDetail() {
           <div style="display:flex;gap:8px;align-items:center;">
             ${(()=>{
               if (!t.source.relativePath || !REPORT.commit || !REPORT.repository) return '';
-              const serverUrl = 'https://github.com';
+              const serverUrl = REPORT.serverUrl || 'https://github.com';
               const lineRef = t.source.endLine && t.source.endLine > t.source.line
                 ? '#L' + t.source.line + '-L' + t.source.endLine
                 : '#L' + t.source.line;

@@ -184,6 +184,7 @@ internal static class HtmlReportGenerator
             if (!string.IsNullOrEmpty(data.CommitSha)) w.WriteString("commit", data.CommitSha);
             if (!string.IsNullOrEmpty(data.PullRequestNumber)) w.WriteString("pr", "#" + data.PullRequestNumber);
             if (!string.IsNullOrEmpty(data.RepositorySlug)) w.WriteString("repository", data.RepositorySlug);
+            if (!string.IsNullOrEmpty(data.ServerUrl)) w.WriteString("serverUrl", data.ServerUrl);
             if (!string.IsNullOrEmpty(data.Filter)) w.WriteString("filter", data.Filter);
 
             w.WriteNumber("startMs", runStartMs);
