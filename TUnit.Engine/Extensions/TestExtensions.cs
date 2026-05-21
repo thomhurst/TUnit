@@ -48,8 +48,10 @@ internal static class TestExtensions
             var testDetails = testContext.Metadata.TestDetails;
 
             var fileLocation = new TestFileLocationProperty(testDetails.TestFilePath, new LinePositionSpan(
-                new LinePosition(testDetails.TestLineNumber, 0),
-                new LinePosition(testDetails.TestLineNumber, 0)
+                new LinePosition(testDetails.TestLineNumber, testDetails.TestStartColumnNumber),
+                new LinePosition(
+                    testDetails.TestEndLineNumber > 0 ? testDetails.TestEndLineNumber : testDetails.TestLineNumber,
+                    testDetails.TestEndColumnNumber)
             ));
 
             var methodIdentifier = new TestMethodIdentifierProperty(

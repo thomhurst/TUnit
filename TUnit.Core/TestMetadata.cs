@@ -39,6 +39,12 @@ public abstract class TestMetadata
 
     public required int LineNumber { get; init; }
 
+    internal int StartColumnNumber { get; init; }
+
+    internal int EndLineNumber { get; init; }
+
+    internal int EndColumnNumber { get; init; }
+
     public required MethodMetadata MethodMetadata { get; init; }
 
     public GenericTypeInfo? GenericTypeInfo { get; init; }

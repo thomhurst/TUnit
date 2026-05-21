@@ -49,6 +49,9 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public required MethodMetadata MethodMetadata { get; set; }
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }
+    internal int TestStartColumnNumber { get; set; }
+    internal int TestEndLineNumber { get; set; }
+    internal int TestEndColumnNumber { get; set; }
     public required Type ReturnType { get; set; }
     // Lazy — the vast majority of tests use zero injected properties, so we skip the
     // per-test ConcurrentDictionary allocation (~200+ bytes) until there's actually
