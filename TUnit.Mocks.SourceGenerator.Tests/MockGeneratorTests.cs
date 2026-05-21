@@ -729,6 +729,64 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public void Partial_Mock_Preserves_All_Access_Modifiers_In_Same_Assembly()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public class AccessModifierService
+            {
+                public virtual string PublicMethod() => "";
+                protected virtual string ProtectedMethod() => "";
+                internal virtual string InternalMethod() => "";
+                protected internal virtual string ProtectedInternalMethod() => "";
+                private protected virtual string PrivateProtectedMethod() => "";
+
+                public virtual string PublicProperty { get; set; } = "";
+                protected virtual string ProtectedProperty { get; set; } = "";
+                internal virtual string InternalProperty { get; set; } = "";
+                protected internal virtual string ProtectedInternalProperty { get; set; } = "";
+                private protected virtual string PrivateProtectedProperty { get; set; } = "";
+
+                public virtual event EventHandler? PublicEvent;
+                protected virtual event EventHandler? ProtectedEvent;
+                internal virtual event EventHandler? InternalEvent;
+                protected internal virtual event EventHandler? ProtectedInternalEvent;
+                private protected virtual event EventHandler? PrivateProtectedEvent;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<AccessModifierService>();
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source);
+
+        AssertContains(generated, "public override string PublicMethod()");
+        AssertContains(generated, "protected override string ProtectedMethod()");
+        AssertContains(generated, "internal override string InternalMethod()");
+        AssertContains(generated, "protected internal override string ProtectedInternalMethod()");
+        AssertContains(generated, "private protected override string PrivateProtectedMethod()");
+
+        AssertContains(generated, "public override string PublicProperty");
+        AssertContains(generated, "protected override string ProtectedProperty");
+        AssertContains(generated, "internal override string InternalProperty");
+        AssertContains(generated, "protected internal override string ProtectedInternalProperty");
+        AssertContains(generated, "private protected override string PrivateProtectedProperty");
+
+        AssertContains(generated, "public override event global::System.EventHandler? PublicEvent");
+        AssertContains(generated, "protected override event global::System.EventHandler? ProtectedEvent");
+        AssertContains(generated, "internal override event global::System.EventHandler? InternalEvent");
+        AssertContains(generated, "protected internal override event global::System.EventHandler? ProtectedInternalEvent");
+        AssertContains(generated, "private protected override event global::System.EventHandler? PrivateProtectedEvent");
+    }
+
+    [Test]
     public Task Partial_Mock_Filters_Internal_Virtual_Members_From_External_Assembly()
     {
         // Simulate an external assembly with internal, private protected, and public virtual members
@@ -766,6 +824,141 @@ public class MockGeneratorTests : SnapshotTestBase
             """;
 
         return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
+    public void Partial_Mock_Preserves_Externally_Accessible_Modifier_Combinations_Without_InternalsVisibleTo()
+    {
+        var externalSource = """
+            using System;
+
+            namespace ExternalLib
+            {
+                public class ExternalModifiers
+                {
+                    public virtual string PublicMethod() => "";
+                    protected virtual string ProtectedMethod() => "";
+                    internal virtual string InternalMethod() => "";
+                    protected internal virtual string ProtectedInternalMethod() => "";
+                    private protected virtual string PrivateProtectedMethod() => "";
+
+                    public virtual string PublicProperty { get; set; } = "";
+                    protected virtual string ProtectedProperty { get; set; } = "";
+                    internal virtual string InternalProperty { get; set; } = "";
+                    protected internal virtual string ProtectedInternalProperty { get; set; } = "";
+                    private protected virtual string PrivateProtectedProperty { get; set; } = "";
+
+                    public virtual event EventHandler? PublicEvent;
+                    protected virtual event EventHandler? ProtectedEvent;
+                    internal virtual event EventHandler? InternalEvent;
+                    protected internal virtual event EventHandler? ProtectedInternalEvent;
+                    private protected virtual event EventHandler? PrivateProtectedEvent;
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ExternalModifiers>();
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source, [externalRef]);
+
+        AssertContains(generated, "public override string PublicMethod()");
+        AssertContains(generated, "protected override string ProtectedMethod()");
+        AssertContains(generated, "protected override string ProtectedInternalMethod()");
+        AssertDoesNotContain(generated, "internal override string InternalMethod()");
+        AssertDoesNotContain(generated, "private protected override string PrivateProtectedMethod()");
+
+        AssertContains(generated, "public override string PublicProperty");
+        AssertContains(generated, "protected override string ProtectedProperty");
+        AssertContains(generated, "protected override string ProtectedInternalProperty");
+        AssertDoesNotContain(generated, "internal override string InternalProperty");
+        AssertDoesNotContain(generated, "private protected override string PrivateProtectedProperty");
+
+        AssertContains(generated, "public override event global::System.EventHandler? PublicEvent");
+        AssertContains(generated, "protected override event global::System.EventHandler? ProtectedEvent");
+        AssertContains(generated, "protected override event global::System.EventHandler? ProtectedInternalEvent");
+        AssertDoesNotContain(generated, "internal override event global::System.EventHandler? InternalEvent");
+        AssertDoesNotContain(generated, "private protected override event global::System.EventHandler? PrivateProtectedEvent");
+    }
+
+    [Test]
+    public void Partial_Mock_Preserves_All_Access_Modifiers_With_InternalsVisibleTo()
+    {
+        var externalSource = """
+            using System;
+            using System.Runtime.CompilerServices;
+
+            [assembly: InternalsVisibleTo("TestAssembly")]
+
+            namespace ExternalLib
+            {
+                public class ExternalModifiers
+                {
+                    public virtual string PublicMethod() => "";
+                    protected virtual string ProtectedMethod() => "";
+                    internal virtual string InternalMethod() => "";
+                    protected internal virtual string ProtectedInternalMethod() => "";
+                    private protected virtual string PrivateProtectedMethod() => "";
+
+                    public virtual string PublicProperty { get; set; } = "";
+                    protected virtual string ProtectedProperty { get; set; } = "";
+                    internal virtual string InternalProperty { get; set; } = "";
+                    protected internal virtual string ProtectedInternalProperty { get; set; } = "";
+                    private protected virtual string PrivateProtectedProperty { get; set; } = "";
+
+                    public virtual event EventHandler? PublicEvent;
+                    protected virtual event EventHandler? ProtectedEvent;
+                    internal virtual event EventHandler? InternalEvent;
+                    protected internal virtual event EventHandler? ProtectedInternalEvent;
+                    private protected virtual event EventHandler? PrivateProtectedEvent;
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ExternalModifiers>();
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source, [externalRef]);
+
+        AssertContains(generated, "public override string PublicMethod()");
+        AssertContains(generated, "protected override string ProtectedMethod()");
+        AssertContains(generated, "internal override string InternalMethod()");
+        AssertContains(generated, "protected internal override string ProtectedInternalMethod()");
+        AssertContains(generated, "private protected override string PrivateProtectedMethod()");
+
+        AssertContains(generated, "public override string PublicProperty");
+        AssertContains(generated, "protected override string ProtectedProperty");
+        AssertContains(generated, "internal override string InternalProperty");
+        AssertContains(generated, "protected internal override string ProtectedInternalProperty");
+        AssertContains(generated, "private protected override string PrivateProtectedProperty");
+
+        AssertContains(generated, "public override event global::System.EventHandler? PublicEvent");
+        AssertContains(generated, "protected override event global::System.EventHandler? ProtectedEvent");
+        AssertContains(generated, "internal override event global::System.EventHandler? InternalEvent");
+        AssertContains(generated, "protected internal override event global::System.EventHandler? ProtectedInternalEvent");
+        AssertContains(generated, "private protected override event global::System.EventHandler? PrivateProtectedEvent");
     }
 
     // Regression for https://github.com/thomhurst/TUnit/issues/5455 — public virtual properties
@@ -877,6 +1070,61 @@ public class MockGeneratorTests : SnapshotTestBase
             """;
 
         return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
+    public void Wrap_Mock_Preserves_Internal_And_ProtectedInternal_Modifiers_With_InternalsVisibleTo()
+    {
+        var externalSource = """
+            using System;
+            using System.Runtime.CompilerServices;
+
+            [assembly: InternalsVisibleTo("TestAssembly")]
+
+            namespace ExternalLib
+            {
+                public class ExternalWrapTarget
+                {
+                    public virtual string PublicMethod() => "";
+                    internal virtual string InternalMethod() => "";
+                    protected internal virtual string ProtectedInternalMethod() => "";
+
+                    public virtual string PublicProperty { get; set; } = "";
+                    internal virtual string InternalProperty { get; set; } = "";
+                    protected internal virtual string ProtectedInternalProperty { get; set; } = "";
+
+                    public virtual event EventHandler? PublicEvent;
+                    internal virtual event EventHandler? InternalEvent;
+                    protected internal virtual event EventHandler? ProtectedInternalEvent;
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource);
+        var source = """
+            using TUnit.Mocks;
+            using ExternalLib;
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Wrap(new ExternalWrapTarget());
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source, [externalRef]);
+
+        AssertContains(generated, "public override string PublicMethod()");
+        AssertContains(generated, "internal override string InternalMethod()");
+        AssertContains(generated, "protected internal override string ProtectedInternalMethod()");
+        AssertContains(generated, "public override string PublicProperty");
+        AssertContains(generated, "internal override string InternalProperty");
+        AssertContains(generated, "protected internal override string ProtectedInternalProperty");
+        AssertContains(generated, "public override event global::System.EventHandler? PublicEvent");
+        AssertContains(generated, "internal override event global::System.EventHandler? InternalEvent");
+        AssertContains(generated, "protected internal override event global::System.EventHandler? ProtectedInternalEvent");
     }
 
     [Test]
@@ -1572,5 +1820,24 @@ public class MockGeneratorTests : SnapshotTestBase
             """;
 
         return VerifyGeneratorOutput(source);
+    }
+
+    private static string GetGeneratedOutput(string source, IEnumerable<Microsoft.CodeAnalysis.MetadataReference>? additionalReferences = null)
+        => string.Join(Environment.NewLine, RunGenerator(source, additionalReferences));
+
+    private static void AssertContains(string text, string expected)
+    {
+        if (!text.Contains(expected, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Expected generated output to contain: {expected}");
+        }
+    }
+
+    private static void AssertDoesNotContain(string text, string unexpected)
+    {
+        if (text.Contains(unexpected, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Expected generated output not to contain: {unexpected}");
+        }
     }
 }
