@@ -39,13 +39,13 @@ public sealed class TestEntry<
     /// <summary>Source start line number.</summary>
     public required int LineNumber { get; init; }
 
-    /// <summary>Source start column number.</summary>
+    /// <summary>Source start column number. Uses a one-based column index; zero indicates the exact column is unavailable.</summary>
     public int StartColumnNumber { get; init; }
 
     /// <summary>Source end line number.</summary>
     public int EndLineNumber { get; init; }
 
-    /// <summary>Source end column number.</summary>
+    /// <summary>Source end column number. Uses a one-based column index; zero indicates the exact column is unavailable.</summary>
     public int EndColumnNumber { get; init; }
 
     /// <summary>Pre-extracted categories for fast filtering.</summary>

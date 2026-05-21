@@ -4041,6 +4041,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static TestSourceLocation CreateSourceLocation(FileLinePositionSpan lineSpan, string filePath)
     {
+        // Roslyn reports zero-based line/character positions; TUnit stores user-facing source
+        // coordinates as one-based values alongside the existing LineNumber convention.
         return new TestSourceLocation(
             filePath,
             lineSpan.StartLinePosition.Line + 1,
@@ -4057,6 +4059,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return new TestSourceLocation(filePath, resolvedLineNumber, 0, resolvedLineNumber, 0);
     }
 
+    /// <summary>
+    /// Source coordinates for a discovered test.
+    /// Line and column values use one-based numbering; zero-valued columns indicate that the
+    /// precise character span could not be determined for the fallback location.
+    /// </summary>
     private readonly record struct TestSourceLocation(
         string FilePath,
         int LineNumber,
