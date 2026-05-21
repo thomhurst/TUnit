@@ -36,7 +36,7 @@ public sealed class TestEntry<
     /// <summary>Source file path.</summary>
     public required string FilePath { get; init; }
 
-    /// <summary>Source line number.</summary>
+    /// <summary>Source start line number.</summary>
     public required int LineNumber { get; init; }
 
     /// <summary>Source start column number.</summary>

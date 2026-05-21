@@ -4051,6 +4051,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static TestSourceLocation CreateFallbackSourceLocation(string filePath, int lineNumber)
     {
+        // Exact Roslyn span data was unavailable. Preserve any caller-supplied start line, and
+        // use zero-valued columns to indicate that the precise character range could not be determined.
         var resolvedLineNumber = lineNumber > 0 ? lineNumber : 0;
         return new TestSourceLocation(filePath, resolvedLineNumber, 0, resolvedLineNumber, 0);
     }
