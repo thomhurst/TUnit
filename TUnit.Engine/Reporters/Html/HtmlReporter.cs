@@ -580,6 +580,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
+            EndLineNumber = fileLocation?.LineSpan.End.Line is > 0 ? fileLocation.LineSpan.End.Line : null,
+            SourceRelativePath = ComputeSourceRelativePath(fileLocation?.FilePath),
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
             Attempts = attempts,
@@ -587,6 +589,42 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             SpanId = spanId,
             AdditionalTraceIds = additionalTraceIds
         };
+    }
+
+    private static string? ComputeSourceRelativePath(string? filePath)
+    {
+        if (string.IsNullOrEmpty(filePath))
+        {
+            return null;
+        }
+
+        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
+        {
+            return null;
+        }
+
+        var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
+        if (string.IsNullOrEmpty(repo))
+        {
+            return null;
+        }
+
+        var normalized = filePath!.Replace('\\', '/');
+
+        var workspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
+        if (!string.IsNullOrEmpty(workspace) && normalized.StartsWith(workspace!, StringComparison.OrdinalIgnoreCase))
+        {
+            return normalized[workspace!.Length..].TrimStart('/');
+        }
+
+        var repoName = repo!.Split('/').LastOrDefault() ?? "";
+        var repoIndex = normalized.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
+        if (repoIndex >= 0)
+        {
+            return normalized[(repoIndex + repoName.Length + 2)..];
+        }
+
+        return null;
     }
 
     internal static string? TruncateOutput(string? value)

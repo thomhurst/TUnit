@@ -529,6 +529,8 @@ internal static class HtmlReportGenerator
         w.WriteStartObject();
         if (!string.IsNullOrEmpty(t.FilePath)) w.WriteString("path", t.FilePath);
         if (t.LineNumber is { } ln) w.WriteNumber("line", ln);
+        if (t.EndLineNumber is { } endLn) w.WriteNumber("endLine", endLn);
+        if (!string.IsNullOrEmpty(t.SourceRelativePath)) w.WriteString("relativePath", t.SourceRelativePath);
         w.WriteEndObject();
 
         if (t.RetryAttempt > 0)

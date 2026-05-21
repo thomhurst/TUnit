@@ -147,6 +147,12 @@ internal sealed class ReportTestResult
     [JsonPropertyName("lineNumber")]
     public int? LineNumber { get; init; }
 
+    [JsonPropertyName("endLineNumber")]
+    public int? EndLineNumber { get; init; }
+
+    [JsonPropertyName("sourceRelativePath")]
+    public string? SourceRelativePath { get; init; }
+
     [JsonPropertyName("skipReason")]
     public string? SkipReason { get; init; }
 
