@@ -1519,6 +1519,8 @@ namespace
         public required <[], object?[], T> CreateInstance { get; init; }
         public .TestDependency[] Dependencies { get; init; }
         public string[] DependsOn { get; init; }
+        public int EndColumnNumber { get; init; }
+        public int EndLineNumber { get; init; }
         public required string FilePath { get; init; }
         public required string FullyQualifiedName { get; init; }
         public bool HasDataSource { get; init; }
@@ -1530,6 +1532,7 @@ namespace
         public required string MethodName { get; init; }
         public string[] Properties { get; init; }
         public int RepeatCount { get; init; }
+        public int StartColumnNumber { get; init; }
         public .IDataSourceAttribute[] TestDataSources { get; init; }
     }
     public class TestInstantiationException : .TestBuilderException

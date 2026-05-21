@@ -39,6 +39,15 @@ public sealed class TestEntry<
     /// <summary>Source line number.</summary>
     public required int LineNumber { get; init; }
 
+    /// <summary>Source start column number.</summary>
+    public int StartColumnNumber { get; init; }
+
+    /// <summary>Source end line number.</summary>
+    public int EndLineNumber { get; init; }
+
+    /// <summary>Source end column number.</summary>
+    public int EndColumnNumber { get; init; }
+
     /// <summary>Pre-extracted categories for fast filtering.</summary>
     public string[] Categories { get; init; } = [];
 
@@ -127,6 +136,9 @@ public sealed class TestEntry<
             AttributeGroupIndex = AttributeGroupIndex,
             FilePath = FilePath,
             LineNumber = LineNumber,
+            StartColumnNumber = StartColumnNumber,
+            EndLineNumber = EndLineNumber,
+            EndColumnNumber = EndColumnNumber,
             MethodMetadata = MethodMetadata,
             RepeatCount = RepeatCount > 0 ? RepeatCount : null,
             TestSessionId = testSessionId,
