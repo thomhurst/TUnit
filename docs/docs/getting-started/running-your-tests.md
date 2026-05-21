@@ -74,7 +74,7 @@ Visual Studio is supported. The "Use testing platform server mode" option must b
 ## Rider
 Rider is supported.
 
-The Enable Testing Platform support option must be selected in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
+The "Enable Testing Platform support" option must be selected in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
 
 ![Rider Settings](../../static/img/rider.png)
 
