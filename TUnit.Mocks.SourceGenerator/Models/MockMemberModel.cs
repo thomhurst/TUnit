@@ -41,7 +41,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string UnwrappedSmartDefault { get; init; } = "default!";
     public bool IsAbstractMember { get; init; }
     public bool IsVirtualMember { get; init; }
-    public bool IsProtected { get; init; }
+    public string OverrideAccessModifier { get; init; } = "public";
+    public string GetterAccessModifier { get; init; } = "";
+    public string SetterAccessModifier { get; init; } = "";
     public bool IsRefStructReturn { get; init; }
     public bool IsStaticAbstract { get; init; }
     public string? AutoMockFactoryMethod { get; init; }
@@ -120,7 +122,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
             && IsAbstractMember == other.IsAbstractMember
             && IsVirtualMember == other.IsVirtualMember
-            && IsProtected == other.IsProtected
+            && OverrideAccessModifier == other.OverrideAccessModifier
+            && GetterAccessModifier == other.GetterAccessModifier
+            && SetterAccessModifier == other.SetterAccessModifier
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
             && AutoMockFactoryMethod == other.AutoMockFactoryMethod
@@ -141,6 +145,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + ReturnType.GetHashCode();
             hash = hash * 31 + Parameters.GetHashCode();
             hash = hash * 31 + IsStaticAbstract.GetHashCode();
+            hash = hash * 31 + OverrideAccessModifier.GetHashCode();
+            hash = hash * 31 + GetterAccessModifier.GetHashCode();
+            hash = hash * 31 + SetterAccessModifier.GetHashCode();
             hash = hash * 31 + (AutoMockFactoryMethod?.GetHashCode() ?? 0);
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);

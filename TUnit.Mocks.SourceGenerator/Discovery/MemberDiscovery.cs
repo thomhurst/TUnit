@@ -363,7 +363,7 @@ internal static class MemberDiscovery
                         {
                             if (seenMethods.ContainsKey(key)) continue;
                             seenMethods[key] = (methods.Count, method.ReturnType);
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, compilation: compilation));
+                            methods.Add(CreateMethodModel(method, ref memberIdCounter, null, compilationAssembly: compilationAssembly, compilation: compilation));
                         }
                         else
                         {
@@ -429,7 +429,7 @@ internal static class MemberDiscovery
                         if (evt.IsAbstract || evt.IsVirtual || evt.IsOverride)
                         {
                             if (!seenEvents.Add(key)) continue;
-                            events.Add(CreateEventModel(evt, null));
+                            events.Add(CreateEventModel(evt, null, compilationAssembly: compilationAssembly));
                         }
                         else
                         {
@@ -551,6 +551,43 @@ internal static class MemberDiscovery
         return true;
     }
 
+    private static string GetOverrideAccessModifier(ISymbol member, IAssemblySymbol? compilationAssembly)
+        => member.DeclaredAccessibility switch
+        {
+            Accessibility.Protected => "protected",
+            Accessibility.Internal => "internal",
+            Accessibility.ProtectedAndInternal => "private protected",
+            Accessibility.ProtectedOrInternal => HasInternalAccess(member, compilationAssembly) ? "protected internal" : "protected",
+            _ => "public"
+        };
+
+    private static bool HasInternalAccess(ISymbol member, IAssemblySymbol? compilationAssembly)
+    {
+        if (compilationAssembly is null)
+        {
+            return true;
+        }
+
+        var memberAssembly = member.ContainingAssembly;
+        return memberAssembly is null
+            || SymbolEqualityComparer.Default.Equals(memberAssembly, compilationAssembly)
+            || memberAssembly.GivesAccessTo(compilationAssembly);
+    }
+
+    private static string GetAccessorAccessModifier(
+        IMethodSymbol? accessor,
+        string propertyAccessModifier,
+        IAssemblySymbol? compilationAssembly)
+    {
+        if (accessor is null)
+        {
+            return "";
+        }
+
+        var accessorAccessModifier = GetOverrideAccessModifier(accessor, compilationAssembly);
+        return accessorAccessModifier == propertyAccessModifier ? "" : accessorAccessModifier;
+    }
+
     /// <summary>
     /// Creates a MockMemberModel from a delegate type's Invoke method.
     /// </summary>
@@ -559,7 +596,7 @@ internal static class MemberDiscovery
         return CreateMethodModel(invokeMethod, ref memberIdCounter, null, compilation: compilation);
     }
 
-    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false, Compilation compilation = null!)
+    private static MockMemberModel CreateMethodModel(IMethodSymbol method, ref int memberIdCounter, string? explicitInterfaceName, string? declaringInterfaceName = null, bool explicitInterfaceCanDelegate = false, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!)
     {
         var returnType = method.ReturnType;
         var isAsync = returnType.IsAsyncReturnType();
@@ -618,8 +655,7 @@ internal static class MemberDiscovery
             UnwrappedSmartDefault = ComputeUnwrappedSmartDefault(returnType, isVoid, isAsync),
             IsAbstractMember = method.IsAbstract,
             IsVirtualMember = method.IsVirtual || method.IsOverride,
-            IsProtected = method.DeclaredAccessibility == Accessibility.Protected
-                       || method.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            OverrideAccessModifier = GetOverrideAccessModifier(method, compilationAssembly),
             IsRefStructReturn = returnType.IsRefLikeType,
             AutoMockFactoryMethod = autoMockFactoryMethod,
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
@@ -666,6 +702,7 @@ internal static class MemberDiscovery
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
         var propertyObsolete = GetObsoleteAttributeSyntax(property);
+        var overrideAccessModifier = GetOverrideAccessModifier(property, compilationAssembly);
 
         return new MockMemberModel
         {
@@ -685,8 +722,9 @@ internal static class MemberDiscovery
             SmartDefault = property.Type.GetSmartDefault(property.Type.IsNullableAnnotated()),
             IsAbstractMember = property.IsAbstract,
             IsVirtualMember = property.IsVirtual || property.IsOverride,
-            IsProtected = property.DeclaredAccessibility == Accessibility.Protected
-                       || property.DeclaredAccessibility == Accessibility.ProtectedOrInternal,
+            OverrideAccessModifier = overrideAccessModifier,
+            GetterAccessModifier = GetAccessorAccessModifier(property.GetMethod, overrideAccessModifier, compilationAssembly),
+            SetterAccessModifier = GetAccessorAccessModifier(property.SetMethod, overrideAccessModifier, compilationAssembly),
             IsRefStructReturn = property.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type, compilation),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
@@ -755,6 +793,7 @@ internal static class MemberDiscovery
         var getterId = memberIdCounter++;
         var setterId = hasSetter ? memberIdCounter++ : 0;
         var indexerObsolete = GetObsoleteAttributeSyntax(indexer);
+        var overrideAccessModifier = GetOverrideAccessModifier(indexer, compilationAssembly);
 
         return new MockMemberModel
         {
@@ -782,6 +821,9 @@ internal static class MemberDiscovery
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
+            OverrideAccessModifier = overrideAccessModifier,
+            GetterAccessModifier = GetAccessorAccessModifier(indexer.GetMethod, overrideAccessModifier, compilationAssembly),
+            SetterAccessModifier = GetAccessorAccessModifier(indexer.SetMethod, overrideAccessModifier, compilationAssembly),
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type, compilation),
             ObsoleteAttribute = indexerObsolete,
             GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.GetMethod),
@@ -822,7 +864,7 @@ internal static class MemberDiscovery
         return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
     }
 
-    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null)
+    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
     {
         var eventHandlerType = evt.Type.GetFullyQualifiedNameWithNullability();
 
@@ -882,6 +924,7 @@ internal static class MemberDiscovery
             EventArgsType = eventArgsType,
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
+            OverrideAccessModifier = GetOverrideAccessModifier(evt, compilationAssembly),
             RaiseParameterList = raiseParameterList,
             ObsoleteAttribute = GetObsoleteAttributeSyntax(evt)
         };

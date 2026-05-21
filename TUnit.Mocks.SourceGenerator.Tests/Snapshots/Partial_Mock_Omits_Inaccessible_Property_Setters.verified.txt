@@ -51,7 +51,7 @@ namespace ExternalLib
                 }
                 return base.Reason;
             }
-            set
+            protected set
             {
                 if (!_engine.TryHandleCall(3, "set_Reason", new object?[] { value }))
                 {

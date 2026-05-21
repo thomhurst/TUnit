@@ -210,8 +210,7 @@ internal static class MockImplBuilder
         writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
 
         // C# prohibits restating generic constraints on override methods (CS0460)
-        var accessModifier = method.IsProtected ? "protected" : "public";
-        using (writer.Block($"{accessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
+        using (writer.Block($"{method.OverrideAccessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
         {
             if (method.IsAbstractMember)
             {
@@ -346,11 +345,12 @@ internal static class MockImplBuilder
 
     private static void GenerateWrapProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        var accessModifier = prop.IsProtected ? "protected" : "public";
         var autoMockFactory = GetAutoMockFactoryLambda(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"{accessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
         writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
 
         if (prop.HasGetter)
         {
@@ -359,7 +359,7 @@ internal static class MockImplBuilder
             {
                 if (prop.IsAbstractMember)
                 {
-                    writer.AppendLine("get");
+                    writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
                     writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                     writer.AppendLine("return default;");
@@ -367,7 +367,7 @@ internal static class MockImplBuilder
                 }
                 else
                 {
-                    writer.AppendLine("get");
+                    writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
                     writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
                     writer.AppendLine("{");
@@ -381,15 +381,15 @@ internal static class MockImplBuilder
             }
             else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             else if (prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine("get");
+                writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
@@ -402,7 +402,7 @@ internal static class MockImplBuilder
             }
             else
             {
-                writer.AppendLine("get");
+                writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
                 writer.AppendLine("{");
@@ -424,11 +424,11 @@ internal static class MockImplBuilder
 
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
-                writer.AppendLine("set");
+                writer.AppendLine($"{setterPrefix}set");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
@@ -593,8 +593,7 @@ internal static class MockImplBuilder
         writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
 
         // C# prohibits restating generic constraints on override methods (CS0460)
-        var accessModifier = method.IsProtected ? "protected" : "public";
-        using (writer.Block($"{accessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
+        using (writer.Block($"{method.OverrideAccessModifier} override {signatureReturnType} {EscapeIdentifier(method.Name)}{typeParams}({paramList})"))
         {
             if (method.IsAbstractMember)
             {
@@ -939,11 +938,12 @@ internal static class MockImplBuilder
 
     private static void GeneratePartialProperty(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        var accessModifier = prop.IsProtected ? "protected" : "public";
         var autoMockFactory = GetAutoMockFactoryLambda(prop);
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"{accessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} {EscapeIdentifier(prop.Name)}");
         writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
 
         if (prop.HasGetter)
         {
@@ -952,7 +952,7 @@ internal static class MockImplBuilder
             {
                 if (prop.IsAbstractMember)
                 {
-                    writer.AppendLine("get");
+                    writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
                     writer.AppendLine($"_engine.HandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>());");
                     writer.AppendLine("return default;");
@@ -960,7 +960,7 @@ internal static class MockImplBuilder
                 }
                 else
                 {
-                    writer.AppendLine("get");
+                    writer.AppendLine($"{getterPrefix}get");
                     writer.OpenBrace();
                     writer.AppendLine($"if (_engine.TryHandleCall({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>()))");
                     writer.AppendLine("{");
@@ -974,16 +974,16 @@ internal static class MockImplBuilder
             }
             else if (prop.IsAbstractMember && prop.IsReturnTypeStaticAbstractInterface)
             {
-                writer.AppendLine($"get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
+                writer.AppendLine($"{getterPrefix}get => ({prop.ReturnType})_engine.HandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null)!;");
             }
             else if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}{FormatAutoMockFactoryArgument(autoMockFactory)});");
             }
             else if (prop.IsReturnTypeStaticAbstractInterface)
             {
                 // Virtual property getter: try engine, fall back to base (CS8920-safe)
-                writer.AppendLine("get");
+                writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<object?>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), null, out var __rawResult))");
                 writer.AppendLine("{");
@@ -997,7 +997,7 @@ internal static class MockImplBuilder
             else
             {
                 // Virtual property getter: try engine, fall back to base
-                writer.AppendLine("get");
+                writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_{prop.Name}\", global::System.Array.Empty<object?>(), {prop.SmartDefault}, out var __result{FormatAutoMockFactoryArgument(autoMockFactory)}))");
                 writer.AppendLine("{");
@@ -1019,12 +1019,12 @@ internal static class MockImplBuilder
 
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs});");
             }
             else
             {
                 // Virtual property setter: try engine, fall back to base
-                writer.AppendLine("set");
+                writer.AppendLine($"{setterPrefix}set");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_{prop.Name}\", {setterArgs}))");
                 writer.AppendLine("{");
@@ -1071,12 +1071,13 @@ internal static class MockImplBuilder
 
     private static void GenerateOverrideIndexer(CodeWriter writer, MockMemberModel prop, string fallbackTarget)
     {
-        var accessModifier = prop.IsProtected ? "protected" : "public";
         var paramList = FormatIndexerParameterList(prop);
         var argPassList = string.Join(", ", prop.Parameters.Select(p => p.Name));
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
-        writer.AppendLine($"{accessModifier} override {prop.ReturnType} this[{paramList}]");
+        writer.AppendLine($"{prop.OverrideAccessModifier} override {prop.ReturnType} this[{paramList}]");
         writer.OpenBrace();
+        var getterPrefix = AccessorPrefix(prop.GetterAccessModifier);
+        var setterPrefix = AccessorPrefix(prop.SetterAccessModifier);
 
         if (prop.HasGetter)
         {
@@ -1084,11 +1085,11 @@ internal static class MockImplBuilder
             writer.AppendLineIfNotEmpty(prop.GetterObsoleteAttribute);
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
+                writer.AppendLine($"{getterPrefix}get => _engine.HandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault});");
             }
             else
             {
-                writer.AppendLine("get");
+                writer.AppendLine($"{getterPrefix}get");
                 writer.OpenBrace();
                 writer.AppendLine($"if (_engine.TryHandleCallWithReturn<{prop.ReturnType}>({prop.MemberId}, \"get_Item\", {argsArray}, {prop.SmartDefault}, out var __result))");
                 writer.OpenBrace();
@@ -1105,11 +1106,11 @@ internal static class MockImplBuilder
             writer.AppendLineIfNotEmpty(prop.SetterObsoleteAttribute);
             if (prop.IsAbstractMember)
             {
-                writer.AppendLine($"set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
+                writer.AppendLine($"{setterPrefix}set => _engine.HandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs});");
             }
             else
             {
-                writer.AppendLine("set");
+                writer.AppendLine($"{setterPrefix}set");
                 writer.OpenBrace();
                 writer.AppendLine($"if (!_engine.TryHandleCall({prop.SetterMemberId}, \"set_Item\", {setterArgs}))");
                 writer.OpenBrace();
@@ -1124,6 +1125,9 @@ internal static class MockImplBuilder
 
     private static string FormatIndexerParameterList(MockMemberModel indexer)
         => FormatParameterList(indexer.Parameters);
+
+    private static string AccessorPrefix(string accessModifier)
+        => accessModifier.Length == 0 ? "" : accessModifier + " ";
 
     private static string GetIndexerGetterArgsArray(MockMemberModel indexer)
     {
@@ -1181,7 +1185,7 @@ internal static class MockImplBuilder
 
         // Event add/remove accessors with override
         writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
-        writer.AppendLine($"public override event {evt.EventHandlerTypeNonNullable}? {EscapeIdentifier(evt.Name)}");
+        writer.AppendLine($"{evt.OverrideAccessModifier} override event {evt.EventHandlerTypeNonNullable}? {EscapeIdentifier(evt.Name)}");
         writer.OpenBrace();
         writer.AppendLine($"add {{ _backing_{evt.Name} += value; _engine.RecordEventSubscription(\"{evt.Name}\", true); }}");
         writer.AppendLine($"remove {{ _backing_{evt.Name} -= value; _engine.RecordEventSubscription(\"{evt.Name}\", false); }}");
