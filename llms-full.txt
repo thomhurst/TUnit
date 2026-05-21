@@ -18074,7 +18074,7 @@ Visual Studio is supported. The "Use testing platform server mode" option must b
 ## Rider
 Rider is supported.
 
-The Enable Testing Platform support option must be selected in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
+The "Enable Testing Platform support" option must be selected in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
 
 ![Rider Settings](../../static/img/rider.png)
 
@@ -23683,13 +23683,29 @@ public async Task MyTest() { }
 
 TUnit requires `Microsoft.Testing.Platform` support to be enabled in your IDE.
 
-**Visual Studio:** Tools > Options > Preview Features > enable "Use testing platform server mode", then restart.
+As a first step, try a clean rebuild of your solution.
 
-**Rider:** Settings > Build, Execution, Deployment > Unit Testing > Testing Platform > enable "Testing Platform support", then restart.
+### Visual Studio
 
-**VS Code:** Install C# Dev Kit, then reload.
+1. Tools > Options > Preview Features > enable "Use testing platform server mode".
+2. Restart IDE.
 
-If tests still don't appear after enabling, try a clean rebuild. In Visual Studio, deleting the `.vs` folder can help.
+If tests are still not discovered, try deleting the `.vs` folder in your solution directory.
+
+### Rider
+
+1. Settings > Build, Execution, Deployment > Unit Testing > Testing Platform > turn on the "Enable Testing Platform support".
+2. Restart IDE.
+
+If tests still don't appear, it may be a conflict with VSTest. You can fix it in two ways:
+1. **Recommended:** Remove all project name masks in Settings > Build, Execution, Deployment > Unit Testing > VSTest > Projects with unit tests.
+2. **Alternative:** Disable "Ignore projects discovered by other test frameworks" in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
+
+If none of the above helps, try invalidating caches via File > Invalidate Caches and restart the IDE.
+
+### VS Code
+
+1. Install C# Dev Kit, then reload.
 
 ## Test Filtering
 
