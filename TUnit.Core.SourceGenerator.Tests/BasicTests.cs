@@ -6,17 +6,17 @@ namespace TUnit.Core.SourceGenerator.Tests;
 
 internal class BasicTests : TestsBase
 {
+    private static readonly string InputFile = Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "BasicTests.cs");
+
     [Test]
-    public Task Test() => RunTest(Path.Combine(Git.RootDirectory.FullName,
-            "TUnit.TestProject",
-            "BasicTests.cs"),
+    public Task Test() => RunTest(InputFile,
         new RunTestOptions
         {
             VerifyConfigurator = verify => verify.UniqueForTargetFrameworkAndVersion()
         },
         async generatedFiles =>
         {
-            var source = await File.ReadAllTextAsync(Path.Combine(Git.RootDirectory.FullName, "TUnit.TestProject", "BasicTests.cs"));
+            var source = await File.ReadAllTextAsync(InputFile);
             var syntaxTree = CSharpSyntaxTree.ParseText(source);
             var firstMethod = syntaxTree.GetRoot()
                 .DescendantNodes()
