@@ -48,12 +48,8 @@ internal sealed class PropertyInjector
         TestContext testContext,
         CancellationToken cancellationToken = default)
     {
-        // Skip property resolution if this test is reusing the discovery instance (already initialized)
-        if (testContext.IsDiscoveryInstanceReused)
-        {
-            return Task.CompletedTask;
-        }
-
+        // Even when the first data row reuses a discovery instance, this test still
+        // needs its own cached property values so shared fixtures get ref-counted.
         var plan = PropertyInjectionCache.GetOrCreatePlan(testClassType);
 
         if (!plan.HasProperties)
