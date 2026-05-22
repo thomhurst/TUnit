@@ -10,6 +10,9 @@ namespace TUnit.Engine;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
 {
+    private static volatile bool _globalHandlersConfigured;
+    private static volatile bool _traceListenersConfigured;
+
     public void Initialize(ExecuteRequestContext context)
     {
         ConfigureGlobalExceptionHandlers(context);
@@ -27,6 +30,12 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookReg
 
     private void SetUpExceptionListeners()
     {
+        if (_traceListenersConfigured)
+        {
+            return;
+        }
+
+        _traceListenersConfigured = true;
         Trace.Listeners.Insert(0, new ThrowListener());
     }
 
@@ -50,6 +59,13 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookReg
 
     private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
     {
+        if (_globalHandlersConfigured)
+        {
+            return;
+        }
+
+        _globalHandlersConfigured = true;
+
         // Handle unhandled exceptions on any thread
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
