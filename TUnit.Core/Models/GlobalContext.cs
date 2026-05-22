@@ -6,16 +6,17 @@ namespace TUnit.Core;
 
 public class GlobalContext : Context
 {
-    // Static, not AsyncLocal: a lazy-creating AsyncLocal getter poisons the first
-    // reading branch with a fresh empty instance, hiding the framework's later
-    // Current = ... assignment from that branch.
-    private static GlobalContext? _current;
+    // Process-level default instance used by source-gen module initializers that run
+    // before any test session starts (and thus before any AsyncLocal value is set).
+    private static readonly GlobalContext DefaultInstance = new();
+
+    // AsyncLocal so concurrent sessions each get their own context without races.
+    private static readonly AsyncLocal<GlobalContext?> Contexts = new();
+
     public static new GlobalContext Current
     {
-        // Factory overload — the parameterless one uses Activator.CreateInstance<T>(),
-        // which AOT trimming may not preserve for GlobalContext's internal ctor.
-        get => LazyInitializer.EnsureInitialized(ref _current, static () => new GlobalContext())!;
-        internal set => Volatile.Write(ref _current, value);
+        get => Contexts.Value ?? DefaultInstance;
+        internal set => Contexts.Value = value;
     }
 
     internal GlobalContext() : base(null)

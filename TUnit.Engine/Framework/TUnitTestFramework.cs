@@ -18,11 +18,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     private readonly ITestFrameworkCapabilities _capabilities;
     private readonly ConcurrentDictionary<string, TUnitServiceProvider> _serviceProvidersPerSession = new();
     private readonly IRequestHandler _requestHandler;
-    // Serialize ExecuteRequestAsync calls: concurrent sessions race on shared static state
-    // (GlobalContext.Current, AppDomain exception handlers, Trace.Listeners, etc.) and can
-    // produce stochastic 0-result sessions. See GitHub issue "MTP server mode: multi-session
-    // findings from a mutation-testing prototype".
-    private readonly SemaphoreSlim _executeRequestLock = new(1, 1);
 
     public TUnitTestFramework(
         IExtension extension,
@@ -54,10 +49,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
-        // Serialize concurrent requests: shared static state (GlobalContext.Current,
-        // AppDomain exception handlers, Trace.Listeners) is not safe for concurrent
-        // modification. Sequential execution is deterministic and correct.
-        await _executeRequestLock.WaitAsync(context.CancellationToken).ConfigureAwait(false);
         try
         {
             var serviceProvider = GetOrCreateServiceProvider(context);
@@ -100,7 +91,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         }
         finally
         {
-            _executeRequestLock.Release();
             context.Complete();
         }
     }
