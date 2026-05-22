@@ -317,73 +317,6 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public void ExtractTestResult_Infers_Source_EndLine_When_FileLocation_Only_Points_To_Test_Attribute()
-    {
-        var sourceFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.cs");
-        File.WriteAllLines(sourceFile,
-        [
-            "namespace Sample;",
-            "",
-            "public class SampleTests",
-            "{",
-            "    [Test]",
-            "    [Arguments(1)]",
-            "    public async Task Admin_Has_Full_Access(",
-            "        int value)",
-            "    {",
-            "        var text = \"{\";",
-            "        // }",
-            "        await Task.CompletedTask;",
-            "    }",
-            "}"
-        ]);
-
-        try
-        {
-            var node = CreateNodeWithLocation(sourceFile, "Admin_Has_Full_Access", startLine: 5, endLine: 5);
-
-            var result = HtmlReporter.ExtractTestResult("source-range-1", node, traceId: null, spanId: null, retryAttempt: 0, additionalTraceIds: null);
-
-            result.LineNumber.ShouldBe(5);
-            result.EndLineNumber.ShouldBe(13);
-        }
-        finally
-        {
-            File.Delete(sourceFile);
-        }
-    }
-
-    [Test]
-    public void ExtractTestResult_Infers_Source_EndLine_For_Expression_Bodied_Tests()
-    {
-        var sourceFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.cs");
-        File.WriteAllLines(sourceFile,
-        [
-            "namespace Sample;",
-            "public class SampleTests",
-            "{",
-            "    [Test]",
-            "    public Task Expression_Test()",
-            "        => Task.CompletedTask;",
-            "}"
-        ]);
-
-        try
-        {
-            var node = CreateNodeWithLocation(sourceFile, "Expression_Test", startLine: 4, endLine: 4);
-
-            var result = HtmlReporter.ExtractTestResult("source-range-2", node, traceId: null, spanId: null, retryAttempt: 0, additionalTraceIds: null);
-
-            result.LineNumber.ShouldBe(4);
-            result.EndLineNumber.ShouldBe(6);
-        }
-        finally
-        {
-            File.Delete(sourceFile);
-        }
-    }
-
-    [Test]
     public void GenerateHtml_StripsSampleDataGeneratorBlock_FromShippedReports()
     {
         // The template carries a generateSampleData() preview block bounded by
@@ -530,27 +463,4 @@ public class HtmlReporterTests
         RetryAttempt = 0,
     };
 
-    private static TestNode CreateNodeWithLocation(string filePath, string methodName, int startLine, int endLine)
-    {
-        return new TestNode
-        {
-            Uid = new TestNodeUid(methodName),
-            DisplayName = methodName,
-            Properties = new PropertyBag(
-                PassedTestNodeStateProperty.CachedInstance,
-                new TestMethodIdentifierProperty(
-                    @namespace: "Sample",
-                    assemblyFullName: "SampleAssembly",
-                    typeName: "SampleTests",
-                    methodName: methodName,
-                    parameterTypeFullNames: [],
-                    returnTypeFullName: "System.Threading.Tasks.Task",
-                    methodArity: 0),
-                new TestFileLocationProperty(
-                    filePath,
-                    new LinePositionSpan(
-                        new LinePosition(startLine, 0),
-                        new LinePosition(endLine, 0))))
-        };
-    }
 }

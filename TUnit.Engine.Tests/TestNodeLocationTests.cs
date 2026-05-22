@@ -3,6 +3,7 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Shouldly;
 using TUnit.Core;
+using TUnit.Engine.Discovery;
 using TUnit.Engine.Extensions;
 
 namespace TUnit.Engine.Tests;
@@ -59,6 +60,25 @@ public class TestNodeLocationTests
         location.LineSpan.End.Line.ShouldBe(12);
         location.LineSpan.End.Column.ShouldBe(0);
     }
+
+    [Test]
+    public void SourceLocationResolver_Finds_EndLine_For_Block_Bodied_Reflection_Tests()
+    {
+        var method = typeof(TestNodeLocationTests).GetMethod(
+            nameof(SourceLocationResolver_Finds_EndLine_For_Block_Bodied_Reflection_Tests))!;
+
+        var location = SourceLocationResolver.Resolve(method);
+        var lines = File.ReadAllLines(location.FilePath);
+        var snippet = string.Join('\n', lines.Skip(location.LineNumber - 1).Take(location.EndLineNumber - location.LineNumber + 1));
+
+        lines[location.LineNumber - 1].Trim().ShouldBe("[Test]");
+        location.EndLineNumber.ShouldBeGreaterThan(location.LineNumber);
+        snippet.ShouldContain("SourceLocationResolver.Resolve(method);");
+    }
+
+    [Test]
+    public Task SourceLocationResolver_Finds_EndLine_For_Expression_Bodied_Reflection_Tests()
+        => AssertExpressionBodySourceLocationAsync();
 
     private static TestContext CreateTestContext(
         string testId,
@@ -136,6 +156,21 @@ public class TestNodeLocationTests
         };
 
         return context;
+    }
+
+    private static Task AssertExpressionBodySourceLocationAsync()
+    {
+        var method = typeof(TestNodeLocationTests).GetMethod(
+            nameof(SourceLocationResolver_Finds_EndLine_For_Expression_Bodied_Reflection_Tests))!;
+
+        var location = SourceLocationResolver.Resolve(method);
+        var lines = File.ReadAllLines(location.FilePath);
+
+        lines[location.LineNumber - 1].Trim().ShouldBe("[Test]");
+        location.EndLineNumber.ShouldBeGreaterThan(location.LineNumber);
+        lines[location.EndLineNumber - 1].ShouldContain("AssertExpressionBodySourceLocationAsync();");
+
+        return Task.CompletedTask;
     }
 
     private sealed class EmptyServiceProvider : IServiceProvider

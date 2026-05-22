@@ -1041,6 +1041,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
+            var sourceLocation = SourceLocationResolver.Resolve(testMethod);
+
             return new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
@@ -1054,8 +1056,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 PropertyDataSources = ReflectionAttributeExtractor.ExtractPropertyDataSources(testClass),
                 InstanceFactory = CreateInstanceFactory(testClass)!,
                 TestInvoker = CreateTestInvoker(testClass, testMethod),
-                FilePath = ExtractFilePath(testMethod) ?? "Unknown",
-                LineNumber = ExtractLineNumber(testMethod) ?? 0,
+                FilePath = sourceLocation.FilePath,
+                LineNumber = sourceLocation.LineNumber,
+                StartColumnNumber = sourceLocation.StartColumnNumber,
+                EndLineNumber = sourceLocation.EndLineNumber,
+                EndColumnNumber = sourceLocation.EndColumnNumber,
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
                 GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(typeForGenericResolution),
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
@@ -1314,30 +1319,24 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var testName = $"[GENERIC METHOD RESOLUTION FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {errorMessage}";
         var exception = new InvalidOperationException(errorMessage);
+        var sourceLocation = SourceLocationResolver.Resolve(method);
 
         return new FailedTestMetadata(exception, displayName)
         {
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            FilePath = ExtractFilePath(method) ?? "Unknown",
-            LineNumber = ExtractLineNumber(method) ?? 0,
+            FilePath = sourceLocation.FilePath,
+            LineNumber = sourceLocation.LineNumber,
+            StartColumnNumber = sourceLocation.StartColumnNumber,
+            EndLineNumber = sourceLocation.EndLineNumber,
+            EndColumnNumber = sourceLocation.EndColumnNumber,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes().ToArray(),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []
         };
-    }
-
-    private static string? ExtractFilePath(MethodInfo method)
-    {
-        return method.GetCustomAttribute<TestAttribute>()?.File;
-    }
-
-    private static int? ExtractLineNumber(MethodInfo method)
-    {
-        return method.GetCustomAttribute<TestAttribute>()?.Line;
     }
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
@@ -1379,6 +1378,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var testName = $"[DISCOVERY FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {ex.Message}";
+        var sourceLocation = SourceLocationResolver.Resolve(method);
 
         // Create a special metadata that will yield a failed data combination
         return new FailedTestMetadata(ex, displayName)
@@ -1386,8 +1386,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            FilePath = ExtractFilePath(method) ?? "Unknown",
-            LineNumber = ExtractLineNumber(method) ?? 0,
+            FilePath = sourceLocation.FilePath,
+            LineNumber = sourceLocation.LineNumber,
+            StartColumnNumber = sourceLocation.StartColumnNumber,
+            EndLineNumber = sourceLocation.EndLineNumber,
+            EndColumnNumber = sourceLocation.EndColumnNumber,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes()
                 .ToArray(),
@@ -2071,11 +2074,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var dynamicTests = new List<TestMetadata>(50);
 
         // Extract file path and line number from the DynamicTestBuilderAttribute if possible
-        var filePath = ExtractFilePath(builderMethod) ?? "Unknown";
-        var lineNumber = ExtractLineNumber(builderMethod) ?? 0;
+        var sourceLocation = SourceLocationResolver.Resolve(builderMethod);
 
         // Create context
-        var context = new DynamicTestBuilderContext(filePath, lineNumber);
+        var context = new DynamicTestBuilderContext(sourceLocation.FilePath, sourceLocation.LineNumber);
 
         // Create instance if needed
         object? instance = null;
@@ -2123,11 +2125,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         try
         {
             // Extract file path and line number from the DynamicTestBuilderAttribute if possible
-            var filePath = ExtractFilePath(builderMethod) ?? "Unknown";
-            var lineNumber = ExtractLineNumber(builderMethod) ?? 0;
+            var sourceLocation = SourceLocationResolver.Resolve(builderMethod);
 
             // Create context
-            var context = new DynamicTestBuilderContext(filePath, lineNumber);
+            var context = new DynamicTestBuilderContext(sourceLocation.FilePath, sourceLocation.LineNumber);
 
             // Create instance if needed
             object? instance = null;
@@ -2330,14 +2331,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         var testName = $"[DYNAMIC BUILDER FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {ex.Message}";
+        var sourceLocation = SourceLocationResolver.Resolve(method);
 
         return new FailedTestMetadata(ex, displayName)
         {
             TestName = testName,
             TestClassType = type,
             TestMethodName = method.Name,
-            FilePath = ExtractFilePath(method) ?? "Unknown",
-            LineNumber = ExtractLineNumber(method) ?? 0,
+            FilePath = sourceLocation.FilePath,
+            LineNumber = sourceLocation.LineNumber,
+            StartColumnNumber = sourceLocation.StartColumnNumber,
+            EndLineNumber = sourceLocation.EndLineNumber,
+            EndColumnNumber = sourceLocation.EndColumnNumber,
             MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(type, method),
             AttributeFactory = () => method.GetCustomAttributes().ToArray(),
             DataSources = [],
