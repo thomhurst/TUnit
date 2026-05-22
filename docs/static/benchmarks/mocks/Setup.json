@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-21T03:28:27.059Z",
+  "timestamp": "2026-05-22T03:28:55.311Z",
   "category": "Setup",
   "description": "Mock behavior configuration (returns, matchers)",
   "environment": {
@@ -10,111 +10,111 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "556.5 ns",
-      "Error": "11.21 ns",
-      "StdDev": "19.03 ns",
+      "Mean": "499.5 ns",
+      "Error": "2.86 ns",
+      "StdDev": "2.67 ns",
       "Gen0": "0.1411",
       "Gen1": "0.0010",
       "Allocated": "2.31 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "932.1 ns",
-      "Error": "15.41 ns",
-      "StdDev": "13.66 ns",
+      "Mean": "820.6 ns",
+      "Error": "5.68 ns",
+      "StdDev": "5.04 ns",
       "Gen0": "0.3738",
       "Gen1": "0.0076",
       "Allocated": "6.12 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "340.8 ns",
-      "Error": "6.87 ns",
-      "StdDev": "10.07 ns",
+      "Mean": "320.9 ns",
+      "Error": "0.55 ns",
+      "StdDev": "0.49 ns",
       "Gen0": "0.1006",
       "Gen1": "0.0005",
       "Allocated": "1.65 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "424,605.2 ns",
-      "Error": "1,636.58 ns",
-      "StdDev": "1,366.62 ns",
+      "Mean": "423,133.4 ns",
+      "Error": "933.23 ns",
+      "StdDev": "779.29 ns",
       "Gen0": "0.9766",
       "Gen1": "-",
       "Allocated": "28.52 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "5,618.9 ns",
-      "Error": "19.78 ns",
-      "StdDev": "16.52 ns",
+      "Mean": "5,405.4 ns",
+      "Error": "21.80 ns",
+      "StdDev": "19.32 ns",
       "Gen0": "0.5493",
       "Gen1": "0.0076",
       "Allocated": "9.01 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "8,237.1 ns",
-      "Error": "161.50 ns",
-      "StdDev": "151.07 ns",
+      "Mean": "7,723.5 ns",
+      "Error": "27.36 ns",
+      "StdDev": "24.26 ns",
       "Gen0": "0.6256",
       "Gen1": "0.0153",
       "Allocated": "10.45 KB"
     },
     {
       "Method": "'TUnit.Mocks (Multiple)'",
-      "Mean": "808.3 ns",
-      "Error": "16.14 ns",
-      "StdDev": "20.41 ns",
+      "Mean": "711.4 ns",
+      "Error": "1.79 ns",
+      "StdDev": "1.50 ns",
       "Gen0": "0.1888",
       "Gen1": "0.0019",
       "Allocated": "3.09 KB"
     },
     {
       "Method": "'Imposter (Multiple)'",
-      "Mean": "1,376.7 ns",
-      "Error": "27.55 ns",
-      "StdDev": "36.78 ns",
+      "Mean": "1,281.0 ns",
+      "Error": "3.38 ns",
+      "StdDev": "2.64 ns",
       "Gen0": "0.6485",
       "Gen1": "0.0248",
       "Allocated": "10.59 KB"
     },
     {
       "Method": "'Mockolate (Multiple)'",
-      "Mean": "557.6 ns",
-      "Error": "10.24 ns",
-      "StdDev": "10.06 ns",
+      "Mean": "523.9 ns",
+      "Error": "3.26 ns",
+      "StdDev": "2.89 ns",
       "Gen0": "0.1583",
       "Gen1": "0.0010",
       "Allocated": "2.6 KB"
     },
     {
       "Method": "'Moq (Multiple)'",
-      "Mean": "114,269.0 ns",
-      "Error": "639.68 ns",
-      "StdDev": "567.06 ns",
+      "Mean": "115,185.2 ns",
+      "Error": "694.33 ns",
+      "StdDev": "649.48 ns",
       "Gen0": "0.9766",
       "Gen1": "0.7324",
       "Allocated": "16.53 KB"
     },
     {
       "Method": "'NSubstitute (Multiple)'",
-      "Mean": "12,098.6 ns",
-      "Error": "127.67 ns",
-      "StdDev": "119.43 ns",
-      "Gen0": "1.2207",
-      "Gen1": "-",
+      "Mean": "11,665.5 ns",
+      "Error": "40.37 ns",
+      "StdDev": "35.79 ns",
+      "Gen0": "1.2360",
+      "Gen1": "0.0305",
       "Allocated": "20.31 KB"
     },
     {
       "Method": "'FakeItEasy (Multiple)'",
-      "Mean": "7,797.7 ns",
-      "Error": "73.11 ns",
-      "StdDev": "64.81 ns",
+      "Mean": "7,767.9 ns",
+      "Error": "82.11 ns",
+      "StdDev": "72.79 ns",
       "Gen0": "0.6714",
       "Gen1": "0.0610",
-      "Allocated": "11.71 KB"
+      "Allocated": "11.82 KB"
     }
   ]
 }
