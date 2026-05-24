@@ -43,6 +43,24 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
 
     protected override string GetExpectation() => "set assertion";
 
+    /// <summary>
+    /// Asserts that the set is null while preserving set-specific chaining.
+    /// </summary>
+    public new SetAssertionBase<TSet, TItem> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter);
+    }
+
+    /// <summary>
+    /// Asserts that the set is not null while preserving set-specific chaining.
+    /// </summary>
+    public new SetAssertionBase<TSet, TItem> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new SetNotNullAssertion<TSet, TItem>(Context, CreateSetAdapter);
+    }
+
     // ========================================
     // Set-specific methods
     // ========================================

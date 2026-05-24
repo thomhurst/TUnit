@@ -40,6 +40,24 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     protected override string GetExpectation() => "async enumerable assertion";
 
     /// <summary>
+    /// Asserts that the async enumerable is null while preserving async-enumerable-specific chaining.
+    /// </summary>
+    public AsyncEnumerableAssertionBase<TItem> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new AsyncEnumerableNullAssertion<TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the async enumerable is not null while preserving async-enumerable-specific chaining.
+    /// </summary>
+    public AsyncEnumerableAssertionBase<TItem> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new AsyncEnumerableNotNullAssertion<TItem>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the async enumerable is empty.
     /// Example: await Assert.That(asyncEnumerable).IsEmpty();
     /// </summary>

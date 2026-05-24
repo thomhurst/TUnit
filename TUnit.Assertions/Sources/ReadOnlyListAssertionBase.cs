@@ -34,6 +34,24 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
     }
 
     /// <summary>
+    /// Asserts that the list is null while preserving read-only-list-specific chaining.
+    /// </summary>
+    public new ReadOnlyListAssertionBase<TList, TItem> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new ReadOnlyListNullAssertion<TList, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the list is not null while preserving read-only-list-specific chaining.
+    /// </summary>
+    public new ReadOnlyListAssertionBase<TList, TItem> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new ReadOnlyListNotNullAssertion<TList, TItem>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the list has an item at the specified index that equals the expected value.
     /// Example: await Assert.That(list).HasItemAt(0, "first");
     /// </summary>

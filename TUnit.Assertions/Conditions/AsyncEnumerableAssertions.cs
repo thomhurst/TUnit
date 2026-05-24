@@ -43,6 +43,32 @@ public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumer
     protected abstract AssertionResult CheckMaterialized(List<TItem> items);
 }
 
+internal class AsyncEnumerableNullAssertion<TItem> : AsyncEnumerableAssertionBase<TItem>
+{
+    public AsyncEnumerableNullAssertion(AssertionContext<IAsyncEnumerable<TItem>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IAsyncEnumerable<TItem>> metadata)
+        => NullCheck.CheckIsNull(metadata);
+
+    protected override string GetExpectation() => "to be null";
+}
+
+internal class AsyncEnumerableNotNullAssertion<TItem> : AsyncEnumerableAssertionBase<TItem>
+{
+    public AsyncEnumerableNotNullAssertion(AssertionContext<IAsyncEnumerable<TItem>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IAsyncEnumerable<TItem>> metadata)
+        => NullCheck.CheckIsNotNull(metadata);
+
+    protected override string GetExpectation() => "to not be null";
+}
+
 /// <summary>
 /// Asserts that the async enumerable is empty or not empty.
 /// </summary>

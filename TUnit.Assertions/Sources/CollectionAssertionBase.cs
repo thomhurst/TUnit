@@ -45,6 +45,24 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     protected override string GetExpectation() => "collection assertion";
 
     /// <summary>
+    /// Asserts that the collection is null while preserving collection-specific chaining.
+    /// </summary>
+    public CollectionAssertionBase<TCollection, TItem> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new CollectionNullAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is not null while preserving collection-specific chaining.
+    /// </summary>
+    public CollectionAssertionBase<TCollection, TItem> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new CollectionNotNullAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the collection is of the specified type and returns an assertion on the casted value.
     /// This allows chaining additional assertions on the typed value.
     /// Example: await Assert.That((IEnumerable<int>)list).IsTypeOf<List<int>>().And.Count().IsEqualTo(5);

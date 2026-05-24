@@ -109,6 +109,27 @@ public class CollectionAssertionTests
     }
 
     [Test]
+    public async Task NullAssertions_Preserve_List_Chaining()
+    {
+        var items = new List<int> { 1 };
+
+        await Assert.That(items).IsNotNull().And.ItemAt(0).IsEqualTo(1);
+
+        List<int>? nullItems = null;
+        await Assert.That(nullItems).IsNull().Or.ItemAt(0).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task NullAssertions_Preserve_Dictionary_And_Set_Chaining()
+    {
+        IDictionary<string, int> dictionary = new Dictionary<string, int> { ["one"] = 1 };
+        ISet<int> set = new HashSet<int> { 1 };
+
+        await Assert.That(dictionary).IsNotNull().And.ContainsKey("one");
+        await Assert.That(set).IsNotNull().And.IsSubsetOf([1, 2]);
+    }
+
+    [Test]
     public async Task Count_WithInnerAssertion_Lambda_Collection()
     {
         var items = new List<int> { 1, 2, 3, 4, 5 };

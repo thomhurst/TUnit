@@ -32,6 +32,24 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
     }
 
     /// <summary>
+    /// Asserts that the list is null while preserving list-specific chaining.
+    /// </summary>
+    public new ListAssertionBase<TList, TItem> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new ListNullAssertion<TList, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the list is not null while preserving list-specific chaining.
+    /// </summary>
+    public new ListAssertionBase<TList, TItem> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new ListNotNullAssertion<TList, TItem>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the item at the specified index equals the expected value.
     /// Example: await Assert.That(list).HasItemAt(0, "expected");
     /// </summary>

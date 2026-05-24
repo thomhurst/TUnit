@@ -41,6 +41,24 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     protected override string GetExpectation() => "dictionary assertion";
 
     /// <summary>
+    /// Asserts that the dictionary is null while preserving dictionary-specific chaining.
+    /// </summary>
+    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not null while preserving dictionary-specific chaining.
+    /// </summary>
+    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new DictionaryNotNullAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the dictionary contains the specified key.
     /// This instance method enables calling ContainsKey with proper type inference.
     /// Example: await Assert.That(dictionary).ContainsKey("key1");
