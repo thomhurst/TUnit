@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-24T03:32:03.972Z",
+  "timestamp": "2026-05-25T03:29:24.567Z",
   "category": "Setup",
   "description": "Mock behavior configuration (returns, matchers)",
   "environment": {
@@ -10,110 +10,110 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "540.2 ns",
-      "Error": "4.95 ns",
-      "StdDev": "4.63 ns",
+      "Mean": "447.7 ns",
+      "Error": "7.04 ns",
+      "StdDev": "6.58 ns",
       "Gen0": "0.1411",
       "Gen1": "0.0010",
       "Allocated": "2.31 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "757.1 ns",
-      "Error": "6.71 ns",
-      "StdDev": "5.95 ns",
+      "Mean": "652.9 ns",
+      "Error": "11.43 ns",
+      "StdDev": "26.04 ns",
       "Gen0": "0.3738",
       "Gen1": "0.0076",
       "Allocated": "6.12 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "359.1 ns",
-      "Error": "2.25 ns",
-      "StdDev": "1.99 ns",
+      "Mean": "280.1 ns",
+      "Error": "3.80 ns",
+      "StdDev": "3.36 ns",
       "Gen0": "0.1006",
       "Gen1": "0.0005",
       "Allocated": "1.65 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "298,446.7 ns",
-      "Error": "1,554.11 ns",
-      "StdDev": "1,213.35 ns",
-      "Gen0": "0.9766",
-      "Gen1": "-",
-      "Allocated": "28.52 KB"
+      "Mean": "244,947.3 ns",
+      "Error": "1,959.41 ns",
+      "StdDev": "1,736.97 ns",
+      "Gen0": "1.4648",
+      "Gen1": "0.9766",
+      "Allocated": "28.56 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "5,228.7 ns",
-      "Error": "54.83 ns",
-      "StdDev": "51.29 ns",
+      "Mean": "4,170.7 ns",
+      "Error": "72.04 ns",
+      "StdDev": "73.98 ns",
       "Gen0": "0.5493",
-      "Gen1": "0.0076",
-      "Allocated": "9.06 KB"
+      "Gen1": "-",
+      "Allocated": "9.01 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "7,010.2 ns",
-      "Error": "47.72 ns",
-      "StdDev": "39.85 ns",
+      "Mean": "5,698.9 ns",
+      "Error": "111.02 ns",
+      "StdDev": "136.35 ns",
       "Gen0": "0.6256",
       "Gen1": "0.0153",
       "Allocated": "10.45 KB"
     },
     {
       "Method": "'TUnit.Mocks (Multiple)'",
-      "Mean": "783.3 ns",
-      "Error": "6.99 ns",
-      "StdDev": "6.19 ns",
+      "Mean": "644.7 ns",
+      "Error": "12.11 ns",
+      "StdDev": "11.33 ns",
       "Gen0": "0.1888",
       "Gen1": "0.0019",
       "Allocated": "3.09 KB"
     },
     {
       "Method": "'Imposter (Multiple)'",
-      "Mean": "1,406.8 ns",
-      "Error": "20.76 ns",
-      "StdDev": "18.40 ns",
+      "Mean": "1,162.7 ns",
+      "Error": "23.05 ns",
+      "StdDev": "29.98 ns",
       "Gen0": "0.6485",
       "Gen1": "0.0248",
       "Allocated": "10.59 KB"
     },
     {
       "Method": "'Mockolate (Multiple)'",
-      "Mean": "577.8 ns",
-      "Error": "3.66 ns",
-      "StdDev": "3.06 ns",
+      "Mean": "502.4 ns",
+      "Error": "7.59 ns",
+      "StdDev": "7.10 ns",
       "Gen0": "0.1583",
       "Gen1": "0.0010",
       "Allocated": "2.6 KB"
     },
     {
       "Method": "'Moq (Multiple)'",
-      "Mean": "88,527.5 ns",
-      "Error": "1,290.13 ns",
-      "StdDev": "1,206.79 ns",
+      "Mean": "68,766.8 ns",
+      "Error": "435.45 ns",
+      "StdDev": "386.01 ns",
       "Gen0": "0.9766",
       "Gen1": "0.7324",
       "Allocated": "16.53 KB"
     },
     {
       "Method": "'NSubstitute (Multiple)'",
-      "Mean": "10,702.7 ns",
-      "Error": "64.66 ns",
-      "StdDev": "57.32 ns",
-      "Gen0": "1.2360",
-      "Gen1": "0.0305",
+      "Mean": "8,554.8 ns",
+      "Error": "167.73 ns",
+      "StdDev": "172.25 ns",
+      "Gen0": "1.2207",
+      "Gen1": "-",
       "Allocated": "20.31 KB"
     },
     {
       "Method": "'FakeItEasy (Multiple)'",
-      "Mean": "6,901.6 ns",
-      "Error": "112.81 ns",
-      "StdDev": "105.52 ns",
-      "Gen0": "0.7095",
-      "Gen1": "0.0153",
+      "Mean": "5,684.8 ns",
+      "Error": "113.62 ns",
+      "StdDev": "180.21 ns",
+      "Gen0": "0.7019",
+      "Gen1": "0.0305",
       "Allocated": "11.71 KB"
     }
   ]
