@@ -63,11 +63,9 @@ public static class DataSourceHelpers
             for (var i = 0; i < factories.Length; i++)
             {
                 var index = i;
-                factories[i] = () =>
-                {
-                    var freshUnwrapped = UnwrapTupleAot(value);
-                    return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
-                };
+                // Capture the already-unwrapped array directly: no Func is involved on this path,
+                // so the elements are stable and there is no need to re-unwrap `value` per invocation.
+                factories[i] = () => Task.FromResult<object?>(index < unwrapped.Length ? unwrapped[index] : null);
             }
             return factories;
         }
