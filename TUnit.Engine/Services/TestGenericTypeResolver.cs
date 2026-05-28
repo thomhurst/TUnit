@@ -44,12 +44,7 @@ internal sealed class TestGenericTypeResolver
         // Otherwise resolve from GenericMethodInfo if the test method is a generic definition
         else if (metadata.GenericMethodInfo != null)
         {
-            var parameters = metadata.MethodMetadata.Parameters;
-            var parameterTypes = new Type[parameters.Length];
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                parameterTypes[i] = parameters[i].Type;
-            }
+            var parameterTypes = Array.ConvertAll(metadata.MethodMetadata.Parameters, p => p.Type);
 
             result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
                 metadata.MethodMetadata,

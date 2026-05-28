@@ -138,12 +138,7 @@ internal sealed class TestRegistry : ITestRegistry
                 nameof(methodArguments));
         }
 
-        var parameters = methodMetadata.Parameters;
-        var parameterTypes = new Type[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            parameterTypes[i] = parameters[i].Type;
-        }
+        var parameterTypes = Array.ConvertAll(methodMetadata.Parameters, p => p.Type);
 
         var methodInfo = methodMetadata.Type.GetMethod(
             methodMetadata.Name,
