@@ -45,7 +45,7 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     public AsyncEnumerableAssertionBase<TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new AsyncEnumerableNullAssertion<TItem>(Context);
+        return new AsyncEnumerableNullAssertion<TItem>(Context, expectNull: true);
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     public AsyncEnumerableAssertionBase<TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new AsyncEnumerableNotNullAssertion<TItem>(Context);
+        return new AsyncEnumerableNullAssertion<TItem>(Context, expectNull: false);
     }
 
     /// <summary>

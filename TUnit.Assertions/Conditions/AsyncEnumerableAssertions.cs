@@ -43,30 +43,13 @@ public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumer
     protected abstract AssertionResult CheckMaterialized(List<TItem> items);
 }
 
-internal class AsyncEnumerableNullAssertion<TItem> : AsyncEnumerableAssertionBase<TItem>
+internal class AsyncEnumerableNullAssertion<TItem>(AssertionContext<IAsyncEnumerable<TItem>> context, bool expectNull)
+    : AsyncEnumerableAssertionBase<TItem>(context)
 {
-    public AsyncEnumerableNullAssertion(AssertionContext<IAsyncEnumerable<TItem>> context)
-        : base(context)
-    {
-    }
-
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IAsyncEnumerable<TItem>> metadata)
-        => NullCheck.CheckIsNull(metadata);
+        => NullCheck.Check(metadata, expectNull);
 
-    protected override string GetExpectation() => "to be null";
-}
-
-internal class AsyncEnumerableNotNullAssertion<TItem> : AsyncEnumerableAssertionBase<TItem>
-{
-    public AsyncEnumerableNotNullAssertion(AssertionContext<IAsyncEnumerable<TItem>> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IAsyncEnumerable<TItem>> metadata)
-        => NullCheck.CheckIsNotNull(metadata);
-
-    protected override string GetExpectation() => "to not be null";
+    protected override string GetExpectation() => NullCheck.Expectation(expectNull);
 }
 
 /// <summary>

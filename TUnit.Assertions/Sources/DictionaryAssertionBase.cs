@@ -46,7 +46,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context);
+        return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: true);
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new DictionaryNotNullAssertion<TDictionary, TKey, TValue>(Context);
+        return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
     }
 
     /// <summary>

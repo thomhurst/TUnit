@@ -44,7 +44,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context);
+        return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: true);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new MutableDictionaryNotNullAssertion<TDictionary, TKey, TValue>(Context);
+        return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
     }
 
     /// <summary>

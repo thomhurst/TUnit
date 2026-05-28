@@ -49,7 +49,7 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
     public new SetAssertionBase<TSet, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter);
+        return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter, expectNull: true);
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
     public new SetAssertionBase<TSet, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new SetNotNullAssertion<TSet, TItem>(Context, CreateSetAdapter);
+        return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter, expectNull: false);
     }
 
     // ========================================

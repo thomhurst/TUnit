@@ -39,7 +39,7 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
     public new ReadOnlyListAssertionBase<TList, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new ReadOnlyListNullAssertion<TList, TItem>(Context);
+        return new ReadOnlyListNullAssertion<TList, TItem>(Context, expectNull: true);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
     public new ReadOnlyListAssertionBase<TList, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new ReadOnlyListNotNullAssertion<TList, TItem>(Context);
+        return new ReadOnlyListNullAssertion<TList, TItem>(Context, expectNull: false);
     }
 
     /// <summary>

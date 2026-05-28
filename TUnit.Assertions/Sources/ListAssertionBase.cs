@@ -37,7 +37,7 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
     public new ListAssertionBase<TList, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new ListNullAssertion<TList, TItem>(Context);
+        return new ListNullAssertion<TList, TItem>(Context, expectNull: true);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
     public new ListAssertionBase<TList, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new ListNotNullAssertion<TList, TItem>(Context);
+        return new ListNullAssertion<TList, TItem>(Context, expectNull: false);
     }
 
     /// <summary>
