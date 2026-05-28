@@ -160,7 +160,12 @@ public static class CastHelper
         // Unwrap single-element enumerables (but not strings or arrays)
         if (value is not string && !sourceType.IsArray && value is IEnumerable enumerable && !typeof(IEnumerable).IsAssignableFrom(targetType))
         {
-            var firstElement = enumerable.Cast<object>().FirstOrDefault();
+            object? firstElement = null;
+            foreach (var e in enumerable)
+            {
+                firstElement = e;
+                break;
+            }
             if (firstElement != null)
             {
                 // Recursively try to cast the first element
