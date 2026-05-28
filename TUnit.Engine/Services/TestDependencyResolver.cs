@@ -110,10 +110,7 @@ internal sealed class TestDependencyResolver
                         continue;
                     }
 
-                    if (!uniqueDependencies.ContainsKey(dep.Test))
-                    {
-                        uniqueDependencies[dep.Test] = dep;
-                    }
+                    uniqueDependencies.TryAdd(dep.Test, dep);
                 }
 
                 test.Dependencies = uniqueDependencies.Values.ToArray();
