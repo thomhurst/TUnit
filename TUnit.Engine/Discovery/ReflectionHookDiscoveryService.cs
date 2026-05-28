@@ -20,6 +20,7 @@ internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
+    private static readonly ConcurrentDictionary<(string Name, Type Type), bool> _registeredAfterTestDiscoveryHooks = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
@@ -499,12 +500,7 @@ internal sealed class ReflectionHookDiscoveryService
                 // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
                 // before we reach here, but this guard protects against future refactors that
                 // might bypass the upstream dedup (e.g. a separate registration path).
-                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
-                    {
-                        var m = h.Materialize();
-                        return m.MethodInfo.Name == discoveryMetadata.Name &&
-                               m.MethodInfo.Type == discoveryMetadata.Type;
-                    }))
+                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryMetadata.Name, discoveryMetadata.Type), true))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -688,12 +684,7 @@ internal sealed class ReflectionHookDiscoveryService
                 // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
                 // before we reach here, but this guard protects against future refactors that
                 // might bypass the upstream dedup (e.g. a separate registration path).
-                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
-                    {
-                        var m = h.Materialize();
-                        return m.MethodInfo.Name == discoveryEveryMetadata.Name &&
-                               m.MethodInfo.Type == discoveryEveryMetadata.Type;
-                    }))
+                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryEveryMetadata.Name, discoveryEveryMetadata.Type), true))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -890,9 +881,9 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static Func<object, TestContext, CancellationToken, ValueTask> CreateInstanceHookDelegate(Type type, MethodInfo method)
     {
+        var parameters = method.GetParameters();
         return async (instance, context, cancellationToken) =>
         {
-            var parameters = method.GetParameters();
             object?[] args;
 
             if (parameters.Length == 0)
@@ -934,9 +925,9 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static Func<T, CancellationToken, ValueTask> CreateHookDelegate<T>([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, MethodInfo method)
     {
+        var parameters = method.GetParameters();
         return async (context, cancellationToken) =>
         {
-            var parameters = method.GetParameters();
             object?[] args;
             object? instance = method.IsStatic ? null : Activator.CreateInstance(type);
 
