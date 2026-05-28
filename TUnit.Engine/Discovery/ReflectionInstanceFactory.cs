@@ -11,6 +11,12 @@ namespace TUnit.Engine.Discovery;
 /// This is a simplified version that handles basic property injection scenarios
 /// where instance data sources depend on property-injected values.
 /// </summary>
+/// <remarks>
+/// No process-wide instance cache: under MTP server mode multiple sessions in one host can
+/// invoke generic-type discovery concurrently, and a shared cache would leak instances and
+/// their per-session state across sessions (#6001). Reflection-mode generic discovery is
+/// already a cold path, so we accept the duplication cost in exchange for isolation.
+/// </remarks>
 [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode isn't used in AOT scenarios")]
 [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Reflection mode isn't used in AOT scenarios")]
 [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode isn't used in AOT scenarios")]
@@ -19,19 +25,11 @@ namespace TUnit.Engine.Discovery;
 [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode isn't used in AOT scenarios")]
 internal static class ReflectionInstanceFactory
 {
-    private static readonly ConcurrentDictionary<Type, object?> _instanceCache = new();
-
     /// <summary>
     /// Creates an instance of the specified type with property injection performed.
     /// </summary>
     public static async Task<object?> CreateInstanceWithPropertyInjectionAsync(Type type)
     {
-        // Check cache first to avoid creating multiple instances for the same type
-        if (_instanceCache.TryGetValue(type, out var cachedInstance))
-        {
-            return cachedInstance;
-        }
-
         try
         {
             // Create the instance
@@ -43,9 +41,6 @@ internal static class ReflectionInstanceFactory
 
             // Perform basic property injection
             await InjectPropertiesAsync(instance, type);
-
-            // Cache the instance
-            _instanceCache.TryAdd(type, instance);
 
             return instance;
         }
@@ -186,13 +181,5 @@ internal static class ReflectionInstanceFactory
     {
         var invokeMethod = func.GetType().GetMethod("Invoke");
         return invokeMethod?.Invoke(func, null);
-    }
-
-    /// <summary>
-    /// Clears the instance cache. Should be called at the end of test discovery.
-    /// </summary>
-    public static void ClearCache()
-    {
-        _instanceCache.Clear();
     }
 }

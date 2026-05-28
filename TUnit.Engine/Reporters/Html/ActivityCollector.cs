@@ -46,7 +46,12 @@ internal sealed class ActivityCollector : IDisposable
 
     // Process-wide pointer to the currently-running collector, used by the OTLP receiver
     // (in TUnit.OpenTelemetry) to feed external spans without an explicit wiring step.
-    // Only one HtmlReporter runs per session, so a static slot is sufficient.
+    // KNOWN LIMITATION (#6001): under MTP server mode with multiple concurrent sessions in
+    // one host, only the first-started session claims this slot — subsequent sessions'
+    // HtmlReporters end up sharing collectors with the first, and once the first session
+    // stops the slot is cleared while later sessions are still running. Acceptable for the
+    // common case (single session per host) and orthogonal to the discovery/execution race
+    // fixes in #6001; a session-keyed registry is the proper long-term fix.
     private static ActivityCollector? _current;
 
     public static ActivityCollector? Current => _current;

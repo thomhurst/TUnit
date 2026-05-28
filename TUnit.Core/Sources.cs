@@ -5,6 +5,14 @@ using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
 
+/// <remarks>
+/// INVARIANT: these collections are populated once at module initialization (by source-gen
+/// in source-gen mode, by ReflectionHookDiscoveryService once-per-process in reflection mode)
+/// and must be treated as append-only for the remainder of the process lifetime. Engine code
+/// that calls <c>.Clear()</c> on any field here will starve concurrent MTP sessions of their
+/// hooks (#6001). The reflection-mode discovery's one-time <c>ClearSourceGeneratedHooks</c>
+/// runs before any session executes — adding new clear calls during a session is a bug.
+/// </remarks>
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif

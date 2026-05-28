@@ -1,4 +1,4 @@
-﻿using TUnit.Core.Settings;
+using TUnit.Core.Settings;
 
 namespace TUnit.Core;
 
@@ -10,25 +10,34 @@ public class EngineCancellationToken : IDisposable
     /// <summary>
     /// Gets the internal cancellation token source.
     /// </summary>
-    internal CancellationTokenSource CancellationTokenSource { get; private set; } = new();
+    internal CancellationTokenSource CancellationTokenSource { get; } = new();
 
     /// <summary>
     /// Gets the cancellation token.
     /// </summary>
-    public CancellationToken Token { get; private set; }
+    public CancellationToken Token { get; }
 
+    private int _initialised;
     private volatile bool _forcefulExitStarted;
 
-    /// <summary>
-    /// Initializes the cancellation token with a linked token source.
-    /// </summary>
-    /// <param name="cancellationToken">The cancellation token to link with.</param>
-    internal void Initialise(CancellationToken cancellationToken)
+    public EngineCancellationToken()
     {
-        CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
+    }
 
-        Token.Register(_ => Cancel(), this);
+    /// <summary>
+    /// Hooks up process-wide cancellation signals (Ctrl+C / ProcessExit) the first time it's
+    /// called for this instance. Idempotent — subsequent calls are no-ops so that concurrent
+    /// MTP server-mode RPCs against one session don't clobber each other's cancellation chain.
+    /// Per-call cancellation flows through the explicit <c>CancellationToken</c> threaded into
+    /// discovery/execution, not through this session-scoped token.
+    /// </summary>
+    internal void Initialise()
+    {
+        if (Interlocked.CompareExchange(ref _initialised, 1, 0) != 0)
+        {
+            return;
+        }
 
         // Console.CancelKeyPress is not supported on browser platforms
 #if NET5_0_OR_GREATER

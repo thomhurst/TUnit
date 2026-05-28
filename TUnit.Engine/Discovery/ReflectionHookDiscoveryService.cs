@@ -24,7 +24,15 @@ internal sealed class ReflectionHookDiscoveryService
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
-    private static int _discoveryRunCount = 0;
+
+    // Hook discovery is process-wide (populates the shared Sources.* bags). The OneTimeGate
+    // makes concurrent first-time callers from multiple MTP sessions block until the single
+    // producer has finished populating, rather than racing past empty bags. If the producer
+    // throws, every concurrent waiter is re-surfaced the failure so no session silently
+    // proceeds with partial state.
+    private static readonly OneTimeGate s_discoveryGate = new(
+        contextName: nameof(ReflectionHookDiscoveryService),
+        waitTimeout: TimeSpan.FromMinutes(5));
 
     private static string GetMethodKey(MethodInfo method)
     {
@@ -165,15 +173,13 @@ internal sealed class ReflectionHookDiscoveryService
     #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
     #endif
-    public static void DiscoverHooks()
-    {
-        // Prevent running hook discovery multiple times in the same process
-        // This can happen when both discovery and execution run in the same process
-        if (Interlocked.Increment(ref _discoveryRunCount) > 1)
-        {
-            return;
-        }
+    public static void DiscoverHooks() => s_discoveryGate.Run(DiscoverHooksCore);
 
+    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
+    #endif
+    private static void DiscoverHooksCore()
+    {
         // Clear source-generated hooks since we're discovering via reflection
         // In reflection mode, source generation may have already populated Sources
         // We need to clear them to avoid duplicates
