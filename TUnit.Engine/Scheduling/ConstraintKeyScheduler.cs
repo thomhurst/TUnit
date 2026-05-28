@@ -9,13 +9,16 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
 {
     private readonly TestRunner _testRunner;
     private readonly TUnitFrameworkLogger _logger;
+    private readonly HashSetPool _hashSetPool;
 
     public ConstraintKeyScheduler(
         TestRunner testRunner,
-        TUnitFrameworkLogger logger)
+        TUnitFrameworkLogger logger,
+        HashSetPool hashSetPool)
     {
         _testRunner = testRunner;
         _logger = logger;
+        _hashSetPool = hashSetPool;
     }
 
     #if NET8_0_OR_GREATER
@@ -162,51 +165,62 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             // Release the constraint keys and check if any waiting tests can now run
             var testsToStart = new List<WaitingTest>();
 
-            lock (lockObject)
+            // Rent a pooled HashSet to collect candidates; returned immediately after we
+            // copy out the (priority-sorted) elements so we avoid allocating a fresh set
+            // per constraint-key release on hot scheduling paths.
+            var candidates = _hashSetPool.Rent<WaitingTest>();
+            try
             {
-                // Release all constraint keys for this test
-                foreach (var key in constraintKeys)
+                lock (lockObject)
                 {
-                    lockedKeys.Remove(key);
-                }
-
-                // Only examine tests that are waiting on the keys we just released (O(k) lookup)
-                var candidates = waitingTestIndex.GetCandidatesForReleasedKeys(constraintKeys);
-
-                // Sort candidates by priority to respect ordering
-                // Use a simple list + sort rather than a SortedSet to avoid per-element allocation
-                var sortedCandidates = new List<WaitingTest>(candidates.Count);
-                sortedCandidates.AddRange(candidates);
-                sortedCandidates.Sort(static (a, b) => a.Priority.CompareTo(b.Priority));
-
-                foreach (var candidate in sortedCandidates)
-                {
-                    // Check if all constraint keys are available for this candidate
-                    var canStart = true;
-                    var waitingKeyCount = candidate.ConstraintKeys.Count;
-                    for (var i = 0; i < waitingKeyCount; i++)
+                    // Release all constraint keys for this test
+                    foreach (var key in constraintKeys)
                     {
-                        if (lockedKeys.Contains(candidate.ConstraintKeys[i]))
-                        {
-                            canStart = false;
-                            break;
-                        }
+                        lockedKeys.Remove(key);
                     }
 
-                    if (canStart)
+                    // Only examine tests that are waiting on the keys we just released (O(k) lookup)
+                    waitingTestIndex.GetCandidatesForReleasedKeys(constraintKeys, candidates);
+
+                    // Sort candidates by priority to respect ordering
+                    // Use a simple list + sort rather than a SortedSet to avoid per-element allocation
+                    var sortedCandidates = new List<WaitingTest>(candidates.Count);
+                    sortedCandidates.AddRange(candidates);
+                    sortedCandidates.Sort(static (a, b) => a.Priority.CompareTo(b.Priority));
+
+                    foreach (var candidate in sortedCandidates)
                     {
-                        // Lock the keys for this test
+                        // Check if all constraint keys are available for this candidate
+                        var canStart = true;
+                        var waitingKeyCount = candidate.ConstraintKeys.Count;
                         for (var i = 0; i < waitingKeyCount; i++)
                         {
-                            lockedKeys.Add(candidate.ConstraintKeys[i]);
+                            if (lockedKeys.Contains(candidate.ConstraintKeys[i]))
+                            {
+                                canStart = false;
+                                break;
+                            }
                         }
 
-                        // Remove from the index and mark for starting
-                        waitingTestIndex.Remove(candidate);
-                        testsToStart.Add(candidate);
+                        if (canStart)
+                        {
+                            // Lock the keys for this test
+                            for (var i = 0; i < waitingKeyCount; i++)
+                            {
+                                lockedKeys.Add(candidate.ConstraintKeys[i]);
+                            }
+
+                            // Remove from the index and mark for starting
+                            waitingTestIndex.Remove(candidate);
+                            testsToStart.Add(candidate);
+                        }
+                        // If can't start, leave it in the index for future key releases
                     }
-                    // If can't start, leave it in the index for future key releases
                 }
+            }
+            finally
+            {
+                _hashSetPool.Return(candidates);
             }
 
             // Log and signal tests to start outside the lock

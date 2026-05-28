@@ -256,7 +256,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
-            Logger));
+            Logger,
+            hashSetPool));
 
         var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer, lazyPropertyInjector, objectGraphDiscoveryService));
 
