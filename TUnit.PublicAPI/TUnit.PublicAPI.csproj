@@ -11,18 +11,6 @@
         <Configuration>Release</Configuration>
     </PropertyGroup>
 
-    <!-- Local-only: bypass GitVersion (which can fail on some local repo states) and pin the
-         assembly version so strong-named TUnit.Core loads cleanly. CI keeps GitVersion-driven
-         versioning because GITHUB_ACTIONS=true. -->
-    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
-        <DisableGitVersionTask>true</DisableGitVersionTask>
-        <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
-        <_EnableLocalGitVersion>false</_EnableLocalGitVersion>
-        <AssemblyVersion>99.99.99.0</AssemblyVersion>
-        <FileVersion>99.99.99.0</FileVersion>
-        <Version>99.99.99</Version>
-    </PropertyGroup>
-
     <ItemGroup>
       <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
       <PackageReference Include="PublicApiGenerator" />
@@ -43,14 +31,14 @@
       <ProjectReference Include="..\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
     </ItemGroup>
 
-    <!-- Propagate the GitVersion-disable + pinned-version properties to every transitive
-         ProjectReference build (e.g. TUnit.Core, TUnit.Assertions). MSBuild flows
-         AdditionalProperties as global properties for the referenced build, and globals
-         then carry on to its own ProjectReferences. Skipped under GitHub Actions where
-         the workflow drives versioning explicitly. -->
+    <!-- Pin transitive ProjectReference builds (TUnit.Core, TUnit.Assertions, ...) to the same
+         dummy version locally so strong-named references resolve consistently. MSBuild flows
+         AdditionalProperties as global properties to the referenced build, which then carry on
+         to its own ProjectReferences. Skipped under GitHub Actions where the workflow drives
+         versioning explicitly. -->
     <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
       <ProjectReference Update="@(ProjectReference)"
-                        AdditionalProperties="DisableGitVersionTask=true;GenerateGitVersionInformation=false;_EnableLocalGitVersion=false;AssemblyVersion=99.99.99.0;FileVersion=99.99.99.0;Version=99.99.99" />
+                        AdditionalProperties="AssemblyVersion=99.99.99.0;FileVersion=99.99.99.0;Version=99.99.99" />
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />

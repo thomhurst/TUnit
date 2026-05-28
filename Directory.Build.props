@@ -14,20 +14,15 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Disable GitVersion MSBuild task by default - CI computes version once and passes properties explicitly.
-         This prevents GitVersion from spawning a process per project×TFM (153+ invocations). -->
-    <DisableGitVersionTask>true</DisableGitVersionTask>
-    <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
-    <!-- Re-enable GitVersion for core library projects when building locally, so that
-         strong-named assembly versions match what NuGet packages (e.g. Verify.TUnit) expect. -->
-    <_EnableLocalGitVersion Condition="'$(GITHUB_ACTIONS)' != 'true' and (
-        '$(MSBuildProjectName)' == 'TUnit.Core' or
-        '$(MSBuildProjectName)' == 'TUnit.Engine' or
-        '$(MSBuildProjectName)' == 'TUnit.Mocks' or
-        '$(MSBuildProjectName)' == 'TUnit.Assertions'
-    )">true</_EnableLocalGitVersion>
-    <DisableGitVersionTask Condition="'$(_EnableLocalGitVersion)' == 'true'">false</DisableGitVersionTask>
-    <GenerateGitVersionInformation Condition="'$(_EnableLocalGitVersion)' == 'true'">true</GenerateGitVersionInformation>
+    <!-- Versioning: CI computes the version once (GitVersion GitHub Action) and passes it to
+         every build/pack via -p:Version/-p:AssemblyVersion/... (see .github/workflows/dotnet.yml).
+         The GitVersion MSBuild task is intentionally NOT used - it crashes on some local repo
+         states (issue #6077) and would spawn a process per project×TFM. Locally we pin a high
+         dummy version so strong-named TUnit.Core loads cleanly and project-to-project references
+         resolve consistently. CI overrides these because it sets the properties explicitly. -->
+    <Version Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(Version)' == ''">99.99.99</Version>
+    <AssemblyVersion Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(AssemblyVersion)' == ''">99.99.99.0</AssemblyVersion>
+    <FileVersion Condition="'$(GITHUB_ACTIONS)' != 'true' and '$(FileVersion)' == ''">99.99.99.0</FileVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
@@ -94,18 +89,6 @@
     <PackageReference Include="Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <!-- GitVersion only needed by the 4 core library projects that produce versioned NuGet packages -->
-  <ItemGroup Condition="
-      '$(MSBuildProjectName)' == 'TUnit.Core' or
-      '$(MSBuildProjectName)' == 'TUnit.Engine' or
-      '$(MSBuildProjectName)' == 'TUnit.Mocks' or
-      '$(MSBuildProjectName)' == 'TUnit.Assertions'">
-    <PackageReference Include="GitVersion.MsBuild">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
