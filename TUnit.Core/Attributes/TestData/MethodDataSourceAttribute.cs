@@ -181,9 +181,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             throw new InvalidOperationException($"Could not determine target type for method '{MethodNameProvidingDataSource}'. This may occur during static property initialization without a test context.");
         }
 
-        // Try to find a method first
-        var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
-                && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
+        // Try to find a method first.
+        var methodInfo = ResolveDataSourceMethod(targetType)
             ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
         object? methodResult;
@@ -323,6 +322,50 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
+    }
+
+    // Resolves the data-source method overload that best matches the supplied Arguments.
+    //
+    // When every argument is non-null we know its runtime type, so we delegate to the runtime
+    // binder via Type.GetMethod(name, flags, binder, types, modifiers). The binder applies normal
+    // overload-resolution rules (most-specific match wins), which both honours the derived-type /
+    // interface widening this fix intends AND disambiguates competing overloads such as
+    // GetData(object) vs GetData(string) — where a plain IsAssignableFrom scan would match both and
+    // throw on SingleOrDefault.
+    //
+    // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
+    // Type[]; we fall back to a name-only single-overload lookup (handled by the caller).
+    //
+    // With zero arguments the empty Type[] flows through the same binder path and selects the
+    // parameterless overload directly — including when the name is shared with other-arity
+    // overloads, which the caller's name-only GetMethod(name, flags) would treat as ambiguous
+    // and silently return null for.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    private MethodInfo? ResolveDataSourceMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
+    {
+        var arguments = Arguments;
+
+        // For zero arguments this produces an empty Type[], which the binder GetMethod overload
+        // resolves to the parameterless overload — even when other-arity overloads share the name.
+        // (The plain name-only GetMethod(name, flags) cannot: it returns null on an ambiguous name.)
+        var argumentTypes = new Type[arguments.Length];
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            var argumentType = arguments[i]?.GetType();
+            if (argumentType is null)
+            {
+                // A null argument has no runtime type the binder can match on.
+                // Fall back to the name-only lookup performed by the caller.
+                return null;
+            }
+
+            argumentTypes[i] = argumentType;
+        }
+
+        // Let the runtime binder pick the best overload for these exact argument types.
+        // Ambiguous matches surface as AmbiguousMatchException (genuinely ambiguous code),
+        // never as the spurious SingleOrDefault throw the old scan produced.
+        return targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags, binder: null, argumentTypes, modifiers: null);
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.
