@@ -60,15 +60,26 @@ public static class StaticPropertyReflectionInitializer
             return;
         }
 
-        // Get all static properties with data source attributes
-        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static)
-            .Where(p => p.CanWrite && HasDataSourceAttribute(p));
+        var staticProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Static);
 
         foreach (var property in staticProperties)
         {
+            if (!property.CanWrite)
+            {
+                continue;
+            }
+
+            // Single-pass lookup avoids materialising the attribute array twice
+            // (once to filter, once to fetch) and skips properties with no data source.
+            var dataSourceAttr = GetFirstDataSourceAttribute(property);
+            if (dataSourceAttr is null)
+            {
+                continue;
+            }
+
             try
             {
-                await InitializeStaticProperty(type, property);
+                await InitializeStaticProperty(property, dataSourceAttr);
             }
             catch (Exception ex)
             {
@@ -78,23 +89,24 @@ public static class StaticPropertyReflectionInitializer
         }
     }
 
-    private static bool HasDataSourceAttribute(PropertyInfo property)
+    private static IDataSourceAttribute? GetFirstDataSourceAttribute(PropertyInfo property)
     {
-        return property.GetCustomAttributes()
-            .Any(attr => attr is IDataSourceAttribute);
+        foreach (var attribute in property.GetCustomAttributes())
+        {
+            if (attribute is IDataSourceAttribute dataSource)
+            {
+                return dataSource;
+            }
+        }
+
+        return null;
     }
 
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
-    private static async Task InitializeStaticProperty(Type type, PropertyInfo property)
+    private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr)
     {
-        if (property.GetCustomAttributes()
-                .FirstOrDefault(attr => attr is IDataSourceAttribute) is not IDataSourceAttribute dataSourceAttr)
-        {
-            return;
-        }
-
         // Create metadata for the data source
         var metadata = new DataGeneratorMetadata
         {

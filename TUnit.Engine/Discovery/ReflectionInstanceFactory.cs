@@ -62,18 +62,15 @@ internal static class ReflectionInstanceFactory
                 continue;
             }
 
-            // Look for data source attributes on the property
-            var dataSourceAttrs = property.GetCustomAttributes()
-                .OfType<IDataSourceAttribute>()
-                .ToArray();
+            // Look for the first data source attribute on the property.
+            // Single-pass avoids allocating the OfType iterator + array for the
+            // common case of properties without a data source attribute.
+            var dataSource = GetFirstDataSourceAttribute(property);
 
-            if (dataSourceAttrs.Length == 0)
+            if (dataSource is null)
             {
                 continue;
             }
-
-            // Try to get data from the first data source
-            var dataSource = dataSourceAttrs[0];
 
             try
             {
@@ -114,6 +111,19 @@ internal static class ReflectionInstanceFactory
                 // Ignore errors during property injection - the test will fail with a better error message
             }
         }
+    }
+
+    private static IDataSourceAttribute? GetFirstDataSourceAttribute(PropertyInfo property)
+    {
+        foreach (var attribute in property.GetCustomAttributes())
+        {
+            if (attribute is IDataSourceAttribute dataSource)
+            {
+                return dataSource;
+            }
+        }
+
+        return null;
     }
 
     private static DataGeneratorMetadata CreatePropertyMetadata(PropertyInfo property, Type containingType, IDataSourceAttribute dataSource)
