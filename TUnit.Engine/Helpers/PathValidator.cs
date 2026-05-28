@@ -1,7 +1,57 @@
+#if NET8_0_OR_GREATER
+using System.Buffers;
+#endif
+
 namespace TUnit.Engine.Helpers;
 
 internal static class PathValidator
 {
+#if NET8_0_OR_GREATER
+    private static readonly SearchValues<char> _invalidFileNameChars =
+        SearchValues.Create(Path.GetInvalidFileNameChars());
+#endif
+
+    /// <summary>
+    /// Removes any characters that are invalid in a file name (e.g. path separators),
+    /// preventing path traversal via crafted assembly names. Equivalent to
+    /// <c>string.Concat(name.Split(Path.GetInvalidFileNameChars()))</c> but allocation-free
+    /// when the name is already clean.
+    /// </summary>
+    internal static string SanitizeFileName(string name)
+    {
+#if NET8_0_OR_GREATER
+        var span = name.AsSpan();
+        var firstInvalid = span.IndexOfAny(_invalidFileNameChars);
+
+        // Fast path: nothing to strip, return the original string unchanged.
+        if (firstInvalid < 0)
+        {
+            return name;
+        }
+
+        // Worst case the result is the same length as the input (no chars removed
+        // after the first), so a single stack/heap buffer of that size suffices.
+        var buffer = name.Length <= 256 ? stackalloc char[name.Length] : new char[name.Length];
+
+        // Everything before the first invalid char is known-good.
+        span.Slice(0, firstInvalid).CopyTo(buffer);
+        var written = firstInvalid;
+
+        for (var i = firstInvalid; i < span.Length; i++)
+        {
+            var c = span[i];
+            if (!_invalidFileNameChars.Contains(c))
+            {
+                buffer[written++] = c;
+            }
+        }
+
+        return new string(buffer.Slice(0, written));
+#else
+        return string.Concat(name.Split(Path.GetInvalidFileNameChars()));
+#endif
+    }
+
     /// <summary>
     /// Validates and normalizes a file path to prevent path traversal attacks.
     /// Returns the normalized full path if valid, or throws an <see cref="ArgumentException"/> if the path is unsafe.

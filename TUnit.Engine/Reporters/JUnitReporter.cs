@@ -121,7 +121,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
 
         // Sanitize assembly name to remove any characters that could be used for path traversal
-        var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
+        var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
 
         return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-junit.xml"));
     }
