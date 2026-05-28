@@ -52,19 +52,19 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     /// <summary>
     /// Asserts that the collection is null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionNullAssertion<TCollection, TItem> IsNull()
+    public CollectionAssertionBase<TCollection, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
-        return new CollectionNullAssertion<TCollection, TItem>(Context);
+        return new CollectionNullAssertion<TCollection, TItem>(Context, expectNull: true);
     }
 
     /// <summary>
     /// Asserts that the collection is not null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionNotNullAssertion<TCollection, TItem> IsNotNull()
+    public CollectionAssertionBase<TCollection, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
-        return new CollectionNotNullAssertion<TCollection, TItem>(Context);
+        return new CollectionNullAssertion<TCollection, TItem>(Context, expectNull: false);
     }
 
     /// <summary>

@@ -6,39 +6,17 @@ using TUnit.Assertions.Sources;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Asserts that a collection is null, preserving collection type information.
+/// Asserts that a collection is null (or not null), preserving collection type information.
 /// Extends CollectionAssertionBase to ensure .And and .Or return collection-specific continuations.
 /// </summary>
-public class CollectionNullAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
+internal class CollectionNullAssertion<TCollection, TItem>(AssertionContext<TCollection> context, bool expectNull)
+    : CollectionAssertionBase<TCollection, TItem>(context)
     where TCollection : IEnumerable<TItem>
 {
-    public CollectionNullAssertion(AssertionContext<TCollection> context)
-        : base(context)
-    {
-    }
-
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
-        => NullCheck.Check(metadata, expectNull: true);
+        => NullCheck.Check(metadata, expectNull);
 
-    protected override string GetExpectation() => NullCheck.Expectation(expectNull: true);
-}
-
-/// <summary>
-/// Asserts that a collection is not null, preserving collection type information.
-/// Extends CollectionAssertionBase to ensure .And and .Or return collection-specific continuations.
-/// </summary>
-public class CollectionNotNullAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
-    where TCollection : IEnumerable<TItem>
-{
-    public CollectionNotNullAssertion(AssertionContext<TCollection> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
-        => NullCheck.Check(metadata, expectNull: false);
-
-    protected override string GetExpectation() => NullCheck.Expectation(expectNull: false);
+    protected override string GetExpectation() => NullCheck.Expectation(expectNull);
 }
 
 internal class ListNullAssertion<TList, TItem>(AssertionContext<TList> context, bool expectNull)

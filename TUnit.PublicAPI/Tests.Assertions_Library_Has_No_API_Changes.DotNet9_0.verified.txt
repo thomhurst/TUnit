@@ -915,20 +915,6 @@ namespace .Conditions
     }
     public class CollectionMemberAssertionAdapter<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem> { }
-    public class CollectionNotNullAssertion<TCollection, TItem> : .<TCollection, TItem>
-        where TCollection : .<TItem>
-    {
-        public CollectionNotNullAssertion(.<TCollection> context) { }
-        protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CollectionNullAssertion<TCollection, TItem> : .<TCollection, TItem>
-        where TCollection : .<TItem>
-    {
-        public CollectionNullAssertion(.<TCollection> context) { }
-        protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public abstract class ComparerBasedAssertion<TValue, TItem> : .<TValue>
     {
         protected ComparerBasedAssertion(.<TValue> context) { }
