@@ -751,12 +751,12 @@ internal static class HtmlReportGenerator
         }
         if (!string.IsNullOrEmpty(s.Source))
         {
-            var src = s.Source.ToLowerInvariant();
-            if (src.Contains("npgsql")) return "npgsql";
-            if (src.Contains("httpclient") || src.Contains("http.client")) return "http.client";
-            if (src.Contains("aspnetcore") || src.Contains("kestrel") || src.Contains("http.server")) return "http.server";
-            if (src.Contains("rabbit")) return "rabbitmq";
-            if (src.Contains("tunit")) return "test";
+            var src = s.Source!;
+            if (src.Contains("npgsql", StringComparison.OrdinalIgnoreCase)) return "npgsql";
+            if (src.Contains("httpclient", StringComparison.OrdinalIgnoreCase) || src.Contains("http.client", StringComparison.OrdinalIgnoreCase)) return "http.client";
+            if (src.Contains("aspnetcore", StringComparison.OrdinalIgnoreCase) || src.Contains("kestrel", StringComparison.OrdinalIgnoreCase) || src.Contains("http.server", StringComparison.OrdinalIgnoreCase)) return "http.server";
+            if (src.Contains("rabbit", StringComparison.OrdinalIgnoreCase)) return "rabbitmq";
+            if (src.Contains("tunit", StringComparison.OrdinalIgnoreCase)) return "test";
         }
         if (s.Name is { Length: > 0 } name)
         {
