@@ -380,27 +380,24 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
     private static readonly ConcurrentDictionary<Type, bool> IsAsyncEnumerableCache = new();
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "The 'type' parameter is annotated with DynamicallyAccessedMemberTypes.Interfaces, so its interfaces are preserved; the closure-free factory only forwards that same Type instance.")]
     private static bool IsAsyncEnumerable([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
     {
         // Cache per-type: GetInterfaces() allocates an array on every call and the
-        // result is invariant for a given Type.
-        if (IsAsyncEnumerableCache.TryGetValue(type, out var cached))
+        // result is invariant for a given Type. GetOrAdd with a static (closure-free)
+        // factory ensures concurrent callers don't each run the interface scan.
+        return IsAsyncEnumerableCache.GetOrAdd(type, static t =>
         {
-            return cached;
-        }
-
-        var result = false;
-        foreach (var i in type.GetInterfaces())
-        {
-            if (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
+            foreach (var i in t.GetInterfaces())
             {
-                result = true;
-                break;
+                if (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
+                {
+                    return true;
+                }
             }
-        }
 
-        IsAsyncEnumerableCache[type] = result;
-        return result;
+            return false;
+        });
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
