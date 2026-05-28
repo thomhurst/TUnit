@@ -31,6 +31,7 @@ internal sealed class ReflectionHookDiscoveryService
     // bags after a single Interlocked.Increment short-circuit.
     private static int _discoveryStarted;
     private static readonly ManualResetEventSlim _discoveryCompleted = new(initialState: false);
+    private static Exception? _discoveryException;
 
     private static string GetMethodKey(MethodInfo method)
     {
@@ -186,6 +187,17 @@ internal sealed class ReflectionHookDiscoveryService
                     "Reflection-mode hook discovery timed out waiting for the first caller to complete. " +
                     "This usually indicates a hang in an assembly being scanned for hooks.");
             }
+
+            if (_discoveryException is { } firstFailure)
+            {
+                // The first caller's discovery failed and left Sources.* in a partial state.
+                // Re-surface the failure to every concurrent waiter so no session silently
+                // proceeds with missing hooks.
+                throw new InvalidOperationException(
+                    "Reflection-mode hook discovery failed in the producing session.",
+                    firstFailure);
+            }
+
             return;
         }
 
@@ -212,6 +224,11 @@ internal sealed class ReflectionHookDiscoveryService
                     DiscoverHooksInAssembly(assembly);
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            _discoveryException = ex;
+            throw;
         }
         finally
         {

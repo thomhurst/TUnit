@@ -28,8 +28,11 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookReg
 
         if (Interlocked.CompareExchange(ref _sessionInitialised, 1, 0) == 0)
         {
-            // Discover hooks using the mode-specific service. The discovery services themselves
-            // guard against running more than once per process where appropriate.
+            // _sessionInitialised is per-instance — TUnitServiceProvider news a fresh
+            // TUnitInitializer per session, so this flag only protects against concurrent
+            // ExecuteRequestAsync calls within ONE session re-entering hook discovery.
+            // Cross-session "run once per process" semantics live downstream in
+            // ReflectionHookDiscoveryService (gate on _discoveryStarted / _discoveryCompleted).
             hookDiscoveryService.DiscoverHooks();
 
             if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
