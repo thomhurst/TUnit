@@ -19,6 +19,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
 {
     private readonly IEnumerable<TItem> _expected;
     private readonly CollectionOrdering _ordering;
+    private string? _cachedExpectedFormat;
 
     [RequiresUnreferencedCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
     public IsEquivalentToAssertion(
@@ -77,5 +78,5 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
     }
 
     protected override string GetExpectation() =>
-        $"to be equivalent to [{string.Join(", ", _expected)}]";
+        $"to be equivalent to [{_cachedExpectedFormat ??= string.Join(", ", _expected)}]";
 }

@@ -206,8 +206,34 @@ public static class CollectionChecks
     /// Checks if the collection has exactly one item.
     /// </summary>
     public static AssertionResult CheckHasSingleItem<TItem>(ICollectionAdapter<TItem> adapter)
+        => CheckHasSingleItem(adapter, out _);
+
+    /// <summary>
+    /// Checks if the collection has exactly one item.
+    /// Returns the single item via out parameter, captured during the single enumeration
+    /// pass to avoid re-enumerating non-replayable sequences.
+    /// </summary>
+    public static AssertionResult CheckHasSingleItem<TItem>(ICollectionAdapter<TItem> adapter, out TItem? singleItem)
     {
-        var count = adapter.Count;
+        singleItem = default;
+        var count = 0;
+
+        // Single enumeration pass: capture the first item, then keep counting so the
+        // failure message can report the true total without re-enumerating.
+        foreach (var item in adapter.AsEnumerable())
+        {
+            if (count == 0)
+            {
+                singleItem = item;
+            }
+            else if (count == 1)
+            {
+                singleItem = default;
+            }
+
+            count++;
+        }
+
         if (count == 1)
         {
             return AssertionResult.Passed;
