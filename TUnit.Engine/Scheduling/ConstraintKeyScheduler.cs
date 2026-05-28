@@ -30,8 +30,18 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             return;
         }
 
-        // Sort tests by priority
-        var sortedTests = tests.OrderBy(static t => t.Priority).ToArray();
+        // Sort tests by priority. Defensive copy so we don't mutate the caller's array.
+        // Pack (Priority, OriginalIndex) into a long key to preserve OrderBy's stability
+        // (Array.Sort itself is not stable) while using the fast default Int64 comparer.
+        // Replaces `tests.OrderBy(...).ToArray()` which allocates iterator + buffer + array.
+        var sortedTests = new (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[tests.Length];
+        var sortKeys = new long[tests.Length];
+        for (var i = 0; i < tests.Length; i++)
+        {
+            sortedTests[i] = tests[i];
+            sortKeys[i] = ((long)tests[i].Priority << 32) | (uint)i;
+        }
+        Array.Sort(sortKeys, sortedTests);
 
         // Track which constraint keys are currently in use
         var lockedKeys = new HashSet<string>();
