@@ -1,4 +1,7 @@
 using System.Collections.Concurrent;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -48,16 +51,26 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     // Reference equality comparer for object tracking (ignores Equals overrides)
     private static readonly Helpers.ReferenceEqualityComparer ReferenceComparer = Helpers.ReferenceEqualityComparer.Instance;
 
-    // Types to skip during discovery (primitives, strings, system types)
+    // Types to skip during discovery (primitives, strings, system types).
+    // Frozen on net8+ for faster lookups; this set is read-many during per-test traversal.
+#if NET8_0_OR_GREATER
+    private static readonly System.Collections.Frozen.FrozenSet<Type> SkipTypes =
+#else
     private static readonly HashSet<Type> SkipTypes =
-    [
-        typeof(string),
-        typeof(decimal),
-        typeof(DateTime),
-        typeof(DateTimeOffset),
-        typeof(TimeSpan),
-        typeof(Guid)
-    ];
+#endif
+        new HashSet<Type>
+        {
+            typeof(string),
+            typeof(decimal),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan),
+            typeof(Guid)
+        }
+#if NET8_0_OR_GREATER
+        .ToFrozenSet()
+#endif
+        ;
 
     // Thread-safe collection of discovery errors for diagnostics
     private static readonly ConcurrentBag<DiscoveryError> DiscoveryErrors = [];

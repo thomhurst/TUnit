@@ -1,5 +1,8 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+#endif
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -206,8 +209,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         });
     }
 
+    // Read-many during reflection discovery (one Contains per assembly).
+    // Frozen on net8+ for faster lookups.
+#if NET8_0_OR_GREATER
+    private static readonly System.Collections.Frozen.FrozenSet<string> ExcludedAssemblyNames =
+        new HashSet<string>
+        {
+#else
     private static readonly HashSet<string> ExcludedAssemblyNames =
-    [
+        new()
+        {
+#endif
         "mscorlib",
         "System",
         "System.Core",
@@ -269,7 +281,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         "Shouldly",
         "NSubstitute",
         "Rhino.Mocks"
-    ];
+        }
+#if NET8_0_OR_GREATER
+        .ToFrozenSet()
+#endif
+        ;
 
     private static bool ShouldScanAssembly(Assembly assembly)
     {
