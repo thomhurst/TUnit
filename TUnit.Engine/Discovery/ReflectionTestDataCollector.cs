@@ -2229,7 +2229,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = ExtractDependencies(result.Attributes),
+            Dependencies = AttributeHelpers.ExtractDependencies(result.Attributes),
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],
@@ -2248,20 +2248,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return Task.FromResult<TestMetadata>(metadata);
     }
 
-    private static TestDependency[] ExtractDependencies(List<Attribute> attributes)
-    {
-        List<TestDependency>? dependencies = null;
-
-        foreach (var attribute in attributes)
-        {
-            if (attribute is DependsOnAttribute dependsOn)
-            {
-                (dependencies ??= []).Add(dependsOn.ToTestDependency());
-            }
-        }
-
-        return dependencies?.ToArray() ?? [];
-    }
 
     private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
     {
