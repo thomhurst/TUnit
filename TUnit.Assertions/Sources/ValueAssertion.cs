@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -15,9 +14,8 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
 
     public ValueAssertion(TValue? value, string? expression)
     {
-        // Initialize StringBuilder with enough space for expression and text
-        var expressionBuilder = new StringBuilder((expression?.Length ?? 1) + 32);
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        // extraCapacity leaves room for the assertion text appended after the seed.
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression, extraCapacity: 32);
         Context = new AssertionContext<TValue>(value, expressionBuilder);
     }
 
