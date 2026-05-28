@@ -32,10 +32,8 @@ public class EngineCancellationToken : IDisposable
     /// Per-call cancellation flows through the explicit <c>CancellationToken</c> threaded into
     /// discovery/execution, not through this session-scoped token.
     /// </summary>
-    internal void Initialise(CancellationToken cancellationToken)
+    internal void Initialise()
     {
-        _ = cancellationToken;
-
         if (Interlocked.CompareExchange(ref _initialised, 1, 0) != 0)
         {
             return;

@@ -5,9 +5,6 @@ using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core;
 
-#if !DEBUG
-[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-#endif
 /// <remarks>
 /// INVARIANT: these collections are populated once at module initialization (by source-gen
 /// in source-gen mode, by ReflectionHookDiscoveryService once-per-process in reflection mode)
@@ -16,6 +13,9 @@ namespace TUnit.Core;
 /// hooks (#6001). The reflection-mode discovery's one-time <c>ClearSourceGeneratedHooks</c>
 /// runs before any session executes — adding new clear calls during a session is a bug.
 /// </remarks>
+#if !DEBUG
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+#endif
 public static class Sources
 {
     public static readonly ConcurrentQueue<Func<Assembly>> AssemblyLoaders = [];

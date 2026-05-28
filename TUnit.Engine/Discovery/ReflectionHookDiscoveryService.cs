@@ -170,15 +170,22 @@ internal sealed class ReflectionHookDiscoveryService
 
     #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
-    [UnconditionalSuppressMessage("Platform", "CA1416:Validate platform compatibility", Justification = "Reflection hook discovery does not run on browser targets — TUnit explicitly throws for AOT/browser via RuntimeFeature.IsDynamicCodeSupported check below.")]
+    [UnconditionalSuppressMessage("Platform", "CA1416:Validate platform compatibility", Justification = "Reflection-mode hook discovery is not reachable on browser targets — those scenarios use AOT/source-gen mode which never invokes this method.")]
     #endif
     public static void DiscoverHooks()
     {
         if (Interlocked.CompareExchange(ref _discoveryStarted, 1, 0) != 0)
         {
             // Another caller is doing (or has done) the work. Wait for it to finish so we
-            // don't proceed past empty Sources.* bags on a concurrent first call.
-            _discoveryCompleted.Wait();
+            // don't proceed past empty Sources.* bags on a concurrent first call. Bounded
+            // so a stuck producer (e.g. a hanging ModuleInitializer in a scanned assembly)
+            // doesn't deadlock every concurrent session indefinitely.
+            if (!_discoveryCompleted.Wait(TimeSpan.FromMinutes(5)))
+            {
+                throw new TimeoutException(
+                    "Reflection-mode hook discovery timed out waiting for the first caller to complete. " +
+                    "This usually indicates a hang in an assembly being scanned for hooks.");
+            }
             return;
         }
 

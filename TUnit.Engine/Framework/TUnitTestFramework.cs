@@ -65,7 +65,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
-            serviceProvider.CancellationToken.Initialise(context.CancellationToken);
+            serviceProvider.CancellationToken.Initialise();
 
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
         }
