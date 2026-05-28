@@ -60,13 +60,18 @@ public static class ArgumentFormatter
             return builder.ToString();
         }
 
-        var elements = new List<string>();
+        // Non-IList fallback (rare: callers normally pass object?[]). Build directly into a
+        // StringBuilder rather than allocating an intermediate List<string> + string.Join.
+        var fallbackBuilder = new StringBuilder();
         foreach (var arg in arguments)
         {
-            elements.Add(FormatDefault(arg));
+            if (fallbackBuilder.Length > 0)
+            {
+                fallbackBuilder.Append(", ");
+            }
+            fallbackBuilder.Append(FormatDefault(arg));
         }
-
-        return elements.Count == 0 ? string.Empty : string.Join(", ", elements);
+        return fallbackBuilder.ToString();
     }
 
     private static string FormatDefault(object? o)
@@ -148,12 +153,24 @@ public static class ArgumentFormatter
     private static string FormatTuple(object tuple)
     {
         var elements = TupleHelper.UnwrapTuple(tuple);
-        var formatted = new string[elements.Length];
+
+        if (elements.Length == 0)
+            return "()";
+
+        if (elements.Length == 1)
+            return $"({FormatDefault(elements[0])})";
+
+        var builder = new StringBuilder("(");
         for (int i = 0; i < elements.Length; i++)
         {
-            formatted[i] = FormatDefault(elements[i]);
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+            builder.Append(FormatDefault(elements[i]));
         }
-        return $"({string.Join(", ", formatted)})";
+        builder.Append(')');
+        return builder.ToString();
     }
 
     private static string FormatEnumerable(IEnumerable enumerable)
