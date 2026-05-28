@@ -21,16 +21,18 @@ internal static class ConstructorHelper
     {
         var constructors = testClass.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-        // First, look for constructors marked with [TestConstructor]
-        var testConstructorMarked = constructors.Where(c => c.GetCustomAttribute<TestConstructorAttribute>() != null).ToArray();
-        
-        if (testConstructorMarked.Length > 0)
+        // First, look for the first constructor marked with [TestConstructor] (stop early instead
+        // of building a filtered array just to read index 0).
+        foreach (var constructor in constructors)
         {
-            return testConstructorMarked[0];
+            if (constructor.GetCustomAttribute<TestConstructorAttribute>() != null)
+            {
+                return constructor;
+            }
         }
 
         // If no [TestConstructor] attribute found, return the first instance constructor
-        return constructors.FirstOrDefault();
+        return constructors.Length > 0 ? constructors[0] : null;
     }
 
     /// <summary>

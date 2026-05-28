@@ -451,7 +451,10 @@ internal sealed class PropertyInjector
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
-        // Check if already cached
+        // Check if already cached. Read through the public property (which returns the empty
+        // read-only singleton when nothing has been stored yet) so we do NOT materialise a
+        // per-test dictionary on the common no-cache path — the dictionary is only created
+        // lazily below, when we actually have a value to store.
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
         {
             return;
@@ -493,7 +496,10 @@ internal sealed class PropertyInjector
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
-        // Check if already cached
+        // Check if already cached. Read through the public property (which returns the empty
+        // read-only singleton when nothing has been stored yet) so we do NOT materialise a
+        // per-test dictionary on the common no-cache path — the dictionary is only created
+        // lazily below, when we actually have a value to store.
         if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
         {
             return;

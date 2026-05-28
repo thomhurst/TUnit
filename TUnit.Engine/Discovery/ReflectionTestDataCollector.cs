@@ -300,7 +300,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (name.EndsWith(".resources") || name.EndsWith(".XmlSerializers"))
+        if (name.EndsWith(".resources", StringComparison.Ordinal) || name.EndsWith(".XmlSerializers", StringComparison.Ordinal))
         {
             return false;
         }
@@ -333,7 +333,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var hasTUnitReference = false;
         foreach (var reference in referencedAssemblies)
         {
-            if (reference.Name != null && (reference.Name.StartsWith("TUnit") || reference.Name == "TUnit"))
+            if (reference.Name != null && (reference.Name.StartsWith("TUnit", StringComparison.Ordinal) || reference.Name == "TUnit"))
             {
                 hasTUnitReference = true;
                 break;
@@ -348,6 +348,45 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return true;
     }
 
+    /// <summary>
+    /// Filters the non-null entries out of <see cref="ReflectionTypeLoadException.Types"/>, using a
+    /// pooled scratch buffer to avoid the per-failure allocations of the old LINQ Where().ToArray().
+    /// Shared by both the eager and streaming discovery type caches.
+    /// </summary>
+    private static Type[] FilterLoadedTypes(Type?[]? loadedTypes)
+    {
+        if (loadedTypes is null || loadedTypes.Length == 0)
+        {
+            return [];
+        }
+
+        var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
+        try
+        {
+            var validCount = 0;
+            foreach (var type in loadedTypes)
+            {
+                if (type != null)
+                {
+                    tempArray[validCount++] = type;
+                }
+            }
+
+            if (validCount == 0)
+            {
+                return [];
+            }
+
+            var result = new Type[validCount];
+            Array.Copy(tempArray, result, validCount);
+            return result;
+        }
+        finally
+        {
+            ArrayPool<Type>.Shared.Return(tempArray);
+        }
+    }
+
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -360,7 +399,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                return reflectionTypeLoadException.Types.Where(static x => x != null).ToArray()!;
+                return FilterLoadedTypes(reflectionTypeLoadException.Types);
             }
             catch (Exception)
             {
@@ -475,35 +514,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException rtle)
             {
-                // Some types might fail to load, but we can still use the ones that loaded successfully
-                // Optimize: Manual filtering with ArrayPool for better memory efficiency
-                var loadedTypes = rtle.Types;
-                if (loadedTypes == null)
-                {
-                    return [];
-                }
-
-                // Use ArrayPool for temporary storage to reduce allocations
-                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
-                try
-                {
-                    var validCount = 0;
-                    foreach (var type in loadedTypes)
-                    {
-                        if (type != null)
-                        {
-                            tempArray[validCount++] = type;
-                        }
-                    }
-
-                    var result = new Type[validCount];
-                    Array.Copy(tempArray, result, validCount);
-                    return result;
-                }
-                finally
-                {
-                    ArrayPool<Type>.Shared.Return(tempArray);
-                }
+                // Some types might fail to load, but we can still use the ones that loaded successfully.
+                return FilterLoadedTypes(rtle.Types);
             }
             catch (Exception)
             {
@@ -1659,39 +1671,56 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var paramGenericDef = paramType.GetGenericTypeDefinition();
 
-        // List of known covariant interfaces
-        var covariantInterfaces = new[]
-        {
-            typeof(IEnumerable<>),
-            typeof(IReadOnlyList<>),
-            typeof(IReadOnlyCollection<>),
-            typeof(IEnumerator<>)
-        };
-
-        if (!covariantInterfaces.Contains(paramGenericDef))
+        if (Array.IndexOf(CovariantInterfaces, paramGenericDef) < 0)
         {
             return false;
         }
 
+        // Check the argument type's interfaces, plus the argument type itself when it's an interface,
+        // without allocating a combined array (the old Concat([argType]).ToArray() per call).
         var argInterfaces = AssemblyReferenceCache.GetInterfaces(argType);
-        if (argType.IsInterface)
-        {
-            argInterfaces = argInterfaces.Concat([argType]).ToArray();
-        }
-
         foreach (var iface in argInterfaces)
         {
-            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
+            if (MatchesCovariantInterface(paramType, paramGenericDef, iface, out var compatible))
             {
-                var paramElementType = paramType.GetGenericArguments()[0];
-                var argElementType = iface.GetGenericArguments()[0];
-
-                // For covariance to work, the parameter element type must be assignable from the argument element type
-                // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
-                return paramElementType.IsAssignableFrom(argElementType);
+                return compatible;
             }
         }
 
+        if (argType.IsInterface && MatchesCovariantInterface(paramType, paramGenericDef, argType, out var argCompatible))
+        {
+            return argCompatible;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Known covariant generic interface definitions. Hoisted to avoid allocating the array per
+    /// <see cref="IsCovariantCompatible"/> call.
+    /// </summary>
+    private static readonly Type[] CovariantInterfaces =
+    [
+        typeof(IEnumerable<>),
+        typeof(IReadOnlyList<>),
+        typeof(IReadOnlyCollection<>),
+        typeof(IEnumerator<>)
+    ];
+
+    private static bool MatchesCovariantInterface(Type paramType, Type paramGenericDef, Type iface, out bool compatible)
+    {
+        if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
+        {
+            var paramElementType = paramType.GetGenericArguments()[0];
+            var argElementType = iface.GetGenericArguments()[0];
+
+            // For covariance to work, the parameter element type must be assignable from the argument element type
+            // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
+            compatible = paramElementType.IsAssignableFrom(argElementType);
+            return true;
+        }
+
+        compatible = false;
         return false;
     }
 
