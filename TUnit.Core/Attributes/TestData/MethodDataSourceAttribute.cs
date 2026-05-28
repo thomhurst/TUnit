@@ -180,9 +180,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             throw new InvalidOperationException($"Could not determine target type for method '{MethodNameProvidingDataSource}'. This may occur during static property initialization without a test context.");
         }
 
-        // Try to find a method first
-        var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
-                && ParameterTypesMatchArguments(x.GetParameters(), Arguments))
+        // Try to find a method first.
+        var methodInfo = ResolveDataSourceMethod(targetType)
             ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
         object? methodResult;
@@ -324,27 +323,46 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
-    // Matches a candidate method's parameter types against the runtime types of the supplied arguments.
-    // Uses IsAssignableFrom (like GenericTypeResolver) so a derived-type or interface-implementing argument
-    // matches a base-class/interface parameter, mirroring what the runtime call would actually accept.
-    // A null argument has no runtime type, so it never matches a (non-null) parameter type.
-    private static bool ParameterTypesMatchArguments(ParameterInfo[] parameters, object?[] arguments)
+    // Resolves the data-source method overload that best matches the supplied Arguments.
+    //
+    // When every argument is non-null we know its runtime type, so we delegate to the runtime
+    // binder via Type.GetMethod(name, flags, binder, types, modifiers). The binder applies normal
+    // overload-resolution rules (most-specific match wins), which both honours the derived-type /
+    // interface widening this fix intends AND disambiguates competing overloads such as
+    // GetData(object) vs GetData(string) — where a plain IsAssignableFrom scan would match both and
+    // throw on SingleOrDefault.
+    //
+    // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
+    // Type[]; we fall back to a name-only single-overload lookup (handled by the caller).
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    private MethodInfo? ResolveDataSourceMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
     {
-        if (parameters.Length != arguments.Length)
+        var arguments = Arguments;
+        if (arguments.Length == 0)
         {
-            return false;
+            // No arguments: a parameterless overload is the natural target; defer to the
+            // caller's name-only lookup which finds it (or any single named overload).
+            return null;
         }
 
-        for (var i = 0; i < parameters.Length; i++)
+        var argumentTypes = new Type[arguments.Length];
+        for (var i = 0; i < arguments.Length; i++)
         {
             var argumentType = arguments[i]?.GetType();
-            if (argumentType is null || !parameters[i].ParameterType.IsAssignableFrom(argumentType))
+            if (argumentType is null)
             {
-                return false;
+                // A null argument has no runtime type the binder can match on.
+                // Fall back to the name-only lookup performed by the caller.
+                return null;
             }
+
+            argumentTypes[i] = argumentType;
         }
 
-        return true;
+        // Let the runtime binder pick the best overload for these exact argument types.
+        // Ambiguous matches surface as AmbiguousMatchException (genuinely ambiguous code),
+        // never as the spurious SingleOrDefault throw the old scan produced.
+        return targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags, binder: null, argumentTypes, modifiers: null);
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.
