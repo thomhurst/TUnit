@@ -357,10 +357,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        foreach (var type in types)
         {
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
+
             if (type.IsAbstract)
             {
                 continue;
@@ -497,11 +500,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        foreach (var type in types)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
 
             // Skip abstract types - they can't be instantiated
             if (type.IsAbstract)
@@ -528,15 +534,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all test methods including inherited ones
-                    testMethods = GetAllTestMethods(type)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                    testMethods = GetAllTestMethods(type);
                 }
                 else
                 {
                     // Only get declared test methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
-                                                  BindingFlags.DeclaredOnly)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                                                  BindingFlags.DeclaredOnly);
                 }
             }
             catch (Exception)
@@ -547,6 +551,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             foreach (var method in testMethods)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                if (!method.IsDefined(typeof(TestAttribute), inherit: false) || method.IsAbstract)
+                {
+                    continue;
+                }
 
                 // Prevent duplicate test metadata for inherited tests
                 if (method.DeclaringType != type && !type.IsDefined(typeof(InheritsTestsAttribute), inherit: false))
@@ -1478,6 +1487,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
+        var parameters = ctor.GetParameters();
 
         return args =>
         {
@@ -1491,7 +1501,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Cast arguments to the expected parameter types
-                var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
                 for (var i = 0; i < parameters.Length && i < args.Length; i++)
@@ -1676,6 +1685,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
+        // For non-generic methods, parameter shape is stable across invocations — hoist the
+        // GetParameters() call out of the hot lambda. Generic method definitions are resolved
+        // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
+        var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
 
         return (instance, args) =>
         {
@@ -1744,7 +1757,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Cast arguments to the expected parameter types
-                var parameters = methodToInvoke.GetParameters();
+                var parameters = staticParameters ?? methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
                 // Check if the last parameter is a params array
