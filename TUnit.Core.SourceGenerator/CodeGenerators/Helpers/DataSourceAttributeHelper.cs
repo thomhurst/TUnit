@@ -12,8 +12,8 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        // Check if the attribute implements IDataSourceAttribute (using cache)
-        return InterfaceCache.ImplementsInterface(attributeClass, "global::TUnit.Core.IDataSourceAttribute");
+        // Check if the attribute implements IDataSourceAttribute
+        return InterfaceHelper.ImplementsInterface(attributeClass, "global::TUnit.Core.IDataSourceAttribute");
     }
 
     public static bool IsTypedDataSourceAttribute(INamedTypeSymbol? attributeClass)
@@ -23,8 +23,8 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        // Check if the attribute implements ITypedDataSourceAttribute<T> (using cache)
-        return InterfaceCache.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
+        // Check if the attribute implements ITypedDataSourceAttribute<T>
+        return InterfaceHelper.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
     }
 
     public static ITypeSymbol? GetTypedDataSourceType(INamedTypeSymbol? attributeClass)
@@ -34,7 +34,7 @@ internal static class DataSourceAttributeHelper
             return null;
         }
 
-        var typedInterface = InterfaceCache.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
+        var typedInterface = InterfaceHelper.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
 
         return typedInterface?.TypeArguments.FirstOrDefault();
     }

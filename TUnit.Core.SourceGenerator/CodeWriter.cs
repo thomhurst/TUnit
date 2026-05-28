@@ -48,7 +48,25 @@ public class CodeWriter : ICodeWriter
     private string GetIndentation(int level)
     {
         var key = (_indentString, level);
-        return _indentCache.GetOrAdd(key, static k => string.Concat(Enumerable.Repeat(k.Item1, k.Item2)));
+        return _indentCache.GetOrAdd(key, static k =>
+        {
+            var (indent, count) = k;
+
+            // Fast path: a single-space indent (or any whitespace-only indent) can be built
+            // directly without allocating an intermediate sequence.
+            if (indent == " ")
+            {
+                return new string(' ', count);
+            }
+
+            var builder = new StringBuilder(indent.Length * count);
+            for (var i = 0; i < count; i++)
+            {
+                builder.Append(indent);
+            }
+
+            return builder.ToString();
+        });
     }
 
     /// <summary>

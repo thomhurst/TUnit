@@ -4,9 +4,9 @@ using TUnit.Core.SourceGenerator.Extensions;
 namespace TUnit.Core.SourceGenerator.Helpers;
 
 /// <summary>
-/// Caches interface implementation checks to avoid repeated AllInterfaces traversals
+/// Helpers for interface implementation checks over <see cref="ITypeSymbol.AllInterfaces"/>.
 /// </summary>
-public static class InterfaceCache
+public static class InterfaceHelper
 {
     /// <summary>
     /// Checks if a type implements a specific interface

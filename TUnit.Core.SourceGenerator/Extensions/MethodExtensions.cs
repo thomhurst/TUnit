@@ -19,8 +19,16 @@ public static class MethodExtensions
             return null;
         }
 
-        return attributes
-            .FirstOrDefault(x => x.AttributeClass?.BaseType?.GloballyQualified()
-                                 == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix);
+        var baseTestAttribute = WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithGlobalPrefix;
+
+        foreach (var attribute in attributes)
+        {
+            if (attribute.AttributeClass?.BaseType?.GloballyQualified() == baseTestAttribute)
+            {
+                return attribute;
+            }
+        }
+
+        return null;
     }
 }
