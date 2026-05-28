@@ -51,7 +51,7 @@ public class TestNameFormatter : ITestNameFormatter
             null => "null",
             string str => $"\"{str}\"",
             char ch => $"'{ch}'",
-            bool b => b.ToString().ToLowerInvariant(),
+            bool b => b ? "true" : "false",
             // Use InvariantCulture for numeric types to avoid culture-specific formatting issues
             double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
             float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -95,7 +95,26 @@ public class TestNameFormatter : ITestNameFormatter
             return string.Empty;
         }
 
-        return string.Join(", ", args.Select(FormatArgumentValue));
+        // Build directly into a pooled StringBuilder to avoid the LINQ iterator/closure
+        // and the temporary string[] that Select + string.Join would materialize.
+        var builder = StringBuilderPool.Get();
+        try
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(FormatArgumentValue(args[i]));
+            }
+
+            return builder.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(builder);
+        }
     }
 
     private string FormatEnumerable(IEnumerable enumerable)
