@@ -161,9 +161,9 @@ public static class CastHelper
         if (value is not string && !sourceType.IsArray && value is IEnumerable enumerable && !typeof(IEnumerable).IsAssignableFrom(targetType))
         {
             object? firstElement = null;
-            foreach (var e in enumerable)
+            foreach (var item in enumerable)
             {
-                firstElement = e;
+                firstElement = item;
                 break;
             }
             if (firstElement != null)
