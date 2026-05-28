@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Text;
 
 namespace TUnit.Core.Helpers;
 
@@ -44,12 +45,19 @@ public static class ArgumentFormatter
             if (list.Count == 0)
                 return string.Empty;
 
-            var formatted = new string[list.Count];
+            if (list.Count == 1)
+                return FormatDefault(list[0]);
+
+            var builder = new StringBuilder();
             for (int i = 0; i < list.Count; i++)
             {
-                formatted[i] = FormatDefault(list[i]);
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(FormatDefault(list[i]));
             }
-            return string.Join(", ", formatted);
+            return builder.ToString();
         }
 
         var elements = new List<string>();
