@@ -110,7 +110,7 @@ internal static class DisplayNameBuilder
             var genericTypeNames = new string[genericTypes.Length];
             for (var i = 0; i < genericTypes.Length; i++)
             {
-                genericTypeNames[i] = GetSimpleTypeName(genericTypes[i]);
+                genericTypeNames[i] = TypeNameFormatter.GetSimpleTypeName(genericTypes[i]);
             }
             var genericPart = string.Join(", ", genericTypeNames);
             testName = $"{testName}<{genericPart}>";
@@ -123,31 +123,6 @@ internal static class DisplayNameBuilder
 
         var argumentsText = FormatArguments(arguments);
         return $"{testName}({argumentsText})";
-    }
-
-    private static string GetSimpleTypeName(Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            return type.Name;
-        }
-
-        var genericTypeName = type.GetGenericTypeDefinition().Name;
-        var index = genericTypeName.IndexOf('`');
-        if (index > 0)
-        {
-            genericTypeName = genericTypeName.Substring(0, index);
-        }
-
-        var genericArgs = type.GetGenericArguments();
-        var genericArgNames = new string[genericArgs.Length];
-        for (var i = 0; i < genericArgs.Length; i++)
-        {
-            genericArgNames[i] = GetSimpleTypeName(genericArgs[i]);
-        }
-        var genericArgsText = string.Join(", ", genericArgNames);
-
-        return $"{genericTypeName}<{genericArgsText}>";
     }
 
     /// <summary>
