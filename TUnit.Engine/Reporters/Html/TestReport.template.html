@@ -1711,14 +1711,12 @@ function loadSourceSnippet(detail) {
       : Math.min(lines.length, from + SNIPPET_FALLBACK_LINES);
     const snippet = lines.slice(from, to);
     const fileName = path.split('/').pop();
-    const rangeLabel = 'lines ' + startLine + '–' + (from + snippet.length);
+    const rangeLabel = `lines ${startLine}–${from + snippet.length}`;
     container.innerHTML =
-      '<div class="source-snippet-header"><span>' + esc(fileName) + ' (' + rangeLabel + ')</span></div>' +
-      '<div class="source-snippet-code">' +
-      snippet.map((l, i) =>
-        '<div class="line"><span class="line-num">' + (from + i + 1) + '</span><span class="line-content">' + esc(l) + '</span></div>'
-      ).join('') +
-      '</div>';
+      `<div class="source-snippet-header"><span>${esc(fileName)} (${rangeLabel})</span></div>` +
+      `<div class="source-snippet-code">${snippet.map((l, i) =>
+        `<div class="line"><span class="line-num">${from + i + 1}</span><span class="line-content">${esc(l)}</span></div>`
+      ).join('')}</div>`;
   };
 
   if (_snippetCache.has(rawUrl)) { render(_snippetCache.get(rawUrl)); return; }
@@ -2356,18 +2354,13 @@ function renderDetail() {
           <div class="source-path">${esc(t.source.path)}<span class="ln">:${t.source.line}</span></div>
           <div class="source-actions">
             ${canLinkSource(t)
-              ? '<a class="source-link-btn" href="' + esc(sourceJumpUrl(t)) + '" target="_blank" rel="noopener">Jump to source ↗</a>'
+              ? `<a class="source-link-btn" href="${esc(sourceJumpUrl(t))}" target="_blank" rel="noopener">Jump to source ↗</a>`
               : ''}
             <button class="copy-btn" data-copy="path">Copy path</button>
           </div>
         </div>
         ${canShowSnippet(t)
-          ? '<div class="source-snippet-container"' +
-            ' data-raw-url="' + esc(fillSourceTemplate(REPORT.sourceLinks.rawUrl, t)) + '"' +
-            ' data-path="' + esc(t.source.relativePath) + '"' +
-            ' data-line="' + t.source.line + '"' +
-            ' data-end-line="' + (t.source.endLine || '') + '">' +
-            '<div class="source-snippet-placeholder">Loading source…</div></div>'
+          ? `<div class="source-snippet-container" data-raw-url="${esc(fillSourceTemplate(REPORT.sourceLinks.rawUrl, t))}" data-path="${esc(t.source.relativePath)}" data-line="${t.source.line}" data-end-line="${t.source.endLine || ''}"><div class="source-snippet-placeholder">Loading source…</div></div>`
           : ''}
       </div>
     </div>

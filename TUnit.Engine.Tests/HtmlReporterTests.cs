@@ -465,9 +465,9 @@ public class HtmlReporterTests
     };
 
     [Test]
-    public void GitHubSourceLink_Strips_Workspace_Prefix()
+    public void SourcePathResolver_Strips_Workspace_Prefix()
     {
-        var relative = GitHubSourceLink.ToRepoRelativePath(
+        var relative = SourcePathResolver.ToRepoRelativePath(
             @"C:\actions-runner\_work\TUnit\TUnit\src\Tests\SampleTests.cs",
             workspace: "C:/actions-runner/_work/TUnit/TUnit",
             repo: "thomhurst/TUnit");
@@ -476,11 +476,11 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public void GitHubSourceLink_Strips_Workspace_Prefix_When_Workspace_Has_Backslashes()
+    public void SourcePathResolver_Strips_Workspace_Prefix_When_Workspace_Has_Backslashes()
     {
         // Workspace is passed in with Windows backslashes (un-normalized); the method
         // must normalize it internally so the prefix still matches.
-        var relative = GitHubSourceLink.ToRepoRelativePath(
+        var relative = SourcePathResolver.ToRepoRelativePath(
             @"C:\actions-runner\_work\TUnit\TUnit\src\Tests\SampleTests.cs",
             workspace: @"C:\actions-runner\_work\TUnit\TUnit",
             repo: "thomhurst/TUnit");
@@ -489,10 +489,10 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public void GitHubSourceLink_Falls_Back_To_Repo_Name_When_No_Workspace()
+    public void SourcePathResolver_Falls_Back_To_Repo_Name_When_No_Workspace()
     {
         // No workspace given; locate the repo name segment within the path instead.
-        var relative = GitHubSourceLink.ToRepoRelativePath(
+        var relative = SourcePathResolver.ToRepoRelativePath(
             "/home/user/code/TUnit/src/Tests/SampleTests.cs",
             workspace: null,
             repo: "thomhurst/TUnit");
@@ -504,9 +504,9 @@ public class HtmlReporterTests
     [Arguments(null, "owner/repo")]   // no file path
     [Arguments("/some/unrelated/path/File.cs", "owner/repo")] // repo name not in path, no workspace
     [Arguments("/x/repo/File.cs", null)] // no repo slug
-    public void GitHubSourceLink_Returns_Null_When_Unresolvable(string? filePath, string? repo)
+    public void SourcePathResolver_Returns_Null_When_Unresolvable(string? filePath, string? repo)
     {
-        GitHubSourceLink.ToRepoRelativePath(filePath, workspace: null, repo: repo).ShouldBeNull();
+        SourcePathResolver.ToRepoRelativePath(filePath, workspace: null, repo: repo).ShouldBeNull();
     }
 
     [Test]

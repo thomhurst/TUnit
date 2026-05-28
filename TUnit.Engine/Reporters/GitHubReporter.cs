@@ -275,7 +275,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         // Cache env vars for source links (read once, not per test)
         var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
-        var githubWorkspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
+        // Not normalized here: ToRepoRelativePath normalizes the workspace internally.
+        var githubWorkspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace);
         // No default: if the server is unknown, omit the link rather than guess github.com.
         var githubServerUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl)?.TrimEnd('/');
 
@@ -595,7 +596,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha) || string.IsNullOrEmpty(serverUrl)) return null;
 
         // Strip to a repo-relative path; fall back to the full normalized path when unresolvable.
-        var filePath = GitHubSourceLink.ToRepoRelativePath(fileLocation.FilePath, workspace, repo)
+        var filePath = SourcePathResolver.ToRepoRelativePath(fileLocation.FilePath, workspace, repo)
             ?? fileLocation.FilePath.Replace('\\', '/');
 
         // TUnit stores source line numbers 1-based (via [CallerLineNumber] / Roslyn span + 1),

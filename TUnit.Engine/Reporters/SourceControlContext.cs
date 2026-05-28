@@ -59,7 +59,7 @@ internal sealed record SourceControlContext(
         var sha = getEnv(EnvironmentConstants.GitHubSha);
         var slug = getEnv(EnvironmentConstants.GitHubRepository);
         var server = getEnv(EnvironmentConstants.GitHubServerUrl)?.TrimEnd('/');
-        var workspace = getEnv(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
+        var workspace = getEnv(EnvironmentConstants.GitHubWorkspace);
 
         // Branch: prefer GITHUB_HEAD_REF (set on PRs), fall back to GITHUB_REF (strip refs/heads/).
         var branch = getEnv(EnvironmentConstants.GitHubHeadRef);
@@ -95,7 +95,7 @@ internal sealed record SourceControlContext(
         var sha = getEnv(EnvironmentConstants.GitLabCommitSha);
         var slug = getEnv(EnvironmentConstants.GitLabProjectPath);
         var server = getEnv(EnvironmentConstants.GitLabServerUrl)?.TrimEnd('/');
-        var workspace = getEnv(EnvironmentConstants.GitLabProjectDir)?.Replace('\\', '/');
+        var workspace = getEnv(EnvironmentConstants.GitLabProjectDir);
         var branch = getEnv(EnvironmentConstants.GitLabBranch);
 
         SourceLinkTemplates? links = null;
@@ -114,7 +114,7 @@ internal sealed record SourceControlContext(
     {
         var sha = getEnv(EnvironmentConstants.BitbucketCommit);
         var slug = getEnv(EnvironmentConstants.BitbucketRepoFullName);
-        var workspace = getEnv(EnvironmentConstants.BitbucketCloneDir)?.Replace('\\', '/');
+        var workspace = getEnv(EnvironmentConstants.BitbucketCloneDir);
         var branch = getEnv(EnvironmentConstants.BitbucketBranch);
         const string server = EnvironmentConstants.BitbucketServerUrl;
 

@@ -553,7 +553,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             // Line numbers are already 1-based here. Emit an end line only when the span covers
             // more than the declaration line (source-gen) — reflection has none, so leave it null.
             EndLineNumber = fileLocation?.LineSpan.End.Line is { } endLine && endLine > fileLocation.LineSpan.Start.Line ? endLine : null,
-            SourceRelativePath = GitHubSourceLink.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
+            SourceRelativePath = SourcePathResolver.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
             Attempts = attempts,

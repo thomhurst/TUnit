@@ -3,10 +3,11 @@ using System.Text.RegularExpressions;
 namespace TUnit.Engine.Reporters;
 
 /// <summary>
-/// Shared helpers for turning a local test source file path into a GitHub
-/// repository-relative path, used by both the GitHub and HTML reporters.
+/// Shared, provider-agnostic helper for turning a local test source file path into a
+/// repository-relative path. Used by every reporter that emits source links (GitHub
+/// markdown summary, HTML report for GitHub/GitLab/Bitbucket).
 /// </summary>
-internal static partial class GitHubSourceLink
+internal static partial class SourcePathResolver
 {
     // Deterministic builds (ContinuousIntegrationBuild=true, which CI enables) remap each
     // SourceRoot to "/_/", "/_1/", "/_2/", ... via PathMap, so test file paths look like
@@ -54,8 +55,8 @@ internal static partial class GitHubSourceLink
             return normalized[normalizedWorkspace!.Length..].TrimStart('/');
         }
 
-        var repoName = repo!.Split('/').LastOrDefault() ?? "";
-        if (repoName.Length > 0)
+        var repoName = repo!.Split('/').LastOrDefault();
+        if (!string.IsNullOrEmpty(repoName))
         {
             var repoIndex = normalized.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
             if (repoIndex >= 0)
