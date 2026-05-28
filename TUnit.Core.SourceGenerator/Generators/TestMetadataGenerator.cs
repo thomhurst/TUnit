@@ -620,9 +620,46 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             });
         }
 
-        var methodArgumentsAttributes = testMethod.MethodAttributes
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToArray();
+        // Single-pass classification of method attributes into named buckets, replacing the
+        // repeated `.Where(...).ToArray()` scans that previously walked MethodAttributes 6-8 times.
+        List<AttributeData>? methodArgumentsBucket = null;
+        List<AttributeData>? methodDataSourceBucket = null;
+        List<AttributeData>? typedDataSourceBucket = null;
+        List<AttributeData>? generateGenericTestBucket = null;
+
+        foreach (var attribute in testMethod.MethodAttributes)
+        {
+            var attributeClass = attribute.AttributeClass;
+            if (attributeClass is null)
+            {
+                continue;
+            }
+
+            // Buckets are independent: an attribute may match more than one (e.g.
+            // MethodDataSourceAttribute is also an IDataSourceAttribute), matching the original
+            // behaviour where each `.Where(...)` scan was evaluated separately.
+            switch (attributeClass.Name)
+            {
+                case "ArgumentsAttribute":
+                    (methodArgumentsBucket ??= []).Add(attribute);
+                    break;
+                case "MethodDataSourceAttribute":
+                    (methodDataSourceBucket ??= []).Add(attribute);
+                    break;
+            }
+
+            if (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass))
+            {
+                (typedDataSourceBucket ??= []).Add(attribute);
+            }
+
+            if (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute"))
+            {
+                (generateGenericTestBucket ??= []).Add(attribute);
+            }
+        }
+
+        var methodArgumentsAttributes = methodArgumentsBucket ?? [];
 
         var classArgumentsAttributes = testMethod.IsGenericType
             ? testMethod.TypeSymbol.GetAttributes()
@@ -679,7 +716,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Handle generic classes with non-generic methods that have method-level Arguments
-        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Length > 0)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -692,7 +729,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Process typed data source attributes
-        foreach (var dataSourceAttr in testMethod.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+        foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
         {
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
@@ -714,7 +751,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process MethodDataSource attributes for generic classes (non-generic methods)
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 var inferredTypes = InferClassTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
@@ -734,7 +771,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process MethodDataSource attributes for generic methods
         if (testMethod.IsGenericMethod)
         {
-            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
@@ -754,7 +791,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     if (testMethod.IsGenericMethod)
                     {
-                        foreach (var methodArgAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+                        foreach (var methodArgAttr in methodArgumentsAttributes)
                         {
                             var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
                             if (methodInferredTypes is { Length: > 0 })
@@ -774,9 +811,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process GenerateGenericTest attributes
         // GenerateGenericTestAttribute takes params Type[] in its constructor, so extract from constructor args
         {
-            var methodGenericTestAttrs = testMethod.IsGenericMethod
-                ? testMethod.MethodAttributes
-                    .Where(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            var methodGenericTestAttrs = testMethod.IsGenericMethod && generateGenericTestBucket is not null
+                ? generateGenericTestBucket
                     .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
                     .Where(t => t is { Length: > 0 })
                     .ToList()
