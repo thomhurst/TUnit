@@ -133,7 +133,19 @@ internal sealed class TestGenericTypeResolver
     {
         // Handle the case where some parameter types are Object (placeholders for generic parameters)
         // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
-        if (parameterTypes.Any(t => t == typeof(object)) && methodArguments.Length > 0)
+        var hasObjectParameter = false;
+        if (methodArguments.Length > 0)
+        {
+            foreach (var parameterType in parameterTypes)
+            {
+                if (parameterType == typeof(object))
+                {
+                    hasObjectParameter = true;
+                    break;
+                }
+            }
+        }
+        if (hasObjectParameter)
         {
             // Check if this is a simple generic method with one type parameter and mixed parameters
             if (genericMethodInfo.ParameterNames.Length == 1 && parameterTypes.Length >= 1)
@@ -193,7 +205,20 @@ internal sealed class TestGenericTypeResolver
         
         // Handle the case where all parameter types are Object
         // This happens when data sources provide untyped data
-        if (parameterTypes.All(t => t == typeof(object)) && methodArguments.Length > 0)
+        var allParametersAreObject = methodArguments.Length > 0;
+        if (allParametersAreObject)
+        {
+            foreach (var t in parameterTypes)
+            {
+                if (t != typeof(object))
+                {
+                    allParametersAreObject = false;
+                    break;
+                }
+            }
+        }
+
+        if (allParametersAreObject)
         {
             // For the AggregateBy test case with 3 generic parameters
             if (genericMethodInfo.ParameterNames.Length == 3 &&
