@@ -184,6 +184,17 @@ internal static class HtmlReportGenerator
             if (!string.IsNullOrEmpty(data.CommitSha)) w.WriteString("commit", data.CommitSha);
             if (!string.IsNullOrEmpty(data.PullRequestNumber)) w.WriteString("pr", "#" + data.PullRequestNumber);
             if (!string.IsNullOrEmpty(data.RepositorySlug)) w.WriteString("repository", data.RepositorySlug);
+            if (data.SourceLinks is { } links)
+            {
+                // URL templates for the detected source-control provider ({path}/{line}/{start}/{end}
+                // are filled client-side per test). rawUrl is omitted when inline fetch is unsupported.
+                w.WritePropertyName("sourceLinks");
+                w.WriteStartObject();
+                w.WriteString("lineUrl", links.LineUrl);
+                w.WriteString("rangeUrl", links.RangeUrl);
+                if (!string.IsNullOrEmpty(links.RawUrl)) w.WriteString("rawUrl", links.RawUrl);
+                w.WriteEndObject();
+            }
             if (!string.IsNullOrEmpty(data.Filter)) w.WriteString("filter", data.Filter);
 
             w.WriteNumber("startMs", runStartMs);
@@ -529,6 +540,8 @@ internal static class HtmlReportGenerator
         w.WriteStartObject();
         if (!string.IsNullOrEmpty(t.FilePath)) w.WriteString("path", t.FilePath);
         if (t.LineNumber is { } ln) w.WriteNumber("line", ln);
+        if (t.EndLineNumber is { } endLn) w.WriteNumber("endLine", endLn);
+        if (!string.IsNullOrEmpty(t.SourceRelativePath)) w.WriteString("relativePath", t.SourceRelativePath);
         w.WriteEndObject();
 
         if (t.RetryAttempt > 0)

@@ -17,6 +17,7 @@ using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters;
 
 #pragma warning disable TPEXP
 
@@ -237,6 +238,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
 
+        // Resolve source-control context once; reused for per-test source links and report metadata below.
+        var ci = SourceControlContext.Detect(Environment.GetEnvironmentVariable);
+
         foreach (var kvp in lastUpdates)
         {
             var testNode = kvp.Value.TestNode;
@@ -293,7 +297,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             string[]? additionalTraceIdsForResult = null;
 #endif
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts);
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, ci.RepositorySlug, ci.Workspace);
 
             AccumulateStatus(summary, testResult);
 
@@ -376,8 +380,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 #endif
 
-        var (commitSha, branch, prNumber, repoSlug) = GetCiContext();
-
         return new ReportData
         {
             AssemblyName = assemblyName,
@@ -391,45 +393,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Summary = summary,
             Groups = groups,
             Spans = spans,
-            CommitSha = commitSha,
-            Branch = branch,
-            PullRequestNumber = prNumber,
-            RepositorySlug = repoSlug,
+            CommitSha = ci.CommitSha,
+            Branch = ci.Branch,
+            PullRequestNumber = ci.PullRequestNumber,
+            RepositorySlug = ci.RepositorySlug,
+            SourceLinks = ci.Links,
         };
-    }
-
-    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug) GetCiContext()
-    {
-        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
-        {
-            return (null, null, null, null);
-        }
-
-        var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
-        var repoSlug = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-
-        // Branch: prefer GITHUB_HEAD_REF (set on PRs), fallback to GITHUB_REF (strip refs/heads/)
-        var branch = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubHeadRef);
-        if (string.IsNullOrEmpty(branch))
-        {
-            var ghRef = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-            if (ghRef is not null && ghRef.StartsWith("refs/heads/", StringComparison.Ordinal))
-            {
-                branch = ghRef.Substring("refs/heads/".Length);
-            }
-        }
-
-        // PR number: parse from GITHUB_REF if it matches refs/pull/{n}/merge
-        string? prNumber = null;
-        var refValue = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-        if (refValue is not null &&
-            refValue.StartsWith("refs/pull/", StringComparison.Ordinal) &&
-            refValue.EndsWith("/merge", StringComparison.Ordinal))
-        {
-            prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
-        }
-
-        return (commitSha, branch, prNumber, repoSlug);
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
@@ -501,7 +470,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             : DateTimeOffset.MaxValue;
     }
 
-    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null)
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null, string? ciRepo = null, string? ciWorkspace = null)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -581,6 +550,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
+            // Line numbers are already 1-based here. Emit an end line only when the span covers
+            // more than the declaration line (source-gen) — reflection has none, so leave it null.
+            EndLineNumber = fileLocation?.LineSpan.End.Line is { } endLine && endLine > fileLocation.LineSpan.Start.Line ? endLine : null,
+            SourceRelativePath = SourcePathResolver.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
             Attempts = attempts,
@@ -794,7 +767,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
             else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
             {
-                var serverUrl = (Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com").TrimEnd('/');
+                var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
                 _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }
