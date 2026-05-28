@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.RegularExpressions;
 #if NET8_0_OR_GREATER
 using System.Buffers;
 #endif
@@ -117,7 +118,7 @@ internal readonly struct FilterHints
 /// Implementation of metadata filter matching logic extracted from TestBuilder.
 /// Evaluates if test metadata could match an execution filter without building tests.
 /// </summary>
-internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
+internal sealed partial class MetadataFilterMatcher : IMetadataFilterMatcher
 {
 #pragma warning disable TPEXP
     private static readonly ConstructorInfo _treeNodeFilterConstructor =
@@ -128,6 +129,16 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     private static readonly PropertyBag _emptyPropertyBag = new();
 
     private static readonly ConcurrentDictionary<string, string> _strippedFilterCache = new();
+
+    // Matches property-bag filters like [key=value]; used to strip them before path parsing.
+#if NET8_0_OR_GREATER
+    [GeneratedRegex(@"\[[^\]]*\]")]
+    private static partial Regex PropertyFilterRegex();
+#else
+    private static readonly Regex _propertyFilterRegex = new(@"\[[^\]]*\]", RegexOptions.Compiled);
+
+    private static Regex PropertyFilterRegex() => _propertyFilterRegex;
+#endif
 
     /// <summary>
     /// Extract hints from a filter that can be used to pre-filter test sources by type.
@@ -149,7 +160,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         // Strip property filters like [key=value]
         if (filterString.Contains('['))
         {
-            filterString = System.Text.RegularExpressions.Regex.Replace(filterString, @"\[([^\]]*)\]", "");
+            filterString = PropertyFilterRegex().Replace(filterString, "");
         }
 
         // Parse path: /{assembly}/{namespace}/{className}/{methodName}
@@ -407,7 +418,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         if (filterString.Contains('['))
         {
             var strippedFilterString = _strippedFilterCache.GetOrAdd(filterString,
-                static fs => System.Text.RegularExpressions.Regex.Replace(fs, @"\[([^\]]*)\]", ""));
+                static fs => PropertyFilterRegex().Replace(fs, ""));
             pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
         }
         else
