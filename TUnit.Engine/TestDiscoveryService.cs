@@ -109,9 +109,12 @@ internal sealed class TestDiscoveryService : IDataProducer
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
 
-    // Project the resolved tests onto their contexts into a pre-sized list. AddTests would
-    // otherwise materialise a Select() into a fresh array; building the list here avoids the
-    // lazy-enumerator allocation and lets the list grow in a single allocation.
+    // Project the resolved tests onto their contexts into a pre-sized list.
+    // TestDiscoveryContext.AddTests stores its argument directly when it is already an
+    // IReadOnlyList<TestContext> and only calls ToArray() otherwise. A List<TestContext>
+    // satisfies IReadOnlyList<TestContext>, so passing one means AddTests stores it as-is —
+    // we pay a single pre-sized list allocation here instead of a lazy Select() enumerator
+    // plus the ToArray() copy that a Select(...) projection would have forced inside AddTests.
     private static List<TestContext> ToContextList(List<AbstractExecutableTest> tests)
     {
         var contexts = new List<TestContext>(tests.Count);

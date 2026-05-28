@@ -854,7 +854,9 @@ internal sealed class ReflectionHookDiscoveryService
             Name = method.Name,
             Type = type,
             Class = CreateClassMetadata(type),
-            Parameters = BuildParameterMetadata(method.GetParameters()),
+            // Hook params: string.Empty name fallback and no IsNullable computation, matching the
+            // original inline projection. Shared with ReflectionMetadataBuilder via the factory.
+            Parameters = Building.ParameterMetadataFactory.Build(method.GetParameters(), nameFallback: string.Empty, computeIsNullable: false),
             GenericTypeCount = 0,
             ReturnTypeInfo = new ConcreteType(method.ReturnType),
             ReturnType = method.ReturnType,
@@ -874,28 +876,6 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static ParameterMetadata[] BuildParameterMetadata(ParameterInfo[] parameters)
-    {
-        if (parameters.Length == 0)
-        {
-            return [];
-        }
-
-        var result = new ParameterMetadata[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var p = parameters[i];
-            result[i] = new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? string.Empty,
-                Type = p.ParameterType,
-                TypeInfo = new ConcreteType(p.ParameterType),
-                ReflectionInfo = p
-            };
-        }
-
-        return result;
-    }
 
     private static ClassMetadata CreateClassMetadata(Type type)
     {
