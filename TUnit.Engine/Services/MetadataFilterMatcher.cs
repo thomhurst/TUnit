@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+#if NET8_0_OR_GREATER
+using System.Buffers;
+#endif
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -14,22 +17,22 @@ namespace TUnit.Engine.Services;
 internal readonly struct FilterHints
 {
     /// <summary>
-    /// The assembly name pattern from the filter (null if wildcard or unparseable).
+    /// The assembly name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? AssemblyName { get; init; }
 
     /// <summary>
-    /// The namespace pattern from the filter (null if wildcard or unparseable).
+    /// The namespace pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? Namespace { get; init; }
 
     /// <summary>
-    /// The class name pattern from the filter (null if wildcard or unparseable).
+    /// The class name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? ClassName { get; init; }
 
     /// <summary>
-    /// The method name pattern from the filter (null if wildcard or unparseable).
+    /// The method name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? MethodName { get; init; }
 
@@ -164,25 +167,25 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         string? methodName = null;
 
         // Extract assembly name (parts[1])
-        if (parts.Length > 1 && !IsWildcard(parts[1]))
+        if (parts.Length > 1 && !IsNonLiteralSegment(parts[1]))
         {
             assemblyName = parts[1];
         }
 
         // Extract namespace (parts[2])
-        if (parts.Length > 2 && !IsWildcard(parts[2]))
+        if (parts.Length > 2 && !IsNonLiteralSegment(parts[2]))
         {
             namespaceName = parts[2];
         }
 
         // Extract class name (parts[3])
-        if (parts.Length > 3 && !IsWildcard(parts[3]))
+        if (parts.Length > 3 && !IsNonLiteralSegment(parts[3]))
         {
             className = parts[3];
         }
 
         // Extract method name (parts[4])
-        if (parts.Length > 4 && !IsWildcard(parts[4]))
+        if (parts.Length > 4 && !IsNonLiteralSegment(parts[4]))
         {
             methodName = parts[4];
         }
@@ -196,9 +199,30 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         };
     }
 
-    private static bool IsWildcard(string value)
+    // Characters that make a TreeNodeFilter path segment non-literal:
+    //   * ?           wildcards
+    //   ( ) | & !     grouping / logical operators
+    //   \             escape character
+    // Property-bag brackets [ ] are stripped before ExtractFilterHints runs (line above).
+    // Characters that are NOT MTP operators and must stay literal: + (nested classes),
+    // . (namespaces), < > , space (generic class names), ^ (no meaning in the grammar).
+    // A segment containing any operator cannot be safely compared with string equality —
+    // hints are skipped for it, and MTP's TreeNodeFilter does the authoritative match
+    // downstream in CouldMatchTreeNodeFilter.
+#if NET8_0_OR_GREATER
+    private static readonly SearchValues<char> _filterOperatorChars =
+        SearchValues.Create("*?()|&!\\");
+#else
+    private static readonly char[] _filterOperatorChars = { '*', '?', '(', ')', '|', '&', '!', '\\' };
+#endif
+
+    private static bool IsNonLiteralSegment(string value)
     {
-        return string.IsNullOrEmpty(value) || value == "*" || value.Contains('*') || value.Contains('?');
+#if NET8_0_OR_GREATER
+        return string.IsNullOrEmpty(value) || value.AsSpan().IndexOfAny(_filterOperatorChars) >= 0;
+#else
+        return string.IsNullOrEmpty(value) || value.IndexOfAny(_filterOperatorChars) >= 0;
+#endif
     }
 #pragma warning restore TPEXP
 
