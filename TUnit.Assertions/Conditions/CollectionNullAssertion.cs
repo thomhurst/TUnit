@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a collection is null, preserving collection type information.
 /// Extends CollectionAssertionBase to ensure .And and .Or return collection-specific continuations.
 /// </summary>
-internal class CollectionNullAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
+public class CollectionNullAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     public CollectionNullAssertion(AssertionContext<TCollection> context)

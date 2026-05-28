@@ -44,10 +44,15 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
 
     protected override string GetExpectation() => "collection assertion";
 
+    // Subclasses hide IsNull/IsNotNull with `public new` to narrow the return type to their own
+    // base (e.g. ListAssertionBase). This is the same idiom used by And/Or below; virtual+override
+    // with covariant returns is avoided because covariant returns are not honored at runtime on the
+    // netstandard2.0 target consumed by .NET Framework.
+
     /// <summary>
     /// Asserts that the collection is null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionAssertionBase<TCollection, TItem> IsNull()
+    public CollectionNullAssertion<TCollection, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new CollectionNullAssertion<TCollection, TItem>(Context);
@@ -56,7 +61,7 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     /// <summary>
     /// Asserts that the collection is not null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionAssertionBase<TCollection, TItem> IsNotNull()
+    public CollectionNotNullAssertion<TCollection, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new CollectionNotNullAssertion<TCollection, TItem>(Context);

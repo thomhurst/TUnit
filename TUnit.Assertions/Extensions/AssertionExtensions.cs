@@ -47,22 +47,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that a collection is not null, preserving collection type information.
-    /// Returns a collection-aware assertion that maintains TItem type for proper chaining.
-    /// This overload enables: Assert.That(collection).IsNotNull().And.Contains(x => predicate).
-    /// </summary>
-    public static CollectionNotNullAssertion<TCollection, TItem> IsNotNull<TCollection, TItem>(
-        this CollectionAssertionBase<TCollection, TItem> source)
-        where TCollection : class, IEnumerable<TItem>
-    {
-        var assertionSource = (IAssertionSource<TCollection>)source;
-        assertionSource.Context.ExpressionBuilder.Append(".IsNotNull()");
-        // Map from TCollection? to TCollection (nullable to non-nullable)
-        var mappedContext = assertionSource.Context.Map((TCollection? v) => v!);
-        return new CollectionNotNullAssertion<TCollection, TItem>(mappedContext);
-    }
-
-    /// <summary>
     /// Alias for IsEqualTo - asserts that the value is equal to the expected value.
     /// Works with assertions, And, and Or continuations!
     /// </summary>
