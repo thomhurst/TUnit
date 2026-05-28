@@ -1,7 +1,7 @@
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
 using TUnit.Engine.Discovery;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine;
 
@@ -11,31 +11,36 @@ namespace TUnit.Engine;
 /// work (hook discovery, working directory) at most once per <see cref="TUnitServiceProvider"/>
 /// instance.
 /// </summary>
-internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
+internal class TUnitInitializer
 {
-    private int _sessionInitialised;
+    private readonly ICommandLineOptions _commandLineOptions;
+    private readonly IHookRegistrar _hookDiscoveryService;
+    private readonly OneTimeGate _sessionGate = new(
+        contextName: nameof(TUnitInitializer),
+        waitTimeout: TimeSpan.FromMinutes(5));
 
-    public void Initialize(ExecuteRequestContext context)
+    public TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
     {
-        _ = context;
+        _commandLineOptions = commandLineOptions;
+        _hookDiscoveryService = hookDiscoveryService;
+    }
 
-        TUnitProcessInitializer.EnsureInitialised(commandLineOptions);
+    public void Initialize()
+    {
+        TUnitProcessInitializer.EnsureInitialised(_commandLineOptions);
 
-        if (Interlocked.CompareExchange(ref _sessionInitialised, 1, 0) != 0)
+        // Session-scoped: every concurrent ExecuteRequestAsync call on this session blocks
+        // until hook discovery + working directory setup have finished, so no caller proceeds
+        // past partial state. Cross-session "run once per process" semantics for reflection
+        // hook discovery live downstream in ReflectionHookDiscoveryService.
+        _sessionGate.Run(() =>
         {
-            return;
-        }
+            _hookDiscoveryService.DiscoverHooks();
 
-        // _sessionInitialised is per-instance — TUnitServiceProvider news a fresh
-        // TUnitInitializer per session, so this flag only protects against concurrent
-        // ExecuteRequestAsync calls within ONE session re-entering hook discovery.
-        // Cross-session "run once per process" semantics live downstream in
-        // ReflectionHookDiscoveryService (gate on _discoveryStarted / _discoveryCompleted).
-        hookDiscoveryService.DiscoverHooks();
-
-        if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
-        {
-            TestContext.WorkingDirectory = TestContext.OutputDirectory!;
-        }
+            if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
+            {
+                TestContext.WorkingDirectory = TestContext.OutputDirectory!;
+            }
+        });
     }
 }

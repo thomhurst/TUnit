@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine;
 
@@ -15,19 +16,20 @@ namespace TUnit.Engine;
 /// </summary>
 internal static class TUnitProcessInitializer
 {
-    private static int s_initialised;
+    private static readonly OneTimeGate s_gate = new(
+        contextName: nameof(TUnitProcessInitializer),
+        waitTimeout: TimeSpan.FromMinutes(1));
 
     /// <summary>
-    /// Runs process-wide setup the first time it is invoked. Subsequent calls (from
-    /// later sessions or concurrent ExecuteRequestAsync invocations) are no-ops.
+    /// Runs process-wide setup the first time it is invoked. Concurrent callers block
+    /// until the first caller finishes; subsequent calls (from later sessions) are
+    /// no-ops once setup has succeeded.
     /// </summary>
     public static void EnsureInitialised(ICommandLineOptions commandLineOptions)
-    {
-        if (Interlocked.CompareExchange(ref s_initialised, 1, 0) != 0)
-        {
-            return;
-        }
+        => s_gate.Run(() => Initialise(commandLineOptions));
 
+    private static void Initialise(ICommandLineOptions commandLineOptions)
+    {
         Trace.Listeners.Insert(0, new ThrowListener());
 
         AppDomain.CurrentDomain.UnhandledException += static (_, args) =>

@@ -54,9 +54,11 @@ public class Tests
         }
     }
 
+    // No [Retry] on this one by design: it pins the regression for #6001. A flaky failure
+    // here is exactly the signal we want to preserve — retrying would mask a re-introduced
+    // race rather than surface it.
     [Test]
     [Timeout(600_000)]
-    [Retry(3)]
     [MethodDataSource(nameof(Frameworks))]
     public async Task RunTests_ConcurrentRpcsOnSameSession_AllReceiveFullResults(string framework, CancellationToken cancellationToken)
     {

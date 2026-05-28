@@ -25,13 +25,14 @@ internal sealed class ReflectionHookDiscoveryService
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
 
-    // Hook discovery is process-wide (populates the shared Sources.* bags). Use a
-    // ManualResetEventSlim gate so concurrent first-time callers from multiple MTP sessions
-    // block until the single producer has finished populating, rather than racing past empty
-    // bags after a single Interlocked.Increment short-circuit.
-    private static int _discoveryStarted;
-    private static readonly ManualResetEventSlim _discoveryCompleted = new(initialState: false);
-    private static Exception? _discoveryException;
+    // Hook discovery is process-wide (populates the shared Sources.* bags). The OneTimeGate
+    // makes concurrent first-time callers from multiple MTP sessions block until the single
+    // producer has finished populating, rather than racing past empty bags. If the producer
+    // throws, every concurrent waiter is re-surfaced the failure so no session silently
+    // proceeds with partial state.
+    private static readonly OneTimeGate s_discoveryGate = new(
+        contextName: nameof(ReflectionHookDiscoveryService),
+        waitTimeout: TimeSpan.FromMinutes(5));
 
     private static string GetMethodKey(MethodInfo method)
     {
@@ -171,68 +172,34 @@ internal sealed class ReflectionHookDiscoveryService
 
     #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
-    [UnconditionalSuppressMessage("Platform", "CA1416:Validate platform compatibility", Justification = "Reflection-mode hook discovery is not reachable on browser targets — those scenarios use AOT/source-gen mode which never invokes this method.")]
     #endif
-    public static void DiscoverHooks()
+    public static void DiscoverHooks() => s_discoveryGate.Run(DiscoverHooksCore);
+
+    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
+    #endif
+    private static void DiscoverHooksCore()
     {
-        if (Interlocked.CompareExchange(ref _discoveryStarted, 1, 0) != 0)
-        {
-            // Another caller is doing (or has done) the work. Wait for it to finish so we
-            // don't proceed past empty Sources.* bags on a concurrent first call. Bounded
-            // so a stuck producer (e.g. a hanging ModuleInitializer in a scanned assembly)
-            // doesn't deadlock every concurrent session indefinitely.
-            if (!_discoveryCompleted.Wait(TimeSpan.FromMinutes(5)))
-            {
-                throw new TimeoutException(
-                    "Reflection-mode hook discovery timed out waiting for the first caller to complete. " +
-                    "This usually indicates a hang in an assembly being scanned for hooks.");
-            }
-
-            if (_discoveryException is { } firstFailure)
-            {
-                // The first caller's discovery failed and left Sources.* in a partial state.
-                // Re-surface the failure to every concurrent waiter so no session silently
-                // proceeds with missing hooks.
-                throw new InvalidOperationException(
-                    "Reflection-mode hook discovery failed in the producing session.",
-                    firstFailure);
-            }
-
-            return;
-        }
-
-        try
-        {
-            // Clear source-generated hooks since we're discovering via reflection
-            // In reflection mode, source generation may have already populated Sources
-            // We need to clear them to avoid duplicates
-            ClearSourceGeneratedHooks();
+        // Clear source-generated hooks since we're discovering via reflection
+        // In reflection mode, source generation may have already populated Sources
+        // We need to clear them to avoid duplicates
+        ClearSourceGeneratedHooks();
 
 #if NET
-            if (!RuntimeFeature.IsDynamicCodeSupported)
-            {
-                throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
-            }
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
 #endif
 
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            foreach (var assembly in assemblies)
+        foreach (var assembly in assemblies)
+        {
+            if (ShouldScanAssembly(assembly))
             {
-                if (ShouldScanAssembly(assembly))
-                {
-                    DiscoverHooksInAssembly(assembly);
-                }
+                DiscoverHooksInAssembly(assembly);
             }
-        }
-        catch (Exception ex)
-        {
-            _discoveryException = ex;
-            throw;
-        }
-        finally
-        {
-            _discoveryCompleted.Set();
         }
     }
 

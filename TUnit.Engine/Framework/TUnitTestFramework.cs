@@ -61,7 +61,7 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
 
-            serviceProvider.Initializer.Initialize(context);
+            serviceProvider.Initializer.Initialize();
 
             await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
