@@ -128,12 +128,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     var pair = (source, i);
                     byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
 
-                    if (!byClass.TryGetValue(fd.ClassName, out var list))
-                    {
-                        list = [];
-                        byClass[fd.ClassName] = list;
-                    }
-                    list.Add(pair);
+                    byClass.AddToList(fd.ClassName, pair);
                 }
             }
 

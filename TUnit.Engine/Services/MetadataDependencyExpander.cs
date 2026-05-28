@@ -112,29 +112,13 @@ internal sealed class MetadataDependencyExpander
             var methodName = metadata.TestMethodName;
 
             // Add to class type index
-            if (!byClassType.TryGetValue(classType, out var classTypeList))
-            {
-                classTypeList = [];
-                byClassType[classType] = classTypeList;
-            }
-            classTypeList.Add(metadata);
+            byClassType.AddToList(classType, metadata);
 
             // Add to class+method index
-            var classMethodKey = (classType, methodName);
-            if (!byClassAndMethod.TryGetValue(classMethodKey, out var classMethodList))
-            {
-                classMethodList = [];
-                byClassAndMethod[classMethodKey] = classMethodList;
-            }
-            classMethodList.Add(metadata);
+            byClassAndMethod.AddToList((classType, methodName), metadata);
 
             // Add to method name index
-            if (!byMethodName.TryGetValue(methodName, out var methodNameList))
-            {
-                methodNameList = [];
-                byMethodName[methodName] = methodNameList;
-            }
-            methodNameList.Add(metadata);
+            byMethodName.AddToList(methodName, metadata);
         }
 
         var queue = new Queue<TestMetadata>(matchingMetadata);
