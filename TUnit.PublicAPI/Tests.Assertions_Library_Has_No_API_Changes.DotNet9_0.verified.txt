@@ -493,6 +493,7 @@ namespace .Collections
         public static . CheckHasCountBetween<TItem>(.<TItem> adapter, int min, int max) { }
         public static . CheckHasDistinctItems<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
         public static . CheckHasSingleItem<TItem>(.<TItem> adapter) { }
+        public static . CheckHasSingleItem<TItem>(.<TItem> adapter, out TItem? singleItem) { }
         public static . CheckHasSingleItemPredicate<TItem>(.<TItem> adapter, <TItem, bool> predicate, out TItem? matchingItem) { }
         public static . CheckIsEmpty<TItem>(.<TItem> adapter) { }
         public static . CheckIsInDescendingOrder<TItem>(.<TItem> adapter, .<TItem>? comparer = null) { }
