@@ -476,6 +476,19 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void GitHubSourceLink_Strips_Workspace_Prefix_When_Workspace_Has_Backslashes()
+    {
+        // Workspace is passed in with Windows backslashes (un-normalized); the method
+        // must normalize it internally so the prefix still matches.
+        var relative = GitHubSourceLink.ToRepoRelativePath(
+            @"C:\actions-runner\_work\TUnit\TUnit\src\Tests\SampleTests.cs",
+            workspace: @"C:\actions-runner\_work\TUnit\TUnit",
+            repo: "thomhurst/TUnit");
+
+        relative.ShouldBe("src/Tests/SampleTests.cs");
+    }
+
+    [Test]
     public void GitHubSourceLink_Falls_Back_To_Repo_Name_When_No_Workspace()
     {
         // No workspace given; locate the repo name segment within the path instead.

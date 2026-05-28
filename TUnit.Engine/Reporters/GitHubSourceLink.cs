@@ -21,10 +21,14 @@ internal static class GitHubSourceLink
 
         var normalized = filePath!.Replace('\\', '/');
 
+        // Normalize the workspace here too so callers don't have to — keeps the prefix
+        // match working regardless of which slash style the caller passes in.
+        var normalizedWorkspace = workspace?.Replace('\\', '/').TrimEnd('/');
+
         // Prefer GITHUB_WORKSPACE for reliable path stripping; fall back to repo name matching.
-        if (!string.IsNullOrEmpty(workspace) && normalized.StartsWith(workspace!, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(normalizedWorkspace) && normalized.StartsWith(normalizedWorkspace!, StringComparison.OrdinalIgnoreCase))
         {
-            return normalized[workspace!.Length..].TrimStart('/');
+            return normalized[normalizedWorkspace!.Length..].TrimStart('/');
         }
 
         var repoName = repo!.Split('/').LastOrDefault() ?? "";

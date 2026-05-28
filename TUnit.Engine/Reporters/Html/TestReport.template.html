@@ -1681,10 +1681,15 @@ function loadSourceSnippet(detail) {
   const endLine = parseInt(container.dataset.endLine, 10) || 0;
 
   const render = (text) => {
-    const lines = text.split('\n');
+    // Strip a UTF-8 BOM (renders as a stray glyph on line 1) and split on both
+    // LF and CRLF so Windows-authored files don't keep a trailing \r per line.
+    const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
+    // from: convert 1-based startLine to 0-based index.
     const from = Math.max(0, startLine - 1);
     // Source-gen mode supplies an end line (full method). Reflection mode does not,
     // so fall back to a fixed window starting at the declaration line.
+    // endLine is 1-based; slice()'s upper bound is exclusive, so a 1-based endLine
+    // is already the correct exclusive index.
     const to = endLine > startLine
       ? Math.min(lines.length, endLine)
       : Math.min(lines.length, from + SNIPPET_FALLBACK_LINES);
