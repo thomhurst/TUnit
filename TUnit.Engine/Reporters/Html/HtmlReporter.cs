@@ -16,6 +16,7 @@ using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
 
 #pragma warning disable TPEXP
 
@@ -647,7 +648,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string GetDefaultOutputPath()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
-        var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
+        var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
         var os = GetShortOsName();
         var tfm = GetShortFrameworkName();
         return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
