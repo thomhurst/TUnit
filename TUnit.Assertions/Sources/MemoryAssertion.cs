@@ -37,7 +37,7 @@ public class MemoryAssertion<TItem> : MemoryAssertionBase<Memory<TItem>, TItem>,
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        return AssertionExpressionBuilder.Create(expression);
     }
 }
 
@@ -72,7 +72,7 @@ public class ReadOnlyMemoryAssertion<TItem> : MemoryAssertionBase<ReadOnlyMemory
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        return AssertionExpressionBuilder.Create(expression);
     }
 }
 #endif

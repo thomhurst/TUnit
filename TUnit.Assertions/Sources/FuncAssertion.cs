@@ -16,7 +16,7 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
 
     public FuncAssertion(Func<TValue?> func, string? expression)
     {
-        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         var evaluationContext = new EvaluationContext<TValue>(() =>
         {
             try

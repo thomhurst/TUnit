@@ -16,7 +16,7 @@ public class AsyncFuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAss
 
     public AsyncFuncAssertion(Func<Task<TValue?>> func, string? expression)
     {
-        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         var evaluationContext = new EvaluationContext<TValue>(async () =>
         {
             try

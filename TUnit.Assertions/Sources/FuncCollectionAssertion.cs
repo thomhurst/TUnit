@@ -19,7 +19,7 @@ public class FuncCollectionAssertion<TItem> : CollectionAssertionBase<IEnumerabl
 
     private static AssertionContext<IEnumerable<TItem>> CreateContext(Func<IEnumerable<TItem>?> func, string? expression)
     {
-        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         var evaluationContext = new EvaluationContext<IEnumerable<TItem>>(() =>
         {
             try

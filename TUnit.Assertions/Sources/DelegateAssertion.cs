@@ -19,7 +19,7 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
     public DelegateAssertion(Action action, string? expression)
     {
         Action = action ?? throw new ArgumentNullException(nameof(action));
-        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         var evaluationContext = new EvaluationContext<object?>(() =>
         {
             try

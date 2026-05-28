@@ -30,6 +30,6 @@ public class ArrayAssertion<TItem> : CollectionAssertionBase<TItem[], TItem>
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+        return AssertionExpressionBuilder.Create(expression);
     }
 }
