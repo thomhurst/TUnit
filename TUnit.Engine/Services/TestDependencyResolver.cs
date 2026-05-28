@@ -27,24 +27,10 @@ internal sealed class TestDependencyResolver
             _allTests.Add(test);
 
             var testType = test.Metadata.TestClassType;
-            if (!_testsByType.TryGetValue(testType, out var testsForType))
-            {
-                testsForType =
-                [
-                ];
-                _testsByType[testType] = testsForType;
-            }
-            testsForType.Add(test);
+            _testsByType.AddToList(testType, test);
 
             var methodName = test.Metadata.TestMethodName;
-            if (!_testsByMethodName.TryGetValue(methodName, out var testsForMethod))
-            {
-                testsForMethod =
-                [
-                ];
-                _testsByMethodName[methodName] = testsForMethod;
-            }
-            testsForMethod.Add(test);
+            _testsByMethodName.AddToList(methodName, test);
 
             // Cache test by composite key for fast lookups in GetTransitiveDependencies
             _testLookupCache[(testType, methodName)] = test;
