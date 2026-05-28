@@ -61,8 +61,7 @@ public static class ArgumentFormatter
             return builder.ToString();
         }
 
-        // Non-IList fallback (rare: callers normally pass object?[]). Build directly into a
-        // StringBuilder rather than allocating an intermediate List<string> + string.Join.
+        // Non-IList fallback — rare in practice; callers normally pass object?[].
         var fallbackBuilder = new StringBuilder();
         foreach (var arg in arguments)
         {
@@ -161,7 +160,9 @@ public static class ArgumentFormatter
         if (elements.Length == 1)
             return $"({FormatDefault(elements[0])})";
 
-        var builder = new StringBuilder("(");
+        // ~16 chars per element + parentheses avoids resizing for typical tuple sizes.
+        var builder = new StringBuilder(elements.Length * 16 + 2);
+        builder.Append('(');
         for (int i = 0; i < elements.Length; i++)
         {
             if (i > 0)
