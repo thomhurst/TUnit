@@ -57,7 +57,8 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
         }
 
         var nupkgs = context.Git().RootDirectory
-            .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg");
+            .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg")
+            .ToArray();
 
         if (nupkgs.Any(file => file.NameWithoutExtension.Contains(DummyLocalVersion)))
         {

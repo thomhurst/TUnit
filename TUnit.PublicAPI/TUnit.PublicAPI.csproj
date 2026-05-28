@@ -31,15 +31,9 @@
       <ProjectReference Include="..\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
     </ItemGroup>
 
-    <!-- Pin transitive ProjectReference builds (TUnit.Core, TUnit.Assertions, ...) to the same
-         dummy version locally so strong-named references resolve consistently. MSBuild flows
-         AdditionalProperties as global properties to the referenced build, which then carry on
-         to its own ProjectReferences. Skipped under GitHub Actions where the workflow drives
-         versioning explicitly. -->
-    <ItemGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
-      <ProjectReference Update="@(ProjectReference)"
-                        AdditionalProperties="AssemblyVersion=99.99.99.0;FileVersion=99.99.99.0;Version=99.99.99" />
-    </ItemGroup>
+    <!-- No transitive version pin needed: each referenced project (TUnit.Core, TUnit.Assertions,
+         ...) self-pins to the same dummy version via the root Directory.Build.props when built
+         locally, so strong-named references resolve consistently. -->
 
     <Import Project="..\TestProject.targets" />
 
