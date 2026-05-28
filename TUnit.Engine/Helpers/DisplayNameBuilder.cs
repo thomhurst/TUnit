@@ -51,16 +51,23 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var sb = new StringBuilder();
-        for (var i = 0; i < arguments.Length; i++)
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (i > 0)
+            for (var i = 0; i < arguments.Length; i++)
             {
-                sb.Append(", ");
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(arguments[i], []));
             }
-            sb.Append(ArgumentFormatter.Format(arguments[i], []));
+            return sb.ToString();
         }
-        return sb.ToString();
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 
     /// <summary>
@@ -73,16 +80,23 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var sb = new StringBuilder();
-        for (var i = 0; i < arguments.Length; i++)
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (i > 0)
+            for (var i = 0; i < arguments.Length; i++)
             {
-                sb.Append(", ");
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(arguments[i], formatters));
             }
-            sb.Append(ArgumentFormatter.Format(arguments[i], formatters));
+            return sb.ToString();
         }
-        return sb.ToString();
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 
     /// <summary>
