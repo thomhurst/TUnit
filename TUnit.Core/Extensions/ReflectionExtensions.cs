@@ -61,14 +61,26 @@ public static class ReflectionExtensions
                 return member.IsDefined(typeof(T), inherit);
             }
 
-            return provider.GetCustomAttributes(inherit)
-                .Any(x => x.GetType().IsAssignableTo(typeof(T)));
+            foreach (var x in provider.GetCustomAttributes(inherit))
+            {
+                if (x is T)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         catch (NotSupportedException ex) when (ex.Message.Contains("Generic types are not valid"))
         {
             // Fall back to safe method for .NET Framework
-            return provider.GetCustomAttributesSafe(inherit)
-                .Any(x => x.GetType().IsAssignableTo(typeof(T)));
+            foreach (var x in provider.GetCustomAttributesSafe(inherit))
+            {
+                if (x is T)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -105,7 +117,12 @@ public static class ReflectionExtensions
                 .OfType<T>()
                 .ToArray();
 #else
-        return provider.GetCustomAttributes(typeof(T), inherit).Cast<T>().ToArray();
+        var attrs = provider.GetCustomAttributes(typeof(T), inherit);
+        if (attrs is T[] typed)
+        {
+            return typed;
+        }
+        return Array.ConvertAll(attrs, static a => (T)a);
 #endif
     }
 
