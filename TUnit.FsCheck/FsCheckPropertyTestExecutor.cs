@@ -18,7 +18,7 @@ namespace TUnit.FsCheck;
 public class FsCheckPropertyTestExecutor : ITestExecutor
 {
 #if NET8_0_OR_GREATER
-    private static readonly System.Buffers.SearchValues<char> LineEndings = System.Buffers.SearchValues.Create("\r\n");
+    private static readonly System.Buffers.SearchValues<char> _lineEndings = System.Buffers.SearchValues.Create("\r\n");
 #endif
 
     private readonly FsCheckPropertyAttribute _propertyAttribute;
@@ -197,7 +197,7 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
 
         // Take only the first line
 #if NET8_0_OR_GREATER
-        var newlineIndex = afterShrunk.AsSpan().IndexOfAny(LineEndings);
+        var newlineIndex = afterShrunk.AsSpan().IndexOfAny(_lineEndings);
 #else
         var newlineIndex = afterShrunk.IndexOfAny(['\r', '\n']);
 #endif
