@@ -347,6 +347,8 @@ public class GitHubReporterTests
         }
         finally
         {
+            Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+            Environment.SetEnvironmentVariable("GITHUB_SHA", null);
             Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", null);
         }
     }
