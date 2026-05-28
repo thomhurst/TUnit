@@ -672,6 +672,22 @@ internal static class HtmlReportGenerator
         expected = null;
         actual = null;
         if (string.IsNullOrEmpty(message)) return;
+#if NET
+        // EnumerateLines splits on \n and \r\n natively — no Replace/Split allocations.
+        foreach (var rawLine in message.AsSpan().EnumerateLines())
+        {
+            var line = rawLine.TrimStart();
+            if (expected is null && line.StartsWith("Expected:", StringComparison.OrdinalIgnoreCase))
+            {
+                expected = line.Slice("Expected:".Length).Trim().ToString();
+            }
+            else if (actual is null && (line.StartsWith("Actual:", StringComparison.OrdinalIgnoreCase) || line.StartsWith("But was:", StringComparison.OrdinalIgnoreCase)))
+            {
+                var prefixLen = line.StartsWith("Actual:", StringComparison.OrdinalIgnoreCase) ? "Actual:".Length : "But was:".Length;
+                actual = line.Slice(prefixLen).Trim().ToString();
+            }
+        }
+#else
         var lines = message.Replace("\r\n", "\n").Split('\n');
         foreach (var raw in lines)
         {
@@ -686,6 +702,7 @@ internal static class HtmlReportGenerator
                 actual = line.Substring(prefixLen).Trim();
             }
         }
+#endif
         if (expected is { Length: 0 }) expected = null;
         if (actual is { Length: 0 }) actual = null;
     }
@@ -767,14 +784,24 @@ internal static class HtmlReportGenerator
     {
         if (string.IsNullOrEmpty(stderr)) return stderr;
         if (stderr!.IndexOf("[TUnit]", StringComparison.Ordinal) < 0) return stderr;
-        var lines = stderr.Replace("\r\n", "\n").Split('\n');
         var sb = new StringBuilder(stderr.Length);
+#if NET
+        // EnumerateLines splits on \n and \r\n natively — no Replace/Split allocations.
+        foreach (var line in stderr.AsSpan().EnumerateLines())
+        {
+            if (line.TrimStart().StartsWith("[TUnit]", StringComparison.Ordinal)) continue;
+            if (sb.Length > 0) sb.Append('\n');
+            sb.Append(line);
+        }
+#else
+        var lines = stderr.Replace("\r\n", "\n").Split('\n');
         foreach (var line in lines)
         {
             if (line.TrimStart().StartsWith("[TUnit]", StringComparison.Ordinal)) continue;
             if (sb.Length > 0) sb.Append('\n');
             sb.Append(line);
         }
+#endif
         return sb.Length == 0 ? null : sb.ToString();
     }
 
