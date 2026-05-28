@@ -238,8 +238,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
 
-        // Read GitHub CI context once; reused for per-test source links and report metadata below.
-        var (commitSha, branch, prNumber, repoSlug, serverUrl, workspace) = GetCiContext();
+        // Resolve source-control context once; reused for per-test source links and report metadata below.
+        var ci = SourceControlContext.Detect(Environment.GetEnvironmentVariable);
 
         foreach (var kvp in lastUpdates)
         {
@@ -297,7 +297,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             string[]? additionalTraceIdsForResult = null;
 #endif
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, repoSlug, workspace);
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, ci.RepositorySlug, ci.Workspace);
 
             AccumulateStatus(summary, testResult);
 
@@ -393,49 +393,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Summary = summary,
             Groups = groups,
             Spans = spans,
-            CommitSha = commitSha,
-            Branch = branch,
-            PullRequestNumber = prNumber,
-            RepositorySlug = repoSlug,
-            ServerUrl = serverUrl,
+            CommitSha = ci.CommitSha,
+            Branch = ci.Branch,
+            PullRequestNumber = ci.PullRequestNumber,
+            RepositorySlug = ci.RepositorySlug,
+            SourceLinks = ci.Links,
         };
-    }
-
-    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug, string? ServerUrl, string? Workspace) GetCiContext()
-    {
-        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
-        {
-            return (null, null, null, null, null, null);
-        }
-
-        var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
-        var repoSlug = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-
-        // Branch: prefer GITHUB_HEAD_REF (set on PRs), fallback to GITHUB_REF (strip refs/heads/)
-        var branch = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubHeadRef);
-        if (string.IsNullOrEmpty(branch))
-        {
-            var ghRef = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-            if (ghRef is not null && ghRef.StartsWith("refs/heads/", StringComparison.Ordinal))
-            {
-                branch = ghRef.Substring("refs/heads/".Length);
-            }
-        }
-
-        // PR number: parse from GITHUB_REF if it matches refs/pull/{n}/merge
-        string? prNumber = null;
-        var refValue = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-        if (refValue is not null &&
-            refValue.StartsWith("refs/pull/", StringComparison.Ordinal) &&
-            refValue.EndsWith("/merge", StringComparison.Ordinal))
-        {
-            prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
-        }
-
-        var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
-        var workspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
-
-        return (commitSha, branch, prNumber, repoSlug, serverUrl, workspace);
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)

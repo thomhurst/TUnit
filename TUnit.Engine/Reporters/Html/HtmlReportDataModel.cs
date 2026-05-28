@@ -54,8 +54,8 @@ internal sealed class ReportData
     [JsonPropertyName("repositorySlug")]
     public string? RepositorySlug { get; init; }
 
-    [JsonPropertyName("serverUrl")]
-    public string? ServerUrl { get; init; }
+    [JsonIgnore]
+    public SourceLinkTemplates? SourceLinks { get; init; }
 }
 
 internal sealed class ReportSummary

@@ -276,7 +276,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
         var githubWorkspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
-        var githubServerUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl;
+        // No default: if the server is unknown, omit the link rather than guess github.com.
+        var githubServerUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl)?.TrimEnd('/');
 
         // Separate failures from other non-passing tests (built once, used by both quick diagnosis and full rendering)
         var failureMessages = new List<FailureEntry>();
@@ -585,13 +586,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return string.IsNullOrEmpty(className) ? displayName : $"{className}.{displayName}";
     }
 
-    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace, string serverUrl)
+    private static string? GetSourceLink(TestNode testNode, string? repo, string? sha, string? workspace, string? serverUrl)
     {
         var fileLocation = testNode.Properties.AsEnumerable()
             .OfType<TestFileLocationProperty>().FirstOrDefault();
         if (fileLocation is null) return null;
 
-        if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha)) return null;
+        if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha) || string.IsNullOrEmpty(serverUrl)) return null;
 
         // Strip to a repo-relative path; fall back to the full normalized path when unresolvable.
         var filePath = GitHubSourceLink.ToRepoRelativePath(fileLocation.FilePath, workspace, repo)
@@ -601,7 +602,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         // and they flow into LineSpan.Start.Line unchanged — so it is already 1-based here.
         var line = fileLocation.LineSpan.Start.Line;
         var fileName = Path.GetFileName(fileLocation.FilePath);
-        return $"[{fileName}:{line}]({serverUrl.TrimEnd('/')}/{repo}/blob/{sha}/{filePath}#L{line})";
+        return $"[{fileName}:{line}]({serverUrl}/{repo}/blob/{sha}/{filePath}#L{line})";
     }
 
     public string? Filter { get; set; }

@@ -1664,9 +1664,26 @@ function pctOf(n, total) { return total === 0 ? 0 : Math.round((n / total) * 100
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-/* ---------- source snippet lazy loading ---------- */
-// True when we have enough CI context to link/fetch the test's source from the repo.
-function canLinkSource(t) { return !!(t.source && t.source.relativePath && REPORT.commit && REPORT.repository); }
+/* ---------- source links & snippet lazy loading ---------- */
+// REPORT.sourceLinks holds pre-built URL templates for the detected provider (GitHub/GitLab/
+// Bitbucket/...). Server, repo and commit are already baked in; we only fill {path}/{line}/
+// {start}/{end} here, so there is zero provider-specific logic in this report.
+function canLinkSource(t)  { return !!(t.source && t.source.relativePath && REPORT.sourceLinks && REPORT.sourceLinks.lineUrl); }
+function canShowSnippet(t) { return !!(t.source && t.source.relativePath && REPORT.sourceLinks && REPORT.sourceLinks.rawUrl); }
+function fillSourceTemplate(tmpl, t) {
+  const end = (t.source.endLine && t.source.endLine > t.source.line) ? t.source.endLine : t.source.line;
+  // encodeURI keeps '/' as a path separator but escapes spaces and other unsafe chars.
+  return tmpl
+    .replace('{path}', encodeURI(t.source.relativePath))
+    .replace('{line}', t.source.line)
+    .replace('{start}', t.source.line)
+    .replace('{end}', end);
+}
+function sourceJumpUrl(t) {
+  const sl = REPORT.sourceLinks;
+  const tmpl = (t.source.endLine && t.source.endLine > t.source.line && sl.rangeUrl) ? sl.rangeUrl : sl.lineUrl;
+  return fillSourceTemplate(tmpl, t);
+}
 const _snippetCache = new Map();
 const SNIPPET_FALLBACK_LINES = 40;
 function loadSourceSnippet(detail) {
@@ -1674,8 +1691,7 @@ function loadSourceSnippet(detail) {
   if (!container || container.dataset.loaded) return;
   container.dataset.loaded = '1';
 
-  const repo = container.dataset.repo;
-  const commit = container.dataset.commit;
+  const rawUrl = container.dataset.rawUrl;
   const path = container.dataset.path;
   const startLine = parseInt(container.dataset.line, 10) || 1;
   const endLine = parseInt(container.dataset.endLine, 10) || 0;
@@ -1705,16 +1721,11 @@ function loadSourceSnippet(detail) {
       '</div>';
   };
 
-  const cacheKey = repo + '/' + commit + '/' + path;
-  if (_snippetCache.has(cacheKey)) { render(_snippetCache.get(cacheKey)); return; }
+  if (_snippetCache.has(rawUrl)) { render(_snippetCache.get(rawUrl)); return; }
 
-  const serverUrl = REPORT.serverUrl || 'https://github.com';
-  const rawUrl = serverUrl === 'https://github.com'
-    ? 'https://raw.githubusercontent.com/' + repo + '/' + commit + '/' + path
-    : serverUrl + '/' + repo + '/raw/' + commit + '/' + path;
   fetch(rawUrl)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-    .then(text => { _snippetCache.set(cacheKey, text); render(text); })
+    .then(text => { _snippetCache.set(rawUrl, text); render(text); })
     .catch(() => {
       container.innerHTML = '<div class="source-snippet-placeholder">Source unavailable — could not fetch from repository.</div>';
     });
@@ -2344,28 +2355,20 @@ function renderDetail() {
         <div class="source-card">
           <div class="source-path">${esc(t.source.path)}<span class="ln">:${t.source.line}</span></div>
           <div class="source-actions">
-            ${(() => {
-              if (!canLinkSource(t)) return '';
-              const serverUrl = REPORT.serverUrl || 'https://github.com';
-              const lineRef = t.source.endLine && t.source.endLine > t.source.line
-                ? '#L' + t.source.line + '-L' + t.source.endLine
-                : '#L' + t.source.line;
-              const href = serverUrl + '/' + REPORT.repository + '/blob/' + REPORT.commit + '/' + t.source.relativePath + lineRef;
-              return '<a class="source-link-btn" href="' + esc(href) + '" target="_blank" rel="noopener">Jump to source ↗</a>';
-            })()}
+            ${canLinkSource(t)
+              ? '<a class="source-link-btn" href="' + esc(sourceJumpUrl(t)) + '" target="_blank" rel="noopener">Jump to source ↗</a>'
+              : ''}
             <button class="copy-btn" data-copy="path">Copy path</button>
           </div>
         </div>
-        ${(() => {
-          if (!canLinkSource(t)) return '';
-          return '<div class="source-snippet-container"' +
-            ' data-repo="' + esc(REPORT.repository) + '"' +
-            ' data-commit="' + esc(REPORT.commit) + '"' +
+        ${canShowSnippet(t)
+          ? '<div class="source-snippet-container"' +
+            ' data-raw-url="' + esc(fillSourceTemplate(REPORT.sourceLinks.rawUrl, t)) + '"' +
             ' data-path="' + esc(t.source.relativePath) + '"' +
             ' data-line="' + t.source.line + '"' +
             ' data-end-line="' + (t.source.endLine || '') + '">' +
-            '<div class="source-snippet-placeholder">Loading source…</div></div>';
-        })()}
+            '<div class="source-snippet-placeholder">Loading source…</div></div>'
+          : ''}
       </div>
     </div>
   `;

@@ -47,4 +47,19 @@ internal static class EnvironmentConstants
 
     // Default GitHub server (overridden by GITHUB_SERVER_URL on GitHub Enterprise)
     public const string GitHubDefaultServerUrl = "https://github.com";
+
+    // GitLab CI context (for source links in reports)
+    public const string GitLabServerUrl = "CI_SERVER_URL";
+    public const string GitLabProjectPath = "CI_PROJECT_PATH";
+    public const string GitLabCommitSha = "CI_COMMIT_SHA";
+    public const string GitLabProjectDir = "CI_PROJECT_DIR";
+    public const string GitLabBranch = "CI_COMMIT_REF_NAME";
+
+    // Bitbucket Pipelines context (for source links in reports)
+    public const string BitbucketBuildNumber = "BITBUCKET_BUILD_NUMBER";
+    public const string BitbucketRepoFullName = "BITBUCKET_REPO_FULL_NAME";
+    public const string BitbucketCommit = "BITBUCKET_COMMIT";
+    public const string BitbucketCloneDir = "BITBUCKET_CLONE_DIR";
+    public const string BitbucketBranch = "BITBUCKET_BRANCH";
+    public const string BitbucketServerUrl = "https://bitbucket.org";
 }

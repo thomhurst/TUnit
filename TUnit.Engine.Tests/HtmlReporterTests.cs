@@ -552,7 +552,7 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public void GenerateHtml_RoundTrips_ServerUrl_And_Source_EndLine_And_RelativePath()
+    public void GenerateHtml_RoundTrips_SourceLinks_And_Source_EndLine_And_RelativePath()
     {
         var html = HtmlReportGenerator.GenerateHtml(new ReportData
         {
@@ -564,7 +564,10 @@ public class HtmlReporterTests
             RuntimeVersion = ".NET 10.0",
             TotalDurationMs = 0,
             Summary = new ReportSummary(),
-            ServerUrl = "https://github.com",
+            SourceLinks = new SourceLinkTemplates(
+                "https://github.com/o/r/blob/sha/{path}#L{line}",
+                "https://github.com/o/r/blob/sha/{path}#L{start}-L{end}",
+                "https://raw.githubusercontent.com/o/r/sha/{path}"),
             Groups =
             [
                 new ReportTestGroup
@@ -589,8 +592,98 @@ public class HtmlReporterTests
         });
 
         var embedded = ExtractEmbeddedReportJson(html);
-        embedded.ShouldContain("\"serverUrl\":\"https://github.com\"");
+        embedded.ShouldContain("\"sourceLinks\":{");
+        embedded.ShouldContain("\"lineUrl\":\"https://github.com/o/r/blob/sha/{path}#L{line}\"");
+        embedded.ShouldContain("\"rawUrl\":\"https://raw.githubusercontent.com/o/r/sha/{path}\"");
         embedded.ShouldContain("\"endLine\":20");
         embedded.ShouldContain("\"relativePath\":\"src/SampleTests.cs\"");
+    }
+
+    [Test]
+    public void SourceControlContext_GitHub_Builds_Blob_And_Raw_Templates()
+    {
+        var env = new Dictionary<string, string?>
+        {
+            ["GITHUB_ACTIONS"] = "true",
+            ["GITHUB_SERVER_URL"] = "https://github.com",
+            ["GITHUB_REPOSITORY"] = "thomhurst/TUnit",
+            ["GITHUB_SHA"] = "abc123",
+            ["GITHUB_WORKSPACE"] = "/work/TUnit",
+        };
+
+        var ctx = SourceControlContext.Detect(k => env.GetValueOrDefault(k));
+
+        ctx.RepositorySlug.ShouldBe("thomhurst/TUnit");
+        ctx.Links.ShouldNotBeNull();
+        ctx.Links!.LineUrl.ShouldBe("https://github.com/thomhurst/TUnit/blob/abc123/{path}#L{line}");
+        ctx.Links.RangeUrl.ShouldBe("https://github.com/thomhurst/TUnit/blob/abc123/{path}#L{start}-L{end}");
+        // github.com raw is CORS-enabled, so a snippet template is provided.
+        ctx.Links.RawUrl.ShouldBe("https://raw.githubusercontent.com/thomhurst/TUnit/abc123/{path}");
+    }
+
+    [Test]
+    public void SourceControlContext_GitHubEnterprise_Omits_Raw_Template()
+    {
+        var env = new Dictionary<string, string?>
+        {
+            ["GITHUB_ACTIONS"] = "true",
+            ["GITHUB_SERVER_URL"] = "https://github.acme.corp",
+            ["GITHUB_REPOSITORY"] = "team/app",
+            ["GITHUB_SHA"] = "deadbeef",
+        };
+
+        var ctx = SourceControlContext.Detect(k => env.GetValueOrDefault(k));
+
+        ctx.Links.ShouldNotBeNull();
+        ctx.Links!.LineUrl.ShouldBe("https://github.acme.corp/team/app/blob/deadbeef/{path}#L{line}");
+        // Enterprise raw host CORS is unknown — link only, no inline snippet.
+        ctx.Links.RawUrl.ShouldBeNull();
+    }
+
+    [Test]
+    public void SourceControlContext_GitLab_Is_Link_Only()
+    {
+        var env = new Dictionary<string, string?>
+        {
+            ["GITLAB_CI"] = "true",
+            ["CI_SERVER_URL"] = "https://gitlab.com",
+            ["CI_PROJECT_PATH"] = "group/proj",
+            ["CI_COMMIT_SHA"] = "f00d",
+        };
+
+        var ctx = SourceControlContext.Detect(k => env.GetValueOrDefault(k));
+
+        ctx.Links.ShouldNotBeNull();
+        ctx.Links!.LineUrl.ShouldBe("https://gitlab.com/group/proj/-/blob/f00d/{path}#L{line}");
+        ctx.Links.RangeUrl.ShouldBe("https://gitlab.com/group/proj/-/blob/f00d/{path}#L{start}-{end}");
+        // GitLab raw sends no CORS header, so inline snippets are not supported.
+        ctx.Links.RawUrl.ShouldBeNull();
+    }
+
+    [Test]
+    public void SourceControlContext_Bitbucket_Supports_Snippet()
+    {
+        var env = new Dictionary<string, string?>
+        {
+            ["BITBUCKET_BUILD_NUMBER"] = "42",
+            ["BITBUCKET_REPO_FULL_NAME"] = "team/repo",
+            ["BITBUCKET_COMMIT"] = "cafe",
+        };
+
+        var ctx = SourceControlContext.Detect(k => env.GetValueOrDefault(k));
+
+        ctx.Links.ShouldNotBeNull();
+        ctx.Links!.LineUrl.ShouldBe("https://bitbucket.org/team/repo/src/cafe/{path}#lines-{line}");
+        ctx.Links.RangeUrl.ShouldBe("https://bitbucket.org/team/repo/src/cafe/{path}#lines-{start}:{end}");
+        ctx.Links.RawUrl.ShouldBe("https://bitbucket.org/team/repo/raw/cafe/{path}");
+    }
+
+    [Test]
+    public void SourceControlContext_NoCi_Is_Empty()
+    {
+        var ctx = SourceControlContext.Detect(_ => null);
+
+        ctx.ShouldBe(SourceControlContext.Empty);
+        ctx.Links.ShouldBeNull();
     }
 }

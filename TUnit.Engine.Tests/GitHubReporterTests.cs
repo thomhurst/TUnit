@@ -314,6 +314,7 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", "thomhurst/TUnit");
         Environment.SetEnvironmentVariable("GITHUB_SHA", "abc123");
         Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", "/work/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", "https://github.com");
 
         try
         {
@@ -350,6 +351,7 @@ public class GitHubReporterTests
             Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
             Environment.SetEnvironmentVariable("GITHUB_SHA", null);
             Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", null);
+            Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", null);
         }
     }
 
