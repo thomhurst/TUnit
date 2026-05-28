@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -329,7 +330,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
                 {
                     resultVsb.Append('+');
                 }
-                AppendTypeNameWithGenericArgs(ref resultVsb, typeHierarchy[i]);
+                TypeNameHelper.AppendTypeNameWithGenericArgs(ref resultVsb, typeHierarchy[i]);
             }
             return resultVsb.ToString();
         }
@@ -338,38 +339,6 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
             resultVsb.Dispose();
             typeHierarchy.Dispose();
         }
-    }
-
-    private static void AppendTypeNameWithGenericArgs(ref ValueStringBuilder vsb, Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            vsb.Append(type.Name);
-            return;
-        }
-
-        var name = type.Name;
-        var backtickIndex = name.IndexOf('`');
-        if (backtickIndex > 0)
-        {
-            vsb.Append(name.AsSpan(0, backtickIndex));
-        }
-        else
-        {
-            vsb.Append(name);
-        }
-
-        var genericArgs = type.GetGenericArguments();
-        vsb.Append('<');
-        for (var i = 0; i < genericArgs.Length; i++)
-        {
-            if (i > 0)
-            {
-                vsb.Append(", ");
-            }
-            vsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
-        }
-        vsb.Append('>');
     }
 
     private static bool HasMethodNameMatch(string uidValue, string methodName)

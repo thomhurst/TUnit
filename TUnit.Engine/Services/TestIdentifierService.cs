@@ -1,6 +1,7 @@
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -135,46 +136,13 @@ internal static class TestIdentifierService
                 {
                     vsb.Append('+');
                 }
-                AppendTypeNameWithGenericArgs(ref vsb, typeHierarchy[i]);
+                TypeNameHelper.AppendTypeNameWithGenericArgs(ref vsb, typeHierarchy[i]);
             }
         }
         finally
         {
             typeHierarchy.Dispose();
         }
-    }
-
-    private static void AppendTypeNameWithGenericArgs(ref ValueStringBuilder vsb, Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            vsb.Append(type.Name);
-            return;
-        }
-
-        var name = type.Name;
-        var backtickIndex = name.IndexOf('`');
-        if (backtickIndex > 0)
-        {
-            vsb.Append(name.AsSpan(0, backtickIndex));
-        }
-        else
-        {
-            vsb.Append(name);
-        }
-
-        // Use the full name for generic arguments to ensure uniqueness.
-        var genericArgs = type.GetGenericArguments();
-        vsb.Append('<');
-        for (var i = 0; i < genericArgs.Length; i++)
-        {
-            if (i > 0)
-            {
-                vsb.Append(", ");
-            }
-            vsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
-        }
-        vsb.Append('>');
     }
 
     private static void WriteTypeWithParameters(ref ValueStringBuilder vsb, ReadOnlySpan<ParameterMetadata> parameterTypes)
