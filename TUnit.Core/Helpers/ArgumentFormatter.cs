@@ -48,7 +48,8 @@ public static class ArgumentFormatter
             if (list.Count == 1)
                 return FormatDefault(list[0]);
 
-            var builder = new StringBuilder();
+            // ~16 chars per formatted arg avoids the internal buffer resizing for typical counts.
+            var builder = new StringBuilder(list.Count * 16);
             for (int i = 0; i < list.Count; i++)
             {
                 if (i > 0)
