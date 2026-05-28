@@ -5305,7 +5305,9 @@ namespace .Sources
         public .<TExpected, .<TItem>> IsNotAssignableFrom<TExpected>() { }
         public .<TExpected, .<TItem>> IsNotAssignableTo<TExpected>() { }
         public .<TItem> IsNotEmpty() { }
+        public .<TItem> IsNotNull() { }
         public .<.<TItem>, TExpected> IsNotTypeOf<TExpected>() { }
+        public .<TItem> IsNull() { }
         public .<.<TItem>, TExpected> IsTypeOf<TExpected>() { }
     }
     public class AsyncEnumerableAssertion<TItem> : .<TItem>
@@ -5375,7 +5377,9 @@ namespace .Sources
         public .<TSource, TCollection> IsNotAssignableFrom<TSource>() { }
         public .<TTarget, TCollection> IsNotAssignableTo<TTarget>() { }
         public .<TCollection, TItem> IsNotEmpty() { }
+        public .<TCollection, TItem> IsNotNull() { }
         public .<TCollection, TExpected> IsNotTypeOf<TExpected>() { }
+        public .<TCollection, TItem> IsNull() { }
         public .<TCollection, TItem, TKey> IsOrderedBy<TKey>(<TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
         public .<TCollection, TItem, TKey> IsOrderedBy<TKey>(<TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(<TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
@@ -5419,6 +5423,8 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public new .<TDictionary, TKey, TValue> IsNotNull() { }
+        public new .<TDictionary, TKey, TValue> IsNull() { }
     }
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
         where TKey :  notnull
@@ -5461,6 +5467,8 @@ namespace .Sources
         public new .<TList, TItem> Or { get; }
         public .<TList, TItem> FirstItem() { }
         public .<TList, TItem> HasItemAt(int index, TItem expected, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
+        public new .<TList, TItem> IsNotNull() { }
+        public new .<TList, TItem> IsNull() { }
         public .<TList, TItem> ItemAt(int index, [.("index")] string? expression = null) { }
         public .<TList, TItem> LastItem() { }
     }
@@ -5486,6 +5494,8 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public new .<TDictionary, TKey, TValue> IsNotNull() { }
+        public new .<TDictionary, TKey, TValue> IsNull() { }
     }
     public class MutableDictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>, TKey, TValue>
         where TKey :  notnull
@@ -5500,6 +5510,8 @@ namespace .Sources
         public new .<TList, TItem> Or { get; }
         public .<TList, TItem> FirstItem() { }
         public .<TList, TItem> HasItemAt(int index, TItem expected, .<TItem>? comparer = null, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
+        public new .<TList, TItem> IsNotNull() { }
+        public new .<TList, TItem> IsNull() { }
         public .<TList, TItem> ItemAt(int index, [.("index")] string? indexExpression = null) { }
         public .<TList, TItem> LastItem() { }
     }
@@ -5521,6 +5533,8 @@ namespace .Sources
         protected abstract .<TItem> CreateSetAdapter(TSet value);
         public .<TSet, TItem> DoesNotOverlap(.<TItem> other, [.("other")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public new .<TSet, TItem> IsNotNull() { }
+        public new .<TSet, TItem> IsNull() { }
         public .<TSet, TItem> IsProperSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
         public .<TSet, TItem> IsProperSupersetOf(.<TItem> other, [.("other")] string? expression = null) { }
         public .<TSet, TItem> IsSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
