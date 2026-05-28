@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 
