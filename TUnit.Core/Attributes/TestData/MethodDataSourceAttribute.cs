@@ -334,17 +334,19 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     //
     // When any argument is null it has no runtime type, so it cannot be expressed in the binder's
     // Type[]; we fall back to a name-only single-overload lookup (handled by the caller).
+    //
+    // With zero arguments the empty Type[] flows through the same binder path and selects the
+    // parameterless overload directly — including when the name is shared with other-arity
+    // overloads, which the caller's name-only GetMethod(name, flags) would treat as ambiguous
+    // and silently return null for.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     private MethodInfo? ResolveDataSourceMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
     {
         var arguments = Arguments;
-        if (arguments.Length == 0)
-        {
-            // No arguments: a parameterless overload is the natural target; defer to the
-            // caller's name-only lookup which finds it (or any single named overload).
-            return null;
-        }
 
+        // For zero arguments this produces an empty Type[], which the binder GetMethod overload
+        // resolves to the parameterless overload — even when other-arity overloads share the name.
+        // (The plain name-only GetMethod(name, flags) cannot: it returns null on an ambiguous name.)
         var argumentTypes = new Type[arguments.Length];
         for (var i = 0; i < arguments.Length; i++)
         {
