@@ -25,7 +25,7 @@ public static class ClassConstructorHelper
         return await TryCreateInstanceWithClassConstructor(
             attributes,
             testClassType,
-            TestBuilderContext.FromTestContext(testContext, attributes.OfType<IDataSourceAttribute>().FirstOrDefault()),
+            TestBuilderContext.FromTestContext(testContext, GetDataSourceAttribute(attributes)),
             testSessionId);
     }
 
@@ -70,7 +70,28 @@ public static class ClassConstructorHelper
     /// </summary>
     public static bool HasClassConstructorAttribute(Attribute[] attributes)
     {
-        return attributes.OfType<ClassConstructorAttribute>().Any();
+        foreach (Attribute attribute in attributes)
+        {
+            if (attribute is ClassConstructorAttribute)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IDataSourceAttribute? GetDataSourceAttribute(IReadOnlyList<Attribute> attributes)
+    {
+        foreach (Attribute attribute in attributes)
+        {
+            if (attribute is IDataSourceAttribute dataSourceAttribute)
+            {
+                return dataSourceAttribute;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
