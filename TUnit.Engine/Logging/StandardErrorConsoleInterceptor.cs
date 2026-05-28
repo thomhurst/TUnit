@@ -5,9 +5,12 @@ namespace TUnit.Engine.Logging;
 
 internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
 {
-    public static StandardErrorConsoleInterceptor Instance { get; private set; } = null!;
-
     public static TextWriter DefaultError { get; }
+
+    // See StandardOutConsoleInterceptor for the rationale — Console.Error is also process-wide
+    // and must be installed exactly once so concurrent sessions in one host (#6001) don't
+    // clobber each other's interception.
+    private static int s_installed;
 
     protected override LogLevel SinkLogLevel => LogLevel.Error;
 
@@ -21,17 +24,18 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
         };
     }
 
-    public StandardErrorConsoleInterceptor()
-    {
-        Instance = this;
-    }
-
     public void Initialize()
     {
-        Console.SetError(this);
+        if (Interlocked.CompareExchange(ref s_installed, 1, 0) == 0)
+        {
+            Console.SetError(this);
+        }
     }
 
     private protected override TextWriter GetOriginalOut() => DefaultError;
 
-    private protected override void ResetDefault() => Console.SetError(DefaultError);
+    private protected override void ResetDefault()
+    {
+        // No-op: we install exactly once per process. See StandardOutConsoleInterceptor.
+    }
 }

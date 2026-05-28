@@ -29,8 +29,14 @@ namespace TUnit.Engine.Discovery;
 [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
-    private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
-    private static ImmutableList<TestMetadata> _discoveredTests = ImmutableList<TestMetadata>.Empty;
+    // Per-session state: each TUnitServiceProvider instantiates its own collector, and these
+    // fields must not leak between sessions. Under MTP server mode the test host can serve
+    // many sessions sequentially or concurrently; static caches here would cause session N+1
+    // to see session N's assemblies as "already scanned" and return zero tests (issue #6001).
+    private readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
+    private ImmutableList<TestMetadata> _discoveredTests = ImmutableList<TestMetadata>.Empty;
+
+    // Process-wide caches: pure reflection metadata that doesn't change across sessions.
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 

@@ -24,7 +24,13 @@ internal sealed class ReflectionHookDiscoveryService
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
-    private static int _discoveryRunCount = 0;
+
+    // Hook discovery is process-wide (populates the shared Sources.* bags). Use a
+    // ManualResetEventSlim gate so concurrent first-time callers from multiple MTP sessions
+    // block until the single producer has finished populating, rather than racing past empty
+    // bags after a single Interlocked.Increment short-circuit.
+    private static int _discoveryStarted;
+    private static readonly ManualResetEventSlim _discoveryCompleted = new(initialState: false);
 
     private static string GetMethodKey(MethodInfo method)
     {
@@ -164,36 +170,45 @@ internal sealed class ReflectionHookDiscoveryService
 
     #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
+    [UnconditionalSuppressMessage("Platform", "CA1416:Validate platform compatibility", Justification = "Reflection hook discovery does not run on browser targets — TUnit explicitly throws for AOT/browser via RuntimeFeature.IsDynamicCodeSupported check below.")]
     #endif
     public static void DiscoverHooks()
     {
-        // Prevent running hook discovery multiple times in the same process
-        // This can happen when both discovery and execution run in the same process
-        if (Interlocked.Increment(ref _discoveryRunCount) > 1)
+        if (Interlocked.CompareExchange(ref _discoveryStarted, 1, 0) != 0)
         {
+            // Another caller is doing (or has done) the work. Wait for it to finish so we
+            // don't proceed past empty Sources.* bags on a concurrent first call.
+            _discoveryCompleted.Wait();
             return;
         }
 
-        // Clear source-generated hooks since we're discovering via reflection
-        // In reflection mode, source generation may have already populated Sources
-        // We need to clear them to avoid duplicates
-        ClearSourceGeneratedHooks();
+        try
+        {
+            // Clear source-generated hooks since we're discovering via reflection
+            // In reflection mode, source generation may have already populated Sources
+            // We need to clear them to avoid duplicates
+            ClearSourceGeneratedHooks();
 
 #if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
-        }
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+            }
 #endif
 
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-        foreach (var assembly in assemblies)
-        {
-            if (ShouldScanAssembly(assembly))
+            foreach (var assembly in assemblies)
             {
-                DiscoverHooksInAssembly(assembly);
+                if (ShouldScanAssembly(assembly))
+                {
+                    DiscoverHooksInAssembly(assembly);
+                }
             }
+        }
+        finally
+        {
+            _discoveryCompleted.Set();
         }
     }
 

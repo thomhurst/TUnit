@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
@@ -10,28 +10,70 @@ namespace TUnit.Engine;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
 {
+    // Process-wide guards. Trace listeners and AppDomain handlers must only be registered once
+    // per process, regardless of how many sessions or concurrent ExecuteRequestAsync calls hit
+    // this initializer — otherwise listeners accumulate per RPC and AppDomain handlers capture
+    // stale ExecuteRequestContext closures.
+    private static int s_processHandlersRegistered;
+    private static int s_parametersParsed;
+
+    private int _sessionInitialised;
+
     public void Initialize(ExecuteRequestContext context)
     {
-        ConfigureGlobalExceptionHandlers(context);
-        SetUpExceptionListeners();
-        ParseParameters();
+        _ = context;
 
-        // Discover hooks using the mode-specific service
-        hookDiscoveryService.DiscoverHooks();
+        EnsureProcessHandlersRegistered();
+        EnsureParametersParsed();
 
-        if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
+        if (Interlocked.CompareExchange(ref _sessionInitialised, 1, 0) == 0)
         {
-            TestContext.WorkingDirectory = TestContext.OutputDirectory!;
+            // Discover hooks using the mode-specific service. The discovery services themselves
+            // guard against running more than once per process where appropriate.
+            hookDiscoveryService.DiscoverHooks();
+
+            if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
+            {
+                TestContext.WorkingDirectory = TestContext.OutputDirectory!;
+            }
         }
     }
 
-    private void SetUpExceptionListeners()
+    private static void EnsureProcessHandlersRegistered()
     {
+        if (Interlocked.CompareExchange(ref s_processHandlersRegistered, 1, 0) != 0)
+        {
+            return;
+        }
+
         Trace.Listeners.Insert(0, new ThrowListener());
+
+        AppDomain.CurrentDomain.UnhandledException += static (_, args) =>
+        {
+            // Log only — we deliberately do not capture an ExecuteRequestContext to call
+            // Complete() on, because under MTP server mode multiple contexts may be in flight
+            // concurrently and capturing any one of them produces use-after-complete bugs and
+            // handler leaks. If the process is terminating, MTP's own shutdown path takes over.
+            var exception = args.ExceptionObject as Exception;
+            Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
+        };
+
+        TaskScheduler.UnobservedTaskException += static (_, args) =>
+        {
+            Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
+
+            // Mark as observed to prevent process termination
+            args.SetObserved();
+        };
     }
 
-    private void ParseParameters()
+    private void EnsureParametersParsed()
     {
+        if (Interlocked.CompareExchange(ref s_parametersParsed, 1, 0) != 0)
+        {
+            return;
+        }
+
         if (!commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.TestParameter, out var parameters))
         {
             return;
@@ -46,31 +88,5 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookReg
             var list = TestContext.InternalParametersDictionary.GetOrAdd(key, static _ => []);
             list.Add(value);
         }
-    }
-
-    private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
-    {
-        // Handle unhandled exceptions on any thread
-        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-        {
-            var exception = args.ExceptionObject as Exception;
-
-            Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
-
-            // Force exit to prevent hanging
-            if (args.IsTerminating)
-            {
-                context.Complete();
-            }
-        };
-
-        // Handle unobserved task exceptions
-        TaskScheduler.UnobservedTaskException += (_, args) =>
-        {
-            Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
-
-            // Mark as observed to prevent process termination
-            args.SetObserved();
-        };
     }
 }
