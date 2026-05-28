@@ -63,9 +63,9 @@ public static class DataSourceHelpers
             for (var i = 0; i < factories.Length; i++)
             {
                 var index = i;
-                // Capture the already-unwrapped array directly: no Func is involved on this path,
-                // so the elements are stable and there is no need to re-unwrap `value` per invocation.
-                factories[i] = () => Task.FromResult<object?>(index < unwrapped.Length ? unwrapped[index] : null);
+                // Elements are stable: ValueTuple fields are value-copied at extraction time and
+                // Tuple<T> items are readonly, so re-unwrapping `value` would yield the same references.
+                factories[i] = () => Task.FromResult<object?>(unwrapped[index]);
             }
             return factories;
         }
