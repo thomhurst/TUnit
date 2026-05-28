@@ -205,7 +205,20 @@ internal sealed class TestGenericTypeResolver
         
         // Handle the case where all parameter types are Object
         // This happens when data sources provide untyped data
-        if (parameterTypes.All(t => t == typeof(object)) && methodArguments.Length > 0)
+        var allParametersAreObject = methodArguments.Length > 0;
+        if (allParametersAreObject)
+        {
+            foreach (var t in parameterTypes)
+            {
+                if (t != typeof(object))
+                {
+                    allParametersAreObject = false;
+                    break;
+                }
+            }
+        }
+
+        if (allParametersAreObject)
         {
             // For the AggregateBy test case with 3 generic parameters
             if (genericMethodInfo.ParameterNames.Length == 3 &&
