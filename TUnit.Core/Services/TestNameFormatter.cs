@@ -100,20 +100,30 @@ public class TestNameFormatter : ITestNameFormatter
 
     private string FormatEnumerable(IEnumerable enumerable)
     {
-        var sb = new StringBuilder("[");
-        var first = true;
-
-        foreach (var item in enumerable)
+        // Pool the builder like BuildTestId. Reentrant-safe: a nested enumerable draws a
+        // distinct instance from the pool, and each Get is balanced by a Return.
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (!first)
-            {
-                sb.Append(", ");
-            }
-            first = false;
-            sb.Append(FormatArgumentValue(item));
-        }
+            sb.Append('[');
+            var first = true;
 
-        sb.Append(']');
-        return sb.ToString();
+            foreach (var item in enumerable)
+            {
+                if (!first)
+                {
+                    sb.Append(", ");
+                }
+                first = false;
+                sb.Append(FormatArgumentValue(item));
+            }
+
+            sb.Append(']');
+            return sb.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 }
