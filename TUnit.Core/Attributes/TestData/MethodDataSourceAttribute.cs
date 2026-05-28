@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Helpers;
@@ -377,11 +378,29 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         return types;
     }
 
+    private static readonly ConcurrentDictionary<Type, bool> IsAsyncEnumerableCache = new();
+
     private static bool IsAsyncEnumerable([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type type)
     {
-        return type.GetInterfaces()
-            .Any(i => i.IsGenericType &&
-                     i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+        // Cache per-type: GetInterfaces() allocates an array on every call and the
+        // result is invariant for a given Type.
+        if (IsAsyncEnumerableCache.TryGetValue(type, out var cached))
+        {
+            return cached;
+        }
+
+        var result = false;
+        foreach (var i in type.GetInterfaces())
+        {
+            if (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>))
+            {
+                result = true;
+                break;
+            }
+        }
+
+        IsAsyncEnumerableCache[type] = result;
+        return result;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
