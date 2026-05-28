@@ -686,6 +686,11 @@ internal static class HtmlReportGenerator
                 var prefixLen = line.StartsWith("Actual:", StringComparison.OrdinalIgnoreCase) ? "Actual:".Length : "But was:".Length;
                 actual = line.Slice(prefixLen).Trim().ToString();
             }
+
+            if (expected is not null && actual is not null)
+            {
+                break;
+            }
         }
 #else
         var lines = message.Replace("\r\n", "\n").Split('\n');
@@ -700,6 +705,11 @@ internal static class HtmlReportGenerator
             {
                 var prefixLen = line.StartsWith("Actual:", StringComparison.OrdinalIgnoreCase) ? "Actual:".Length : "But was:".Length;
                 actual = line.Substring(prefixLen).Trim();
+            }
+
+            if (expected is not null && actual is not null)
+            {
+                break;
             }
         }
 #endif
