@@ -184,6 +184,7 @@ internal static class HtmlReportGenerator
             if (!string.IsNullOrEmpty(data.CommitSha)) w.WriteString("commit", data.CommitSha);
             if (!string.IsNullOrEmpty(data.PullRequestNumber)) w.WriteString("pr", "#" + data.PullRequestNumber);
             if (!string.IsNullOrEmpty(data.RepositorySlug)) w.WriteString("repository", data.RepositorySlug);
+            if (!string.IsNullOrEmpty(data.ServerUrl)) w.WriteString("serverUrl", data.ServerUrl);
             if (!string.IsNullOrEmpty(data.Filter)) w.WriteString("filter", data.Filter);
 
             w.WriteNumber("startMs", runStartMs);
@@ -529,6 +530,8 @@ internal static class HtmlReportGenerator
         w.WriteStartObject();
         if (!string.IsNullOrEmpty(t.FilePath)) w.WriteString("path", t.FilePath);
         if (t.LineNumber is { } ln) w.WriteNumber("line", ln);
+        if (t.EndLineNumber is { } endLn) w.WriteNumber("endLine", endLn);
+        if (!string.IsNullOrEmpty(t.SourceRelativePath)) w.WriteString("relativePath", t.SourceRelativePath);
         w.WriteEndObject();
 
         if (t.RetryAttempt > 0)

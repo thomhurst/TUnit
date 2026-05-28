@@ -17,6 +17,7 @@ using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters;
 
 #pragma warning disable TPEXP
 
@@ -237,6 +238,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
 
+        // Read GitHub CI context once; reused for per-test source links and report metadata below.
+        var (commitSha, branch, prNumber, repoSlug, serverUrl, workspace) = GetCiContext();
+
         foreach (var kvp in lastUpdates)
         {
             var testNode = kvp.Value.TestNode;
@@ -293,7 +297,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             string[]? additionalTraceIdsForResult = null;
 #endif
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts);
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, repoSlug, workspace);
 
             AccumulateStatus(summary, testResult);
 
@@ -376,8 +380,6 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 #endif
 
-        var (commitSha, branch, prNumber, repoSlug) = GetCiContext();
-
         return new ReportData
         {
             AssemblyName = assemblyName,
@@ -395,14 +397,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Branch = branch,
             PullRequestNumber = prNumber,
             RepositorySlug = repoSlug,
+            ServerUrl = serverUrl,
         };
     }
 
-    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug) GetCiContext()
+    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug, string? ServerUrl, string? Workspace) GetCiContext()
     {
         if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
         {
-            return (null, null, null, null);
+            return (null, null, null, null, null, null);
         }
 
         var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
@@ -429,7 +432,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
         }
 
-        return (commitSha, branch, prNumber, repoSlug);
+        var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
+        var workspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
+
+        return (commitSha, branch, prNumber, repoSlug, serverUrl, workspace);
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
@@ -501,7 +507,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             : DateTimeOffset.MaxValue;
     }
 
-    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null)
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null, string? ciRepo = null, string? ciWorkspace = null)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -581,6 +587,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
+            // Line numbers are already 1-based here. Emit an end line only when the span covers
+            // more than the declaration line (source-gen) — reflection has none, so leave it null.
+            EndLineNumber = fileLocation?.LineSpan.End.Line is { } endLine && endLine > fileLocation.LineSpan.Start.Line ? endLine : null,
+            SourceRelativePath = GitHubSourceLink.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
             Attempts = attempts,
@@ -794,7 +804,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
             else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
             {
-                var serverUrl = (Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com").TrimEnd('/');
+                var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
                 _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }

@@ -53,6 +53,9 @@ internal sealed class ReportData
 
     [JsonPropertyName("repositorySlug")]
     public string? RepositorySlug { get; init; }
+
+    [JsonPropertyName("serverUrl")]
+    public string? ServerUrl { get; init; }
 }
 
 internal sealed class ReportSummary
@@ -146,6 +149,12 @@ internal sealed class ReportTestResult
 
     [JsonPropertyName("lineNumber")]
     public int? LineNumber { get; init; }
+
+    [JsonPropertyName("endLineNumber")]
+    public int? EndLineNumber { get; init; }
+
+    [JsonPropertyName("sourceRelativePath")]
+    public string? SourceRelativePath { get; init; }
 
     [JsonPropertyName("skipReason")]
     public string? SkipReason { get; init; }

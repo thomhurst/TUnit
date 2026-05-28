@@ -275,8 +275,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         // Cache env vars for source links (read once, not per test)
         var githubRepo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var githubSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
-        var githubWorkspace = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")?.Replace('\\', '/');
-        var githubServerUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com";
+        var githubWorkspace = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubWorkspace)?.Replace('\\', '/');
+        var githubServerUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl;
 
         // Separate failures from other non-passing tests (built once, used by both quick diagnosis and full rendering)
         var failureMessages = new List<FailureEntry>();
@@ -593,24 +593,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(sha)) return null;
 
-        var filePath = fileLocation.FilePath.Replace('\\', '/');
+        // Strip to a repo-relative path; fall back to the full normalized path when unresolvable.
+        var filePath = GitHubSourceLink.ToRepoRelativePath(fileLocation.FilePath, workspace, repo)
+            ?? fileLocation.FilePath.Replace('\\', '/');
 
-        // Prefer GITHUB_WORKSPACE for reliable path stripping; fall back to repo name matching
-        if (!string.IsNullOrEmpty(workspace) && filePath.StartsWith(workspace!, StringComparison.OrdinalIgnoreCase))
-        {
-            filePath = filePath[workspace!.Length..].TrimStart('/');
-        }
-        else
-        {
-            var repoName = repo!.Split('/').LastOrDefault() ?? "";
-            var repoIndex = filePath.IndexOf($"/{repoName}/", StringComparison.OrdinalIgnoreCase);
-            if (repoIndex >= 0)
-            {
-                filePath = filePath[(repoIndex + repoName.Length + 2)..];
-            }
-        }
-
-        var line = fileLocation.LineSpan.Start.Line + 1; // 0-based to 1-based
+        // TUnit stores source line numbers 1-based (via [CallerLineNumber] / Roslyn span + 1),
+        // and they flow into LineSpan.Start.Line unchanged — so it is already 1-based here.
+        var line = fileLocation.LineSpan.Start.Line;
         var fileName = Path.GetFileName(fileLocation.FilePath);
         return $"[{fileName}:{line}]({serverUrl.TrimEnd('/')}/{repo}/blob/{sha}/{filePath}#L{line})";
     }

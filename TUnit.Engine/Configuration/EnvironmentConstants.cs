@@ -42,4 +42,9 @@ internal static class EnvironmentConstants
     public const string GitHubRef = "GITHUB_REF";
     public const string GitHubHeadRef = "GITHUB_HEAD_REF";
     public const string GitHubEventName = "GITHUB_EVENT_NAME";
+    public const string GitHubWorkspace = "GITHUB_WORKSPACE";
+    public const string GitHubServerUrl = "GITHUB_SERVER_URL";
+
+    // Default GitHub server (overridden by GITHUB_SERVER_URL on GitHub Enterprise)
+    public const string GitHubDefaultServerUrl = "https://github.com";
 }

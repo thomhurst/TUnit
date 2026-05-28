@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.TestHost;
 using Shouldly;
 using TUnit.Core;
 using TUnit.Core.Enums;
+using TUnit.Engine.Reporters;
 using TUnit.Engine.Reporters.Html;
 
 namespace TUnit.Engine.Tests;
@@ -462,4 +463,121 @@ public class HtmlReporterTests
         EndTime = startTime,
         RetryAttempt = 0,
     };
+
+    [Test]
+    public void GitHubSourceLink_Strips_Workspace_Prefix()
+    {
+        var relative = GitHubSourceLink.ToRepoRelativePath(
+            @"C:\actions-runner\_work\TUnit\TUnit\src\Tests\SampleTests.cs",
+            workspace: "C:/actions-runner/_work/TUnit/TUnit",
+            repo: "thomhurst/TUnit");
+
+        relative.ShouldBe("src/Tests/SampleTests.cs");
+    }
+
+    [Test]
+    public void GitHubSourceLink_Falls_Back_To_Repo_Name_When_No_Workspace()
+    {
+        // No workspace given; locate the repo name segment within the path instead.
+        var relative = GitHubSourceLink.ToRepoRelativePath(
+            "/home/user/code/TUnit/src/Tests/SampleTests.cs",
+            workspace: null,
+            repo: "thomhurst/TUnit");
+
+        relative.ShouldBe("src/Tests/SampleTests.cs");
+    }
+
+    [Test]
+    [Arguments(null, "owner/repo")]   // no file path
+    [Arguments("/some/unrelated/path/File.cs", "owner/repo")] // repo name not in path, no workspace
+    [Arguments("/x/repo/File.cs", null)] // no repo slug
+    public void GitHubSourceLink_Returns_Null_When_Unresolvable(string? filePath, string? repo)
+    {
+        GitHubSourceLink.ToRepoRelativePath(filePath, workspace: null, repo: repo).ShouldBeNull();
+    }
+
+    [Test]
+    public void ExtractTestResult_Populates_EndLineNumber_When_Span_Spans_Multiple_Lines()
+    {
+        var node = new TestNode
+        {
+            Uid = new TestNodeUid("src-1"),
+            DisplayName = "Test",
+            Properties = new PropertyBag(
+                PassedTestNodeStateProperty.CachedInstance,
+                new TestFileLocationProperty(
+                    @"C:\repo\SampleTests.cs",
+                    new LinePositionSpan(new LinePosition(12, 5), new LinePosition(20, 6))))
+        };
+
+        var result = HtmlReporter.ExtractTestResult("src-1", node, traceId: null, spanId: null, retryAttempt: 0, additionalTraceIds: null);
+
+        result.LineNumber.ShouldBe(12);
+        result.EndLineNumber.ShouldBe(20);
+    }
+
+    [Test]
+    public void ExtractTestResult_Omits_EndLineNumber_When_End_Equals_Start()
+    {
+        // Reflection mode has no method end line, so the span collapses to a single line;
+        // we emit null rather than a redundant endLine so the client falls back to a window.
+        var node = new TestNode
+        {
+            Uid = new TestNodeUid("src-2"),
+            DisplayName = "Test",
+            Properties = new PropertyBag(
+                PassedTestNodeStateProperty.CachedInstance,
+                new TestFileLocationProperty(
+                    @"C:\repo\SampleTests.cs",
+                    new LinePositionSpan(new LinePosition(12, 0), new LinePosition(12, 0))))
+        };
+
+        var result = HtmlReporter.ExtractTestResult("src-2", node, traceId: null, spanId: null, retryAttempt: 0, additionalTraceIds: null);
+
+        result.LineNumber.ShouldBe(12);
+        result.EndLineNumber.ShouldBeNull();
+    }
+
+    [Test]
+    public void GenerateHtml_RoundTrips_ServerUrl_And_Source_EndLine_And_RelativePath()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            ServerUrl = "https://github.com",
+            Groups =
+            [
+                new ReportTestGroup
+                {
+                    ClassName = "SampleTests",
+                    Namespace = "Tests",
+                    Summary = new ReportSummary(),
+                    Tests =
+                    [
+                        new ReportTestResult
+                        {
+                            Id = "t1", DisplayName = "t1", MethodName = "t1",
+                            ClassName = "SampleTests", Status = "passed",
+                            FilePath = @"C:\repo\src\SampleTests.cs",
+                            LineNumber = 12,
+                            EndLineNumber = 20,
+                            SourceRelativePath = "src/SampleTests.cs",
+                        },
+                    ],
+                },
+            ],
+        });
+
+        var embedded = ExtractEmbeddedReportJson(html);
+        embedded.ShouldContain("\"serverUrl\":\"https://github.com\"");
+        embedded.ShouldContain("\"endLine\":20");
+        embedded.ShouldContain("\"relativePath\":\"src/SampleTests.cs\"");
+    }
 }
