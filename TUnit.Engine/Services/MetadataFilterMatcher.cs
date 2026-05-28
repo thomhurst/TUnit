@@ -448,12 +448,19 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
     private static string BuildPathFromMetadata(TestMetadata metadata)
     {
+        if (metadata.CachedFilterPath is { } cached)
+        {
+            return cached;
+        }
+
         var classMetadata = metadata.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
         var className = TestFilterService.GetNestedClassName(classMetadata);
         var methodName = metadata.TestMethodName;
 
-        return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+        var path = $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+        metadata.CachedFilterPath = path;
+        return path;
     }
 }
