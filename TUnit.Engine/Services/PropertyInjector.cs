@@ -451,8 +451,13 @@ internal sealed class PropertyInjector
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(metadata);
 
+        // Resolve the concrete dictionary once and reuse it for both the early-out guard and the
+        // later add, instead of going through the ContainsKey property getter (which materialises
+        // the empty singleton) and then GetOrCreateInjectedPropertyArguments() separately.
+        var injectedArguments = testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments();
+
         // Check if already cached
-        if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
+        if (injectedArguments.ContainsKey(cacheKey))
         {
             return;
         }
@@ -464,7 +469,7 @@ internal sealed class PropertyInjector
 
         if (resolvedValue != null)
         {
-            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments().TryAdd(cacheKey, resolvedValue);
+            injectedArguments.TryAdd(cacheKey, resolvedValue);
         }
     }
 
@@ -493,8 +498,13 @@ internal sealed class PropertyInjector
     {
         var cacheKey = PropertyCacheKeyGenerator.GetCacheKey(property);
 
+        // Resolve the concrete dictionary once and reuse it for both the early-out guard and the
+        // later add, instead of going through the ContainsKey property getter (which materialises
+        // the empty singleton) and then GetOrCreateInjectedPropertyArguments() separately.
+        var injectedArguments = testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments();
+
         // Check if already cached
-        if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(cacheKey))
+        if (injectedArguments.ContainsKey(cacheKey))
         {
             return;
         }
@@ -507,7 +517,7 @@ internal sealed class PropertyInjector
 
         if (resolvedValue != null)
         {
-            testContext.Metadata.TestDetails.GetOrCreateInjectedPropertyArguments().TryAdd(cacheKey, resolvedValue);
+            injectedArguments.TryAdd(cacheKey, resolvedValue);
         }
     }
 

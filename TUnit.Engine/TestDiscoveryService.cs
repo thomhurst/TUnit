@@ -72,7 +72,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
@@ -107,6 +107,20 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
+    }
+
+    // Project the resolved tests onto their contexts into a pre-sized list. AddTests would
+    // otherwise materialise a Select() into a fresh array; building the list here avoids the
+    // lazy-enumerator allocation and lets the list grow in a single allocation.
+    private static List<TestContext> ToContextList(List<AbstractExecutableTest> tests)
+    {
+        var contexts = new List<TestContext>(tests.Count);
+        foreach (var test in tests)
+        {
+            contexts.Add(test.Context);
+        }
+
+        return contexts;
     }
 
     private async Task<List<AbstractExecutableTest>> DiscoverAndResolveTestsAsync(
@@ -232,7 +246,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 

@@ -128,25 +128,32 @@ internal sealed class ReflectionHookDiscoveryService
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
         {
-            var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .OrderBy(m =>
-                {
-                    // Get the minimum order from cached hook attributes
-                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
+            var declaredMethods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-                    var orders = new List<int>();
-                    if (beforeAttr != null) orders.Add(beforeAttr.Order);
-                    if (afterAttr != null) orders.Add(afterAttr.Order);
-                    if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
-                    if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
+            // Pre-compute the sort keys once (the old OrderBy lambda allocated a List<int> and
+            // recomputed attributes on every comparison). Sort by minimum hook order, then by
+            // MetadataToken to preserve source-file order. MetadataToken is unique per method
+            // within a type, so the (order, token) key is total — Array.Sort needs no extra
+            // stability guarantee to reproduce the previous OrderBy/ThenBy result.
+            var sortKeys = new HookMethodSortKey[declaredMethods.Length];
+            for (var i = 0; i < declaredMethods.Length; i++)
+            {
+                var m = declaredMethods[i];
+                var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
-                    // Use Count instead of Any() to avoid double enumeration
-                    return orders.Count > 0 ? orders.Min() : 0;
-                })
-                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
-                .ToArray();
+                var hasOrder = false;
+                var minOrder = 0;
+                if (beforeAttr != null) { minOrder = beforeAttr.Order; hasOrder = true; }
+                if (afterAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, afterAttr.Order) : afterAttr.Order; hasOrder = true; }
+                if (beforeEveryAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, beforeEveryAttr.Order) : beforeEveryAttr.Order; hasOrder = true; }
+                if (afterEveryAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, afterEveryAttr.Order) : afterEveryAttr.Order; }
 
-            foreach (var method in methods)
+                sortKeys[i] = new HookMethodSortKey(hasOrder ? minOrder : 0, m.MetadataToken);
+            }
+
+            Array.Sort(sortKeys, declaredMethods);
+
+            foreach (var method in declaredMethods)
             {
                 // Check for Before attributes
                 var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
@@ -847,18 +854,47 @@ internal sealed class ReflectionHookDiscoveryService
             Name = method.Name,
             Type = type,
             Class = CreateClassMetadata(type),
-            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? string.Empty,
-                Type = p.ParameterType,
-                TypeInfo = new ConcreteType(p.ParameterType),
-                ReflectionInfo = p
-            }).ToArray(),
+            Parameters = BuildParameterMetadata(method.GetParameters()),
             GenericTypeCount = 0,
             ReturnTypeInfo = new ConcreteType(method.ReturnType),
             ReturnType = method.ReturnType,
             TypeInfo = new ConcreteType(type)
         };
+    }
+
+    private readonly struct HookMethodSortKey(int order, int metadataToken) : IComparable<HookMethodSortKey>
+    {
+        private readonly int _order = order;
+        private readonly int _metadataToken = metadataToken;
+
+        public int CompareTo(HookMethodSortKey other)
+        {
+            var orderComparison = _order.CompareTo(other._order);
+            return orderComparison != 0 ? orderComparison : _metadataToken.CompareTo(other._metadataToken);
+        }
+    }
+
+    private static ParameterMetadata[] BuildParameterMetadata(ParameterInfo[] parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return [];
+        }
+
+        var result = new ParameterMetadata[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var p = parameters[i];
+            result[i] = new ParameterMetadata(p.ParameterType)
+            {
+                Name = p.Name ?? string.Empty,
+                Type = p.ParameterType,
+                TypeInfo = new ConcreteType(p.ParameterType),
+                ReflectionInfo = p
+            };
+        }
+
+        return result;
     }
 
     private static ClassMetadata CreateClassMetadata(Type type)

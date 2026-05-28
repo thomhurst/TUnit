@@ -26,13 +26,54 @@ internal static class ReflectionMetadataBuilder
             Type = type,
             TypeInfo = CreateTypeInfo(type),
             Class = CreateClassMetadata(type),
-            Parameters = method.GetParameters()
-                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
-                .ToArray(),
+            Parameters = BuildParameterMetadata(method.GetParameters()),
             GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
             ReturnTypeInfo = CreateTypeInfo(method.ReturnType),
             ReturnType = method.ReturnType
         };
+    }
+
+#if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
+#endif
+    private static ParameterMetadata[] BuildParameterMetadata(System.Reflection.ParameterInfo[] parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return [];
+        }
+
+        var result = new ParameterMetadata[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var p = parameters[i];
+            result[i] = CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p);
+        }
+
+        return result;
+    }
+
+#if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
+#endif
+    private static ParameterMetadata[] BuildConstructorParameterMetadata(System.Reflection.ParameterInfo[] parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return [];
+        }
+
+        var result = new ParameterMetadata[parameters.Length];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var p = parameters[i];
+            // Preserve original behaviour: ctor parameters pass p.Name through unchanged
+            // (CreateParameterMetadata falls back to "param{index}" when null), unlike method
+            // parameters which fall back to "unnamed".
+            result[i] = CreateParameterMetadata(p.ParameterType, p.Name, i, p);
+        }
+
+        return result;
     }
 
     private static TypeInfo CreateTypeInfo(Type type)
@@ -74,9 +115,9 @@ internal static class ReflectionMetadataBuilder
             var constructors = type.GetConstructors(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
 
-            var constructorParameters = constructor?.GetParameters()
-                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name, i, p))
-                .ToArray() ?? [];
+            var constructorParameters = constructor is null
+                ? []
+                : BuildConstructorParameterMetadata(constructor.GetParameters());
 
             return new ClassMetadata
             {
