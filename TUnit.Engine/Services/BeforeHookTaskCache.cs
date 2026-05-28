@@ -35,6 +35,12 @@ internal sealed class BeforeHookTaskCache
 
     public ValueTask GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, CancellationToken, ValueTask> taskFactory, CancellationToken cancellationToken)
     {
+        // Lock-free fast path avoids allocating a closure on the common cache-hit case.
+        if (_beforeAssemblyTasks.TryGetValue(assembly, out var existingTask))
+        {
+            return new ValueTask(existingTask);
+        }
+
         var task = _beforeAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a, cancellationToken).AsTask());
         return new ValueTask(task);
     }
