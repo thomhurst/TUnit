@@ -70,6 +70,12 @@ internal static class CastExpressionHelper
             {
                 arms.Add($"{sourceGQ} __s => __s");
             }
+            else if (NeedsDecimalCastHelper(sourceType, targetType))
+            {
+                // A direct (decimal)__s cast from a binary floating-point source loses precision
+                // (e.g. 0.1d/0.1f are not exactly representable); route through CastHelper instead.
+                arms.Add($"{sourceGQ} __s => global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>(__s)");
+            }
             else if (compilation != null && compilation.ClassifyConversion(sourceType, targetType) is { IsImplicit: true } or { IsExplicit: true })
             {
                 arms.Add($"{sourceGQ} __s => ({targetGQ})__s");
@@ -153,7 +159,7 @@ internal static class CastExpressionHelper
             return $"({targetGQ}){argsExpression}";
         }
 
-        if (IsDecimalLike(targetType) && !IsDecimalLike(sourceType))
+        if (NeedsDecimalCastHelper(sourceType, targetType))
         {
             return $"global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>({argsExpression})";
         }
@@ -181,6 +187,12 @@ internal static class CastExpressionHelper
         // No known conversion → CastHelper fallback
         return $"global::TUnit.Core.Helpers.CastHelper.Cast<{targetGQ}>({argsExpression})";
     }
+
+    // A decimal target fed from a non-decimal source must go through CastHelper rather than a direct
+    // (decimal) cast: binary floating-point literals (double, float) lose precision when cast directly,
+    // and attribute-stored numeric literals (e.g. [Arguments(1.5)] storing a double) need the same care.
+    private static bool NeedsDecimalCastHelper(ITypeSymbol sourceType, ITypeSymbol targetType)
+        => IsDecimalLike(targetType) && !IsDecimalLike(sourceType);
 
     private static bool IsDecimalLike(ITypeSymbol type)
     {
