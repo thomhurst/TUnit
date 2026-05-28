@@ -153,52 +153,70 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         }
 
         // Parse path: /{assembly}/{namespace}/{className}/{methodName}
+        // Expected format: "", assembly, namespace, className, methodName
+        // segment[0] is empty (before first /), segment[1] is assembly, etc.
+        // FilterHints only retains segments 1-4, so we only materialize those.
+#if NET8_0_OR_GREATER
+        var filterSpan = filterString.AsSpan();
+
+        // Up to 5 useful segments (empty, assembly, namespace, className, methodName);
+        // a 6th range absorbs any trailing path so the earlier segments stay intact.
+        Span<Range> ranges = stackalloc Range[6];
+        var count = filterSpan.Split(ranges, '/');
+
+        // Need at least the leading empty segment plus the assembly segment.
+        if (count < 2)
+        {
+            return default;
+        }
+
+        return new FilterHints
+        {
+            AssemblyName = ExtractSegment(filterSpan, ranges, count, 1),
+            Namespace = ExtractSegment(filterSpan, ranges, count, 2),
+            ClassName = ExtractSegment(filterSpan, ranges, count, 3),
+            MethodName = ExtractSegment(filterSpan, ranges, count, 4)
+        };
+    }
+
+    private static string? ExtractSegment(ReadOnlySpan<char> filterSpan, ReadOnlySpan<Range> ranges, int count, int index)
+    {
+        if (index >= count)
+        {
+            return null;
+        }
+
+        var segment = filterSpan[ranges[index]];
+        return IsNonLiteralSegment(segment) ? null : segment.ToString();
+    }
+#else
         var parts = filterString.Split('/');
 
-        // Expected format: "", assembly, namespace, className, methodName
-        // parts[0] is empty (before first /), parts[1] is assembly, etc.
         if (parts.Length < 2)
         {
             return default;
         }
 
-        string? assemblyName = null;
-        string? namespaceName = null;
-        string? className = null;
-        string? methodName = null;
-
-        // Extract assembly name (parts[1])
-        if (parts.Length > 1 && !IsNonLiteralSegment(parts[1]))
-        {
-            assemblyName = parts[1];
-        }
-
-        // Extract namespace (parts[2])
-        if (parts.Length > 2 && !IsNonLiteralSegment(parts[2]))
-        {
-            namespaceName = parts[2];
-        }
-
-        // Extract class name (parts[3])
-        if (parts.Length > 3 && !IsNonLiteralSegment(parts[3]))
-        {
-            className = parts[3];
-        }
-
-        // Extract method name (parts[4])
-        if (parts.Length > 4 && !IsNonLiteralSegment(parts[4]))
-        {
-            methodName = parts[4];
-        }
-
         return new FilterHints
         {
-            AssemblyName = assemblyName,
-            Namespace = namespaceName,
-            ClassName = className,
-            MethodName = methodName
+            AssemblyName = ExtractSegment(parts, 1),
+            Namespace = ExtractSegment(parts, 2),
+            ClassName = ExtractSegment(parts, 3),
+            MethodName = ExtractSegment(parts, 4)
         };
     }
+
+    private static string? ExtractSegment(string[] parts, int index)
+    {
+        if (index >= parts.Length)
+        {
+            return null;
+        }
+
+        var segment = parts[index];
+        return IsNonLiteralSegment(segment) ? null : segment;
+    }
+#endif
 
     // Characters that make a TreeNodeFilter path segment non-literal:
     //   * ?           wildcards
@@ -217,14 +235,17 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     private static readonly char[] _filterOperatorChars = { '*', '?', '(', ')', '|', '&', '!', '\\' };
 #endif
 
+#if NET8_0_OR_GREATER
+    private static bool IsNonLiteralSegment(ReadOnlySpan<char> value)
+    {
+        return value.IsEmpty || value.IndexOfAny(_filterOperatorChars) >= 0;
+    }
+#else
     private static bool IsNonLiteralSegment(string value)
     {
-#if NET8_0_OR_GREATER
-        return string.IsNullOrEmpty(value) || value.AsSpan().IndexOfAny(_filterOperatorChars) >= 0;
-#else
         return string.IsNullOrEmpty(value) || value.IndexOfAny(_filterOperatorChars) >= 0;
-#endif
     }
+#endif
 #pragma warning restore TPEXP
 
     public bool CouldMatchFilter(TestMetadata metadata, ITestExecutionFilter? filter)
