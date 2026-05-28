@@ -8,6 +8,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -309,77 +310,34 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
             return type.Name;
         }
 
-        // Build the full nested type hierarchy with '+' separators
-        // This matches TestIdentifierService.WriteTypeNameWithGenerics
-        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
-        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        // Collect the nested-type chain (inner -> outer) without allocating per-segment strings,
+        // then emit it directly into the result builder. Matches TestIdentifierService.WriteTypeNameWithGenerics.
+        var typeHierarchy = new ValueListBuilder<Type>([null!, null!, null!, null!]);
+        var resultVsb = new ValueStringBuilder(stackalloc char[256]);
         try
         {
             var currentType = type;
-
             while (currentType != null)
             {
-                if (currentType.IsGenericType)
-                {
-                    var name = currentType.Name;
-
-                    var backtickIndex = name.IndexOf('`');
-                    if (backtickIndex > 0)
-                    {
-                        typeVsb.Append(name.AsSpan(0, backtickIndex));
-                    }
-                    else
-                    {
-                        typeVsb.Append(name);
-                    }
-
-                    // Add the generic type arguments (same format as TestIdentifierService)
-                    var genericArgs = currentType.GetGenericArguments();
-                    typeVsb.Append('<');
-                    for (var i = 0; i < genericArgs.Length; i++)
-                    {
-                        if (i > 0)
-                        {
-                            typeVsb.Append(", ");
-                        }
-                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
-                    }
-                    typeVsb.Append('>');
-
-                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
-                    typeVsb.Length = 0;
-                }
-                else
-                {
-                    typeHierarchy.Append(currentType.Name);
-                }
-
+                typeHierarchy.Append(currentType);
                 currentType = currentType.DeclaringType;
             }
 
-            // Build result: reverse to get outer-to-inner order and join with '+'
-            var resultVsb = new ValueStringBuilder(stackalloc char[256]);
-            try
+            // Reverse to get outer-to-inner order and join with '+'.
+            for (var i = typeHierarchy.Length - 1; i >= 0; i--)
             {
-                for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+                if (i < typeHierarchy.Length - 1)
                 {
-                    if (i < typeHierarchy.Length - 1)
-                    {
-                        resultVsb.Append('+');
-                    }
-                    resultVsb.Append(typeHierarchy[i]);
+                    resultVsb.Append('+');
                 }
-                return resultVsb.ToString();
+                TypeNameHelper.AppendTypeNameWithGenericArgs(ref resultVsb, typeHierarchy[i]);
             }
-            finally
-            {
-                resultVsb.Dispose();
-            }
+            return resultVsb.ToString();
         }
         finally
         {
+            resultVsb.Dispose();
             typeHierarchy.Dispose();
-            typeVsb.Dispose();
         }
     }
 

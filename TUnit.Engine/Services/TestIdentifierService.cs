@@ -1,6 +1,7 @@
 using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -117,69 +118,30 @@ internal static class TestIdentifierService
 
     private static void WriteTypeNameWithGenerics(ref ValueStringBuilder vsb, Type type)
     {
-        // Build the full type hierarchy including all containing types
-        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
-        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        // Collect the nested-type chain (inner -> outer) without allocating per-segment strings.
+        var typeHierarchy = new ValueListBuilder<Type>([null!, null!, null!, null!]);
         try
         {
             var currentType = type;
-
             while (currentType != null)
             {
-                if (currentType.IsGenericType)
-                {
-                    var name = currentType.Name;
-
-                    var backtickIndex = name.IndexOf('`');
-                    if (backtickIndex > 0)
-                    {
-                        typeVsb.Append(name.AsSpan(0, backtickIndex));
-                    }
-                    else
-                    {
-                        typeVsb.Append(name);
-                    }
-
-                    // Add the generic type arguments
-                    var genericArgs = currentType.GetGenericArguments();
-                    typeVsb.Append('<');
-                    for (var i = 0; i < genericArgs.Length; i++)
-                    {
-                        if (i > 0)
-                        {
-                            typeVsb.Append(", ");
-                        }
-                        // Use the full name for generic arguments to ensure uniqueness
-                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
-                    }
-                    typeVsb.Append('>');
-
-                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
-                    typeVsb.Length = 0;
-                }
-                else
-                {
-                    typeHierarchy.Append(currentType.Name);
-                }
-
+                typeHierarchy.Append(currentType);
                 currentType = currentType.DeclaringType;
             }
 
-            // Reverse to get outer-to-inner order
-            // Append all types with + separator (matching .NET Type.FullName convention for nested types)
+            // Reverse to get outer-to-inner order (matches .NET Type.FullName convention for nested types).
             for (var i = typeHierarchy.Length - 1; i >= 0; i--)
             {
                 if (i < typeHierarchy.Length - 1)
                 {
                     vsb.Append('+');
                 }
-                vsb.Append(typeHierarchy[i]);
+                TypeNameHelper.AppendTypeNameWithGenericArgs(ref vsb, typeHierarchy[i]);
             }
         }
         finally
         {
             typeHierarchy.Dispose();
-            typeVsb.Dispose();
         }
     }
 
