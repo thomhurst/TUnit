@@ -285,9 +285,7 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = methodInfo.Name,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>()
-                .Select(x => x.ToTestDependency())
-                .ToArray(),
+            Dependencies = AttributeHelpers.ExtractDependencies(result.Attributes),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],
