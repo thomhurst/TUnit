@@ -126,7 +126,40 @@ internal static class ConstructorHelper
 
         // Also check individual properties for RequiredAttribute (older approach)
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        return properties.Any(p => p.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute"));
+        foreach (var property in properties)
+        {
+            if (HasRequiredAttribute(property))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // System.ComponentModel.DataAnnotations.RequiredAttribute, resolved once. It lives in a separate
+    // assembly that isn't referenced on netstandard2.0, so we look it up by name instead of a compile-time
+    // type reference. Null when the type can't be loaded (e.g. the assembly isn't present).
+    private static readonly Type? RequiredAttributeType =
+        Type.GetType("System.ComponentModel.DataAnnotations.RequiredAttribute, System.ComponentModel.Annotations")
+        ?? Type.GetType("System.ComponentModel.DataAnnotations.RequiredAttribute, System.ComponentModel.DataAnnotations");
+
+    private static bool HasRequiredAttribute(PropertyInfo property)
+    {
+        if (RequiredAttributeType is null)
+        {
+            return false;
+        }
+
+        foreach (var attribute in property.GetCustomAttributes())
+        {
+            if (RequiredAttributeType.IsInstanceOfType(attribute))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -145,7 +178,7 @@ internal static class ConstructorHelper
         {
             // In C# 11+, required properties are marked with RequiredMemberAttribute at the member level
             var isRequired = property.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>() != null ||
-                            property.GetCustomAttributes().Any(a => a.GetType().Name == "RequiredAttribute");
+                            HasRequiredAttribute(property);
 
             // Also check if property is marked with 'required' modifier by checking if it's init-only and the type has RequiredMemberAttribute
             if (!isRequired && property is { CanWrite: true, SetMethod.IsSpecialName: true } &&
