@@ -132,6 +132,11 @@ internal sealed class MetadataDependencyExpander
                 // Get candidate list based on dependency type for O(1) lookup
                 IEnumerable<TestMetadata> candidates;
 
+                // When matching same-class dependencies by method name only, the candidate
+                // list spans all classes, so we must additionally filter by the current
+                // test's class type inside the loop below (avoids a per-iteration closure).
+                var filterByCurrentClassType = false;
+
                 if (dependency.ClassType != null && !string.IsNullOrEmpty(dependency.MethodName))
                 {
                     // Specific class and method - use most specific index
@@ -160,7 +165,8 @@ internal sealed class MetadataDependencyExpander
                     // Same-class dependency by method name - look up by method name, then filter by class
                     if (byMethodName.TryGetValue(dependency.MethodName!, out var list))
                     {
-                        candidates = list.Where(m => m.TestClassType == current.TestClassType);
+                        candidates = list;
+                        filterByCurrentClassType = true;
                     }
                     else
                     {
@@ -175,6 +181,11 @@ internal sealed class MetadataDependencyExpander
 
                 foreach (var candidateMetadata in candidates)
                 {
+                    if (filterByCurrentClassType && candidateMetadata.TestClassType != current.TestClassType)
+                    {
+                        continue;
+                    }
+
                     if (dependency.Matches(candidateMetadata, current))
                     {
                         if (result.Add(candidateMetadata))
