@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Text;
 
 namespace TUnit.Core.Helpers;
 
@@ -44,21 +45,33 @@ public static class ArgumentFormatter
             if (list.Count == 0)
                 return string.Empty;
 
-            var formatted = new string[list.Count];
+            if (list.Count == 1)
+                return FormatDefault(list[0]);
+
+            // ~16 chars per formatted arg avoids the internal buffer resizing for typical counts.
+            var builder = new StringBuilder(list.Count * 16);
             for (int i = 0; i < list.Count; i++)
             {
-                formatted[i] = FormatDefault(list[i]);
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(FormatDefault(list[i]));
             }
-            return string.Join(", ", formatted);
+            return builder.ToString();
         }
 
-        var elements = new List<string>();
+        // Non-IList fallback — rare in practice; callers normally pass object?[].
+        var fallbackBuilder = new StringBuilder();
         foreach (var arg in arguments)
         {
-            elements.Add(FormatDefault(arg));
+            if (fallbackBuilder.Length > 0)
+            {
+                fallbackBuilder.Append(", ");
+            }
+            fallbackBuilder.Append(FormatDefault(arg));
         }
-
-        return elements.Count == 0 ? string.Empty : string.Join(", ", elements);
+        return fallbackBuilder.ToString();
     }
 
     private static string FormatDefault(object? o)
@@ -140,12 +153,26 @@ public static class ArgumentFormatter
     private static string FormatTuple(object tuple)
     {
         var elements = TupleHelper.UnwrapTuple(tuple);
-        var formatted = new string[elements.Length];
+
+        if (elements.Length == 0)
+            return "()";
+
+        if (elements.Length == 1)
+            return $"({FormatDefault(elements[0])})";
+
+        // ~16 chars per element + parentheses avoids resizing for typical tuple sizes.
+        var builder = new StringBuilder(elements.Length * 16 + 2);
+        builder.Append('(');
         for (int i = 0; i < elements.Length; i++)
         {
-            formatted[i] = FormatDefault(elements[i]);
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+            builder.Append(FormatDefault(elements[i]));
         }
-        return $"({string.Join(", ", formatted)})";
+        builder.Append(')');
+        return builder.ToString();
     }
 
     private static string FormatEnumerable(IEnumerable enumerable)
