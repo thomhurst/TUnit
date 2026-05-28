@@ -325,8 +325,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     }
 
     // Matches a candidate method's parameter types against the runtime types of the supplied arguments.
-    // A null argument has no runtime type, so it never matches a (non-null) parameter type, preserving
-    // the previous SequenceEqual(parameterTypes, arguments.Select(a => a?.GetType())) behavior.
+    // Uses IsAssignableFrom (like GenericTypeResolver) so a derived-type or interface-implementing argument
+    // matches a base-class/interface parameter, mirroring what the runtime call would actually accept.
+    // A null argument has no runtime type, so it never matches a (non-null) parameter type.
     private static bool ParameterTypesMatchArguments(ParameterInfo[] parameters, object?[] arguments)
     {
         if (parameters.Length != arguments.Length)
@@ -336,7 +337,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         for (var i = 0; i < parameters.Length; i++)
         {
-            if (parameters[i].ParameterType != arguments[i]?.GetType())
+            var argumentType = arguments[i]?.GetType();
+            if (argumentType is null || !parameters[i].ParameterType.IsAssignableFrom(argumentType))
             {
                 return false;
             }
