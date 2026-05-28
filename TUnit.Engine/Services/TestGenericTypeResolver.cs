@@ -288,11 +288,17 @@ internal sealed class TestGenericTypeResolver
                         }
                         else if (arg0 is IEnumerable<object> objEnum)
                         {
-                            // Last resort - try to infer from first element
-                            var first = objEnum.FirstOrDefault();
-                            if (first != null)
+                            // Last resort - try to infer from first element.
+                            // foreach avoids the iterator allocation that FirstOrDefault
+                            // incurs on non-list IEnumerable<object> sources.
+                            foreach (var first in objEnum)
                             {
-                                sourceType = first.GetType();
+                                if (first != null)
+                                {
+                                    sourceType = first.GetType();
+                                }
+
+                                break;
                             }
                         }
                     }
