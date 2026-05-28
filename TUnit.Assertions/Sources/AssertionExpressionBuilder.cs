@@ -13,5 +13,10 @@ internal static class AssertionExpressionBuilder
     /// substituting <c>?</c> when the caller expression is unavailable.
     /// </summary>
     internal static StringBuilder Create(string? expression)
-        => new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
+    {
+        var expr = expression ?? "?";
+        // Pre-size to "Assert.That(" (12) + expression + ")" (1) so the default 16-char
+        // buffer doesn't resize for any expression longer than 3 characters.
+        return new StringBuilder(13 + expr.Length).Append("Assert.That(").Append(expr).Append(')');
+    }
 }
