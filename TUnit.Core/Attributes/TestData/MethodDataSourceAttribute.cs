@@ -182,7 +182,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         // Try to find a method first
         var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
-                && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
+                && ParameterTypesMatchArguments(x.GetParameters(), Arguments))
             ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
         object? methodResult;
@@ -322,6 +322,27 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
+    }
+
+    // Matches a candidate method's parameter types against the runtime types of the supplied arguments.
+    // A null argument has no runtime type, so it never matches a (non-null) parameter type, preserving
+    // the previous SequenceEqual(parameterTypes, arguments.Select(a => a?.GetType())) behavior.
+    private static bool ParameterTypesMatchArguments(ParameterInfo[] parameters, object?[] arguments)
+    {
+        if (parameters.Length != arguments.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].ParameterType != arguments[i]?.GetType())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // MethodInfo.Invoke does not auto-fill optional parameters the way a C# call site does.

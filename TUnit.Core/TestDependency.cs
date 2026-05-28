@@ -142,10 +142,17 @@ public sealed class TestDependency : IEquatable<TestDependency>
             {
                 var testParams = test.MethodMetadata.Parameters;
 
-                if (testParams.Length != MethodParameters.Length
-                    || !testParams.Select(x => x.Type).SequenceEqual(MethodParameters!))
+                if (testParams.Length != MethodParameters.Length)
                 {
                     return false;
+                }
+
+                for (var i = 0; i < testParams.Length; i++)
+                {
+                    if (testParams[i].Type != MethodParameters[i])
+                    {
+                        return false;
+                    }
                 }
             }
         }
