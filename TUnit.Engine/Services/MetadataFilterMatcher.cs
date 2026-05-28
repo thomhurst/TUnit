@@ -131,11 +131,11 @@ internal sealed partial class MetadataFilterMatcher : IMetadataFilterMatcher
     private static readonly ConcurrentDictionary<string, string> _strippedFilterCache = new();
 
     // Matches property-bag filters like [key=value]; used to strip them before path parsing.
-#if NET7_0_OR_GREATER
-    [GeneratedRegex(@"\[([^\]]*)\]")]
+#if NET8_0_OR_GREATER
+    [GeneratedRegex(@"\[[^\]]*\]")]
     private static partial Regex PropertyFilterRegex();
 #else
-    private static readonly Regex _propertyFilterRegex = new(@"\[([^\]]*)\]", RegexOptions.Compiled);
+    private static readonly Regex _propertyFilterRegex = new(@"\[[^\]]*\]", RegexOptions.Compiled);
 
     private static Regex PropertyFilterRegex() => _propertyFilterRegex;
 #endif
