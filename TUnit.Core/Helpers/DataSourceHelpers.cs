@@ -59,11 +59,17 @@ public static class DataSourceHelpers
         if (unwrapped.Length > 1)
         {
             // Multiple values from tuple - create a factory for each that returns the specific element
-            return unwrapped.Select((_, index) => new Func<Task<object?>>(() =>
+            var factories = new Func<Task<object?>>[unwrapped.Length];
+            for (var i = 0; i < factories.Length; i++)
             {
-                var freshUnwrapped = UnwrapTupleAot(value);
-                return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
-            })).ToArray();
+                var index = i;
+                factories[i] = () =>
+                {
+                    var freshUnwrapped = UnwrapTupleAot(value);
+                    return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
+                };
+            }
+            return factories;
         }
 
         // Single value or not a tuple
@@ -265,12 +271,18 @@ public static class DataSourceHelpers
             // For tuples, return individual factories for each parameter
             if (expectedParameterCount > 0 && unwrapped.Length == expectedParameterCount)
             {
-                return unwrapped.Select((_, index) => new Func<Task<object?>>(() =>
+                var factories = new Func<Task<object?>>[unwrapped.Length];
+                for (var i = 0; i < factories.Length; i++)
                 {
-                    var freshData = InvokeIfFunc(data);
-                    var freshUnwrapped = UnwrapTupleAot(freshData);
-                    return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
-                })).ToArray();
+                    var index = i;
+                    factories[i] = () =>
+                    {
+                        var freshData = InvokeIfFunc(data);
+                        var freshUnwrapped = UnwrapTupleAot(freshData);
+                        return Task.FromResult<object?>(index < freshUnwrapped.Length ? freshUnwrapped[index] : null);
+                    };
+                }
+                return factories;
             }
             // If parameter count doesn't match, return as single tuple value
             return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
@@ -282,15 +294,21 @@ public static class DataSourceHelpers
             // If expecting multiple parameters and array length matches, unwrap it
             if (expectedParameterCount > 1 && array.Length == expectedParameterCount)
             {
-                return array.Select((_, index) => new Func<Task<object?>>(() =>
+                var factories = new Func<Task<object?>>[array.Length];
+                for (var i = 0; i < factories.Length; i++)
                 {
-                    var freshData = InvokeIfFunc(data);
-                    if (freshData is object?[] freshArray && index < freshArray.Length)
+                    var index = i;
+                    factories[i] = () =>
                     {
-                        return Task.FromResult<object?>(freshArray[index]);
-                    }
-                    return Task.FromResult<object?>(null);
-                })).ToArray();
+                        var freshData = InvokeIfFunc(data);
+                        if (freshData is object?[] freshArray && index < freshArray.Length)
+                        {
+                            return Task.FromResult<object?>(freshArray[index]);
+                        }
+                        return Task.FromResult<object?>(null);
+                    };
+                }
+                return factories;
             }
             // If expecting 1 parameter, keep array as single value
             // Or if array length doesn't match expected count, treat as single value
