@@ -113,7 +113,7 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         // Compute Cartesian product of all parameter value sets
         foreach (var combination in GetCartesianProduct(parameterValueSets))
         {
-            yield return () => Task.FromResult(combination.ToArray())!;
+            yield return () => Task.FromResult(combination)!;
         }
     }
 
@@ -221,12 +221,52 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         return values;
     }
 
-    private readonly IEnumerable<IEnumerable<object?>> _seed = [[]];
-
-    private IEnumerable<IEnumerable<object?>> GetCartesianProduct(IEnumerable<IReadOnlyList<object?>> parameterValueSets)
+    private static IEnumerable<object?[]> GetCartesianProduct(IReadOnlyList<IReadOnlyList<object?>> parameterValueSets)
     {
-        // Same algorithm as Matrix - compute Cartesian product
-        return parameterValueSets.Aggregate(_seed, (accumulator, values)
-            => accumulator.SelectMany(x => values.Select(x.Append)));
+        var dimensionCount = parameterValueSets.Count;
+
+        // Any empty dimension makes the product empty (matches the previous
+        // Aggregate/SelectMany behaviour where SelectMany over [] yields nothing).
+        for (var dimension = 0; dimension < dimensionCount; dimension++)
+        {
+            if (parameterValueSets[dimension].Count == 0)
+            {
+                yield break;
+            }
+        }
+
+        // Odometer-style Cartesian product: the last dimension varies fastest,
+        // matching the previous Aggregate/SelectMany ordering exactly.
+        var indices = new int[dimensionCount];
+
+        while (true)
+        {
+            var row = new object?[dimensionCount];
+            for (var dimension = 0; dimension < dimensionCount; dimension++)
+            {
+                row[dimension] = parameterValueSets[dimension][indices[dimension]];
+            }
+
+            yield return row;
+
+            // Advance the odometer from the rightmost dimension.
+            var position = dimensionCount - 1;
+            while (position >= 0)
+            {
+                if (++indices[position] < parameterValueSets[position].Count)
+                {
+                    break;
+                }
+
+                indices[position] = 0;
+                position--;
+            }
+
+            // All dimensions wrapped back to zero: enumeration is complete.
+            if (position < 0)
+            {
+                yield break;
+            }
+        }
     }
 }
