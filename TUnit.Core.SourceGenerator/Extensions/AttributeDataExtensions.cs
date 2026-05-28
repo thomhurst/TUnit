@@ -22,8 +22,7 @@ public static class AttributeDataExtensions
             return false;
         }
 
-        // Use InterfaceCache instead of AllInterfaces.Any() for better performance
-        return InterfaceCache.ImplementsInterface(attributeData.AttributeClass,
+        return InterfaceHelper.ImplementsInterface(attributeData.AttributeClass,
             WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix);
     }
 
@@ -34,8 +33,7 @@ public static class AttributeDataExtensions
             return false;
         }
 
-        // Use InterfaceCache instead of AllInterfaces.Any() for better performance
-        return InterfaceCache.ImplementsGenericInterface(attributeData.AttributeClass,
+        return InterfaceHelper.ImplementsGenericInterface(attributeData.AttributeClass,
             WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
     }
 
@@ -46,8 +44,7 @@ public static class AttributeDataExtensions
             return null;
         }
 
-        // Use InterfaceCache instead of AllInterfaces.FirstOrDefault() for better performance
-        var typedInterface = InterfaceCache.GetGenericInterface(attributeData.AttributeClass,
+        var typedInterface = InterfaceHelper.GetGenericInterface(attributeData.AttributeClass,
             WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
 
         return typedInterface?.TypeArguments.FirstOrDefault();

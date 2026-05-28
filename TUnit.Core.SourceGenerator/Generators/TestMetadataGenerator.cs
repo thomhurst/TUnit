@@ -2004,8 +2004,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
-        // Use cached interface check
-        return InterfaceCache.IsAsyncEnumerable(type);
+        return InterfaceHelper.IsAsyncEnumerable(type);
     }
 
     private static bool IsTask(ITypeSymbol type)
@@ -2017,8 +2016,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsEnumerable(ITypeSymbol type)
     {
-        // Use cached interface check (already handles string exclusion)
-        return InterfaceCache.IsEnumerable(type);
+        // Already handles string exclusion
+        return InterfaceHelper.IsEnumerable(type);
     }
 
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)

@@ -1,47 +1,27 @@
-using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.Helpers;
 
 /// <summary>
-/// Caches interface implementation checks to avoid repeated AllInterfaces traversals.
+/// Helpers for interface implementation checks over <see cref="ITypeSymbol.AllInterfaces"/>.
 /// </summary>
-/// <remarks>
-/// Cache entries are keyed by the <see cref="ITypeSymbol"/> itself and held in a
-/// <see cref="ConditionalWeakTable{TKey,TValue}"/>. This ties each entry's lifetime to the
-/// symbol's lifetime, so the cache is reclaimed automatically when a <see cref="Compilation"/>
-/// is collected. This avoids the cross-compilation symbol leak a long-lived static dictionary
-/// would cause in extended IDE sessions.
-/// </remarks>
-public static class InterfaceCache
+public static class InterfaceHelper
 {
-    /// <summary>
-    /// Per-type cache of the globally-qualified names of every interface the type implements.
-    /// </summary>
-    private static readonly ConditionalWeakTable<ITypeSymbol, ImmutableHashSet<string>> InterfaceNames = new();
-
-    private static ImmutableHashSet<string> GetInterfaceNames(ITypeSymbol type)
-    {
-        return InterfaceNames.GetValue(type, static t =>
-        {
-            var builder = ImmutableHashSet.CreateBuilder<string>(StringComparer.Ordinal);
-            foreach (var i in t.AllInterfaces)
-            {
-                builder.Add(i.GloballyQualified());
-            }
-
-            return builder.ToImmutable();
-        });
-    }
-
     /// <summary>
     /// Checks if a type implements a specific interface
     /// </summary>
     public static bool ImplementsInterface(ITypeSymbol type, string fullyQualifiedInterfaceName)
     {
-        return GetInterfaceNames(type).Contains(fullyQualifiedInterfaceName);
+        foreach (var i in type.AllInterfaces)
+        {
+            if (i.GloballyQualified() == fullyQualifiedInterfaceName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
