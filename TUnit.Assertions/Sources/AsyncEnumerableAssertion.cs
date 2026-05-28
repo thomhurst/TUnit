@@ -24,8 +24,7 @@ public class AsyncEnumerableAssertion<TItem> : AsyncEnumerableAssertionBase<TIte
         IAsyncEnumerable<TItem> value,
         string? expression)
     {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         return new AssertionContext<IAsyncEnumerable<TItem>>(value, expressionBuilder);
     }
 }

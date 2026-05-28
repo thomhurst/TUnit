@@ -25,8 +25,7 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
     {
         AsyncAction = action ?? throw new ArgumentNullException(nameof(action));
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         var evaluationContext = new EvaluationContext<object?>(async () =>
         {
             try
@@ -42,8 +41,7 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);
 
         // DO NOT await the task here - we want to check its state synchronously
-        var taskExpressionBuilder = new StringBuilder();
-        taskExpressionBuilder.Append(expressionBuilder.ToString());
+        var taskExpressionBuilder = AssertionExpressionBuilder.Create(expression);
         var taskEvaluationContext = new EvaluationContext<Task>(() =>
         {
             // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously

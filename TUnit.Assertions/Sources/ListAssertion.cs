@@ -34,8 +34,7 @@ public class ListAssertion<TItem> : ListAssertionBase<IList<TItem>, TItem>
         IList<TItem>? value,
         string? expression)
     {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         return new AssertionContext<IList<TItem>>(value!, expressionBuilder);
     }
 }

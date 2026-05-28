@@ -30,8 +30,7 @@ public class ReadOnlyListAssertion<TItem> : ReadOnlyListAssertionBase<IReadOnlyL
         IReadOnlyList<TItem>? value,
         string? expression)
     {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = AssertionExpressionBuilder.Create(expression);
         return new AssertionContext<IReadOnlyList<TItem>>(value!, expressionBuilder);
     }
 }
