@@ -19,8 +19,7 @@ public class AsyncFuncCollectionAssertion<TItem> : CollectionAssertionBase<IEnum
 
     private static AssertionContext<IEnumerable<TItem>> CreateContext(Func<Task<IEnumerable<TItem>?>> func, string? expression)
     {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
         var evaluationContext = new EvaluationContext<IEnumerable<TItem>>(async () =>
         {
             try

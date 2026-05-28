@@ -31,8 +31,7 @@ public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAsserti
         IDictionary<TKey, TValue>? value,
         string? expression)
     {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
         return new AssertionContext<IDictionary<TKey, TValue>>(value!, expressionBuilder);
     }
 }

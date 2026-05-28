@@ -43,9 +43,7 @@ public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssert
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        var builder = new StringBuilder();
-        builder.Append($"Assert.That({expression ?? "?"})");
-        return builder;
+        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
     }
 }
 
@@ -88,9 +86,7 @@ public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>,
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        var builder = new StringBuilder();
-        builder.Append($"Assert.That({expression ?? "?"})");
-        return builder;
+        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
     }
 }
 #endif
@@ -133,8 +129,6 @@ public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, 
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        var builder = new StringBuilder();
-        builder.Append($"Assert.That({expression ?? "?"})");
-        return builder;
+        return new StringBuilder("Assert.That(").Append(expression ?? "?").Append(')');
     }
 }
