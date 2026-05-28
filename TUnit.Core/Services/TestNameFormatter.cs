@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
@@ -68,11 +69,23 @@ public class TestNameFormatter : ITestNameFormatter
         int classDataIndex = 0,
         int methodDataIndex = 0)
     {
-        return template
-            .Replace("{TestIndex}", testIndex.ToString())
-            .Replace("{RepeatIndex}", repeatIndex.ToString())
-            .Replace("{ClassDataIndex}", classDataIndex.ToString())
-            .Replace("{MethodDataIndex}", methodDataIndex.ToString());
+        // Mutate a pooled StringBuilder in place then materialize once, instead of
+        // allocating a new string per Replace call. Only the final string allocates.
+        var builder = StringBuilderPool.Get();
+        try
+        {
+            return builder
+                .Append(template)
+                .Replace("{TestIndex}", testIndex.ToString())
+                .Replace("{RepeatIndex}", repeatIndex.ToString())
+                .Replace("{ClassDataIndex}", classDataIndex.ToString())
+                .Replace("{MethodDataIndex}", methodDataIndex.ToString())
+                .ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(builder);
+        }
     }
 
     private string FormatArguments(object?[] args)
@@ -87,20 +100,30 @@ public class TestNameFormatter : ITestNameFormatter
 
     private string FormatEnumerable(IEnumerable enumerable)
     {
-        var sb = new StringBuilder("[");
-        var first = true;
-
-        foreach (var item in enumerable)
+        // Pool the builder like BuildTestId. Reentrant-safe: a nested enumerable draws a
+        // distinct instance from the pool, and each Get is balanced by a Return.
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (!first)
-            {
-                sb.Append(", ");
-            }
-            first = false;
-            sb.Append(FormatArgumentValue(item));
-        }
+            sb.Append('[');
+            var first = true;
 
-        sb.Append(']');
-        return sb.ToString();
+            foreach (var item in enumerable)
+            {
+                if (!first)
+                {
+                    sb.Append(", ");
+                }
+                first = false;
+                sb.Append(FormatArgumentValue(item));
+            }
+
+            sb.Append(']');
+            return sb.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 }
