@@ -89,12 +89,16 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     // Lazy — the vast majority of tests declare zero categories / custom properties, so we
     // skip the per-test List/Dictionary allocation until something is actually stored. Reads
     // always return a usable (possibly freshly-created empty) mutable collection, so callers
-    // that .Add or index in still observe the same backing instance.
+    // that .Add or index in still observe the same backing instance. Lazy init uses
+    // Interlocked.CompareExchange (matching GetOrCreateInjectedPropertyArguments) so concurrent
+    // first-readers can't lose a backing instance to a non-atomic ??= race.
     private List<string>? _categories;
-    public List<string> Categories => _categories ??= [];
+    public List<string> Categories =>
+        _categories ?? Interlocked.CompareExchange(ref _categories, [], null) ?? _categories;
 
     private Dictionary<string, List<string>>? _customProperties;
-    public Dictionary<string, List<string>> CustomProperties => _customProperties ??= [];
+    public Dictionary<string, List<string>> CustomProperties =>
+        _customProperties ?? Interlocked.CompareExchange(ref _customProperties, [], null) ?? _customProperties;
     public Type[]? TestClassParameterTypes { get; set; }
 
     public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
@@ -124,10 +128,7 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
             return [];
         }
 
-        // ToAttributeDictionary buckets by exact attr.GetType(), so every element is already T.
-        // If the bucket is stored as a typed list we can hand it back directly with no iterator
-        // allocation; otherwise fall back to the (safe) OfType filter.
-        return attrs is IReadOnlyList<T> typed ? typed : attrs.OfType<T>();
+        return attrs.OfType<T>();
     }
 
     /// <summary>
