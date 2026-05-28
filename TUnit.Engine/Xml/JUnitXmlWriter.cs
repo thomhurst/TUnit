@@ -179,22 +179,32 @@ internal static class JUnitXmlWriter
     {
         var testNode = test.TestNode;
 
-        // Get test state
-        var stateProperty = testNode.Properties.AsEnumerable()
-            .OfType<TestNodeStateProperty>()
-            .FirstOrDefault();
+        // Get state, timing, and method identifier in a single pass
+        TestNodeStateProperty? stateProperty = null;
+        TimingProperty? timingProperty = null;
+        TestMethodIdentifierProperty? testMethodIdentifier = null;
+        foreach (var prop in testNode.Properties.AsEnumerable())
+        {
+            if (stateProperty is null && prop is TestNodeStateProperty s)
+            {
+                stateProperty = s;
+            }
+            else if (timingProperty is null && prop is TimingProperty t)
+            {
+                timingProperty = t;
+            }
+            else if (testMethodIdentifier is null && prop is TestMethodIdentifierProperty m)
+            {
+                testMethodIdentifier = m;
+            }
 
-        // Get timing
-        var timingProperty = testNode.Properties.AsEnumerable()
-            .OfType<TimingProperty>()
-            .FirstOrDefault();
+            if (stateProperty is not null && timingProperty is not null && testMethodIdentifier is not null)
+            {
+                break;
+            }
+        }
 
         var duration = timingProperty?.GlobalTiming.Duration is { } d ? d : TimeSpan.Zero;
-
-        // Get class and method names
-        var testMethodIdentifier = testNode.Properties.AsEnumerable()
-            .OfType<TestMethodIdentifierProperty>()
-            .FirstOrDefault();
 
         var className = testMethodIdentifier?.TypeName ?? "UnknownClass";
         var testName = testNode.DisplayName;
@@ -346,13 +356,24 @@ internal static class JUnitXmlWriter
         {
             summary.Total++;
 
-            var stateProperty = test.TestNode.Properties.AsEnumerable()
-                .OfType<TestNodeStateProperty>()
-                .FirstOrDefault();
+            TestNodeStateProperty? stateProperty = null;
+            TimingProperty? timing = null;
+            foreach (var prop in test.TestNode.Properties.AsEnumerable())
+            {
+                if (stateProperty is null && prop is TestNodeStateProperty s)
+                {
+                    stateProperty = s;
+                }
+                else if (timing is null && prop is TimingProperty t)
+                {
+                    timing = t;
+                }
 
-            var timing = test.TestNode.Properties.AsEnumerable()
-                .OfType<TimingProperty>()
-                .FirstOrDefault();
+                if (stateProperty is not null && timing is not null)
+                {
+                    break;
+                }
+            }
 
             if (timing?.GlobalTiming.Duration is { } durationValue)
             {
