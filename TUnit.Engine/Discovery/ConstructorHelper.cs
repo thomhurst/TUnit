@@ -144,23 +144,10 @@ internal static class ConstructorHelper
         Type.GetType("System.ComponentModel.DataAnnotations.RequiredAttribute, System.ComponentModel.Annotations")
         ?? Type.GetType("System.ComponentModel.DataAnnotations.RequiredAttribute, System.ComponentModel.DataAnnotations");
 
-    private static bool HasRequiredAttribute(PropertyInfo property)
-    {
-        if (RequiredAttributeType is null)
-        {
-            return false;
-        }
-
-        foreach (var attribute in property.GetCustomAttributes())
-        {
-            if (RequiredAttributeType.IsInstanceOfType(attribute))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    private static bool HasRequiredAttribute(PropertyInfo property) =>
+        // IsDefined checks metadata tokens only — no attribute instances are materialised.
+        // It matches subclasses of RequiredAttributeType, same as the previous IsInstanceOfType.
+        RequiredAttributeType is not null && property.IsDefined(RequiredAttributeType, inherit: true);
 
     /// <summary>
     /// Tries to initialize required properties on an instance
