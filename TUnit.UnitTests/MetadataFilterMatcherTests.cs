@@ -15,12 +15,17 @@ namespace TUnit.UnitTests;
 public class MetadataFilterMatcherTests
 {
 #pragma warning disable TPEXP
-    private static readonly ConstructorInfo TreeNodeFilterCtor =
+    private static readonly ConstructorInfo? TreeNodeFilterCtor =
         typeof(TreeNodeFilter).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null)!;
+            BindingFlags.NonPublic | BindingFlags.Instance, null, [typeof(string)], null);
 
     private static TreeNodeFilter CreateFilter(string pattern)
-        => (TreeNodeFilter)TreeNodeFilterCtor.Invoke([pattern]);
+    {
+        var ctor = TreeNodeFilterCtor
+            ?? throw new InvalidOperationException(
+                "TreeNodeFilter(string) non-public ctor not found — has Microsoft.Testing.Platform changed its API?");
+        return (TreeNodeFilter)ctor.Invoke([pattern]);
+    }
 #pragma warning restore TPEXP
 
     [Test]

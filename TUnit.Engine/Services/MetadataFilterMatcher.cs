@@ -201,7 +201,9 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     //   ( ) | & !     grouping / logical operators
     //   \             escape character
     // Property-bag brackets [ ] are stripped before ExtractFilterHints runs (line above).
-    // A segment containing any of these cannot be safely compared with string equality —
+    // Characters that are NOT MTP operators and must stay literal: + (nested classes),
+    // . (namespaces), < > , space (generic class names), ^ (no meaning in the grammar).
+    // A segment containing any operator cannot be safely compared with string equality —
     // hints are skipped for it, and MTP's TreeNodeFilter does the authoritative match
     // downstream in CouldMatchTreeNodeFilter.
     private static readonly char[] _filterOperatorChars = { '*', '?', '(', ')', '|', '&', '!', '\\' };
