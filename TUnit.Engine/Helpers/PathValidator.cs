@@ -12,10 +12,12 @@ internal static class PathValidator
 #endif
 
     /// <summary>
-    /// Removes any characters that are invalid in a file name (e.g. path separators),
-    /// preventing path traversal via crafted assembly names. Equivalent to
-    /// <c>string.Concat(name.Split(Path.GetInvalidFileNameChars()))</c> but allocation-free
-    /// when the name is already clean.
+    /// Strips characters that are invalid in a file name component (those returned by
+    /// <see cref="Path.GetInvalidFileNameChars"/>). This is not full path-traversal protection
+    /// — e.g. on Linux only <c>/</c> and <c>\0</c> are invalid, so a value like <c>..foo</c>
+    /// passes through unchanged; use <see cref="ValidateAndNormalizePath"/> for that.
+    /// Equivalent to <c>string.Concat(name.Split(Path.GetInvalidFileNameChars()))</c> but
+    /// allocation-free when the name is already clean.
     /// </summary>
     internal static string SanitizeFileName(string name)
     {
