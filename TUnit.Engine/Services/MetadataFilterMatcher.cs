@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+#if NET8_0_OR_GREATER
+using System.Buffers;
+#endif
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -206,11 +209,20 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     // A segment containing any operator cannot be safely compared with string equality —
     // hints are skipped for it, and MTP's TreeNodeFilter does the authoritative match
     // downstream in CouldMatchTreeNodeFilter.
+#if NET8_0_OR_GREATER
+    private static readonly SearchValues<char> _filterOperatorChars =
+        SearchValues.Create("*?()|&!\\");
+#else
     private static readonly char[] _filterOperatorChars = { '*', '?', '(', ')', '|', '&', '!', '\\' };
+#endif
 
     private static bool IsNonLiteralSegment(string value)
     {
+#if NET8_0_OR_GREATER
+        return string.IsNullOrEmpty(value) || value.AsSpan().IndexOfAny(_filterOperatorChars) >= 0;
+#else
         return string.IsNullOrEmpty(value) || value.IndexOfAny(_filterOperatorChars) >= 0;
+#endif
     }
 #pragma warning restore TPEXP
 
