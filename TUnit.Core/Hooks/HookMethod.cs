@@ -23,7 +23,18 @@ public abstract record HookMethod
     [field: AllowNull, MaybeNull]
     public IEnumerable<Attribute> Attributes => field ??= MethodInfo.GetCustomAttributes();
 
-    public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute => Attributes.OfType<TAttribute>().FirstOrDefault();
+    public TAttribute? GetAttribute<TAttribute>() where TAttribute : Attribute
+    {
+        foreach (var attribute in Attributes)
+        {
+            if (attribute is TAttribute match)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Gets the timeout for this hook method. When <c>null</c>, the engine falls back to
