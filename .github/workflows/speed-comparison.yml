@@ -8,7 +8,7 @@ on:
 jobs:
   build-test-artifacts:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-4
 
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +47,7 @@ jobs:
       matrix:
         class: [DataDrivenTests, AsyncTests, ScaleTests, MatrixTests, MassiveParallelTests, SetupTeardownTests]
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-4
     concurrency:
       group: "speed-comparison-run-time-${{matrix.class}}"
       cancel-in-progress: true
