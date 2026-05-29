@@ -200,7 +200,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _resultsDirectory = path;
     }
 
-    private ReportData BuildReportData()
+    internal ReportData BuildReportData()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
@@ -253,41 +253,46 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 spanId = spanInfo.SpanId;
             }
 
-            // Walk all updates in order so we capture each retry attempt's status and
-            // timing — not just the count. The renderer's flaky/retry UI needs the
-            // per-attempt list, and we have all of it sitting on the update messages.
+            // Build the per-attempt history for the flaky/retry UI. The engine emits only one
+            // update per test (the final result), so we cannot reconstruct attempts from the
+            // update stream. Instead, failed attempts that triggered a retry are captured during
+            // execution and carried here on the final node via TUnitRetryAttemptsProperty; the
+            // final attempt is the node's own state. We stitch the two together in order.
             ReportAttempt[]? attempts = null;
             var retryAttempt = 0;
-            if (_updates.TryGetValue(kvp.Key, out var allUpdates))
+            var priorAttempts = testNode.Properties.AsEnumerable()
+                .OfType<TUnitRetryAttemptsProperty>()
+                .FirstOrDefault();
+            if (priorAttempts is { Attempts.Length: > 0 })
             {
-                List<ReportAttempt>? attemptList = null;
-                foreach (var update in allUpdates)
-                {
-                    var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                    if (state is null or InProgressTestNodeStateProperty or DiscoveredTestNodeStateProperty)
-                    {
-                        continue;
-                    }
+                var finalState = testNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                var (finalStatus, finalException, _) = ExtractStatus(finalState);
+                var finalDuration = testNode.Properties.AsEnumerable()
+                    .OfType<TimingProperty>()
+                    .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
 
-                    var (attemptStatus, attemptException, _) = ExtractStatus(state);
-                    var attemptDuration = update.TestNode.Properties.AsEnumerable()
-                        .OfType<TimingProperty>()
-                        .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
-                    attemptList ??= new List<ReportAttempt>();
+                var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Length + 1);
+                foreach (var prior in priorAttempts.Attempts)
+                {
                     attemptList.Add(new ReportAttempt
                     {
-                        Status = attemptStatus,
-                        DurationMs = attemptDuration,
-                        ExceptionType = attemptException?.Type,
-                        ExceptionMessage = attemptException?.Message,
+                        Status = StatusFromState(prior.State),
+                        DurationMs = prior.Duration.TotalMilliseconds,
+                        ExceptionType = prior.ExceptionType,
+                        ExceptionMessage = prior.ExceptionMessage,
                     });
                 }
 
-                if (attemptList is { Count: > 1 })
+                attemptList.Add(new ReportAttempt
                 {
-                    retryAttempt = attemptList.Count - 1;
-                    attempts = attemptList.ToArray();
-                }
+                    Status = finalStatus,
+                    DurationMs = finalDuration,
+                    ExceptionType = finalException?.Type,
+                    ExceptionMessage = finalException?.Message,
+                });
+
+                retryAttempt = attemptList.Count - 1;
+                attempts = attemptList.ToArray();
             }
 
 #if NET
@@ -599,6 +604,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             _ => ("unknown", null, null)
         };
     }
+
+    // Maps a captured retry attempt's TestState to the same status vocabulary ExtractStatus
+    // produces for the final node, so prior and final attempts render consistently. A retried
+    // attempt is always a failure of some kind; Failed maps to "failed" (HtmlReportGenerator's
+    // MapStatus collapses "failed"/"error"/"timedOut" to "fail" for the UI).
+    private static string StatusFromState(TestState state) => state switch
+    {
+        TestState.Passed => "passed",
+        TestState.Failed => "failed",
+        TestState.Timeout => "timedOut",
+        TestState.Skipped => "skipped",
+        TestState.Cancelled => "cancelled",
+        _ => "error",
+    };
 
     private static ReportExceptionData? MapException(Exception? ex)
     {

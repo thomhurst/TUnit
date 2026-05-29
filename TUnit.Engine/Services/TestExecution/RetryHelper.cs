@@ -45,6 +45,19 @@ internal static class RetryHelper
                     // Apply backoff delay before retrying
                     await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
 
+                    // Record this failed attempt before it's cleared, so reporters (e.g. the HTML
+                    // report's retry/flaky UI) can show the full attempt history. The engine only
+                    // emits one update per test (the final result), so without this the per-attempt
+                    // data would be lost.
+                    var failedResult = testContext.Execution.Result;
+                    (testContext.RetryAttempts ??= []).Add(new RetryAttemptRecord
+                    {
+                        State = failedResult?.State ?? TestState.Failed,
+                        Duration = failedResult?.Duration ?? TimeSpan.Zero,
+                        ExceptionType = ex.GetType().FullName,
+                        ExceptionMessage = ex.Message,
+                    });
+
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;

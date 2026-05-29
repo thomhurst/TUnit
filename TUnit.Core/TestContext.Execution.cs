@@ -19,6 +19,8 @@ public partial class TestContext
     internal DateTimeOffset? TestStart { get; set; }
     internal DateTimeOffset? TestEnd { get; set; }
     internal int CurrentRetryAttempt { get; set; }
+    // Lazily allocated; stays null for the common no-retry case so passing tests pay nothing.
+    internal List<RetryAttemptRecord>? RetryAttempts { get; set; }
     internal Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
     internal IHookExecutor? CustomHookExecutor { get; set; }
     internal bool ReportResult { get; set; } = true;
@@ -50,6 +52,8 @@ public partial class TestContext
         get => CurrentRetryAttempt;
         set => CurrentRetryAttempt = value;
     }
+
+    IReadOnlyList<RetryAttemptRecord> ITestExecution.RetryAttempts => RetryAttempts ?? (IReadOnlyList<RetryAttemptRecord>)[];
 
     string? ITestExecution.SkipReason => SkipReason;
     Func<TestContext, Exception, int, Task<bool>>? ITestExecution.RetryFunc => RetryFunc;

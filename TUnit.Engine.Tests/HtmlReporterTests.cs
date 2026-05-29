@@ -423,6 +423,53 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public async Task BuildReportData_Reconstructs_Attempts_From_RetryAttemptsProperty()
+    {
+        // #6119: the engine emits only one update per test (the final result), so the reporter
+        // must rebuild the per-attempt history from TUnitRetryAttemptsProperty carried on the
+        // final node — failed attempts stitched in front of the surviving final attempt — rather
+        // than from the (single) update stream. Without this the flaky/retry UI stays empty.
+        var reporter = new HtmlReporter(new MockExtension());
+
+        var start = DateTimeOffset.UtcNow;
+        var finalNode = new TestNode
+        {
+            Uid = new TestNodeUid("flaky-1"),
+            DisplayName = "FlakyTest",
+            Properties = new PropertyBag(
+                PassedTestNodeStateProperty.CachedInstance,
+                new TestMethodIdentifierProperty(
+                    @namespace: "Sample",
+                    assemblyFullName: "TestAssembly",
+                    typeName: "FlakyTests",
+                    methodName: "FlakyTest",
+                    parameterTypeFullNames: [],
+                    returnTypeFullName: "System.Void",
+                    methodArity: 0),
+                new TimingProperty(new TimingInfo(start, start.AddMilliseconds(200), TimeSpan.FromMilliseconds(200))),
+                new TUnitRetryAttemptsProperty(
+                [
+                    new RetryAttemptRecord { State = TestState.Failed, Duration = TimeSpan.FromMilliseconds(100), ExceptionType = "System.TimeoutException", ExceptionMessage = "transient 1" },
+                    new RetryAttemptRecord { State = TestState.Failed, Duration = TimeSpan.FromMilliseconds(150), ExceptionType = "System.TimeoutException", ExceptionMessage = "transient 2" },
+                ]))
+        };
+
+        await reporter.ConsumeAsync(reporter, new TestNodeUpdateMessage(new SessionUid("s"), finalNode), CancellationToken.None);
+
+        var data = reporter.BuildReportData();
+
+        var test = data.Groups.SelectMany(g => g.Tests).Single(t => t.Id == "flaky-1");
+        test.Attempts.ShouldNotBeNull();
+        test.Attempts!.Length.ShouldBe(3); // 2 failed attempts + the surviving final pass
+        test.Attempts[0].Status.ShouldBe("failed");
+        test.Attempts[0].ExceptionType.ShouldBe("System.TimeoutException");
+        test.Attempts[2].Status.ShouldBe("passed");
+        test.RetryAttempt.ShouldBe(2);
+        test.Status.ShouldBe("passed");
+        data.Summary.Flaky.ShouldBe(1); // passed-after-retry is flaky
+    }
+
+    [Test]
     public void FilterEngineNotices_StripsTUnitPrefixedLines()
     {
         // Engine-emitted advisories ("[TUnit] External span cap reached…") are written

@@ -38,6 +38,13 @@ public interface ITestExecution
     int CurrentRetryAttempt { get; internal set; }
 
     /// <summary>
+    /// Gets the history of prior execution attempts that triggered a retry, in attempt order.
+    /// Empty when the test was not retried. The final (surviving) attempt is reflected by
+    /// <see cref="Result"/> and is not included here.
+    /// </summary>
+    IReadOnlyList<RetryAttemptRecord> RetryAttempts { get; }
+
+    /// <summary>
     /// Gets the reason why this test was skipped, or null if not skipped.
     /// </summary>
     string? SkipReason { get; }
