@@ -53,8 +53,13 @@ public static class TupleArgumentHelper
             throw new ArgumentException("argumentCount must be int or string");
         }
 
-        // Check if last parameter is params array
-        var hasParams = parameters.Count > 0 && parameters[parameters.Count - 1].IsParams;
+        // Check if last parameter is a params array OR a plain trailing array parameter.
+        // A non-params array parameter (e.g. `string[] names`) is bound the same way as a
+        // params array: remaining loose values are collected into the array. This lets
+        // `[Arguments(["a", "b"])]` map onto a single `string[]` parameter (issue #6120).
+        var hasParams = parameters.Count > 0
+            && (parameters[parameters.Count - 1].IsParams
+                || parameters[parameters.Count - 1].Type is IArrayTypeSymbol);
 
         if (!hasParams)
         {

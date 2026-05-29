@@ -31,4 +31,45 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
+
+    // Issue #6120: a plain (non-params) array parameter collects loose argument values,
+    // so `[Arguments(["a", "b"])]` (a collection expression, identical to `[Arguments("a", "b")]`)
+    // maps onto a single `string[]` parameter.
+    [Test]
+    [Arguments(["Chloe"])]
+    [Arguments(["Skipper", "Lucy"])]
+    public async Task NonParamsStringArray(string[] names)
+    {
+        await Assert.That(names).IsNotEmpty();
+        await Assert.That(names.All(n => !string.IsNullOrEmpty(n))).IsTrue();
+    }
+
+    [Test]
+    [Arguments("Chloe")]
+    public async Task NonParamsStringArray_SingleValue(string[] names)
+    {
+        await Assert.That(names).IsEquivalentTo(["Chloe"]);
+    }
+
+    [Test]
+    [Arguments(["Skipper", "Lucy"])]
+    public async Task NonParamsStringArray_MultipleValues(string[] names)
+    {
+        await Assert.That(names).IsEquivalentTo(["Skipper", "Lucy"]);
+    }
+
+    [Test]
+    [Arguments(1, 2, 3)]
+    public async Task NonParamsIntArray(int[] numbers)
+    {
+        await Assert.That(numbers).IsEquivalentTo([1, 2, 3]);
+    }
+
+    // The strongly-typed generic form is the unambiguous way to pass an array as a single value.
+    [Test]
+    [Arguments<string[]>(["Skipper", "Lucy"])]
+    public async Task GenericStringArray(string[] names)
+    {
+        await Assert.That(names).IsEquivalentTo(["Skipper", "Lucy"]);
+    }
 }

@@ -2643,16 +2643,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
+            // A trailing array parameter (params OR a plain `T[]`) binds like a params array:
+            // it accepts any number of remaining arguments collected into the array (issue #6120).
+            var hasParams = parametersFromArgs.Length > 0
+                && (parametersFromArgs[parametersFromArgs.Length - 1].IsParams
+                    || parametersFromArgs[parametersFromArgs.Length - 1].Type is IArrayTypeSymbol);
+
+            // Count required parameters (those without default values, excluding CancellationToken
+            // and the trailing array/params parameter, which may receive zero arguments).
+            var requiredParamCount = parametersFromArgs
+                .Where((p, index) => index != parametersFromArgs.Length - 1 || !hasParams)
+                .Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
-
-            // Check if last parameter is params array
-            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
 
             // For params arrays, we need to handle any number of arguments >= required count
             // Generate a reasonable number of cases plus a default that handles the rest

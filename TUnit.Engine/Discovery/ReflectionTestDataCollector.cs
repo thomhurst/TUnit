@@ -1805,9 +1805,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var parameters = staticParameters ?? methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
-                // Check if the last parameter is a params array
+                // Check if the last parameter is a params array, or a plain trailing array
+                // parameter (e.g. `string[] names`). Both collect remaining loose arguments
+                // into the array, letting `[Arguments(["a", "b"])]` map onto a single array
+                // parameter (issue #6120).
                 var lastParam = parameters.Length > 0 ? parameters[^1] : null;
-                var isParamsArray = lastParam != null && lastParam.IsDefined(typeof(ParamArrayAttribute), false);
+                var isParamsArray = lastParam != null
+                    && (lastParam.IsDefined(typeof(ParamArrayAttribute), false) || lastParam.ParameterType.IsArray);
 
                 if (isParamsArray && lastParam != null)
                 {
