@@ -28,6 +28,9 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
                 continue;
             }
 
+            // IsHookMethod covers all hook levels (Before/After/BeforeEvery/AfterEvery) intentionally —
+            // no hook method requires the 'Async' suffix regardless of scope. (This is deliberately
+            // broader than MarkMethodStaticSuppressor, which only narrows CA1822 to Test-level hooks.)
             if (methodSymbol.HasTestAttribute(context.Compilation)
                 || methodSymbol.IsHookMethod(context.Compilation, out _, out _, out _))
             {
@@ -36,17 +39,10 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
         }
     }
 
+    // This suppressor only ever handles VSTHRD200, so reference the single descriptor directly
+    // rather than scanning SupportedSuppressions on every reported diagnostic.
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
-    {
-        var suppression = SupportedSuppressions.First(s => s.SuppressedDiagnosticId == diagnostic.Id);
-
-        context.ReportSuppression(
-            Suppression.Create(
-                suppression,
-                diagnostic
-            )
-        );
-    }
+        => context.ReportSuppression(Suppression.Create(SupportedSuppressions[0], diagnostic));
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
         ImmutableArray.Create(CreateDescriptor("VSTHRD200"));

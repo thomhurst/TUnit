@@ -6,6 +6,14 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class MethodExtensions
 {
+    /// <summary>
+    /// Returns true if the method is decorated with the exact <c>TUnit.Core.TestAttribute</c>.
+    /// </summary>
+    /// <remarks>
+    /// This is an exact-match check — it does not match subclasses of <c>BaseTestAttribute</c>
+    /// (e.g. <c>[DynamicTestBuilder]</c>). Use <see cref="HasTestAttribute"/> for the broader,
+    /// inheritance-aware check.
+    /// </remarks>
     public static bool IsTestMethod(this IMethodSymbol methodSymbol, Compilation compilation)
     {
         var testAttribute = compilation.GetTypeByMetadataName("TUnit.Core.TestAttribute")!;
