@@ -11,6 +11,7 @@ public class Vsthrd200AsyncSuffixSuppressorTests
 
     [Test]
     [Arguments("Test")]
+    [Arguments("DynamicTestBuilder")]
     [Arguments("Before(Test)")]
     [Arguments("After(Test)")]
     [Arguments("BeforeEvery(Test)")]

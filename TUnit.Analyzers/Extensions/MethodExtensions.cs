@@ -33,9 +33,11 @@ public static class MethodExtensions
             return false;
         }
 
+        // Use Any(...) rather than Contains(...): the latter walks the whole base-type chain even
+        // after a match, whereas Any short-circuits on the first matching type.
         return methodSymbol.GetAttributes().Any(attribute =>
             attribute.AttributeClass?.GetSelfAndBaseTypes()
-                .Contains(baseTestAttribute, SymbolEqualityComparer.Default) == true);
+                .Any(t => SymbolEqualityComparer.Default.Equals(t, baseTestAttribute)) == true);
     }
 
     public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
