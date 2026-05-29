@@ -53,7 +53,7 @@ public partial class TestContext
         set => CurrentRetryAttempt = value;
     }
 
-    IReadOnlyList<RetryAttemptRecord> ITestExecution.RetryAttempts => RetryAttempts ?? (IReadOnlyList<RetryAttemptRecord>)[];
+    IReadOnlyList<RetryAttemptRecord> ITestExecution.RetryAttempts => RetryAttempts ?? [];
 
     string? ITestExecution.SkipReason => SkipReason;
     Func<TestContext, Exception, int, Task<bool>>? ITestExecution.RetryFunc => RetryFunc;

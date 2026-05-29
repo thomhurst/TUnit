@@ -3,7 +3,7 @@ using TUnit.Core;
 
 #pragma warning disable TPEXP
 
-namespace TUnit.Engine.Reporters.Html;
+namespace TUnit.Engine.Reporters;
 
 /// <summary>
 /// Carries the history of failed retry attempts on the final <see cref="TestNode"/> update so
@@ -12,4 +12,4 @@ namespace TUnit.Engine.Reporters.Html;
 /// lives transiently on the <see cref="TestContext"/> during execution — would be unavailable
 /// to consumers that work purely off <c>TestNodeUpdateMessage</c>.
 /// </summary>
-internal sealed record TUnitRetryAttemptsProperty(RetryAttemptRecord[] Attempts) : IProperty;
+internal sealed record TUnitRetryAttemptsProperty(IReadOnlyList<RetryAttemptRecord> Attempts) : IProperty;

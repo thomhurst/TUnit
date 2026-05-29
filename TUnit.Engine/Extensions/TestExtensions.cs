@@ -6,7 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
-using TUnit.Engine.Reporters.Html;
+using TUnit.Engine.Reporters;
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
@@ -213,7 +213,7 @@ internal static class TestExtensions
         // this is the one chance to surface the per-attempt list captured during execution.
         if (isFinalState && testContext.RetryAttempts is { Count: > 0 } retryAttempts)
         {
-            propertyBag.Add(new TUnitRetryAttemptsProperty(retryAttempts.ToArray()));
+            propertyBag.Add(new TUnitRetryAttemptsProperty(retryAttempts));
         }
 
         var testNode = new TestNode

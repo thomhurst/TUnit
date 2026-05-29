@@ -263,7 +263,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             var priorAttempts = testNode.Properties.AsEnumerable()
                 .OfType<TUnitRetryAttemptsProperty>()
                 .FirstOrDefault();
-            if (priorAttempts is { Attempts.Length: > 0 })
+            if (priorAttempts is { Attempts.Count: > 0 })
             {
                 var finalState = testNode.Properties.SingleOrDefault<TestNodeStateProperty>();
                 var (finalStatus, finalException, _) = ExtractStatus(finalState);
@@ -271,7 +271,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     .OfType<TimingProperty>()
                     .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
 
-                var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Length + 1);
+                var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Count + 1);
                 foreach (var prior in priorAttempts.Attempts)
                 {
                     attemptList.Add(new ReportAttempt

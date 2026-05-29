@@ -4,7 +4,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Shouldly;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
-using TUnit.Engine.Reporters.Html;
+using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
 
@@ -86,7 +86,7 @@ public class TestNodeLocationTests
         var finalNode = context.ToTestNode(PassedTestNodeStateProperty.CachedInstance);
         var attached = finalNode.Properties.AsEnumerable().OfType<TUnitRetryAttemptsProperty>().SingleOrDefault();
         attached.ShouldNotBeNull();
-        attached!.Attempts.Length.ShouldBe(1);
+        attached!.Attempts.Count.ShouldBe(1);
         attached.Attempts[0].State.ShouldBe(TestState.Failed);
 
         // Discovered/in-progress state -> not attached.
