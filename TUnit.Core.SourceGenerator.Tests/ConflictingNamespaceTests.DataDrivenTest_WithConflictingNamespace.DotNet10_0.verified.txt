@@ -270,7 +270,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
+                            throw new global::System.ArgumentException($"Expected at least 0 arguments, but got {args.Length}");
                     }
                 }
                 catch (global::System.Exception ex)

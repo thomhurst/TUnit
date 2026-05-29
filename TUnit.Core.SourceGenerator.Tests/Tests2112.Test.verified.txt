@@ -79,7 +79,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                            throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
                     }
                 }
                 catch (global::System.Exception ex)
@@ -129,7 +129,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                            throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
                     }
                 }
                 catch (global::System.Exception ex)

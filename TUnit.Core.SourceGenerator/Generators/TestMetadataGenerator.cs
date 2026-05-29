@@ -2694,6 +2694,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
             }
+            else if (hasParams)
+            {
+                // A trailing array/params parameter accepts any number of trailing values, so there
+                // is no fixed upper bound — only a minimum (the required, non-collecting parameters).
+                writer.AppendLine($"throw new global::System.ArgumentException($\"Expected at least {requiredParamCount} argument{(requiredParamCount == 1 ? "" : "s")}, but got {{args.Length}}\");");
+            }
             else
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");

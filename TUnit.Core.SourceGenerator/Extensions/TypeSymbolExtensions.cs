@@ -9,6 +9,11 @@ internal static class TypeSymbolExtensions
     /// either a <c>params T[]</c> parameter or a plain trailing <c>T[]</c> parameter. The
     /// latter lets <c>[Arguments(["a", "b"])]</c> map onto a single array parameter (issue #6120).
     /// </summary>
+    /// <remarks>
+    /// This is a type-level check only — it does not verify that the parameter is actually the
+    /// last one. Callers are responsible for the positional constraint (i.e. only invoking this
+    /// on the final parameter), since a non-trailing array binds value-by-value, not collected.
+    /// </remarks>
     public static bool CollectsTrailingArguments(this IParameterSymbol parameter)
         => parameter.IsParams || parameter.Type is IArrayTypeSymbol;
 
