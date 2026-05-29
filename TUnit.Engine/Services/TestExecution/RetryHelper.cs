@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Services.TestExecution;
 
@@ -50,13 +51,16 @@ internal static class RetryHelper
                     // emits one update per test (the final result), so without this the per-attempt
                     // data would be lost.
                     var failedResult = testContext.Execution.Result;
+                    // Unwrap TUnit wrapper exceptions so the captured type/message/stack trace match
+                    // what the final attempt records via HtmlReporter.MapException (which also unwraps).
+                    var capturedException = TUnitFailedException.Unwrap(ex);
                     (testContext.RetryAttempts ??= []).Add(new RetryAttemptRecord
                     {
                         State = failedResult?.State ?? TestState.Failed,
                         Duration = failedResult?.Duration ?? TimeSpan.Zero,
-                        ExceptionType = ex.GetType().FullName,
-                        ExceptionMessage = ex.Message,
-                        ExceptionStackTrace = ex.StackTrace,
+                        ExceptionType = capturedException.GetType().FullName,
+                        ExceptionMessage = capturedException.Message,
+                        ExceptionStackTrace = capturedException.StackTrace,
                     });
 
                     // Clear the previous result before retrying

@@ -53,7 +53,9 @@ public partial class TestContext
         set => CurrentRetryAttempt = value;
     }
 
-    IReadOnlyList<RetryAttemptRecord> ITestExecution.RetryAttempts => RetryAttempts ?? [];
+    // Array.Empty for the common no-retry path so passing tests allocate nothing.
+    IReadOnlyList<RetryAttemptRecord> ITestExecution.RetryAttempts
+        => (IReadOnlyList<RetryAttemptRecord>?)RetryAttempts ?? Array.Empty<RetryAttemptRecord>();
 
     string? ITestExecution.SkipReason => SkipReason;
     Func<TestContext, Exception, int, Task<bool>>? ITestExecution.RetryFunc => RetryFunc;
