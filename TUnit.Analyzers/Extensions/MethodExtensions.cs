@@ -12,6 +12,24 @@ public static class MethodExtensions
         return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
     }
 
+    /// <summary>
+    /// Returns true if the method is decorated with any attribute deriving from
+    /// <c>TUnit.Core.BaseTestAttribute</c> (e.g. <c>[Test]</c> or <c>[DynamicTestBuilder]</c>).
+    /// </summary>
+    public static bool HasTestAttribute(this IMethodSymbol methodSymbol, Compilation compilation)
+    {
+        var baseTestAttribute = compilation.GetTypeByMetadataName("TUnit.Core.BaseTestAttribute");
+
+        if (baseTestAttribute is null)
+        {
+            return false;
+        }
+
+        return methodSymbol.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.GetSelfAndBaseTypes()
+                .Contains(baseTestAttribute, SymbolEqualityComparer.Default) == true);
+    }
+
     public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)
     {
         return IsStandardHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType) || IsEveryHookMethod(methodSymbol, compilation, out type, out hookLevel, out hookType);
