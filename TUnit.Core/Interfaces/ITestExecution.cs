@@ -40,7 +40,9 @@ public interface ITestExecution
     /// <summary>
     /// Gets the history of prior execution attempts that triggered a retry, in attempt order.
     /// Empty when the test was not retried. The final (surviving) attempt is reflected by
-    /// <see cref="Result"/> and is not included here.
+    /// <see cref="Result"/> and is not included here — so for a test that ran 3 times,
+    /// <c>RetryAttempts.Count</c> is 2 (the two failed prior attempts) and
+    /// <see cref="CurrentRetryAttempt"/> is 2 (the zero-based index of the surviving attempt).
     /// </summary>
     IReadOnlyList<RetryAttemptRecord> RetryAttempts { get; }
 

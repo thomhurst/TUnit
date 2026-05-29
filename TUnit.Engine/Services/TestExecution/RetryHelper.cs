@@ -56,6 +56,7 @@ internal static class RetryHelper
                         Duration = failedResult?.Duration ?? TimeSpan.Zero,
                         ExceptionType = ex.GetType().FullName,
                         ExceptionMessage = ex.Message,
+                        ExceptionStackTrace = ex.StackTrace,
                     });
 
                     // Clear the previous result before retrying

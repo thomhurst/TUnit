@@ -280,6 +280,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                         DurationMs = prior.Duration.TotalMilliseconds,
                         ExceptionType = prior.ExceptionType,
                         ExceptionMessage = prior.ExceptionMessage,
+                        StackTrace = prior.ExceptionStackTrace,
                     });
                 }
 
@@ -289,6 +290,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     DurationMs = finalDuration,
                     ExceptionType = finalException?.Type,
                     ExceptionMessage = finalException?.Message,
+                    StackTrace = finalException?.StackTrace,
                 });
 
                 retryAttempt = attemptList.Count - 1;

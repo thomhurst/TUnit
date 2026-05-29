@@ -27,4 +27,9 @@ public readonly record struct RetryAttemptRecord
     /// The message of the exception that ended this attempt, or null if none.
     /// </summary>
     public string? ExceptionMessage { get; init; }
+
+    /// <summary>
+    /// The stack trace of the exception that ended this attempt, or null if none.
+    /// </summary>
+    public string? ExceptionStackTrace { get; init; }
 }
