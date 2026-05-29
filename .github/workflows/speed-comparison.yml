@@ -91,7 +91,7 @@ jobs:
 
   build-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-8
     concurrency:
       group: "speed-comparison-build-time"
       cancel-in-progress: true
