@@ -2645,14 +2645,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // A trailing array parameter (params OR a plain `T[]`) binds like a params array:
             // it accepts any number of remaining arguments collected into the array (issue #6120).
-            var hasParams = parametersFromArgs.Length > 0
-                && (parametersFromArgs[parametersFromArgs.Length - 1].IsParams
-                    || parametersFromArgs[parametersFromArgs.Length - 1].Type is IArrayTypeSymbol);
+            var lastIndex = parametersFromArgs.Length - 1;
+            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[lastIndex].CollectsTrailingArguments();
 
             // Count required parameters (those without default values, excluding CancellationToken
             // and the trailing array/params parameter, which may receive zero arguments).
             var requiredParamCount = parametersFromArgs
-                .Where((p, index) => index != parametersFromArgs.Length - 1 || !hasParams)
+                .Where((p, index) => index != lastIndex || !hasParams)
                 .Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
