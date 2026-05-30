@@ -3701,10 +3701,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 break;
 
             case TestReturnPattern.Unknown:
-                // F# Async, custom awaitables
-                writer.AppendLine($"var methodResult = {methodCall};");
-                writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
-                writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                // F# Async, custom awaitables.
+                // Wrap in its own block so the temporary local can never collide with a
+                // sibling/enclosing declaration when multiple invocations are emitted into
+                // the same scope (e.g. the array-argument binding paths). See #6122.
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"var __tunit_methodResult = {methodCall};");
+                writer.AppendLine("if (__tunit_methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(__tunit_methodResult);");
+                writer.Unindent();
+                writer.AppendLine("}");
                 break;
         }
     }
