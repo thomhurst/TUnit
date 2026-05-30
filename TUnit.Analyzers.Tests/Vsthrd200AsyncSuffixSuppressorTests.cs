@@ -16,6 +16,10 @@ public class Vsthrd200AsyncSuffixSuppressorTests
     [Arguments("After(Test)")]
     [Arguments("BeforeEvery(Test)")]
     [Arguments("AfterEvery(Test)")]
+    [Arguments("Before(Class)")]
+    [Arguments("After(Class)")]
+    [Arguments("Before(Assembly)")]
+    [Arguments("After(Assembly)")]
     public async Task WarningsOnTestAndHookMethodsAreSuppressed(string attribute) =>
         await AnalyzerTestHelpers
             .CreateSuppressorTest<Vsthrd200AsyncSuffixSuppressor>(

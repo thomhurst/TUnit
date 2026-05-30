@@ -16,7 +16,7 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
     {
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
-            if (diagnostic.Location.SourceTree?.GetRoot().FindNode(diagnostic.Location.SourceSpan) is not { } node)
+            if (diagnostic.Location.SourceTree?.GetRoot(context.CancellationToken).FindNode(diagnostic.Location.SourceSpan) is not { } node)
             {
                 continue;
             }
@@ -28,9 +28,12 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
                 continue;
             }
 
-            // IsHookMethod covers all hook levels (Before/After/BeforeEvery/AfterEvery) intentionally —
-            // no hook method requires the 'Async' suffix regardless of scope. (This is deliberately
-            // broader than MarkMethodStaticSuppressor, which only narrows CA1822 to Test-level hooks.)
+            // HasTestAttribute is inheritance-aware (covers [Test], [DynamicTestBuilder], etc.) and
+            // IsHookMethod covers all hook levels (Before/After/BeforeEvery/AfterEvery). This is
+            // deliberately broader than MarkMethodStaticSuppressor (CA1822), which uses the exact-match
+            // IsTestMethod and only narrows to Test-level hooks — so a [DynamicTestBuilder] method may
+            // still see CA1822. That divergence is intentional: VSTHRD200 (async naming) never applies
+            // to any test/hook method, whereas CA1822 (make-static) has narrower, scope-specific intent.
             if (methodSymbol.HasTestAttribute(context.Compilation)
                 || methodSymbol.IsHookMethod(context.Compilation, out _, out _, out _))
             {
@@ -39,10 +42,11 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
         }
     }
 
-    // This suppressor only ever handles VSTHRD200, so reference the single descriptor directly
-    // rather than scanning SupportedSuppressions on every reported diagnostic.
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
-        => context.ReportSuppression(Suppression.Create(SupportedSuppressions[0], diagnostic));
+    {
+        var descriptor = SupportedSuppressions.First(s => s.SuppressedDiagnosticId == diagnostic.Id);
+        context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
+    }
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
         ImmutableArray.Create(CreateDescriptor("VSTHRD200"));
