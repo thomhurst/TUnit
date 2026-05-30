@@ -72,4 +72,13 @@ public class ArgsAsArrayTests
     {
         await Assert.That(names).IsEquivalentTo(["Skipper", "Lucy"]);
     }
+
+    // Issue #6120: more loose values than the source generator emits static switch cases for
+    // (cap is parameterCount + 5) must still bind, matching the unbounded reflection path.
+    [Test]
+    [Arguments("a", "b", "c", "d", "e", "f", "g", "h")]
+    public async Task NonParamsStringArray_BeyondStaticCaseCap(string[] names)
+    {
+        await Assert.That(names).IsEquivalentTo(["a", "b", "c", "d", "e", "f", "g", "h"]);
+    }
 }

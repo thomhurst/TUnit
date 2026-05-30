@@ -210,7 +210,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "strings", 
                                 return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest(new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) }));
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected at least 0 arguments, but got {args.Length}");
+                            return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest((args.Length > 0 ? global::System.Linq.Enumerable.Range(0, args.Length - 0).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[i])).ToArray() : new string[0])));
                     }
                 }
                 catch (global::System.Exception ex)

@@ -1661,6 +1661,40 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Checks if the argument type is compatible with the parameter type through covariance
     /// </summary>
+    // Mirrors the source generator's GetTrailingElementType: the element type for a trailing
+    // collecting parameter — a plain array, or a C# 13 params collection whose target is an
+    // array-assignable generic interface (a generated T[] satisfies the parameter).
+    private static Type? GetTrailingElementType(ParameterInfo parameter)
+    {
+        var type = parameter.ParameterType;
+
+        if (type.IsArray)
+        {
+            return type.GetElementType();
+        }
+
+        if (type.IsGenericType)
+        {
+            var definition = type.GetGenericTypeDefinition();
+            if (definition == typeof(IEnumerable<>)
+                || definition == typeof(ICollection<>)
+                || definition == typeof(IList<>)
+                || definition == typeof(IReadOnlyCollection<>)
+                || definition == typeof(IReadOnlyList<>))
+            {
+                return type.GetGenericArguments()[0];
+            }
+        }
+
+        return null;
+    }
+
+    // C# 13 params collections are marked with ParamCollectionAttribute rather than
+    // ParamArrayAttribute. Match by name so it works across target frameworks that predate the type.
+    private static bool IsParamCollection(ParameterInfo parameter)
+        => parameter.GetCustomAttributesData()
+            .Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.ParamCollectionAttribute");
+
     private static bool IsCovariantCompatible(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType)
     {
         // Only check for generic interface covariance
@@ -1810,13 +1844,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // into the array, letting `[Arguments(["a", "b"])]` map onto a single array
                 // parameter (issue #6120).
                 var lastParam = parameters.Length > 0 ? parameters[^1] : null;
-                var isParamsArray = lastParam != null
-                    && (lastParam.IsDefined(typeof(ParamArrayAttribute), false) || lastParam.ParameterType.IsArray);
+                var paramsElementType = lastParam != null ? GetTrailingElementType(lastParam) : null;
+                // A plain trailing array always collects (matches source-gen). A non-array collection
+                // only collects when it is a params collection (C# 13, ParamCollectionAttribute).
+                var isParamsArray = lastParam != null && paramsElementType != null
+                    && (lastParam.ParameterType.IsArray
+                        || lastParam.IsDefined(typeof(ParamArrayAttribute), false)
+                        || IsParamCollection(lastParam));
 
                 if (isParamsArray && lastParam != null)
                 {
-                    // Handle params array parameter
-                    var paramsElementType = lastParam.ParameterType.GetElementType();
+                    // Handle params array / params collection parameter
                     var regularParamsCount = parameters.Length - 1;
 
                     // Process regular parameters first

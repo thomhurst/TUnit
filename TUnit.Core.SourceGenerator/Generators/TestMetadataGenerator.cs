@@ -2698,7 +2698,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // A trailing array/params parameter accepts any number of trailing values, so there
                 // is no fixed upper bound — only a minimum (the required, non-collecting parameters).
-                writer.AppendLine($"throw new global::System.ArgumentException($\"Expected at least {requiredParamCount} argument{(requiredParamCount == 1 ? "" : "s")}, but got {{args.Length}}\");");
+                // Counts beyond the statically-generated cases are bound dynamically so behaviour
+                // matches the reflection path (which has no such cap) — see issue #6120.
+                if (requiredParamCount > 0)
+                {
+                    writer.AppendLine($"if (args.Length < {requiredParamCount})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new global::System.ArgumentException($\"Expected at least {requiredParamCount} argument{(requiredParamCount == 1 ? "" : "s")}, but got {{args.Length}}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+
+                var dynamicArgs = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", "args.Length");
+                if (hasCancellationToken)
+                {
+                    dynamicArgs.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                }
+
+                var dynamicMethodCall = $"instance.{methodName}({string.Join(", ", dynamicArgs)})";
+                GenerateReturnHandling(writer, dynamicMethodCall, returnPattern);
             }
             else
             {

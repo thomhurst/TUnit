@@ -79,7 +79,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            if (args.Length < 1)
+                            {
+                                throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            }
+                            instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.Range(1, args.Length - 1).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i])).ToArray() : new long[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
                     }
                 }
                 catch (global::System.Exception ex)
@@ -129,7 +134,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            if (args.Length < 1)
+                            {
+                                throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            }
+                            instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.Range(1, args.Length - 1).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i])).ToArray() : new long[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
                     }
                 }
                 catch (global::System.Exception ex)

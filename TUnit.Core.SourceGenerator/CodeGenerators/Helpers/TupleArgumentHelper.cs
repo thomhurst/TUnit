@@ -109,7 +109,7 @@ public static class TupleArgumentHelper
 
             // Handle params array parameter
             var paramsParam = parameters[parameters.Count - 1];
-            var elementType = (paramsParam.Type as IArrayTypeSymbol)?.ElementType;
+            var elementType = GetTrailingElementType(paramsParam.Type);
 
             if (elementType != null)
             {
@@ -161,4 +161,33 @@ public static class TupleArgumentHelper
 
         return argumentExpressions;
     }
+
+    /// <summary>
+    /// Gets the element type for a trailing collecting parameter. Handles plain arrays as well as
+    /// C# 13 <c>params</c> collections whose target is an array-assignable generic interface
+    /// (<c>IEnumerable&lt;T&gt;</c>, <c>IReadOnlyList&lt;T&gt;</c>, etc.) — for those a generated
+    /// <c>T[]</c> satisfies the parameter. Returns null when no safe array construction applies.
+    /// </summary>
+    private static ITypeSymbol? GetTrailingElementType(ITypeSymbol parameterType)
+    {
+        if (parameterType is IArrayTypeSymbol array)
+        {
+            return array.ElementType;
+        }
+
+        if (parameterType is INamedTypeSymbol { IsGenericType: true } named &&
+            IsArrayAssignableCollectionInterface(named.OriginalDefinition.SpecialType))
+        {
+            return named.TypeArguments[0];
+        }
+
+        return null;
+    }
+
+    private static bool IsArrayAssignableCollectionInterface(SpecialType specialType)
+        => specialType is SpecialType.System_Collections_Generic_IEnumerable_T
+            or SpecialType.System_Collections_Generic_ICollection_T
+            or SpecialType.System_Collections_Generic_IList_T
+            or SpecialType.System_Collections_Generic_IReadOnlyCollection_T
+            or SpecialType.System_Collections_Generic_IReadOnlyList_T;
 }
