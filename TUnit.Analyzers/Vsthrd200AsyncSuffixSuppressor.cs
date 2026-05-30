@@ -42,14 +42,16 @@ public class Vsthrd200AsyncSuffixSuppressor : DiagnosticSuppressor
         }
     }
 
-    private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
-    {
-        var descriptor = SupportedSuppressions.First(s => s.SuppressedDiagnosticId == diagnostic.Id);
-        context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
-    }
+    // Exactly one descriptor is registered (VSTHRD200), and Roslyn only routes diagnostics whose id
+    // matches it here, so referencing the single descriptor directly is correct and avoids a
+    // per-call predicate scan.
+    private static void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
+        => context.ReportSuppression(Suppression.Create(Vsthrd200Descriptor, diagnostic));
+
+    private static readonly SuppressionDescriptor Vsthrd200Descriptor = CreateDescriptor("VSTHRD200");
 
     public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-        ImmutableArray.Create(CreateDescriptor("VSTHRD200"));
+        ImmutableArray.Create(Vsthrd200Descriptor);
 
     private static SuppressionDescriptor CreateDescriptor(string id)
         => new(
