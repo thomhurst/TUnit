@@ -11,6 +11,16 @@ namespace TUnit.Mocks.Assertions;
 public static class MockAssertionExtensions
 {
     /// <summary>
+    /// Asserts that the mock member was called at least once.
+    /// </summary>
+    public static WasCalledAssertion WasCalled(
+        this IAssertionSource<ICallVerification> source)
+    {
+        source.Context.ExpressionBuilder.Append($".WasCalled({nameof(Times.AtLeastOnce)})");
+        return new WasCalledAssertion(source.Context, Times.AtLeastOnce);
+    }
+
+    /// <summary>
     /// Asserts that the mock member was called the specified number of times.
     /// </summary>
     public static WasCalledAssertion WasCalled(
