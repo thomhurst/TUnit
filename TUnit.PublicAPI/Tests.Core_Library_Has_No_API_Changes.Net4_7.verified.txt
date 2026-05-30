@@ -1188,6 +1188,7 @@ namespace
     {
         public required  Duration { get; init; }
         public string? ExceptionMessage { get; init; }
+        public string? ExceptionStackTrace { get; init; }
         public string? ExceptionType { get; init; }
         public required .TestState State { get; init; }
     }
