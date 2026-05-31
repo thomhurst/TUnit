@@ -115,8 +115,13 @@ public static class TupleArgumentHelper
             {
                 if (argCountExpression != null)
                 {
-                    // Dynamic count - create array from remaining arguments
-                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {argCountExpression} - {regularParamCount}).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i])).ToArray() : new {elementType.GloballyQualified()}[0])";
+                    // Dynamic count - create array from remaining arguments. With no leading
+                    // regular parameters the range spans the whole args array, so drop the
+                    // redundant "- 0" offset for cleaner generated code.
+                    var rangeCount = regularParamCount == 0
+                        ? argCountExpression
+                        : $"{argCountExpression} - {regularParamCount}";
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i])).ToArray() : new {elementType.GloballyQualified()}[0])";
                     argumentExpressions.Add(arrayInit);
                 }
                 else

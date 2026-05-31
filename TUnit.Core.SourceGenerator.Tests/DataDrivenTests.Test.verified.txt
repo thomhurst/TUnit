@@ -270,7 +270,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         default:
-                            instance.IntegerArray((args.Length > 0 ? global::System.Linq.Enumerable.Range(0, args.Length - 0).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i])).ToArray() : new int[0]));
+                            instance.IntegerArray((args.Length > 0 ? global::System.Linq.Enumerable.Range(0, args.Length).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i])).ToArray() : new int[0]));
                             return default(global::System.Threading.Tasks.ValueTask);
                     }
                 }
