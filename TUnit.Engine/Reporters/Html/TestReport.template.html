@@ -2655,14 +2655,18 @@ function traceHTML(t) {
   const byId = new Map(spans.map(s => [s.id, s]));
   spans.forEach(s => { s._children = []; });
   spans.forEach(s => { if (s.parent && byId.has(s.parent)) byId.get(s.parent)._children.push(s); });
-  const totalDur = Math.max(...spans.map(s => s.start + s.dur));
+  // Span starts are absolute offsets from the run start, so normalise to the
+  // earliest span — otherwise the axis begins at 0 and all bars are pushed to
+  // the right, leaving the lead-in time before the test empty.
+  const minStart = Math.min(...spans.map(s => s.start));
+  const totalDur = (Math.max(...spans.map(s => s.start + s.dur)) - minStart) || 1;
   const ticks = 6, axisHtml = [];
   for (let i = 0; i <= ticks; i++) axisHtml.push(`<span>${fmtDur((i/ticks)*totalDur)}</span>`);
 
   const rows = [];
   function walk(span, depth) {
     const color = SERVICE_COLORS[span.service] || 'var(--text-muted)';
-    const left = (span.start / totalDur) * 100;
+    const left = ((span.start - minStart) / totalDur) * 100;
     const width = Math.max(0.2, (span.dur / totalDur) * 100);
     const err = (span.attrs && span.attrs['http.status_code'] >= 500) ? ' err' : '';
     rows.push(`
