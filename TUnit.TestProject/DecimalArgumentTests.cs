@@ -114,6 +114,14 @@ public class DecimalArgumentTests
         await Assert.That(credit).IsEqualTo(123_999.00000000000000001m);
     }
 
+    [Test]
+    [Arguments(1.5f)] // float literal source -> decimal parameter must route through CastHelper,
+                      // not a direct (decimal)(float) cast (which loses precision for many values)
+    public async Task FloatToDecimal(decimal value)
+    {
+        await Assert.That(value).IsEqualTo(1.5m);
+    }
+
     private const int BatchSize = 42;
 
     [Test]
