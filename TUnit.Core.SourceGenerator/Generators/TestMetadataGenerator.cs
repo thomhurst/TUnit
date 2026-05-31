@@ -2659,12 +2659,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
 
-            // For params arrays, we need to handle any number of arguments >= required count
-            // Generate a reasonable number of cases plus a default that handles the rest
-            var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
+            // A trailing params/array parameter accepts any argument count >= the required minimum.
+            // Emit explicit switch cases up to `maxExtraTrailingArgs` beyond the declared parameters;
+            // the `default` arm binds larger counts dynamically (matching the reflection path).
+            // Fixed-arity methods only need one case per optional parameter.
+            // Both bounds in the loop guard are real: `casesToGenerate` caps total cases, while the
+            // `+ maxExtraTrailingArgs` term caps how far past the declared arity we enumerate.
+            const int maxParamsCases = 10;
+            const int maxExtraTrailingArgs = 5;
+            var casesToGenerate = hasParams ? maxParamsCases : parametersFromArgs.Length - requiredParamCount + 1;
 
             // Generate cases for each valid argument count
-            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
+            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + maxExtraTrailingArgs; i++)
             {
                 var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
