@@ -32,7 +32,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string? _outputPath;
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
+    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
     private GitHubReporter? _githubReporter;
 
 #if NET
@@ -64,8 +64,26 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, _ => []).Enqueue(testNodeUpdateMessage);
+        // Keep only the update we'll report per test: a final-state update always wins over a
+        // non-final one, otherwise the latest wins. The engine emits a single final update per
+        // test, so storing the whole stream (the old ConcurrentQueue) just wasted memory.
+        _updates.AddOrUpdate(
+            testNodeUpdateMessage.TestNode.Uid.Value,
+            testNodeUpdateMessage,
+            (_, existing) => PreferForReport(existing, testNodeUpdateMessage));
         return Task.CompletedTask;
+    }
+
+    // Selects which update to keep for the report when more than one arrives for a test: a
+    // final-state update always wins over a non-final one; otherwise the later (incoming) one
+    // wins. Mirrors the previous "last final, else last overall" walk over the per-test queue.
+    private static TestNodeUpdateMessage PreferForReport(TestNodeUpdateMessage existing, TestNodeUpdateMessage incoming)
+        => IsFinalState(incoming) || !IsFinalState(existing) ? incoming : existing;
+
+    private static bool IsFinalState(TestNodeUpdateMessage update)
+    {
+        var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+        return state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty;
     }
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
@@ -206,24 +224,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
 
         // Get the last update with a final state for each test
-        var lastUpdates = new Dictionary<string, TestNodeUpdateMessage>(_updates.Count);
-        foreach (var kvp in _updates)
-        {
-            TestNodeUpdateMessage? lastFinal = null;
-            foreach (var update in kvp.Value)
-            {
-                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
-                {
-                    lastFinal = update;
-                }
-            }
-
-            if (lastFinal != null)
-            {
-                lastUpdates[kvp.Key] = lastFinal;
-            }
-        }
+        // Each test's update was already reduced to the one we report (final-state preferred) in
+        // ConsumeAsync, so _updates maps directly to the nodes to render.
+        var lastUpdates = _updates;
 
         var summary = new ReportSummary();
         var groupsByClass = new Dictionary<string, List<ReportTestResult>>();
