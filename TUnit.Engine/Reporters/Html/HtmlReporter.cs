@@ -244,6 +244,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         foreach (var kvp in lastUpdates)
         {
+            // ConsumeAsync prefers a final-state update per test, but a test abandoned mid-flight
+            // (e.g. process-crash recovery) may only ever have a non-final update stored. Skip those
+            // so the report never renders a discovered/in-progress node as if it were a result.
+            if (!IsFinalState(kvp.Value))
+            {
+                continue;
+            }
+
             var testNode = kvp.Value.TestNode;
 
             // Correlate trace/span IDs from collected activities
