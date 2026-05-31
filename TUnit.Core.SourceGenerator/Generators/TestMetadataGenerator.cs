@@ -4061,16 +4061,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : methodLocation.SourceTree?.FilePath ?? "");
         }
 
+        // The base method lives in a referenced assembly (cross-project inheritance), so its symbol
+        // has no source location in this compilation. The [Test] attribute's CallerFilePath and
+        // CallerLineNumber were baked at the base method declaration, so they remain the correct
+        // pointer to the test. We deliberately do NOT fall back to the derived class's syntax span:
+        // that pairs the base file path with the derived class's line range, sending the source view
+        // to unrelated lines in the base file.
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            return CreateFallbackSourceLocation(attrFilePath!, attrLineNumber);
+        }
+
         var classLocation = classInfo.ClassSyntax.GetLocation();
         if (classLocation.IsInSource)
         {
             return CreateSourceLocation(
                 classLocation.GetLineSpan(),
-                !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "");
+                classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "");
         }
 
         return CreateFallbackSourceLocation(
-            !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : classInfo.ClassSyntax.SyntaxTree.FilePath ?? "",
+            classInfo.ClassSyntax.SyntaxTree.FilePath ?? "",
             attrLineNumber);
     }
 
