@@ -35,6 +35,14 @@
     --shadow-sm: 0 1px 2px rgba(15,15,15,0.04);
     --shadow:    0 1px 2px rgba(15,15,15,0.04), 0 1px 4px rgba(15,15,15,0.04);
     --shadow-pop:0 12px 32px rgba(15,15,15,0.10), 0 0 0 1px rgba(15,15,15,0.05);
+    /* C# syntax highlighting — matches the docs site's Prism "github" light theme. */
+    --syn-plain:   #393a34;
+    --syn-comment: #999988;
+    --syn-string:  #e3116c;
+    --syn-keyword: #00009f;
+    --syn-number:  #36acaa;
+    --syn-func:    #d73a49;
+    --syn-type:    #6f42c1;
   }
   :root[data-theme="dark"] {
     --bg:            #0a0a0a;
@@ -65,6 +73,14 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
     --shadow:    0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.02);
     --shadow-pop:0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    /* C# syntax highlighting — matches the docs site's Prism "dracula" dark theme. */
+    --syn-plain:   #f8f8f2;
+    --syn-comment: #6272a4;
+    --syn-string:  #ff79c6;
+    --syn-keyword: #bd93f9;
+    --syn-number:  #bd93f9;
+    --syn-func:    #50fa7b;
+    --syn-type:    #8be9fd;
   }
 
   *, *::before, *::after { box-sizing: border-box; }
@@ -587,7 +603,15 @@
     user-select: none; min-width: 3ch; text-align: right;
     color: var(--text-dim); opacity: 0.5; margin-right: 16px; flex-shrink: 0;
   }
-  .source-snippet-code .line-content { white-space: pre; color: var(--text); }
+  .source-snippet-code .line-content { white-space: pre; color: var(--syn-plain); }
+  /* Baked-in "good enough" C# syntax highlighting. Token colors are theme-aware
+     and switch with the light/dark toggle via the --syn-* custom properties. */
+  .source-snippet-code .tok-comment { color: var(--syn-comment); font-style: italic; }
+  .source-snippet-code .tok-string  { color: var(--syn-string); }
+  .source-snippet-code .tok-keyword { color: var(--syn-keyword); }
+  .source-snippet-code .tok-number  { color: var(--syn-number); }
+  .source-snippet-code .tok-func    { color: var(--syn-func); }
+  .source-snippet-code .tok-type    { color: var(--syn-type); }
 
   /* ============================== run view ============================== */
   .run-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 28px 80px; }
@@ -1684,6 +1708,125 @@ function sourceJumpUrl(t) {
   const tmpl = (t.source.endLine && t.source.endLine > t.source.line && sl.rangeUrl) ? sl.rangeUrl : sl.lineUrl;
   return fillSourceTemplate(tmpl, t);
 }
+// ── Baked-in "good enough" C# syntax highlighter ──────────────────────────
+// A small hand-rolled tokenizer. Not a full C# parser — it deliberately trades
+// edge-case accuracy for zero dependencies and a tiny footprint. Output token
+// classes map to theme-aware --syn-* colors so highlighting follows the toggle.
+const CS_KEYWORDS = new Set((
+  'abstract as async await base bool break byte case catch char checked class const ' +
+  'continue decimal default delegate do double else enum event explicit extern false ' +
+  'finally fixed float for foreach goto if implicit in int interface internal is lock ' +
+  'long namespace new null object operator out override params private protected public ' +
+  'readonly ref return sbyte sealed short sizeof stackalloc static string struct switch ' +
+  'this throw true try typeof uint ulong unchecked unsafe ushort using virtual void ' +
+  'volatile while ' +
+  // Contextual keywords — limited to ones that are nearly always keywords, so we
+  // don't miscolor common identifiers like `value`, `from`, `select`, `on`, `by`.
+  'and dynamic file get global init nameof nint not notnull nuint or ' +
+  'partial record required scoped set unmanaged var when where with yield'
+).split(' '));
+
+function highlightCSharpLines(code) {
+  // Tokenize the whole snippet (so multi-line comments / verbatim strings are
+  // handled), then split tokens across newlines into one HTML string per line.
+  const lines = [[]];
+  const push = (cls, text) => {
+    const parts = text.split('\n');
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0) lines.push([]);
+      if (parts[i] === '') continue;
+      const safe = esc(parts[i]);
+      lines[lines.length - 1].push(cls ? `<span class="${cls}">${safe}</span>` : safe);
+    }
+  };
+  const n = code.length;
+  let i = 0;
+  while (i < n) {
+    const c = code[i];
+    const c2 = code[i + 1];
+    // line comment / xml-doc comment
+    if (c === '/' && c2 === '/') {
+      let j = i + 2; while (j < n && code[j] !== '\n') j++;
+      push('tok-comment', code.slice(i, j)); i = j; continue;
+    }
+    // block comment
+    if (c === '/' && c2 === '*') {
+      let j = i + 2; while (j < n && !(code[j] === '*' && code[j + 1] === '/')) j++;
+      j = Math.min(n, j + 2);
+      push('tok-comment', code.slice(i, j)); i = j; continue;
+    }
+    // raw string literal: """ ... """ (optionally interpolated: $"""), 3+ quotes
+    if (c === '"' && c2 === '"' && code[i + 2] === '"') {
+      let q = 0; while (code[i + q] === '"') q++;
+      const fence = '"'.repeat(q);
+      let j = code.indexOf(fence, i + q);
+      j = j === -1 ? n : j + q;
+      push('tok-string', code.slice(i, j)); i = j; continue;
+    }
+    // verbatim / interpolated-verbatim string: @"...", $@"...", @$"..."
+    if (c === '@' && c2 === '"') { i = readVerbatim(code, i, 1, push); continue; }
+    if ((c === '$' && c2 === '@') || (c === '@' && c2 === '$')) {
+      if (code[i + 2] === '"') { i = readVerbatim(code, i, 2, push); continue; }
+    }
+    // regular or interpolated string: "..." / $"..."
+    if (c === '"' || (c === '$' && c2 === '"')) {
+      const start = c === '$' ? i + 1 : i;
+      let j = start + 1;
+      while (j < n && code[j] !== '"' && code[j] !== '\n') {
+        if (code[j] === '\\') j++;
+        j++;
+      }
+      j = Math.min(n, j + 1);
+      push('tok-string', code.slice(i, j)); i = j; continue;
+    }
+    // char literal
+    if (c === "'") {
+      let j = i + 1;
+      while (j < n && code[j] !== "'" && code[j] !== '\n') {
+        if (code[j] === '\\') j++;
+        j++;
+      }
+      j = Math.min(n, j + 1);
+      push('tok-string', code.slice(i, j)); i = j; continue;
+    }
+    // number
+    if (c >= '0' && c <= '9') {
+      const m = /^(?:0[xX][0-9a-fA-F_]+|0[bB][01_]+|[0-9][0-9_]*(?:\.[0-9_]+)?(?:[eE][+-]?[0-9]+)?)[fFdDmMuUlL]*/.exec(code.slice(i));
+      const tok = m ? m[0] : c;
+      push('tok-number', tok); i += tok.length; continue;
+    }
+    // identifier / keyword (allow leading @ verbatim identifier)
+    if (/[A-Za-z_@]/.test(c)) {
+      const m = /^@?[A-Za-z_][A-Za-z0-9_]*/.exec(code.slice(i));
+      const word = m[0];
+      const bare = word[0] === '@' ? word.slice(1) : word;
+      let k = i + word.length; while (k < n && /\s/.test(code[k])) k++;
+      let cls = '';
+      if (CS_KEYWORDS.has(bare)) cls = 'tok-keyword';
+      else if (code[k] === '(') cls = 'tok-func';             // call / declaration
+      else if (/^[A-Z]/.test(bare)) cls = 'tok-type';         // PascalCase ⇒ type
+      push(cls, word); i += word.length; continue;
+    }
+    // anything else (punctuation, operators, whitespace) → plain
+    push('', c); i++;
+  }
+  return lines.map(parts => parts.join(''));
+}
+function readVerbatim(code, i, prefix, push) {
+  // prefix = number of chars before the opening quote (@ ⇒ 1, $@/@$ ⇒ 2).
+  // In verbatim strings a quote is escaped by doubling it ("").
+  const n = code.length;
+  let j = i + prefix + 1;
+  while (j < n) {
+    if (code[j] === '"') {
+      if (code[j + 1] === '"') { j += 2; continue; }
+      j++; break;
+    }
+    j++;
+  }
+  push('tok-string', code.slice(i, Math.min(n, j)));
+  return Math.min(n, j);
+}
 const _snippetCache = new Map();
 const SNIPPET_FALLBACK_LINES = 40;
 function loadSourceSnippet(detail) {
@@ -1712,10 +1855,14 @@ function loadSourceSnippet(detail) {
     const snippet = lines.slice(from, to);
     const fileName = path.split('/').pop();
     const rangeLabel = `lines ${startLine}–${from + snippet.length}`;
+    // Highlight C# files; fall back to plain (escaped) text for anything else.
+    const htmlLines = /\.cs$/i.test(fileName)
+      ? highlightCSharpLines(snippet.join('\n'))
+      : snippet.map(esc);
     container.innerHTML =
       `<div class="source-snippet-header"><span>${esc(fileName)} (${rangeLabel})</span></div>` +
       `<div class="source-snippet-code">${snippet.map((l, i) =>
-        `<div class="line"><span class="line-num">${from + i + 1}</span><span class="line-content">${esc(l)}</span></div>`
+        `<div class="line"><span class="line-num">${from + i + 1}</span><span class="line-content">${htmlLines[i] || ''}</span></div>`
       ).join('')}</div>`;
   };
 
