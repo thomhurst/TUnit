@@ -85,6 +85,30 @@ public class AsyncVerificationTests
     }
 
     [Test]
+    public async Task WasCalled_AtLeastOnceByDefault_Passes()
+    {
+        var mock = ICalculator.Mock();
+        mock.Add(Any(), Any()).Returns(42);
+
+        ICalculator calc = mock.Object;
+        _ = calc.Add(1, 2);
+        _ = calc.Add(3, 4);
+
+        await Assert.That(mock.Add(Any(), Any()))
+            .WasCalled();
+    }
+
+    [Test]
+    public async Task WasCalled_Default_Fails_When_Not_Called()
+    {
+        var mock = ICalculator.Mock();
+
+        await Assert.ThrowsAsync(async () =>
+            await Assert.That(mock.Add(Any(), Any()))
+                .WasCalled());
+    }
+
+    [Test]
     public async Task Property_Getter_WasCalled_Via_Assert()
     {
         var mock = IPropertyService.Mock();
