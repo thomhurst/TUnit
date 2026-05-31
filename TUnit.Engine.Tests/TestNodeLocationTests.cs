@@ -79,7 +79,7 @@ public class TestNodeLocationTests
 
         context.RetryAttempts =
         [
-            new RetryAttemptRecord { State = TestState.Failed, Duration = TimeSpan.FromMilliseconds(50), ExceptionType = "System.Exception", ExceptionMessage = "boom" },
+            new TestResult { State = TestState.Failed, Start = null, End = null, Duration = TimeSpan.FromMilliseconds(50), Exception = new Exception("boom"), ComputerName = "test" },
         ];
 
         // Final state -> attached.

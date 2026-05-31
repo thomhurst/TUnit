@@ -277,13 +277,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Count + 1);
                 foreach (var prior in priorAttempts.Attempts)
                 {
+                    var priorException = MapException(prior.Exception);
                     attemptList.Add(new ReportAttempt
                     {
                         Status = StatusFromState(prior.State),
-                        DurationMs = prior.Duration.TotalMilliseconds,
-                        ExceptionType = prior.ExceptionType,
-                        ExceptionMessage = prior.ExceptionMessage,
-                        StackTrace = prior.ExceptionStackTrace,
+                        DurationMs = prior.Duration?.TotalMilliseconds ?? 0,
+                        ExceptionType = priorException?.Type,
+                        ExceptionMessage = priorException?.Message,
+                        StackTrace = priorException?.StackTrace,
                     });
                 }
 

@@ -12,4 +12,4 @@ namespace TUnit.Engine.Reporters;
 /// lives transiently on the <see cref="TestContext"/> during execution — would be unavailable
 /// to consumers that work purely off <c>TestNodeUpdateMessage</c>.
 /// </summary>
-internal sealed record TUnitRetryAttemptsProperty(IReadOnlyList<RetryAttemptRecord> Attempts) : IProperty;
+internal sealed record TUnitRetryAttemptsProperty(IReadOnlyList<TestResult> Attempts) : IProperty;

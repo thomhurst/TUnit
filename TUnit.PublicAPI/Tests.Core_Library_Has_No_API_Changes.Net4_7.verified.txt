@@ -1184,14 +1184,6 @@ namespace
         public bool ProceedOnFailure { get; }
         public required .AbstractExecutableTest Test { get; init; }
     }
-    public readonly struct RetryAttemptRecord : <.RetryAttemptRecord>
-    {
-        public required  Duration { get; init; }
-        public string? ExceptionMessage { get; init; }
-        public string? ExceptionStackTrace { get; init; }
-        public string? ExceptionType { get; init; }
-        public required .TestState State { get; init; }
-    }
     [(.Assembly | .Class | .Method)]
     public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
@@ -2573,7 +2565,7 @@ namespace .Interfaces
         .TestPhase Phase { get; }
         bool ReportResult { get; set; }
         .TestResult? Result { get; }
-        .<.RetryAttemptRecord> RetryAttempts { get; }
+        .<.TestResult> RetryAttempts { get; }
         <.TestContext, , int, .<bool>>? RetryFunc { get; }
         string? SkipReason { get; }
         ? TestEnd { get; }

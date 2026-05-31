@@ -49,19 +49,25 @@ internal static class RetryHelper
                     // Record this failed attempt before it's cleared, so reporters (e.g. the HTML
                     // report's retry/flaky UI) can show the full attempt history. The engine only
                     // emits one update per test (the final result), so without this the per-attempt
-                    // data would be lost.
+                    // data would be lost. The attempt's own TestResult IS the record we keep; we
+                    // detach the TestContext back-reference so the history doesn't retain the live
+                    // execution graph. Wrapper-exception unwrapping is deferred to the reporter
+                    // (HtmlReporter.MapException), matching how the final attempt is rendered.
                     var failedResult = testContext.Execution.Result;
-                    // Unwrap TUnit wrapper exceptions so the captured type/message/stack trace match
-                    // what the final attempt records via HtmlReporter.MapException (which also unwraps).
-                    var capturedException = TUnitFailedException.Unwrap(ex);
-                    (testContext.RetryAttempts ??= []).Add(new RetryAttemptRecord
-                    {
-                        State = failedResult?.State ?? TestState.Failed,
-                        Duration = failedResult?.Duration ?? TimeSpan.Zero,
-                        ExceptionType = capturedException.GetType().FullName,
-                        ExceptionMessage = capturedException.Message,
-                        ExceptionStackTrace = capturedException.StackTrace,
-                    });
+                    var attemptResult = failedResult is not null
+                        ? failedResult with { TestContext = null }
+                        : new TestResult
+                        {
+                            State = TestState.Failed,
+                            Start = testContext.TestStart,
+                            End = testContext.Execution.TestEnd,
+                            Duration = testContext.TestStart is { } start && testContext.Execution.TestEnd is { } end
+                                ? end - start
+                                : null,
+                            Exception = TUnitFailedException.Unwrap(ex),
+                            ComputerName = Environment.MachineName,
+                        };
+                    (testContext.RetryAttempts ??= []).Add(attemptResult);
 
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;

@@ -449,8 +449,8 @@ public class HtmlReporterTests
                 new TimingProperty(new TimingInfo(start, start.AddMilliseconds(200), TimeSpan.FromMilliseconds(200))),
                 new TUnitRetryAttemptsProperty(
                 [
-                    new RetryAttemptRecord { State = TestState.Failed, Duration = TimeSpan.FromMilliseconds(100), ExceptionType = "System.TimeoutException", ExceptionMessage = "transient 1" },
-                    new RetryAttemptRecord { State = TestState.Failed, Duration = TimeSpan.FromMilliseconds(150), ExceptionType = "System.TimeoutException", ExceptionMessage = "transient 2" },
+                    new TestResult { State = TestState.Failed, Start = start, End = start.AddMilliseconds(100), Duration = TimeSpan.FromMilliseconds(100), Exception = new TimeoutException("transient 1"), ComputerName = "test" },
+                    new TestResult { State = TestState.Failed, Start = start, End = start.AddMilliseconds(150), Duration = TimeSpan.FromMilliseconds(150), Exception = new TimeoutException("transient 2"), ComputerName = "test" },
                 ]))
         };
 
