@@ -119,7 +119,7 @@ internal static class TestExtensions
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
-        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+        var isFinalState = stateProperty.IsFinalState();
 
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
@@ -250,7 +250,7 @@ internal static class TestExtensions
 
     private static int EstimateCount(TestContext testContext, TestNodeStateProperty stateProperty, bool isTrxEnabled)
     {
-        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+        var isFinalState = stateProperty.IsFinalState();
 
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 

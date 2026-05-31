@@ -15,6 +15,7 @@ using TUnit.Core;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Reporters;
@@ -81,10 +82,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         => IsFinalState(incoming) || !IsFinalState(existing) ? incoming : existing;
 
     private static bool IsFinalState(TestNodeUpdateMessage update)
-    {
-        var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-        return state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty;
-    }
+        => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
 
@@ -297,6 +295,10 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     StackTrace = finalException?.StackTrace,
                 });
 
+                // Index of the surviving (final) attempt; equals testContext.CurrentRetryAttempt.
+                // Derived from the attempt list rather than read back from the node because
+                // CurrentRetryAttempt is not serialised onto the TestNode. A non-zero value here is
+                // what flags the test as flaky in AccumulateStatus.
                 retryAttempt = attemptList.Count - 1;
                 attempts = attemptList.ToArray();
             }

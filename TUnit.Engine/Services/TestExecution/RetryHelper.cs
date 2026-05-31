@@ -53,6 +53,10 @@ internal static class RetryHelper
                     // detach the TestContext back-reference so the history doesn't retain the live
                     // execution graph. Wrapper-exception unwrapping is deferred to the reporter
                     // (HtmlReporter.MapException), matching how the final attempt is rendered.
+                    // Result is normally populated by the time a failing attempt reaches here, so
+                    // the first branch is the common path. The fallback covers the rare case where
+                    // the attempt threw before a TestResult was written (e.g. an exception during
+                    // setup), so the attempt is still recorded rather than dropped from the history.
                     var failedResult = testContext.Execution.Result;
                     var attemptResult = failedResult is not null
                         ? failedResult with { TestContext = null }
