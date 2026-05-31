@@ -1,5 +1,7 @@
 using System.Runtime.CompilerServices;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
+using TUnit.Mocks.Exceptions;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks.Assertions;
@@ -12,12 +14,25 @@ public static class MockAssertionExtensions
 {
     /// <summary>
     /// Asserts that the mock member was called at least once.
+    /// Generates the <c>WasCalled()</c> assertion on <see cref="IAssertionSource{ICallVerification}"/>.
     /// </summary>
-    public static WasCalledAssertion WasCalled(
-        this IAssertionSource<ICallVerification> source)
+    [GenerateAssertion(ExpectationMessage = "to have been called")]
+    public static AssertionResult WasCalled(ICallVerification verification)
     {
-        source.Context.ExpressionBuilder.Append($".WasCalled({nameof(Times.AtLeastOnce)})");
-        return new WasCalledAssertion(source.Context, Times.AtLeastOnce);
+        if (verification is null)
+        {
+            return AssertionResult.Failed("Verification target is null");
+        }
+
+        try
+        {
+            verification.WasCalled();
+            return AssertionResult.Passed;
+        }
+        catch (MockVerificationException ex)
+        {
+            return AssertionResult.Failed(ex.Message);
+        }
     }
 
     /// <summary>

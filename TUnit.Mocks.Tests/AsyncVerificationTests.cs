@@ -99,6 +99,16 @@ public class AsyncVerificationTests
     }
 
     [Test]
+    public async Task WasCalled_Default_Fails_When_Not_Called()
+    {
+        var mock = ICalculator.Mock();
+
+        await Assert.ThrowsAsync(async () =>
+            await Assert.That(mock.Add(Any(), Any()))
+                .WasCalled());
+    }
+
+    [Test]
     public async Task Property_Getter_WasCalled_Via_Assert()
     {
         var mock = IPropertyService.Mock();
