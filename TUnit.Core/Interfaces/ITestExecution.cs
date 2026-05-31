@@ -45,6 +45,12 @@ public interface ITestExecution
     /// <see cref="CurrentRetryAttempt"/> is 2 (the zero-based index of the surviving attempt).
     /// Each entry is the <see cref="TestResult"/> that attempt produced before it was retried.
     /// </summary>
+    /// <remarks>
+    /// This member has no default implementation because <c>ITestExecution</c> targets
+    /// netstandard2.0, which predates default interface members. External types that implement
+    /// <c>ITestExecution</c> directly must add this property when upgrading — return an empty
+    /// list (e.g. <c>Array.Empty&lt;TestResult&gt;()</c>) if retry history is not tracked.
+    /// </remarks>
     IReadOnlyList<TestResult> RetryAttempts { get; }
 
     /// <summary>

@@ -213,7 +213,7 @@ internal static class TestExtensions
         // this is the one chance to surface the per-attempt list captured during execution.
         if (isFinalState && testContext.RetryAttempts is { Count: > 0 } retryAttempts)
         {
-            // Defensive copy: the live List<RetryAttemptRecord> on the TestContext could otherwise
+            // Defensive copy: the live List<TestResult> on the TestContext could otherwise
             // be mutated after the property is published.
             propertyBag.Add(new TUnitRetryAttemptsProperty([.. retryAttempts]));
         }
