@@ -79,9 +79,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     // final-state update always wins over a non-final one; otherwise the later (incoming) one
     // wins. Mirrors the previous "last final, else last overall" walk over the per-test queue.
     private static TestNodeUpdateMessage PreferForReport(TestNodeUpdateMessage existing, TestNodeUpdateMessage incoming)
-        => IsFinalState(incoming) || !IsFinalState(existing) ? incoming : existing;
+        => HasFinalState(incoming) || !HasFinalState(existing) ? incoming : existing;
 
-    private static bool IsFinalState(TestNodeUpdateMessage update)
+    // Named distinctly from the TestNodeStateProperty.IsFinalState() extension to avoid two
+    // same-named symbols in scope; this overload reaches into the update's node state for callers.
+    private static bool HasFinalState(TestNodeUpdateMessage update)
         => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
@@ -247,7 +249,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             // ConsumeAsync prefers a final-state update per test, but a test abandoned mid-flight
             // (e.g. process-crash recovery) may only ever have a non-final update stored. Skip those
             // so the report never renders a discovered/in-progress node as if it were a result.
-            if (!IsFinalState(kvp.Value))
+            if (!HasFinalState(kvp.Value))
             {
                 continue;
             }
@@ -283,6 +285,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Count + 1);
                 foreach (var prior in priorAttempts.Attempts)
                 {
+                    // We keep only the top-level type/message/stack here; MapException's recursive
+                    // InnerException chain is intentionally discarded, matching how the final
+                    // attempt is rendered (ReportAttempt has no inner-exception field).
                     var priorException = MapException(prior.Exception);
                     attemptList.Add(new ReportAttempt
                     {

@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine.Services.TestExecution;
 
@@ -68,7 +67,7 @@ internal static class RetryHelper
                             Duration = testContext.TestStart is { } start && testContext.Execution.TestEnd is { } end
                                 ? end - start
                                 : null,
-                            Exception = TUnitFailedException.Unwrap(ex),
+                            Exception = ex,
                             ComputerName = Environment.MachineName,
                         };
                     (testContext.RetryAttempts ??= []).Add(attemptResult);
