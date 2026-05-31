@@ -2643,23 +2643,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
+            // A trailing array parameter (params OR a plain `T[]`) binds like a params array:
+            // it accepts any number of remaining arguments collected into the array (issue #6120).
+            var lastIndex = parametersFromArgs.Length - 1;
+            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[lastIndex].CollectsTrailingArguments();
+
+            // Count required parameters (those without default values, excluding CancellationToken
+            // and the trailing array/params parameter, which may receive zero arguments).
+            var requiredParamCount = parametersFromArgs
+                .Where((p, index) => index != lastIndex || !hasParams)
+                .Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
 
-            // Check if last parameter is params array
-            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
-
-            // For params arrays, we need to handle any number of arguments >= required count
-            // Generate a reasonable number of cases plus a default that handles the rest
-            var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
+            // A trailing params/array parameter accepts any argument count >= the required minimum.
+            // Emit explicit switch cases up to `maxExtraTrailingArgs` beyond the declared parameters;
+            // the `default` arm binds larger counts dynamically (matching the reflection path).
+            // Fixed-arity methods only need one case per optional parameter.
+            // Both bounds in the loop guard are real: `casesToGenerate` caps total cases, while the
+            // `+ maxExtraTrailingArgs` term caps how far past the declared arity we enumerate.
+            const int maxParamsCases = 10;
+            const int maxExtraTrailingArgs = 5;
+            var casesToGenerate = hasParams ? maxParamsCases : parametersFromArgs.Length - requiredParamCount + 1;
 
             // Generate cases for each valid argument count
-            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
+            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + maxExtraTrailingArgs; i++)
             {
                 var argCount = requiredParamCount + i;
                 writer.AppendLine($"case {argCount}:");
@@ -2688,6 +2699,31 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (requiredParamCount == parametersFromArgs.Length && !hasParams)
             {
                 writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
+            }
+            else if (hasParams)
+            {
+                // A trailing array/params parameter accepts any number of trailing values, so there
+                // is no fixed upper bound — only a minimum (the required, non-collecting parameters).
+                // Counts beyond the statically-generated cases are bound dynamically so behaviour
+                // matches the reflection path (which has no such cap) — see issue #6120.
+                if (requiredParamCount > 0)
+                {
+                    writer.AppendLine($"if (args.Length < {requiredParamCount})");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"throw new global::System.ArgumentException($\"Expected at least {requiredParamCount} argument{(requiredParamCount == 1 ? "" : "s")}, but got {{args.Length}}\");");
+                    writer.Unindent();
+                    writer.AppendLine("}");
+                }
+
+                var dynamicArgs = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", "args.Length");
+                if (hasCancellationToken)
+                {
+                    dynamicArgs.Add("context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None");
+                }
+
+                var dynamicMethodCall = $"instance.{methodName}({string.Join(", ", dynamicArgs)})";
+                GenerateReturnHandling(writer, dynamicMethodCall, returnPattern);
             }
             else
             {
@@ -3671,10 +3707,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 break;
 
             case TestReturnPattern.Unknown:
-                // F# Async, custom awaitables
-                writer.AppendLine($"var methodResult = {methodCall};");
-                writer.AppendLine("if (methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
-                writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(methodResult);");
+                // F# Async, custom awaitables.
+                // Wrap in its own block so the temporary local can never collide with a
+                // sibling/enclosing declaration when multiple invocations are emitted into
+                // the same scope (e.g. the array-argument binding paths). See #6122.
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"var __tunit_methodResult = {methodCall};");
+                writer.AppendLine("if (__tunit_methodResult == null) return default(global::System.Threading.Tasks.ValueTask);");
+                writer.AppendLine("return global::TUnit.Core.AsyncConvert.ConvertObject(__tunit_methodResult);");
+                writer.Unindent();
+                writer.AppendLine("}");
                 break;
         }
     }

@@ -17,6 +17,13 @@ namespace TUnit.Core;
 /// Multiple <c>ArgumentsAttribute</c> instances can be applied to a single test method to create
 /// multiple test cases with different input values.
 /// </para>
+/// <para>
+/// A test method parameter that is an array (e.g. <c>string[] names</c>) collects the supplied
+/// values into that array, so <c>[Arguments("Skipper", "Lucy")]</c> (or the equivalent collection
+/// expression <c>[Arguments(["Skipper", "Lucy"])]</c>) maps onto a single <c>string[]</c> parameter.
+/// For an unambiguous, strongly-typed array argument, prefer the generic form
+/// <c>[Arguments&lt;string[]&gt;(["Skipper", "Lucy"])]</c>.
+/// </para>
 /// <example>
 /// <code>
 /// [Test]
