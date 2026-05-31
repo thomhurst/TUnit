@@ -2492,7 +2492,13 @@ function attemptsHTML(attempts) {
     const ico = a.status === 'pass'
       ? `<svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
       : `<svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-    pills.push(`<span class="attempt ${a.status}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
+    const tipParts = [`Attempt ${i+1}: ${a.status}`];
+    if (a.error) {
+      const head = [a.error.type, a.error.message].filter(Boolean).join(': ');
+      if (head) tipParts.push(head);
+      if (a.error.stack) tipParts.push(a.error.stack);
+    }
+    pills.push(`<span class="attempt ${a.status}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
   });
   return `
     <div class="attempts ${allFailed?'all-failed':''}">
