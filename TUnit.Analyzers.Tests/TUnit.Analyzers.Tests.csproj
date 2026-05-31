@@ -49,6 +49,13 @@
              Link="Shared\AnalyzerTestCompatibility.cs" />
   </ItemGroup>
 
+  <!-- Reference the VSTHRD analyzer assembly (Analyzer="false") so its analyzer types are
+       usable in suppressor tests via WithAnalyzer<>, without running it against this project. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_VisualStudio_Threading_Analyzers)\analyzers\cs\Microsoft.VisualStudio.Threading.Analyzers.dll" Analyzer="false" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
     <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
