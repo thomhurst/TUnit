@@ -1,9 +1,5 @@
 [
   {
-    "date": "2026-03-05",
-    "environment": "Ubuntu"
-  },
-  {
     "date": "2026-03-06",
     "environment": "Ubuntu"
   },
@@ -357,6 +353,10 @@
   },
   {
     "date": "2026-05-29",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-05-31",
     "environment": "Ubuntu"
   }
 ]
