@@ -7,28 +7,41 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class TupleFactory
 {
-    private static readonly Dictionary<Type, Func<object?[], object?>> TypedFactories = new();
-    
+    // Read-only after the static initializer completes; TryGetValue is called per
+    // tuple-arg conversion. Frozen on net8+ for faster lookups.
+#if NET8_0_OR_GREATER
+    private static readonly System.Collections.Frozen.FrozenDictionary<Type, Func<object?[], object?>> TypedFactories;
+#else
+    private static readonly Dictionary<Type, Func<object?[], object?>> TypedFactories;
+#endif
+
     static TupleFactory()
     {
         // Register factories for common tuple types with object elements
-        RegisterFactory<ValueTuple<object?, object?>>((args) => 
+        var factories = new Dictionary<Type, Func<object?[], object?>>();
+        RegisterFactory<ValueTuple<object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?>(args[0], args[1]));
-        RegisterFactory<ValueTuple<object?, object?, object?>>((args) => 
+        RegisterFactory<ValueTuple<object?, object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?, object?>(args[0], args[1], args[2]));
-        RegisterFactory<ValueTuple<object?, object?, object?, object?>>((args) => 
+        RegisterFactory<ValueTuple<object?, object?, object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?, object?, object?>(args[0], args[1], args[2], args[3]));
-        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?>>((args) => 
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4]));
-        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?>>((args) => 
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4], args[5]));
-        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?, object?>>((args) => 
+        RegisterFactory<ValueTuple<object?, object?, object?, object?, object?, object?, object?>>(factories, (args) =>
             new ValueTuple<object?, object?, object?, object?, object?, object?, object?>(args[0], args[1], args[2], args[3], args[4], args[5], args[6]));
+
+#if NET8_0_OR_GREATER
+        TypedFactories = System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(factories);
+#else
+        TypedFactories = factories;
+#endif
     }
-    
-    private static void RegisterFactory<T>(Func<object?[], T> factory) where T : struct
+
+    private static void RegisterFactory<T>(Dictionary<Type, Func<object?[], object?>> factories, Func<object?[], T> factory) where T : struct
     {
-        TypedFactories[typeof(T)] = args => factory(args);
+        factories[typeof(T)] = args => factory(args);
     }
     
     /// <summary>

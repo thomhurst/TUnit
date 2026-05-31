@@ -149,6 +149,21 @@ public class AsyncEnumerableAssertionTests
             .Or.Contains(99); // First passes, so overall passes
     }
 
+    [Test]
+    public async Task Test_AsyncEnumerable_NullAssertions_Preserve_Chaining()
+    {
+        var items = AsyncRange(1, 5);
+
+        await Assert.That(items)
+            .IsNotNull()
+            .And.Contains(3);
+
+        IAsyncEnumerable<int>? nullItems = null;
+        await Assert.That(nullItems!)
+            .IsNull()
+            .Or.Contains(3);
+    }
+
     // Null handling
     [Test]
     public async Task Test_AsyncEnumerable_Null_Fails()

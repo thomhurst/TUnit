@@ -72,7 +72,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
@@ -107,6 +107,23 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
+    }
+
+    // Project the resolved tests onto their contexts into a pre-sized list.
+    // TestDiscoveryContext.AddTests stores its argument directly when it is already an
+    // IReadOnlyList<TestContext> and only calls ToArray() otherwise. A List<TestContext>
+    // satisfies IReadOnlyList<TestContext>, so passing one means AddTests stores it as-is —
+    // we pay a single pre-sized list allocation here instead of a lazy Select() enumerator
+    // plus the ToArray() copy that a Select(...) projection would have forced inside AddTests.
+    private static List<TestContext> ToContextList(List<AbstractExecutableTest> tests)
+    {
+        var contexts = new List<TestContext>(tests.Count);
+        foreach (var test in tests)
+        {
+            contexts.Add(test.Context);
+        }
+
+        return contexts;
     }
 
     private async Task<List<AbstractExecutableTest>> DiscoverAndResolveTestsAsync(
@@ -232,7 +249,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // Add tests to context and run After(TestDiscovery) hooks before event receivers
         // This marks the end of the discovery phase, before registration begins
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        contextProvider.TestDiscoveryContext.AddTests(ToContextList(allTests));
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 

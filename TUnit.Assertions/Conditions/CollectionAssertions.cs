@@ -494,13 +494,7 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
         }
 
         var adapter = new EnumerableAdapter<TItem>(metadata.Value);
-        var result = CollectionChecks.CheckHasSingleItem(adapter);
-
-        if (result.IsPassed)
-        {
-            // Capture the single item for GetAwaiter
-            _singleItem = adapter.AsEnumerable().First();
-        }
+        var result = CollectionChecks.CheckHasSingleItem(adapter, out _singleItem);
 
         return Task.FromResult(result);
     }
@@ -869,23 +863,27 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
         }
 
         var comparer = _comparer ?? Comparer<TKey>.Default;
-        var enumerated = value.ToArray();
-        var ordered = enumerated.OrderBy(_keySelector, comparer).ToArray();
 
-        if (enumerated.SequenceEqual(ordered))
+        using var enumerator = value.GetEnumerator();
+        if (!enumerator.MoveNext())
         {
             return AssertionResult._passedTask;
         }
 
-        for (int i = 1; i < enumerated.Length; i++)
+        var prevKey = _keySelector(enumerator.Current);
+        var index = 1;
+
+        while (enumerator.MoveNext())
         {
-            var prevKey = _keySelector(enumerated[i - 1]);
-            var currKey = _keySelector(enumerated[i]);
+            var currKey = _keySelector(enumerator.Current);
 
             if (comparer.Compare(prevKey, currKey) > 0)
             {
-                return Task.FromResult(AssertionResult.Failed($"item at index {i} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
+                return Task.FromResult(AssertionResult.Failed($"item at index {index} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
             }
+
+            prevKey = currKey;
+            index++;
         }
 
         return AssertionResult._passedTask;
@@ -931,23 +929,27 @@ public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> 
         }
 
         var comparer = _comparer ?? Comparer<TKey>.Default;
-        var enumerated = value.ToArray();
-        var ordered = enumerated.OrderByDescending(_keySelector, comparer).ToArray();
 
-        if (enumerated.SequenceEqual(ordered))
+        using var enumerator = value.GetEnumerator();
+        if (!enumerator.MoveNext())
         {
             return AssertionResult._passedTask;
         }
 
-        for (int i = 1; i < enumerated.Length; i++)
+        var prevKey = _keySelector(enumerator.Current);
+        var index = 1;
+
+        while (enumerator.MoveNext())
         {
-            var prevKey = _keySelector(enumerated[i - 1]);
-            var currKey = _keySelector(enumerated[i]);
+            var currKey = _keySelector(enumerator.Current);
 
             if (comparer.Compare(prevKey, currKey) < 0)
             {
-                return Task.FromResult(AssertionResult.Failed($"item at index {i} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
+                return Task.FromResult(AssertionResult.Failed($"item at index {index} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
             }
+
+            prevKey = currKey;
+            index++;
         }
 
         return AssertionResult._passedTask;

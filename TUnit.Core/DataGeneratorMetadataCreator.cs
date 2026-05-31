@@ -41,10 +41,17 @@ internal static class DataGeneratorMetadataCreator
                 var propertyMetadataList = new List<PropertyMetadata>();
                 var allProperties = testMetadata.MethodMetadata.Class.Properties;
 
+                // Build a name -> metadata lookup once (O(N)) so the per-data-source
+                // resolution below is O(1) instead of an O(N*M) FirstOrDefault scan.
+                var propertiesByName = new Dictionary<string, PropertyMetadata>(allProperties.Length, StringComparer.Ordinal);
+                foreach (var property in allProperties)
+                {
+                    propertiesByName[property.Name] = property;
+                }
+
                 foreach (var propertyDataSource in testMetadata.PropertyDataSources)
                 {
-                    var matchingProperty = allProperties.FirstOrDefault(p => p.Name == propertyDataSource.PropertyName);
-                    if (matchingProperty != null)
+                    if (propertiesByName.TryGetValue(propertyDataSource.PropertyName, out var matchingProperty))
                     {
                         propertyMetadataList.Add(matchingProperty);
                     }

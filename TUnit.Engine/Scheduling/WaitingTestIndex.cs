@@ -77,13 +77,14 @@ internal sealed class WaitingTestIndex
     }
 
     /// <summary>
-    /// Returns a deduplicated set of waiting tests that are associated with any of the released keys.
-    /// These are candidates that might be unblocked (but still need to be checked against locked keys).
+    /// Populates the supplied set with a deduplicated collection of waiting tests
+    /// that are associated with any of the released keys. These are candidates that
+    /// might be unblocked (but still need to be checked against locked keys).
+    /// The caller owns the lifetime of <paramref name="candidates"/> (typically rented
+    /// from a pool) so this method avoids allocating a fresh set per key release.
     /// </summary>
-    public HashSet<WaitingTest> GetCandidatesForReleasedKeys(IReadOnlyList<string> releasedKeys)
+    public void GetCandidatesForReleasedKeys(IReadOnlyList<string> releasedKeys, HashSet<WaitingTest> candidates)
     {
-        var candidates = new HashSet<WaitingTest>();
-
         var keyCount = releasedKeys.Count;
         for (var i = 0; i < keyCount; i++)
         {
@@ -93,7 +94,5 @@ internal sealed class WaitingTestIndex
                 candidates.UnionWith(tests);
             }
         }
-
-        return candidates;
     }
 }

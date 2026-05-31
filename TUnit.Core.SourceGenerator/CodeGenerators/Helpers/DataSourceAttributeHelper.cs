@@ -5,9 +5,6 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceAttributeHelper
 {
-    // GloballyQualified() emits open generics as Foo<>, not Foo`1
-    private const string TypedDataSourceInterfacePattern = "global::TUnit.Core.ITypedDataSourceAttribute<>";
-
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
@@ -15,7 +12,8 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        return InterfaceCache.ImplementsInterface(attributeClass, "global::TUnit.Core.IDataSourceAttribute");
+        // Check if the attribute implements IDataSourceAttribute
+        return InterfaceHelper.ImplementsInterface(attributeClass, "global::TUnit.Core.IDataSourceAttribute");
     }
 
     public static bool IsTypedDataSourceAttribute(INamedTypeSymbol? attributeClass)
@@ -25,7 +23,8 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        return InterfaceCache.ImplementsGenericInterface(attributeClass, TypedDataSourceInterfacePattern);
+        // Check if the attribute implements ITypedDataSourceAttribute<T>
+        return InterfaceHelper.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
     }
 
     public static ITypeSymbol? GetTypedDataSourceType(INamedTypeSymbol? attributeClass)
@@ -35,7 +34,7 @@ internal static class DataSourceAttributeHelper
             return null;
         }
 
-        var typedInterface = InterfaceCache.GetGenericInterface(attributeClass, TypedDataSourceInterfacePattern);
+        var typedInterface = InterfaceHelper.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
 
         return typedInterface?.TypeArguments.FirstOrDefault();
     }

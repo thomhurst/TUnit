@@ -1,5 +1,8 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
+#if NET8_0_OR_GREATER
+using System.Collections.Frozen;
+#endif
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -29,8 +32,14 @@ namespace TUnit.Engine.Discovery;
 [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
-    private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
-    private static ImmutableList<TestMetadata> _discoveredTests = ImmutableList<TestMetadata>.Empty;
+    // Per-session state: each TUnitServiceProvider instantiates its own collector, and these
+    // fields must not leak between sessions. Under MTP server mode the test host can serve
+    // many sessions sequentially or concurrently; static caches here would cause session N+1
+    // to see session N's assemblies as "already scanned" and return zero tests (issue #6001).
+    private readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
+    private ImmutableList<TestMetadata> _discoveredTests = ImmutableList<TestMetadata>.Empty;
+
+    // Process-wide caches: pure reflection metadata that doesn't change across sessions.
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
@@ -200,8 +209,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         });
     }
 
+    // Read-many during reflection discovery (one Contains per assembly).
+    // Frozen on net8+ for faster lookups.
+#if NET8_0_OR_GREATER
+    private static readonly System.Collections.Frozen.FrozenSet<string> ExcludedAssemblyNames =
+        new HashSet<string>
+        {
+#else
     private static readonly HashSet<string> ExcludedAssemblyNames =
-    [
+        new()
+        {
+#endif
         "mscorlib",
         "System",
         "System.Core",
@@ -263,7 +281,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         "Shouldly",
         "NSubstitute",
         "Rhino.Mocks"
-    ];
+        }
+#if NET8_0_OR_GREATER
+        .ToFrozenSet()
+#endif
+        ;
 
     private static bool ShouldScanAssembly(Assembly assembly)
     {
@@ -278,7 +300,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        if (name.EndsWith(".resources") || name.EndsWith(".XmlSerializers"))
+        if (name.EndsWith(".resources", StringComparison.Ordinal) || name.EndsWith(".XmlSerializers", StringComparison.Ordinal))
         {
             return false;
         }
@@ -311,7 +333,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var hasTUnitReference = false;
         foreach (var reference in referencedAssemblies)
         {
-            if (reference.Name != null && (reference.Name.StartsWith("TUnit") || reference.Name == "TUnit"))
+            if (reference.Name != null && (reference.Name.StartsWith("TUnit", StringComparison.Ordinal) || reference.Name == "TUnit"))
             {
                 hasTUnitReference = true;
                 break;
@@ -326,6 +348,45 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return true;
     }
 
+    /// <summary>
+    /// Filters the non-null entries out of <see cref="ReflectionTypeLoadException.Types"/>, using a
+    /// pooled scratch buffer to avoid the per-failure allocations of the old LINQ Where().ToArray().
+    /// Shared by both the eager and streaming discovery type caches.
+    /// </summary>
+    private static Type[] FilterLoadedTypes(Type?[]? loadedTypes)
+    {
+        if (loadedTypes is null || loadedTypes.Length == 0)
+        {
+            return [];
+        }
+
+        var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
+        try
+        {
+            var validCount = 0;
+            foreach (var type in loadedTypes)
+            {
+                if (type != null)
+                {
+                    tempArray[validCount++] = type;
+                }
+            }
+
+            if (validCount == 0)
+            {
+                return [];
+            }
+
+            var result = new Type[validCount];
+            Array.Copy(tempArray, result, validCount);
+            return result;
+        }
+        finally
+        {
+            ArrayPool<Type>.Shared.Return(tempArray);
+        }
+    }
+
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -338,7 +399,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                return reflectionTypeLoadException.Types.Where(static x => x != null).ToArray()!;
+                return FilterLoadedTypes(reflectionTypeLoadException.Types);
             }
             catch (Exception)
             {
@@ -351,10 +412,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        foreach (var type in types)
         {
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
+
             if (type.IsAbstract)
             {
                 continue;
@@ -450,35 +514,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException rtle)
             {
-                // Some types might fail to load, but we can still use the ones that loaded successfully
-                // Optimize: Manual filtering with ArrayPool for better memory efficiency
-                var loadedTypes = rtle.Types;
-                if (loadedTypes == null)
-                {
-                    return [];
-                }
-
-                // Use ArrayPool for temporary storage to reduce allocations
-                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
-                try
-                {
-                    var validCount = 0;
-                    foreach (var type in loadedTypes)
-                    {
-                        if (type != null)
-                        {
-                            tempArray[validCount++] = type;
-                        }
-                    }
-
-                    var result = new Type[validCount];
-                    Array.Copy(tempArray, result, validCount);
-                    return result;
-                }
-                finally
-                {
-                    ArrayPool<Type>.Shared.Return(tempArray);
-                }
+                // Some types might fail to load, but we can still use the ones that loaded successfully.
+                return FilterLoadedTypes(rtle.Types);
             }
             catch (Exception)
             {
@@ -491,11 +528,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
-        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
-
-        foreach (var type in filteredTypes)
+        foreach (var type in types)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (!type.IsClass || IsCompilerGenerated(type))
+            {
+                continue;
+            }
 
             // Skip abstract types - they can't be instantiated
             if (type.IsAbstract)
@@ -522,15 +562,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (inheritsTests)
                 {
                     // Get all test methods including inherited ones
-                    testMethods = GetAllTestMethods(type)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                    testMethods = GetAllTestMethods(type);
                 }
                 else
                 {
                     // Only get declared test methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
-                                                  BindingFlags.DeclaredOnly)
-                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract);
+                                                  BindingFlags.DeclaredOnly);
                 }
             }
             catch (Exception)
@@ -541,6 +579,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             foreach (var method in testMethods)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                if (!method.IsDefined(typeof(TestAttribute), inherit: false) || method.IsAbstract)
+                {
+                    continue;
+                }
 
                 // Prevent duplicate test metadata for inherited tests
                 if (method.DeclaringType != type && !type.IsDefined(typeof(InheritsTestsAttribute), inherit: false))
@@ -1472,6 +1515,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
+        var parameters = ctor.GetParameters();
 
         return args =>
         {
@@ -1485,7 +1529,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Cast arguments to the expected parameter types
-                var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
                 for (var i = 0; i < parameters.Length && i < args.Length; i++)
@@ -1628,39 +1671,56 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var paramGenericDef = paramType.GetGenericTypeDefinition();
 
-        // List of known covariant interfaces
-        var covariantInterfaces = new[]
-        {
-            typeof(IEnumerable<>),
-            typeof(IReadOnlyList<>),
-            typeof(IReadOnlyCollection<>),
-            typeof(IEnumerator<>)
-        };
-
-        if (!covariantInterfaces.Contains(paramGenericDef))
+        if (Array.IndexOf(CovariantInterfaces, paramGenericDef) < 0)
         {
             return false;
         }
 
+        // Check the argument type's interfaces, plus the argument type itself when it's an interface,
+        // without allocating a combined array (the old Concat([argType]).ToArray() per call).
         var argInterfaces = AssemblyReferenceCache.GetInterfaces(argType);
-        if (argType.IsInterface)
-        {
-            argInterfaces = argInterfaces.Concat([argType]).ToArray();
-        }
-
         foreach (var iface in argInterfaces)
         {
-            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
+            if (MatchesCovariantInterface(paramType, paramGenericDef, iface, out var compatible))
             {
-                var paramElementType = paramType.GetGenericArguments()[0];
-                var argElementType = iface.GetGenericArguments()[0];
-
-                // For covariance to work, the parameter element type must be assignable from the argument element type
-                // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
-                return paramElementType.IsAssignableFrom(argElementType);
+                return compatible;
             }
         }
 
+        if (argType.IsInterface && MatchesCovariantInterface(paramType, paramGenericDef, argType, out var argCompatible))
+        {
+            return argCompatible;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Known covariant generic interface definitions. Hoisted to avoid allocating the array per
+    /// <see cref="IsCovariantCompatible"/> call.
+    /// </summary>
+    private static readonly Type[] CovariantInterfaces =
+    [
+        typeof(IEnumerable<>),
+        typeof(IReadOnlyList<>),
+        typeof(IReadOnlyCollection<>),
+        typeof(IEnumerator<>)
+    ];
+
+    private static bool MatchesCovariantInterface(Type paramType, Type paramGenericDef, Type iface, out bool compatible)
+    {
+        if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenericDef)
+        {
+            var paramElementType = paramType.GetGenericArguments()[0];
+            var argElementType = iface.GetGenericArguments()[0];
+
+            // For covariance to work, the parameter element type must be assignable from the argument element type
+            // This allows IEnumerable<int> to be passed where IEnumerable<object> is expected
+            compatible = paramElementType.IsAssignableFrom(argElementType);
+            return true;
+        }
+
+        compatible = false;
         return false;
     }
 
@@ -1670,6 +1730,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
+        // For non-generic methods, parameter shape is stable across invocations — hoist the
+        // GetParameters() call out of the hot lambda. Generic method definitions are resolved
+        // to a concrete MethodInfo per invocation, so they must still call GetParameters() inline.
+        var staticParameters = testMethod.IsGenericMethodDefinition ? null : testMethod.GetParameters();
 
         return (instance, args) =>
         {
@@ -1738,7 +1802,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 // Cast arguments to the expected parameter types
-                var parameters = methodToInvoke.GetParameters();
+                var parameters = staticParameters ?? methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
                 // Check if the last parameter is a params array
@@ -2210,7 +2274,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(static a => a.ToTestDependency()).ToArray(),
+            Dependencies = AttributeHelpers.ExtractDependencies(result.Attributes),
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],
@@ -2228,6 +2292,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         return Task.FromResult<TestMetadata>(metadata);
     }
+
 
     private static Attribute[] GetDynamicTestAttributes(DynamicDiscoveryResult result)
     {

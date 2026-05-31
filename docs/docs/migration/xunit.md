@@ -21,7 +21,7 @@ Migrating from xUnit to TUnit can improve test execution speed. Check the [bench
 | `IAsyncLifetime` | `[Before(Test)]` / `[After(Test)]` |
 | `ITestOutputHelper` | `TestContext` parameter |
 | `Assert.Equal(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
-| `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
+| `Assert.Throws<T>(() => ...)` | `Assert.Throws<T>(() => ...)` |
 
 ## Automated Migration with Code Fixers
 
@@ -35,7 +35,7 @@ TUnit includes Roslyn analyzers and code fixers that automate most of the migrat
 - `[Trait("key", "value")]` → `[Property("key", "value")]`
 - `Assert.Equal(expected, actual)` → `await Assert.That(actual).IsEqualTo(expected)`
 - `Assert.True(condition)` → `await Assert.That(condition).IsTrue()`
-- `Assert.Throws<T>(...)` → `await Assert.ThrowsAsync<T>(...)`
+- `Assert.Throws<T>(...)` → `Assert.Throws<T>(...)`
 - `Assert.Contains(item, collection)` → `await Assert.That(collection).Contains(item)`
 - Test methods converted to `async Task` with `await` on assertions
 
@@ -1022,9 +1022,9 @@ public async Task Async_Exception_Assertions()
 [Test]
 public async Task Exception_Assertions()
 {
-    await Assert.ThrowsAsync<ArgumentException>(() => ThrowsException());
+    Assert.Throws<ArgumentException>(() => ThrowsException());
 
-    var ex = await Assert.ThrowsAsync<ArgumentException>(() => ThrowsException());
+    var ex = Assert.Throws<ArgumentException>(() => ThrowsException());
     await Assert.That(ex.ParamName).IsEqualTo("paramName");
 }
 
@@ -1036,7 +1036,8 @@ public async Task Async_Exception_Assertions()
 ```
 
 **Key Changes:**
-- Both sync and async use `Assert.ThrowsAsync` in TUnit
+- Sync exception assertions use `Assert.Throws`
+- Async exception assertions use `Assert.ThrowsAsync`
 - Returned exception can be further asserted on
 
 ### Complete Example: Real-World Test Class

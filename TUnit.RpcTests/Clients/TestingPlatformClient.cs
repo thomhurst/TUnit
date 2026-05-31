@@ -93,6 +93,18 @@ public sealed class TestingPlatformClient : IDisposable
             return (ResponseListener)runListener;
         });
 
+    /// <summary>
+    /// Registers a listener for incoming testing/testUpdates/tests notifications keyed by the
+    /// given runId, without sending any RPC itself. Used by tests that need to observe how the
+    /// server attributes the runId field on inbound notifications (e.g. #6001 finding 3).
+    /// </summary>
+    public ResponseListener RegisterTestUpdatesListener(Guid runId, Func<TestNodeUpdate[], Task> action)
+    {
+        var listener = new TestNodeUpdatesResponseListener(runId, action);
+        _targetHandler.RegisterResponseListener(listener);
+        return listener;
+    }
+
     public void Dispose()
     {
         JsonRpcClient.Dispose();

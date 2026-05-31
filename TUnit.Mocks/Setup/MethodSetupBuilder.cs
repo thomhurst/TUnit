@@ -31,9 +31,14 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
 
     public ISetupChain<TReturn> ReturnsSequentially(params TReturn[] values)
     {
-        foreach (var value in values)
+        for (var i = 0; i < values.Length; i++)
         {
-            _setup.AddBehavior(new ReturnBehavior<TReturn>(value));
+            if (i > 0)
+            {
+                _setup.Then();
+            }
+
+            _setup.AddBehavior(new ReturnBehavior<TReturn>(values[i]));
         }
 
         return this;
@@ -179,5 +184,9 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
         return this;
     }
 
-    public IMethodSetup<TReturn> Then() => this;
+    public IMethodSetup<TReturn> Then()
+    {
+        _setup.Then();
+        return this;
+    }
 }

@@ -3,6 +3,10 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Reporters.Html;
 
+// NOTE: the [JsonPropertyName] attributes below are documentation-only. JSON output
+// is hand-written via Utf8JsonWriter in HtmlReportGenerator.SerializeReport; renaming
+// an attribute here will not change the emitted property name. Update the writer.
+
 internal sealed class ReportData
 {
     [JsonPropertyName("assemblyName")]
@@ -49,6 +53,9 @@ internal sealed class ReportData
 
     [JsonPropertyName("repositorySlug")]
     public string? RepositorySlug { get; init; }
+
+    [JsonIgnore]
+    public SourceLinkTemplates? SourceLinks { get; init; }
 }
 
 internal sealed class ReportSummary
@@ -143,11 +150,20 @@ internal sealed class ReportTestResult
     [JsonPropertyName("lineNumber")]
     public int? LineNumber { get; init; }
 
+    [JsonPropertyName("endLineNumber")]
+    public int? EndLineNumber { get; init; }
+
+    [JsonPropertyName("sourceRelativePath")]
+    public string? SourceRelativePath { get; init; }
+
     [JsonPropertyName("skipReason")]
     public string? SkipReason { get; init; }
 
     [JsonPropertyName("retryAttempt")]
     public int RetryAttempt { get; init; }
+
+    [JsonPropertyName("attempts")]
+    public ReportAttempt[]? Attempts { get; init; }
 
     [JsonPropertyName("traceId")]
     public string? TraceId { get; init; }
@@ -157,6 +173,21 @@ internal sealed class ReportTestResult
 
     [JsonPropertyName("additionalTraceIds")]
     public string[]? AdditionalTraceIds { get; init; }
+}
+
+internal sealed class ReportAttempt
+{
+    [JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    [JsonPropertyName("durationMs")]
+    public double DurationMs { get; init; }
+
+    [JsonPropertyName("exceptionType")]
+    public string? ExceptionType { get; init; }
+
+    [JsonPropertyName("exceptionMessage")]
+    public string? ExceptionMessage { get; init; }
 }
 
 internal sealed class ReportExceptionData

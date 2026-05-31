@@ -5,7 +5,7 @@ namespace TUnit.Playwright;
 
 public class BrowserTest : PlaywrightTest
 {
-    public BrowserTest() : this(new BrowserTypeLaunchOptions())
+    public BrowserTest() : this(TUnitPlaywrightSettings.Default.DefaultBrowserTypeLaunchOptions ?? new BrowserTypeLaunchOptions())
     {
     }
 
@@ -34,7 +34,7 @@ public class BrowserTest : PlaywrightTest
 
     public async Task<IBrowserContext> NewContext(BrowserNewContextOptions options)
     {
-        options = MergeTelemetryHeaders(options);
+        options = PlaywrightTelemetryHeaders.Merge(options, PropagateTraceContext);
         var context = await Browser.NewContextAsync(options).ConfigureAwait(false);
 
         lock (_contextsLock)
@@ -91,34 +91,4 @@ public class BrowserTest : PlaywrightTest
         }
     }
 
-    private BrowserNewContextOptions MergeTelemetryHeaders(BrowserNewContextOptions options)
-    {
-#if NET
-        if (!PropagateTraceContext || System.Diagnostics.Activity.Current is null)
-        {
-            return options;
-        }
-
-        // Seed user headers first so they win when the propagator tries to add the same key.
-        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (options.ExtraHTTPHeaders is not null)
-        {
-            foreach (var kvp in options.ExtraHTTPHeaders)
-            {
-                merged[kvp.Key] = kvp.Value;
-            }
-        }
-
-        var before = merged.Count;
-        Telemetry.PlaywrightActivityPropagator.InjectInto(merged);
-        if (merged.Count == before)
-        {
-            return options;
-        }
-
-        return new BrowserNewContextOptions(options) { ExtraHTTPHeaders = merged };
-#else
-        return options;
-#endif
-    }
 }

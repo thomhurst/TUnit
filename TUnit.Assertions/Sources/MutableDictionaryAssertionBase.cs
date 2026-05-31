@@ -39,6 +39,24 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     protected override string GetExpectation() => "dictionary assertion";
 
     /// <summary>
+    /// Asserts that the dictionary is null while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNull()");
+        return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: true);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not null while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
+    {
+        Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
+    }
+
+    /// <summary>
     /// Asserts that the dictionary contains the specified key.
     /// Example: await Assert.That(dictionary).ContainsKey("key1");
     /// </summary>

@@ -31,6 +31,10 @@
       <ProjectReference Include="..\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
     </ItemGroup>
 
+    <!-- No transitive version pin needed: each referenced project (TUnit.Core, TUnit.Assertions,
+         ...) self-pins to the same dummy version via the root Directory.Build.props when built
+         locally, so strong-named references resolve consistently. -->
+
     <Import Project="..\TestProject.targets" />
 
 </Project>

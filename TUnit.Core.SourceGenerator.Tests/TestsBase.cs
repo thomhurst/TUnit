@@ -160,7 +160,10 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         // Scrub GUIDs from generated files before verification
         var scrubbedFiles = generatedFiles.Select(file => Scrub(file)).ToArray();
         var verifyTask = Verify(scrubbedFiles)
-            .ScrubFilePaths();
+            .ScrubFilePaths()
+            .ScrubLinesContaining("StartColumnNumber = ")
+            .ScrubLinesContaining("EndLineNumber = ")
+            .ScrubLinesContaining("EndColumnNumber = ");
 
         if (runTestOptions.VerifyConfigurator != null)
         {

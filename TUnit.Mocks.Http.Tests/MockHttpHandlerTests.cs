@@ -559,4 +559,50 @@ public class MockHttpHandlerTests
 
         await Assert.That(capturedContentType).IsEqualTo("application/json");
     }
+
+    [Test]
+    public async Task MatchesByPath_AutoPrependsSlashWhenMissing()
+    {
+        using var client = Mock.HttpClient("https://my.domain/");
+        client.Handler.OnPost("my_endpoint").Respond(HttpStatusCode.Accepted);
+
+        var response = await client.PostAsync("my_endpoint", null);
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Accepted);
+    }
+
+    [Test]
+    public async Task MatchesByPathPrefix_AutoPrependsSlashWhenMissing()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("api/v2"))
+            .Respond(HttpStatusCode.OK);
+
+        var response = await client.GetAsync("/api/v2/anything/here");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task MatchesByPath_KeepsAbsoluteUrlAsIs()
+    {
+        using var client = Mock.HttpClient();
+        client.Handler.OnGet("https://my.domain/foo").Respond(HttpStatusCode.OK);
+
+        var response = await client.GetAsync("https://my.domain/foo");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task MatchesByPath_RegexNotNormalized()
+    {
+        using var client = Mock.HttpClient("http://localhost");
+        client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathMatches(@"^/api/users/\d+$"))
+            .Respond(HttpStatusCode.OK);
+
+        var response = await client.GetAsync("/api/users/42");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+    }
 }

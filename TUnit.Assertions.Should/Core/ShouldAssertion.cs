@@ -18,7 +18,7 @@ namespace TUnit.Assertions.Should.Core;
 /// is desirable. The single per-call allocation is the conscious cost; the entry types
 /// (<c>ShouldSource</c>, <c>ShouldContinuation</c>) stay structs because they're pure routers.
 /// </remarks>
-public sealed class ShouldAssertion<T> : IShouldSource<T>
+public sealed class ShouldAssertion<T> : IShouldSource<T>, IAssertion
 {
     private readonly Assertion<T> _inner;
 
@@ -32,6 +32,10 @@ public sealed class ShouldAssertion<T> : IShouldSource<T>
     }
 
     public TaskAwaiter<T?> GetAwaiter() => _inner.GetAwaiter();
+
+    public Task<T?> AssertAsync() => _inner.AssertAsync();
+
+    Task IAssertion.AssertAsync() => _inner.AssertAsync();
 
     public ShouldAssertion<T> Because(string message)
     {

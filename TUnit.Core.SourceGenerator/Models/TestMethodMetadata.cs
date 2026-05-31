@@ -21,6 +21,9 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required string FilePath { get; init; }
     public required int LineNumber { get; init; }
+    public required int StartColumnNumber { get; init; }
+    public required int EndLineNumber { get; init; }
+    public required int EndColumnNumber { get; init; }
     public required AttributeData TestAttribute { get; init; }
     public GeneratorAttributeSyntaxContext? Context { get; init; }
     public required CompilationContext CompilationContext { get; init; }
@@ -65,6 +68,9 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
                TypeFullyQualifiedName == other.TypeFullyQualifiedName &&
                FilePath == other.FilePath &&
                LineNumber == other.LineNumber &&
+               StartColumnNumber == other.StartColumnNumber &&
+               EndLineNumber == other.EndLineNumber &&
+               EndColumnNumber == other.EndColumnNumber &&
                IsGenericType == other.IsGenericType &&
                IsGenericMethod == other.IsGenericMethod &&
                InheritanceDepth == other.InheritanceDepth &&
@@ -84,6 +90,9 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
             hashCode = (hashCode * 397) ^ TypeFullyQualifiedName.GetHashCode();
             hashCode = (hashCode * 397) ^ FilePath.GetHashCode();
             hashCode = (hashCode * 397) ^ LineNumber;
+            hashCode = (hashCode * 397) ^ StartColumnNumber;
+            hashCode = (hashCode * 397) ^ EndLineNumber;
+            hashCode = (hashCode * 397) ^ EndColumnNumber;
             hashCode = (hashCode * 397) ^ IsGenericType.GetHashCode();
             hashCode = (hashCode * 397) ^ IsGenericMethod.GetHashCode();
             hashCode = (hashCode * 397) ^ InheritanceDepth;

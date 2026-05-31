@@ -20,7 +20,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
     {
         if (metadata.Exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed("received null"));
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
         }
 
         var value = metadata.Value;

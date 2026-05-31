@@ -144,6 +144,8 @@ internal sealed class TestScheduler : ITestScheduler
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
+        MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+
         // Suites with no global [NotInParallel] tests skip the runtime exclusion
         // lock entirely. Once enabled, the flag is monotonic — dynamic batches
         // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
@@ -317,8 +319,52 @@ internal sealed class TestScheduler : ITestScheduler
         // tests with [NotInParallel(key)], [ParallelGroup(...)] etc. honour their constraints
         // instead of being silently dropped.
         var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTests.ToArray()).ConfigureAwait(false);
+        MarkDependencyRelatedTestsForExecutionDedup(dynamicTests);
         MarkGlobalNotInParallelTests(groupedDynamicTests);
         await ExecuteAllPhasesAsync(groupedDynamicTests, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal static void MarkDependencyRelatedTestsForExecutionDedup(IEnumerable<AbstractExecutableTest> tests)
+    {
+        HashSet<AbstractExecutableTest>? visitedDependencyTargets = null;
+        Stack<AbstractExecutableTest>? pendingDependencyTargets = null;
+
+        foreach (var test in tests)
+        {
+            if (test.Dependencies.Length == 0)
+            {
+                continue;
+            }
+
+            test.RequiresExecutionDedup = true;
+
+            visitedDependencyTargets ??= [];
+            // Shared across roots so a common dependency target is marked once even
+            // when multiple scheduled tests reference it.
+            pendingDependencyTargets ??= [];
+
+            foreach (var dependency in test.Dependencies)
+            {
+                pendingDependencyTargets.Push(dependency.Test);
+            }
+
+            while (pendingDependencyTargets.Count > 0)
+            {
+                var dependencyTarget = pendingDependencyTargets.Pop();
+
+                if (!visitedDependencyTargets.Add(dependencyTarget))
+                {
+                    continue;
+                }
+
+                dependencyTarget.RequiresExecutionDedup = true;
+
+                foreach (var nestedDependency in dependencyTarget.Dependencies)
+                {
+                    pendingDependencyTargets.Push(nestedDependency.Test);
+                }
+            }
+        }
     }
 
     private void MarkGlobalNotInParallelTests(GroupedTests grouped)
@@ -362,8 +408,7 @@ internal sealed class TestScheduler : ITestScheduler
     {
         foreach (var test in tests)
         {
-            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
-            await test.ExecutionTask.ConfigureAwait(false);
+            await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -381,8 +426,7 @@ internal sealed class TestScheduler : ITestScheduler
             },
             async (test, ct) =>
             {
-                test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
-                await test.ExecutionTask.ConfigureAwait(false);
+                await ExecuteScheduledTestAsync(test, ct).ConfigureAwait(false);
             }
         );
     }
@@ -402,8 +446,7 @@ internal sealed class TestScheduler : ITestScheduler
                 await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
-                    await test.ExecutionTask.ConfigureAwait(false);
+                    await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -414,6 +457,20 @@ internal sealed class TestScheduler : ITestScheduler
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 #endif
+
+    private async ValueTask ExecuteScheduledTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        if (!test.RequiresExecutionDedup)
+        {
+            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        // Dependency recursion is the re-entrant path. Only those tests reuse the
+        // scheduler task slot; independent tests may also use it for constraint wrappers.
+        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
+        await test.ExecutionTask.ConfigureAwait(false);
+    }
 
     // The cancellation token is forwarded only so WaitForTasksWithFailFastHandling can
     // distinguish a fail-fast cancellation from a normal task fault when both phases run.

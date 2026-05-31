@@ -69,6 +69,9 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
 #if NET
     public override ValueTask DisposeAsync()
     {
+        // ResetDefault is intentionally a no-op for Standard{Out,Error}ConsoleInterceptor
+        // (#6001): under MTP server mode the interceptor is installed exactly once for the
+        // process and must outlive any individual session's disposal.
         ResetDefault();
         return ValueTask.CompletedTask;
     }
@@ -197,6 +200,8 @@ internal abstract class OptimizedConsoleInterceptor : TextWriter
     public override void Close()
     {
         Flush();
+        // ResetDefault is a no-op for Standard{Out,Error}ConsoleInterceptor under
+        // MTP server mode — see DisposeAsync above and the subclass overrides.
         ResetDefault();
     }
 

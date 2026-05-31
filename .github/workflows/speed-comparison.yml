@@ -2,13 +2,13 @@ name: Speed Comparison
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 0'
   workflow_dispatch:
 
 jobs:
   build-test-artifacts:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-4
 
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +47,7 @@ jobs:
       matrix:
         class: [DataDrivenTests, AsyncTests, ScaleTests, MatrixTests, MassiveParallelTests, SetupTeardownTests]
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-4
     concurrency:
       group: "speed-comparison-run-time-${{matrix.class}}"
       cancel-in-progress: true
@@ -91,7 +91,7 @@ jobs:
 
   build-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-8
     concurrency:
       group: "speed-comparison-build-time"
       cancel-in-progress: true

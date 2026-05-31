@@ -26,9 +26,7 @@ internal static class ReflectionMetadataBuilder
             Type = type,
             TypeInfo = CreateTypeInfo(type),
             Class = CreateClassMetadata(type),
-            Parameters = method.GetParameters()
-                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
-                .ToArray(),
+            Parameters = ParameterMetadataFactory.Build(method.GetParameters(), nameFallback: "unnamed", computeIsNullable: true),
             GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
             ReturnTypeInfo = CreateTypeInfo(method.ReturnType),
             ReturnType = method.ReturnType
@@ -38,25 +36,6 @@ internal static class ReflectionMetadataBuilder
     private static TypeInfo CreateTypeInfo(Type type)
     {
         return new ConcreteType(type);
-    }
-
-#if NET8_0_OR_GREATER
-    [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
-#endif
-    private static ParameterMetadata CreateParameterMetadata(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
-            | DynamicallyAccessedMemberTypes.PublicMethods
-            | DynamicallyAccessedMemberTypes.PublicProperties)]Type parameterType, string? name, int index, System.Reflection.ParameterInfo reflectionInfo)
-    {
-        return new ParameterMetadata(parameterType)
-        {
-            Name = name ?? $"param{index}",
-            TypeInfo = CreateTypeInfo(parameterType),
-            ReflectionInfo = reflectionInfo,
-            Type = parameterType,
-            IsNullable = parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)
-                || Nullable.GetUnderlyingType(parameterType) != null
-        };
     }
 
 #if NET8_0_OR_GREATER
@@ -74,9 +53,11 @@ internal static class ReflectionMetadataBuilder
             var constructors = type.GetConstructors(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
             var constructor = constructors.FirstOrDefault();
 
-            var constructorParameters = constructor?.GetParameters()
-                .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name, i, p))
-                .ToArray() ?? [];
+            // Constructor params pass a null fallback so a null ParameterInfo.Name yields
+            // "param{index}" (not "unnamed"), preserving the original per-callsite behaviour.
+            var constructorParameters = constructor is null
+                ? []
+                : ParameterMetadataFactory.Build(constructor.GetParameters(), nameFallback: null, computeIsNullable: true);
 
             return new ClassMetadata
             {

@@ -39,6 +39,12 @@ public abstract class TestMetadata
 
     public required int LineNumber { get; init; }
 
+    internal int StartColumnNumber { get; init; }
+
+    internal int EndLineNumber { get; init; }
+
+    internal int EndColumnNumber { get; init; }
+
     public required MethodMetadata MethodMetadata { get; init; }
 
     public GenericTypeInfo? GenericTypeInfo { get; init; }
@@ -127,6 +133,14 @@ public abstract class TestMetadata
     /// The delegates encapsulate all mode-specific behavior.
     /// </summary>
     public abstract Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory { get; }
+
+    /// <summary>
+    /// Cached treenode filter path built from this metadata's assembly/namespace/class/method.
+    /// The path is metadata-scoped (independent of per-test data row), so populating once amortises
+    /// across every test instance derived from this metadata during filter pre-check. Benign race
+    /// on first write — string is deterministic so a torn winner is still correct.
+    /// </summary>
+    internal string? CachedFilterPath { get; set; }
 }
 
 public sealed class GenericTypeInfo

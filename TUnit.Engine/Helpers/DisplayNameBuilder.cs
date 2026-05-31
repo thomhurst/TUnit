@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 
@@ -51,16 +50,23 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var sb = new StringBuilder();
-        for (var i = 0; i < arguments.Length; i++)
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (i > 0)
+            for (var i = 0; i < arguments.Length; i++)
             {
-                sb.Append(", ");
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(arguments[i], []));
             }
-            sb.Append(ArgumentFormatter.Format(arguments[i], []));
+            return sb.ToString();
         }
-        return sb.ToString();
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 
     /// <summary>
@@ -73,16 +79,23 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var sb = new StringBuilder();
-        for (var i = 0; i < arguments.Length; i++)
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (i > 0)
+            for (var i = 0; i < arguments.Length; i++)
             {
-                sb.Append(", ");
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(arguments[i], formatters));
             }
-            sb.Append(ArgumentFormatter.Format(arguments[i], formatters));
+            return sb.ToString();
         }
-        return sb.ToString();
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 
     /// <summary>
@@ -97,7 +110,7 @@ internal static class DisplayNameBuilder
             var genericTypeNames = new string[genericTypes.Length];
             for (var i = 0; i < genericTypes.Length; i++)
             {
-                genericTypeNames[i] = GetSimpleTypeName(genericTypes[i]);
+                genericTypeNames[i] = TypeNameFormatter.GetSimpleTypeName(genericTypes[i]);
             }
             var genericPart = string.Join(", ", genericTypeNames);
             testName = $"{testName}<{genericPart}>";
@@ -110,31 +123,6 @@ internal static class DisplayNameBuilder
 
         var argumentsText = FormatArguments(arguments);
         return $"{testName}({argumentsText})";
-    }
-
-    private static string GetSimpleTypeName(Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            return type.Name;
-        }
-
-        var genericTypeName = type.GetGenericTypeDefinition().Name;
-        var index = genericTypeName.IndexOf('`');
-        if (index > 0)
-        {
-            genericTypeName = genericTypeName.Substring(0, index);
-        }
-
-        var genericArgs = type.GetGenericArguments();
-        var genericArgNames = new string[genericArgs.Length];
-        for (var i = 0; i < genericArgs.Length; i++)
-        {
-            genericArgNames[i] = GetSimpleTypeName(genericArgs[i]);
-        }
-        var genericArgsText = string.Join(", ", genericArgNames);
-
-        return $"{genericTypeName}<{genericArgsText}>";
     }
 
     /// <summary>

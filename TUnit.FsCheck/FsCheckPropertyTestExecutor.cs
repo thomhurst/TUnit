@@ -17,6 +17,10 @@ namespace TUnit.FsCheck;
 #pragma warning disable IL2072 // DynamicallyAccessedMembers warning
 public class FsCheckPropertyTestExecutor : ITestExecutor
 {
+#if NET8_0_OR_GREATER
+    private static readonly System.Buffers.SearchValues<char> _lineEndings = System.Buffers.SearchValues.Create("\r\n");
+#endif
+
     private readonly FsCheckPropertyAttribute _propertyAttribute;
 
     public FsCheckPropertyTestExecutor(FsCheckPropertyAttribute propertyAttribute)
@@ -192,7 +196,11 @@ public class FsCheckPropertyTestExecutor : ITestExecutor
         var afterShrunk = message[(shrunkIndex + 7)..].TrimStart();
 
         // Take only the first line
+#if NET8_0_OR_GREATER
+        var newlineIndex = afterShrunk.AsSpan().IndexOfAny(_lineEndings);
+#else
         var newlineIndex = afterShrunk.IndexOfAny(['\r', '\n']);
+#endif
         var shrunkLine = newlineIndex >= 0 ? afterShrunk[..newlineIndex] : afterShrunk;
 
         if (shrunkLine.StartsWith('('))

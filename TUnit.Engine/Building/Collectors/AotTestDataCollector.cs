@@ -128,12 +128,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     var pair = (source, i);
                     byClassAndMethod[(fd.ClassName, fd.MethodName)] = pair;
 
-                    if (!byClass.TryGetValue(fd.ClassName, out var list))
-                    {
-                        list = [];
-                        byClass[fd.ClassName] = list;
-                    }
-                    list.Add(pair);
+                    byClass.AddToList(fd.ClassName, pair);
                 }
             }
 
@@ -274,7 +269,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
+            Dependencies = AttributeHelpers.ExtractDependencies(result.Attributes),
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -15,6 +16,8 @@ using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
+using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters;
 
 #pragma warning disable TPEXP
 
@@ -235,6 +238,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         var spanLookup = (Dictionary<string, (string TraceId, string SpanId)>?)null;
 #endif
 
+        // Resolve source-control context once; reused for per-test source links and report metadata below.
+        var ci = SourceControlContext.Detect(Environment.GetEnvironmentVariable);
+
         foreach (var kvp in lastUpdates)
         {
             var testNode = kvp.Value.TestNode;
@@ -247,24 +253,40 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 spanId = spanInfo.SpanId;
             }
 
-            // Track retry attempts by counting final-state updates.
-            // A non-retried test has exactly 1 final-state update; each retry adds another.
+            // Walk all updates in order so we capture each retry attempt's status and
+            // timing — not just the count. The renderer's flaky/retry UI needs the
+            // per-attempt list, and we have all of it sitting on the update messages.
+            ReportAttempt[]? attempts = null;
             var retryAttempt = 0;
             if (_updates.TryGetValue(kvp.Key, out var allUpdates))
             {
-                var finalStateCount = 0;
+                List<ReportAttempt>? attemptList = null;
                 foreach (var update in allUpdates)
                 {
                     var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                    if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
+                    if (state is null or InProgressTestNodeStateProperty or DiscoveredTestNodeStateProperty)
                     {
-                        finalStateCount++;
+                        continue;
                     }
+
+                    var (attemptStatus, attemptException, _) = ExtractStatus(state);
+                    var attemptDuration = update.TestNode.Properties.AsEnumerable()
+                        .OfType<TimingProperty>()
+                        .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
+                    attemptList ??= new List<ReportAttempt>();
+                    attemptList.Add(new ReportAttempt
+                    {
+                        Status = attemptStatus,
+                        DurationMs = attemptDuration,
+                        ExceptionType = attemptException?.Type,
+                        ExceptionMessage = attemptException?.Message,
+                    });
                 }
 
-                if (finalStateCount > 1)
+                if (attemptList is { Count: > 1 })
                 {
-                    retryAttempt = finalStateCount - 1;
+                    retryAttempt = attemptList.Count - 1;
+                    attempts = attemptList.ToArray();
                 }
             }
 
@@ -275,7 +297,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             string[]? additionalTraceIdsForResult = null;
 #endif
 
-            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult);
+            var testResult = ExtractTestResult(kvp.Key, testNode, traceId, spanId, retryAttempt, additionalTraceIdsForResult, attempts, ci.RepositorySlug, ci.Workspace);
 
             AccumulateStatus(summary, testResult);
 
@@ -336,7 +358,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 ClassName = kvp.Key,
                 Namespace = groupNamespaces.GetValueOrDefault(kvp.Key, ""),
                 Summary = groupSummary,
-                Tests = kvp.Value.ToArray()
+                Tests = OrderTestsForDisplay(kvp.Value)
             };
         }
 
@@ -358,13 +380,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
 #endif
 
-        var (commitSha, branch, prNumber, repoSlug) = GetCiContext();
-
         return new ReportData
         {
             AssemblyName = assemblyName,
             MachineName = Environment.MachineName,
-            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'"),
+            Timestamp = DateTimeOffset.UtcNow.ToString("dd MMM yyyy, HH:mm:ss 'UTC'", CultureInfo.InvariantCulture),
             TUnitVersion = tunitVersion,
             OperatingSystem = RuntimeInformation.OSDescription,
             RuntimeVersion = RuntimeInformation.FrameworkDescription,
@@ -373,45 +393,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             Summary = summary,
             Groups = groups,
             Spans = spans,
-            CommitSha = commitSha,
-            Branch = branch,
-            PullRequestNumber = prNumber,
-            RepositorySlug = repoSlug
+            CommitSha = ci.CommitSha,
+            Branch = ci.Branch,
+            PullRequestNumber = ci.PullRequestNumber,
+            RepositorySlug = ci.RepositorySlug,
+            SourceLinks = ci.Links,
         };
-    }
-
-    private static (string? CommitSha, string? Branch, string? PullRequestNumber, string? RepositorySlug) GetCiContext()
-    {
-        if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
-        {
-            return (null, null, null, null);
-        }
-
-        var commitSha = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubSha);
-        var repoSlug = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
-
-        // Branch: prefer GITHUB_HEAD_REF (set on PRs), fallback to GITHUB_REF (strip refs/heads/)
-        var branch = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubHeadRef);
-        if (string.IsNullOrEmpty(branch))
-        {
-            var ghRef = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-            if (ghRef is not null && ghRef.StartsWith("refs/heads/", StringComparison.Ordinal))
-            {
-                branch = ghRef.Substring("refs/heads/".Length);
-            }
-        }
-
-        // PR number: parse from GITHUB_REF if it matches refs/pull/{n}/merge
-        string? prNumber = null;
-        var refValue = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRef);
-        if (refValue is not null &&
-            refValue.StartsWith("refs/pull/", StringComparison.Ordinal) &&
-            refValue.EndsWith("/merge", StringComparison.Ordinal))
-        {
-            prNumber = refValue.Substring("refs/pull/".Length, refValue.Length - "refs/pull/".Length - "/merge".Length);
-        }
-
-        return (commitSha, branch, prNumber, repoSlug);
     }
 
     private static void AccumulateStatus(ReportSummary summary, ReportTestResult testResult)
@@ -465,7 +452,25 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     }
 #endif
 
-    private static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds)
+    internal static ReportTestResult[] OrderTestsForDisplay(IEnumerable<ReportTestResult> tests)
+    {
+        // Parse to DateTimeOffset so the sort works regardless of how the caller formatted
+        // StartTime — production writes UTC ISO-8601, but tests construct ReportTestResult
+        // directly via InternalsVisibleTo and could pass non-UTC offsets.
+        return tests
+            .OrderBy(static test => ParseStartTimeForSort(test.StartTime))
+            .ThenBy(static test => test.DisplayName, StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static DateTimeOffset ParseStartTimeForSort(string? raw)
+    {
+        return DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed)
+            ? parsed
+            : DateTimeOffset.MaxValue;
+    }
+
+    internal static ReportTestResult ExtractTestResult(string testId, TestNode testNode, string? traceId, string? spanId, int retryAttempt, string[]? additionalTraceIds, ReportAttempt[]? attempts = null, string? ciRepo = null, string? ciWorkspace = null)
     {
         IProperty? stateProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
@@ -499,10 +504,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                     stdErr = TruncateOutput(e.StandardError);
                     break;
                 case TestMetadataProperty meta:
-                    if (string.IsNullOrEmpty(meta.Key))
+                    // MTP convention (matches Microsoft.Testing.Extensions.VSTestBridge): categories are
+                    // emitted as TestMetadataProperty(category, "") — name in Key, empty Value. Traits/
+                    // custom properties use (key, value) with a non-empty Value.
+                    if (string.IsNullOrEmpty(meta.Value))
                     {
                         categories ??= [];
-                        categories.Add(meta.Value);
+                        categories.Add(meta.Key);
                     }
                     else
                     {
@@ -533,8 +541,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ClassName = className,
             Status = status,
             DurationMs = durationMs,
-            StartTime = startTime?.ToString("o"),
-            EndTime = endTime?.ToString("o"),
+            StartTime = startTime?.ToUniversalTime().ToString("o"),
+            EndTime = endTime?.ToUniversalTime().ToString("o"),
             Exception = exception,
             Output = stdOut,
             ErrorOutput = stdErr,
@@ -542,8 +550,13 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             CustomProperties = customPropertiesArray is { Length: > 0 } ? customPropertiesArray : null,
             FilePath = fileLocation?.FilePath,
             LineNumber = fileLocation?.LineSpan.Start.Line,
+            // Line numbers are already 1-based here. Emit an end line only when the span covers
+            // more than the declaration line (source-gen) — reflection has none, so leave it null.
+            EndLineNumber = fileLocation?.LineSpan.End.Line is { } endLine && endLine > fileLocation.LineSpan.Start.Line ? endLine : null,
+            SourceRelativePath = SourcePathResolver.ToRepoRelativePath(fileLocation?.FilePath, ciWorkspace, ciRepo),
             SkipReason = skipReason,
             RetryAttempt = retryAttempt,
+            Attempts = attempts,
             TraceId = traceId,
             SpanId = spanId,
             AdditionalTraceIds = additionalTraceIds
@@ -608,7 +621,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string GetDefaultOutputPath()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
-        var sanitizedName = string.Concat(assemblyName.Split(Path.GetInvalidFileNameChars()));
+        var sanitizedName = PathValidator.SanitizeFileName(assemblyName);
         var os = GetShortOsName();
         var tfm = GetShortFrameworkName();
         return Path.GetFullPath(Path.Combine(_resultsDirectory, $"{sanitizedName}-{os}-{tfm}-report.html"));
@@ -754,7 +767,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
             else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
             {
-                var serverUrl = (Environment.GetEnvironmentVariable("GITHUB_SERVER_URL") ?? "https://github.com").TrimEnd('/');
+                var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
                 _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }

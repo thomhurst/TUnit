@@ -826,6 +826,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
         OutRefContext.Set(matchedSetup?.OutRefAssignments);
         if (matchedSetup is not null)
         {
+            if (matchedSetup.TransitionTarget is not null)
+            {
+                lock (Lock)
+                {
+                    _currentState = matchedSetup.TransitionTarget;
+                }
+            }
+
             RaiseEventsForSetup(matchedSetup);
         }
     }
@@ -938,10 +946,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
                 {
                     setup.IncrementInvokeCount();
                     setup.ApplyCaptures(args);
-                    if (setup.TransitionTarget is not null)
-                    {
-                        _currentState = setup.TransitionTarget;
-                    }
                     return (true, setup.GetNextBehavior(), setup);
                 }
             }

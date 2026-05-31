@@ -1,0 +1,16 @@
+{
+  "name": "TUnit Development",
+  "image": "mcr.microsoft.com/dotnet/sdk:10.0",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "TUnit.sln"
+      }
+    }
+  },
+  "postCreateCommand": "dotnet restore && dotnet build"
+}

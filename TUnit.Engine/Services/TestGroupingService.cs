@@ -1,3 +1,6 @@
+#if NET
+using System.Runtime.InteropServices;
+#endif
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
@@ -255,12 +258,18 @@ internal sealed class TestGroupingService : ITestGroupingService
         ParallelGroupConstraint constraint,
         Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>> parallelGroups)
     {
+#if NET
+        ref var orderGroups = ref CollectionsMarshal.GetValueRefOrAddDefault(parallelGroups, constraint.Group, out _);
+        orderGroups ??= new SortedDictionary<int, List<AbstractExecutableTest>>();
+#else
         if (!parallelGroups.TryGetValue(constraint.Group, out var orderGroups))
         {
             orderGroups = new SortedDictionary<int, List<AbstractExecutableTest>>();
             parallelGroups[constraint.Group] = orderGroups;
         }
+#endif
 
+        // SortedDictionary is not supported by CollectionsMarshal, so keep the two-lookup pattern here.
         if (!orderGroups.TryGetValue(constraint.Order, out var tests))
         {
             tests = [];
@@ -282,11 +291,17 @@ internal sealed class TestGroupingService : ITestGroupingService
         NotInParallelConstraint notInParallel,
         Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)> constrainedGroups)
     {
+#if NET
+        ref var group = ref CollectionsMarshal.GetValueRefOrAddDefault(constrainedGroups, parallelGroup.Group, out _);
+        group.Unconstrained ??= [];
+        group.Keyed ??= [];
+#else
         if (!constrainedGroups.TryGetValue(parallelGroup.Group, out var group))
         {
             group = ([], []);
             constrainedGroups[parallelGroup.Group] = group;
         }
+#endif
 
         // Add to keyed tests within the parallel group
         var order = notInParallel.Order;

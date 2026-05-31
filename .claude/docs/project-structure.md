@@ -18,7 +18,7 @@
 | `TUnit.Assertions.FSharp` | F# assertion extensions |
 | `TUnit.AspNetCore` | ASP.NET Core integration |
 | `TUnit.AspNetCore.Analyzers` | ASP.NET Core-specific analyzers |
-| `TUnit.Aspire` | .NET Aspire integration |
+| `TUnit.Aspire` | Aspire integration |
 | `TUnit.Logging.Microsoft` | Microsoft.Extensions.Logging integration (no ASP.NET Core dependency) |
 | `TUnit.PropertyTesting` | Property-based testing |
 | `TUnit.FsCheck` | F#-based property testing integration |

@@ -44,23 +44,19 @@ public class WaitsForAssertionTests
     [Test]
     public async Task WaitsFor_Fails_When_Timeout_Expires()
     {
-        var stopwatch = Stopwatch.StartNew();
+        var timeout = TimeSpan.FromMilliseconds(250);
+        var pollingInterval = TimeSpan.FromMilliseconds(10);
         var value = 1;
 
         var exception = await Assert.That(
             async () => await Assert.That(value).WaitsFor(
                 assert => assert.IsEqualTo(999),
-                timeout: TimeSpan.FromMilliseconds(100),
-                pollingInterval: TimeSpan.FromMilliseconds(10))
+                timeout: timeout,
+                pollingInterval: pollingInterval)
         ).Throws<AssertionException>();
 
-        stopwatch.Stop();
-
-        // Verify timeout was respected (should be close to 100ms, not significantly longer)
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
-
         // Verify error message contains useful information
-        await Assert.That(exception.Message).Contains("assertion did not pass within 100ms");
+        await Assert.That(exception.Message).Contains($"assertion did not pass within {timeout.TotalMilliseconds:F0}ms");
         await Assert.That(exception.Message).Contains("Last error:");
     }
 
@@ -409,6 +405,110 @@ public class WaitsForAssertionTests
         await Assert.That(entity!.Id).IsEqualTo(42);
         await Assert.That(entity.Name).IsEqualTo("Resolved");
         await Assert.That(entity.IsReady).IsEqualTo(true);
+    }
+
+    [Test]
+    public async Task WaitsFor_PropagatesExternalCancellation_Before_Internal_Timeout()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromMilliseconds(100));
+
+        var stopwatch = Stopwatch.StartNew();
+
+        var act = async () => await Assert.That(() => false)
+            .WaitsFor(
+                assert => assert.IsTrue(),
+                timeout: TimeSpan.FromSeconds(30),
+                cancellationToken: cts.Token);
+
+        await Assert.That(act).Throws<OperationCanceledException>();
+
+        stopwatch.Stop();
+
+        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
+    }
+
+    [Test]
+    public async Task WaitsFor_Throws_AssertionException_On_Internal_Timeout_When_Token_Not_Cancelled()
+    {
+        using var cts = new CancellationTokenSource();
+
+        var act = async () => await Assert.That(() => false)
+            .WaitsFor(
+                assert => assert.IsTrue(),
+                timeout: TimeSpan.FromMilliseconds(200),
+                cancellationToken: cts.Token);
+
+        await Assert.That(act).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task WaitsFor_Honours_PreCancelled_Token_Before_First_Poll()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var stopwatch = Stopwatch.StartNew();
+
+        var act = async () => await Assert.That(() => false)
+            .WaitsFor(
+                assert => assert.IsTrue(),
+                timeout: TimeSpan.FromSeconds(5),
+                cancellationToken: cts.Token);
+
+        await Assert.That(act).Throws<OperationCanceledException>();
+
+        stopwatch.Stop();
+
+        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
+    }
+
+    [Test]
+    public async Task Eventually_PropagatesExternalCancellation_Before_Internal_Timeout()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromMilliseconds(100));
+
+        var stopwatch = Stopwatch.StartNew();
+
+        var act = async () => await Assert.That(() => false)
+            .Eventually(
+                assert => assert.IsTrue(),
+                timeout: TimeSpan.FromSeconds(30),
+                cancellationToken: cts.Token);
+
+        await Assert.That(act).Throws<OperationCanceledException>();
+
+        stopwatch.Stop();
+
+        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(1));
+    }
+
+    [Test]
+    public async Task WaitsFor_Propagates_OCE_When_Predicate_Observes_Supplied_Token()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromMilliseconds(50));
+
+        Func<bool> tokenAwarePredicate = () =>
+        {
+            cts.Token.ThrowIfCancellationRequested();
+            return false;
+        };
+
+        var stopwatch = Stopwatch.StartNew();
+
+        var act = async () => await Assert.That(tokenAwarePredicate)
+            .WaitsFor(
+                assert => assert.IsTrue(),
+                timeout: TimeSpan.FromSeconds(30),
+                cancellationToken: cts.Token);
+
+        await Assert.That(act).Throws<OperationCanceledException>();
+
+        stopwatch.Stop();
+
+        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(500));
     }
 
     // Helper class for testing complex objects

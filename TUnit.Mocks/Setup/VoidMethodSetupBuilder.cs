@@ -149,5 +149,9 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         return this;
     }
 
-    public IVoidMethodSetup Then() => this;
+    public IVoidMethodSetup Then()
+    {
+        _setup.Then();
+        return this;
+    }
 }

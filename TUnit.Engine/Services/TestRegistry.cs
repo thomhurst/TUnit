@@ -138,7 +138,8 @@ internal sealed class TestRegistry : ITestRegistry
                 nameof(methodArguments));
         }
 
-        var parameterTypes = methodMetadata.Parameters.Select(p => p.Type).ToArray();
+        var parameterTypes = Array.ConvertAll(methodMetadata.Parameters, p => p.Type);
+
         var methodInfo = methodMetadata.Type.GetMethod(
             methodMetadata.Name,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static,
@@ -284,9 +285,7 @@ internal sealed class TestRegistry : ITestRegistry
             TestName = methodInfo.Name,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>()
-                .Select(x => x.ToTestDependency())
-                .ToArray(),
+            Dependencies = AttributeHelpers.ExtractDependencies(result.Attributes),
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],

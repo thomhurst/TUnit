@@ -21,6 +21,10 @@ namespace TUnit.AspNetCore;
 /// </summary>
 public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFactory<TEntryPoint> where TEntryPoint : class
 {
+    // One scope per factory instance. Threaded through the per-factory
+    // TUnitTestCorrelationProcessor so the processor recognises which activities
+    // belong to its own request pipeline vs. a sibling factory's.
+    private readonly CorrelationScope _correlationScope = new();
 
     public WebApplicationFactory<TEntryPoint> GetIsolatedFactory(
         TestContext testContext,
@@ -55,7 +59,7 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
 
                     if (options.AutoConfigureOpenTelemetry)
                     {
-                        AddTUnitOpenTelemetry(services);
+                        AddTUnitOpenTelemetry(services, _correlationScope);
                     }
                 });
 
@@ -97,6 +101,7 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
         builder.ConfigureServices(services =>
         {
             services.AddSingleton<IStartupFilter, PropagatorAlignmentStartupFilter>();
+            services.AddSingleton<IStartupFilter>(_ => new FactoryScopeStartupFilter(_correlationScope));
             services.AddCorrelatedTUnitLogging();
         });
     }
@@ -110,10 +115,10 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     /// own processor, and the processor's idempotent tagging guard prevents duplicate
     /// <c>tunit.test.id</c> tags across its <c>OnStart</c>/<c>OnEnd</c> hooks.
     /// </summary>
-    private static void AddTUnitOpenTelemetry(IServiceCollection services)
+    private static void AddTUnitOpenTelemetry(IServiceCollection services, CorrelationScope scope)
     {
         services.AddOpenTelemetry().WithTracing(tracing => tracing
-            .AddProcessor(new TUnitTestCorrelationProcessor())
+            .AddProcessor(new TUnitTestCorrelationProcessor(scope))
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation());
     }

@@ -44,11 +44,13 @@ internal sealed class TestGenericTypeResolver
         // Otherwise resolve from GenericMethodInfo if the test method is a generic definition
         else if (metadata.GenericMethodInfo != null)
         {
+            var parameterTypes = Array.ConvertAll(metadata.MethodMetadata.Parameters, p => p.Type);
+
             result.ResolvedMethodGenericArguments = ResolveMethodGenericArguments(
                 metadata.MethodMetadata,
                 metadata.GenericMethodInfo,
                 testData.MethodData,
-                metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray());
+                parameterTypes);
         }
 
         return result;
@@ -133,7 +135,19 @@ internal sealed class TestGenericTypeResolver
     {
         // Handle the case where some parameter types are Object (placeholders for generic parameters)
         // This happens when data sources provide untyped data or when we have mixed generic/non-generic parameters
-        if (parameterTypes.Any(t => t == typeof(object)) && methodArguments.Length > 0)
+        var hasObjectParameter = false;
+        if (methodArguments.Length > 0)
+        {
+            foreach (var parameterType in parameterTypes)
+            {
+                if (parameterType == typeof(object))
+                {
+                    hasObjectParameter = true;
+                    break;
+                }
+            }
+        }
+        if (hasObjectParameter)
         {
             // Check if this is a simple generic method with one type parameter and mixed parameters
             if (genericMethodInfo.ParameterNames.Length == 1 && parameterTypes.Length >= 1)
@@ -193,7 +207,20 @@ internal sealed class TestGenericTypeResolver
         
         // Handle the case where all parameter types are Object
         // This happens when data sources provide untyped data
-        if (parameterTypes.All(t => t == typeof(object)) && methodArguments.Length > 0)
+        var allParametersAreObject = methodArguments.Length > 0;
+        if (allParametersAreObject)
+        {
+            foreach (var t in parameterTypes)
+            {
+                if (t != typeof(object))
+                {
+                    allParametersAreObject = false;
+                    break;
+                }
+            }
+        }
+
+        if (allParametersAreObject)
         {
             // For the AggregateBy test case with 3 generic parameters
             if (genericMethodInfo.ParameterNames.Length == 3 &&
@@ -261,11 +288,17 @@ internal sealed class TestGenericTypeResolver
                         }
                         else if (arg0 is IEnumerable<object> objEnum)
                         {
-                            // Last resort - try to infer from first element
-                            var first = objEnum.FirstOrDefault();
-                            if (first != null)
+                            // Last resort - try to infer from first element.
+                            // foreach avoids the iterator allocation that FirstOrDefault
+                            // incurs on non-list IEnumerable<object> sources.
+                            foreach (var first in objEnum)
                             {
-                                sourceType = first.GetType();
+                                if (first != null)
+                                {
+                                    sourceType = first.GetType();
+                                }
+
+                                break;
                             }
                         }
                     }

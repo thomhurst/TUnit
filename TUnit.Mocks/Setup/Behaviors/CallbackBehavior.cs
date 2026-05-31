@@ -1,6 +1,6 @@
 namespace TUnit.Mocks.Setup.Behaviors;
 
-internal sealed class CallbackBehavior : IBehavior, IArgumentFreeBehavior
+internal sealed class CallbackBehavior : IBehavior, IArgumentFreeBehavior, ISideEffectBehavior
 {
     private readonly Action _callback;
 

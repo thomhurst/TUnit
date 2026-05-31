@@ -1,10 +1,15 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.RegularExpressions;
+#if NET8_0_OR_GREATER
+using System.Buffers;
+#endif
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -14,22 +19,22 @@ namespace TUnit.Engine.Services;
 internal readonly struct FilterHints
 {
     /// <summary>
-    /// The assembly name pattern from the filter (null if wildcard or unparseable).
+    /// The assembly name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? AssemblyName { get; init; }
 
     /// <summary>
-    /// The namespace pattern from the filter (null if wildcard or unparseable).
+    /// The namespace pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? Namespace { get; init; }
 
     /// <summary>
-    /// The class name pattern from the filter (null if wildcard or unparseable).
+    /// The class name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? ClassName { get; init; }
 
     /// <summary>
-    /// The method name pattern from the filter (null if wildcard or unparseable).
+    /// The method name pattern from the filter (null if non-literal or unparseable).
     /// </summary>
     public string? MethodName { get; init; }
 
@@ -113,7 +118,7 @@ internal readonly struct FilterHints
 /// Implementation of metadata filter matching logic extracted from TestBuilder.
 /// Evaluates if test metadata could match an execution filter without building tests.
 /// </summary>
-internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
+internal sealed partial class MetadataFilterMatcher : IMetadataFilterMatcher
 {
 #pragma warning disable TPEXP
     private static readonly ConstructorInfo _treeNodeFilterConstructor =
@@ -124,6 +129,16 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
     private static readonly PropertyBag _emptyPropertyBag = new();
 
     private static readonly ConcurrentDictionary<string, string> _strippedFilterCache = new();
+
+    // Matches property-bag filters like [key=value]; used to strip them before path parsing.
+#if NET8_0_OR_GREATER
+    [GeneratedRegex(@"\[[^\]]*\]")]
+    private static partial Regex PropertyFilterRegex();
+#else
+    private static readonly Regex _propertyFilterRegex = new(@"\[[^\]]*\]", RegexOptions.Compiled);
+
+    private static Regex PropertyFilterRegex() => _propertyFilterRegex;
+#endif
 
     /// <summary>
     /// Extract hints from a filter that can be used to pre-filter test sources by type.
@@ -145,61 +160,103 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         // Strip property filters like [key=value]
         if (filterString.Contains('['))
         {
-            filterString = System.Text.RegularExpressions.Regex.Replace(filterString, @"\[([^\]]*)\]", "");
+            filterString = PropertyFilterRegex().Replace(filterString, "");
         }
 
         // Parse path: /{assembly}/{namespace}/{className}/{methodName}
+        // Expected format: "", assembly, namespace, className, methodName
+        // segment[0] is empty (before first /), segment[1] is assembly, etc.
+        // FilterHints only retains segments 1-4, so we only materialize those.
+#if NET8_0_OR_GREATER
+        var filterSpan = filterString.AsSpan();
+
+        // Up to 5 useful segments (empty, assembly, namespace, className, methodName);
+        // a 6th range absorbs any trailing path so the earlier segments stay intact.
+        Span<Range> ranges = stackalloc Range[6];
+        var count = filterSpan.Split(ranges, '/');
+
+        // Need at least the leading empty segment plus the assembly segment.
+        if (count < 2)
+        {
+            return default;
+        }
+
+        return new FilterHints
+        {
+            AssemblyName = ExtractSegment(filterSpan, ranges, count, 1),
+            Namespace = ExtractSegment(filterSpan, ranges, count, 2),
+            ClassName = ExtractSegment(filterSpan, ranges, count, 3),
+            MethodName = ExtractSegment(filterSpan, ranges, count, 4)
+        };
+    }
+
+    private static string? ExtractSegment(ReadOnlySpan<char> filterSpan, ReadOnlySpan<Range> ranges, int count, int index)
+    {
+        if (index >= count)
+        {
+            return null;
+        }
+
+        var segment = filterSpan[ranges[index]];
+        return IsNonLiteralSegment(segment) ? null : segment.ToString();
+    }
+#else
         var parts = filterString.Split('/');
 
-        // Expected format: "", assembly, namespace, className, methodName
-        // parts[0] is empty (before first /), parts[1] is assembly, etc.
         if (parts.Length < 2)
         {
             return default;
         }
 
-        string? assemblyName = null;
-        string? namespaceName = null;
-        string? className = null;
-        string? methodName = null;
-
-        // Extract assembly name (parts[1])
-        if (parts.Length > 1 && !IsWildcard(parts[1]))
-        {
-            assemblyName = parts[1];
-        }
-
-        // Extract namespace (parts[2])
-        if (parts.Length > 2 && !IsWildcard(parts[2]))
-        {
-            namespaceName = parts[2];
-        }
-
-        // Extract class name (parts[3])
-        if (parts.Length > 3 && !IsWildcard(parts[3]))
-        {
-            className = parts[3];
-        }
-
-        // Extract method name (parts[4])
-        if (parts.Length > 4 && !IsWildcard(parts[4]))
-        {
-            methodName = parts[4];
-        }
-
         return new FilterHints
         {
-            AssemblyName = assemblyName,
-            Namespace = namespaceName,
-            ClassName = className,
-            MethodName = methodName
+            AssemblyName = ExtractSegment(parts, 1),
+            Namespace = ExtractSegment(parts, 2),
+            ClassName = ExtractSegment(parts, 3),
+            MethodName = ExtractSegment(parts, 4)
         };
     }
 
-    private static bool IsWildcard(string value)
+    private static string? ExtractSegment(string[] parts, int index)
     {
-        return string.IsNullOrEmpty(value) || value == "*" || value.Contains('*') || value.Contains('?');
+        if (index >= parts.Length)
+        {
+            return null;
+        }
+
+        var segment = parts[index];
+        return IsNonLiteralSegment(segment) ? null : segment;
     }
+#endif
+
+    // Characters that make a TreeNodeFilter path segment non-literal:
+    //   * ?           wildcards
+    //   ( ) | & !     grouping / logical operators
+    //   \             escape character
+    // Property-bag brackets [ ] are stripped before ExtractFilterHints runs (line above).
+    // Characters that are NOT MTP operators and must stay literal: + (nested classes),
+    // . (namespaces), < > , space (generic class names), ^ (no meaning in the grammar).
+    // A segment containing any operator cannot be safely compared with string equality —
+    // hints are skipped for it, and MTP's TreeNodeFilter does the authoritative match
+    // downstream in CouldMatchTreeNodeFilter.
+#if NET8_0_OR_GREATER
+    private static readonly SearchValues<char> _filterOperatorChars =
+        SearchValues.Create("*?()|&!\\");
+#else
+    private static readonly char[] _filterOperatorChars = { '*', '?', '(', ')', '|', '&', '!', '\\' };
+#endif
+
+#if NET8_0_OR_GREATER
+    private static bool IsNonLiteralSegment(ReadOnlySpan<char> value)
+    {
+        return value.IsEmpty || value.IndexOfAny(_filterOperatorChars) >= 0;
+    }
+#else
+    private static bool IsNonLiteralSegment(string value)
+    {
+        return string.IsNullOrEmpty(value) || value.IndexOfAny(_filterOperatorChars) >= 0;
+    }
+#endif
 #pragma warning restore TPEXP
 
     public bool CouldMatchFilter(TestMetadata metadata, ITestExecutionFilter? filter)
@@ -285,77 +342,34 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
             return type.Name;
         }
 
-        // Build the full nested type hierarchy with '+' separators
-        // This matches TestIdentifierService.WriteTypeNameWithGenerics
-        var typeHierarchy = new ValueListBuilder<string>([null, null, null, null]);
-        var typeVsb = new ValueStringBuilder(stackalloc char[128]);
+        // Collect the nested-type chain (inner -> outer) without allocating per-segment strings,
+        // then emit it directly into the result builder. Matches TestIdentifierService.WriteTypeNameWithGenerics.
+        var typeHierarchy = new ValueListBuilder<Type>([null!, null!, null!, null!]);
+        var resultVsb = new ValueStringBuilder(stackalloc char[256]);
         try
         {
             var currentType = type;
-
             while (currentType != null)
             {
-                if (currentType.IsGenericType)
-                {
-                    var name = currentType.Name;
-
-                    var backtickIndex = name.IndexOf('`');
-                    if (backtickIndex > 0)
-                    {
-                        typeVsb.Append(name.AsSpan(0, backtickIndex));
-                    }
-                    else
-                    {
-                        typeVsb.Append(name);
-                    }
-
-                    // Add the generic type arguments (same format as TestIdentifierService)
-                    var genericArgs = currentType.GetGenericArguments();
-                    typeVsb.Append('<');
-                    for (var i = 0; i < genericArgs.Length; i++)
-                    {
-                        if (i > 0)
-                        {
-                            typeVsb.Append(", ");
-                        }
-                        typeVsb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
-                    }
-                    typeVsb.Append('>');
-
-                    typeHierarchy.Append(typeVsb.AsSpan().ToString());
-                    typeVsb.Length = 0;
-                }
-                else
-                {
-                    typeHierarchy.Append(currentType.Name);
-                }
-
+                typeHierarchy.Append(currentType);
                 currentType = currentType.DeclaringType;
             }
 
-            // Build result: reverse to get outer-to-inner order and join with '+'
-            var resultVsb = new ValueStringBuilder(stackalloc char[256]);
-            try
+            // Reverse to get outer-to-inner order and join with '+'.
+            for (var i = typeHierarchy.Length - 1; i >= 0; i--)
             {
-                for (var i = typeHierarchy.Length - 1; i >= 0; i--)
+                if (i < typeHierarchy.Length - 1)
                 {
-                    if (i < typeHierarchy.Length - 1)
-                    {
-                        resultVsb.Append('+');
-                    }
-                    resultVsb.Append(typeHierarchy[i]);
+                    resultVsb.Append('+');
                 }
-                return resultVsb.ToString();
+                TypeNameHelper.AppendTypeNameWithGenericArgs(ref resultVsb, typeHierarchy[i]);
             }
-            finally
-            {
-                resultVsb.Dispose();
-            }
+            return resultVsb.ToString();
         }
         finally
         {
+            resultVsb.Dispose();
             typeHierarchy.Dispose();
-            typeVsb.Dispose();
         }
     }
 
@@ -404,7 +418,7 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
         if (filterString.Contains('['))
         {
             var strippedFilterString = _strippedFilterCache.GetOrAdd(filterString,
-                static fs => System.Text.RegularExpressions.Regex.Replace(fs, @"\[([^\]]*)\]", ""));
+                static fs => PropertyFilterRegex().Replace(fs, ""));
             pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
         }
         else
@@ -424,12 +438,19 @@ internal sealed class MetadataFilterMatcher : IMetadataFilterMatcher
 
     private static string BuildPathFromMetadata(TestMetadata metadata)
     {
+        if (metadata.CachedFilterPath is { } cached)
+        {
+            return cached;
+        }
+
         var classMetadata = metadata.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
         var className = TestFilterService.GetNestedClassName(classMetadata);
         var methodName = metadata.TestMethodName;
 
-        return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+        var path = $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+        metadata.CachedFilterPath = path;
+        return path;
     }
 }

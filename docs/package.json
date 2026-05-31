@@ -21,8 +21,8 @@
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.10.1",
@@ -52,12 +52,12 @@
     "minimatch": "10.2.5",
     "express/path-to-regexp": "8.4.2",
     "serialize-javascript": "7.0.5",
-    "brace-expansion": "5.0.5",
-    "qs": "6.15.1",
-    "dompurify": "3.4.2",
+    "brace-expansion": "5.0.6",
+    "qs": "6.15.2",
+    "dompurify": "3.4.7",
     "node-forge": "1.4.0",
     "picomatch": "4.0.4",
     "svgo": "4.0.1",
-    "yaml": "2.8.4"
+    "yaml": "2.9.0"
   }
 }

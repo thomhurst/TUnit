@@ -6,10 +6,36 @@ namespace TUnit.Analyzers.Extensions;
 
 public static class MethodExtensions
 {
+    /// <summary>
+    /// Returns true if the method is decorated with the exact <c>TUnit.Core.TestAttribute</c>.
+    /// </summary>
+    /// <remarks>
+    /// This is an exact-match check — it does not match subclasses of <c>BaseTestAttribute</c>
+    /// (e.g. <c>[DynamicTestBuilder]</c>). Use <see cref="HasTestAttribute"/> for the broader,
+    /// inheritance-aware check.
+    /// </remarks>
     public static bool IsTestMethod(this IMethodSymbol methodSymbol, Compilation compilation)
     {
         var testAttribute = compilation.GetTypeByMetadataName("TUnit.Core.TestAttribute")!;
         return methodSymbol.GetAttributes().Any(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, testAttribute));
+    }
+
+    /// <summary>
+    /// Returns true if the method is decorated with any attribute deriving from
+    /// <c>TUnit.Core.BaseTestAttribute</c> (e.g. <c>[Test]</c> or <c>[DynamicTestBuilder]</c>).
+    /// </summary>
+    public static bool HasTestAttribute(this IMethodSymbol methodSymbol, Compilation compilation)
+    {
+        var baseTestAttribute = compilation.GetTypeByMetadataName("TUnit.Core.BaseTestAttribute");
+
+        if (baseTestAttribute is null)
+        {
+            return false;
+        }
+
+        return methodSymbol.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.GetSelfAndBaseTypes()
+                .Contains(baseTestAttribute, SymbolEqualityComparer.Default) == true);
     }
 
     public static bool IsHookMethod(this IMethodSymbol methodSymbol, Compilation compilation, [NotNullWhen(true)] out INamedTypeSymbol? type, [NotNullWhen(true)] out HookLevel? hookLevel, [NotNullWhen(true)] out HookType? hookType)

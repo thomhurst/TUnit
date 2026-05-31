@@ -20,11 +20,20 @@ internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
+    private static readonly ConcurrentDictionary<(string Name, Type Type), bool> _registeredAfterTestDiscoveryHooks = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     // Cache attribute lookups to avoid repeated reflection calls in hot paths
     private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
-    private static int _discoveryRunCount = 0;
+
+    // Hook discovery is process-wide (populates the shared Sources.* bags). The OneTimeGate
+    // makes concurrent first-time callers from multiple MTP sessions block until the single
+    // producer has finished populating, rather than racing past empty bags. If the producer
+    // throws, every concurrent waiter is re-surfaced the failure so no session silently
+    // proceeds with partial state.
+    private static readonly OneTimeGate s_discoveryGate = new(
+        contextName: nameof(ReflectionHookDiscoveryService),
+        waitTimeout: TimeSpan.FromMinutes(5));
 
     private static string GetMethodKey(MethodInfo method)
     {
@@ -119,25 +128,32 @@ internal sealed class ReflectionHookDiscoveryService
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
         {
-            var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .OrderBy(m =>
-                {
-                    // Get the minimum order from cached hook attributes
-                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
+            var declaredMethods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-                    var orders = new List<int>();
-                    if (beforeAttr != null) orders.Add(beforeAttr.Order);
-                    if (afterAttr != null) orders.Add(afterAttr.Order);
-                    if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
-                    if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
+            // Pre-compute the sort keys once (the old OrderBy lambda allocated a List<int> and
+            // recomputed attributes on every comparison). Sort by minimum hook order, then by
+            // MetadataToken to preserve source-file order. MetadataToken is unique per method
+            // within a type, so the (order, token) key is total — Array.Sort needs no extra
+            // stability guarantee to reproduce the previous OrderBy/ThenBy result.
+            var sortKeys = new HookMethodSortKey[declaredMethods.Length];
+            for (var i = 0; i < declaredMethods.Length; i++)
+            {
+                var m = declaredMethods[i];
+                var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
-                    // Use Count instead of Any() to avoid double enumeration
-                    return orders.Count > 0 ? orders.Min() : 0;
-                })
-                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
-                .ToArray();
+                var hasOrder = false;
+                var minOrder = 0;
+                if (beforeAttr != null) { minOrder = beforeAttr.Order; hasOrder = true; }
+                if (afterAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, afterAttr.Order) : afterAttr.Order; hasOrder = true; }
+                if (beforeEveryAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, beforeEveryAttr.Order) : beforeEveryAttr.Order; hasOrder = true; }
+                if (afterEveryAttr != null) { minOrder = hasOrder ? Math.Min(minOrder, afterEveryAttr.Order) : afterEveryAttr.Order; }
 
-            foreach (var method in methods)
+                sortKeys[i] = new HookMethodSortKey(hasOrder ? minOrder : 0, m.MetadataToken);
+            }
+
+            Array.Sort(sortKeys, declaredMethods);
+
+            foreach (var method in declaredMethods)
             {
                 // Check for Before attributes
                 var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
@@ -165,15 +181,13 @@ internal sealed class ReflectionHookDiscoveryService
     #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
     #endif
-    public static void DiscoverHooks()
-    {
-        // Prevent running hook discovery multiple times in the same process
-        // This can happen when both discovery and execution run in the same process
-        if (Interlocked.Increment(ref _discoveryRunCount) > 1)
-        {
-            return;
-        }
+    public static void DiscoverHooks() => s_discoveryGate.Run(DiscoverHooksCore);
 
+    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
+    #endif
+    private static void DiscoverHooksCore()
+    {
         // Clear source-generated hooks since we're discovering via reflection
         // In reflection mode, source generation may have already populated Sources
         // We need to clear them to avoid duplicates
@@ -493,12 +507,7 @@ internal sealed class ReflectionHookDiscoveryService
                 // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
                 // before we reach here, but this guard protects against future refactors that
                 // might bypass the upstream dedup (e.g. a separate registration path).
-                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
-                    {
-                        var m = h.Materialize();
-                        return m.MethodInfo.Name == discoveryMetadata.Name &&
-                               m.MethodInfo.Type == discoveryMetadata.Type;
-                    }))
+                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryMetadata.Name, discoveryMetadata.Type), true))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -682,12 +691,7 @@ internal sealed class ReflectionHookDiscoveryService
                 // Defence in depth: _registeredMethods.TryAdd above would normally short-circuit
                 // before we reach here, but this guard protects against future refactors that
                 // might bypass the upstream dedup (e.g. a separate registration path).
-                if (!Sources.AfterTestDiscoveryHooks.Any(h =>
-                    {
-                        var m = h.Materialize();
-                        return m.MethodInfo.Name == discoveryEveryMetadata.Name &&
-                               m.MethodInfo.Type == discoveryEveryMetadata.Type;
-                    }))
+                if (_registeredAfterTestDiscoveryHooks.TryAdd((discoveryEveryMetadata.Name, discoveryEveryMetadata.Type), true))
                 {
                     var discoveryHook = new AfterTestDiscoveryHookMethod
                     {
@@ -850,19 +854,28 @@ internal sealed class ReflectionHookDiscoveryService
             Name = method.Name,
             Type = type,
             Class = CreateClassMetadata(type),
-            Parameters = method.GetParameters().Select(p => new ParameterMetadata(p.ParameterType)
-            {
-                Name = p.Name ?? string.Empty,
-                Type = p.ParameterType,
-                TypeInfo = new ConcreteType(p.ParameterType),
-                ReflectionInfo = p
-            }).ToArray(),
+            // Hook params: string.Empty name fallback and no IsNullable computation, matching the
+            // original inline projection. Shared with ReflectionMetadataBuilder via the factory.
+            Parameters = Building.ParameterMetadataFactory.Build(method.GetParameters(), nameFallback: string.Empty, computeIsNullable: false),
             GenericTypeCount = 0,
             ReturnTypeInfo = new ConcreteType(method.ReturnType),
             ReturnType = method.ReturnType,
             TypeInfo = new ConcreteType(type)
         };
     }
+
+    private readonly struct HookMethodSortKey(int order, int metadataToken) : IComparable<HookMethodSortKey>
+    {
+        private readonly int _order = order;
+        private readonly int _metadataToken = metadataToken;
+
+        public int CompareTo(HookMethodSortKey other)
+        {
+            var orderComparison = _order.CompareTo(other._order);
+            return orderComparison != 0 ? orderComparison : _metadataToken.CompareTo(other._metadataToken);
+        }
+    }
+
 
     private static ClassMetadata CreateClassMetadata(Type type)
     {
@@ -884,9 +897,9 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static Func<object, TestContext, CancellationToken, ValueTask> CreateInstanceHookDelegate(Type type, MethodInfo method)
     {
+        var parameters = method.GetParameters();
         return async (instance, context, cancellationToken) =>
         {
-            var parameters = method.GetParameters();
             object?[] args;
 
             if (parameters.Length == 0)
@@ -928,9 +941,9 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static Func<T, CancellationToken, ValueTask> CreateHookDelegate<T>([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, MethodInfo method)
     {
+        var parameters = method.GetParameters();
         return async (context, cancellationToken) =>
         {
-            var parameters = method.GetParameters();
             object?[] args;
             object? instance = method.IsStatic ? null : Activator.CreateInstance(type);
 

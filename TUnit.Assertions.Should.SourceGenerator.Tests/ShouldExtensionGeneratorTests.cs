@@ -85,6 +85,105 @@ public class ShouldExtensionGeneratorTests
     }
 
     [Test]
+    public async Task Overload_with_trailing_optional_constructor_parameter_is_emitted()
+    {
+        var output = await RunGenerator("""
+            using System;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class ExceptionMessageEqualsAssertion<TException> : Assertion<TException>
+                where TException : Exception
+            {
+                public ExceptionMessageEqualsAssertion(
+                    AssertionContext<TException> context,
+                    string expectedMessage,
+                    StringComparison comparison = StringComparison.Ordinal)
+                    : base(context) { }
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to have message";
+            }
+
+            public static class ExceptionExtensions
+            {
+                public static ExceptionMessageEqualsAssertion<TException> WithMessage<TException>(
+                    this IAssertionSource<TException> source,
+                    string expectedMessage,
+                    [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+                    where TException : Exception
+                    => new(source.Context, expectedMessage);
+
+                public static ExceptionMessageEqualsAssertion<TException> WithMessage<TException>(
+                    this IAssertionSource<TException> source,
+                    string expectedMessage,
+                    StringComparison comparison,
+                    [CallerArgumentExpression(nameof(expectedMessage))] string? expression = null)
+                    where TException : Exception
+                    => new(source.Context, expectedMessage, comparison);
+            }
+            """);
+
+        await Assert.That(output).Contains("WithMessage<TException>(this global::TUnit.Assertions.Should.Core.IShouldSource<TException> source, string expectedMessage, [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"expectedMessage\")] string? expression = null)");
+        await Assert.That(output).Contains("WithMessage<TException>(this global::TUnit.Assertions.Should.Core.IShouldSource<TException> source, string expectedMessage, System.StringComparison comparison, [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"expectedMessage\")] string? expression = null)");
+        await Assert.That(output).Contains("new global::MyNamespace.ExceptionMessageEqualsAssertion<TException>(innerContext, expectedMessage)");
+    }
+
+    [Test]
+    public async Task RequiresUnreferencedCode_is_not_forwarded_to_overloads_with_AOT_safe_ctor()
+    {
+        // The reflection-based ctor carries [RequiresUnreferencedCode]; the
+        // IEqualityComparer<T> overload doesn't. RUC must attach only to the
+        // overload whose dispatch target actually reflects.
+        var output = await RunGenerator("""
+            using System;
+            using System.Collections.Generic;
+            using System.Diagnostics.CodeAnalysis;
+            using System.Runtime.CompilerServices;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class EquivalentToAssertion<TItem> : Assertion<IEnumerable<TItem>>
+            {
+                [RequiresUnreferencedCode("Reflection-based equivalency")]
+                public EquivalentToAssertion(AssertionContext<IEnumerable<TItem>> context, IEnumerable<TItem> expected)
+                    : base(context) { }
+
+                public EquivalentToAssertion(AssertionContext<IEnumerable<TItem>> context, IEnumerable<TItem> expected, IEqualityComparer<TItem> comparer)
+                    : base(context) { }
+
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to be equivalent";
+            }
+
+            public static class EquivalentExtensions
+            {
+                [RequiresUnreferencedCode("Reflection-based equivalency")]
+                public static EquivalentToAssertion<TItem> IsEquivalentTo<TItem>(
+                    this IAssertionSource<IEnumerable<TItem>> source,
+                    IEnumerable<TItem> expected,
+                    [CallerArgumentExpression(nameof(expected))] string? expression = null)
+                    => new(source.Context, expected);
+
+                public static EquivalentToAssertion<TItem> IsEquivalentTo<TItem>(
+                    this IAssertionSource<IEnumerable<TItem>> source,
+                    IEnumerable<TItem> expected,
+                    IEqualityComparer<TItem> comparer,
+                    [CallerArgumentExpression(nameof(expected))] string? expression = null)
+                    => new(source.Context, expected, comparer);
+            }
+            """);
+
+        var comparerSig = "BeEquivalentTo<TItem>(this global::TUnit.Assertions.Should.Core.IShouldSource<System.Collections.Generic.IEnumerable<TItem>> source, System.Collections.Generic.IEnumerable<TItem> expected, System.Collections.Generic.IEqualityComparer<TItem> comparer";
+        await Assert.That(output).Contains(comparerSig);
+        await Assert.That(CountOccurrences(output, "RequiresUnreferencedCode(\"Reflection-based equivalency\")")).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task ShouldNameAttribute_overrides_conjugation()
     {
         var output = await RunGenerator("""

@@ -112,29 +112,13 @@ internal sealed class MetadataDependencyExpander
             var methodName = metadata.TestMethodName;
 
             // Add to class type index
-            if (!byClassType.TryGetValue(classType, out var classTypeList))
-            {
-                classTypeList = [];
-                byClassType[classType] = classTypeList;
-            }
-            classTypeList.Add(metadata);
+            byClassType.AddToList(classType, metadata);
 
             // Add to class+method index
-            var classMethodKey = (classType, methodName);
-            if (!byClassAndMethod.TryGetValue(classMethodKey, out var classMethodList))
-            {
-                classMethodList = [];
-                byClassAndMethod[classMethodKey] = classMethodList;
-            }
-            classMethodList.Add(metadata);
+            byClassAndMethod.AddToList((classType, methodName), metadata);
 
             // Add to method name index
-            if (!byMethodName.TryGetValue(methodName, out var methodNameList))
-            {
-                methodNameList = [];
-                byMethodName[methodName] = methodNameList;
-            }
-            methodNameList.Add(metadata);
+            byMethodName.AddToList(methodName, metadata);
         }
 
         var queue = new Queue<TestMetadata>(matchingMetadata);
@@ -147,6 +131,11 @@ internal sealed class MetadataDependencyExpander
             {
                 // Get candidate list based on dependency type for O(1) lookup
                 IEnumerable<TestMetadata> candidates;
+
+                // When matching same-class dependencies by method name only, the candidate
+                // list spans all classes, so we must additionally filter by the current
+                // test's class type inside the loop below (avoids a per-iteration closure).
+                var filterByCurrentClassType = false;
 
                 if (dependency.ClassType != null && !string.IsNullOrEmpty(dependency.MethodName))
                 {
@@ -176,7 +165,8 @@ internal sealed class MetadataDependencyExpander
                     // Same-class dependency by method name - look up by method name, then filter by class
                     if (byMethodName.TryGetValue(dependency.MethodName!, out var list))
                     {
-                        candidates = list.Where(m => m.TestClassType == current.TestClassType);
+                        candidates = list;
+                        filterByCurrentClassType = true;
                     }
                     else
                     {
@@ -191,6 +181,11 @@ internal sealed class MetadataDependencyExpander
 
                 foreach (var candidateMetadata in candidates)
                 {
+                    if (filterByCurrentClassType && candidateMetadata.TestClassType != current.TestClassType)
+                    {
+                        continue;
+                    }
+
                     if (dependency.Matches(candidateMetadata, current))
                     {
                         if (result.Add(candidateMetadata))

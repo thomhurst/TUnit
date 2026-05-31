@@ -49,6 +49,9 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public required MethodMetadata MethodMetadata { get; set; }
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }
+    internal int TestStartColumnNumber { get; set; }
+    internal int TestEndLineNumber { get; set; }
+    internal int TestEndColumnNumber { get; set; }
     public required Type ReturnType { get; set; }
     // Lazy — the vast majority of tests use zero injected properties, so we skip the
     // per-test ConcurrentDictionary allocation (~200+ bytes) until there's actually
@@ -83,8 +86,19 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
         public static readonly IDictionary<string, object?> Instance =
             new ReadOnlyDictionary<string, object?>(new Dictionary<string, object?>(0));
     }
-    public List<string> Categories { get; } = [];
-    public Dictionary<string, List<string>> CustomProperties { get; } = new();
+    // Lazy — the vast majority of tests declare zero categories / custom properties, so we
+    // skip the per-test List/Dictionary allocation until something is actually stored. Reads
+    // always return a usable (possibly freshly-created empty) mutable collection, so callers
+    // that .Add or index in still observe the same backing instance. Lazy init uses
+    // Interlocked.CompareExchange (matching GetOrCreateInjectedPropertyArguments) so concurrent
+    // first-readers can't lose a backing instance to a non-atomic ??= race.
+    private List<string>? _categories;
+    public List<string> Categories =>
+        _categories ?? Interlocked.CompareExchange(ref _categories, [], null) ?? _categories;
+
+    private Dictionary<string, List<string>>? _customProperties;
+    public Dictionary<string, List<string>> CustomProperties =>
+        _customProperties ?? Interlocked.CompareExchange(ref _customProperties, [], null) ?? _customProperties;
     public Type[]? TestClassParameterTypes { get; set; }
 
     public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
@@ -108,9 +122,14 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     /// <typeparam name="T">The attribute type to retrieve.</typeparam>
     /// <returns>An enumerable of attributes of the specified type.</returns>
     public IEnumerable<T> GetAttributes<T>() where T : Attribute
-        => AttributesByType.TryGetValue(typeof(T), out var attrs)
-            ? attrs.OfType<T>()
-            : [];
+    {
+        if (!AttributesByType.TryGetValue(typeof(T), out var attrs))
+        {
+            return [];
+        }
+
+        return attrs.OfType<T>();
+    }
 
     /// <summary>
     /// Gets all attributes as a flattened collection.

@@ -57,6 +57,17 @@ internal sealed class CodeWriter
         return new BlockScope(this);
     }
 
+    /// <summary>
+    /// Opens a <c>namespace {ns} { ... }</c> block when <paramref name="namespaceName"/> is
+    /// non-empty, or returns a no-op disposable so the caller's content is emitted at
+    /// top-level. Used by mock builders to skip the namespace block when targeting the
+    /// global namespace.
+    /// </summary>
+    public IDisposable OptionalNamespaceBlock(string namespaceName)
+        => string.IsNullOrEmpty(namespaceName)
+            ? NoopDisposable.Instance
+            : Block($"namespace {namespaceName}");
+
     public void IncreaseIndent() => _indent++;
     public void DecreaseIndent() => _indent--;
 
@@ -67,5 +78,11 @@ internal sealed class CodeWriter
         private readonly CodeWriter _writer;
         public BlockScope(CodeWriter writer) => _writer = writer;
         public void Dispose() => _writer.CloseBrace();
+    }
+
+    private sealed class NoopDisposable : IDisposable
+    {
+        public static readonly NoopDisposable Instance = new();
+        public void Dispose() { }
     }
 }

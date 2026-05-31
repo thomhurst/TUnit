@@ -254,6 +254,9 @@ internal sealed class TestBuilderPipeline
                 TestClassArguments = [],
                 TestFilePath = metadata.FilePath ?? "Unknown",
                 TestLineNumber = metadata.LineNumber,
+                TestStartColumnNumber = metadata.StartColumnNumber,
+                TestEndLineNumber = metadata.EndLineNumber,
+                TestEndColumnNumber = metadata.EndColumnNumber,
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
                 AttributesByType = attributes.ToAttributeDictionary()
@@ -380,6 +383,9 @@ internal sealed class TestBuilderPipeline
                         TestClassArguments = [],
                         TestFilePath = resolvedMetadata.FilePath ?? "Unknown",
                         TestLineNumber = resolvedMetadata.LineNumber,
+                        TestStartColumnNumber = resolvedMetadata.StartColumnNumber,
+                        TestEndLineNumber = resolvedMetadata.EndLineNumber,
+                        TestEndColumnNumber = resolvedMetadata.EndColumnNumber,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
                         AttributesByType = attributes.ToAttributeDictionary()
@@ -458,6 +464,9 @@ internal sealed class TestBuilderPipeline
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber,
+            TestStartColumnNumber = metadata.StartColumnNumber,
+            TestEndLineNumber = metadata.EndLineNumber,
+            TestEndColumnNumber = metadata.EndColumnNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = AttributeDictionaryHelper.Empty
@@ -510,6 +519,9 @@ internal sealed class TestBuilderPipeline
             TestClassArguments = [],
             TestFilePath = metadata.FilePath ?? "Unknown",
             TestLineNumber = metadata.LineNumber,
+            TestStartColumnNumber = metadata.StartColumnNumber,
+            TestEndLineNumber = metadata.EndLineNumber,
+            TestEndColumnNumber = metadata.EndColumnNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
             AttributesByType = AttributeDictionaryHelper.Empty

@@ -36,8 +36,17 @@ public sealed class TestEntry<
     /// <summary>Source file path.</summary>
     public required string FilePath { get; init; }
 
-    /// <summary>Source line number.</summary>
+    /// <summary>Source start line number. This preserves the existing LineNumber semantics for backwards compatibility.</summary>
     public required int LineNumber { get; init; }
+
+    /// <summary>Source start column number. Uses a one-based column index; zero indicates the exact column is unavailable for fallback/no-span locations.</summary>
+    public int StartColumnNumber { get; init; }
+
+    /// <summary>Source end line number.</summary>
+    public int EndLineNumber { get; init; }
+
+    /// <summary>Source end column number. Uses a one-based column index; zero indicates the exact column is unavailable for fallback/no-span locations.</summary>
+    public int EndColumnNumber { get; init; }
 
     /// <summary>Pre-extracted categories for fast filtering.</summary>
     public string[] Categories { get; init; } = [];
@@ -127,6 +136,9 @@ public sealed class TestEntry<
             AttributeGroupIndex = AttributeGroupIndex,
             FilePath = FilePath,
             LineNumber = LineNumber,
+            StartColumnNumber = StartColumnNumber,
+            EndLineNumber = EndLineNumber,
+            EndColumnNumber = EndColumnNumber,
             MethodMetadata = MethodMetadata,
             RepeatCount = RepeatCount > 0 ? RepeatCount : null,
             TestSessionId = testSessionId,

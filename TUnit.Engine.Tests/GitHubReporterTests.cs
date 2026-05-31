@@ -304,6 +304,57 @@ public class GitHubReporterTests
         output.ShouldContain("CancelledTest");
     }
 
+    [Test]
+    public async Task AfterRunAsync_SourceLink_Uses_OneBased_Line_Without_Extra_Increment()
+    {
+        // Regression: source line numbers are already 1-based when they reach the reporter
+        // (via [CallerLineNumber] / Roslyn span + 1), so the GitHub blob link must NOT add
+        // another +1 — that pointed the link one line below the actual test.
+        var (reporter, outputFile) = await SetupReporter();
+        Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", "thomhurst/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SHA", "abc123");
+        Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", "/work/TUnit");
+        Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", "https://github.com");
+
+        try
+        {
+            var message = new TestNodeUpdateMessage(
+                sessionUid: new SessionUid("test-session"),
+                testNode: new TestNode
+                {
+                    Uid = new TestNodeUid("loc-1"),
+                    DisplayName = "FailingTest",
+                    Properties = new PropertyBag(
+                        new FailedTestNodeStateProperty(new Exception("boom"), "boom"),
+                        new TestMethodIdentifierProperty(
+                            @namespace: "TestNamespace",
+                            assemblyFullName: "TestAssembly",
+                            typeName: "SampleTests",
+                            methodName: "FailingTest",
+                            parameterTypeFullNames: [],
+                            returnTypeFullName: "System.Void",
+                            methodArity: 0),
+                        new TestFileLocationProperty(
+                            "/work/TUnit/src/SampleTests.cs",
+                            new LinePositionSpan(new LinePosition(12, 0), new LinePosition(20, 0))))
+                });
+
+            await FeedTestMessages(reporter, message);
+            await reporter.AfterRunAsync(1, CancellationToken.None);
+
+            var output = await File.ReadAllTextAsync(outputFile);
+            output.ShouldContain("/thomhurst/TUnit/blob/abc123/src/SampleTests.cs#L12");
+            output.ShouldNotContain("#L13");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("GITHUB_REPOSITORY", null);
+            Environment.SetEnvironmentVariable("GITHUB_SHA", null);
+            Environment.SetEnvironmentVariable("GITHUB_WORKSPACE", null);
+            Environment.SetEnvironmentVariable("GITHUB_SERVER_URL", null);
+        }
+    }
+
     private string CreateTempFile()
     {
         var path = Path.GetTempFileName();

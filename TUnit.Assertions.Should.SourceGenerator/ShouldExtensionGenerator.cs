@@ -535,7 +535,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             if (caeTarget is null) ctorCandidates.Add(p);
         }
 
-        if (!HasMatchingConstructor(returnType, assertionTypeArg, assertionContext, ctorCandidates))
+        var matchedCtor = TryFindMatchingConstructor(returnType, assertionTypeArg, assertionContext, ctorCandidates);
+        if (matchedCtor is null)
         {
             return false;
         }
@@ -547,7 +548,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             ReturnTypeGenericArgs: new EquatableArray<string>(returnType.TypeArguments.Select(a => a.ToDisplayString(NoGlobalFormat)).ToList()),
             RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
                                           ?? TryGetRucMessage(returnType.GetAttributes())
-                                          ?? TryGetRucMessageFromConstructors(returnType));
+                                          ?? TryGetRucMessage(matchedCtor.GetAttributes()));
         return true;
     }
 
@@ -732,7 +733,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         // Find a public ctor on the return type whose param list (after the leading
         // AssertionContext<assertionTypeArg>) matches our ctor candidates by type.
-        if (!HasMatchingConstructor(returnType, assertionTypeArg, ctx.AssertionContext, ctorCandidates))
+        var matchedCtor = TryFindMatchingConstructor(returnType, assertionTypeArg, ctx.AssertionContext, ctorCandidates);
+        if (matchedCtor is null)
         {
             return;
         }
@@ -745,7 +747,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var rucMessage = TryGetRucMessage(method.GetAttributes())
                        ?? TryGetRucMessage(returnType.GetAttributes())
-                       ?? TryGetRucMessageFromConstructors(returnType);
+                       ?? TryGetRucMessage(matchedCtor.GetAttributes());
 
         var suppressedTrimWarnings = CollectSuppressedTrimWarnings(method.GetAttributes());
 
@@ -819,22 +821,24 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Returns true when <paramref name="returnType"/> has a public ctor whose parameters,
-    /// after a leading <c>AssertionContext&lt;assertionTypeArg&gt;</c>, match
-    /// <paramref name="ctorCandidates"/> by type. This guards the "simple factory" template
-    /// against extension methods that map context or otherwise transform before construction.
+    /// Returns the public ctor on <paramref name="returnType"/> whose parameters, after a
+    /// leading <c>AssertionContext&lt;assertionTypeArg&gt;</c>, match
+    /// <paramref name="ctorCandidates"/> by type — or null if none match. Guards the
+    /// "simple factory" template against extension methods that map context or otherwise
+    /// transform before construction.
     /// </summary>
-    private static bool HasMatchingConstructor(
+    private static IMethodSymbol? TryFindMatchingConstructor(
         INamedTypeSymbol returnType,
         ITypeSymbol assertionTypeArg,
         INamedTypeSymbol assertionContextSymbol,
         List<IParameterSymbol> ctorCandidates)
     {
+        var minimumParameterCount = ctorCandidates.Count + 1;
         foreach (var ctor in returnType.Constructors)
         {
             if (ctor.DeclaredAccessibility != Accessibility.Public
                 || ctor.IsStatic
-                || ctor.Parameters.Length != ctorCandidates.Count + 1)
+                || ctor.Parameters.Length < minimumParameterCount)
             {
                 continue;
             }
@@ -857,9 +861,27 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
                     break;
                 }
             }
-            if (allMatch) return true;
+
+            // Source overloads may intentionally omit simple constructor defaults, such as
+            // StringComparison or comparer parameters. Do not infer hidden boolean/string state:
+            // generated negation and expression parameters require body knowledge to forward.
+            for (var i = minimumParameterCount; allMatch && i < ctor.Parameters.Length; i++)
+            {
+                if (!CanOmitConstructorParameter(ctor.Parameters[i]))
+                {
+                    allMatch = false;
+                }
+            }
+            if (allMatch) return ctor;
         }
-        return false;
+        return null;
+    }
+
+    private static bool CanOmitConstructorParameter(IParameterSymbol parameter)
+    {
+        return parameter.HasExplicitDefaultValue
+               && parameter.Type.SpecialType != SpecialType.System_Boolean
+               && parameter.Type.SpecialType != SpecialType.System_String;
     }
 
     private static string? TryGetShouldNameOverride(INamedTypeSymbol returnType, INamedTypeSymbol? shouldNameAttr)
@@ -927,16 +949,6 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static string? TryGetRucMessageFromConstructors(INamedTypeSymbol type)
-    {
-        foreach (var ctor in type.Constructors)
-        {
-            var msg = TryGetRucMessage(ctor.GetAttributes());
-            if (msg is not null) return msg;
-        }
-        return null;
-    }
-
     private static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
     {
         if (defaultValue is null)
@@ -988,6 +1000,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("#pragma warning disable");
         sb.AppendLine("#nullable enable");
         sb.AppendLine();
         sb.AppendLine("using System;");
@@ -1096,6 +1109,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     {
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("#pragma warning disable");
         sb.AppendLine("#nullable enable");
         sb.AppendLine();
         sb.AppendLine("using System;");
@@ -1495,8 +1509,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
             SignatureKey: CreateShouldMethodSignatureKey(method, "Should"),
             Priority: priority,
             RequiresUnreferencedCodeMessage: TryGetRucMessage(method.GetAttributes())
-                                          ?? TryGetRucMessage(returnType.GetAttributes())
-                                          ?? TryGetRucMessageFromConstructors(returnType),
+                                          ?? TryGetRucMessage(returnType.GetAttributes()),
             SuppressedTrimWarnings: new EquatableArray<string>(CollectSuppressedTrimWarnings(method.GetAttributes())),
             ForwardedAttributes: new EquatableArray<string>(CollectForwardedAttributes(method.GetAttributes())));
         return true;
@@ -1598,6 +1611,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
     {
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated />");
+        sb.AppendLine("#pragma warning disable");
         sb.AppendLine("#nullable enable");
         sb.AppendLine();
         sb.AppendLine("using System;");

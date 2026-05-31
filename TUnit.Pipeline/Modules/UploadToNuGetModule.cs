@@ -15,6 +15,7 @@ namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
 [RunOnLinuxOnly]
+[DependsOn<GenerateVersionModule>]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
 [DependsOn<RunEngineTestsModule>]
@@ -22,6 +23,10 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<TestVBNugetPackageModule>]
 public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<CommandResult[]>
 {
+    // Local builds pin this dummy version (see Directory.Build.props). Pushing it to NuGet.org
+    // would burn the version and ship an unbuildable package, so guard against it explicitly.
+    private const string DummyLocalVersion = "99.99.99";
+
     protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
         .WithSkipWhen(_ =>
         {
@@ -41,8 +46,25 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
 
     protected override async Task<CommandResult[]?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
+        var versionResult = await context.GetModule<GenerateVersionModule>();
+        var semVer = versionResult.ValueOrDefault?.SemVer;
+
+        if (string.IsNullOrWhiteSpace(semVer) || semVer.StartsWith(DummyLocalVersion, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                $"Refusing to publish to NuGet: resolved version '{semVer}' is missing or is the dummy local version '{DummyLocalVersion}'. " +
+                "This indicates the CI versioning step did not run; aborting to avoid shipping a bad package.");
+        }
+
         var nupkgs = context.Git().RootDirectory
-            .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg");
+            .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg")
+            .ToArray();
+
+        if (nupkgs.Any(file => file.NameWithoutExtension.Contains(DummyLocalVersion)))
+        {
+            throw new InvalidOperationException(
+                $"Refusing to publish to NuGet: found a package stamped with the dummy local version '{DummyLocalVersion}'.");
+        }
 
         return await nupkgs.SelectAsync(file =>
                 context.DotNet().Nuget.Push(new DotNetNugetPushOptions

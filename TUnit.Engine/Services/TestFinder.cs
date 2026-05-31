@@ -42,21 +42,10 @@ internal class TestFinder : ITestFinder
             var testName = test.Metadata.TestDetails.TestName;
 
             // Index by type
-            if (!testsByType.TryGetValue(classType, out var testsForType))
-            {
-                testsForType = [];
-                testsByType[classType] = testsForType;
-            }
-            testsForType.Add(test);
+            testsByType.AddToList(classType, test);
 
             // Index by (type, name)
-            var key = (classType, testName);
-            if (!testsByTypeAndName.TryGetValue(key, out var testsForKey))
-            {
-                testsForKey = [];
-                testsByTypeAndName[key] = testsForKey;
-            }
-            testsForKey.Add(test);
+            testsByTypeAndName.AddToList((classType, testName), test);
         }
 
         _testsByType = testsByType;

@@ -35,6 +35,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     /// Used by the wrapper type builder for correct explicit interface forwarding.
     /// </summary>
     public string? DeclaringInterfaceName { get; init; }
+    public string OverrideAccessModifier { get; init; } = "public";
     public bool IsStaticAbstract { get; init; }
 
     /// <summary>
@@ -56,6 +57,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
             && DeclaringInterfaceName == other.DeclaringInterfaceName
+            && OverrideAccessModifier == other.OverrideAccessModifier
             && IsStaticAbstract == other.IsStaticAbstract
             && RaiseParameterList == other.RaiseParameterList
             && ObsoleteAttribute == other.ObsoleteAttribute;
@@ -71,6 +73,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + RaiseParameterList.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + OverrideAccessModifier.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             return hash;
         }

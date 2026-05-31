@@ -26,31 +26,30 @@ public static class TestDataFormatter
             return string.Empty;
         }
 
-        var formattedArgs = new string[arguments.Length];
-        for (var i = 0; i < arguments.Length; i++)
+        var builder = StringBuilderPool.Get();
+        try
         {
-            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], formatters);
+            for (var i = 0; i < arguments.Length; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(ArgumentFormatter.Format(arguments[i], formatters));
+            }
+            return builder.ToString();
         }
-        return string.Join(", ", formattedArgs);
+        finally
+        {
+            StringBuilderPool.Return(builder);
+        }
     }
 
     /// <summary>
     /// Formats an array of arguments using default formatting
     /// </summary>
     public static string FormatArguments(object?[] arguments)
-    {
-        if (arguments.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        var formattedArgs = new string[arguments.Length];
-        for (var i = 0; i < arguments.Length; i++)
-        {
-            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], []);
-        }
-        return string.Join(", ", formattedArgs);
-    }
+        => FormatArguments(arguments, []);
 
     /// <summary>
     /// Creates a display name from test metadata and arguments
@@ -87,7 +86,7 @@ public static class TestDataFormatter
             var genericTypeNames = new string[genericTypes.Length];
             for (var i = 0; i < genericTypes.Length; i++)
             {
-                genericTypeNames[i] = GetSimpleTypeName(genericTypes[i]);
+                genericTypeNames[i] = TypeNameFormatter.GetSimpleTypeName(genericTypes[i]);
             }
             var genericPart = string.Join(", ", genericTypeNames);
             testName = $"{testName}<{genericPart}>";
@@ -101,30 +100,4 @@ public static class TestDataFormatter
         var argumentsText = FormatArguments(arguments);
         return $"{testName}({argumentsText})";
     }
-
-    private static string GetSimpleTypeName(Type type)
-    {
-        if (!type.IsGenericType)
-        {
-            return type.Name;
-        }
-
-        var genericTypeName = type.GetGenericTypeDefinition().Name;
-        var index = genericTypeName.IndexOf('`');
-        if (index > 0)
-        {
-            genericTypeName = genericTypeName.Substring(0, index);
-        }
-
-        var genericArgs = type.GetGenericArguments();
-        var genericArgNames = new string[genericArgs.Length];
-        for (var i = 0; i < genericArgs.Length; i++)
-        {
-            genericArgNames[i] = GetSimpleTypeName(genericArgs[i]);
-        }
-        var genericArgsText = string.Join(", ", genericArgNames);
-
-        return $"{genericTypeName}<{genericArgsText}>";
-    }
-
 }

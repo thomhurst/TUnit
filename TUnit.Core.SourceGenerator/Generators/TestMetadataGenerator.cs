@@ -169,9 +169,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
 
-        var (filePath, lineNumber) = GetTestMethodSourceLocation(methodSyntax, testAttribute);
+        var location = GetTestMethodSourceLocation(methodSyntax, testAttribute);
 
-        var methodAttributes = methodSymbol.GetAttributes();
+        var methodAttributes = methodSymbol!.GetAttributes();
 
         return new TestMethodMetadata
         {
@@ -180,8 +180,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             MethodFullyQualifiedName = methodSymbol!.ToDisplayString(),
             TypeFullyQualifiedName = containingType.ToDisplayString(),
             MethodAttributeHash = TestMethodMetadata.ComputeAttributeHash(methodAttributes),
-            FilePath = filePath,
-            LineNumber = lineNumber,
+            FilePath = location.FilePath,
+            LineNumber = location.LineNumber,
+            StartColumnNumber = location.StartColumnNumber,
+            EndLineNumber = location.EndLineNumber,
+            EndColumnNumber = location.EndColumnNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
             CompilationContext = compilationContext,
@@ -236,7 +239,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 continue;
             }
-            var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
+            var location = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
             // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
             var typeForMetadata = classInfo.TypeSymbol;
@@ -266,8 +269,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodFullyQualifiedName = effectiveMethod.ToDisplayString(),
                 TypeFullyQualifiedName = typeForMetadata.ToDisplayString(),
                 MethodAttributeHash = TestMethodMetadata.ComputeAttributeHash(methodAttributes),
-                FilePath = filePath,
-                LineNumber = lineNumber,
+                FilePath = location.FilePath,
+                LineNumber = location.LineNumber,
+                StartColumnNumber = location.StartColumnNumber,
+                EndLineNumber = location.EndLineNumber,
+                EndColumnNumber = location.EndColumnNumber,
                 TestAttribute = testAttribute,
                 Context = classInfo.Context, // Use class context to access Compilation
                 CompilationContext = classInfo.CompilationContext,
@@ -635,9 +641,46 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             });
         }
 
-        var methodArgumentsAttributes = testMethod.MethodAttributes
-            .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
-            .ToArray();
+        // Single-pass classification of method attributes into named buckets, replacing the
+        // repeated `.Where(...).ToArray()` scans that previously walked MethodAttributes 6-8 times.
+        List<AttributeData>? methodArgumentsBucket = null;
+        List<AttributeData>? methodDataSourceBucket = null;
+        List<AttributeData>? typedDataSourceBucket = null;
+        List<AttributeData>? generateGenericTestBucket = null;
+
+        foreach (var attribute in testMethod.MethodAttributes)
+        {
+            var attributeClass = attribute.AttributeClass;
+            if (attributeClass is null)
+            {
+                continue;
+            }
+
+            // Buckets are independent: an attribute may match more than one (e.g.
+            // MethodDataSourceAttribute is also an IDataSourceAttribute), matching the original
+            // behaviour where each `.Where(...)` scan was evaluated separately.
+            switch (attributeClass.Name)
+            {
+                case "ArgumentsAttribute":
+                    (methodArgumentsBucket ??= []).Add(attribute);
+                    break;
+                case "MethodDataSourceAttribute":
+                    (methodDataSourceBucket ??= []).Add(attribute);
+                    break;
+            }
+
+            if (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass))
+            {
+                (typedDataSourceBucket ??= []).Add(attribute);
+            }
+
+            if (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute"))
+            {
+                (generateGenericTestBucket ??= []).Add(attribute);
+            }
+        }
+
+        var methodArgumentsAttributes = methodArgumentsBucket ?? [];
 
         var classArgumentsAttributes = testMethod.IsGenericType
             ? testMethod.TypeSymbol.GetAttributes()
@@ -694,7 +737,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Handle generic classes with non-generic methods that have method-level Arguments
-        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Length > 0)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -707,7 +750,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Process typed data source attributes
-        foreach (var dataSourceAttr in testMethod.MethodAttributes.Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+        foreach (var dataSourceAttr in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
         {
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
@@ -729,7 +772,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process MethodDataSource attributes for generic classes (non-generic methods)
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 var inferredTypes = InferClassTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
@@ -749,7 +792,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process MethodDataSource attributes for generic methods
         if (testMethod.IsGenericMethod)
         {
-            foreach (var mdsAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "MethodDataSourceAttribute"))
+            foreach (var mdsAttr in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 var inferredTypes = InferTypesFromMethodDataSource(testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
@@ -769,7 +812,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     if (testMethod.IsGenericMethod)
                     {
-                        foreach (var methodArgAttr in testMethod.MethodAttributes.Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+                        foreach (var methodArgAttr in methodArgumentsAttributes)
                         {
                             var methodInferredTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodArgAttr, compilation);
                             if (methodInferredTypes is { Length: > 0 })
@@ -789,9 +832,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process GenerateGenericTest attributes
         // GenerateGenericTestAttribute takes params Type[] in its constructor, so extract from constructor args
         {
-            var methodGenericTestAttrs = testMethod.IsGenericMethod
-                ? testMethod.MethodAttributes
-                    .Where(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            var methodGenericTestAttrs = testMethod.IsGenericMethod && generateGenericTestBucket is not null
+                ? generateGenericTestBucket
                     .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
                     .Where(t => t is { Length: > 0 })
                     .ToList()
@@ -1073,8 +1115,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine($"MethodName = \"{EscapeString(entry.TestName)}\",");
         writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
         writer.AppendLine($"Categories = {categoriesArray},");
         writer.AppendLine($"Properties = {propertiesArray},");
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
@@ -1218,13 +1259,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
-        // File location metadata
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
 
         // Method metadata
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
+    }
+
+    private static void WriteSourceLocationMetadata(CodeWriter writer, TestMethodMetadata testMethod)
+    {
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        writer.AppendLine($"StartColumnNumber = {testMethod.StartColumnNumber},");
+        writer.AppendLine($"EndLineNumber = {testMethod.EndLineNumber},");
+        writer.AppendLine($"EndColumnNumber = {testMethod.EndColumnNumber},");
     }
 
     private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, TestMethodMetadata testMethod)
@@ -1266,9 +1314,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
-        // File location metadata
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -1981,8 +2027,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
-        // Use cached interface check
-        return InterfaceCache.IsAsyncEnumerable(type);
+        return InterfaceHelper.IsAsyncEnumerable(type);
     }
 
     private static bool IsTask(ITypeSymbol type)
@@ -1994,8 +2039,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsEnumerable(ITypeSymbol type)
     {
-        // Use cached interface check (already handles string exclusion)
-        return InterfaceCache.IsEnumerable(type);
+        // Already handles string exclusion
+        return InterfaceHelper.IsEnumerable(type);
     }
 
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
@@ -3098,8 +3143,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
         writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
         writer.AppendLine($"Categories = {categoriesArray},");
         writer.AppendLine($"Properties = {propertiesArray},");
         writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
@@ -4011,70 +4055,97 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+    private static TestSourceLocation GetTestMethodSourceLocation(
         MethodDeclarationSyntax methodSyntax,
         AttributeData testAttribute)
     {
-        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
-            if (attrLineNumber > 0)
-            {
-                return (attrFilePath!, attrLineNumber);
-            }
-        }
+        var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
-        // Fall back to method syntax location
         var methodLocation = methodSyntax.GetLocation();
-        var filePath = methodLocation.SourceTree?.FilePath;
-        if (!string.IsNullOrEmpty(filePath))
+        if (methodLocation.IsInSource)
         {
-            var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (filePath!, lineNumber);
+            return CreateSourceLocation(
+                methodLocation.GetLineSpan(),
+                !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : methodLocation.SourceTree?.FilePath ?? methodSyntax.SyntaxTree.FilePath ?? "");
         }
 
-        // Final fallback
-        filePath = methodSyntax.SyntaxTree.FilePath ?? "";
-        var fallbackLineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-        return (filePath, fallbackLineNumber);
+        return CreateFallbackSourceLocation(
+            !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : methodSyntax.SyntaxTree.FilePath ?? "",
+            attrLineNumber);
     }
 
-    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+    private static TestSourceLocation GetTestMethodSourceLocation(
         IMethodSymbol method,
         AttributeData testAttribute,
         InheritsTestsClassMetadata classInfo)
     {
-        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
-            if (attrLineNumber > 0)
-            {
-                return (attrFilePath!, attrLineNumber);
-            }
-        }
+        var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
-        // Fall back to method symbol location
         var methodLocation = method.Locations.FirstOrDefault();
         if (methodLocation != null && methodLocation.IsInSource)
         {
-            var filePath = methodLocation.SourceTree?.FilePath;
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-                return (filePath!, lineNumber);
-            }
+            return CreateSourceLocation(
+                methodLocation.GetLineSpan(),
+                !string.IsNullOrEmpty(attrFilePath) ? attrFilePath! : methodLocation.SourceTree?.FilePath ?? "");
         }
 
-        // Final fallback to class location
+        // The base method lives in a referenced assembly (cross-project inheritance), so its symbol
+        // has no source location in this compilation. The [Test] attribute's CallerFilePath and
+        // CallerLineNumber were baked at the base method declaration, so they remain the correct
+        // pointer to the test. We deliberately do NOT fall back to the derived class's syntax span:
+        // that pairs the base file path with the derived class's line range, sending the source view
+        // to unrelated lines in the base file.
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            return CreateFallbackSourceLocation(attrFilePath!, attrLineNumber);
+        }
+
         var classLocation = classInfo.ClassSyntax.GetLocation();
-        var derivedFilePath = classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "";
-        var derivedLineNumber = classLocation.GetLineSpan().StartLinePosition.Line + 1;
-        return (derivedFilePath, derivedLineNumber);
+        if (classLocation.IsInSource)
+        {
+            return CreateSourceLocation(
+                classLocation.GetLineSpan(),
+                classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "");
+        }
+
+        return CreateFallbackSourceLocation(
+            classInfo.ClassSyntax.SyntaxTree.FilePath ?? "",
+            attrLineNumber);
     }
+
+    private static TestSourceLocation CreateSourceLocation(FileLinePositionSpan lineSpan, string filePath)
+    {
+        // Roslyn reports zero-based line/character positions; TUnit stores user-facing source
+        // coordinates as one-based values alongside the existing LineNumber convention.
+        return new TestSourceLocation(
+            filePath,
+            lineSpan.StartLinePosition.Line + 1,
+            lineSpan.StartLinePosition.Character + 1,
+            lineSpan.EndLinePosition.Line + 1,
+            lineSpan.EndLinePosition.Character + 1);
+    }
+
+    private static TestSourceLocation CreateFallbackSourceLocation(string filePath, int lineNumber)
+    {
+        // Exact Roslyn span data was unavailable. Preserve any caller-supplied start line, and
+        // use zero-valued columns to indicate that the precise character range could not be determined.
+        var resolvedLineNumber = lineNumber > 0 ? lineNumber : 0;
+        return new TestSourceLocation(filePath, resolvedLineNumber, 0, resolvedLineNumber, 0);
+    }
+
+    /// <summary>
+    /// Source coordinates for a discovered test.
+    /// Line and column values use one-based numbering; zero-valued columns indicate that the
+    /// precise character span could not be determined for the fallback location.
+    /// </summary>
+    private readonly record struct TestSourceLocation(
+        string FilePath,
+        int LineNumber,
+        int StartColumnNumber,
+        int EndLineNumber,
+        int EndColumnNumber);
 
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
@@ -6144,8 +6215,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyInjections(writer, concreteTypeSymbol, concreteTypeSymbol.GloballyQualified());
 
         // Other metadata
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
         writer.AppendLine("TestSessionId = testSessionId,");
 
@@ -6492,8 +6562,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
 
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
-        writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
+        WriteSourceLocationMetadata(writer, testMethod);
 
         writer.Unindent();
         writer.AppendLine("};");

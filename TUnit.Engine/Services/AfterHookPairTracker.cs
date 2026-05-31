@@ -155,6 +155,12 @@ internal sealed class AfterHookPairTracker
     /// </summary>
     public ValueTask<List<Exception>> GetOrCreateAfterAssemblyTask(Assembly assembly, Func<Assembly, ValueTask<List<Exception>>> taskFactory)
     {
+        // Lock-free fast path avoids allocating a closure on the common cache-hit case.
+        if (_afterAssemblyTasks.TryGetValue(assembly, out var existingTask))
+        {
+            return new ValueTask<List<Exception>>(existingTask);
+        }
+
         var task = _afterAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a).AsTask());
         return new ValueTask<List<Exception>>(task);
     }

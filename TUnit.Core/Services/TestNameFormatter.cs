@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Services;
@@ -50,7 +51,7 @@ public class TestNameFormatter : ITestNameFormatter
             null => "null",
             string str => $"\"{str}\"",
             char ch => $"'{ch}'",
-            bool b => b.ToString().ToLowerInvariant(),
+            bool b => b ? "true" : "false",
             // Use InvariantCulture for numeric types to avoid culture-specific formatting issues
             double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
             float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -68,11 +69,23 @@ public class TestNameFormatter : ITestNameFormatter
         int classDataIndex = 0,
         int methodDataIndex = 0)
     {
-        return template
-            .Replace("{TestIndex}", testIndex.ToString())
-            .Replace("{RepeatIndex}", repeatIndex.ToString())
-            .Replace("{ClassDataIndex}", classDataIndex.ToString())
-            .Replace("{MethodDataIndex}", methodDataIndex.ToString());
+        // Mutate a pooled StringBuilder in place then materialize once, instead of
+        // allocating a new string per Replace call. Only the final string allocates.
+        var builder = StringBuilderPool.Get();
+        try
+        {
+            return builder
+                .Append(template)
+                .Replace("{TestIndex}", testIndex.ToString())
+                .Replace("{RepeatIndex}", repeatIndex.ToString())
+                .Replace("{ClassDataIndex}", classDataIndex.ToString())
+                .Replace("{MethodDataIndex}", methodDataIndex.ToString())
+                .ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(builder);
+        }
     }
 
     private string FormatArguments(object?[] args)
@@ -82,25 +95,54 @@ public class TestNameFormatter : ITestNameFormatter
             return string.Empty;
         }
 
-        return string.Join(", ", args.Select(FormatArgumentValue));
+        // Build directly into a pooled StringBuilder to avoid the LINQ iterator/closure
+        // and the temporary string[] that Select + string.Join would materialize.
+        var builder = StringBuilderPool.Get();
+        try
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(FormatArgumentValue(args[i]));
+            }
+
+            return builder.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(builder);
+        }
     }
 
     private string FormatEnumerable(IEnumerable enumerable)
     {
-        var sb = new StringBuilder("[");
-        var first = true;
-
-        foreach (var item in enumerable)
+        // Pool the builder like BuildTestId. Reentrant-safe: a nested enumerable draws a
+        // distinct instance from the pool, and each Get is balanced by a Return.
+        var sb = StringBuilderPool.Get();
+        try
         {
-            if (!first)
-            {
-                sb.Append(", ");
-            }
-            first = false;
-            sb.Append(FormatArgumentValue(item));
-        }
+            sb.Append('[');
+            var first = true;
 
-        sb.Append(']');
-        return sb.ToString();
+            foreach (var item in enumerable)
+            {
+                if (!first)
+                {
+                    sb.Append(", ");
+                }
+                first = false;
+                sb.Append(FormatArgumentValue(item));
+            }
+
+            sb.Append(']');
+            return sb.ToString();
+        }
+        finally
+        {
+            StringBuilderPool.Return(sb);
+        }
     }
 }

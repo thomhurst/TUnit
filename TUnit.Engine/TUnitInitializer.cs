@@ -1,76 +1,46 @@
-﻿using System.Diagnostics;
 using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
-using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Discovery;
-using TUnit.Engine.Exceptions;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine;
 
-internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
+/// <summary>
+/// Per-session TUnit initialization. Delegates process-wide setup (exception handlers,
+/// parameter parsing) to <see cref="TUnitProcessInitializer"/> and performs session-scoped
+/// work (hook discovery, working directory) at most once per <see cref="TUnitServiceProvider"/>
+/// instance.
+/// </summary>
+internal class TUnitInitializer
 {
-    public void Initialize(ExecuteRequestContext context)
+    private readonly ICommandLineOptions _commandLineOptions;
+    private readonly IHookRegistrar _hookDiscoveryService;
+    private readonly OneTimeGate _sessionGate = new(
+        contextName: nameof(TUnitInitializer),
+        waitTimeout: TimeSpan.FromMinutes(5));
+
+    public TUnitInitializer(ICommandLineOptions commandLineOptions, IHookRegistrar hookDiscoveryService)
     {
-        ConfigureGlobalExceptionHandlers(context);
-        SetUpExceptionListeners();
-        ParseParameters();
-
-        // Discover hooks using the mode-specific service
-        hookDiscoveryService.DiscoverHooks();
-
-        if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
-        {
-            TestContext.WorkingDirectory = TestContext.OutputDirectory!;
-        }
+        _commandLineOptions = commandLineOptions;
+        _hookDiscoveryService = hookDiscoveryService;
     }
 
-    private void SetUpExceptionListeners()
+    public void Initialize()
     {
-        Trace.Listeners.Insert(0, new ThrowListener());
-    }
+        TUnitProcessInitializer.EnsureInitialised(_commandLineOptions);
 
-    private void ParseParameters()
-    {
-        if (!commandLineOptions.TryGetOptionArgumentList(ParametersCommandProvider.TestParameter, out var parameters))
+        // Session-scoped: every concurrent ExecuteRequestAsync call on this session blocks
+        // until hook discovery + working directory setup have finished, so no caller proceeds
+        // past partial state. Cross-session "run once per process" semantics for reflection
+        // hook discovery live downstream in ReflectionHookDiscoveryService.
+        _sessionGate.Run(() =>
         {
-            return;
-        }
+            _hookDiscoveryService.DiscoverHooks();
 
-        foreach (var parameter in parameters)
-        {
-            var split = parameter.Split('=');
-            var key = split[0];
-            var value = split[1];
-
-            var list = TestContext.InternalParametersDictionary.GetOrAdd(key, static _ => []);
-            list.Add(value);
-        }
-    }
-
-    private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
-    {
-        // Handle unhandled exceptions on any thread
-        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-        {
-            var exception = args.ExceptionObject as Exception;
-
-            Console.Error.WriteLine($"Unhandled exception in AppDomain: {exception}");
-
-            // Force exit to prevent hanging
-            if (args.IsTerminating)
+            if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
             {
-                context.Complete();
+                TestContext.WorkingDirectory = TestContext.OutputDirectory!;
             }
-        };
-
-        // Handle unobserved task exceptions
-        TaskScheduler.UnobservedTaskException += (_, args) =>
-        {
-            Console.Error.WriteLine($"Unobserved task exception: {args.Exception}");
-
-            // Mark as observed to prevent process termination
-            args.SetObserved();
-        };
+        });
     }
 }

@@ -61,11 +61,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
 
-            serviceProvider.Initializer.Initialize(context);
+            serviceProvider.Initializer.Initialize();
 
             await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
-            serviceProvider.CancellationToken.Initialise(context.CancellationToken);
+            serviceProvider.CancellationToken.Initialise();
 
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
         }

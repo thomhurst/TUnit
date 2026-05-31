@@ -30,6 +30,11 @@ public abstract class AbstractExecutableTest
     // avoiding a per-test scan over ParallelConstraints in the hot path.
     internal bool RequiresGlobalNotInParallelLock { get; set; }
 
+    // Set by the scheduler for tests that either have dependencies or are the target of
+    // another test's dependency. These tests can be reached from both the scheduler and
+    // dependency recursion, so TestRunner must keep using its execution dedup ledger.
+    internal bool RequiresExecutionDedup { get; set; }
+
     public required TestContext Context
     {
         get;

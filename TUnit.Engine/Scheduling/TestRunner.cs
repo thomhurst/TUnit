@@ -42,19 +42,48 @@ public sealed class TestRunner
         _notInParallelLock = notInParallelLock;
     }
 
-    // Dedup ledger for re-entrant ExecuteTestAsync calls (dependency recursion, scheduler races).
-    // Entries are intentionally retained for the session: a late dependency lookup must still
-    // observe the in-flight or completed TCS. Session-scoped lifetime bounds growth to O(test count).
+    // Dedup ledger for tests involved in dependency relationships. Entries are intentionally
+    // retained for the session: a late dependency lookup must still observe the in-flight or
+    // completed TCS. Session-scoped lifetime bounds growth to O(test count).
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
     private Exception? _firstFailFastException;
 
+    internal int ExecutingTestsCount => _executingTests.Count;
+
     public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        if (!test.RequiresExecutionDedup)
+        {
+            if (test.ExecutionTask is { } executionTask)
+            {
+                return new ValueTask(executionTask);
+            }
+
+            return ExecuteTestInternalAsync(test, cancellationToken);
+        }
+
+        return ExecuteTestWithDependenciesAsync(test, cancellationToken);
+    }
+
+    internal ValueTask ExecuteTestWithoutExecutionTaskAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        if (!test.RequiresExecutionDedup)
+        {
+            return ExecuteTestInternalAsync(test, cancellationToken);
+        }
+
+        return ExecuteTestWithDependenciesAsync(test, cancellationToken);
+    }
+
+    private ValueTask ExecuteTestWithDependenciesAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         if (_executingTests.TryGetValue(test.TestId, out var existingTcs))
         {
             return new ValueTask(existingTcs.Task);
         }
-        var tcs = new TaskCompletionSource<bool>();
+        // Continuations may re-enter scheduling paths; keep them off the thread
+        // that publishes ledger completion.
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         existingTcs = _executingTests.GetOrAdd(test.TestId, tcs);
 
         if (existingTcs != tcs)
