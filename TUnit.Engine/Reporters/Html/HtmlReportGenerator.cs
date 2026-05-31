@@ -564,6 +564,7 @@ internal static class HtmlReportGenerator
                     w.WriteStartObject();
                     if (!string.IsNullOrEmpty(a.ExceptionType)) w.WriteString("type", a.ExceptionType!);
                     if (!string.IsNullOrEmpty(a.ExceptionMessage)) w.WriteString("message", a.ExceptionMessage!);
+                    if (!string.IsNullOrEmpty(a.StackTrace)) w.WriteString("stack", a.StackTrace!);
                     w.WriteEndObject();
                 }
                 w.WriteEndObject();

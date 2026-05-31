@@ -2635,6 +2635,7 @@ namespace .Interfaces
         .TestPhase Phase { get; }
         bool ReportResult { get; set; }
         .TestResult? Result { get; }
+        .<.TestResult> RetryAttempts { get; }
         <.TestContext, , int, .<bool>>? RetryFunc { get; }
         string? SkipReason { get; }
         ? TestEnd { get; }

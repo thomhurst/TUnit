@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Shouldly;
 using TUnit.Core;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
 
@@ -58,6 +59,39 @@ public class TestNodeLocationTests
         location.LineSpan.Start.Column.ShouldBe(0);
         location.LineSpan.End.Line.ShouldBe(12);
         location.LineSpan.End.Column.ShouldBe(0);
+    }
+
+    [Test]
+    public void ToTestNode_Attaches_RetryAttempts_On_Final_State_Only()
+    {
+        // #6119: failed retry attempts are captured on the TestContext during execution. They
+        // must ride along on the final node so the HTML report can rebuild the attempt history;
+        // intermediate (Discovered/InProgress) updates carry no final result, so nothing attaches.
+        TestExtensions.ClearCaches();
+
+        var context = CreateTestContext(
+            testId: Guid.NewGuid().ToString("N"),
+            filePath: @"C:\tests\SampleTests.cs",
+            lineNumber: 12,
+            startColumnNumber: 5,
+            endLineNumber: 16,
+            endColumnNumber: 6);
+
+        context.RetryAttempts =
+        [
+            new TestResult { State = TestState.Failed, Start = null, End = null, Duration = TimeSpan.FromMilliseconds(50), Exception = new Exception("boom"), ComputerName = "test" },
+        ];
+
+        // Final state -> attached.
+        var finalNode = context.ToTestNode(PassedTestNodeStateProperty.CachedInstance);
+        var attached = finalNode.Properties.AsEnumerable().OfType<TUnitRetryAttemptsProperty>().SingleOrDefault();
+        attached.ShouldNotBeNull();
+        attached!.Attempts.Count.ShouldBe(1);
+        attached.Attempts[0].State.ShouldBe(TestState.Failed);
+
+        // Discovered/in-progress state -> not attached.
+        var discoveredNode = context.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance);
+        discoveredNode.Properties.AsEnumerable().OfType<TUnitRetryAttemptsProperty>().ShouldBeEmpty();
     }
 
     private static TestContext CreateTestContext(

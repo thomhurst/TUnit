@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Reporters;
 #pragma warning disable TPEXP
 
 namespace TUnit.Engine.Extensions;
@@ -118,7 +119,7 @@ internal static class TestExtensions
     {
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
-        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+        var isFinalState = stateProperty.IsFinalState();
 
         var isTrxEnabled = isFinalState && IsTrxEnabled(testContext);
 
@@ -208,6 +209,15 @@ internal static class TestExtensions
             propertyBag.Add(GetTimingProperty(testContext, testContext.Execution.TestStart.GetValueOrDefault()));
         }
 
+        // Carry failed-retry history to reporters. Only the final update is emitted per test, so
+        // this is the one chance to surface the per-attempt list captured during execution.
+        if (isFinalState && testContext.RetryAttempts is { Count: > 0 } retryAttempts)
+        {
+            // Defensive copy: the live List<TestResult> on the TestContext could otherwise
+            // be mutated after the property is published.
+            propertyBag.Add(new TUnitRetryAttemptsProperty([.. retryAttempts]));
+        }
+
         var testNode = new TestNode
         {
             Uid = new TestNodeUid(testDetails.TestId),
@@ -240,7 +250,7 @@ internal static class TestExtensions
 
     private static int EstimateCount(TestContext testContext, TestNodeStateProperty stateProperty, bool isTrxEnabled)
     {
-        var isFinalState = stateProperty is not DiscoveredTestNodeStateProperty and not InProgressTestNodeStateProperty;
+        var isFinalState = stateProperty.IsFinalState();
 
         var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 

@@ -188,6 +188,9 @@ internal sealed class ReportAttempt
 
     [JsonPropertyName("exceptionMessage")]
     public string? ExceptionMessage { get; init; }
+
+    [JsonPropertyName("stackTrace")]
+    public string? StackTrace { get; init; }
 }
 
 internal sealed class ReportExceptionData

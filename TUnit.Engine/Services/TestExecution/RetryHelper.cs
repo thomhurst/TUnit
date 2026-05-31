@@ -45,6 +45,33 @@ internal static class RetryHelper
                     // Apply backoff delay before retrying
                     await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
 
+                    // Record this failed attempt before it's cleared, so reporters (e.g. the HTML
+                    // report's retry/flaky UI) can show the full attempt history. The engine only
+                    // emits one update per test (the final result), so without this the per-attempt
+                    // data would be lost. The attempt's own TestResult IS the record we keep; we
+                    // detach the TestContext back-reference so the history doesn't retain the live
+                    // execution graph. Wrapper-exception unwrapping is deferred to the reporter
+                    // (HtmlReporter.MapException), matching how the final attempt is rendered.
+                    // Result is normally populated by the time a failing attempt reaches here, so
+                    // the first branch is the common path. The fallback covers the rare case where
+                    // the attempt threw before a TestResult was written (e.g. an exception during
+                    // setup), so the attempt is still recorded rather than dropped from the history.
+                    var failedResult = testContext.Execution.Result;
+                    var attemptResult = failedResult is not null
+                        ? failedResult with { TestContext = null }
+                        : new TestResult
+                        {
+                            State = TestState.Failed,
+                            Start = testContext.TestStart,
+                            End = testContext.Execution.TestEnd,
+                            Duration = testContext.TestStart is { } start && testContext.Execution.TestEnd is { } end
+                                ? end - start
+                                : null,
+                            Exception = ex,
+                            ComputerName = Environment.MachineName,
+                        };
+                    (testContext.RetryAttempts ??= []).Add(attemptResult);
+
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;

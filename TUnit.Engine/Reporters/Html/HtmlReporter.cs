@@ -15,6 +15,7 @@ using TUnit.Core;
 using TUnit.Engine.Configuration;
 using TUnit.Engine.Constants;
 using TUnit.Engine.Exceptions;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Reporters;
@@ -32,7 +33,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     private string? _outputPath;
     private IMessageBus? _messageBus;
     private string _resultsDirectory = "TestResults";
-    private readonly ConcurrentDictionary<string, ConcurrentQueue<TestNodeUpdateMessage>> _updates = [];
+    private readonly ConcurrentDictionary<string, TestNodeUpdateMessage> _updates = [];
     private GitHubReporter? _githubReporter;
 
 #if NET
@@ -64,9 +65,26 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
         var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
-        _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, _ => []).Enqueue(testNodeUpdateMessage);
+        // Keep only the update we'll report per test: a final-state update always wins over a
+        // non-final one, otherwise the latest wins. The engine emits a single final update per
+        // test, so storing the whole stream (the old ConcurrentQueue) just wasted memory.
+        _updates.AddOrUpdate(
+            testNodeUpdateMessage.TestNode.Uid.Value,
+            testNodeUpdateMessage,
+            (_, existing) => PreferForReport(existing, testNodeUpdateMessage));
         return Task.CompletedTask;
     }
+
+    // Selects which update to keep for the report when more than one arrives for a test: a
+    // final-state update always wins over a non-final one; otherwise the later (incoming) one
+    // wins. Mirrors the previous "last final, else last overall" walk over the per-test queue.
+    private static TestNodeUpdateMessage PreferForReport(TestNodeUpdateMessage existing, TestNodeUpdateMessage incoming)
+        => HasFinalState(incoming) || !HasFinalState(existing) ? incoming : existing;
+
+    // Named distinctly from the TestNodeStateProperty.IsFinalState() extension to avoid two
+    // same-named symbols in scope; this overload reaches into the update's node state for callers.
+    private static bool HasFinalState(TestNodeUpdateMessage update)
+        => update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>().IsFinalState();
 
     public Type[] DataTypesConsumed { get; } = [typeof(TestNodeUpdateMessage)];
 
@@ -200,30 +218,15 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         _resultsDirectory = path;
     }
 
-    private ReportData BuildReportData()
+    internal ReportData BuildReportData()
     {
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? "TestResults";
         var tunitVersion = typeof(HtmlReporter).Assembly.GetName().Version?.ToString() ?? "unknown";
 
         // Get the last update with a final state for each test
-        var lastUpdates = new Dictionary<string, TestNodeUpdateMessage>(_updates.Count);
-        foreach (var kvp in _updates)
-        {
-            TestNodeUpdateMessage? lastFinal = null;
-            foreach (var update in kvp.Value)
-            {
-                var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                if (state is not null and not InProgressTestNodeStateProperty and not DiscoveredTestNodeStateProperty)
-                {
-                    lastFinal = update;
-                }
-            }
-
-            if (lastFinal != null)
-            {
-                lastUpdates[kvp.Key] = lastFinal;
-            }
-        }
+        // Each test's update was already reduced to the one we report (final-state preferred) in
+        // ConsumeAsync, so _updates maps directly to the nodes to render.
+        var lastUpdates = _updates;
 
         var summary = new ReportSummary();
         var groupsByClass = new Dictionary<string, List<ReportTestResult>>();
@@ -243,6 +246,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         foreach (var kvp in lastUpdates)
         {
+            // ConsumeAsync prefers a final-state update per test, but a test abandoned mid-flight
+            // (e.g. process-crash recovery) may only ever have a non-final update stored. Skip those
+            // so the report never renders a discovered/in-progress node as if it were a result.
+            if (!HasFinalState(kvp.Value))
+            {
+                continue;
+            }
+
             var testNode = kvp.Value.TestNode;
 
             // Correlate trace/span IDs from collected activities
@@ -253,41 +264,56 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 spanId = spanInfo.SpanId;
             }
 
-            // Walk all updates in order so we capture each retry attempt's status and
-            // timing — not just the count. The renderer's flaky/retry UI needs the
-            // per-attempt list, and we have all of it sitting on the update messages.
+            // Build the per-attempt history for the flaky/retry UI. The engine emits only one
+            // update per test (the final result), so we cannot reconstruct attempts from the
+            // update stream. Instead, failed attempts that triggered a retry are captured during
+            // execution and carried here on the final node via TUnitRetryAttemptsProperty; the
+            // final attempt is the node's own state. We stitch the two together in order.
             ReportAttempt[]? attempts = null;
             var retryAttempt = 0;
-            if (_updates.TryGetValue(kvp.Key, out var allUpdates))
+            var priorAttempts = testNode.Properties.AsEnumerable()
+                .OfType<TUnitRetryAttemptsProperty>()
+                .FirstOrDefault();
+            if (priorAttempts is { Attempts.Count: > 0 })
             {
-                List<ReportAttempt>? attemptList = null;
-                foreach (var update in allUpdates)
-                {
-                    var state = update.TestNode.Properties.SingleOrDefault<TestNodeStateProperty>();
-                    if (state is null or InProgressTestNodeStateProperty or DiscoveredTestNodeStateProperty)
-                    {
-                        continue;
-                    }
+                var finalState = testNode.Properties.SingleOrDefault<TestNodeStateProperty>();
+                var (finalStatus, finalException, _) = ExtractStatus(finalState);
+                var finalDuration = testNode.Properties.AsEnumerable()
+                    .OfType<TimingProperty>()
+                    .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
 
-                    var (attemptStatus, attemptException, _) = ExtractStatus(state);
-                    var attemptDuration = update.TestNode.Properties.AsEnumerable()
-                        .OfType<TimingProperty>()
-                        .FirstOrDefault()?.GlobalTiming.Duration.TotalMilliseconds ?? 0;
-                    attemptList ??= new List<ReportAttempt>();
+                var attemptList = new List<ReportAttempt>(priorAttempts.Attempts.Count + 1);
+                foreach (var prior in priorAttempts.Attempts)
+                {
+                    // We keep only the top-level type/message/stack here; MapException's recursive
+                    // InnerException chain is intentionally discarded, matching how the final
+                    // attempt is rendered (ReportAttempt has no inner-exception field).
+                    var priorException = MapException(prior.Exception);
                     attemptList.Add(new ReportAttempt
                     {
-                        Status = attemptStatus,
-                        DurationMs = attemptDuration,
-                        ExceptionType = attemptException?.Type,
-                        ExceptionMessage = attemptException?.Message,
+                        Status = StatusFromState(prior.State),
+                        DurationMs = prior.Duration?.TotalMilliseconds ?? 0,
+                        ExceptionType = priorException?.Type,
+                        ExceptionMessage = priorException?.Message,
+                        StackTrace = priorException?.StackTrace,
                     });
                 }
 
-                if (attemptList is { Count: > 1 })
+                attemptList.Add(new ReportAttempt
                 {
-                    retryAttempt = attemptList.Count - 1;
-                    attempts = attemptList.ToArray();
-                }
+                    Status = finalStatus,
+                    DurationMs = finalDuration,
+                    ExceptionType = finalException?.Type,
+                    ExceptionMessage = finalException?.Message,
+                    StackTrace = finalException?.StackTrace,
+                });
+
+                // Index of the surviving (final) attempt; equals testContext.CurrentRetryAttempt.
+                // Derived from the attempt list rather than read back from the node because
+                // CurrentRetryAttempt is not serialised onto the TestNode. A non-zero value here is
+                // what flags the test as flaky in AccumulateStatus.
+                retryAttempt = attemptList.Count - 1;
+                attempts = attemptList.ToArray();
             }
 
 #if NET
@@ -599,6 +625,20 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             _ => ("unknown", null, null)
         };
     }
+
+    // Maps a captured retry attempt's TestState to the same status vocabulary ExtractStatus
+    // produces for the final node, so prior and final attempts render consistently. A retried
+    // attempt is always a failure of some kind; Failed maps to "failed" (HtmlReportGenerator's
+    // MapStatus collapses "failed"/"error"/"timedOut" to "fail" for the UI).
+    private static string StatusFromState(TestState state) => state switch
+    {
+        TestState.Passed => "passed",
+        TestState.Failed => "failed",
+        TestState.Timeout => "timedOut",
+        TestState.Skipped => "skipped",
+        TestState.Cancelled => "cancelled",
+        _ => "error",
+    };
 
     private static ReportExceptionData? MapException(Exception? ex)
     {

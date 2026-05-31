@@ -2639,7 +2639,13 @@ function attemptsHTML(attempts) {
     const ico = a.status === 'pass'
       ? `<svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
       : `<svg class="ico" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-    pills.push(`<span class="attempt ${a.status}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
+    const tipParts = [`Attempt ${i+1}: ${a.status}`];
+    if (a.error) {
+      const head = [a.error.type, a.error.message].filter(Boolean).join(': ');
+      if (head) tipParts.push(head);
+      if (a.error.stack) tipParts.push(a.error.stack);
+    }
+    pills.push(`<span class="attempt ${a.status}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
   });
   return `
     <div class="attempts ${allFailed?'all-failed':''}">
@@ -2802,14 +2808,18 @@ function traceHTML(t) {
   const byId = new Map(spans.map(s => [s.id, s]));
   spans.forEach(s => { s._children = []; });
   spans.forEach(s => { if (s.parent && byId.has(s.parent)) byId.get(s.parent)._children.push(s); });
-  const totalDur = Math.max(...spans.map(s => s.start + s.dur));
+  // Span starts are absolute offsets from the run start, so normalise to the
+  // earliest span — otherwise the axis begins at 0 and all bars are pushed to
+  // the right, leaving the lead-in time before the test empty.
+  const minStart = Math.min(...spans.map(s => s.start));
+  const totalDur = (Math.max(...spans.map(s => s.start + s.dur)) - minStart) || 1;
   const ticks = 6, axisHtml = [];
   for (let i = 0; i <= ticks; i++) axisHtml.push(`<span>${fmtDur((i/ticks)*totalDur)}</span>`);
 
   const rows = [];
   function walk(span, depth) {
     const color = SERVICE_COLORS[span.service] || 'var(--text-muted)';
-    const left = (span.start / totalDur) * 100;
+    const left = ((span.start - minStart) / totalDur) * 100;
     const width = Math.max(0.2, (span.dur / totalDur) * 100);
     const err = (span.attrs && span.attrs['http.status_code'] >= 500) ? ' err' : '';
     rows.push(`
