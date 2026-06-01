@@ -121,7 +121,10 @@ public static class TupleArgumentHelper
                     var rangeCount = regularParamCount == 0
                         ? argCountExpression
                         : $"{argCountExpression} - {regularParamCount}";
-                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}).Select(i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i])).ToArray() : new {elementType.GloballyQualified()}[0])";
+                    // Use fully-qualified static Enumerable.Select/ToArray calls rather than the
+                    // extension-method chain — generated files don't import System.Linq unless the
+                    // project has ImplicitUsings enabled, so the extension form fails to compile (CS1061).
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : new {elementType.GloballyQualified()}[0])";
                     argumentExpressions.Add(arrayInit);
                 }
                 else
