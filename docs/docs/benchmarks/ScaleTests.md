@@ -1,7 +1,7 @@
 ---
 title: ScaleTests
 description: Performance benchmark results for ScaleTests
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # ScaleTests Benchmark

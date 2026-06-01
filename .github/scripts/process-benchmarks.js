@@ -173,7 +173,7 @@ Object.entries(categories.runtime).forEach(([testClass, data]) => {
   const benchmarkPage = `---
 title: ${testClass}
 description: Performance benchmark results for ${testClass}
-sidebar_position: ${Object.keys(categories.runtime).indexOf(testClass) + 2}
+sidebar_position: ${Object.keys(categories.runtime).indexOf(testClass) + 3}
 ---
 
 # ${testClass} Benchmark
@@ -272,7 +272,7 @@ if (Object.keys(categories.build).length > 0) {
     const benchmarkPage = `---
 title: Build Performance
 description: Compilation time benchmark results
-sidebar_position: ${Object.keys(categories.runtime).length + 2}
+sidebar_position: ${Object.keys(categories.runtime).length + 3}
 ---
 
 # Build Performance Benchmark

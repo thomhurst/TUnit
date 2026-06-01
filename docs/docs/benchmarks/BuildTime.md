@@ -1,7 +1,7 @@
 ---
 title: Build Performance
 description: Compilation time benchmark results
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # Build Performance Benchmark
