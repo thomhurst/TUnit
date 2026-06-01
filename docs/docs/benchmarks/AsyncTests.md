@@ -6,6 +6,8 @@ sidebar_position: 2
 
 # AsyncTests Benchmark
 
+> Realistic async/await patterns with I/O simulation
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 

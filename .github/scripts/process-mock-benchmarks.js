@@ -305,6 +305,8 @@ sidebar_position: ${index + 2}
 
 # ${category} Benchmark
 
+> ${description} — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
 

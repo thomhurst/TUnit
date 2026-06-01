@@ -6,6 +6,8 @@ sidebar_position: 5
 
 # MatrixTests Benchmark
 
+> Combinatorial test generation and execution
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 

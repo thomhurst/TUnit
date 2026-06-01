@@ -178,6 +178,8 @@ sidebar_position: ${Object.keys(categories.runtime).indexOf(testClass) + 2}
 
 # ${testClass} Benchmark
 
+> ${RUNTIME_DESCRIPTIONS[testClass] || `Performance benchmark for ${testClass}.`}
+
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
 
@@ -274,6 +276,8 @@ sidebar_position: ${Object.keys(categories.runtime).length + 2}
 ---
 
 # Build Performance Benchmark
+
+> Compilation time from a clean build across frameworks — how long it takes to build an identical test project.
 
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.

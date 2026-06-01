@@ -6,6 +6,8 @@ sidebar_position: 4
 
 # MassiveParallelTests Benchmark
 
+> Parallel execution stress tests
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 

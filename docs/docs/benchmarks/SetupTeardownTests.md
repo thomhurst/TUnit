@@ -6,6 +6,8 @@ sidebar_position: 7
 
 # SetupTeardownTests Benchmark
 
+> Expensive test fixtures with setup/teardown overhead
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 

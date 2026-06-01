@@ -6,6 +6,8 @@ sidebar_position: 8
 
 # Build Performance Benchmark
 
+> Compilation time from a clean build across frameworks — how long it takes to build an identical test project.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 

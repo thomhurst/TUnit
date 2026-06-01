@@ -6,6 +6,8 @@ sidebar_position: 3
 
 # CombinedWorkflow Benchmark
 
+> Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
 
