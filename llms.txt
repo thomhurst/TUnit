@@ -32,13 +32,13 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [Task and Async Assertions](https://tunit.dev/docs/assertions/tasks-and-async.md): TUnit provides specialized assertions for testing `Task` and `Task<T>` objects, including state checking, completion timeouts, and async exception ...
 - [Type Checking](https://tunit.dev/docs/assertions/type-checking.md): TUnit assertions check types at compile time wherever possible. This gives faster feedback and catches mistakes before your build pipeline runs.
 - [Type Assertions](https://tunit.dev/docs/assertions/types.md): TUnit provides comprehensive assertions for testing types and type properties. These assertions work with both runtime values and `Type` objects th...
-- [AsyncTests](https://tunit.dev/docs/benchmarks/AsyncTests.md): Performance benchmark results for AsyncTests
-- [Build Performance](https://tunit.dev/docs/benchmarks/BuildTime.md): Compilation time benchmark results
-- [DataDrivenTests](https://tunit.dev/docs/benchmarks/DataDrivenTests.md): Performance benchmark results for DataDrivenTests
-- [MassiveParallelTests](https://tunit.dev/docs/benchmarks/MassiveParallelTests.md): Performance benchmark results for MassiveParallelTests
-- [MatrixTests](https://tunit.dev/docs/benchmarks/MatrixTests.md): Performance benchmark results for MatrixTests
-- [ScaleTests](https://tunit.dev/docs/benchmarks/ScaleTests.md): Performance benchmark results for ScaleTests
-- [SetupTeardownTests](https://tunit.dev/docs/benchmarks/SetupTeardownTests.md): Performance benchmark results for SetupTeardownTests
+- [AsyncTests](https://tunit.dev/docs/benchmarks/engine/AsyncTests.md): Performance benchmark results for AsyncTests
+- [Build Performance](https://tunit.dev/docs/benchmarks/engine/BuildTime.md): Compilation time benchmark results
+- [DataDrivenTests](https://tunit.dev/docs/benchmarks/engine/DataDrivenTests.md): Performance benchmark results for DataDrivenTests
+- [MassiveParallelTests](https://tunit.dev/docs/benchmarks/engine/MassiveParallelTests.md): Performance benchmark results for MassiveParallelTests
+- [MatrixTests](https://tunit.dev/docs/benchmarks/engine/MatrixTests.md): Performance benchmark results for MatrixTests
+- [ScaleTests](https://tunit.dev/docs/benchmarks/engine/ScaleTests.md): Performance benchmark results for ScaleTests
+- [SetupTeardownTests](https://tunit.dev/docs/benchmarks/engine/SetupTeardownTests.md): Performance benchmark results for SetupTeardownTests
 - [Performance Benchmarks](https://tunit.dev/docs/benchmarks.md): Real-world performance comparisons between TUnit and other .NET testing frameworks
 - [Benchmark Methodology](https://tunit.dev/docs/benchmarks/methodology.md): How TUnit's performance benchmarks are measured and compared
 - [Mock Benchmark: Callback](https://tunit.dev/docs/benchmarks/mocks/Callback.md): Callback registration and execution — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy

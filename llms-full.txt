@@ -9304,6 +9304,8 @@ public async Task Record_Properties()
 
 # AsyncTests Benchmark
 
+> Realistic async/await patterns with I/O simulation
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 
@@ -9378,6 +9380,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 
 # Build Performance Benchmark
 
+> Compilation time from a clean build across frameworks — how long it takes to build an identical test project.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 
@@ -9448,6 +9452,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 ## DataDrivenTests
 
 # DataDrivenTests Benchmark
+
+> Parameterized tests with multiple data sources
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
@@ -9523,6 +9529,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 
 # MassiveParallelTests Benchmark
 
+> Parallel execution stress tests
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 
@@ -9596,6 +9604,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 ## MatrixTests
 
 # MatrixTests Benchmark
+
+> Combinatorial test generation and execution
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
@@ -9671,6 +9681,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 
 # ScaleTests Benchmark
 
+> Large test suites (150+ tests) measuring scalability
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
 
@@ -9744,6 +9756,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 ## SetupTeardownTests
 
 # SetupTeardownTests Benchmark
+
+> Expensive test fixtures with setup/teardown overhead
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
@@ -9828,16 +9842,16 @@ These benchmarks were automatically generated on **2026-05-31** from the latest 
 
 Click on any benchmark to view detailed results:
 
-- [AsyncTests](./AsyncTests.md) — Realistic async/await patterns with I/O simulation
-- [DataDrivenTests](./DataDrivenTests.md) — Parameterized tests with multiple data sources
-- [MassiveParallelTests](./MassiveParallelTests.md) — Parallel execution stress tests
-- [MatrixTests](./MatrixTests.md) — Combinatorial test generation and execution
-- [ScaleTests](./ScaleTests.md) — Large test suites (150+ tests) measuring scalability
-- [SetupTeardownTests](./SetupTeardownTests.md) — Expensive test fixtures with setup/teardown overhead
+- [AsyncTests](./engine/AsyncTests.md) — Realistic async/await patterns with I/O simulation
+- [DataDrivenTests](./engine/DataDrivenTests.md) — Parameterized tests with multiple data sources
+- [MassiveParallelTests](./engine/MassiveParallelTests.md) — Parallel execution stress tests
+- [MatrixTests](./engine/MatrixTests.md) — Combinatorial test generation and execution
+- [ScaleTests](./engine/ScaleTests.md) — Large test suites (150+ tests) measuring scalability
+- [SetupTeardownTests](./engine/SetupTeardownTests.md) — Expensive test fixtures with setup/teardown overhead
 
 ## 🔨 Build Benchmarks
 
-- [Build Performance](./BuildTime.md) - Compilation time comparison
+- [Build Performance](./engine/BuildTime.md) - Compilation time comparison
 
 ---
 
@@ -10186,6 +10200,8 @@ Found an issue with the benchmarks? [Open an issue](https://github.com/thomhurst
 
 # Callback Benchmark
 
+> Callback registration and execution — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
 
@@ -10292,6 +10308,8 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # CombinedWorkflow Benchmark
 
+> Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
 
@@ -10356,6 +10374,8 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 ## Mock Benchmark: Invocation
 
 # Invocation Benchmark
+
+> Calling methods on mock objects — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
@@ -10504,6 +10524,8 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # MockCreation Benchmark
 
+> Mock instance creation performance — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
 
@@ -10610,6 +10632,8 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 
 # Setup Benchmark
 
+> Mock behavior configuration (returns, matchers) — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
 
@@ -10715,6 +10739,8 @@ View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology deta
 ## Mock Benchmark: Verification
 
 # Verification Benchmark
+
+> Verifying mock method calls — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-06-01** from the latest CI run.
