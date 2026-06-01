@@ -4,6 +4,9 @@ const path = require('path');
 const RUNTIME_DIR = 'benchmark-results/runtime';
 const BUILD_DIR = 'benchmark-results/build';
 const OUTPUT_DIR = 'docs/docs/benchmarks';
+// Individual result pages live in an "Engine Benchmarks" sub-list, mirroring the
+// "Mock Library Benchmarks" sub-list. The overview (index.md) stays at OUTPUT_DIR.
+const ENGINE_DIR = path.join(OUTPUT_DIR, 'engine');
 const STATIC_DIR = 'docs/static/benchmarks';
 
 const RUNTIME_DESCRIPTIONS = {
@@ -18,11 +21,17 @@ const RUNTIME_DESCRIPTIONS = {
 console.log('🚀 Processing benchmark results...\n');
 
 // Ensure output directories exist
-[OUTPUT_DIR, STATIC_DIR].forEach(dir => {
+[OUTPUT_DIR, ENGINE_DIR, STATIC_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
+
+// Write the sub-list metadata so the "Engine Benchmarks" category persists.
+fs.writeFileSync(
+  path.join(ENGINE_DIR, '_category_.json'),
+  JSON.stringify({ label: 'Engine Benchmarks', position: 3, collapsed: true }, null, 2) + '\n'
+);
 
 function findMarkdownFiles(dir) {
   const files = [];
@@ -248,8 +257,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 *Last generated: ${new Date().toISOString()}*
 `;
 
-  fs.writeFileSync(path.join(OUTPUT_DIR, `${testClass}.md`), benchmarkPage);
-  console.log(`  ✓ Created ${OUTPUT_DIR}/${testClass}.md`);
+  fs.writeFileSync(path.join(ENGINE_DIR, `${testClass}.md`), benchmarkPage);
+  console.log(`  ✓ Created ${ENGINE_DIR}/${testClass}.md`);
 
   // Generate individual JSON file for each benchmark
   const benchmarkJson = {
@@ -345,8 +354,8 @@ View the [benchmarks overview](/docs/benchmarks) for methodology details and env
 *Last generated: ${new Date().toISOString()}*
 `;
 
-    fs.writeFileSync(path.join(OUTPUT_DIR, 'BuildTime.md'), benchmarkPage);
-    console.log(`  ✓ Created ${OUTPUT_DIR}/BuildTime.md`);
+    fs.writeFileSync(path.join(ENGINE_DIR, 'BuildTime.md'), benchmarkPage);
+    console.log(`  ✓ Created ${ENGINE_DIR}/BuildTime.md`);
 
     // Generate build benchmark JSON
     const buildJson = {
@@ -384,13 +393,13 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 Click on any benchmark to view detailed results:
 
 ${Object.keys(categories.runtime).map(testClass =>
-  `- [${testClass}](./${testClass}.md)${RUNTIME_DESCRIPTIONS[testClass] ? ` — ${RUNTIME_DESCRIPTIONS[testClass]}` : ''}`
+  `- [${testClass}](./engine/${testClass}.md)${RUNTIME_DESCRIPTIONS[testClass] ? ` — ${RUNTIME_DESCRIPTIONS[testClass]}` : ''}`
 ).join('\n')}
 
 ${Object.keys(categories.build).length > 0 ? `
 ## 🔨 Build Benchmarks
 
-- [Build Performance](./BuildTime.md) - Compilation time comparison
+- [Build Performance](./engine/BuildTime.md) - Compilation time comparison
 ` : ''}
 
 ---

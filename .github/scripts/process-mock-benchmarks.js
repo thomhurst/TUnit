@@ -362,7 +362,7 @@ const libraryTableRows = discoveredLibraries.map(lib => {
 const indexPage = `---
 title: Mock Library Benchmarks
 description: Performance comparisons between ${discoveredLibraries.join(', ')}
-sidebar_position: 1
+sidebar_position: 4
 ---
 
 # Mock Library Benchmarks
