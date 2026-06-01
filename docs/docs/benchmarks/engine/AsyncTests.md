@@ -1,10 +1,12 @@
 ---
-title: MassiveParallelTests
-description: Performance benchmark results for MassiveParallelTests
-sidebar_position: 4
+title: AsyncTests
+description: Performance benchmark results for AsyncTests
+sidebar_position: 3
 ---
 
-# MassiveParallelTests Benchmark
+# AsyncTests Benchmark
+
+> Realistic async/await patterns with I/O simulation
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
@@ -16,11 +18,11 @@ This benchmark was automatically generated on **2026-05-31** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.47.0 | 468.0 ms | 468.5 ms | 6.76 ms |
-| NUnit | 4.6.1 | 1,102.6 ms | 1,100.5 ms | 17.75 ms |
-| MSTest | 4.2.3 | 2,844.8 ms | 2,843.8 ms | 11.53 ms |
-| xUnit3 | 3.2.2 | 2,935.8 ms | 2,935.0 ms | 10.69 ms |
-| **TUnit (AOT)** | 1.47.0 | 221.9 ms | 223.0 ms | 2.51 ms |
+| **TUnit** | 1.47.0 | 347.7 ms | 347.2 ms | 8.10 ms |
+| NUnit | 4.6.1 | 623.8 ms | 611.8 ms | 40.94 ms |
+| MSTest | 4.2.3 | 588.5 ms | 587.3 ms | 31.40 ms |
+| xUnit3 | 3.2.2 | 696.6 ms | 697.2 ms | 27.88 ms |
+| **TUnit (AOT)** | 1.47.0 | 117.9 ms | 117.9 ms | 0.83 ms |
 
 ## 📈 Visual Comparison
 
@@ -56,10 +58,10 @@ This benchmark was automatically generated on **2026-05-31** from the latest CI 
   }
 }}%%
 xychart-beta
-  title "MassiveParallelTests Performance Comparison"
+  title "AsyncTests Performance Comparison"
   x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 3523
-  bar [468, 1102.6, 2844.8, 2935.8, 221.9]
+  y-axis "Time (ms)" 0 --> 836
+  bar [347.7, 623.8, 588.5, 696.6, 117.9]
 ```
 
 ## 🎯 Key Insights

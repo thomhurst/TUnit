@@ -1,10 +1,12 @@
 ---
-title: SetupTeardownTests
-description: Performance benchmark results for SetupTeardownTests
-sidebar_position: 7
+title: Build Performance
+description: Compilation time benchmark results
+sidebar_position: 9
 ---
 
-# SetupTeardownTests Benchmark
+# Build Performance Benchmark
+
+> Compilation time from a clean build across frameworks — how long it takes to build an identical test project.
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-05-31** from the latest CI run.
@@ -14,13 +16,14 @@ This benchmark was automatically generated on **2026-05-31** from the latest CI 
 
 ## 📊 Results
 
+Compilation time comparison across frameworks:
+
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.47.0 | 314.5 ms | 315.8 ms | 4.52 ms |
-| NUnit | 4.6.1 | 1,022.9 ms | 1,024.8 ms | 9.85 ms |
-| MSTest | 4.2.3 | 965.1 ms | 964.0 ms | 7.67 ms |
-| xUnit3 | 3.2.2 | 1,035.2 ms | 1,033.9 ms | 6.42 ms |
-| **TUnit (AOT)** | 1.47.0 | NA | NA | NA |
+| **TUnit** | 1.47.0 | 912.2 ms | 901.5 ms | 38.36 ms |
+| Build_NUnit | 4.6.1 | 857.6 ms | 857.4 ms | 6.48 ms |
+| Build_MSTest | 4.2.3 | 1,050.7 ms | 1,052.9 ms | 12.88 ms |
+| Build_xUnit3 | 3.2.2 | 861.9 ms | 862.3 ms | 8.31 ms |
 
 ## 📈 Visual Comparison
 
@@ -56,15 +59,11 @@ This benchmark was automatically generated on **2026-05-31** from the latest CI 
   }
 }}%%
 xychart-beta
-  title "SetupTeardownTests Performance Comparison"
-  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 1243
-  bar [314.5, 1022.9, 965.1, 1035.2, 0]
+  title "Build Time Comparison"
+  x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
+  y-axis "Time (ms)" 0 --> 1261
+  bar [912.2, 857.6, 1050.7, 861.9]
 ```
-
-## 🎯 Key Insights
-
-This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using identical test scenarios.
 
 ---
 

@@ -16,17 +16,17 @@ These benchmarks were automatically generated on **2026-05-31** from the latest 
 
 Click on any benchmark to view detailed results:
 
-- [AsyncTests](./AsyncTests.md) — Realistic async/await patterns with I/O simulation
-- [DataDrivenTests](./DataDrivenTests.md) — Parameterized tests with multiple data sources
-- [MassiveParallelTests](./MassiveParallelTests.md) — Parallel execution stress tests
-- [MatrixTests](./MatrixTests.md) — Combinatorial test generation and execution
-- [ScaleTests](./ScaleTests.md) — Large test suites (150+ tests) measuring scalability
-- [SetupTeardownTests](./SetupTeardownTests.md) — Expensive test fixtures with setup/teardown overhead
+- [AsyncTests](./engine/AsyncTests.md) — Realistic async/await patterns with I/O simulation
+- [DataDrivenTests](./engine/DataDrivenTests.md) — Parameterized tests with multiple data sources
+- [MassiveParallelTests](./engine/MassiveParallelTests.md) — Parallel execution stress tests
+- [MatrixTests](./engine/MatrixTests.md) — Combinatorial test generation and execution
+- [ScaleTests](./engine/ScaleTests.md) — Large test suites (150+ tests) measuring scalability
+- [SetupTeardownTests](./engine/SetupTeardownTests.md) — Expensive test fixtures with setup/teardown overhead
 
 
 ## 🔨 Build Benchmarks
 
-- [Build Performance](./BuildTime.md) - Compilation time comparison
+- [Build Performance](./engine/BuildTime.md) - Compilation time comparison
 
 
 ---
