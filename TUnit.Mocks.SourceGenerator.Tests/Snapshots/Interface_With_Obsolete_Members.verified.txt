@@ -321,7 +321,7 @@ file sealed class IDialogServiceMockImpl : global::IDialogService, global::TUnit
     {
         try
         {
-            var __result = _engine.HandleCallWithReturn<string?, TData?>(1, "ShowPanel", data, default);
+            var __result = _engine.HandleCallWithReturn<string?>(1, "ShowPanel", new object?[] { data }, default, new global::System.Type[] { typeof(TData) });
             if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
             {
                 if (__rawAsync is global::System.Threading.Tasks.Task<string?> __typedAsync) return __typedAsync;
@@ -469,14 +469,14 @@ public static class IDialogService_MockMemberExtensions
     public static global::TUnit.Mocks.MockMethodCall<string?> ShowPanel<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<TData?> data) where TData : class
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<string?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowPanel", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<string?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowPanel", matchers, new global::System.Type[] { typeof(TData) });
     }
 
     public static global::TUnit.Mocks.MockMethodCall<string?> ShowPanel<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<TData?, bool> data) where TData : class
     {
         global::TUnit.Mocks.Arguments.Arg<TData?> __fa_data = data;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<string?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowPanel", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<string?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowPanel", matchers, new global::System.Type[] { typeof(TData) });
     }
 
     public static IDialogService_WithTrickyChars_M8_MockCall WithTrickyChars(this global::TUnit.Mocks.Mock<global::IDialogService> mock)

@@ -78,12 +78,35 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public string MemberName { get; }
 
+    /// <summary>
+    /// For a generic method, the configured type arguments (concrete types, or
+    /// <see cref="Arguments.AnyType"/>/<see cref="Arguments.AnyValueType"/> wildcards). Null for a
+    /// non-generic method, in which case the setup matches regardless of call-site type arguments.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public Type[]? TypeArguments { get; }
+
     public MethodSetup(int memberId, IArgumentMatcher[] matchers, string memberName = "")
+        : this(memberId, matchers, memberName, null)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public MethodSetup(int memberId, IArgumentMatcher[] matchers, string memberName, Type[]? typeArguments)
     {
         MemberId = memberId;
         _matchers = matchers;
         MemberName = memberName;
+        TypeArguments = typeArguments;
     }
+
+    /// <summary>
+    /// True if this setup's configured type arguments match a call made with
+    /// <paramref name="callTypeArgs"/>. Non-generic setups (null <see cref="TypeArguments"/>) match any call.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TypeArgumentsMatch(Type[]? callTypeArgs)
+        => TypeArgumentMatching.Matches(TypeArguments, callTypeArgs);
 
     private RareState EnsureRareState()
     {

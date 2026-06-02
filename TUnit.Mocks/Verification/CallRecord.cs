@@ -17,11 +17,21 @@ public sealed class CallRecord
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber)
+        : this(memberId, memberName, arguments, sequenceNumber, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a call record with pre-boxed arguments and generic-method type arguments.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber, Type[]? typeArguments)
     {
         MemberId = memberId;
         MemberName = memberName;
         _arguments = arguments;
         SequenceNumber = sequenceNumber;
+        TypeArguments = typeArguments;
     }
 
     /// <summary>
@@ -44,6 +54,12 @@ public sealed class CallRecord
 
     /// <summary>The global sequence number for cross-mock ordering.</summary>
     public long SequenceNumber { get; }
+
+    /// <summary>
+    /// For a generic method, the concrete closed type arguments the call was made with; null for a
+    /// non-generic member. Used by verification to discriminate calls by type argument.
+    /// </summary>
+    public Type[]? TypeArguments { get; }
 
     /// <summary>
     /// The arguments passed to the call. Lazily materialized from the argument store if one was provided.

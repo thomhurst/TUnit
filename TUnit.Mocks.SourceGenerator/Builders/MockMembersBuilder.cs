@@ -969,6 +969,13 @@ internal static class MockMembersBuilder
     private static void EmitReturnConstruction(CodeWriter writer, MockMemberModel method, MockTypeModel model,
         string safeName, bool useTypedWrapper, string setupReturnType)
     {
+        // For a generic method, pass the configured type arguments so the setup/verification can
+        // discriminate calls by type argument. Non-generic methods omit the argument (overload with
+        // the trailing Type[] is not selected). The typed wrapper is never generated for generic methods.
+        var typeArgs = method.IsGenericMethod
+            ? $", new global::System.Type[] {{ {string.Join(", ", method.TypeParameters.Select(tp => $"typeof({tp.Name})"))} }}"
+            : "";
+
         if (useTypedWrapper)
         {
             var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
@@ -976,15 +983,15 @@ internal static class MockMembersBuilder
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
         }
         else
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
         }
     }
 

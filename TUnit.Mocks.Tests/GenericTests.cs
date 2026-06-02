@@ -13,6 +13,15 @@ public interface IRepository
     TResult Transform<TInput, TResult>(TInput input) where TInput : class where TResult : class;
 }
 
+/// <summary>
+/// Generic method whose type parameter does not appear in the parameter list, so calls can only be
+/// distinguished by their type argument. Mirrors discussion #4981.
+/// </summary>
+public interface IGenericGreeter
+{
+    string Greet<T>() where T : class;
+}
+
 public class Customer
 {
     public int Id { get; set; }
@@ -23,6 +32,9 @@ public class Order
 {
     public int OrderId { get; set; }
 }
+
+public class Class1 { }
+public class Class2 { }
 
 /// <summary>
 /// US7 Integration Tests: Generic method support in mock generation.
@@ -144,5 +156,62 @@ public class GenericTests
         // Assert
         await Assert.That(result).IsNotNull();
         await Assert.That(result.OrderId).IsEqualTo(10);
+    }
+
+    [Test]
+    public async Task Generic_Method_ZeroArgs_Distinguished_By_Type_Argument()
+    {
+        // Regression for discussion #4981: with no parameters, only the type argument distinguishes
+        // the two setups. Before the fix both setups collided and the last one always won.
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<Class1>().Returns("Hello!");
+        mock.Greet<Class2>().Returns("Goodbye!");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("Hello!");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("Goodbye!");
+    }
+
+    [Test]
+    public async Task Generic_Method_Wildcard_AnyType_Matches_Any_Type_Argument()
+    {
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<AnyType>().Returns("any");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("any");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("any");
+    }
+
+    [Test]
+    public async Task Generic_Method_Exact_Type_Setup_Wins_Over_Wildcard()
+    {
+        // A later, more specific setup is matched first (last-wins iteration), while other type
+        // arguments still fall through to the wildcard.
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<AnyType>().Returns("any");
+        mock.Greet<Class1>().Returns("specific");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("specific");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("any");
+    }
+
+    [Test]
+    public void Generic_Void_Method_Verify_Discriminates_By_Type_Argument()
+    {
+        var mock = IRepository.Mock();
+        IRepository repo = mock.Object;
+
+        repo.Save(new Customer());
+        repo.Save(new Customer());
+        repo.Save(new Order());
+
+        mock.Save<Customer>(Any()).WasCalled(Times.Exactly(2));
+        mock.Save<Order>(Any()).WasCalled(Times.Once);
+        mock.Save<AnyType>(Any()).WasCalled(Times.Exactly(3));
     }
 }

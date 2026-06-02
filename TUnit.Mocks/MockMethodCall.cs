@@ -20,23 +20,31 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
+    private readonly Type[]? _typeArguments;
     private MethodSetupBuilder<TReturn>? _builder;
     private bool _builderInitialized;
     private object? _builderLock;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
+        : this(engine, memberId, memberName, matchers, null)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
+        _typeArguments = typeArguments;
     }
 
     private MethodSetupBuilder<TReturn> EnsureSetup() =>
         LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
         {
-            var setup = new MethodSetup(_memberId, _matchers, _memberName);
+            var setup = new MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
             _engine.AddSetup(setup);
             return new MethodSetupBuilder<TReturn>(setup);
         })!;
@@ -111,31 +119,31 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
 
     public void WasCalled(Times times)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
     }
 
     public void WasCalled(Times times, string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
     }
 
     public void WasNeverCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
     }
 
     public void WasNeverCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
     }
 
     public void WasCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled();
     }
 
     public void WasCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
     }
 }

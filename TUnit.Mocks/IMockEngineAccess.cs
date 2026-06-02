@@ -24,6 +24,13 @@ public interface IMockEngineAccess
     /// <summary>Creates a call verification builder for the specified member.</summary>
     ICallVerification CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers);
 
+    /// <summary>
+    /// Creates a call verification builder for a generic-method member, filtering recorded calls by
+    /// the supplied type arguments (concrete types or <see cref="AnyType"/>/<see cref="AnyValueType"/>
+    /// wildcards).
+    /// </summary>
+    ICallVerification CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments);
+
     /// <summary>Registers a callback that fires when a handler subscribes to the named event.</summary>
     void OnSubscribe(string eventName, Action callback);
 

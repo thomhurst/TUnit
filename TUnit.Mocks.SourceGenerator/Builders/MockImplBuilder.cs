@@ -744,6 +744,15 @@ internal static class MockImplBuilder
         }
 
         var (isTyped, typeArgs, argsList) = GetTypedDispatchInfo(method);
+        // Generic methods always dispatch through the object?[] + Type[] fallback so their concrete
+        // type arguments reach the engine (typed dispatch can't carry them). Force the fallback path
+        // here so argsArray is materialized; the emit helpers then select the type-arg overloads.
+        if (method.IsGenericMethod)
+        {
+            isTyped = false;
+            typeArgs = null;
+            argsList = null;
+        }
         var argsArray = isTyped ? null : EmitArgsArrayVariable(writer, method);
         var autoMockFactory = GetAutoMockFactoryLambda(method);
 
@@ -752,7 +761,7 @@ internal static class MockImplBuilder
         if (method.IsVoid && !method.IsAsync)
         {
             // Pure void method
-            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)};");
+            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
             EmitOutRefReadback(writer, method, model);
         }
         else if (method.IsVoid && method.IsAsync)
@@ -760,7 +769,7 @@ internal static class MockImplBuilder
             // Async void method (Task or ValueTask with no generic arg)
             using (writer.Block("try"))
             {
-                writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)};");
+                writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
                 EmitOutRefReadback(writer, method, model);
                 EmitRawReturnCheck(writer, method);
                 if (method.IsValueTask)
@@ -793,11 +802,11 @@ internal static class MockImplBuilder
             {
                 if (method.IsReturnTypeStaticAbstractInterface)
                 {
-                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault)}!;");
+                    writer.AppendLine($"var __result = ({method.UnwrappedReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, method: method)}!;");
                 }
                 else
                 {
-                    writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, autoMockFactory)};");
+                    writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, unwrappedArg, method.MemberId, method.Name, unwrappedDefault, autoMockFactory, method)};");
                 }
                 EmitOutRefReadback(writer, method, model);
                 EmitRawReturnCheck(writer, method);
@@ -827,7 +836,7 @@ internal static class MockImplBuilder
             // Synchronous method returning a ref struct — can't use HandleCallWithReturn<T> because
             // ref structs can't be generic type arguments. Use void dispatch for call tracking,
             // callbacks, and throws.
-            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name)};");
+            writer.AppendLine($"{EmitHandleCall(isTyped, typeArgs, argsList, argsArray, method.MemberId, method.Name, method)};");
             if (method.SpanReturnElementType is not null)
             {
                 // Span return: read back out/ref params AND extract return value from OutRefContext index -1
@@ -845,13 +854,13 @@ internal static class MockImplBuilder
             // as a generic type argument. Use object? and cast.
             if (hasOutRef)
             {
-                writer.AppendLine($"var __result = ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null")}!;");
+                writer.AppendLine($"var __result = ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", method: method)}!;");
                 EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return __result;");
             }
             else
             {
-                writer.AppendLine($"return ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null")}!;");
+                writer.AppendLine($"return ({method.ReturnType}){EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, "object?", method.MemberId, method.Name, "null", method: method)}!;");
             }
         }
         else
@@ -859,13 +868,13 @@ internal static class MockImplBuilder
             // Synchronous method with return value — need to read back out/ref before returning
             if (hasOutRef)
             {
-                writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory)};");
+                writer.AppendLine($"var __result = {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory, method)};");
                 EmitOutRefReadback(writer, method, model);
                 writer.AppendLine("return __result;");
             }
             else
             {
-                writer.AppendLine($"return {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory)};");
+                writer.AppendLine($"return {EmitHandleCallWithReturn(isTyped, typeArgs, argsList, argsArray, method.ReturnType, method.MemberId, method.Name, method.SmartDefault, autoMockFactory, method)};");
             }
         }
     }
@@ -1375,16 +1384,39 @@ internal static class MockImplBuilder
     }
 
     /// <summary>Emits a HandleCall or TryHandleCall invocation, choosing typed or fallback path.</summary>
-    private static string EmitHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName)
-        => isTyped
+    /// <remarks>
+    /// A generic method always uses the object?[] fallback overload that also takes the method's
+    /// concrete type arguments, so the engine can discriminate setups/calls by type argument.
+    /// </remarks>
+    private static string EmitHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName, MockMemberModel? method = null)
+    {
+        if (method is { IsGenericMethod: true })
+        {
+            return $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray}, {TypeArgumentsArrayLiteral(method)})";
+        }
+        return isTyped
             ? $"_engine.HandleCall<{typeArgs}>({memberId}, \"{memberName}\", {argsList})"
             : $"_engine.HandleCall({memberId}, \"{memberName}\", {argsArray})";
+    }
 
     /// <summary>Emits a HandleCallWithReturn invocation, choosing typed or fallback path.</summary>
-    private static string EmitHandleCallWithReturn(bool isTyped, string? typeArgs, string? argsList, string? argsArray, string returnTypeArg, int memberId, string memberName, string defaultValue, string? autoMockFactory = null)
-        => isTyped
+    /// <remarks>See <see cref="EmitHandleCall"/> for the generic-method type-argument path.</remarks>
+    private static string EmitHandleCallWithReturn(bool isTyped, string? typeArgs, string? argsList, string? argsArray, string returnTypeArg, int memberId, string memberName, string defaultValue, string? autoMockFactory = null, MockMemberModel? method = null)
+    {
+        if (method is { IsGenericMethod: true })
+        {
+            // Generic methods dispatch through the object?[] overload that carries the method's type
+            // arguments; an auto-mock factory (for an auto-mockable return type) is preserved before it.
+            return $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)}, {TypeArgumentsArrayLiteral(method)})";
+        }
+        return isTyped
             ? $"_engine.HandleCallWithReturn<{returnTypeArg}, {typeArgs}>({memberId}, \"{memberName}\", {argsList}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})"
             : $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})";
+    }
+
+    /// <summary>Emits <c>new global::System.Type[] { typeof(T), ... }</c> for a generic method's type parameters.</summary>
+    private static string TypeArgumentsArrayLiteral(MockMemberModel method)
+        => $"new global::System.Type[] {{ {string.Join(", ", method.TypeParameters.Select(tp => $"typeof({tp.Name})"))} }}";
 
     /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>
     private static string EmitTryHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName)

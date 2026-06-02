@@ -15,13 +15,20 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
+    private readonly Type[]? _typeArguments;
 
     public CallVerificationBuilder(MockEngine<T> engine, int memberId, string memberName, IArgumentMatcher[] matchers)
+        : this(engine, memberId, memberName, matchers, null)
+    {
+    }
+
+    public CallVerificationBuilder(MockEngine<T> engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
+        _typeArguments = typeArguments;
     }
 
     /// <inheritdoc />
@@ -46,11 +53,13 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             return;
         }
 
-        // Fast path: when no argument matchers, use the per-member call counter directly.
+        // Fast path: when no argument matchers (and no type-argument filter), use the per-member
+        // call counter directly. A type-argument filter forces the per-record path below, since the
+        // member counter aggregates calls across all type arguments.
         // Note: the count is read lock-free, then MarkCallsVerified acquires the lock.
         // Calls recorded between these two steps will be marked verified but weren't counted.
         // This is safe because verification should only run after all calls have completed.
-        if (_matchers.Length == 0)
+        if (_matchers.Length == 0 && _typeArguments is null)
         {
             var totalCount = _engine.GetCallCountFor(_memberId);
             if (!times.Matches(totalCount))
@@ -113,7 +122,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         var count = 0;
         for (int i = 0; i < bufferCount; i++)
         {
-            if (MatchesArguments(items[i]!.Arguments))
+            if (MatchesCall(items[i]!))
             {
                 count++;
             }
@@ -127,12 +136,16 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         for (int i = 0; i < bufferCount; i++)
         {
             var record = items[i]!;
-            if (MatchesArguments(record.Arguments))
+            if (MatchesCall(record))
             {
                 record.IsVerified = true;
             }
         }
     }
+
+    private bool MatchesCall(CallRecord record)
+        => MatchesArguments(record.Arguments)
+           && TypeArgumentMatching.Matches(_typeArguments, record.TypeArguments);
 
     private bool MatchesArguments(object?[] arguments)
     {
