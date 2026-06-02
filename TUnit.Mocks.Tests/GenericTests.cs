@@ -22,6 +22,19 @@ public interface IGenericGreeter
     string Greet<T>() where T : class;
 }
 
+/// <summary>
+/// Methods with two type parameters, used to verify discrimination is sensitive to the full,
+/// ordered list of type arguments — not just the first.
+/// </summary>
+public interface IMultiGeneric
+{
+    // Zero parameters: the only discriminator is the (T1, T2) type-argument pair.
+    string Describe<T1, T2>() where T1 : class where T2 : class;
+
+    // TOutput appears only as a type parameter; the argument matcher is on TInput.
+    void Handle<TInput, TOutput>(TInput input) where TInput : class where TOutput : class;
+}
+
 public class Customer
 {
     public int Id { get; set; }
@@ -213,5 +226,64 @@ public class GenericTests
         mock.Save<Customer>(Any()).WasCalled(Times.Exactly(2));
         mock.Save<Order>(Any()).WasCalled(Times.Once);
         mock.Save<AnyType>(Any()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Distinguished_By_Order()
+    {
+        // The two setups share the same (empty) argument list and the same type-argument *set* —
+        // only the order differs. Each must resolve independently.
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<Class1, Class2>().Returns("1-2");
+        mock.Describe<Class2, Class1>().Returns("2-1");
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("1-2");
+        await Assert.That(sut.Describe<Class2, Class1>()).IsEqualTo("2-1");
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Partial_Wildcard()
+    {
+        // Wildcard the first type parameter, pin the second. Only the second must match exactly.
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<AnyType, Class2>().Returns("any-2");
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("any-2"); // first wildcard, second matches
+        await Assert.That(sut.Describe<Class2, Class2>()).IsEqualTo("any-2"); // first wildcard, second matches
+        // Second type arg (Class1) != Class2 → no setup matches → unconfigured default (empty string)
+        await Assert.That(sut.Describe<Class1, Class1>()).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Exact_Wins_Over_Partial_Wildcard()
+    {
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<AnyType, Class2>().Returns("any-2");
+        mock.Describe<Class1, Class2>().Returns("1-2"); // more specific, added later → matched first
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("1-2");
+        await Assert.That(sut.Describe<Class2, Class2>()).IsEqualTo("any-2");
+    }
+
+    [Test]
+    public void Generic_Void_Method_Two_Type_Params_Verify_Discriminates()
+    {
+        var mock = IMultiGeneric.Mock();
+        IMultiGeneric sut = mock.Object;
+
+        sut.Handle<Customer, Order>(new Customer());
+        sut.Handle<Order, Customer>(new Order());
+
+        mock.Handle<Customer, Order>(Any()).WasCalled(Times.Once);
+        mock.Handle<Order, Customer>(Any()).WasCalled(Times.Once);
+        mock.Handle<Customer, Customer>(Any()).WasNeverCalled();          // pair never called
+        mock.Handle<AnyType, AnyType>(Any()).WasCalled(Times.Exactly(2)); // both wildcards
+        mock.Handle<AnyType, Customer>(Any()).WasCalled(Times.Once);      // only Handle<Order, Customer>
     }
 }
