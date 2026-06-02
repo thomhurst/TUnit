@@ -25,8 +25,16 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private bool _builderInitialized;
     private object? _builderLock;
 
+    // Kept as a distinct overload (not a single optional-parameter ctor) to preserve the original
+    // public binary signature for backward compatibility.
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments = null)
+    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
+        : this(engine, memberId, memberName, matchers, null)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
@@ -111,33 +119,40 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
 
     // ICallVerification implementation
 
+    // Non-generic calls use the public engine surface unchanged; generic calls route through the
+    // internal type-argument-aware factory (the engine is always a MockEngine, which implements it).
+    private ICallVerification CreateVerification()
+        => _typeArguments is null
+            ? _engine.CreateVerification(_memberId, _memberName, _matchers)
+            : ((ITypeArgumentVerificationFactory)_engine).CreateVerification(_memberId, _memberName, _matchers, _typeArguments);
+
     public void WasCalled(Times times)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+        CreateVerification().WasCalled(times);
     }
 
     public void WasCalled(Times times, string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+        CreateVerification().WasCalled(times, message);
     }
 
     public void WasNeverCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+        CreateVerification().WasNeverCalled();
     }
 
     public void WasNeverCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
+        CreateVerification().WasNeverCalled(message);
     }
 
     public void WasCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled();
+        CreateVerification().WasCalled();
     }
 
     public void WasCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+        CreateVerification().WasCalled(message);
     }
 }

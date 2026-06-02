@@ -21,7 +21,7 @@ internal static class MockCallSequence
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
+public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVerificationFactory where T : class
 {
     // Single lock for both setup and call mutations — reduces allocation by one Lock object.
     // Contention is acceptable since setup and call recording rarely overlap in typical usage.
@@ -224,7 +224,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess where T : class
     ICallVerification IMockEngineAccess.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers)
         => new CallVerificationBuilder<T>(this, memberId, memberName, matchers);
 
-    ICallVerification IMockEngineAccess.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    ICallVerification ITypeArgumentVerificationFactory.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
         => new CallVerificationBuilder<T>(this, memberId, memberName, matchers, typeArguments);
 
     /// <summary>
