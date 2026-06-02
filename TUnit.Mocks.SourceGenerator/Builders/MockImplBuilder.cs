@@ -1415,7 +1415,7 @@ internal static class MockImplBuilder
     }
 
     /// <summary>Emits <c>new global::System.Type[] { typeof(T), ... }</c> for a generic method's type parameters.</summary>
-    private static string TypeArgumentsArrayLiteral(MockMemberModel method)
+    internal static string TypeArgumentsArrayLiteral(MockMemberModel method)
         => $"new global::System.Type[] {{ {string.Join(", ", method.TypeParameters.Select(tp => $"typeof({tp.Name})"))} }}";
 
     /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>

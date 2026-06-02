@@ -973,7 +973,7 @@ internal static class MockMembersBuilder
         // discriminate calls by type argument. Non-generic methods omit the argument (overload with
         // the trailing Type[] is not selected). The typed wrapper is never generated for generic methods.
         var typeArgs = method.IsGenericMethod
-            ? $", new global::System.Type[] {{ {string.Join(", ", method.TypeParameters.Select(tp => $"typeof({tp.Name})"))} }}"
+            ? $", {MockImplBuilder.TypeArgumentsArrayLiteral(method)}"
             : "";
 
         if (useTypedWrapper)

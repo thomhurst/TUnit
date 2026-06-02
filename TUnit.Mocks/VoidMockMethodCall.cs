@@ -28,25 +28,13 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private object? _builderLock;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments: null)
-    {
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments = null)
         : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister)
-        : this(engine, memberId, memberName, matchers, eagerRegister, typeArguments: null)
-    {
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister, Type[]? typeArguments)
+    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister, Type[]? typeArguments = null)
     {
         _engine = engine;
         _memberId = memberId;

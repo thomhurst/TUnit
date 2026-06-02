@@ -26,13 +26,7 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private object? _builderLock;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, null)
-    {
-    }
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments = null)
     {
         _engine = engine;
         _memberId = memberId;
