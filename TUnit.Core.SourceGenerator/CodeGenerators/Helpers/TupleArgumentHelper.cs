@@ -124,7 +124,7 @@ public static class TupleArgumentHelper
                     // Use fully-qualified static Enumerable.Select/ToArray calls rather than the
                     // extension-method chain — generated files don't import System.Linq unless the
                     // project has ImplicitUsings enabled, so the extension form fails to compile (CS1061).
-                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : new {elementType.GloballyQualified()}[0])";
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range({regularParamCount}, {rangeCount}), i => global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))) : global::System.Array.Empty<{elementType.GloballyQualified()}>())";
                     argumentExpressions.Add(arrayInit);
                 }
                 else
@@ -133,8 +133,11 @@ public static class TupleArgumentHelper
 
                     if (remainingArgCount == 0)
                     {
-                        // No arguments for params array - pass empty array
-                        argumentExpressions.Add($"new {elementType.GloballyQualified()}[0]");
+                        // No arguments for params array - pass empty array. Use Array.Empty<T>()
+                        // rather than `new T[0]`: when T is itself an array (jagged param like
+                        // byte[][], element type byte[]) the rank-specifier form `new byte[][0]`
+                        // is invalid C# (CS1586/CS0178). See issue #6150.
+                        argumentExpressions.Add($"global::System.Array.Empty<{elementType.GloballyQualified()}>()");
                     }
                     else if (remainingArgCount == 1)
                     {

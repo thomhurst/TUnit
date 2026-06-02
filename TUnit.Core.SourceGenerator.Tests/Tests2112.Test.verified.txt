@@ -45,7 +45,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                     {
                         case 1:
                             {
-                                instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                                instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::System.Array.Empty<long>());
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 2:
@@ -83,7 +83,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             {
                                 throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
                             }
-                            instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i]))) : new long[0]));
+                            instance.Test(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i]))) : global::System.Array.Empty<long>()));
                             return default(global::System.Threading.Tasks.ValueTask);
                     }
                 }
@@ -100,7 +100,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                     {
                         case 1:
                             {
-                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                                instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::System.Array.Empty<long>());
                                 return default(global::System.Threading.Tasks.ValueTask);
                             }
                         case 2:
@@ -138,7 +138,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
                             {
                                 throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
                             }
-                            instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i]))) : new long[0]));
+                            instance.Test2(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[i]))) : global::System.Array.Empty<long>()));
                             return default(global::System.Threading.Tasks.ValueTask);
                     }
                 }
