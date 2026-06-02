@@ -1,5 +1,6 @@
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
+using TUnit.Mocks.Exceptions;
 
 namespace TUnit.Mocks.Tests;
 
@@ -285,5 +286,18 @@ public class GenericTests
         mock.Handle<Customer, Customer>(Any()).WasNeverCalled();          // pair never called
         mock.Handle<AnyType, AnyType>(Any()).WasCalled(Times.Exactly(2)); // both wildcards
         mock.Handle<AnyType, Customer>(Any()).WasCalled(Times.Once);      // only Handle<Order, Customer>
+    }
+
+    [Test]
+    public async Task Generic_Verification_Failure_Message_Includes_Type_Argument()
+    {
+        var mock = IRepository.Mock();
+        mock.Object.Save(new Order()); // Save<Order>, never Save<Customer>
+
+        var ex = Assert.Throws<MockVerificationException>(() =>
+            mock.Save<Customer>(Any()).WasCalled(Times.Once));
+
+        // The failure should name the type argument so the developer can tell which setup was expected.
+        await Assert.That(ex!.ExpectedCall).Contains("Save<Customer>");
     }
 }

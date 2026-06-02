@@ -1414,9 +1414,20 @@ internal static class MockImplBuilder
             : $"_engine.HandleCallWithReturn<{returnTypeArg}>({memberId}, \"{memberName}\", {argsArray}, {defaultValue}{FormatAutoMockFactoryArgument(autoMockFactory)})";
     }
 
-    /// <summary>Emits <c>new global::System.Type[] { typeof(T), ... }</c> for a generic method's type parameters.</summary>
+    /// <summary>
+    /// Emits the type-argument array for a generic method. For the common 1–2 type-parameter cases it
+    /// references the per-closed-type cache (<c>TypeArguments.Of&lt;T&gt;.Value</c>) to avoid a per-call
+    /// allocation; higher arities fall back to a fresh <c>new global::System.Type[] { typeof(T), ... }</c>.
+    /// </summary>
     internal static string TypeArgumentsArrayLiteral(MockMemberModel method)
-        => $"new global::System.Type[] {{ {string.Join(", ", method.TypeParameters.Select(tp => $"typeof({tp.Name})"))} }}";
+    {
+        var typeParams = method.TypeParameters;
+        if (typeParams.Length is 1 or 2)
+        {
+            return $"global::TUnit.Mocks.TypeArguments.Of<{string.Join(", ", typeParams.Select(tp => tp.Name))}>.Value";
+        }
+        return $"new global::System.Type[] {{ {string.Join(", ", typeParams.Select(tp => $"typeof({tp.Name})"))} }}";
+    }
 
     /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>
     private static string EmitTryHandleCall(bool isTyped, string? typeArgs, string? argsList, string? argsArray, int memberId, string memberName)

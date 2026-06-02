@@ -34,7 +34,7 @@ file sealed class IDialogReferenceMockImpl : global::IDialogReference, global::T
     {
         try
         {
-            var __result = _engine.HandleCallWithReturn<T?>(0, "GetReturnValueAsync", global::System.Array.Empty<object?>(), default, new global::System.Type[] { typeof(T) });
+            var __result = _engine.HandleCallWithReturn<T?>(0, "GetReturnValueAsync", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
             if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
             {
                 if (__rawAsync is global::System.Threading.Tasks.Task<T?> __typedAsync) return __typedAsync;
@@ -95,7 +95,7 @@ public static class IDialogReference_MockMemberExtensions
     public static global::TUnit.Mocks.MockMethodCall<T?> GetReturnValueAsync<T>(this global::TUnit.Mocks.Mock<global::IDialogReference> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetReturnValueAsync", matchers, new global::System.Type[] { typeof(T) });
+        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetReturnValueAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     #if NET9_0_OR_GREATER
@@ -238,7 +238,7 @@ file sealed class IDialogServiceMockImpl : global::IDialogService, global::TUnit
     {
         try
         {
-            var __result = _engine.HandleCallWithReturn<global::IDialogReference?>(0, "UpdateDialogAsync", new object?[] { id, parameters }, default, static __behavior => global::IDialogReferenceMockFactory.CreateAutoMock(__behavior), new global::System.Type[] { typeof(TData) });
+            var __result = _engine.HandleCallWithReturn<global::IDialogReference?>(0, "UpdateDialogAsync", new object?[] { id, parameters }, default, static __behavior => global::IDialogReferenceMockFactory.CreateAutoMock(__behavior), global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
             if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
             {
                 if (__rawAsync is global::System.Threading.Tasks.Task<global::IDialogReference?> __typedAsync) return __typedAsync;
@@ -256,7 +256,7 @@ file sealed class IDialogServiceMockImpl : global::IDialogService, global::TUnit
     {
         try
         {
-            var __result = _engine.HandleCallWithReturn<global::IDialogReference>(1, "ShowDialogAsync", new object?[] { data, parameters }, default!, static __behavior => global::IDialogReferenceMockFactory.CreateAutoMock(__behavior), new global::System.Type[] { typeof(TDialog) });
+            var __result = _engine.HandleCallWithReturn<global::IDialogReference>(1, "ShowDialogAsync", new object?[] { data, parameters }, default!, static __behavior => global::IDialogReferenceMockFactory.CreateAutoMock(__behavior), global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
             if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
             {
                 if (__rawAsync is global::System.Threading.Tasks.Task<global::IDialogReference> __typedAsync) return __typedAsync;
@@ -347,21 +347,21 @@ public static class IDialogService_MockMemberExtensions
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference?> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<string> id, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> parameters) where TData : class
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher, parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, new global::System.Type[] { typeof(TData) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference?> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool> id, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> parameters) where TData : class
     {
         global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, new global::System.Type[] { typeof(TData) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference?> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<string> id, global::System.Func<global::DialogParameters<TData>, bool> parameters) where TData : class
     {
         global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher, __fa_parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, new global::System.Type[] { typeof(TData) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference?> UpdateDialogAsync<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string, bool> id, global::System.Func<global::DialogParameters<TData>, bool> parameters) where TData : class
@@ -369,27 +369,27 @@ public static class IDialogService_MockMemberExtensions
         global::TUnit.Mocks.Arguments.Arg<string> __fa_id = id;
         global::TUnit.Mocks.Arguments.Arg<global::DialogParameters<TData>> __fa_parameters = parameters;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, __fa_parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, new global::System.Type[] { typeof(TData) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "UpdateDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<object> data, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> parameters) where TDialog : global::IDialogContentComponent
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher, parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, new global::System.Type[] { typeof(TDialog) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool> data, global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> parameters) where TDialog : global::IDialogContentComponent
     {
         global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher, parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, new global::System.Type[] { typeof(TDialog) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<object> data, global::System.Func<global::DialogParameters, bool> parameters) where TDialog : global::IDialogContentComponent
     {
         global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { data.Matcher, __fa_parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, new global::System.Type[] { typeof(TDialog) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::IDialogReference> ShowDialogAsync<TDialog>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<object, bool> data, global::System.Func<global::DialogParameters, bool> parameters) where TDialog : global::IDialogContentComponent
@@ -397,7 +397,7 @@ public static class IDialogService_MockMemberExtensions
         global::TUnit.Mocks.Arguments.Arg<object> __fa_data = data;
         global::TUnit.Mocks.Arguments.Arg<global::DialogParameters> __fa_parameters = parameters;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher, __fa_parameters.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, new global::System.Type[] { typeof(TDialog) });
+        return new global::TUnit.Mocks.MockMethodCall<global::IDialogReference>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowDialogAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<TDialog>.Value);
     }
 
     public static void RaiseOnShow(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::IDialogReference arg1, global::System.Type? arg2, global::DialogParameters arg3, object arg4)

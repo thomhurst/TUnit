@@ -167,6 +167,9 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     private string FormatExpectedCall()
     {
         var argDescriptions = string.Join(", ", _matchers.Select(m => m.Describe()));
-        return $"{_memberName}({argDescriptions})";
+        var typeArgs = _typeArguments is { Length: > 0 } ta
+            ? "<" + string.Join(", ", ta.Select(t => t.Name)) + ">"
+            : "";
+        return $"{_memberName}{typeArgs}({argDescriptions})";
     }
 }
