@@ -1422,7 +1422,7 @@ internal static class MockImplBuilder
     internal static string TypeArgumentsArrayLiteral(MockMemberModel method)
     {
         var typeParams = method.TypeParameters;
-        if (typeParams.Length is 1 or 2)
+        if (typeParams.Length is >= 1 and <= 4)
         {
             return $"global::TUnit.Mocks.TypeArguments.Of<{string.Join(", ", typeParams.Select(tp => tp.Name))}>.Value";
         }

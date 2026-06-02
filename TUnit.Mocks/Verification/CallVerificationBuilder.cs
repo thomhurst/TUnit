@@ -168,8 +168,16 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     {
         var argDescriptions = string.Join(", ", _matchers.Select(m => m.Describe()));
         var typeArgs = _typeArguments is { Length: > 0 } ta
-            ? "<" + string.Join(", ", ta.Select(t => t.Name)) + ">"
+            ? "<" + string.Join(", ", ta.Select(FriendlyTypeName)) + ">"
             : "";
         return $"{_memberName}{typeArgs}({argDescriptions})";
+    }
+
+    /// <summary>Short type name for diagnostics, without the CLR arity suffix (e.g. <c>List</c>, not <c>List`1</c>).</summary>
+    private static string FriendlyTypeName(Type type)
+    {
+        var name = type.Name;
+        var tick = name.IndexOf('`');
+        return tick < 0 ? name : name.Substring(0, tick);
     }
 }

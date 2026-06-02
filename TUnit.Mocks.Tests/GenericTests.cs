@@ -36,6 +36,15 @@ public interface IMultiGeneric
     void Handle<TInput, TOutput>(TInput input) where TInput : class where TOutput : class;
 }
 
+/// <summary>
+/// A struct-constrained generic method, to verify the <see cref="AnyValueType"/> wildcard works for
+/// <c>where T : struct</c> parameters (and is not dead code).
+/// </summary>
+public interface IValueDescriber
+{
+    string Describe<T>() where T : struct;
+}
+
 public class Customer
 {
     public int Id { get; set; }
@@ -299,5 +308,31 @@ public class GenericTests
 
         // The failure should name the type argument so the developer can tell which setup was expected.
         await Assert.That(ex!.ExpectedCall).Contains("Save<Customer>");
+    }
+
+    [Test]
+    public async Task Generic_Method_Struct_Constraint_AnyValueType_Wildcard()
+    {
+        // AnyValueType is a struct, so it satisfies `where T : struct` and acts as a wildcard there.
+        var mock = IValueDescriber.Mock();
+        mock.Describe<AnyValueType>().Returns("any-value");
+
+        IValueDescriber sut = mock.Object;
+
+        await Assert.That(sut.Describe<int>()).IsEqualTo("any-value");
+        await Assert.That(sut.Describe<System.DateTime>()).IsEqualTo("any-value");
+    }
+
+    [Test]
+    public async Task Generic_Method_Struct_Constraint_Distinguished_By_Type_Argument()
+    {
+        var mock = IValueDescriber.Mock();
+        mock.Describe<int>().Returns("int");
+        mock.Describe<long>().Returns("long");
+
+        IValueDescriber sut = mock.Object;
+
+        await Assert.That(sut.Describe<int>()).IsEqualTo("int");
+        await Assert.That(sut.Describe<long>()).IsEqualTo("long");
     }
 }
