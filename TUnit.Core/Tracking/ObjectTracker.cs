@@ -10,7 +10,8 @@ namespace TUnit.Core.Tracking;
 /// </summary>
 /// <remarks>
 /// The static <c>s_trackedObjects</c> dictionary is shared across all tests.
-/// Call <see cref="ClearStaticTracking"/> at the end of a test session to release memory.
+/// Call <see cref="DisposeAndClearStaticTrackingAsync"/> at the end of a run session to
+/// dispose any leftovers and release memory.
 /// </remarks>
 internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphProvider, Disposer disposer)
 {
@@ -26,15 +27,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// Check this at the end of a test session to surface hidden failures.
     /// </summary>
     public static IReadOnlyCollection<Exception> GetAsyncCallbackErrors() => s_asyncCallbackErrors.ToArray();
-
-    /// <summary>
-    /// Clears all static tracking state. Call at the end of a test session to release memory.
-    /// </summary>
-    public static void ClearStaticTracking()
-    {
-        s_trackedObjects.Clear();
-        s_asyncCallbackErrors.Clear();
-    }
 
     /// <summary>
     /// Disposes any objects still tracked with a positive reference count, then clears all
