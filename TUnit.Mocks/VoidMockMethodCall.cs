@@ -126,11 +126,13 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     // ICallVerification implementation
 
     // Non-generic calls use the public engine surface unchanged; generic calls route through the
-    // internal type-argument-aware factory (the engine is always a MockEngine, which implements it).
+    // internal type-argument-aware factory (always implemented by MockEngine). A custom
+    // IMockEngineAccess implementation falls back to the public surface, losing type-argument
+    // filtering but never throwing.
     private ICallVerification CreateVerification()
-        => _typeArguments is null
-            ? _engine.CreateVerification(_memberId, _memberName, _matchers)
-            : ((ITypeArgumentVerificationFactory)_engine).CreateVerification(_memberId, _memberName, _matchers, _typeArguments);
+        => _typeArguments is not null && _engine is ITypeArgumentVerificationFactory typeArgFactory
+            ? typeArgFactory.CreateVerification(_memberId, _memberName, _matchers, _typeArguments)
+            : _engine.CreateVerification(_memberId, _memberName, _matchers);
 
     public void WasCalled(Times times)
     {

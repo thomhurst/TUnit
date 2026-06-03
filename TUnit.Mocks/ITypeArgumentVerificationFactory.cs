@@ -6,8 +6,10 @@ namespace TUnit.Mocks;
 /// <summary>
 /// Internal extension of the engine's verification surface that also filters by a generic method's
 /// type arguments. Kept off the public <see cref="IMockEngineAccess"/> interface so adding generic
-/// type-argument support does not break external implementers; the only implementer is
-/// <see cref="MockEngine{T}"/>, and generic mock-call wrappers reach it via an internal cast.
+/// type-argument support does not break external implementers (a default interface method is not an
+/// option while the library targets netstandard2.0). The only implementer is
+/// <see cref="MockEngine{T}"/>; generic mock-call wrappers reach it via a type test and fall back to
+/// the public, non-filtering surface for any custom engine.
 /// </summary>
 internal interface ITypeArgumentVerificationFactory
 {
