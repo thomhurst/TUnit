@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Verification;
 
@@ -17,5 +18,20 @@ internal interface ITypeArgumentVerificationFactory
     /// Creates a call verification builder that filters recorded calls by the supplied type arguments
     /// (concrete types or <see cref="AnyType"/>/<see cref="AnyValueType"/> wildcards).
     /// </summary>
-    ICallVerification CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments);
+    ICallVerification CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments);
+}
+
+/// <summary>
+/// Shared verification-builder routing for <see cref="MockMethodCall{TReturn}"/> and
+/// <see cref="VoidMockMethodCall"/>: non-generic calls use the public engine surface unchanged;
+/// generic calls route through <see cref="ITypeArgumentVerificationFactory"/> (always implemented by
+/// MockEngine). A custom <see cref="IMockEngineAccess"/> implementation falls back to the public
+/// surface, losing type-argument filtering but never throwing.
+/// </summary>
+internal static class MockCallVerification
+{
+    public static ICallVerification Create(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
+        => !typeArguments.IsDefault && engine is ITypeArgumentVerificationFactory typeArgFactory
+            ? typeArgFactory.CreateVerification(memberId, memberName, matchers, typeArguments)
+            : engine.CreateVerification(memberId, memberName, matchers);
 }

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Setup;
@@ -22,7 +23,7 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Type[]? _typeArguments;
+    private readonly ImmutableArray<Type> _typeArguments;
     private VoidMethodSetupBuilder? _builder;
     private bool _builderInitialized;
     private object? _builderLock;
@@ -31,24 +32,24 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     // public/internal binary signatures for backward compatibility.
     [EditorBrowsable(EditorBrowsableState.Never)]
     public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments: null)
+        : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments: default)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
         : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister)
-        : this(engine, memberId, memberName, matchers, eagerRegister, typeArguments: null)
+        : this(engine, memberId, memberName, matchers, eagerRegister, typeArguments: default)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister, Type[]? typeArguments)
+    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister, ImmutableArray<Type> typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
@@ -125,14 +126,8 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
 
     // ICallVerification implementation
 
-    // Non-generic calls use the public engine surface unchanged; generic calls route through the
-    // internal type-argument-aware factory (always implemented by MockEngine). A custom
-    // IMockEngineAccess implementation falls back to the public surface, losing type-argument
-    // filtering but never throwing.
     private ICallVerification CreateVerification()
-        => _typeArguments is not null && _engine is ITypeArgumentVerificationFactory typeArgFactory
-            ? typeArgFactory.CreateVerification(_memberId, _memberName, _matchers, _typeArguments)
-            : _engine.CreateVerification(_memberId, _memberName, _matchers);
+        => MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
 
     public void WasCalled(Times times)
     {

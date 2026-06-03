@@ -335,4 +335,46 @@ public class GenericTests
         await Assert.That(sut.Describe<int>()).IsEqualTo("int");
         await Assert.That(sut.Describe<long>()).IsEqualTo("long");
     }
+
+    [Test]
+    public void Ordered_Verification_Discriminates_By_Type_Argument()
+    {
+        var mock = IGenericGreeter.Mock();
+        IGenericGreeter greeter = mock.Object;
+
+        greeter.Greet<Class1>();
+        greeter.Greet<Class2>();
+
+        // Passes only if each expectation matches the call with its own type argument.
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Greet<Class1>().WasCalled();
+            mock.Greet<Class2>().WasCalled();
+        });
+    }
+
+    [Test]
+    public async Task Ordered_Verification_Fails_When_Type_Arguments_Out_Of_Order()
+    {
+        var mock = IGenericGreeter.Mock();
+        IGenericGreeter greeter = mock.Object;
+
+        greeter.Greet<Class1>();
+        greeter.Greet<Class2>();
+
+        // Reversed type-argument order must fail. Before type arguments were threaded through
+        // ordered verification, both expectations matched both calls and this passed regardless
+        // of which type was actually called first.
+        var ex = Assert.Throws<MockVerificationException>(() =>
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Greet<Class2>().WasCalled();
+                mock.Greet<Class1>().WasCalled();
+            }));
+
+        await Assert.That(ex!.Message).Contains("Ordered verification failed");
+        // The failure message names the expected calls with their type arguments.
+        await Assert.That(ex.Message).Contains("Greet<Class1>");
+        await Assert.That(ex.Message).Contains("Greet<Class2>");
+    }
 }

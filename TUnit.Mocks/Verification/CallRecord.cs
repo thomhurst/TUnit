@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 
@@ -17,7 +18,7 @@ public sealed class CallRecord
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber)
-        : this(memberId, memberName, arguments, sequenceNumber, null)
+        : this(memberId, memberName, arguments, sequenceNumber, default)
     {
     }
 
@@ -25,7 +26,7 @@ public sealed class CallRecord
     /// Creates a call record with pre-boxed arguments and generic-method type arguments.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber, Type[]? typeArguments)
+    public CallRecord(int memberId, string memberName, object?[] arguments, long sequenceNumber, ImmutableArray<Type> typeArguments)
     {
         MemberId = memberId;
         MemberName = memberName;
@@ -56,10 +57,10 @@ public sealed class CallRecord
     public long SequenceNumber { get; }
 
     /// <summary>
-    /// For a generic method, the concrete closed type arguments the call was made with; null for a
+    /// For a generic method, the concrete closed type arguments the call was made with; default for a
     /// non-generic member. Used by verification to discriminate calls by type argument.
     /// </summary>
-    public Type[]? TypeArguments { get; }
+    public ImmutableArray<Type> TypeArguments { get; }
 
     /// <summary>
     /// The arguments passed to the call. Lazily materialized from the argument store if one was provided.

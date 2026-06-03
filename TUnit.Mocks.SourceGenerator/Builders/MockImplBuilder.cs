@@ -744,7 +744,7 @@ internal static class MockImplBuilder
         }
 
         var (isTyped, typeArgs, argsList) = GetTypedDispatchInfo(method);
-        // Generic methods always dispatch through the object?[] + Type[] fallback so their concrete
+        // Generic methods always dispatch through the object?[] + type-arguments fallback so their concrete
         // type arguments reach the engine (typed dispatch can't carry them). Force the fallback path
         // here so argsArray is materialized; the emit helpers then select the type-arg overloads.
         if (method.IsGenericMethod)
@@ -1415,9 +1415,9 @@ internal static class MockImplBuilder
     }
 
     /// <summary>
-    /// Emits the type-argument array for a generic method. For the common 1–2 type-parameter cases it
+    /// Emits the type-argument array for a generic method. For the common 1–4 type-parameter cases it
     /// references the per-closed-type cache (<c>TypeArguments.Of&lt;T&gt;.Value</c>) to avoid a per-call
-    /// allocation; higher arities fall back to a fresh <c>new global::System.Type[] { typeof(T), ... }</c>.
+    /// allocation; higher arities fall back to a per-call <c>ImmutableArray.Create(...)</c>.
     /// </summary>
     internal static string TypeArgumentsArrayLiteral(MockMemberModel method)
     {
@@ -1426,7 +1426,7 @@ internal static class MockImplBuilder
         {
             return $"global::TUnit.Mocks.TypeArguments.Of<{string.Join(", ", typeParams.Select(tp => tp.Name))}>.Value";
         }
-        return $"new global::System.Type[] {{ {string.Join(", ", typeParams.Select(tp => $"typeof({tp.Name})"))} }}";
+        return $"global::System.Collections.Immutable.ImmutableArray.Create<global::System.Type>({string.Join(", ", typeParams.Select(tp => $"typeof({tp.Name})"))})";
     }
 
     /// <summary>Emits a TryHandleCall condition, choosing typed or fallback path.</summary>

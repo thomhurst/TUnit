@@ -971,7 +971,8 @@ internal static class MockMembersBuilder
     {
         // For a generic method, pass the configured type arguments so the setup/verification can
         // discriminate calls by type argument. Non-generic methods omit the argument (overload with
-        // the trailing Type[] is not selected). The typed wrapper is never generated for generic methods.
+        // the trailing type-arguments parameter is not selected). The typed wrapper is never generated
+        // for generic methods.
         var typeArgs = method.IsGenericMethod
             ? $", {MockImplBuilder.TypeArgumentsArrayLiteral(method)}"
             : "";

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Setup;
@@ -20,7 +21,7 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Type[]? _typeArguments;
+    private readonly ImmutableArray<Type> _typeArguments;
     private MethodSetupBuilder<TReturn>? _builder;
     private bool _builderInitialized;
     private object? _builderLock;
@@ -29,12 +30,12 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
     // public binary signature for backward compatibility.
     [EditorBrowsable(EditorBrowsableState.Never)]
     public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, null)
+        : this(engine, memberId, memberName, matchers, default)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    public MockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
@@ -119,14 +120,8 @@ public sealed class MockMethodCall<TReturn> : IMethodSetup<TReturn>, ISetupChain
 
     // ICallVerification implementation
 
-    // Non-generic calls use the public engine surface unchanged; generic calls route through the
-    // internal type-argument-aware factory (always implemented by MockEngine). A custom
-    // IMockEngineAccess implementation falls back to the public surface, losing type-argument
-    // filtering but never throwing.
     private ICallVerification CreateVerification()
-        => _typeArguments is not null && _engine is ITypeArgumentVerificationFactory typeArgFactory
-            ? typeArgFactory.CreateVerification(_memberId, _memberName, _matchers, _typeArguments)
-            : _engine.CreateVerification(_memberId, _memberName, _matchers);
+        => MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
 
     public void WasCalled(Times times)
     {

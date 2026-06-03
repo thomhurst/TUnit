@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Exceptions;
@@ -15,14 +16,14 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
-    private readonly Type[]? _typeArguments;
+    private readonly ImmutableArray<Type> _typeArguments;
 
     public CallVerificationBuilder(MockEngine<T> engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, null)
+        : this(engine, memberId, memberName, matchers, default)
     {
     }
 
-    public CallVerificationBuilder(MockEngine<T> engine, int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    public CallVerificationBuilder(MockEngine<T> engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
@@ -49,7 +50,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
             }
 
             var allCalls = _engine.GetAllCalls();
-            OrderedVerification.RecordExpectation(_memberId, _memberName, _matchers, times, allCalls);
+            OrderedVerification.RecordExpectation(_memberId, _memberName, _matchers, _typeArguments, times, allCalls);
             return;
         }
 
@@ -59,7 +60,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         // Note: the count is read lock-free, then MarkCallsVerified acquires the lock.
         // Calls recorded between these two steps will be marked verified but weren't counted.
         // This is safe because verification should only run after all calls have completed.
-        if (_matchers.Length == 0 && _typeArguments is null)
+        if (_matchers.Length == 0 && _typeArguments.IsDefault)
         {
             var totalCount = _engine.GetCallCountFor(_memberId);
             if (!times.Matches(totalCount))
@@ -167,17 +168,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     private string FormatExpectedCall()
     {
         var argDescriptions = string.Join(", ", _matchers.Select(m => m.Describe()));
-        var typeArgs = _typeArguments is { Length: > 0 } ta
-            ? "<" + string.Join(", ", ta.Select(FriendlyTypeName)) + ">"
-            : "";
+        var typeArgs = TypeArgumentMatching.FormatForDiagnostics(_typeArguments);
         return $"{_memberName}{typeArgs}({argDescriptions})";
-    }
-
-    /// <summary>Short type name for diagnostics, without the CLR arity suffix (e.g. <c>List</c>, not <c>List`1</c>).</summary>
-    private static string FriendlyTypeName(Type type)
-    {
-        var name = type.Name;
-        var tick = name.IndexOf('`');
-        return tick < 0 ? name : name.Substring(0, tick);
     }
 }

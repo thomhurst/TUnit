@@ -4,6 +4,7 @@ using TUnit.Mocks.Setup;
 using TUnit.Mocks.Setup.Behaviors;
 using TUnit.Mocks.Verification;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.ComponentModel;
@@ -224,24 +225,24 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     ICallVerification IMockEngineAccess.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers)
         => new CallVerificationBuilder<T>(this, memberId, memberName, matchers);
 
-    ICallVerification ITypeArgumentVerificationFactory.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, Type[]? typeArguments)
+    ICallVerification ITypeArgumentVerificationFactory.CreateVerification(int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
         => new CallVerificationBuilder<T>(this, memberId, memberName, matchers, typeArguments);
 
     /// <summary>
     /// Handles a void method call. Records the call and executes matching setup behavior.
     /// </summary>
     public void HandleCall(int memberId, string memberName, object?[] args)
-        => HandleCallCore(memberId, memberName, args, null);
+        => HandleCallCore(memberId, memberName, args, default);
 
     /// <summary>
     /// Handles a void generic-method call. <paramref name="typeArguments"/> are the concrete closed
     /// type arguments, used to discriminate setups and recorded calls by type argument.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void HandleCall(int memberId, string memberName, object?[] args, Type[] typeArguments)
+    public void HandleCall(int memberId, string memberName, object?[] args, ImmutableArray<Type> typeArguments)
         => HandleCallCore(memberId, memberName, args, typeArguments);
 
-    private void HandleCallCore(int memberId, string memberName, object?[] args, Type[]? typeArguments)
+    private void HandleCallCore(int memberId, string memberName, object?[] args, ImmutableArray<Type> typeArguments)
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args, typeArguments);
@@ -296,18 +297,18 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// or returns default/throws for strict mode.
     /// </summary>
     public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue)
-        => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, null, null);
+        => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, null, default);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory)
-        => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, autoMockFactory, null);
+        => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, autoMockFactory, default);
 
     /// <summary>
     /// Handles a generic-method call with a return value. <paramref name="typeArguments"/> are the
     /// concrete closed type arguments, used to discriminate setups and recorded calls by type argument.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Type[] typeArguments)
+    public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, ImmutableArray<Type> typeArguments)
         => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, null, typeArguments);
 
     /// <summary>
@@ -315,10 +316,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// <paramref name="autoMockFactory"/> and <paramref name="typeArguments"/> paths.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory, Type[] typeArguments)
+    public TReturn HandleCallWithReturn<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory, ImmutableArray<Type> typeArguments)
         => HandleCallWithReturnCore(memberId, memberName, args, defaultValue, autoMockFactory, typeArguments);
 
-    private TReturn HandleCallWithReturnCore<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory, Type[]? typeArguments)
+    private TReturn HandleCallWithReturnCore<TReturn>(int memberId, string memberName, object?[] args, TReturn defaultValue, Func<MockBehavior, IMock>? autoMockFactory, ImmutableArray<Type> typeArguments)
     {
         RawReturnContext.Clear();
         var callRecord = RecordCall(memberId, memberName, args, typeArguments);
@@ -785,7 +786,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)
         => StoreCallRecord(new CallRecord(memberId, memberName, args, MockCallSequence.Next()));
 
-    private CallRecord RecordCall(int memberId, string memberName, object?[] args, Type[]? typeArguments)
+    private CallRecord RecordCall(int memberId, string memberName, object?[] args, ImmutableArray<Type> typeArguments)
         => StoreCallRecord(new CallRecord(memberId, memberName, args, MockCallSequence.Next(), typeArguments));
 
     private CallRecord RecordCall(int memberId, string memberName, IArgumentStore store)
@@ -916,9 +917,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     // Adding a defaulted third parameter here would let the generic overload bind instead,
     // silently treating the args array as a single typed argument.
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args)
-        => FindMatchingSetup(memberId, args, (Type[]?)null);
+        => FindMatchingSetup(memberId, args, default(ImmutableArray<Type>));
 
-    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args, Type[]? typeArguments)
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup(int memberId, object?[] args, ImmutableArray<Type> typeArguments)
     {
         // Rebuild snapshots if setup phase just ended (batches all ToArray work into one pass)
         if (_hasStaleSetups)
@@ -963,7 +964,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     // FindMatchingSetupLocked has no generic sibling, so a defaulted parameter is safe here
     // (unlike FindMatchingSetup, which competes with FindMatchingSetup<T1>).
-    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetupLocked(int memberId, object?[] args, Type[]? typeArguments = null)
+    private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetupLocked(int memberId, object?[] args, ImmutableArray<Type> typeArguments = default)
     {
         lock (Lock)
         {
@@ -999,6 +1000,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         return (false, null, null);
     }
 
+    // The typed FindMatchingSetup<T1..T8> family deliberately omits a TypeArgumentsMatch check.
+    // Typed dispatch never carries call-side type arguments, and per TypeArgumentMatching.Matches a
+    // default call side matches any setup — so the check would be a constant `true`. Two paths land
+    // here: non-generic methods (their setups never carry type arguments), and virtual/partial/wrap
+    // generic methods, which use the documented graceful-degradation path where setups are matched by
+    // arguments only, regardless of configured type arguments. Interface generic methods never use
+    // typed dispatch (see MockMembersBuilder.ShouldGenerateTypedWrapper) and are fully discriminated
+    // via the object?[] overloads above.
     private (bool SetupFound, IBehavior? Behavior, MethodSetup? Setup) FindMatchingSetup<T1>(int memberId, T1 arg1)
     {
         if (_hasStaleSetups) RebuildStaleSnapshots();
