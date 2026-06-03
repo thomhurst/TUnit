@@ -20,18 +20,21 @@ internal sealed class TestRegistry : ITestRegistry
     private readonly TestBuilderPipeline? _testBuilderPipeline;
     private readonly ITestCoordinator _testCoordinator;
     private readonly IDynamicTestQueue _dynamicTestQueue;
+    private readonly TestFilterService _testFilterService;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
         ITestCoordinator testCoordinator,
         IDynamicTestQueue dynamicTestQueue,
+        TestFilterService testFilterService,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
         _testCoordinator = testCoordinator;
         _dynamicTestQueue = dynamicTestQueue;
+        _testFilterService = testFilterService;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -98,6 +101,10 @@ internal sealed class TestRegistry : ITestRegistry
         // These are dynamic tests registered after discovery, so not in execution mode with a filter
         var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
         var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList, buildingContext);
+
+        // Dynamic tests bypass the discovery pipeline's post-filter registration, so register them
+        // here (event receivers + argument registration/reference counting) before they execute.
+        await _testFilterService.RegisterTestsAsync(builtTests, isForExecution: true);
 
         foreach (var test in builtTests)
         {
@@ -264,6 +271,10 @@ internal sealed class TestRegistry : ITestRegistry
 
         var builtTest = builtTests.FirstOrDefault()
             ?? throw new InvalidOperationException("Failed to build test variant");
+
+        // Variants bypass the discovery pipeline's post-filter registration, so register here
+        // (event receivers + argument registration/reference counting) before execution.
+        await _testFilterService.RegisterTestsAsync([builtTest], isForExecution: true);
 
         _dynamicTestQueue.Enqueue(builtTest);
 

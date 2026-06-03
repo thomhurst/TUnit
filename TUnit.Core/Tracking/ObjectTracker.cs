@@ -10,7 +10,8 @@ namespace TUnit.Core.Tracking;
 /// </summary>
 /// <remarks>
 /// The static <c>s_trackedObjects</c> dictionary is shared across all tests.
-/// Call <see cref="ClearStaticTracking"/> at the end of a test session to release memory.
+/// Call <see cref="DisposeAndClearStaticTrackingAsync"/> at the end of a run session to
+/// dispose any leftovers and release memory.
 /// </remarks>
 internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphProvider, Disposer disposer)
 {
@@ -28,12 +29,40 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     public static IReadOnlyCollection<Exception> GetAsyncCallbackErrors() => s_asyncCallbackErrors.ToArray();
 
     /// <summary>
-    /// Clears all static tracking state. Call at the end of a test session to release memory.
+    /// Disposes any objects still tracked with a positive reference count, then clears all
+    /// static tracking state. Call at the end of a run session: every executed test has
+    /// already decremented its references by then, so anything still alive would otherwise
+    /// leak (e.g. its remaining consumers were cancelled or a path miscounted). Clearing also
+    /// ensures a subsequent run request in the same process starts with fresh state.
+    /// Intentionally an instance method despite operating on static state: disposal needs the
+    /// injected <see cref="Disposer"/> (for error logging), which only instances carry.
     /// </summary>
-    public static void ClearStaticTracking()
+    /// <returns>Any exceptions thrown by the disposals, or null if none.</returns>
+    public async ValueTask<List<Exception>?> DisposeAndClearStaticTrackingAsync()
     {
-        s_trackedObjects.Clear();
+        List<Exception>? exceptions = null;
+
+        foreach (var kvp in s_trackedObjects)
+        {
+            // TryRemove guards against racing disposals (e.g. a late UntrackObject call)
+            if (!s_trackedObjects.TryRemove(kvp.Key, out _))
+            {
+                continue;
+            }
+
+            try
+            {
+                await disposer.DisposeAsync(kvp.Key).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                (exceptions ??= []).Add(ex);
+            }
+        }
+
         s_asyncCallbackErrors.Clear();
+
+        return exceptions;
     }
 
     /// <summary>
@@ -188,6 +217,15 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         var counter = GetOrCreateCounter(obj);
         counter.Increment();
     }
+
+    /// <summary>
+    /// Decrements a single object's reference count, disposing it (and removing it from the
+    /// static tracking dictionary) when the count reaches zero. Used by owners that hold their
+    /// own +1 reference (e.g. static properties) so disposal stays consistent with ref counting
+    /// instead of bypassing it — a direct dispose would leave a stale entry that the session-end
+    /// sweep would dispose a second time.
+    /// </summary>
+    public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj);
 
     private async ValueTask UntrackObject(object? obj)
     {

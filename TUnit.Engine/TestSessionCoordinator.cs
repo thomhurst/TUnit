@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Services;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
@@ -22,6 +23,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly ITUnitMessageBus _messageBus;
     private readonly IStaticPropertyInitializer _staticPropertyInitializer;
+    private readonly ObjectTracker _objectTracker;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -30,7 +32,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         IContextProvider contextProvider,
         TestLifecycleCoordinator lifecycleCoordinator,
         ITUnitMessageBus messageBus,
-        IStaticPropertyInitializer staticPropertyInitializer)
+        IStaticPropertyInitializer staticPropertyInitializer,
+        ObjectTracker objectTracker)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -40,6 +43,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _messageBus = messageBus;
         _testScheduler = testScheduler;
         _staticPropertyInitializer = staticPropertyInitializer;
+        _objectTracker = objectTracker;
     }
 
     public async Task ExecuteTests(
@@ -59,6 +63,23 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         }
         finally
         {
+            // Dispose anything still ref-counted (e.g. consumers were cancelled or filtered out)
+            // and reset the static shared-instance caches so a subsequent run request in the same
+            // process (IDE server mode) creates fresh fixtures instead of reusing disposed ones.
+            // Runs after After(TestSession) hooks and static property disposal (both inside
+            // ExecuteTestsCore via the scheduler), preserving existing disposal ordering.
+            var sweepExceptions = await _objectTracker.DisposeAndClearStaticTrackingAsync();
+
+            if (sweepExceptions is { Count: > 0 })
+            {
+                foreach (var exception in sweepExceptions)
+                {
+                    await _logger.LogErrorAsync($"Error disposing tracked object at session end: {exception}");
+                }
+            }
+
+            TestDataContainer.Reset();
+
             foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
             {
                 await _messageBus.SessionArtifact(artifact);

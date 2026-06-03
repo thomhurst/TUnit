@@ -203,7 +203,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var dependencyExpander = Register(new MetadataDependencyExpander(filterMatcher));
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, testArgumentRegistrationService, filterMatcher));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, ObjectLifecycleService, hookDiscoveryService, filterMatcher));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
@@ -259,7 +259,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             hashSetPool));
 
-        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer, lazyPropertyInjector, objectGraphDiscoveryService));
+        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, lazyPropertyInjector, objectGraphDiscoveryService));
 
         var dynamicTestQueue = Register<IDynamicTestQueue>(new DynamicTestQueue(MessageBus));
 
@@ -285,9 +285,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             ContextProvider,
             lifecycleCoordinator,
             MessageBus,
-            staticPropertyInitializer));
+            staticPropertyInitializer,
+            objectTracker));
 
-        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestSessionId, CancellationToken.Token));
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestFilterService, TestSessionId, CancellationToken.Token));
 
         InitializeConsoleInterceptors();
     }

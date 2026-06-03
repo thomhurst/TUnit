@@ -103,7 +103,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             filteredTests = [.. testsToInclude];
         }
 
-        await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
+        await _testFilterService.RegisterTestsAsync(filteredTests, isForExecution).ConfigureAwait(false);
 
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
@@ -232,6 +232,11 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
     }
 
+    // NOTE: This streaming path never calls _testFilterService.RegisterTestsAsync, so yielded
+    // tests have NOT had argument registration (shared-object creation + reference counting).
+    // It currently has no callers; if it is ever wired into an execution path, tests must be
+    // registered with isForExecution: true before they run, or property injection and shared
+    // fixture disposal will silently break.
     #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif

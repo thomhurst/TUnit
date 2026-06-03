@@ -23,7 +23,6 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly IContextProvider _contextProvider;
     private readonly ObjectLifecycleService _objectLifecycleService;
     private readonly Discovery.IHookRegistrar _hookDiscoveryService;
-    private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
     private readonly IMetadataFilterMatcher _filterMatcher;
 
     public TestBuilder(
@@ -32,7 +31,6 @@ internal sealed class TestBuilder : ITestBuilder
         IContextProvider contextProvider,
         ObjectLifecycleService objectLifecycleService,
         Discovery.IHookRegistrar hookDiscoveryService,
-        TestArgumentRegistrationService testArgumentRegistrationService,
         IMetadataFilterMatcher filterMatcher)
     {
         _sessionId = sessionId;
@@ -40,7 +38,6 @@ internal sealed class TestBuilder : ITestBuilder
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
         _objectLifecycleService = objectLifecycleService;
-        _testArgumentRegistrationService = testArgumentRegistrationService;
         _filterMatcher = filterMatcher ?? throw new ArgumentNullException(nameof(filterMatcher));
     }
 
@@ -934,25 +931,14 @@ internal sealed class TestBuilder : ITestBuilder
         // Set InternalExecutableTest so it's available during registration for error handling
         context.InternalExecutableTest = test;
 
-        // Register test arguments for property injection and reference counting
-        // Note: ITestRegisteredEventReceiver and ITestDiscoveryEventReceiver are invoked later
-        // in InvokePostResolutionEventsAsync after dependencies are resolved
-        try
-        {
-            await RegisterTestArgumentsAsync(context, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // Property registration failed - mark the test as failed immediately
-            test.SetResult(TestState.Failed, ex);
-        }
-        finally
-        {
-            // Clear TestContext.Current so subsequent build operations use TestBuildContext.Current
-            // for output capture. This ensures console output during data source evaluation
-            // goes to the shared build context, not a previous test's context.
-            TestContext.Current = null;
-        }
+        // Test argument registration (property injection + reference counting) is NOT done here.
+        // It happens post-filter in TestFilterService.RegisterTest so that shared-object reference
+        // counts only include tests that will actually execute. Registering at build time inflated
+        // the counts with built-but-filtered-out tests (e.g. [Explicit] siblings or single
+        // [Arguments] cases selected by an IDE uid filter), so the count never drained to zero and
+        // shared fixtures were never disposed (#6151).
+        // ITestRegisteredEventReceiver and ITestDiscoveryEventReceiver are invoked later in
+        // InvokePostResolutionEventsAsync after dependencies are resolved.
 
         return test;
     }
@@ -1100,23 +1086,6 @@ internal sealed class TestBuilder : ITestBuilder
         context.Metadata.TestDetails = testDetails;
 
         return context;
-    }
-
-    /// <summary>
-    /// Registers test arguments for property injection and reference counting.
-    /// Called during test building, before dependencies are resolved.
-    /// </summary>
-    private async Task RegisterTestArgumentsAsync(TestContext context, CancellationToken cancellationToken = default)
-    {
-        var discoveredTest = new DiscoveredTest<object>
-        {
-            TestContext = context
-        };
-
-        context.InternalDiscoveredTest = discoveredTest;
-
-        // Invoke the global test argument registration service to register shared instances
-        await _testArgumentRegistrationService.RegisterTestArgumentsAsync(context, cancellationToken);
     }
 
 #if NET8_0_OR_GREATER
