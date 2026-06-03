@@ -69,10 +69,7 @@ public abstract class InvokableTestBase(TestMode testMode)
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithEnvironmentVariables(new Dictionary<string, string?>
-            {
-                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
-            })
+            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions))
             .WithValidation(CommandResultValidation.None);
 
         await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
@@ -105,13 +102,25 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithEnvironmentVariables(new Dictionary<string, string?>
-            {
-                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
-            })
+            .WithEnvironmentVariables(BuildEnvironmentVariables(runOptions))
             .WithValidation(CommandResultValidation.None);
 
         await RunWithFailureLogging(command, runOptions, trxFilename, assertions, assertionExpression);
+    }
+
+    private static Dictionary<string, string?> BuildEnvironmentVariables(RunOptions runOptions)
+    {
+        var environmentVariables = new Dictionary<string, string?>
+        {
+            ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
+        };
+
+        foreach (var (key, value) in runOptions.EnvironmentVariables)
+        {
+            environmentVariables[key] = value;
+        }
+
+        return environmentVariables;
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
@@ -176,11 +185,19 @@ public record RunOptions
 
     public List<string> AdditionalArguments { get; init; } = [];
 
+    public Dictionary<string, string?> EnvironmentVariables { get; init; } = [];
+
     public List<Func<CommandTask<BufferedCommandResult>, Task>> OnExecutingDelegates { get; init; } = [];
 
     public RunOptions WithArgument(string argument)
     {
         AdditionalArguments.Add(argument);
+        return this;
+    }
+
+    public RunOptions WithEnvironmentVariable(string key, string? value)
+    {
+        EnvironmentVariables[key] = value;
         return this;
     }
 

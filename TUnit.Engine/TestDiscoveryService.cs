@@ -103,7 +103,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             filteredTests = [.. testsToInclude];
         }
 
-        await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
+        await _testFilterService.RegisterTestsAsync(filteredTests, isForExecution).ConfigureAwait(false);
 
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);

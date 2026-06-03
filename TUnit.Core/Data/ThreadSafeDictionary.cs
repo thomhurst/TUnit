@@ -103,4 +103,9 @@ public class ThreadSafeDictionary<TKey, [DynamicallyAccessedMembers(DynamicallyA
     public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy)
         ? lazy.Value
         : throw new KeyNotFoundException($"Key '{key}' not found in dictionary");
+
+    /// <summary>
+    /// Removes all keys and values from the dictionary.
+    /// </summary>
+    public void Clear() => _innerDictionary.Clear();
 }

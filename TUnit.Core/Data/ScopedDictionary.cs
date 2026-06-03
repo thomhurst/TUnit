@@ -11,4 +11,9 @@ public class ScopedDictionary<TScope>
 
         return innerDictionary.GetOrAdd(type, factory);
     }
+
+    /// <summary>
+    /// Removes all scopes and their cached instances.
+    /// </summary>
+    public void Clear() => _scopedContainers.Clear();
 }

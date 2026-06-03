@@ -29,4 +29,17 @@ internal static class TestDataContainer
     {
         return _keyContainer.GetOrCreate(key, type, func);
     }
+
+    /// <summary>
+    /// Clears all cached shared instances. Called at the end of a run session so that a
+    /// subsequent run request in the same process (e.g. IDE server mode) creates fresh
+    /// instances instead of reusing already-disposed ones.
+    /// </summary>
+    public static void Reset()
+    {
+        _globalContainer.Clear();
+        _classContainer.Clear();
+        _assemblyContainer.Clear();
+        _keyContainer.Clear();
+    }
 }

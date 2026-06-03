@@ -61,7 +61,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         return filteredTests;
     }
 
-    private async Task RegisterTest(AbstractExecutableTest test)
+    private async Task RegisterTest(AbstractExecutableTest test, bool isForExecution)
     {
         var discoveredTest = new DiscoveredTest<object>
         {
@@ -102,14 +102,21 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             return;
         }
 
-        try
+        // Argument registration creates shared data-source objects and increments their
+        // reference counts. Only do this for tests that will actually execute — those counts
+        // are only ever decremented on test completion, so registering during discovery-only
+        // requests would create fixtures as a side effect and leak them forever (#6151).
+        if (isForExecution)
         {
-            await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
-        }
-        catch (Exception ex)
-        {
-            // Mark the test as failed - event receivers have already run above
-            test.SetResult(TestState.Failed, ex);
+            try
+            {
+                await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
+            }
+            catch (Exception ex)
+            {
+                // Mark the test as failed - event receivers have already run above
+                test.SetResult(TestState.Failed, ex);
+            }
         }
 
         // Clear the cached display name after registration events
@@ -125,7 +132,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
     /// TestArgumentRegistrationService) use ConcurrentDictionary internally.
     /// ITestRegisteredEventReceiver implementations must be thread-safe.
     /// </summary>
-    public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
+    public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests, bool isForExecution)
     {
         var testList = tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
 
@@ -133,7 +140,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             foreach (var test in testList)
             {
-                await RegisterTest(test);
+                await RegisterTest(test, isForExecution);
             }
             return;
         }
@@ -141,7 +148,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         await Parallel.ForEachAsync(
             testList,
             new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            async (test, _) => await RegisterTest(test).ConfigureAwait(false)
+            async (test, _) => await RegisterTest(test, isForExecution).ConfigureAwait(false)
         ).ConfigureAwait(false);
     }
 

@@ -1857,6 +1857,7 @@ namespace .Data
         where TScope :  notnull
     {
         public ScopedDictionary() { }
+        public void Clear() { }
         public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
     }
     public class ThreadSafeDictionary<TKey, [.(..PublicParameterlessConstructor)]  TValue>
@@ -1866,6 +1867,7 @@ namespace .Data
         public TValue this[TKey key] { get; }
         public .<TKey> Keys { get; }
         public .<TValue> Values { get; }
+        public void Clear() { }
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
         public TValue GetOrAdd<TArg>(TKey key, <TKey, TArg, TValue> func, TArg arg) { }
         public TValue? Remove(TKey key) { }

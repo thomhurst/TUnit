@@ -37,6 +37,41 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     }
 
     /// <summary>
+    /// Disposes any objects still tracked with a positive reference count, then clears all
+    /// static tracking state. Call at the end of a run session: every executed test has
+    /// already decremented its references by then, so anything still alive would otherwise
+    /// leak (e.g. its remaining consumers were cancelled or a path miscounted). Clearing also
+    /// ensures a subsequent run request in the same process starts with fresh state.
+    /// </summary>
+    /// <returns>Any exceptions thrown by the disposals, or null if none.</returns>
+    public async ValueTask<List<Exception>?> DisposeAndClearStaticTrackingAsync()
+    {
+        List<Exception>? exceptions = null;
+
+        foreach (var kvp in s_trackedObjects)
+        {
+            // TryRemove guards against racing disposals (e.g. a late UntrackObject call)
+            if (!s_trackedObjects.TryRemove(kvp.Key, out _))
+            {
+                continue;
+            }
+
+            try
+            {
+                await disposer.DisposeAsync(kvp.Key).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                (exceptions ??= []).Add(ex);
+            }
+        }
+
+        s_asyncCallbackErrors.Clear();
+
+        return exceptions;
+    }
+
+    /// <summary>
     /// Gets an existing counter for the object or creates a new one.
     /// Centralizes the GetOrAdd pattern to ensure consistent counter creation.
     /// </summary>
