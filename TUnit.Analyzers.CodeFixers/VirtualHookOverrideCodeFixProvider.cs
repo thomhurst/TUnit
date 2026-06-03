@@ -15,7 +15,7 @@ public class VirtualHookOverrideCodeFixProvider : CodeFixProvider
     private const string Title = "Remove redundant hook attribute";
 
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.RedundantHookAttributeOnOverride.Id);
+        ImmutableArray.Create(DiagnosticIds.RedundantHookAttributeOnOverride);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

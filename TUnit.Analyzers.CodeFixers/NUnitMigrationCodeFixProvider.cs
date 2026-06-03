@@ -14,7 +14,7 @@ namespace TUnit.Analyzers.CodeFixers;
 public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 {
     protected override string FrameworkName => "NUnit";
-    protected override string DiagnosticId => Rules.NUnitMigration.Id;
+    protected override string DiagnosticId => DiagnosticIds.NUnitMigration;
     protected override string CodeFixTitle => "Convert NUnit code to TUnit";
     
     protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)

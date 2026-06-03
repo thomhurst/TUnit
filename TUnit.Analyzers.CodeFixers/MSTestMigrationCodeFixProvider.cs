@@ -14,7 +14,7 @@ namespace TUnit.Analyzers.CodeFixers;
 public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 {
     protected override string FrameworkName => "MSTest";
-    protected override string DiagnosticId => Rules.MSTestMigration.Id;
+    protected override string DiagnosticId => DiagnosticIds.MSTestMigration;
     protected override string CodeFixTitle => "Convert MSTest code to TUnit";
 
     protected override bool ShouldAddTUnitUsings() => true;

@@ -15,7 +15,7 @@ public class MatrixDataSourceCodeFixProvider : CodeFixProvider
     private const string Title = "Add [MatrixDataSource]";
 
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.MatrixDataSourceAttributeRequired.Id);
+        ImmutableArray.Create(DiagnosticIds.MatrixDataSourceAttributeRequired);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

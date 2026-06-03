@@ -13,8 +13,8 @@ namespace TUnit.Analyzers.CodeFixers;
 public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 {
     protected override string FrameworkName => "XUnit";
-    protected override string DiagnosticId => Rules.XunitMigration.Id;
-    protected override string CodeFixTitle => Rules.XunitMigration.Title.ToString();
+    protected override string DiagnosticId => DiagnosticIds.XunitMigration;
+    protected override string CodeFixTitle => "Convert xUnit code to TUnit";
 
     protected override bool ShouldAddTUnitUsings() => true;
 

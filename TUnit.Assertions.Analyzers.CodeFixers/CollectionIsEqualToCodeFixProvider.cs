@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Analyzers.CodeFixers;
 public class CollectionIsEqualToCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.CollectionIsEqualToUsesReferenceEquality.Id);
+        ImmutableArray.Create(DiagnosticIds.CollectionIsEqualToUsesReferenceEquality);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

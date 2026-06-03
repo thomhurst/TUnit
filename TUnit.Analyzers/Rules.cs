@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Analyzers;
 
@@ -7,171 +7,171 @@ public static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor WrongArgumentTypeTestData =
-        CreateDescriptor("TUnit0001", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoTestDataProvided =
-        CreateDescriptor("TUnit0002", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.NoTestDataProvided, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoMethodFound =
-        CreateDescriptor("TUnit0004", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.NoMethodFound, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodParameterBadNullability =
-        CreateDescriptor("TUnit0005", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.MethodParameterBadNullability, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MethodMustBeStatic =
-        CreateDescriptor("TUnit0007", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustBeStatic, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodMustBePublic =
-        CreateDescriptor("TUnit0008", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustBePublic, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodMustNotBeAbstract =
-        CreateDescriptor("TUnit0009", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustNotBeAbstract, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodMustBeParameterless =
-        CreateDescriptor("TUnit0010", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustBeParameterless, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MethodMustReturnData =
-        CreateDescriptor("TUnit0011", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustReturnData, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TooManyArgumentsInTestMethod =
-        CreateDescriptor("TUnit0013", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.TooManyArgumentsInTestMethod, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor PublicMethodMissingTestAttribute =
-        CreateDescriptor("TUnit0014", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.PublicMethodMissingTestAttribute, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MissingTimeoutCancellationTokenAttributes =
-        CreateDescriptor("TUnit0015", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.MissingTimeoutCancellationTokenAttributes, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor CancellationTokenMustBeLastParameter =
-        CreateDescriptor("TUnit0062", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.CancellationTokenMustBeLastParameter, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MethodMustNotBeStatic =
-        CreateDescriptor("TUnit0016", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MethodMustNotBeStatic, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor ConflictingExplicitAttributes =
-        CreateDescriptor("TUnit0017", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.ConflictingExplicitAttributes, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor InstanceAssignmentInTestClass =
-        CreateDescriptor("TUnit0018", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.InstanceAssignmentInTestClass, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor MissingTestAttribute =
-        CreateDescriptor("TUnit0019", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MissingTestAttribute, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor Dispose_Member_In_Cleanup =
-        CreateDescriptor("TUnit0023", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.Dispose_Member_In_Cleanup, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor UnknownParameters =
-        CreateDescriptor("TUnit0027", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.UnknownParameters, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DoNotOverrideAttributeUsageMetadata =
-        CreateDescriptor("TUnit0028", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.DoNotOverrideAttributeUsageMetadata, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DuplicateSingleAttribute =
-        CreateDescriptor("TUnit0029", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.DuplicateSingleAttribute, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DoesNotInheritTestsWarning =
-        CreateDescriptor("TUnit0030", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.DoesNotInheritTestsWarning, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor AsyncVoidMethod =
-        CreateDescriptor("TUnit0031", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.AsyncVoidMethod, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DependsOnConflicts =
-        CreateDescriptor("TUnit0033", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.DependsOnConflicts, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoMainMethod =
-        CreateDescriptor("TUnit0034", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.NoMainMethod, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor NoDataSourceProvided =
-        CreateDescriptor("TUnit0038", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.NoDataSourceProvided, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor SingleTestContextParameterRequired =
-        CreateDescriptor("TUnit0039", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.SingleTestContextParameterRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor SingleClassHookContextParameterRequired =
-        CreateDescriptor("TUnit0040", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.SingleClassHookContextParameterRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor SingleAssemblyHookContextParameterRequired =
-        CreateDescriptor("TUnit0041", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.SingleAssemblyHookContextParameterRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GlobalHooksSeparateClass =
-        CreateDescriptor("TUnit0042", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.GlobalHooksSeparateClass, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor PropertyRequiredNotSet =
-        CreateDescriptor("TUnit0043", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.PropertyRequiredNotSet, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor MustHavePropertySetter =
-        CreateDescriptor("TUnit0044", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MustHavePropertySetter, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TooManyDataAttributes =
-        CreateDescriptor("TUnit0045", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.TooManyDataAttributes, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor ReturnFunc =
-        CreateDescriptor("TUnit0046", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.ReturnFunc, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor AsyncLocalCallFlowValues =
-        CreateDescriptor("TUnit0047", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.AsyncLocalCallFlowValues, UsageCategory, DiagnosticSeverity.Warning);
 
     public static DiagnosticDescriptor InstanceTestMethod =
-        CreateDescriptor("TUnit0048", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.InstanceTestMethod, UsageCategory, DiagnosticSeverity.Error);
 
     public static DiagnosticDescriptor MatrixDataSourceAttributeRequired =
-        CreateDescriptor("TUnit0049", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.MatrixDataSourceAttributeRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TooManyArguments =
-        CreateDescriptor("TUnit0050", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.TooManyArguments, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TypeMustBePublic =
-        CreateDescriptor("TUnit0051", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.TypeMustBePublic, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MultipleConstructorsWithoutTestConstructor =
-        CreateDescriptor("TUnit0052", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.MultipleConstructorsWithoutTestConstructor, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor XunitMigration =
-        CreateDescriptor("TUXU0001", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.XunitMigration, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor NUnitMigration =
-        CreateDescriptor("TUNU0001", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.NUnitMigration, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor MSTestMigration =
-        CreateDescriptor("TUMS0001", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.MSTestMigration, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor OverwriteConsole =
-        CreateDescriptor("TUnit0055", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.OverwriteConsole, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor CombinedDataSourceAttributeRequired =
-        CreateDescriptor("TUnit0070", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.CombinedDataSourceAttributeRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor CombinedDataSourceMissingParameterDataSource =
-        CreateDescriptor("TUnit0071", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.CombinedDataSourceMissingParameterDataSource, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor CombinedDataSourceConflictWithMatrix =
-        CreateDescriptor("TUnit0072", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.CombinedDataSourceConflictWithMatrix, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor InstanceMethodSource =
-        CreateDescriptor("TUnit0056", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.InstanceMethodSource, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor HookContextParameterOptional =
-        CreateDescriptor("TUnit0057", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.HookContextParameterOptional, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor HookUnknownParameters =
-        CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.HookUnknownParameters, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor AbstractTestClassWithDataSources =
-        CreateDescriptor("TUnit0059", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.AbstractTestClassWithDataSources, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor PotentialEmptyDataSource =
-        CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.PotentialEmptyDataSource, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor NoAccessibleConstructor =
-        CreateDescriptor("TUnit0061", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.NoAccessibleConstructor, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor MissingPolyfillPackage =
-        CreateDescriptor("TUnit0073", UsageCategory, DiagnosticSeverity.Error,
+        CreateDescriptor(DiagnosticIds.MissingPolyfillPackage, UsageCategory, DiagnosticSeverity.Error,
             customTags: [WellKnownDiagnosticTags.CompilationEnd],
             helpLinkUri: "https://www.nuget.org/packages/Polyfill");
 
     public static readonly DiagnosticDescriptor RedundantHookAttributeOnOverride =
-        CreateDescriptor("TUnit0074", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.RedundantHookAttributeOnOverride, UsageCategory, DiagnosticSeverity.Error);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity,
         string[]? customTags = null, string? helpLinkUri = null)
