@@ -15,7 +15,6 @@ internal sealed class StaticPropertyHandler
     private readonly TUnitFrameworkLogger _logger;
     private readonly ObjectTracker _objectTracker;
     private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
-    private readonly Disposer _disposer;
     private readonly Lazy<PropertyInjector> _propertyInjector;
     private readonly ObjectGraphDiscoveryService _objectGraphDiscoveryService;
     private readonly ConcurrentDictionary<string, object?> _sessionObjectBag = new();
@@ -24,14 +23,12 @@ internal sealed class StaticPropertyHandler
     public StaticPropertyHandler(TUnitFrameworkLogger logger,
         ObjectTracker objectTracker,
         TrackableObjectGraphProvider trackableObjectGraphProvider,
-        Disposer disposer,
         Lazy<PropertyInjector> propertyInjector,
         ObjectGraphDiscoveryService objectGraphDiscoveryService)
     {
         _logger = logger;
         _objectTracker = objectTracker;
         _trackableObjectGraphProvider = trackableObjectGraphProvider;
-        _disposer = disposer;
         _propertyInjector = propertyInjector;
         _objectGraphDiscoveryService = objectGraphDiscoveryService;
     }
@@ -96,7 +93,10 @@ internal sealed class StaticPropertyHandler
     }
 
     /// <summary>
-    /// Dispose all tracked static properties at session end
+    /// Dispose all tracked static properties at session end.
+    /// Goes through the ObjectTracker (decrementing the +1 reference TrackStaticProperties took)
+    /// rather than disposing directly, so the tracking entry is removed and the session-end
+    /// sweep in TestSessionCoordinator does not dispose the same object a second time.
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
@@ -106,7 +106,7 @@ internal sealed class StaticPropertyHandler
         {
             try
             {
-                await _disposer.DisposeAsync(staticProperty).ConfigureAwait(false);
+                await _objectTracker.UntrackObjectAsync(staticProperty).ConfigureAwait(false);
             }
             catch (Exception e)
             {

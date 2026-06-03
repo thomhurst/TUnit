@@ -34,6 +34,8 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// already decremented its references by then, so anything still alive would otherwise
     /// leak (e.g. its remaining consumers were cancelled or a path miscounted). Clearing also
     /// ensures a subsequent run request in the same process starts with fresh state.
+    /// Intentionally an instance method despite operating on static state: disposal needs the
+    /// injected <see cref="Disposer"/> (for error logging), which only instances carry.
     /// </summary>
     /// <returns>Any exceptions thrown by the disposals, or null if none.</returns>
     public async ValueTask<List<Exception>?> DisposeAndClearStaticTrackingAsync()
@@ -215,6 +217,15 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         var counter = GetOrCreateCounter(obj);
         counter.Increment();
     }
+
+    /// <summary>
+    /// Decrements a single object's reference count, disposing it (and removing it from the
+    /// static tracking dictionary) when the count reaches zero. Used by owners that hold their
+    /// own +1 reference (e.g. static properties) so disposal stays consistent with ref counting
+    /// instead of bypassing it — a direct dispose would leave a stale entry that the session-end
+    /// sweep would dispose a second time.
+    /// </summary>
+    public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj);
 
     private async ValueTask UntrackObject(object? obj)
     {

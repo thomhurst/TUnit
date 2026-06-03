@@ -60,5 +60,10 @@ public static class Bug6151SessionMarker
         }
 
         File.WriteAllText(markerPath, $"Created={SessionSharedFixture.CreatedCount};Disposed={SessionSharedFixture.DisposedCount}");
+
+        // Reset so a later run session in the same process (IDE server mode) reports
+        // per-session counts instead of cumulative ones.
+        Interlocked.Exchange(ref SessionSharedFixture.CreatedCount, 0);
+        Interlocked.Exchange(ref SessionSharedFixture.DisposedCount, 0);
     }
 }
