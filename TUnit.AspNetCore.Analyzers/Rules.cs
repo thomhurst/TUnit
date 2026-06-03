@@ -7,14 +7,14 @@ public static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor FactoryAccessedTooEarly =
-        CreateDescriptor("TUnit0062", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.FactoryAccessedTooEarly, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GlobalFactoryMemberAccess =
-        CreateDescriptor("TUnit0063", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.GlobalFactoryMemberAccess, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DirectWebApplicationFactoryInheritance =
         CreateDescriptor(
-            "TUnit0064",
+            DiagnosticIds.DirectWebApplicationFactoryInheritance,
             UsageCategory,
             DiagnosticSeverity.Warning,
             helpLinkUri: "https://tunit.dev/docs/guides/distributed-tracing");

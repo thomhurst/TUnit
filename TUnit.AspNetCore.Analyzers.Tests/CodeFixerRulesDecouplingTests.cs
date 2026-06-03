@@ -1,6 +1,7 @@
+using TUnit.AspNetCore.Analyzers.CodeFixers;
 using TUnit.Tests.Shared;
 
-namespace TUnit.Assertions.Analyzers.CodeFixers.Tests;
+namespace TUnit.AspNetCore.Analyzers.Tests;
 
 /// <summary>
 /// Code fixers must use <c>DiagnosticIds</c> constants, never <c>Rules.X</c> — see
@@ -12,11 +13,11 @@ public class CodeFixerRulesDecouplingTests
     public async Task CodeFixers_Assembly_Has_No_Reference_To_Rules_Type()
     {
         var rulesReferences = RulesDecouplingVerifier.FindRulesTypeReferences(
-            typeof(AwaitAssertionCodeFixProvider).Assembly, "TUnit.Assertions.Analyzers");
+            typeof(UseTestWebApplicationFactoryCodeFixProvider).Assembly, "TUnit.AspNetCore.Analyzers");
 
         await Assert.That(rulesReferences)
             .IsEmpty()
-            .Because("TUnit.Assertions.Analyzers.CodeFixers must not reference TUnit.Assertions.Analyzers.Rules at runtime - " +
+            .Because("TUnit.AspNetCore.Analyzers.CodeFixers must not reference TUnit.AspNetCore.Analyzers.Rules at runtime - " +
                      "use DiagnosticIds constants instead (see issue #6157)");
     }
 }

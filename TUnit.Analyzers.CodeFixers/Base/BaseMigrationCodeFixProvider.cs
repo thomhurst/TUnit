@@ -15,10 +15,8 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     protected abstract string FrameworkName { get; }
 
     /// <summary>
-    /// The fixable diagnostic ID. Implementations MUST return a <see cref="DiagnosticIds"/> constant
-    /// (never <c>Rules.X.Id</c>): VS evaluates <see cref="FixableDiagnosticIds"/> eagerly, and a runtime
-    /// field reference into TUnit.Analyzers can bind against a stale copy already loaded in the IDE,
-    /// throwing MissingFieldException. See https://github.com/thomhurst/TUnit/issues/6157.
+    /// The fixable diagnostic ID. Implementations MUST return a <see cref="DiagnosticIds"/> constant,
+    /// never <c>Rules.X.Id</c> — see <see cref="DiagnosticIds"/> remarks (issue #6157).
     /// </summary>
     protected abstract string DiagnosticId { get; }
 

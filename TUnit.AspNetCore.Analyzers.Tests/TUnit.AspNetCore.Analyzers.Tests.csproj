@@ -29,6 +29,8 @@
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
              Link="Shared\AnalyzerTestCompatibility.cs" />
+    <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
+             Link="Shared\RulesDecouplingVerifier.cs" />
   </ItemGroup>
 
   <Import Project="..\TestProject.targets" />

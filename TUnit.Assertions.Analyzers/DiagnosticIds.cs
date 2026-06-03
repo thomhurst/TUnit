@@ -2,15 +2,12 @@ namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
 /// Diagnostic ID constants for all TUnit assertions analyzer rules.
+/// Code fix providers MUST reference these constants instead of <c>Rules.X.Id</c> — consts are
+/// baked into the consuming IL at compile time, avoiding a runtime bind against a stale
+/// analyzer assembly in Visual Studio. See https://github.com/thomhurst/TUnit/issues/6157.
+/// Members MUST stay <c>const</c>: <c>static readonly</c> would reintroduce the runtime
+/// reference (and fails the IL regression tests).
 /// </summary>
-/// <remarks>
-/// Code fix providers (TUnit.Assertions.Analyzers.CodeFixers) MUST reference these constants instead
-/// of <c>Rules.X.Id</c>. Constants are baked into the consuming assembly at compile time, so the
-/// code fixers carry no runtime reference to the <see cref="Rules"/> type. A runtime reference
-/// can bind against a stale TUnit.Assertions.Analyzers.dll already loaded in Visual Studio
-/// (analyzers cannot be unloaded), throwing <see cref="System.MissingFieldException"/> for newly
-/// added rules. See https://github.com/thomhurst/TUnit/issues/6157.
-/// </remarks>
 public static class DiagnosticIds
 {
     public const string MixAndOrConditionsAssertion = "TUnitAssertions0001";

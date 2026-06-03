@@ -111,10 +111,10 @@ public static class Rules
     public static readonly DiagnosticDescriptor AsyncLocalCallFlowValues =
         CreateDescriptor(DiagnosticIds.AsyncLocalCallFlowValues, UsageCategory, DiagnosticSeverity.Warning);
 
-    public static DiagnosticDescriptor InstanceTestMethod =
+    public static readonly DiagnosticDescriptor InstanceTestMethod =
         CreateDescriptor(DiagnosticIds.InstanceTestMethod, UsageCategory, DiagnosticSeverity.Error);
 
-    public static DiagnosticDescriptor MatrixDataSourceAttributeRequired =
+    public static readonly DiagnosticDescriptor MatrixDataSourceAttributeRequired =
         CreateDescriptor(DiagnosticIds.MatrixDataSourceAttributeRequired, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor TooManyArguments =
