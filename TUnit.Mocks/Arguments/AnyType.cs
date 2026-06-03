@@ -20,6 +20,9 @@ public sealed class AnyType
 /// Wildcard marker for a generic method's value-type argument. The struct counterpart of
 /// <see cref="AnyType"/>, for matching a <c>where T : struct</c> type parameter regardless of the
 /// concrete value type supplied at the call site.
+/// A type parameter with constraints beyond <c>struct</c> (e.g. <c>where T : struct, IComparable</c>)
+/// supports exact-type matching only, since <see cref="AnyValueType"/> does not implement any
+/// interfaces and cannot be supplied as its type argument.
 /// </summary>
 public struct AnyValueType
 {
