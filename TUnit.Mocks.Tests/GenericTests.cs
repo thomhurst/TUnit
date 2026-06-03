@@ -1,5 +1,6 @@
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
+using TUnit.Mocks.Exceptions;
 
 namespace TUnit.Mocks.Tests;
 
@@ -13,6 +14,37 @@ public interface IRepository
     TResult Transform<TInput, TResult>(TInput input) where TInput : class where TResult : class;
 }
 
+/// <summary>
+/// Generic method whose type parameter does not appear in the parameter list, so calls can only be
+/// distinguished by their type argument. Mirrors discussion #4981.
+/// </summary>
+public interface IGenericGreeter
+{
+    string Greet<T>() where T : class;
+}
+
+/// <summary>
+/// Methods with two type parameters, used to verify discrimination is sensitive to the full,
+/// ordered list of type arguments — not just the first.
+/// </summary>
+public interface IMultiGeneric
+{
+    // Zero parameters: the only discriminator is the (T1, T2) type-argument pair.
+    string Describe<T1, T2>() where T1 : class where T2 : class;
+
+    // TOutput appears only as a type parameter; the argument matcher is on TInput.
+    void Handle<TInput, TOutput>(TInput input) where TInput : class where TOutput : class;
+}
+
+/// <summary>
+/// A struct-constrained generic method, to verify the <see cref="AnyValueType"/> wildcard works for
+/// <c>where T : struct</c> parameters (and is not dead code).
+/// </summary>
+public interface IValueDescriber
+{
+    string Describe<T>() where T : struct;
+}
+
 public class Customer
 {
     public int Id { get; set; }
@@ -23,6 +55,9 @@ public class Order
 {
     public int OrderId { get; set; }
 }
+
+public class Class1 { }
+public class Class2 { }
 
 /// <summary>
 /// US7 Integration Tests: Generic method support in mock generation.
@@ -144,5 +179,202 @@ public class GenericTests
         // Assert
         await Assert.That(result).IsNotNull();
         await Assert.That(result.OrderId).IsEqualTo(10);
+    }
+
+    [Test]
+    public async Task Generic_Method_ZeroArgs_Distinguished_By_Type_Argument()
+    {
+        // Regression for discussion #4981: with no parameters, only the type argument distinguishes
+        // the two setups. Before the fix both setups collided and the last one always won.
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<Class1>().Returns("Hello!");
+        mock.Greet<Class2>().Returns("Goodbye!");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("Hello!");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("Goodbye!");
+    }
+
+    [Test]
+    public async Task Generic_Method_Wildcard_AnyType_Matches_Any_Type_Argument()
+    {
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<AnyType>().Returns("any");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("any");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("any");
+    }
+
+    [Test]
+    public async Task Generic_Method_Exact_Type_Setup_Wins_Over_Wildcard()
+    {
+        // A later, more specific setup is matched first (last-wins iteration), while other type
+        // arguments still fall through to the wildcard.
+        var mock = IGenericGreeter.Mock();
+        mock.Greet<AnyType>().Returns("any");
+        mock.Greet<Class1>().Returns("specific");
+
+        IGenericGreeter greeter = mock.Object;
+
+        await Assert.That(greeter.Greet<Class1>()).IsEqualTo("specific");
+        await Assert.That(greeter.Greet<Class2>()).IsEqualTo("any");
+    }
+
+    [Test]
+    public void Generic_Void_Method_Verify_Discriminates_By_Type_Argument()
+    {
+        var mock = IRepository.Mock();
+        IRepository repo = mock.Object;
+
+        repo.Save(new Customer());
+        repo.Save(new Customer());
+        repo.Save(new Order());
+
+        mock.Save<Customer>(Any()).WasCalled(Times.Exactly(2));
+        mock.Save<Order>(Any()).WasCalled(Times.Once);
+        mock.Save<AnyType>(Any()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Distinguished_By_Order()
+    {
+        // The two setups share the same (empty) argument list and the same type-argument *set* —
+        // only the order differs. Each must resolve independently.
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<Class1, Class2>().Returns("1-2");
+        mock.Describe<Class2, Class1>().Returns("2-1");
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("1-2");
+        await Assert.That(sut.Describe<Class2, Class1>()).IsEqualTo("2-1");
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Partial_Wildcard()
+    {
+        // Wildcard the first type parameter, pin the second. Only the second must match exactly.
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<AnyType, Class2>().Returns("any-2");
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("any-2"); // first wildcard, second matches
+        await Assert.That(sut.Describe<Class2, Class2>()).IsEqualTo("any-2"); // first wildcard, second matches
+        // Second type arg (Class1) != Class2 → no setup matches → unconfigured default (empty string)
+        await Assert.That(sut.Describe<Class1, Class1>()).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Generic_Method_Two_Type_Params_Exact_Wins_Over_Partial_Wildcard()
+    {
+        var mock = IMultiGeneric.Mock();
+        mock.Describe<AnyType, Class2>().Returns("any-2");
+        mock.Describe<Class1, Class2>().Returns("1-2"); // more specific, added later → matched first
+
+        IMultiGeneric sut = mock.Object;
+
+        await Assert.That(sut.Describe<Class1, Class2>()).IsEqualTo("1-2");
+        await Assert.That(sut.Describe<Class2, Class2>()).IsEqualTo("any-2");
+    }
+
+    [Test]
+    public void Generic_Void_Method_Two_Type_Params_Verify_Discriminates()
+    {
+        var mock = IMultiGeneric.Mock();
+        IMultiGeneric sut = mock.Object;
+
+        sut.Handle<Customer, Order>(new Customer());
+        sut.Handle<Order, Customer>(new Order());
+
+        mock.Handle<Customer, Order>(Any()).WasCalled(Times.Once);
+        mock.Handle<Order, Customer>(Any()).WasCalled(Times.Once);
+        mock.Handle<Customer, Customer>(Any()).WasNeverCalled();          // pair never called
+        mock.Handle<AnyType, AnyType>(Any()).WasCalled(Times.Exactly(2)); // both wildcards
+        mock.Handle<AnyType, Customer>(Any()).WasCalled(Times.Once);      // only Handle<Order, Customer>
+    }
+
+    [Test]
+    public async Task Generic_Verification_Failure_Message_Includes_Type_Argument()
+    {
+        var mock = IRepository.Mock();
+        mock.Object.Save(new Order()); // Save<Order>, never Save<Customer>
+
+        var ex = Assert.Throws<MockVerificationException>(() =>
+            mock.Save<Customer>(Any()).WasCalled(Times.Once));
+
+        // The failure should name the type argument so the developer can tell which setup was expected.
+        await Assert.That(ex!.ExpectedCall).Contains("Save<Customer>");
+    }
+
+    [Test]
+    public async Task Generic_Method_Struct_Constraint_AnyValueType_Wildcard()
+    {
+        // AnyValueType is a struct, so it satisfies `where T : struct` and acts as a wildcard there.
+        var mock = IValueDescriber.Mock();
+        mock.Describe<AnyValueType>().Returns("any-value");
+
+        IValueDescriber sut = mock.Object;
+
+        await Assert.That(sut.Describe<int>()).IsEqualTo("any-value");
+        await Assert.That(sut.Describe<System.DateTime>()).IsEqualTo("any-value");
+    }
+
+    [Test]
+    public async Task Generic_Method_Struct_Constraint_Distinguished_By_Type_Argument()
+    {
+        var mock = IValueDescriber.Mock();
+        mock.Describe<int>().Returns("int");
+        mock.Describe<long>().Returns("long");
+
+        IValueDescriber sut = mock.Object;
+
+        await Assert.That(sut.Describe<int>()).IsEqualTo("int");
+        await Assert.That(sut.Describe<long>()).IsEqualTo("long");
+    }
+
+    [Test]
+    public void Ordered_Verification_Discriminates_By_Type_Argument()
+    {
+        var mock = IGenericGreeter.Mock();
+        IGenericGreeter greeter = mock.Object;
+
+        greeter.Greet<Class1>();
+        greeter.Greet<Class2>();
+
+        // Passes only if each expectation matches the call with its own type argument.
+        Mock.VerifyInOrder(() =>
+        {
+            mock.Greet<Class1>().WasCalled();
+            mock.Greet<Class2>().WasCalled();
+        });
+    }
+
+    [Test]
+    public async Task Ordered_Verification_Fails_When_Type_Arguments_Out_Of_Order()
+    {
+        var mock = IGenericGreeter.Mock();
+        IGenericGreeter greeter = mock.Object;
+
+        greeter.Greet<Class1>();
+        greeter.Greet<Class2>();
+
+        // Reversed type-argument order must fail. Before type arguments were threaded through
+        // ordered verification, both expectations matched both calls and this passed regardless
+        // of which type was actually called first.
+        var ex = Assert.Throws<MockVerificationException>(() =>
+            Mock.VerifyInOrder(() =>
+            {
+                mock.Greet<Class2>().WasCalled();
+                mock.Greet<Class1>().WasCalled();
+            }));
+
+        await Assert.That(ex!.Message).Contains("Ordered verification failed");
+        // The failure message names the expected calls with their type arguments.
+        await Assert.That(ex.Message).Contains("Greet<Class1>");
+        await Assert.That(ex.Message).Contains("Greet<Class2>");
     }
 }

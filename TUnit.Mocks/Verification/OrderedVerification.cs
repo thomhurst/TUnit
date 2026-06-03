@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Exceptions;
 
@@ -21,9 +22,9 @@ public static class OrderedVerification
     /// Records an expectation during ordered verification collection.
     /// Called by <see cref="CallVerificationBuilder{T}.WasCalled()"/> and overloads.
     /// </summary>
-    internal static void RecordExpectation(int memberId, string memberName, IArgumentMatcher[] matchers, Times times, IReadOnlyList<CallRecord> allCalls)
+    internal static void RecordExpectation(int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments, Times times, IReadOnlyList<CallRecord> allCalls)
     {
-        _expectations.Value?.Add(new OrderedCallExpectation(memberId, memberName, matchers, times, allCalls));
+        _expectations.Value?.Add(new OrderedCallExpectation(memberId, memberName, matchers, typeArguments, times, allCalls));
     }
 
     /// <summary>
@@ -163,7 +164,9 @@ public static class OrderedVerification
         var result = new List<CallRecord>();
         foreach (var call in expectation.AllCalls)
         {
-            if (call.MemberId == expectation.MemberId && MatchesArguments(call.Arguments, expectation.Matchers))
+            if (call.MemberId == expectation.MemberId
+                && MatchesArguments(call.Arguments, expectation.Matchers)
+                && TypeArgumentMatching.Matches(expectation.TypeArguments, call.TypeArguments))
             {
                 result.Add(call);
             }
@@ -195,13 +198,14 @@ public static class OrderedVerification
 
     private static string FormatExpectedCall(OrderedCallExpectation expectation)
     {
+        var typeArgs = TypeArgumentMatching.FormatForDiagnostics(expectation.TypeArguments);
         if (expectation.Matchers.Length == 0)
         {
-            return $"{expectation.MemberName}()";
+            return $"{expectation.MemberName}{typeArgs}()";
         }
 
         var argDescriptions = string.Join(", ", expectation.Matchers.Select(m => m.Describe()));
-        return $"{expectation.MemberName}({argDescriptions})";
+        return $"{expectation.MemberName}{typeArgs}({argDescriptions})";
     }
 }
 
@@ -212,6 +216,7 @@ internal sealed record OrderedCallExpectation(
     int MemberId,
     string MemberName,
     IArgumentMatcher[] Matchers,
+    ImmutableArray<Type> TypeArguments,
     Times Times,
     IReadOnlyList<CallRecord> AllCalls
 );

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using TUnit.Mocks.Arguments;
@@ -78,12 +79,35 @@ public sealed class MethodSetup
     [EditorBrowsable(EditorBrowsableState.Never)]
     public string MemberName { get; }
 
+    /// <summary>
+    /// For a generic method, the configured type arguments (concrete types, or
+    /// <see cref="Arguments.AnyType"/>/<see cref="Arguments.AnyValueType"/> wildcards). Default for a
+    /// non-generic method, in which case the setup matches regardless of call-site type arguments.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public ImmutableArray<Type> TypeArguments { get; }
+
     public MethodSetup(int memberId, IArgumentMatcher[] matchers, string memberName = "")
+        : this(memberId, matchers, memberName, default)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public MethodSetup(int memberId, IArgumentMatcher[] matchers, string memberName, ImmutableArray<Type> typeArguments)
     {
         MemberId = memberId;
         _matchers = matchers;
         MemberName = memberName;
+        TypeArguments = typeArguments;
     }
+
+    /// <summary>
+    /// True if this setup's configured type arguments match a call made with
+    /// <paramref name="callTypeArgs"/>. Non-generic setups (default <see cref="TypeArguments"/>) match any call.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TypeArgumentsMatch(ImmutableArray<Type> callTypeArgs)
+        => TypeArgumentMatching.Matches(TypeArguments, callTypeArgs);
 
     private RareState EnsureRareState()
     {

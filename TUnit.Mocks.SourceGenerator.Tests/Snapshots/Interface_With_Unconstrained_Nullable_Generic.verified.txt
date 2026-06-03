@@ -38,7 +38,7 @@ file sealed class IFooMockImpl : global::IFoo, global::TUnit.Mocks.IRaisable, gl
     {
         try
         {
-            var __result = _engine.HandleCallWithReturn<T?>(0, "DoSomethingAsync", global::System.Array.Empty<object?>(), default);
+            var __result = _engine.HandleCallWithReturn<T?>(0, "DoSomethingAsync", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
             if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))
             {
                 if (__rawAsync is global::System.Threading.Tasks.Task<T?> __typedAsync) return __typedAsync;
@@ -54,12 +54,12 @@ file sealed class IFooMockImpl : global::IFoo, global::TUnit.Mocks.IRaisable, gl
 
     public T? GetValue<T>()
     {
-        return _engine.HandleCallWithReturn<T?>(1, "GetValue", global::System.Array.Empty<object?>(), default);
+        return _engine.HandleCallWithReturn<T?>(1, "GetValue", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public (T?, string) GetPair<T>()
     {
-        return _engine.HandleCallWithReturn<(T?, string)>(2, "GetPair", global::System.Array.Empty<object?>(), default);
+        return _engine.HandleCallWithReturn<(T?, string)>(2, "GetPair", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -109,19 +109,19 @@ public static class IFoo_MockMemberExtensions
     public static global::TUnit.Mocks.MockMethodCall<T?> DoSomethingAsync<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "DoSomethingAsync", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "DoSomethingAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T?> GetValue<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetValue", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<(T?, string)> GetPair<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<(T?, string)>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetPair", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<(T?, string)>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetPair", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     #if NET9_0_OR_GREATER

@@ -42,32 +42,32 @@ file sealed class IConstrainedMockImpl : global::IConstrained, global::TUnit.Moc
 
     public T GetNotnull<T>(string key) where T : notnull
     {
-        return _engine.HandleCallWithReturn<T, string>(0, "GetNotnull", key, default!);
+        return _engine.HandleCallWithReturn<T>(0, "GetNotnull", new object?[] { key }, default!, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public T GetNew<T>() where T : new()
     {
-        return _engine.HandleCallWithReturn<T>(1, "GetNew", global::System.Array.Empty<object?>(), default!);
+        return _engine.HandleCallWithReturn<T>(1, "GetNew", global::System.Array.Empty<object?>(), default!, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public T GetUnmanaged<T>() where T : struct, unmanaged
     {
-        return _engine.HandleCallWithReturn<T>(2, "GetUnmanaged", global::System.Array.Empty<object?>(), default);
+        return _engine.HandleCallWithReturn<T>(2, "GetUnmanaged", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public T GetDisposable<T>() where T : global::System.IDisposable
     {
-        return _engine.HandleCallWithReturn<T>(3, "GetDisposable", global::System.Array.Empty<object?>(), default!);
+        return _engine.HandleCallWithReturn<T>(3, "GetDisposable", global::System.Array.Empty<object?>(), default!, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public T GetClassNew<T>() where T : class, global::System.IDisposable, new()
     {
-        return _engine.HandleCallWithReturn<T>(4, "GetClassNew", global::System.Array.Empty<object?>(), default!);
+        return _engine.HandleCallWithReturn<T>(4, "GetClassNew", global::System.Array.Empty<object?>(), default!, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public T GetStructDisposable<T>() where T : struct, global::System.IDisposable
     {
-        return _engine.HandleCallWithReturn<T>(5, "GetStructDisposable", global::System.Array.Empty<object?>(), default);
+        return _engine.HandleCallWithReturn<T>(5, "GetStructDisposable", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -117,44 +117,44 @@ public static class IConstrained_MockMemberExtensions
     public static global::TUnit.Mocks.MockMethodCall<T> GetNotnull<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock, global::TUnit.Mocks.Arguments.Arg<string> key) where T : notnull
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetNotnull", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetNotnull", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetNotnull<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock, global::System.Func<string, bool> key) where T : notnull
     {
         global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetNotnull", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetNotnull", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetNew<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : new()
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetNew", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetNew", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetUnmanaged<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : struct, unmanaged
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetUnmanaged", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetUnmanaged", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetDisposable<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : global::System.IDisposable
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "GetDisposable", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 3, "GetDisposable", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetClassNew<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : class, global::System.IDisposable, new()
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 4, "GetClassNew", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 4, "GetClassNew", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T> GetStructDisposable<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : struct, global::System.IDisposable
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 5, "GetStructDisposable", matchers);
+        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 5, "GetStructDisposable", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     #if NET9_0_OR_GREATER

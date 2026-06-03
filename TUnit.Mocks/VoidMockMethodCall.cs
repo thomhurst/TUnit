@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Setup;
@@ -22,23 +23,39 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private readonly int _memberId;
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
+    private readonly ImmutableArray<Type> _typeArguments;
     private VoidMethodSetupBuilder? _builder;
     private bool _builderInitialized;
     private object? _builderLock;
 
+    // Kept as distinct overloads (not single optional-parameter ctors) to preserve the original
+    // public/internal binary signatures for backward compatibility.
     [EditorBrowsable(EditorBrowsableState.Never)]
     public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers)
-        : this(engine, memberId, memberName, matchers, eagerRegister: true)
+        : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments: default)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
+        : this(engine, memberId, memberName, matchers, eagerRegister: true, typeArguments)
     {
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister)
+        : this(engine, memberId, memberName, matchers, eagerRegister, typeArguments: default)
+    {
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal VoidMockMethodCall(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, bool eagerRegister, ImmutableArray<Type> typeArguments)
     {
         _engine = engine;
         _memberId = memberId;
         _memberName = memberName;
         _matchers = matchers;
+        _typeArguments = typeArguments;
         if (eagerRegister)
         {
             _ = EnsureSetup();
@@ -48,7 +65,7 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     private VoidMethodSetupBuilder EnsureSetup() =>
         LazyInitializer.EnsureInitialized(ref _builder, ref _builderInitialized, ref _builderLock, () =>
         {
-            var setup = new MethodSetup(_memberId, _matchers, _memberName);
+            var setup = new MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
             _engine.AddSetup(setup);
             return new VoidMethodSetupBuilder(setup);
         })!;
@@ -109,33 +126,36 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
 
     // ICallVerification implementation
 
+    private ICallVerification CreateVerification()
+        => MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
+
     public void WasCalled(Times times)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+        CreateVerification().WasCalled(times);
     }
 
     public void WasCalled(Times times, string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+        CreateVerification().WasCalled(times, message);
     }
 
     public void WasNeverCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+        CreateVerification().WasNeverCalled();
     }
 
     public void WasNeverCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
+        CreateVerification().WasNeverCalled(message);
     }
 
     public void WasCalled()
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+        CreateVerification().WasCalled();
     }
 
     public void WasCalled(string? message)
     {
-        _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+        CreateVerification().WasCalled(message);
     }
 }
