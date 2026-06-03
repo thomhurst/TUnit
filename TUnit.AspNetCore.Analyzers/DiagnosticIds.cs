@@ -10,6 +10,10 @@ namespace TUnit.AspNetCore.Analyzers;
 /// </summary>
 public static class DiagnosticIds
 {
+    // NOTE: "TUnit0062" collides with TUnit.Analyzers.DiagnosticIds.CancellationTokenMustBeLastParameter.
+    // Pre-existing (both Rules.cs files shipped this literal); .editorconfig severity for TUnit0062
+    // affects both rules in projects referencing both analyzers. Renumbering is a user-facing change
+    // tracked separately from #6157.
     public const string FactoryAccessedTooEarly = "TUnit0062";
     public const string GlobalFactoryMemberAccess = "TUnit0063";
     public const string DirectWebApplicationFactoryInheritance = "TUnit0064";
