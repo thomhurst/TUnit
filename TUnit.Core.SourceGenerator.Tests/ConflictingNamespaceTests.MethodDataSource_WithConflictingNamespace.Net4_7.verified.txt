@@ -183,7 +183,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "strings", 
                     {
                         case 0:
                             {
-                                return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest(new string[0]));
+                                return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest(global::System.Array.Empty<string>()));
                             }
                         case 1:
                             {
@@ -210,7 +210,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "strings", 
                                 return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest(new string[] { global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) }));
                             }
                         default:
-                            return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[i]))) : new string[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[i]))) : global::System.Array.Empty<string>())));
                     }
                 }
                 catch (global::System.Exception ex)
