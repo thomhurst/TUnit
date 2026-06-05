@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace TUnit.Assertions.Analyzers;
 
@@ -7,52 +7,52 @@ internal static class Rules
     private const string UsageCategory = "Usage";
 
     public static readonly DiagnosticDescriptor MixAndOrConditionsAssertion =
-        CreateDescriptor("TUnitAssertions0001", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.MixAndOrConditionsAssertion, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor AwaitAssertion =
-        CreateDescriptor("TUnitAssertions0002", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.AwaitAssertion, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor CompilerArgumentsPopulated =
-        CreateDescriptor("TUnitAssertions0003", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.CompilerArgumentsPopulated, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor DisposableUsingMultiple =
-        CreateDescriptor("TUnitAssertions0004", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.DisposableUsingMultiple, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor ConstantValueInAssertThat =
-        CreateDescriptor("TUnitAssertions0005", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.ConstantValueInAssertThat, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor ObjectEqualsBaseMethod =
-        CreateDescriptor("TUnitAssertions0006", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.ObjectEqualsBaseMethod, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor DynamicValueInAssertThat =
-        CreateDescriptor("TUnitAssertions0007", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.DynamicValueInAssertThat, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor AwaitValueTaskInAssertThat =
-        CreateDescriptor("TUnitAssertions0008", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.AwaitValueTaskInAssertThat, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor XUnitAssertion =
-        CreateDescriptor("TUnitAssertions0009", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.XUnitAssertion, UsageCategory, DiagnosticSeverity.Info);
 
     public static readonly DiagnosticDescriptor GenerateAssertionMethodMustBeStatic =
-        CreateDescriptor("TUnitAssertions0010", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.GenerateAssertionMethodMustBeStatic, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GenerateAssertionMethodMustHaveParameter =
-        CreateDescriptor("TUnitAssertions0011", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.GenerateAssertionMethodMustHaveParameter, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GenerateAssertionInvalidReturnType =
-        CreateDescriptor("TUnitAssertions0012", UsageCategory, DiagnosticSeverity.Error);
+        CreateDescriptor(DiagnosticIds.GenerateAssertionInvalidReturnType, UsageCategory, DiagnosticSeverity.Error);
 
     public static readonly DiagnosticDescriptor GenerateAssertionShouldBeExtensionMethod =
-        CreateDescriptor("TUnitAssertions0013", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.GenerateAssertionShouldBeExtensionMethod, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor PreferIsNullOverIsEqualToNull =
-        CreateDescriptor("TUnitAssertions0014", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.PreferIsNullOverIsEqualToNull, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor PreferIsTrueOrIsFalseOverIsEqualToBool =
-        CreateDescriptor("TUnitAssertions0015", UsageCategory, DiagnosticSeverity.Warning);
+        CreateDescriptor(DiagnosticIds.PreferIsTrueOrIsFalseOverIsEqualToBool, UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor CollectionIsEqualToUsesReferenceEquality =
-        CreateDescriptor("TUnitAssertions0016", UsageCategory, DiagnosticSeverity.Info);
+        CreateDescriptor(DiagnosticIds.CollectionIsEqualToUsesReferenceEquality, UsageCategory, DiagnosticSeverity.Info);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

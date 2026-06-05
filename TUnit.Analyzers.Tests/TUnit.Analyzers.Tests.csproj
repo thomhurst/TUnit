@@ -47,6 +47,8 @@
           Visible="false" />
     <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
              Link="Shared\AnalyzerTestCompatibility.cs" />
+    <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
+             Link="Shared\RulesDecouplingVerifier.cs" />
   </ItemGroup>
 
   <!-- Reference the VSTHRD analyzer assembly (Analyzer="false") so its analyzer types are

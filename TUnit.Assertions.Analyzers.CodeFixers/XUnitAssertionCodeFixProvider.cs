@@ -14,7 +14,7 @@ namespace TUnit.Assertions.Analyzers.CodeFixers;
 public class XUnitAssertionCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.XUnitAssertion.Id);
+        ImmutableArray.Create(DiagnosticIds.XUnitAssertion);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

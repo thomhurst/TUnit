@@ -17,7 +17,7 @@ public class TimeoutCancellationTokenCodeFixProvider : CodeFixProvider
     private const string ParameterName = "cancellationToken";
 
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.MissingTimeoutCancellationTokenAttributes.Id);
+        ImmutableArray.Create(DiagnosticIds.MissingTimeoutCancellationTokenAttributes);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

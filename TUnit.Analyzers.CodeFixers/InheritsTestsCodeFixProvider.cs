@@ -16,8 +16,10 @@ namespace TUnit.Analyzers.CodeFixers;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InheritsTestsCodeFixProvider)), Shared]
 public class InheritsTestsCodeFixProvider : CodeFixProvider
 {
+    private const string CodeFixTitle = "Add [InheritsTests] attribute";
+
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.DoesNotInheritTestsWarning.Id);
+        ImmutableArray.Create(DiagnosticIds.DoesNotInheritTestsWarning);
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -38,9 +40,9 @@ public class InheritsTestsCodeFixProvider : CodeFixProvider
 
             context.RegisterCodeFix(
                 CodeAction.Create(
-                    title: Rules.DoesNotInheritTestsWarning.Title.ToString(),
+                    title: CodeFixTitle,
                     createChangedDocument: c => AddInheritsTests(context.Document, classDeclarationSyntax, c),
-                    equivalenceKey: Rules.DoesNotInheritTestsWarning.Title.ToString()),
+                    equivalenceKey: CodeFixTitle),
                 diagnostic);
         }
     }

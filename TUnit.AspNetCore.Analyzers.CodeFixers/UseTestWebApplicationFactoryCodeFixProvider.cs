@@ -20,7 +20,7 @@ public class UseTestWebApplicationFactoryCodeFixProvider : CodeFixProvider
     private const string TestWebApplicationFactoryNamespace = "TUnit.AspNetCore";
 
     public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.DirectWebApplicationFactoryInheritance.Id);
+        ImmutableArray.Create(DiagnosticIds.DirectWebApplicationFactoryInheritance);
 
     public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
