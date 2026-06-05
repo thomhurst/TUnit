@@ -1248,6 +1248,51 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task External_Interface_With_Indexer_Static_Extension_Discovery()
+    {
+        var externalSource = """
+            namespace Microsoft.Extensions.Configuration
+            {
+                public interface IConfiguration
+                {
+                    string? this[string key] { get; set; }
+                    string? GetSectionValue(string key);
+                }
+            }
+            """;
+
+        var externalRef = CreateExternalAssemblyReference(externalSource, "Microsoft.Extensions.Configuration.Abstractions");
+
+        var source = """
+            using Microsoft.Extensions.Configuration;
+            using TUnit.Mocks;
+
+            public class MyService
+            {
+                public MyService(IConfiguration configuration)
+                {
+                }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var configuration = IConfiguration.Mock();
+                    var service = new MyService(configuration);
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source, [externalRef]);
+        AssertContains(generated, "sealed class IConfigurationMock : global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>, global::Microsoft.Extensions.Configuration.IConfiguration");
+        AssertContains(generated, "string? global::Microsoft.Extensions.Configuration.IConfiguration.this[string key]");
+        AssertContains(generated, "public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)");
+
+        return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
     public Task Generic_Interface_Extension_Discovery()
     {
         var source = """

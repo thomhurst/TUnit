@@ -8,15 +8,15 @@ internal static class MockWrapperTypeBuilder
 {
     /// <summary>
     /// Whether a typed wrapper (IFoo_Mock : Mock&lt;IFoo&gt;, IFoo) can be generated for this model.
-    /// False for multi-interface mocks, static-abstract types, and interfaces with indexers
-    /// or ref-struct-returning properties that can't be forwarded.
+    /// False for multi-interface mocks, static-abstract types, and interfaces with
+    /// ref-struct-returning properties that can't be forwarded.
     /// </summary>
     public static bool CanGenerateWrapper(MockTypeModel model)
     {
         if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
             return false;
 
-        if (model.Properties.Any(p => !p.IsStaticAbstract && (p.IsIndexer || p.IsRefStructReturn)))
+        if (model.Properties.Any(p => !p.IsStaticAbstract && p.IsRefStructReturn))
             return false;
 
         return true;
@@ -64,7 +64,14 @@ internal static class MockWrapperTypeBuilder
                 {
                     if (prop.IsStaticAbstract) continue;
                     writer.AppendLine();
-                    GeneratePropertyForwarding(writer, prop, model);
+                    if (prop.IsIndexer)
+                    {
+                        GenerateIndexerForwarding(writer, prop, model);
+                    }
+                    else
+                    {
+                        GeneratePropertyForwarding(writer, prop, model);
+                    }
                 }
 
                 foreach (var evt in model.Events)
@@ -132,6 +139,27 @@ internal static class MockWrapperTypeBuilder
         var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{EscapeIdentifier(prop.Name)} = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.{EscapeIdentifier(prop.Name)} {{ {getter}{setter}}}");
+    }
+
+    private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var interfaceName = prop.ExplicitInterfaceName ?? prop.DeclaringInterfaceName ?? model.FullyQualifiedName;
+        var returnType = prop.ReturnType;
+        var paramList = MockImplBuilder.GetParameterList(prop);
+        var argPassList = MockImplBuilder.GetArgPassList(prop);
+
+        var target = prop.ExplicitInterfaceName is not null
+            ? $"(({prop.ExplicitInterfaceName})Object)"
+            : "Object";
+
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+
+        var getterAttr = prop.GetterObsoleteAttribute.Length > 0 ? prop.GetterObsoleteAttribute + " " : "";
+        var setterAttr = prop.SetterObsoleteAttribute.Length > 0 ? prop.SetterObsoleteAttribute + " " : "";
+        var getter = prop.HasGetter ? $"{getterAttr}get => {target}[{argPassList}]; " : "";
+        var setter = prop.HasSetter ? $"{setterAttr}set => {target}[{argPassList}] = value; " : "";
+
+        writer.AppendLine($"{returnType} {interfaceName}.this[{paramList}] {{ {getter}{setter}}}");
     }
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)

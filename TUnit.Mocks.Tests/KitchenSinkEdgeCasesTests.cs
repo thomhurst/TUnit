@@ -182,6 +182,40 @@ public interface IHasIndexer
     int Regular { get; set; }
 }
 
+public sealed class IndexerConsumer
+{
+    private readonly IHasIndexer _indexer;
+
+    public IndexerConsumer(IHasIndexer indexer)
+    {
+        _indexer = indexer;
+    }
+
+    public string Read(int index) => _indexer[index];
+
+    public void Write(int index, string value) => _indexer[index] = value;
+}
+
+public interface IHasGetOnlyIndexer
+{
+    string this[int index] { get; }
+}
+
+public interface IHasSetOnlyIndexer
+{
+    string this[int index] { set; }
+}
+
+public interface IBaseIndexer
+{
+    string this[string key] { get; set; }
+}
+
+public interface IDerivedIndexer : IBaseIndexer
+{
+    int Count { get; }
+}
+
 // T14b. Indexer with `in` parameter — exercises modifier forwarding
 // in FormatIndexerParameterList. `in` is the only ref-kind C# permits on
 // indexer parameters.
@@ -558,6 +592,166 @@ public class KitchenSinkEdgeCasesTests
         mock.SetItem(5, Any<string>()).WasCalled(Times.Exactly(2));
         mock.SetItem(6, "six").WasCalled(Times.Once);
         mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Matcher_Setup_And_Verification()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(Any<int>()).Returns("fallback");
+        mock.Item(9).Returns("specific");
+
+        await Assert.That(mock.Object[2]).IsEqualTo("fallback");
+        await Assert.That(mock.Object[9]).IsEqualTo("specific");
+
+        mock.Item(2).WasCalled(Times.Once);
+        mock.Item(9).WasCalled(Times.Once);
+        mock.Item(Any<int>()).WasCalled(Times.Exactly(2));
+        mock.Item(10).WasNeverCalled();
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Getter_Callback_Setup_Runs()
+    {
+        var mock = IHasIndexer.Mock();
+        var callCount = 0;
+        mock.Item(Any<int>())
+            .Callback(() => callCount++)
+            .Returns("configured");
+
+        await Assert.That(mock.Object[3]).IsEqualTo("configured");
+        await Assert.That(mock.Object[4]).IsEqualTo("configured");
+
+        await Assert.That(callCount).IsEqualTo(2);
+        mock.Item(Any<int>()).WasCalled(Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Setter_Callback_Setup_Runs()
+    {
+        var mock = IHasIndexer.Mock();
+        var callCount = 0;
+        mock.SetItem(Any<int>(), Any<string>())
+            .Callback(() => callCount++);
+
+        mock.Object[7] = "seven";
+        mock.Object[8] = "eight";
+
+        await Assert.That(callCount).IsEqualTo(2);
+        mock.SetItem(7, "seven").WasCalled(Times.Once);
+        mock.SetItem(8, "eight").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Exactly(2));
+        mock.SetItem(7, "wrong").WasNeverCalled();
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Getter_Throws_Setup_And_Verification()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(404).Throws(new InvalidOperationException("missing"));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => _ = mock.Object[404]);
+
+        await Assert.That(exception.Message).IsEqualTo("missing");
+        mock.Item(404).WasCalled(Times.Once);
+        mock.Item(Any<int>()).WasCalled(Times.Once);
+        mock.Item(200).WasNeverCalled();
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Typed_Wrapper_Can_Be_Used_Directly_As_Interface()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(1).Returns("one");
+
+        IHasIndexer asInterface = mock;
+
+        await Assert.That(asInterface[1]).IsEqualTo("one");
+        mock.Item(1).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Static_Mock_Can_Assign_Directly_To_Interface()
+    {
+        IHasIndexer asInterface = IHasIndexer.Mock();
+        var mock = (Mock<IHasIndexer>)asInterface;
+        mock.Item(2).Returns("two");
+
+        await Assert.That(asInterface[2]).IsEqualTo("two");
+        mock.Item(2).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public void T14_Interface_With_Indexer_Typed_Wrapper_Setter_Forwards_To_Mock()
+    {
+        var mock = IHasIndexer.Mock();
+
+        IHasIndexer asInterface = mock;
+        asInterface[2] = "two";
+
+        mock.SetItem(2, "two").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Interface_With_Indexer_Typed_Wrapper_Can_Be_Injected_Into_Constructor()
+    {
+        var mock = IHasIndexer.Mock();
+        mock.Item(12).Returns("injected");
+        var consumer = new IndexerConsumer(mock);
+
+        await Assert.That(consumer.Read(12)).IsEqualTo("injected");
+
+        consumer.Write(13, "written");
+
+        mock.Item(12).WasCalled(Times.Once);
+        mock.SetItem(13, "written").WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Get_Only_Indexer_Configurable_And_Verifiable_Through_Interface()
+    {
+        var mock = IHasGetOnlyIndexer.Mock();
+        mock.Item(5).Returns("five");
+
+        IHasGetOnlyIndexer asInterface = mock;
+
+        await Assert.That(asInterface[5]).IsEqualTo("five");
+        mock.Item(5).WasCalled(Times.Once);
+        mock.Item(6).WasNeverCalled();
+    }
+
+    [Test]
+    public void T14_Set_Only_Indexer_Verifiable_Through_Interface()
+    {
+        var mock = IHasSetOnlyIndexer.Mock();
+
+        IHasSetOnlyIndexer asInterface = mock;
+        asInterface[6] = "six";
+
+        mock.SetItem(6, "six").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>()).WasCalled(Times.Once);
+        mock.SetItem(6, "other").WasNeverCalled();
+    }
+
+    [Test]
+    public async Task T14_Inherited_Indexer_Configurable_And_Verifiable_Through_Base_Interface()
+    {
+        var mock = IDerivedIndexer.Mock();
+        mock.Item("alpha").Returns("A");
+        mock.Count.Returns(3);
+
+        IDerivedIndexer asDerived = mock;
+        IBaseIndexer asBase = mock;
+
+        await Assert.That(asDerived.Count).IsEqualTo(3);
+        await Assert.That(asBase["alpha"]).IsEqualTo("A");
+
+        asBase["beta"] = "B";
+
+        mock.Count.WasCalled(Times.Once);
+        mock.Item("alpha").WasCalled(Times.Once);
+        mock.SetItem("beta", "B").WasCalled(Times.Once);
     }
 
     [Test]
