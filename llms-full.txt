@@ -23477,6 +23477,7 @@ Settings are organized into logical groups:
 - `Parallelism` — concurrent test execution limits
 - `Execution` — runtime behavior such as fail-fast
 - `Display` — output and display options
+- `Mocks` — defaults for TUnit.Mocks when the package is referenced
 
 ## Usage
 
@@ -23484,6 +23485,7 @@ Set values inside a `[Before(HookType.TestDiscovery)]` hook so they are applied 
 
 ```csharp
 using TUnit.Core;
+using TUnit.Mocks;
 
 public class TestSetup
 {
@@ -23493,6 +23495,7 @@ public class TestSetup
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
         context.Settings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         context.Settings.Execution.FailFast = true;
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
 
         return Task.CompletedTask;
     }
@@ -23531,6 +23534,14 @@ Settings are accessed exclusively through `context.Settings` in the discovery ho
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `FailFast` | `bool` | `false` | Cancels the remaining test run after the first test failure. |
+
+### `context.Settings.Mocks`
+
+Available when `TUnit.Mocks` is referenced.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `DefaultMode` | `MockBehavior` | `MockBehavior.Loose` | Default behavior for mocks created without an explicit mode. Set to `MockBehavior.Strict` to make unconfigured calls throw by default. |
 
 ## Precedence
 
@@ -28211,9 +28222,9 @@ client.Handler.Reset(); // clears all setups and captured requests
 ## TUnit.Mocks
 
 
-TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
 
-While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
+While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks does **not require the TUnit test runner** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
 ## Installation
 
@@ -28293,6 +28304,31 @@ All factory methods accept an optional `MockBehavior` parameter:
 ```csharp
 var loose = IService.Mock();                           // loose (default)
 var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
+```
+
+### Global Default Mode
+
+In TUnit test projects, you can change the default mode for all mocks that are created without an explicit `MockBehavior`:
+
+```csharp
+using TUnit.Core;
+using TUnit.Mocks;
+
+public class GlobalSetup
+{
+    [Before(HookType.TestDiscovery)]
+    public static void Configure(BeforeTestDiscoveryContext context)
+    {
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
+    }
+}
+```
+
+With this setting, `IService.Mock()`, `Mock.Of<IService>()`, `Mock.Wrap(instance)`, `Mock.OfDelegate<T>()`, and `new MockRepository()` use strict mode by default. Passing a `MockBehavior` still overrides the global default:
+
+```csharp
+var strict = IService.Mock();                    // uses global strict default
+var loose = IService.Mock(MockBehavior.Loose);   // explicit override
 ```
 
 ### The Mock Wrapper
