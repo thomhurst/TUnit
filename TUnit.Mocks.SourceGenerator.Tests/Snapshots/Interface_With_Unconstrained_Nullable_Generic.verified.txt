@@ -106,10 +106,10 @@ internal static class IFooMockFactory
 
 public static class IFoo_MockMemberExtensions
 {
-    public static global::TUnit.Mocks.MockMethodCall<T?> DoSomethingAsync<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
+    public static IFoo_DoSomethingAsync_M0_MockCall<T> DoSomethingAsync<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<T?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "DoSomethingAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
+        return new IFoo_DoSomethingAsync_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "DoSomethingAsync", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<T?> GetValue<T>(this global::TUnit.Mocks.Mock<global::IFoo> mock)
@@ -169,6 +169,82 @@ public static class IFoo_MockMemberExtensions
         }
     }
     #endif
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class IFoo_DoSomethingAsync_M0_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>? _builder;
+
+    internal IFoo_DoSomethingAsync_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _typeArguments = typeArguments;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T?> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T?>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Returns(T? value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Returns(global::System.Func<T?> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> ReturnsSequentially(params T?[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Return a pre-built Task directly (e.g., from a TaskCompletionSource).</summary>
+    public IFoo_DoSomethingAsync_M0_MockCall<T> ReturnsAsync(global::System.Threading.Tasks.Task<T?> task) { EnsureSetup().ReturnsRaw(task); return this; }
+    /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
+    public IFoo_DoSomethingAsync_M0_MockCall<T> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
 }
 
 

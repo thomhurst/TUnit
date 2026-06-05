@@ -8,15 +8,15 @@ internal static class MockWrapperTypeBuilder
 {
     /// <summary>
     /// Whether a typed wrapper (IFoo_Mock : Mock&lt;IFoo&gt;, IFoo) can be generated for this model.
-    /// False for multi-interface mocks, static-abstract types, and interfaces with indexers
-    /// or ref-struct-returning properties that can't be forwarded.
+    /// False for multi-interface mocks, static-abstract types, and interfaces with
+    /// ref-struct-returning properties that can't be forwarded.
     /// </summary>
     public static bool CanGenerateWrapper(MockTypeModel model)
     {
         if (model.AdditionalInterfaceNames.Length > 0 || model.HasStaticAbstractMembers)
             return false;
 
-        if (model.Properties.Any(p => !p.IsStaticAbstract && (p.IsIndexer || p.IsRefStructReturn)))
+        if (model.Properties.Any(p => !p.IsStaticAbstract && p.IsRefStructReturn))
             return false;
 
         return true;
@@ -29,6 +29,7 @@ internal static class MockWrapperTypeBuilder
 
         var writer = new CodeWriter();
         var safeName = MockImplBuilder.GetCompositeShortSafeName(model);
+        var interfaceSafeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
         var mockNamespace = MockImplBuilder.GetMockNamespace(model);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
@@ -56,7 +57,7 @@ internal static class MockWrapperTypeBuilder
                     if (model.TypeParameters.Length > 0 && method.TypeParameters.Length > 0)
                     {
                         writer.AppendLine();
-                        MockMembersBuilder.GenerateGenericMethodMembersForWrapper(writer, method, model, safeName);
+                        MockMembersBuilder.GenerateGenericMethodMembersForWrapper(writer, method, model, interfaceSafeName);
                     }
                 }
 
@@ -64,7 +65,14 @@ internal static class MockWrapperTypeBuilder
                 {
                     if (prop.IsStaticAbstract) continue;
                     writer.AppendLine();
-                    GeneratePropertyForwarding(writer, prop, model);
+                    if (prop.IsIndexer)
+                    {
+                        GenerateIndexerForwarding(writer, prop, model);
+                    }
+                    else
+                    {
+                        GeneratePropertyForwarding(writer, prop, model);
+                    }
                 }
 
                 foreach (var evt in model.Events)
@@ -114,25 +122,51 @@ internal static class MockWrapperTypeBuilder
 
     private static void GeneratePropertyForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        var interfaceName = prop.ExplicitInterfaceName ?? prop.DeclaringInterfaceName ?? model.FullyQualifiedName;
+        var interfaceName = GetForwardingInterfaceName(prop, model);
         var returnType = prop.ReturnType;
-
-        // When the property is an explicit interface impl on the underlying object,
-        // we must cast to access the correct property.
-        var target = prop.ExplicitInterfaceName is not null
-            ? $"(({prop.ExplicitInterfaceName})Object)"
-            : "Object";
+        var target = GetForwardingTarget(prop);
 
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
         // Per-accessor [Obsolete] is injected inline so the property line stays a one-liner.
-        var getterAttr = prop.GetterObsoleteAttribute.Length > 0 ? prop.GetterObsoleteAttribute + " " : "";
-        var setterAttr = prop.SetterObsoleteAttribute.Length > 0 ? prop.SetterObsoleteAttribute + " " : "";
+        var getterAttr = GetAccessorObsoletePrefix(prop.GetterObsoleteAttribute);
+        var setterAttr = GetAccessorObsoletePrefix(prop.SetterObsoleteAttribute);
         var getter = prop.HasGetter ? $"{getterAttr}get => {target}.{EscapeIdentifier(prop.Name)}; " : "";
         var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{EscapeIdentifier(prop.Name)} = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.{EscapeIdentifier(prop.Name)} {{ {getter}{setter}}}");
     }
+
+    private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
+    {
+        var interfaceName = GetForwardingInterfaceName(prop, model);
+        var returnType = prop.ReturnType;
+        var paramList = MockImplBuilder.GetParameterList(prop);
+        var argPassList = MockImplBuilder.GetArgPassList(prop);
+        var target = GetForwardingTarget(prop);
+
+        writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
+
+        var getterAttr = GetAccessorObsoletePrefix(prop.GetterObsoleteAttribute);
+        var setterAttr = GetAccessorObsoletePrefix(prop.SetterObsoleteAttribute);
+        var getter = prop.HasGetter ? $"{getterAttr}get => {target}[{argPassList}]; " : "";
+        var setter = prop.HasSetter ? $"{setterAttr}set => {target}[{argPassList}] = value; " : "";
+
+        writer.AppendLine($"{returnType} {interfaceName}.this[{paramList}] {{ {getter}{setter}}}");
+    }
+
+    private static string GetForwardingInterfaceName(MockMemberModel member, MockTypeModel model)
+        => member.ExplicitInterfaceName ?? member.DeclaringInterfaceName ?? model.FullyQualifiedName;
+
+    // When the member is an explicit interface impl on the underlying object,
+    // we must cast to access the correct member.
+    private static string GetForwardingTarget(MockMemberModel member)
+        => member.ExplicitInterfaceName is not null
+            ? $"(({member.ExplicitInterfaceName})Object)"
+            : "Object";
+
+    private static string GetAccessorObsoletePrefix(string obsoleteAttribute)
+        => obsoleteAttribute.Length > 0 ? obsoleteAttribute + " " : "";
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
     {

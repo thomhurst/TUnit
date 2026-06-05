@@ -81,43 +81,43 @@ file static class BaseServicePartialMockFactory
 
 public static class BaseService_MockMemberExtensions
 {
-    public static global::TUnit.Mocks.MockMethodCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<int> id) where T : class
+    public static BaseService_GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<int> id) where T : class
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
+        return new BaseService_GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public static global::TUnit.Mocks.MockMethodCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<int, bool> id) where T : class
+    public static BaseService_GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<int, bool> id) where T : class
     {
         global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
+        return new BaseService_GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public static global::TUnit.Mocks.VoidMockMethodCall Save<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<T> entity) where T : class, new()
+    public static BaseService_Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<T> entity) where T : class, new()
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { entity.Matcher };
-        return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
+        return new BaseService_Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public static global::TUnit.Mocks.VoidMockMethodCall Save<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<T, bool> entity) where T : class, new()
+    public static BaseService_Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<T, bool> entity) where T : class, new()
     {
         global::TUnit.Mocks.Arguments.Arg<T> __fa_entity = entity;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_entity.Matcher };
-        return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
+        return new BaseService_Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public static global::TUnit.Mocks.MockMethodCall<TResult> Transform<TInput, TResult>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<TInput> input) where TInput : notnull where TResult : struct
+    public static BaseService_Transform_M2_MockCall<TInput, TResult> Transform<TInput, TResult>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::TUnit.Mocks.Arguments.Arg<TInput> input) where TInput : notnull where TResult : struct
     {
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { input.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<TResult>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Transform", matchers, global::TUnit.Mocks.TypeArguments.Of<TInput, TResult>.Value);
+        return new BaseService_Transform_M2_MockCall<TInput, TResult>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Transform", matchers, global::TUnit.Mocks.TypeArguments.Of<TInput, TResult>.Value);
     }
 
-    public static global::TUnit.Mocks.MockMethodCall<TResult> Transform<TInput, TResult>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<TInput, bool> input) where TInput : notnull where TResult : struct
+    public static BaseService_Transform_M2_MockCall<TInput, TResult> Transform<TInput, TResult>(this global::TUnit.Mocks.Mock<global::BaseService> mock, global::System.Func<TInput, bool> input) where TInput : notnull where TResult : struct
     {
         global::TUnit.Mocks.Arguments.Arg<TInput> __fa_input = input;
         var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
-        return new global::TUnit.Mocks.MockMethodCall<TResult>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Transform", matchers, global::TUnit.Mocks.TypeArguments.Of<TInput, TResult>.Value);
+        return new BaseService_Transform_M2_MockCall<TInput, TResult>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Transform", matchers, global::TUnit.Mocks.TypeArguments.Of<TInput, TResult>.Value);
     }
 
     public static global::TUnit.Mocks.MockMethodCall<global::System.Collections.Generic.IEnumerable<T>> GetAll<T>(this global::TUnit.Mocks.Mock<global::BaseService> mock) where T : class
@@ -171,6 +171,272 @@ public static class BaseService_MockMemberExtensions
         }
     }
     #endif
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class BaseService_GetById_M0_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification where T : class
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T>? _builder;
+
+    internal BaseService_GetById_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _typeArguments = typeArguments;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<T> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<T>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Returns(T value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Returns(global::System.Func<T> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> ReturnsSequentially(params T[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public BaseService_GetById_M0_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public BaseService_GetById_M0_MockCall<T> Returns(global::System.Func<int, T> factory)
+    {
+        EnsureSetup().Returns(args => factory((int)args[0]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public BaseService_GetById_M0_MockCall<T> Callback(global::System.Action<int> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public BaseService_GetById_M0_MockCall<T> Throws(global::System.Func<int, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((int)args[0]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class BaseService_Save_M1_MockCall<T> : global::TUnit.Mocks.Verification.ICallVerification where T : class, new()
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
+
+    internal BaseService_Save_M1_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _typeArguments = typeArguments;
+        _ = EnsureSetup();
+    }
+
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
+        var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> Returns() { EnsureSetup().Returns(); return this; }
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public BaseService_Save_M1_MockCall<T> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public BaseService_Save_M1_MockCall<T> Callback(global::System.Action<T> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public BaseService_Save_M1_MockCall<T> Throws(global::System.Func<T, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((T)args[0]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
+}
+
+[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+public sealed class BaseService_Transform_M2_MockCall<TInput, TResult> : global::TUnit.Mocks.Verification.ICallVerification where TInput : notnull where TResult : struct
+{
+    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+    private readonly int _memberId;
+    private readonly string _memberName;
+    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+    private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<TResult>? _builder;
+
+    internal BaseService_Transform_M2_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
+    {
+        _engine = engine;
+        _memberId = memberId;
+        _memberName = memberName;
+        _matchers = matchers;
+        _typeArguments = typeArguments;
+    }
+
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<TResult> EnsureSetup()
+    {
+        var existing = global::System.Threading.Volatile.Read(ref _builder);
+        if (existing is not null) return existing;
+        return EnsureSetupSlow();
+    }
+
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private global::TUnit.Mocks.Setup.MethodSetupBuilder<TResult> EnsureSetupSlow()
+    {
+        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
+        var fresh = new global::TUnit.Mocks.Setup.MethodSetupBuilder<TResult>(setup);
+        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+        if (prev is not null) return prev;
+        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+        // so a concurrent loser observing the builder before registration is benign.
+        _engine.AddSetup(setup);
+        return fresh;
+    }
+
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Returns(TResult value) { EnsureSetup().Returns(value); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Returns(global::System.Func<TResult> factory) { EnsureSetup().Returns(factory); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> ReturnsSequentially(params TResult[] values) { EnsureSetup().ReturnsSequentially(values); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+    /// <inheritdoc />
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Then() { EnsureSetup().Then(); return this; }
+
+    /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Returns(global::System.Func<TInput, TResult> factory)
+    {
+        EnsureSetup().Returns(args => factory((TInput)args[0]!));
+        return this;
+    }
+
+    /// <summary>Execute a typed callback using the actual method parameters.</summary>
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Callback(global::System.Action<TInput> callback)
+    {
+        EnsureSetup().Callback(callback);
+        return this;
+    }
+
+    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+    public BaseService_Transform_M2_MockCall<TInput, TResult> Throws(global::System.Func<TInput, global::System.Exception> exceptionFactory)
+    {
+        EnsureSetup().Throws(args => exceptionFactory((TInput)args[0]!));
+        return this;
+    }
+
+    // ICallVerification
+    /// <inheritdoc />
+    public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+    /// <inheritdoc />
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+    /// <inheritdoc />
+    public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+    /// <inheritdoc />
+    public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+    /// <inheritdoc />
+    public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
 }
 
 
