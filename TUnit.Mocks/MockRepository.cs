@@ -6,12 +6,14 @@ namespace TUnit.Mocks;
 /// </summary>
 public class MockRepository
 {
-    private readonly MockBehavior _defaultBehavior;
+    private readonly MockBehavior? _defaultBehavior;
     private readonly List<IMock> _mocks = new();
     private readonly Lock _lock = new();
 
-    /// <summary>Creates a repository with <see cref="MockBehavior.Loose"/> as the default behavior.</summary>
-    public MockRepository() : this(MockBehavior.Loose) { }
+    /// <summary>Creates a repository with the configured mock default behavior.</summary>
+    public MockRepository()
+    {
+    }
 
     /// <summary>Creates a repository with the specified default behavior for all mocks created through it.</summary>
     public MockRepository(MockBehavior defaultBehavior)
@@ -20,7 +22,7 @@ public class MockRepository
     }
 
     /// <summary>Creates and tracks a mock of T using the repository's default behavior.</summary>
-    public Mock<T> Of<T>() where T : class => Of<T>(_defaultBehavior);
+    public Mock<T> Of<T>() where T : class => Of<T>(EffectiveBehavior);
 
     /// <summary>Creates and tracks a mock of T with the specified behavior.</summary>
     public Mock<T> Of<T>(MockBehavior behavior) where T : class
@@ -28,7 +30,7 @@ public class MockRepository
 
     /// <summary>Creates and tracks a mock of T using the repository's default behavior, optionally passing constructor arguments for concrete classes.</summary>
     public Mock<T> Of<T>(params object[] constructorArgs) where T : class
-        => Of<T>(_defaultBehavior, constructorArgs);
+        => Of<T>(EffectiveBehavior, constructorArgs);
 
     /// <summary>Creates and tracks a mock of T with the specified behavior, optionally passing constructor arguments for concrete classes.</summary>
     public Mock<T> Of<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
@@ -129,4 +131,6 @@ public class MockRepository
             return _mocks.ToArray();
         }
     }
+
+    private MockBehavior EffectiveBehavior => _defaultBehavior ?? Mock.DefaultBehavior;
 }

@@ -260,7 +260,12 @@ namespace TUnit.Mocks
     {
         extension(global::IFoo _)
         {
-            public static global::IFooMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IFooMock Mock()
+            {
+                return (global::IFooMock)global::IFooMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IFooMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IFooMock)global::IFooMockFactory.CreateAutoMock(behavior);
             }

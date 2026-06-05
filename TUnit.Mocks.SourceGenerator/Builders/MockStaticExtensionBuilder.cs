@@ -16,12 +16,19 @@ internal static class MockStaticExtensionBuilder
 
         return BuildCore(model, (writer, mockableType, visibility) =>
         {
-            using (writer.Block($"{visibility} static {globalPrefix}{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)} Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
-            {
-                var generatedMockType = $"{globalPrefix}{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
-                var factoryType = $"{globalPrefix}{shortName}MockFactory";
-                var typeArguments = MockImplBuilder.GetTypeParameterList(model);
+            var generatedMockType = $"{globalPrefix}{MockImplBuilder.GetGeneratedTypeName($"{shortName}Mock", model)}";
+            var factoryType = $"{globalPrefix}{shortName}MockFactory";
+            var typeArguments = MockImplBuilder.GetTypeParameterList(model);
 
+            using (writer.Block($"{visibility} static {generatedMockType} Mock()"))
+            {
+                writer.AppendLine($"return ({generatedMockType}){factoryType}.CreateAutoMock{typeArguments}(global::TUnit.Mocks.Mock.DefaultBehavior);");
+            }
+
+            writer.AppendLine();
+
+            using (writer.Block($"{visibility} static {generatedMockType} Mock(global::TUnit.Mocks.MockBehavior behavior)"))
+            {
                 writer.AppendLine($"return ({generatedMockType}){factoryType}.CreateAutoMock{typeArguments}(behavior);");
             }
         });
@@ -34,7 +41,14 @@ internal static class MockStaticExtensionBuilder
     {
         return BuildCore(model, (writer, mockableType, visibility) =>
         {
-            using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)"))
+            using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock()"))
+            {
+                writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>();");
+            }
+
+            writer.AppendLine();
+
+            using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock(global::TUnit.Mocks.MockBehavior behavior)"))
             {
                 writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
             }
@@ -50,14 +64,21 @@ internal static class MockStaticExtensionBuilder
 
                 writer.AppendLine();
 
-                var paramList = string.Join(", ",
-                    ctor.Parameters.Select(FormatParameter)
-                        .Append($"global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose"));
+                var parameterListWithoutBehavior = string.Join(", ", ctor.Parameters.Select(FormatParameter));
+                var parameterListWithBehavior = string.Join(", ",
+                    ctor.Parameters.Select(FormatParameter).Append("global::TUnit.Mocks.MockBehavior behavior"));
 
                 var argList = string.Join(", ",
                     ctor.Parameters.Select(p => p.Name));
 
-                using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({paramList})"))
+                using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithoutBehavior})"))
+                {
+                    writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>({argList});");
+                }
+
+                writer.AppendLine();
+
+                using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithBehavior})"))
                 {
                     writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior, {argList});");
                 }

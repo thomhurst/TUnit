@@ -271,7 +271,12 @@ namespace TUnit.Mocks
     {
         extension(global::Microsoft.Extensions.Configuration.IConfiguration _)
         {
-            public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock()
+            {
+                return (global::Microsoft.Extensions.Configuration.IConfigurationMock)global::Microsoft.Extensions.Configuration.IConfigurationMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::Microsoft.Extensions.Configuration.IConfigurationMock)global::Microsoft.Extensions.Configuration.IConfigurationMockFactory.CreateAutoMock(behavior);
             }

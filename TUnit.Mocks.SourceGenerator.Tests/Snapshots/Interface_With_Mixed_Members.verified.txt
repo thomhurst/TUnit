@@ -459,7 +459,12 @@ namespace TUnit.Mocks
     {
         extension(global::IService _)
         {
-            public static global::IServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IServiceMock Mock()
+            {
+                return (global::IServiceMock)global::IServiceMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IServiceMock)global::IServiceMockFactory.CreateAutoMock(behavior);
             }

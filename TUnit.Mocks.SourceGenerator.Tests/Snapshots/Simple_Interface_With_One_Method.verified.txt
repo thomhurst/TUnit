@@ -242,7 +242,12 @@ namespace TUnit.Mocks
     {
         extension(global::IGreeter _)
         {
-            public static global::IGreeterMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IGreeterMock Mock()
+            {
+                return (global::IGreeterMock)global::IGreeterMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IGreeterMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IGreeterMock)global::IGreeterMockFactory.CreateAutoMock(behavior);
             }

@@ -309,7 +309,12 @@ namespace TUnit.Mocks
     {
         extension(global::IConstrained _)
         {
-            public static global::IConstrainedMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IConstrainedMock Mock()
+            {
+                return (global::IConstrainedMock)global::IConstrainedMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IConstrainedMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IConstrainedMock)global::IConstrainedMockFactory.CreateAutoMock(behavior);
             }

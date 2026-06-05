@@ -109,7 +109,12 @@ namespace TUnit.Mocks
     {
         extension(global::ConfigBase _)
         {
-            public static global::TUnit.Mocks.Mock<global::ConfigBase> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::ConfigBase> Mock()
+            {
+                return global::TUnit.Mocks.Mock.Of<global::ConfigBase>();
+            }
+
+            public static global::TUnit.Mocks.Mock<global::ConfigBase> Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::ConfigBase>(behavior);
             }

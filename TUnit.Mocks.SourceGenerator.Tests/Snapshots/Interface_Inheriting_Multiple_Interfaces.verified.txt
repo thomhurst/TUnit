@@ -264,7 +264,12 @@ namespace TUnit.Mocks
     {
         extension(global::IReadWriter _)
         {
-            public static global::IReadWriterMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IReadWriterMock Mock()
+            {
+                return (global::IReadWriterMock)global::IReadWriterMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IReadWriterMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IReadWriterMock)global::IReadWriterMockFactory.CreateAutoMock(behavior);
             }
