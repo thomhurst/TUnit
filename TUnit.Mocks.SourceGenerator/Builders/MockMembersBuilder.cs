@@ -188,8 +188,6 @@ internal static class MockMembersBuilder
 
     private static bool ShouldGenerateTypedWrapper(MockMemberModel method, MockTypeModel model, bool hasEvents)
     {
-        if (method.IsGenericMethod) return false;
-
         // Async methods need a typed wrapper for the generated ReturnsAsync() method
         if (method.IsAsync) return true;
 
@@ -222,6 +220,9 @@ internal static class MockMembersBuilder
     // compound identifier, and the resulting token after '@' is not itself a keyword.
     private static string GetWrapperName(string safeName, MockMemberModel method)
         => $"{safeName}_{method.Name}_M{method.MemberId}_MockCall";
+
+    private static string GetWrapperTypeName(string safeName, MockMemberModel method, MockTypeModel model)
+        => GetWrapperName(safeName, method) + GetCombinedTypeParameterList(model, method);
 
     private static string GetSafeMemberName(string name, MockTypeModel model)
     {
@@ -297,8 +298,8 @@ internal static class MockMembersBuilder
             : method.ReturnType;
 
         var wrapperName = GetWrapperName(safeName, method);
-        var wrapperTypeName = MockImplBuilder.GetGeneratedTypeName(wrapperName, model);
-        var typeConstraints = MockImplBuilder.GetConstraintClauses(model);
+        var wrapperTypeName = GetWrapperTypeName(safeName, method, model);
+        var typeConstraints = GetCombinedConstraintClauses(model, method);
         var matchableParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
         var hasRefStructParams = method.HasRefStructParams;
         var allNonOutParams = method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList();
@@ -339,23 +340,34 @@ internal static class MockMembersBuilder
             writer.AppendLine("private readonly int _memberId;");
             writer.AppendLine("private readonly string _memberName;");
             writer.AppendLine("private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;");
+            if (method.IsGenericMethod)
+            {
+                writer.AppendLine("private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;");
+            }
             writer.AppendLine($"private {builderType}? _builder;");
             writer.AppendLine();
 
             // Constructor
-            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
+            var typeArgumentsCtorParameter = method.IsGenericMethod
+                ? ", global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments"
+                : "";
+            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers{typeArgumentsCtorParameter})");
             using (writer.Block())
             {
                 writer.AppendLine("_engine = engine;");
                 writer.AppendLine("_memberId = memberId;");
                 writer.AppendLine("_memberName = memberName;");
                 writer.AppendLine("_matchers = matchers;");
+                if (method.IsGenericMethod)
+                {
+                    writer.AppendLine("_typeArguments = typeArguments;");
+                }
             }
 
             writer.AppendLine();
 
             // EnsureSetup — CAS-based lazy init (see EmitEnsureSetup)
-            EmitEnsureSetup(writer, builderType);
+            EmitEnsureSetup(writer, builderType, method.IsGenericMethod);
 
             writer.AppendLine();
 
@@ -418,17 +430,20 @@ internal static class MockMembersBuilder
             writer.AppendLine();
             writer.AppendLine("// ICallVerification");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();");
+            var createVerification = method.IsGenericMethod
+                ? "global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments)"
+                : "_engine.CreateVerification(_memberId, _memberName, _matchers)";
+            writer.AppendLine($"public void WasCalled() => {createVerification}.WasCalled();");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);");
+            writer.AppendLine($"public void WasCalled(global::TUnit.Mocks.Times times) => {createVerification}.WasCalled(times);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);");
+            writer.AppendLine($"public void WasCalled(global::TUnit.Mocks.Times times, string? message) => {createVerification}.WasCalled(times, message);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);");
+            writer.AppendLine($"public void WasCalled(string? message) => {createVerification}.WasCalled(message);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();");
+            writer.AppendLine($"public void WasNeverCalled() => {createVerification}.WasNeverCalled();");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);");
+            writer.AppendLine($"public void WasNeverCalled(string? message) => {createVerification}.WasNeverCalled(message);");
         }
     }
 
@@ -450,25 +465,36 @@ internal static class MockMembersBuilder
             writer.AppendLine("private readonly int _memberId;");
             writer.AppendLine("private readonly string _memberName;");
             writer.AppendLine("private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;");
+            if (method.IsGenericMethod)
+            {
+                writer.AppendLine("private readonly global::System.Collections.Immutable.ImmutableArray<global::System.Type> _typeArguments;");
+            }
             writer.AppendLine($"private {builderType}? _builder;");
             writer.AppendLine();
 
             // Constructor — eagerly registers because void methods
             // are commonly used without chaining (e.g., mock.Log(Arg.Any<string>()) in strict mode).
-            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)");
+            var typeArgumentsCtorParameter = method.IsGenericMethod
+                ? ", global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments"
+                : "";
+            writer.AppendLine($"internal {wrapperCtorName}(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers{typeArgumentsCtorParameter})");
             using (writer.Block())
             {
                 writer.AppendLine("_engine = engine;");
                 writer.AppendLine("_memberId = memberId;");
                 writer.AppendLine("_memberName = memberName;");
                 writer.AppendLine("_matchers = matchers;");
+                if (method.IsGenericMethod)
+                {
+                    writer.AppendLine("_typeArguments = typeArguments;");
+                }
                 writer.AppendLine("_ = EnsureSetup();");
             }
 
             writer.AppendLine();
 
             // EnsureSetup — CAS-based lazy init (see EmitEnsureSetup)
-            EmitEnsureSetup(writer, builderType);
+            EmitEnsureSetup(writer, builderType, method.IsGenericMethod);
 
             writer.AppendLine();
 
@@ -544,17 +570,20 @@ internal static class MockMembersBuilder
             writer.AppendLine();
             writer.AppendLine("// ICallVerification");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();");
+            var createVerification = method.IsGenericMethod
+                ? "global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments)"
+                : "_engine.CreateVerification(_memberId, _memberName, _matchers)";
+            writer.AppendLine($"public void WasCalled() => {createVerification}.WasCalled();");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);");
+            writer.AppendLine($"public void WasCalled(global::TUnit.Mocks.Times times) => {createVerification}.WasCalled(times);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);");
+            writer.AppendLine($"public void WasCalled(global::TUnit.Mocks.Times times, string? message) => {createVerification}.WasCalled(times, message);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);");
+            writer.AppendLine($"public void WasCalled(string? message) => {createVerification}.WasCalled(message);");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();");
+            writer.AppendLine($"public void WasNeverCalled() => {createVerification}.WasNeverCalled();");
             writer.AppendLine("/// <inheritdoc />");
-            writer.AppendLine("public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);");
+            writer.AppendLine($"public void WasNeverCalled(string? message) => {createVerification}.WasNeverCalled(message);");
         }
     }
 
@@ -887,7 +916,7 @@ internal static class MockMembersBuilder
         string returnType;
         if (useTypedWrapper)
         {
-            returnType = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
+            returnType = GetWrapperTypeName(safeName, method, model);
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
@@ -971,16 +1000,15 @@ internal static class MockMembersBuilder
     {
         // For a generic method, pass the configured type arguments so the setup/verification can
         // discriminate calls by type argument. Non-generic methods omit the argument (overload with
-        // the trailing type-arguments parameter is not selected). The typed wrapper is never generated
-        // for generic methods.
+        // the trailing type-arguments parameter is not selected).
         var typeArgs = method.IsGenericMethod
             ? $", {MockImplBuilder.TypeArgumentsArrayLiteral(method)}"
             : "";
 
         if (useTypedWrapper)
         {
-            var wrapperName = MockImplBuilder.GetGeneratedTypeName(GetWrapperName(safeName, method), model);
-            writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers);");
+            var wrapperName = GetWrapperTypeName(safeName, method, model);
+            writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
@@ -1486,7 +1514,7 @@ internal static class MockMembersBuilder
         writer.AppendLine($"public {wrapperName} ReturnsAsync(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
     }
 
-    private static void EmitEnsureSetup(CodeWriter writer, string builderType)
+    private static void EmitEnsureSetup(CodeWriter writer, string builderType, bool hasTypeArguments)
     {
         // CAS-based lazy init avoids the LazyInitializer Func closure and its two scratch fields.
         writer.AppendLine($"private {builderType} EnsureSetup()");
@@ -1506,7 +1534,8 @@ internal static class MockMembersBuilder
         writer.AppendLine($"private {builderType} EnsureSetupSlow()");
         using (writer.Block())
         {
-            writer.AppendLine("var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);");
+            var typeArgumentsArgument = hasTypeArguments ? ", _typeArguments" : "";
+            writer.AppendLine($"var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName{typeArgumentsArgument});");
             writer.AppendLine($"var fresh = new {builderType}(setup);");
             writer.AppendLine($"var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);");
             writer.AppendLine("if (prev is not null) return prev;");

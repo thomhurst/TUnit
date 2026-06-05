@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.ComponentModel;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Verification;
 
@@ -28,7 +29,8 @@ internal interface ITypeArgumentVerificationFactory
 /// MockEngine). A custom <see cref="IMockEngineAccess"/> implementation falls back to the public
 /// surface, losing type-argument filtering but never throwing.
 /// </summary>
-internal static class MockCallVerification
+[EditorBrowsable(EditorBrowsableState.Never)]
+public static class MockCallVerification
 {
     public static ICallVerification Create(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
         => !typeArguments.IsDefault && engine is ITypeArgumentVerificationFactory typeArgFactory
