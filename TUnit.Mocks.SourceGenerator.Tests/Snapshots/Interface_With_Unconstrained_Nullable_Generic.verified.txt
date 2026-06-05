@@ -234,17 +234,17 @@ public sealed class IFoo_DoSomethingAsync_M0_MockCall<T> : global::TUnit.Mocks.V
 
     // ICallVerification
     /// <inheritdoc />
-    public void WasCalled() => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
+    public void WasCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled();
     /// <inheritdoc />
-    public void WasCalled(global::TUnit.Mocks.Times times) => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
+    public void WasCalled(global::TUnit.Mocks.Times times) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times);
     /// <inheritdoc />
-    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
+    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(times, message);
     /// <inheritdoc />
-    public void WasCalled(string? message) => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
+    public void WasCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasCalled(message);
     /// <inheritdoc />
-    public void WasNeverCalled() => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
+    public void WasNeverCalled() => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled();
     /// <inheritdoc />
-    public void WasNeverCalled(string? message) => global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
+    public void WasNeverCalled(string? message) => new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments).WasNeverCalled(message);
 }
 
 

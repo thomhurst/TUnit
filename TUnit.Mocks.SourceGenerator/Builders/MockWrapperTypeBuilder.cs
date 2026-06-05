@@ -29,7 +29,7 @@ internal static class MockWrapperTypeBuilder
 
         var writer = new CodeWriter();
         var safeName = MockImplBuilder.GetCompositeShortSafeName(model);
-        var memberSafeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
+        var interfaceSafeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
         var mockNamespace = MockImplBuilder.GetMockNamespace(model);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
@@ -57,7 +57,7 @@ internal static class MockWrapperTypeBuilder
                     if (model.TypeParameters.Length > 0 && method.TypeParameters.Length > 0)
                     {
                         writer.AppendLine();
-                        MockMembersBuilder.GenerateGenericMethodMembersForWrapper(writer, method, model, memberSafeName);
+                        MockMembersBuilder.GenerateGenericMethodMembersForWrapper(writer, method, model, interfaceSafeName);
                     }
                 }
 

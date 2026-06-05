@@ -434,7 +434,7 @@ internal static class MockMembersBuilder
             writer.AppendLine("// ICallVerification");
             writer.AppendLine("/// <inheritdoc />");
             var createVerification = method.IsGenericMethod
-                ? "global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments)"
+                ? "new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments)"
                 : "_engine.CreateVerification(_memberId, _memberName, _matchers)";
             writer.AppendLine($"public void WasCalled() => {createVerification}.WasCalled();");
             writer.AppendLine("/// <inheritdoc />");
@@ -574,7 +574,7 @@ internal static class MockMembersBuilder
             writer.AppendLine("// ICallVerification");
             writer.AppendLine("/// <inheritdoc />");
             var createVerification = method.IsGenericMethod
-                ? "global::TUnit.Mocks.MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments)"
+                ? "new global::TUnit.Mocks.MockMethodCall<object?>(_engine, _memberId, _memberName, _matchers, _typeArguments)"
                 : "_engine.CreateVerification(_memberId, _memberName, _matchers)";
             writer.AppendLine($"public void WasCalled() => {createVerification}.WasCalled();");
             writer.AppendLine("/// <inheritdoc />");

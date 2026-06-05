@@ -30,7 +30,7 @@ internal interface ITypeArgumentVerificationFactory
 /// surface, losing type-argument filtering but never throwing.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class MockCallVerification
+internal static class MockCallVerification
 {
     public static ICallVerification Create(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
         => !typeArguments.IsDefault && engine is ITypeArgumentVerificationFactory typeArgFactory
