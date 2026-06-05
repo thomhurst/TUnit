@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using TUnit.Mocks.Diagnostics;
 using TUnit.Mocks.Verification;
 
@@ -8,6 +9,14 @@ namespace TUnit.Mocks;
 /// </summary>
 public static class Mock
 {
+    /// <summary>Current default behavior used by parameterless mock factory APIs.</summary>
+    /// <remarks>
+    /// Hidden from IntelliSense because user code should configure this through
+    /// <c>context.Settings.Mocks.DefaultMode</c>; generated code and factory APIs use this as the runtime lookup.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static MockBehavior DefaultBehavior => TUnitMocksSettings.Default.DefaultMode;
+
     /// <summary>
     /// Retrieves the <see cref="Mock{T}"/> wrapper for a mock implementation object.
     /// Use this to access the mock wrapper from auto-mocked return values or any mocked object.
@@ -38,8 +47,8 @@ public static class Mock
             $"Mock.Get can only be used with objects created by Mock.Of, auto-mocking, or other Mock factory methods.");
     }
 
-    /// <summary>Creates a mock of T in loose mode.</summary>
-    public static Mock<T> Of<T>() where T : class => Of<T>(MockBehavior.Loose);
+    /// <summary>Creates a mock of T using the configured default behavior.</summary>
+    public static Mock<T> Of<T>() where T : class => Of<T>(DefaultBehavior);
 
     /// <summary>Creates a mock of T with specified behavior and custom default value provider.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior, IDefaultValueProvider defaultValueProvider) where T : class
@@ -53,9 +62,9 @@ public static class Mock
     public static Mock<T> Of<T>(MockBehavior behavior) where T : class
         => Of<T>(behavior, Array.Empty<object>());
 
-    /// <summary>Creates a mock of T in loose mode, optionally passing constructor arguments for concrete classes.</summary>
+    /// <summary>Creates a mock of T using the configured default behavior, optionally passing constructor arguments for concrete classes.</summary>
     public static Mock<T> Of<T>(params object[] constructorArgs) where T : class
-        => Of<T>(MockBehavior.Loose, constructorArgs);
+        => Of<T>(DefaultBehavior, constructorArgs);
 
     /// <summary>Creates a mock of T with specified behavior, optionally passing constructor arguments for concrete classes.</summary>
     public static Mock<T> Of<T>(MockBehavior behavior, params object[] constructorArgs) where T : class
@@ -70,12 +79,12 @@ public static class Mock
             $"Ensure the TUnit.Mocks source generator is referenced in your project.");
     }
 
-    /// <summary>Creates a delegate mock of T in loose mode.</summary>
+    /// <summary>Creates a delegate mock of T using the configured default behavior.</summary>
     /// <remarks>
     /// Delegate parameters with <c>out</c> modifiers will always receive <c>default</c> values.
     /// Use interface mocks for full <c>out</c> parameter configuration support.
     /// </remarks>
-    public static Mock<T> OfDelegate<T>() where T : class => OfDelegate<T>(MockBehavior.Loose);
+    public static Mock<T> OfDelegate<T>() where T : class => OfDelegate<T>(DefaultBehavior);
 
     /// <summary>Creates a delegate mock of T with specified behavior.</summary>
     /// <remarks>
@@ -94,8 +103,8 @@ public static class Mock
             $"Ensure the TUnit.Mocks source generator is referenced and the type is a delegate type.");
     }
 
-    /// <summary>Creates a wrap mock around an existing instance of T in loose mode.</summary>
-    public static Mock<T> Wrap<T>(T instance) where T : class => Wrap(MockBehavior.Loose, instance);
+    /// <summary>Creates a wrap mock around an existing instance of T using the configured default behavior.</summary>
+    public static Mock<T> Wrap<T>(T instance) where T : class => Wrap(DefaultBehavior, instance);
 
     /// <summary>Creates a wrap mock around an existing instance of T with specified behavior.</summary>
     public static Mock<T> Wrap<T>(MockBehavior behavior, T instance) where T : class
@@ -110,10 +119,10 @@ public static class Mock
             $"Ensure the TUnit.Mocks source generator is referenced and the type is a non-sealed class with virtual members.");
     }
 
-    /// <summary>Creates a mock implementing both T1 and T2 in loose mode.</summary>
+    /// <summary>Creates a mock implementing both T1 and T2 using the configured default behavior.</summary>
     public static Mock<T1> Of<T1, T2>()
         where T1 : class where T2 : class
-        => Of<T1, T2>(MockBehavior.Loose);
+        => Of<T1, T2>(DefaultBehavior);
 
     /// <summary>Creates a mock implementing both T1 and T2 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2>(MockBehavior behavior)
@@ -130,10 +139,10 @@ public static class Mock
             $"Ensure the TUnit.Mocks source generator is referenced in your project.");
     }
 
-    /// <summary>Creates a mock implementing T1, T2, and T3 in loose mode.</summary>
+    /// <summary>Creates a mock implementing T1, T2, and T3 using the configured default behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3>()
         where T1 : class where T2 : class where T3 : class
-        => Of<T1, T2, T3>(MockBehavior.Loose);
+        => Of<T1, T2, T3>(DefaultBehavior);
 
     /// <summary>Creates a mock implementing T1, T2, and T3 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3>(MockBehavior behavior)
@@ -150,10 +159,10 @@ public static class Mock
             $"Ensure the TUnit.Mocks source generator is referenced in your project.");
     }
 
-    /// <summary>Creates a mock implementing T1, T2, T3, and T4 in loose mode.</summary>
+    /// <summary>Creates a mock implementing T1, T2, T3, and T4 using the configured default behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3, T4>()
         where T1 : class where T2 : class where T3 : class where T4 : class
-        => Of<T1, T2, T3, T4>(MockBehavior.Loose);
+        => Of<T1, T2, T3, T4>(DefaultBehavior);
 
     /// <summary>Creates a mock implementing T1, T2, T3, and T4 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3, T4>(MockBehavior behavior)

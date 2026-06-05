@@ -173,27 +173,52 @@ namespace TUnit.Mocks
     {
         extension(global::MyService _)
         {
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock()
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>();
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string name, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string name)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(name);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string name, global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, name);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int id, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int id)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(id);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int id, global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, id);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string host, int port, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string host, int port)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(host, port);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(string host, int port, global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, host, port);
             }
 
-            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int timeout, bool verbose, global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int timeout, bool verbose)
+            {
+                return global::TUnit.Mocks.Mock.Of<global::MyService>(timeout, verbose);
+            }
+
+            public static global::TUnit.Mocks.Mock<global::MyService> Mock(int timeout, bool verbose, global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::MyService>(behavior, timeout, verbose);
             }

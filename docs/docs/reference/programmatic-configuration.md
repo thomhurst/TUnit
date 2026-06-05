@@ -14,6 +14,7 @@ Settings are organized into logical groups:
 - `Parallelism` — concurrent test execution limits
 - `Execution` — runtime behavior such as fail-fast
 - `Display` — output and display options
+- `Mocks` — defaults for TUnit.Mocks when the package is referenced
 
 ## Usage
 
@@ -21,6 +22,7 @@ Set values inside a `[Before(HookType.TestDiscovery)]` hook so they are applied 
 
 ```csharp
 using TUnit.Core;
+using TUnit.Mocks;
 
 public class TestSetup
 {
@@ -30,6 +32,7 @@ public class TestSetup
         context.Settings.Timeouts.DefaultTestTimeout = TimeSpan.FromMinutes(5);
         context.Settings.Timeouts.DefaultHookTimeout = TimeSpan.FromMinutes(2);
         context.Settings.Execution.FailFast = true;
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
 
         return Task.CompletedTask;
     }
@@ -68,6 +71,14 @@ Settings are accessed exclusively through `context.Settings` in the discovery ho
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `FailFast` | `bool` | `false` | Cancels the remaining test run after the first test failure. |
+
+### `context.Settings.Mocks`
+
+Available when `TUnit.Mocks` is referenced.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `DefaultMode` | `MockBehavior` | `MockBehavior.Loose` | Default behavior for mocks created without an explicit mode. Set to `MockBehavior.Strict` to make unconfigured calls throw by default. |
 
 ## Precedence
 

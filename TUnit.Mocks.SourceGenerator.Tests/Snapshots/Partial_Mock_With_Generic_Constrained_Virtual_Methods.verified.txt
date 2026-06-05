@@ -452,7 +452,12 @@ namespace TUnit.Mocks
     {
         extension(global::BaseService _)
         {
-            public static global::TUnit.Mocks.Mock<global::BaseService> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::BaseService> Mock()
+            {
+                return global::TUnit.Mocks.Mock.Of<global::BaseService>();
+            }
+
+            public static global::TUnit.Mocks.Mock<global::BaseService> Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::BaseService>(behavior);
             }

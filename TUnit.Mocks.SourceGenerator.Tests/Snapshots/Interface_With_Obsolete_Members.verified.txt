@@ -222,7 +222,12 @@ namespace TUnit.Mocks
     {
         extension(global::BaseDialog _)
         {
-            public static global::TUnit.Mocks.Mock<global::BaseDialog> Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::TUnit.Mocks.Mock<global::BaseDialog> Mock()
+            {
+                return global::TUnit.Mocks.Mock.Of<global::BaseDialog>();
+            }
+
+            public static global::TUnit.Mocks.Mock<global::BaseDialog> Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return global::TUnit.Mocks.Mock.Of<global::BaseDialog>(behavior);
             }
@@ -834,7 +839,12 @@ namespace TUnit.Mocks
     {
         extension(global::IDialogService _)
         {
-            public static global::IDialogServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IDialogServiceMock Mock()
+            {
+                return (global::IDialogServiceMock)global::IDialogServiceMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IDialogServiceMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IDialogServiceMock)global::IDialogServiceMockFactory.CreateAutoMock(behavior);
             }

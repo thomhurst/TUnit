@@ -4,9 +4,9 @@ sidebar_position: 1
 
 # TUnit.Mocks
 
-TUnit.Mocks is a **standalone, source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
 
-While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks has **no dependency on the TUnit test framework** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
+While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks does **not require the TUnit test runner** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
 
 ## Installation
 
@@ -86,6 +86,31 @@ All factory methods accept an optional `MockBehavior` parameter:
 ```csharp
 var loose = IService.Mock();                           // loose (default)
 var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
+```
+
+### Global Default Mode
+
+In TUnit test projects, you can change the default mode for all mocks that are created without an explicit `MockBehavior`:
+
+```csharp
+using TUnit.Core;
+using TUnit.Mocks;
+
+public class GlobalSetup
+{
+    [Before(HookType.TestDiscovery)]
+    public static void Configure(BeforeTestDiscoveryContext context)
+    {
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
+    }
+}
+```
+
+With this setting, `IService.Mock()`, `Mock.Of<IService>()`, `Mock.Wrap(instance)`, `Mock.OfDelegate<T>()`, and `new MockRepository()` use strict mode by default. Passing a `MockBehavior` still overrides the global default:
+
+```csharp
+var strict = IService.Mock();                    // uses global strict default
+var loose = IService.Mock(MockBehavior.Loose);   // explicit override
 ```
 
 ### The Mock Wrapper

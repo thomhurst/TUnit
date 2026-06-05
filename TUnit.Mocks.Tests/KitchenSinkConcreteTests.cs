@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using TUnit.Mocks;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Verification;
@@ -514,5 +515,25 @@ public class KitchenSinkConcreteTests
         await Assert.That(mock.Object.Describe()).IsEqualTo("mocked");
         await Assert.That(mock.Object.Describe()).IsEqualTo("mocked");
         mock.Describe().WasCalled(Times.Exactly(2));
+    }
+
+    public class MyService
+    {
+        public IConfiguration Configuration { get; }
+
+        public MyService(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+    }
+
+
+    [Test]
+    public async Task IConfiguration_Param_Mock()
+    {
+        var configuration = IConfiguration.Mock();
+        var service = new MyService(configuration);
+
+        await Assert.That(service.Configuration).IsEqualTo(configuration);
     }
 }

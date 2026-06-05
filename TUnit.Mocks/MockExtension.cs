@@ -17,7 +17,14 @@ public static class MockExtension
         /// will prefer it over this generic fallback.
         /// </summary>
         [OverloadResolutionPriority(-1)]
-        public static Mock<T> Mock(MockBehavior behavior = MockBehavior.Loose)
+        public static Mock<T> Mock()
+            => TUnit.Mocks.Mock.Of<T>();
+
+        /// <summary>
+        /// Creates a mock of <typeparamref name="T"/> with the specified behavior.
+        /// </summary>
+        [OverloadResolutionPriority(-1)]
+        public static Mock<T> Mock(MockBehavior behavior)
             => TUnit.Mocks.Mock.Of<T>(behavior);
     }
 }

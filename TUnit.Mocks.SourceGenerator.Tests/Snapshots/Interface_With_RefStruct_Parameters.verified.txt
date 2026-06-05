@@ -200,7 +200,12 @@ namespace TUnit.Mocks
     {
         extension(global::IBufferProcessor _)
         {
-            public static global::IBufferProcessorMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)
+            public static global::IBufferProcessorMock Mock()
+            {
+                return (global::IBufferProcessorMock)global::IBufferProcessorMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+            }
+
+            public static global::IBufferProcessorMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
                 return (global::IBufferProcessorMock)global::IBufferProcessorMockFactory.CreateAutoMock(behavior);
             }

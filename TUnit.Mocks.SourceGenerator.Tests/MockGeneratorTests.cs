@@ -1294,7 +1294,7 @@ public class MockGeneratorTests : SnapshotTestBase
         AssertContains(
             generated,
             "public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock"
-            + "(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)");
+            + "(global::TUnit.Mocks.MockBehavior behavior)");
 
         return VerifyGeneratorOutput(source, [externalRef]);
     }
