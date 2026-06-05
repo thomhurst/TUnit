@@ -206,6 +206,11 @@ public interface IHasSetOnlyIndexer
     string this[int index] { set; }
 }
 
+public interface IHasMultiParameterIndexer
+{
+    string this[int row, string column] { get; set; }
+}
+
 public interface IBaseIndexer
 {
     string this[string key] { get; set; }
@@ -752,6 +757,25 @@ public class KitchenSinkEdgeCasesTests
         mock.Count.WasCalled(Times.Once);
         mock.Item("alpha").WasCalled(Times.Once);
         mock.SetItem("beta", "B").WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task T14_Multi_Parameter_Indexer_Configurable_And_Verifiable_Through_Interface()
+    {
+        var mock = IHasMultiParameterIndexer.Mock();
+        mock.Item(2, "name").Returns("two-name");
+
+        IHasMultiParameterIndexer asInterface = mock;
+
+        await Assert.That(asInterface[2, "name"]).IsEqualTo("two-name");
+
+        asInterface[3, "status"] = "three-status";
+
+        mock.Item(2, "name").WasCalled(Times.Once);
+        mock.Item(Any<int>(), Any<string>()).WasCalled(Times.Once);
+        mock.SetItem(3, "status", "three-status").WasCalled(Times.Once);
+        mock.SetItem(Any<int>(), Any<string>(), Any<string>()).WasCalled(Times.Once);
+        mock.SetItem(3, "name", Any<string>()).WasNeverCalled();
     }
 
     [Test]

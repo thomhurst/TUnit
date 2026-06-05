@@ -38,6 +38,11 @@ public class ReturnsTests
         string Greet8<T>(T obj, string a, string b, string c, string d, string e, string f, string g) where T : class;
     }
 
+    public interface IGenericGreeter<TPrefix>
+    {
+        string Greet<TName>(TPrefix prefix, TName name) where TName : class;
+    }
+
     public class Class1
     {
     }
@@ -166,7 +171,8 @@ public class ReturnsTests
         var mock = IArityGreeter.Mock();
 
         mock.Greet7(Any<Class1>(), Any(), Any(), Any(), Any(), Any(), Any())
-            .Returns((input1, input2, input3, input4, input5, input6, input7) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}");
+            .Returns((input1, input2, input3, input4, input5, input6, input7)
+                => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}");
 
         IArityGreeter greeter = mock;
 
@@ -179,10 +185,27 @@ public class ReturnsTests
         var mock = IArityGreeter.Mock();
 
         mock.Greet8(Any<Class1>(), Any(), Any(), Any(), Any(), Any(), Any(), Any())
-            .Returns((input1, input2, input3, input4, input5, input6, input7, input8) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}:{input8}");
+            .Returns((input1, input2, input3, input4, input5, input6, input7, input8)
+                => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}:{input8}");
 
         IArityGreeter greeter = mock;
 
         await Assert.That(greeter.Greet8(new Class1(), "a", "b", "c", "d", "e", "f", "g")).IsEqualTo("Class1:a:b:c:d:e:f:g");
+    }
+
+    [Test]
+    public async Task Generic_Interface_Generic_Method_Returns_And_Verifies()
+    {
+        var mock = IGenericGreeter<Class1>.Mock();
+
+        mock.Greet<Class2>(Any(), Any())
+            .Returns((prefix, name) => $"{prefix.GetType().Name}:{name.GetType().Name}");
+
+        IGenericGreeter<Class1> greeter = mock;
+
+        await Assert.That(greeter.Greet(new Class1(), new Class2())).IsEqualTo("Class1:Class2");
+
+        mock.Greet<Class2>(Any(), Any()).WasCalled(Times.Once);
+        mock.Greet<Class1>(Any(), Any()).WasNeverCalled();
     }
 }

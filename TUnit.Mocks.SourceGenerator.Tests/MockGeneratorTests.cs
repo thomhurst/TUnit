@@ -1285,11 +1285,81 @@ public class MockGeneratorTests : SnapshotTestBase
             """;
 
         var generated = GetGeneratedOutput(source, [externalRef]);
-        AssertContains(generated, "sealed class IConfigurationMock : global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>, global::Microsoft.Extensions.Configuration.IConfiguration");
+        AssertContains(
+            generated,
+            "sealed class IConfigurationMock : "
+            + "global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>, "
+            + "global::Microsoft.Extensions.Configuration.IConfiguration");
         AssertContains(generated, "string? global::Microsoft.Extensions.Configuration.IConfiguration.this[string key]");
-        AssertContains(generated, "public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)");
+        AssertContains(
+            generated,
+            "public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock"
+            + "(global::TUnit.Mocks.MockBehavior behavior = global::TUnit.Mocks.MockBehavior.Loose)");
 
         return VerifyGeneratorOutput(source, [externalRef]);
+    }
+
+    [Test]
+    public void Ref_Struct_Returning_Indexer_Does_Not_Generate_Typed_Wrapper()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public ref struct RefValue
+            {
+            }
+
+            public interface IRefStructIndexer
+            {
+                RefValue this[int index] { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IRefStructIndexer>();
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source);
+
+        AssertContains(generated, "sealed class IRefStructIndexerMockImpl");
+        AssertDoesNotContain(generated, "sealed class IRefStructIndexerMock :");
+        AssertDoesNotContain(generated, "IRefStructIndexer_MockStaticExtension");
+        AssertDoesNotContain(generated, "MockMethodCall<global::RefValue>");
+    }
+
+    [Test]
+    public void Static_Abstract_Interface_Returning_Indexer_Does_Not_Generate_Item_Call()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IStaticAbstractReturn
+            {
+                static abstract IStaticAbstractReturn Create();
+            }
+
+            public interface IStaticAbstractIndexer
+            {
+                IStaticAbstractReturn this[int index] { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = IStaticAbstractIndexer.Mock();
+                }
+            }
+            """;
+
+        var generated = GetGeneratedOutput(source);
+
+        AssertContains(generated, "sealed class IStaticAbstractIndexerMock :");
+        AssertDoesNotContain(generated, "MockMethodCall<global::IStaticAbstractReturn>");
     }
 
     [Test]

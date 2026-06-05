@@ -108,7 +108,10 @@ internal static class MockMembersBuilder
                 // setups and verifications can target distinct index values independently.
                 // Each indexer overload (different parameter signature) gets its own pair.
                 var indexers = model.Properties
-                    .Where(p => p.IsIndexer && !p.IsStaticAbstract)
+                    .Where(p => p.IsIndexer
+                        && !p.IsStaticAbstract
+                        && !p.IsRefStructReturn
+                        && !p.IsReturnTypeStaticAbstractInterface)
                     .ToList();
                 foreach (var indexer in indexers)
                 {

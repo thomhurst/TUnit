@@ -824,7 +824,10 @@ internal static class MemberDiscovery
             OverrideAccessModifier = overrideAccessModifier,
             GetterAccessModifier = GetAccessorAccessModifier(indexer.GetMethod, overrideAccessModifier, compilationAssembly),
             SetterAccessModifier = GetAccessorAccessModifier(indexer.SetMethod, overrideAccessModifier, compilationAssembly),
+            IsRefStructReturn = indexer.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type, compilation),
+            IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(indexer.Type),
+            SpanReturnElementType = indexer.Type.IsRefLikeType ? GetSpanElementType(indexer.Type) : null,
             ObsoleteAttribute = indexerObsolete,
             GetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.GetMethod),
             SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(indexerObsolete, indexer.SetMethod)
