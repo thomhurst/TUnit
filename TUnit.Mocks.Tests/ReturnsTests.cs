@@ -28,6 +28,16 @@ public class ReturnsTests
         string Greet<T>(T obj, string name) where T : class;
     }
 
+    public interface IArityGreeter
+    {
+        string Greet3<T>(T obj, string a, string b) where T : class;
+        string Greet4<T>(T obj, string a, string b, string c) where T : class;
+        string Greet5<T>(T obj, string a, string b, string c, string d) where T : class;
+        string Greet6<T>(T obj, string a, string b, string c, string d, string e) where T : class;
+        string Greet7<T>(T obj, string a, string b, string c, string d, string e, string f) where T : class;
+        string Greet8<T>(T obj, string a, string b, string c, string d, string e, string f, string g) where T : class;
+    }
+
     public class Class1
     {
     }
@@ -96,5 +106,83 @@ public class ReturnsTests
         mock.Greet<Class1>(Any(), Any()).WasCalled(Times.Exactly(2));
         mock.Greet<Class2>(Any(), Any()).WasCalled(Times.Once);
         mock.Greet<AnyType>(Any(), Any()).WasCalled(Times.Exactly(3));
+    }
+
+    [Test]
+    public async Task Greet_3_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet3(Any<Class1>(), Any(), Any())
+            .Returns((input1, input2, input3) => $"{input1.GetType().Name}:{input2}:{input3}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet3(new Class1(), "a", "b")).IsEqualTo("Class1:a:b");
+    }
+
+    [Test]
+    public async Task Greet_4_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet4(Any<Class1>(), Any(), Any(), Any())
+            .Returns((input1, input2, input3, input4) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet4(new Class1(), "a", "b", "c")).IsEqualTo("Class1:a:b:c");
+    }
+
+    [Test]
+    public async Task Greet_5_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet5(Any<Class1>(), Any(), Any(), Any(), Any())
+            .Returns((input1, input2, input3, input4, input5) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet5(new Class1(), "a", "b", "c", "d")).IsEqualTo("Class1:a:b:c:d");
+    }
+
+    [Test]
+    public async Task Greet_6_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet6(Any<Class1>(), Any(), Any(), Any(), Any(), Any())
+            .Returns((input1, input2, input3, input4, input5, input6) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet6(new Class1(), "a", "b", "c", "d", "e")).IsEqualTo("Class1:a:b:c:d:e");
+    }
+
+    [Test]
+    public async Task Greet_7_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet7(Any<Class1>(), Any(), Any(), Any(), Any(), Any(), Any())
+            .Returns((input1, input2, input3, input4, input5, input6, input7) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet7(new Class1(), "a", "b", "c", "d", "e", "f")).IsEqualTo("Class1:a:b:c:d:e:f");
+    }
+
+    [Test]
+    public async Task Greet_8_Params_Returns_Can_Access_All_Inputs()
+    {
+        var mock = IArityGreeter.Mock();
+
+        mock.Greet8(Any<Class1>(), Any(), Any(), Any(), Any(), Any(), Any(), Any())
+            .Returns((input1, input2, input3, input4, input5, input6, input7, input8) => $"{input1.GetType().Name}:{input2}:{input3}:{input4}:{input5}:{input6}:{input7}:{input8}");
+
+        IArityGreeter greeter = mock;
+
+        await Assert.That(greeter.Greet8(new Class1(), "a", "b", "c", "d", "e", "f", "g")).IsEqualTo("Class1:a:b:c:d:e:f:g");
     }
 }
