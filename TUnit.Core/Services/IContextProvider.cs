@@ -41,7 +41,6 @@ public interface IContextProvider
     /// partially-built context.
     /// </summary>
     TestContext CreateTestContext(
-        string testName,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,

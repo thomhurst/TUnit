@@ -1,0 +1,309 @@
+diff --git a/TUnit.Core/ContextProvider.cs b/TUnit.Core/ContextProvider.cs
+index b81cd12a38..1836e97619 100644
+--- a/TUnit.Core/ContextProvider.cs
++++ b/TUnit.Core/ContextProvider.cs
+@@ -85,11 +85,17 @@ public TestContext CreateTestContext(
+         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+         Type classType,
+         TestBuilderContext testBuilderContext,
++        TestDetails testDetails,
+         CancellationToken cancellationToken)
+     {
+         var classContext = GetOrCreateClassContext(classType);
+ 
+-        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken);
++        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken)
++        {
++            // Must be assigned before AddTest publishes the context via ClassHookContext.Tests —
++            // AfterEvery(Class) hooks can iterate Tests while sibling dynamic tests are still being built.
++            TestDetails = testDetails,
++        };
+ 
+         classContext.AddTest(testContext);
+ 
+diff --git a/TUnit.Core/Services/IContextProvider.cs b/TUnit.Core/Services/IContextProvider.cs
+index 085182b417..913e4b4e15 100644
+--- a/TUnit.Core/Services/IContextProvider.cs
++++ b/TUnit.Core/Services/IContextProvider.cs
+@@ -36,12 +36,15 @@ ClassHookContext GetOrCreateClassContext(
+         Type classType);
+ 
+     /// <summary>
+-    /// Creates a test context
++    /// Creates a test context. <paramref name="testDetails"/> is assigned before the context
++    /// becomes observable via <see cref="ClassHookContext.Tests"/> so hooks never see a
++    /// partially-built context.
+     /// </summary>
+     TestContext CreateTestContext(
+         string testName,
+         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+         Type classType,
+         TestBuilderContext testBuilderContext,
++        TestDetails testDetails,
+         CancellationToken cancellationToken);
+ }
+diff --git a/TUnit.Engine/Building/TestBuilder.cs b/TUnit.Engine/Building/TestBuilder.cs
+index 42cf5a438b..b8b2ace2a3 100644
+--- a/TUnit.Engine/Building/TestBuilder.cs
++++ b/TUnit.Engine/Building/TestBuilder.cs
+@@ -1081,10 +1081,9 @@ private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestM
+             metadata.TestName,
+             metadata.TestClassType,
+             testBuilderContext,
++            testDetails,
+             CancellationToken.None);
+ 
+-        context.Metadata.TestDetails = testDetails;
+-
+         return context;
+     }
+ 
+@@ -1180,10 +1179,9 @@ private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails t
+             {
+                 TestMetadata = metadata.MethodMetadata
+             },
++            testDetails,
+             CancellationToken.None);
+ 
+-        context.Metadata.TestDetails = testDetails;
+-
+         return context;
+     }
+ 
+diff --git a/TUnit.Engine/Building/TestBuilderPipeline.cs b/TUnit.Engine/Building/TestBuilderPipeline.cs
+index 493aec53b5..53b7c74e39 100644
+--- a/TUnit.Engine/Building/TestBuilderPipeline.cs
++++ b/TUnit.Engine/Building/TestBuilderPipeline.cs
+@@ -268,11 +268,9 @@ private async Task<AbstractExecutableTest[]> GenerateDynamicTests(TestMetadata m
+                 metadata.TestName,
+                 metadata.TestClassType,
+                 testBuilderContext,
++                testDetails,
+                 CancellationToken.None);
+ 
+-            // Set the TestDetails on the context
+-            context.Metadata.TestDetails = testDetails;
+-
+             // Set custom display name for dynamic tests if specified
+             if (dynamicTestMetadata?.DisplayName != null)
+             {
+@@ -395,11 +393,9 @@ private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetad
+                         resolvedMetadata.TestName,
+                         resolvedMetadata.TestClassType,
+                         CreateTestBuilderContext(resolvedMetadata),
++                        testDetails,
+                         CancellationToken.None);
+ 
+-                    // Set the TestDetails on the context
+-                    context.Metadata.TestDetails = testDetails;
+-
+                     // Set custom display name for dynamic tests if specified
+                     if (dynamicMetadata.DisplayName != null)
+                     {
+@@ -476,10 +472,9 @@ private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetada
+             metadata.TestName,
+             metadata.TestClassType,
+             CreateTestBuilderContext(metadata),
++            testDetails,
+             CancellationToken.None);
+ 
+-        context.Metadata.TestDetails = testDetails;
+-
+         var now = DateTimeOffset.UtcNow;
+ 
+         return new FailedExecutableTest(exception)
+@@ -531,10 +526,9 @@ private AbstractExecutableTest CreateFailedTestForGenericResolutionError(TestMet
+             metadata.TestName,
+             metadata.TestClassType,
+             CreateTestBuilderContext(metadata),
++            testDetails,
+             CancellationToken.None);
+ 
+-        context.Metadata.TestDetails = testDetails;
+-
+         var now = DateTimeOffset.UtcNow;
+ 
+         return new FailedExecutableTest(exception)
+diff --git a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet10_0.verified.txt b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet10_0.verified.txt
+index 0c948f5566..352b4e7fa1 100644
+--- a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet10_0.verified.txt
++++ b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet10_0.verified.txt
+@@ -430,7 +430,7 @@ namespace
+         public .GlobalContext GlobalContext { get; }
+         public .TestDiscoveryContext TestDiscoveryContext { get; }
+         public .TestSessionContext TestSessionContext { get; }
+-        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
++        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
+         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+         [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
+         public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
+@@ -2903,7 +2903,7 @@ namespace .Services
+         .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+         .TestDiscoveryContext TestDiscoveryContext { get; }
+         .TestSessionContext TestSessionContext { get; }
+-        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken);
++        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
+         .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
+         .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
+     }
+diff --git a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet8_0.verified.txt b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet8_0.verified.txt
+index c63d5e723c..20af460db7 100644
+--- a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet8_0.verified.txt
++++ b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet8_0.verified.txt
+@@ -430,7 +430,7 @@ namespace
+         public .GlobalContext GlobalContext { get; }
+         public .TestDiscoveryContext TestDiscoveryContext { get; }
+         public .TestSessionContext TestSessionContext { get; }
+-        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
++        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
+         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+         [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
+         public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
+@@ -2903,7 +2903,7 @@ namespace .Services
+         .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+         .TestDiscoveryContext TestDiscoveryContext { get; }
+         .TestSessionContext TestSessionContext { get; }
+-        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken);
++        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
+         .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
+         .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
+     }
+diff --git a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet9_0.verified.txt b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet9_0.verified.txt
+index 61ab10d179..fd940f3ac0 100644
+--- a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet9_0.verified.txt
++++ b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.DotNet9_0.verified.txt
+@@ -430,7 +430,7 @@ namespace
+         public .GlobalContext GlobalContext { get; }
+         public .TestDiscoveryContext TestDiscoveryContext { get; }
+         public .TestSessionContext TestSessionContext { get; }
+-        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
++        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
+         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+         [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
+         public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
+@@ -2903,7 +2903,7 @@ namespace .Services
+         .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+         .TestDiscoveryContext TestDiscoveryContext { get; }
+         .TestSessionContext TestSessionContext { get; }
+-        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken);
++        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
+         .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
+         .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
+     }
+diff --git a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.Net4_7.verified.txt b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.Net4_7.verified.txt
+index 0da677c22b..eedb7e681c 100644
+--- a/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.Net4_7.verified.txt
++++ b/TUnit.PublicAPI/Tests.Core_Library_Has_No_API_Changes.Net4_7.verified.txt
+@@ -410,7 +410,7 @@ namespace
+         public .GlobalContext GlobalContext { get; }
+         public .TestDiscoveryContext TestDiscoveryContext { get; }
+         public .TestSessionContext TestSessionContext { get; }
+-        public .TestContext CreateTestContext(string testName,  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
++        public .TestContext CreateTestContext(string testName,  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
+         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
+         public .ClassHookContext GetOrCreateClassContext( classType) { }
+     }
+@@ -2824,7 +2824,7 @@ namespace .Services
+         .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
+         .TestDiscoveryContext TestDiscoveryContext { get; }
+         .TestSessionContext TestSessionContext { get; }
+-        .TestContext CreateTestContext(string testName,  classType, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken);
++        .TestContext CreateTestContext(string testName,  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
+         .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
+         .ClassHookContext GetOrCreateClassContext( classType);
+     }
+diff --git a/TUnit.UnitTests/ContextProviderTests.cs b/TUnit.UnitTests/ContextProviderTests.cs
+new file mode 100644
+index 0000000000..600d92d28a
+--- /dev/null
++++ b/TUnit.UnitTests/ContextProviderTests.cs
+@@ -0,0 +1,77 @@
++namespace TUnit.UnitTests;
++
++/// <summary>
++/// Regression tests for https://github.com/thomhurst/TUnit/issues/6180 —
++/// a partially-built <see cref="TestContext"/> (with <c>TestDetails == null</c>) must never
++/// be observable via <see cref="ClassHookContext.Tests"/>, otherwise AfterEvery(Class) hooks
++/// running concurrently with dynamic test registration NRE on <c>test.Metadata.TestDetails</c>.
++/// </summary>
++public class ContextProviderTests
++{
++    [Test]
++    public async Task CreateTestContext_PublishesContextWithTestDetailsAlreadyAssigned()
++    {
++        var provider = new ContextProvider(new EmptyServiceProvider(), Guid.NewGuid().ToString(), testFilter: null);
++
++        var classMetadata = new ClassMetadata
++        {
++            Type = typeof(DummyTestClass),
++            TypeInfo = new ConcreteType(typeof(DummyTestClass)),
++            Name = nameof(DummyTestClass),
++            Namespace = typeof(DummyTestClass).Namespace ?? string.Empty,
++            Assembly = new AssemblyMetadata
++            {
++                Name = typeof(DummyTestClass).Assembly.GetName().Name ?? string.Empty
++            },
++            Parent = null,
++            Parameters = [],
++            Properties = []
++        };
++
++        var methodMetadata = MethodMetadataFactory.Create(
++            nameof(DummyTestClass.SomeTest),
++            typeof(DummyTestClass),
++            typeof(Task),
++            classMetadata);
++
++        var testDetails = new TestDetails([])
++        {
++            TestId = "Test:0",
++            TestName = nameof(DummyTestClass.SomeTest),
++            ClassType = typeof(DummyTestClass),
++            MethodName = nameof(DummyTestClass.SomeTest),
++            ClassInstance = PlaceholderInstance.Instance,
++            TestMethodArguments = [],
++            TestClassArguments = [],
++            MethodMetadata = methodMetadata,
++            ReturnType = typeof(Task),
++            AttributesByType = new Dictionary<Type, IReadOnlyList<Attribute>>()
++        };
++
++        var context = provider.CreateTestContext(
++            nameof(DummyTestClass.SomeTest),
++            typeof(DummyTestClass),
++            new TestBuilderContext { TestMetadata = methodMetadata },
++            testDetails,
++            CancellationToken.None);
++
++        var classContext = provider.GetOrCreateClassContext(typeof(DummyTestClass));
++        var publishedContext = classContext.Tests.Single();
++
++        // The contract callers (and AfterEvery(Class) hooks) rely on: by the time a context is
++        // visible in ClassHookContext.Tests, its TestDetails is set — no post-hoc assignment.
++        await Assert.That(publishedContext).IsSameReferenceAs(context);
++        await Assert.That(publishedContext.TestDetails).IsNotNull();
++        await Assert.That(publishedContext.Metadata.TestDetails).IsSameReferenceAs(testDetails);
++    }
++
++    private sealed class DummyTestClass
++    {
++        public Task SomeTest() => Task.CompletedTask;
++    }
++
++    private sealed class EmptyServiceProvider : IServiceProvider
++    {
++        public object? GetService(Type serviceType) => null;
++    }
++}
+diff --git a/TUnit.UnitTests/SessionActivityLifecycleTests.cs b/TUnit.UnitTests/SessionActivityLifecycleTests.cs
+index 517a41b18f..c0372ec49a 100644
+--- a/TUnit.UnitTests/SessionActivityLifecycleTests.cs
++++ b/TUnit.UnitTests/SessionActivityLifecycleTests.cs
+@@ -315,6 +315,7 @@ public TestContext CreateTestContext(
+                                         DynamicallyAccessedMemberTypes.PublicMethods)]
+             Type classType,
+             TestBuilderContext testBuilderContext,
++            TestDetails testDetails,
+             CancellationToken cancellationToken) =>
+             throw new NotSupportedException();
+     }

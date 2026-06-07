@@ -265,7 +265,6 @@ internal sealed class TestBuilderPipeline
             var testBuilderContext = CreateTestBuilderContext(metadata);
 
             var context = _contextProvider.CreateTestContext(
-                metadata.TestName,
                 metadata.TestClassType,
                 testBuilderContext,
                 testDetails,
@@ -390,7 +389,6 @@ internal sealed class TestBuilderPipeline
                     };
 
                     var context = _contextProvider.CreateTestContext(
-                        resolvedMetadata.TestName,
                         resolvedMetadata.TestClassType,
                         CreateTestBuilderContext(resolvedMetadata),
                         testDetails,
@@ -469,7 +467,6 @@ internal sealed class TestBuilderPipeline
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             CreateTestBuilderContext(metadata),
             testDetails,
@@ -523,7 +520,6 @@ internal sealed class TestBuilderPipeline
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             CreateTestBuilderContext(metadata),
             testDetails,

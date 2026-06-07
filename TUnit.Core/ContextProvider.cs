@@ -81,7 +81,6 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
     /// Creates a test context with proper parent hierarchy
     /// </summary>
     public TestContext CreateTestContext(
-        string testName,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,
@@ -90,7 +89,7 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
     {
         var classContext = GetOrCreateClassContext(classType);
 
-        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken)
+        var testContext = new TestContext(testDetails.TestName, serviceProvider, classContext, testBuilderContext, cancellationToken)
         {
             // Must be assigned before AddTest publishes the context via ClassHookContext.Tests —
             // AfterEvery(Class) hooks can iterate Tests while sibling dynamic tests are still being built.

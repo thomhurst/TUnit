@@ -49,7 +49,6 @@ public class ContextProviderTests
         };
 
         var context = provider.CreateTestContext(
-            nameof(DummyTestClass.SomeTest),
             typeof(DummyTestClass),
             new TestBuilderContext { TestMetadata = methodMetadata },
             testDetails,

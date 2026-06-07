@@ -1078,7 +1078,6 @@ internal sealed class TestBuilder : ITestBuilder
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             testBuilderContext,
             testDetails,
@@ -1173,7 +1172,6 @@ internal sealed class TestBuilder : ITestBuilder
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails)
     {
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             new TestBuilderContext
             {

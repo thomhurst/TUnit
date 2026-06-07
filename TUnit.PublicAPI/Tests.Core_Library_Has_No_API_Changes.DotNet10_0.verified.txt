@@ -430,7 +430,7 @@ namespace
         public .GlobalContext GlobalContext { get; }
         public .TestDiscoveryContext TestDiscoveryContext { get; }
         public .TestSessionContext TestSessionContext { get; }
-        public .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
+        public .TestContext CreateTestContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
         public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
         [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
         public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
@@ -2903,7 +2903,7 @@ namespace .Services
         .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
         .TestDiscoveryContext TestDiscoveryContext { get; }
         .TestSessionContext TestSessionContext { get; }
-        .TestContext CreateTestContext(string testName, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
+        .TestContext CreateTestContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
         .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
         .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
     }
