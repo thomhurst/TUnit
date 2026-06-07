@@ -26,14 +26,14 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
     /// </summary>
     public bool IsNonSpanRefStruct => IsRefStruct && SpanElementType is null;
 
-    /// <summary>True when the parameter is declared with the <c>params</c> modifier.</summary>
-    public bool IsParams { get; init; }
-
     /// <summary>
     /// For <c>params T[]</c> parameters, the fully qualified element type with nullability (e.g.
     /// "global::System.Object"). Null for non-params parameters and for params collections that
-    /// are not single-dimensional arrays. Used to emit the params-expanded setup overload that
-    /// accepts per-element <c>Arg&lt;T&gt;</c> matchers.
+    /// are not single-dimensional arrays. Non-null implies the parameter is a params array — there
+    /// is no separate flag. Used to emit the params-expanded setup overload that accepts
+    /// per-element <c>Arg&lt;T&gt;</c> matchers. Only populated for methods: indexers cannot
+    /// declare <c>params</c> parameters that surface in setups, and delegate parameters are only
+    /// used for event raising.
     /// </summary>
     public string? ParamsElementType { get; init; }
 
@@ -47,7 +47,6 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
             && IsValueType == other.IsValueType
             && IsRefStruct == other.IsRefStruct
             && SpanElementType == other.SpanElementType
-            && IsParams == other.IsParams
             && ParamsElementType == other.ParamsElementType;
     }
 
@@ -62,7 +61,6 @@ internal sealed record MockParameterModel : IEquatable<MockParameterModel>
             hash = hash * 31 + IsValueType.GetHashCode();
             hash = hash * 31 + IsRefStruct.GetHashCode();
             hash = hash * 31 + (SpanElementType?.GetHashCode() ?? 0);
-            hash = hash * 31 + IsParams.GetHashCode();
             hash = hash * 31 + (ParamsElementType?.GetHashCode() ?? 0);
             return hash;
         }

@@ -32,22 +32,12 @@ public readonly struct Arg<T>
 
     /// <summary>Implicitly converts a raw value to an <see cref="Arg{T}"/> using exact equality matching.</summary>
     /// <param name="value">The value to match against.</param>
-    public static implicit operator Arg<T>(T value)
-    {
-        // C# permits Arg<X> -> Arg<T> via boxing + this operator when X boxes to T (e.g. Is(1)
-        // passed to an Arg<object> slot). That would create an exact matcher on the boxed Arg
-        // struct itself, which can never match — fail fast with guidance instead.
-        if (value is not null && value.GetType() is { IsConstructedGenericType: true } valueType
-            && valueType.GetGenericTypeDefinition() == typeof(Arg<>))
-        {
-            throw new ArgumentException(
-                $"An Arg<{valueType.GetGenericArguments()[0].Name}> matcher was passed where Arg<{typeof(T).Name}> was expected, " +
-                $"so it would be matched as a literal value and never succeed. " +
-                $"Use Arg.Is<{typeof(T).Name}>(value), Arg.Any<{typeof(T).Name}>(), or pass the raw value instead.");
-        }
-
-        return new(new ExactMatcher<T>(value));
-    }
+    /// <exception cref="ArgumentException">
+    /// When <paramref name="value"/> is itself a boxed <see cref="Arg{T}"/> — e.g. <c>Is(1)</c>
+    /// converted into an <c>Arg&lt;object&gt;</c> slot, which could never match. Thrown by
+    /// <see cref="ExactMatcher{T}"/>.
+    /// </exception>
+    public static implicit operator Arg<T>(T value) => new(new ExactMatcher<T>(value));
 
     /// <summary>Implicitly converts a predicate to an <see cref="Arg{T}"/> using predicate matching.</summary>
     /// <param name="predicate">The predicate that determines whether an argument matches.</param>

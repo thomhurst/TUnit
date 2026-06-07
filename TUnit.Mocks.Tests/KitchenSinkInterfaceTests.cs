@@ -487,10 +487,14 @@ public class KitchenSinkInterfaceTests
         var mock = IKitchenSink.Mock();
 
         // Is(1) is Arg<int>; converting it to the Arg<object> element slot would silently
-        // never match — the implicit conversion guard must throw instead.
+        // never match — the guard must throw instead.
         var ex = Assert.Throws<ArgumentException>(() => mock.Render(Is(1)));
-
         await Assert.That(ex.Message).Contains("Arg<Int32>");
+
+        // Same misuse via the explicit Is<object>(value) path, which bypasses the implicit
+        // operator and constructs the ExactMatcher directly — the guard lives there too.
+        var ex2 = Assert.Throws<ArgumentException>(() => mock.Render(Is<object>(Is(1))));
+        await Assert.That(ex2.Message).Contains("Arg<Int32>");
     }
 
     [Test]

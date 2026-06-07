@@ -635,7 +635,6 @@ internal static class MemberDiscovery
                     IsValueType = p.Type.IsValueType,
                     IsRefStruct = p.Type.IsRefLikeType,
                     SpanElementType = GetSpanElementType(p.Type),
-                    IsParams = p.IsParams,
                     // Only single-dimensional arrays get the params-expanded setup overload;
                     // params collections (C# 13) and params spans degrade to whole-value matching.
                     ParamsElementType = p.IsParams && p.Type is IArrayTypeSymbol paramsArray

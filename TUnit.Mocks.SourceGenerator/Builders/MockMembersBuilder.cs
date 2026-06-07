@@ -1467,11 +1467,23 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static string GetArgParameterList(MockMemberModel method, bool includeRefStructArgs)
+    /// <param name="lastParamOverride">
+    /// When non-null, emits the method's last parameter with this renderer instead of the default
+    /// <c>Arg&lt;T&gt;</c> form — used for the params-expanded (<c>params Arg&lt;TElem&gt;[]</c>)
+    /// and <c>AnyArg</c>-slotted overloads of <c>params T[]</c> methods.
+    /// </param>
+    private static string GetArgParameterList(MockMemberModel method, bool includeRefStructArgs,
+        Func<MockParameterModel, string>? lastParamOverride = null)
     {
         var parts = new List<string>();
-        foreach (var p in method.Parameters)
+        for (var i = 0; i < method.Parameters.Length; i++)
         {
+            var p = method.Parameters[i];
+            if (lastParamOverride is not null && i == method.Parameters.Length - 1)
+            {
+                parts.Add(lastParamOverride(p));
+                continue;
+            }
             if (p.Direction == ParameterDirection.Out)
             {
                 // Normally out params are omitted from the extension signature so callers
@@ -1512,14 +1524,15 @@ internal static class MockMembersBuilder
         string safeName, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
     {
         var last = method.Parameters.Length > 0 ? method.Parameters[method.Parameters.Length - 1] : null;
-        if (last is null || !last.IsParams || last.ParamsElementType is null || last.Direction != ParameterDirection.In)
+        if (last is null || last.ParamsElementType is null || last.Direction != ParameterDirection.In)
         {
             return;
         }
 
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
 
-        var paramList = GetParamsExpandedParameterList(method, includeRefStructArgs);
+        var paramList = GetArgParameterList(method, includeRefStructArgs,
+            p => $"params global::TUnit.Mocks.Arguments.Arg<{p.ParamsElementType}>[] {p.Name}");
         var typeParams = captureModelTypeParameters
             ? MockImplBuilder.GetTypeParameterList(method)
             : GetCombinedTypeParameterList(model, method);
@@ -1544,21 +1557,14 @@ internal static class MockMembersBuilder
 
             EmitOutParamDefaults(writer, method);
 
-            var matchableParams = includeRefStructArgs
-                ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
-                : method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
-
             writer.AppendLine($"var __paramsElementMatchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[{last.Name}.Length];");
             using (writer.Block($"for (int __i = 0; __i < {last.Name}.Length; __i++)"))
             {
                 writer.AppendLine($"__paramsElementMatchers[__i] = {last.Name}[__i].Matcher;");
             }
 
-            var matcherArgs = matchableParams
-                .Select(p => p == last
-                    ? "new global::TUnit.Mocks.Matchers.ParamsArrayMatcher(__paramsElementMatchers)"
-                    : $"{p.Name}.Matcher");
-            writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
+            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
+                "new global::TUnit.Mocks.Matchers.ParamsArrayMatcher(__paramsElementMatchers)");
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
@@ -1577,7 +1583,9 @@ internal static class MockMembersBuilder
     private static void EmitParamsAnyArgOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
         string safeName, MockParameterModel last, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
     {
-        var paramList = GetParamsAnyArgParameterList(method, includeRefStructArgs);
+        static string AnyArgLastParam(MockParameterModel p) => $"global::TUnit.Mocks.Arguments.AnyArg {p.Name}";
+
+        var paramList = GetArgParameterList(method, includeRefStructArgs, AnyArgLastParam);
 
         // Two same-name params methods that differ only in element type (e.g. M(params int[]) and
         // M(params string[])) would both produce this AnyArg-slotted signature — skip on collision.
@@ -1587,8 +1595,8 @@ internal static class MockMembersBuilder
             if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
             if (m.TypeParameters.Length != method.TypeParameters.Length) continue;
             var mLast = m.Parameters.Length > 0 ? m.Parameters[m.Parameters.Length - 1] : null;
-            if (mLast is null || !mLast.IsParams || mLast.ParamsElementType is null || mLast.Direction != ParameterDirection.In) continue;
-            if (GetParamsAnyArgParameterList(m, includeRefStructArgs) == paramList) return;
+            if (mLast is null || mLast.ParamsElementType is null || mLast.Direction != ParameterDirection.In) continue;
+            if (GetArgParameterList(m, includeRefStructArgs, AnyArgLastParam) == paramList) return;
         }
 
         var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
@@ -1617,95 +1625,30 @@ internal static class MockMembersBuilder
 
             EmitOutParamDefaults(writer, method);
 
-            var matchableParams = includeRefStructArgs
-                ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
-                : method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
-
             // AnyMatcher<T[]>.Instance: whole-array Any, identical to the Arg<T[]> overload with Any().
-            var matcherArgs = matchableParams
-                .Select(p => p == last
-                    ? $"global::TUnit.Mocks.Matchers.AnyMatcher<{p.FullyQualifiedType}>.Instance"
-                    : $"{p.Name}.Matcher");
-            writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
+            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
+                $"global::TUnit.Mocks.Matchers.AnyMatcher<{last.FullyQualifiedType}>.Instance");
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
     }
 
     /// <summary>
-    /// Same shape as <see cref="GetArgParameterList"/> but the trailing <c>params T[]</c> parameter
-    /// is emitted as the untyped <c>AnyArg</c> sentinel.
+    /// Emits the <c>matchers</c> array for a params-method overload: leading matchable parameters
+    /// contribute <c>{name}.Matcher</c>, and the trailing params slot is filled with
+    /// <paramref name="paramsSlotExpression"/>. The params parameter is always <c>In</c> and never
+    /// a ref struct, so it is always the last matchable parameter.
     /// </summary>
-    private static string GetParamsAnyArgParameterList(MockMemberModel method, bool includeRefStructArgs)
+    private static void EmitMatchersArrayWithParamsSlot(CodeWriter writer, MockMemberModel method,
+        bool includeRefStructArgs, string paramsSlotExpression)
     {
-        var parts = new List<string>();
-        for (var i = 0; i < method.Parameters.Length; i++)
-        {
-            var p = method.Parameters[i];
-            if (i == method.Parameters.Length - 1)
-            {
-                parts.Add($"global::TUnit.Mocks.Arguments.AnyArg {p.Name}");
-                continue;
-            }
-            if (p.Direction == ParameterDirection.Out)
-            {
-                if (method.KeepOutParamsInExtensionSignature)
-                {
-                    parts.Add($"out {p.FullyQualifiedType} {p.Name}");
-                }
-                continue;
-            }
-            if (p.IsRefStruct)
-            {
-                if (includeRefStructArgs)
-                {
-                    parts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
-                }
-            }
-            else
-            {
-                parts.Add($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}");
-            }
-        }
-        return string.Join(", ", parts);
-    }
+        var matchableParams = includeRefStructArgs
+            ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
+            : method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
 
-    /// <summary>
-    /// Same shape as <see cref="GetArgParameterList"/> but the trailing <c>params T[]</c> parameter
-    /// is emitted as <c>params Arg&lt;T&gt;[]</c> instead of <c>Arg&lt;T[]&gt;</c>.
-    /// </summary>
-    private static string GetParamsExpandedParameterList(MockMemberModel method, bool includeRefStructArgs)
-    {
-        var parts = new List<string>();
-        for (var i = 0; i < method.Parameters.Length; i++)
-        {
-            var p = method.Parameters[i];
-            if (i == method.Parameters.Length - 1)
-            {
-                parts.Add($"params global::TUnit.Mocks.Arguments.Arg<{p.ParamsElementType}>[] {p.Name}");
-                continue;
-            }
-            if (p.Direction == ParameterDirection.Out)
-            {
-                if (method.KeepOutParamsInExtensionSignature)
-                {
-                    parts.Add($"out {p.FullyQualifiedType} {p.Name}");
-                }
-                continue;
-            }
-            if (p.IsRefStruct)
-            {
-                if (includeRefStructArgs)
-                {
-                    parts.Add($"global::TUnit.Mocks.Arguments.RefStructArg<{p.FullyQualifiedType}> {p.Name}");
-                }
-            }
-            else
-            {
-                parts.Add($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {p.Name}");
-            }
-        }
-        return string.Join(", ", parts);
+        var matcherArgs = matchableParams
+            .Select((p, i) => i == matchableParams.Count - 1 ? paramsSlotExpression : $"{p.Name}.Matcher");
+        writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
     }
 
     private static string BuildExtensionMethodParameterList(MockTypeModel model, string paramList)

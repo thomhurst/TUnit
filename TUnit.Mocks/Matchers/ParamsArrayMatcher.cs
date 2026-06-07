@@ -22,8 +22,28 @@ public sealed class ParamsArrayMatcher : IArgumentMatcher, ICapturingMatcher
 
     public bool Matches(object? value)
     {
-        // The packed argument is the concrete array type (e.g. int[] for params int[]),
-        // not object?[] — match via System.Array so value-element params work.
+        // Reference-element params (object[], string[], ...) are object?[]-compatible via array
+        // covariance — index directly, no per-element GetValue call.
+        if (value is object?[] referenceArray)
+        {
+            if (referenceArray.Length != _elementMatchers.Length)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < _elementMatchers.Length; i++)
+            {
+                if (!_elementMatchers[i].Matches(referenceArray[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Value-element params pack as the concrete array type (e.g. int[] for params int[]),
+        // which is not object?[] — match via System.Array.
         if (value is not Array array || array.Length != _elementMatchers.Length)
         {
             return false;
