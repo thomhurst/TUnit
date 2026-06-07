@@ -1,4 +1,5 @@
 using TUnit.Assertions.Adapters;
+using TUnit.Assertions.Collections;
 using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
@@ -31,6 +32,22 @@ public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : 
     {
         return new MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(
             Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
+    }
+
+    /// <summary>
+    /// Returns an And continuation that, in addition to the usual dictionary chaining, exposes
+    /// <see cref="MutableDictionaryContainsKeyAndContinuation{TDictionary,TKey,TValue}.Value"/> to
+    /// drill into the value stored at the asserted key.
+    /// Example: <c>await Assert.That(dict).ContainsKey("key").And.Value.IsEqualTo(123);</c>
+    /// </summary>
+    public new MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> And
+    {
+        get
+        {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
+            return new MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>(
+                Context, InternalWrappedExecution ?? this, _expectedKey, _comparer);
+        }
     }
 
     protected override string GetExpectation() => $"to contain key {_expectedKey}";
@@ -396,4 +413,66 @@ public class MutableDictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Mut
 
         return Task.FromResult(AssertionResult.Failed("no value satisfied the predicate"));
     }
+}
+
+/// <summary>
+/// Asserts that a mutable dictionary is empty while preserving dictionary-specific chaining.
+/// </summary>
+public class MutableDictionaryIsEmptyAssertion<TDictionary, TKey, TValue> : MutableDictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    public MutableDictionaryIsEmptyAssertion(AssertionContext<TDictionary> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
+
+        var adapter = new EnumerableAdapter<KeyValuePair<TKey, TValue>>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckIsEmpty(adapter));
+    }
+
+    protected override string GetExpectation() => "to be empty";
+}
+
+/// <summary>
+/// Asserts that a mutable dictionary is not empty while preserving dictionary-specific chaining.
+/// </summary>
+public class MutableDictionaryIsNotEmptyAssertion<TDictionary, TKey, TValue> : MutableDictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    public MutableDictionaryIsNotEmptyAssertion(AssertionContext<TDictionary> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
+
+        var adapter = new EnumerableAdapter<KeyValuePair<TKey, TValue>>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckIsNotEmpty(adapter));
+    }
+
+    protected override string GetExpectation() => "to not be empty";
 }

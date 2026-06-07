@@ -39,6 +39,22 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
             Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
     }
 
+    /// <summary>
+    /// Returns an And continuation that, in addition to the usual dictionary chaining, exposes
+    /// <see cref="DictionaryContainsKeyAndContinuation{TDictionary,TKey,TValue}.Value"/> to drill
+    /// into the value stored at the asserted key.
+    /// Example: <c>await Assert.That(dict).ContainsKey("key").And.Value.IsEqualTo(123);</c>
+    /// </summary>
+    public new DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> And
+    {
+        get
+        {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
+            return new DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>(
+                Context, InternalWrappedExecution ?? this, _expectedKey, _comparer);
+        }
+    }
+
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
     {
         var value = metadata.Value;
@@ -390,4 +406,66 @@ public class DictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Sources.Di
     }
 
     protected override string GetExpectation() => "any value to satisfy the predicate";
+}
+
+/// <summary>
+/// Asserts that a dictionary is empty while preserving dictionary-specific chaining.
+/// </summary>
+public class DictionaryIsEmptyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    public DictionaryIsEmptyAssertion(AssertionContext<TDictionary> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
+
+        var adapter = new EnumerableAdapter<KeyValuePair<TKey, TValue>>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckIsEmpty(adapter));
+    }
+
+    protected override string GetExpectation() => "to be empty";
+}
+
+/// <summary>
+/// Asserts that a dictionary is not empty while preserving dictionary-specific chaining.
+/// </summary>
+public class DictionaryIsNotEmptyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    where TKey : notnull
+{
+    public DictionaryIsNotEmptyAssertion(AssertionContext<TDictionary> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
+    {
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {metadata.Exception.GetType().Name}", metadata.Exception));
+        }
+
+        if (metadata.Value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
+
+        var adapter = new EnumerableAdapter<KeyValuePair<TKey, TValue>>(metadata.Value);
+        return Task.FromResult(CollectionChecks.CheckIsNotEmpty(adapter));
+    }
+
+    protected override string GetExpectation() => "to not be empty";
 }

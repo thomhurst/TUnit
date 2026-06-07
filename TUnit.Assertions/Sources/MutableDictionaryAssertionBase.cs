@@ -57,6 +57,24 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     }
 
     /// <summary>
+    /// Asserts that the dictionary is empty while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new MutableDictionaryIsEmptyAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not empty while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new MutableDictionaryIsNotEmptyAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the dictionary contains the specified key.
     /// Example: await Assert.That(dictionary).ContainsKey("key1");
     /// </summary>

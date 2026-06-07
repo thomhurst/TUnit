@@ -59,6 +59,24 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     }
 
     /// <summary>
+    /// Asserts that the dictionary is empty while preserving dictionary-specific chaining.
+    /// </summary>
+    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new DictionaryIsEmptyAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not empty while preserving dictionary-specific chaining.
+    /// </summary>
+    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new DictionaryIsNotEmptyAssertion<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the dictionary contains the specified key.
     /// This instance method enables calling ContainsKey with proper type inference.
     /// Example: await Assert.That(dictionary).ContainsKey("key1");
