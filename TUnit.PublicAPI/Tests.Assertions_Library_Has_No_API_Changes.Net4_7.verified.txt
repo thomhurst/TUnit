@@ -1219,10 +1219,10 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
+    public class IsAssignableToAssertion<TTarget, TValue> : .<TTarget>
     {
         public IsAssignableToAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override .<.> CheckAsync(.<TTarget> _) { }
         protected override string GetExpectation() { }
     }
     [.("IsDefault")]
