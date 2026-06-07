@@ -781,15 +781,18 @@ internal static class MockMembersBuilder
             writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: false, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: false, receiverIsThis: false);
             writer.AppendLine("#else");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
             writer.AppendLine("#endif");
         }
         else
         {
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: false, receiverIsThis: false);
         }
 
         EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: false, receiverIsThis: false);
@@ -823,15 +826,18 @@ internal static class MockMembersBuilder
             writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             writer.AppendLine("#else");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             writer.AppendLine("#endif");
         }
         else
         {
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
         }
 
         EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: false);
@@ -844,15 +850,18 @@ internal static class MockMembersBuilder
             writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: true);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: true);
             writer.AppendLine("#else");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
             writer.AppendLine("#endif");
         }
         else
         {
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
+            EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: true);
         }
 
         EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: true);
@@ -1458,11 +1467,23 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static string GetArgParameterList(MockMemberModel method, bool includeRefStructArgs)
+    /// <param name="lastParamOverride">
+    /// When non-null, emits the method's last parameter with this renderer instead of the default
+    /// <c>Arg&lt;T&gt;</c> form — used for the params-expanded (<c>params Arg&lt;TElem&gt;[]</c>)
+    /// and <c>AnyArg</c>-slotted overloads of <c>params T[]</c> methods.
+    /// </param>
+    private static string GetArgParameterList(MockMemberModel method, bool includeRefStructArgs,
+        Func<MockParameterModel, string>? lastParamOverride = null)
     {
         var parts = new List<string>();
-        foreach (var p in method.Parameters)
+        for (var i = 0; i < method.Parameters.Length; i++)
         {
+            var p = method.Parameters[i];
+            if (lastParamOverride is not null && i == method.Parameters.Length - 1)
+            {
+                parts.Add(lastParamOverride(p));
+                continue;
+            }
             if (p.Direction == ParameterDirection.Out)
             {
                 // Normally out params are omitted from the extension signature so callers
@@ -1489,6 +1510,145 @@ internal static class MockMembersBuilder
             }
         }
         return string.Join(", ", parts);
+    }
+
+    /// <summary>
+    /// Emits a params-expanded setup overload for methods whose last parameter is <c>params T[]</c>:
+    /// the trailing <c>Arg&lt;T[]&gt;</c> slot becomes <c>params Arg&lt;T&gt;[]</c> so callers can match
+    /// per element (<c>mock.Sum(Is(1), Is(2))</c>). The element matchers are wrapped into a single
+    /// <c>ParamsArrayMatcher</c> so matcher arity stays equal to the declared parameter count.
+    /// The whole-array overload remains and wins normal-form overload resolution for
+    /// <c>Sum(Any())</c> / <c>Sum(array)</c>, preserving existing behavior.
+    /// </summary>
+    private static void EmitParamsExpandedOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
+    {
+        var last = method.Parameters.Length > 0 ? method.Parameters[method.Parameters.Length - 1] : null;
+        if (last is null || last.ParamsElementType is null || last.Direction != ParameterDirection.In)
+        {
+            return;
+        }
+
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
+
+        var paramList = GetArgParameterList(method, includeRefStructArgs,
+            p => $"params global::TUnit.Mocks.Arguments.Arg<{p.ParamsElementType}>[] {p.Name}");
+        var typeParams = captureModelTypeParameters
+            ? MockImplBuilder.GetTypeParameterList(method)
+            : GetCombinedTypeParameterList(model, method);
+        var constraints = captureModelTypeParameters
+            ? MockImplBuilder.GetConstraintClauses(method)
+            : GetCombinedConstraintClauses(model, method);
+
+        var safeMemberName = GetSafeMemberName(method.Name, model);
+        var fullParamList = captureModelTypeParameters
+            ? paramList
+            : BuildExtensionMethodParameterList(model, paramList);
+
+        var methodDeclarationPrefix = captureModelTypeParameters ? "public" : "public static";
+
+        writer.AppendLine($"/// <summary>Configure the mock setup for <c>{method.Name}</c> with per-element matchers for its <c>params</c> parameter.</summary>");
+        using (writer.Block($"{methodDeclarationPrefix} {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        {
+            if (receiverIsThis)
+            {
+                writer.AppendLine("var mock = this;");
+            }
+
+            EmitOutParamDefaults(writer, method);
+
+            writer.AppendLine($"var __paramsElementMatchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[{last.Name}.Length];");
+            using (writer.Block($"for (int __i = 0; __i < {last.Name}.Length; __i++)"))
+            {
+                writer.AppendLine($"__paramsElementMatchers[__i] = {last.Name}[__i].Matcher;");
+            }
+
+            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
+                "new global::TUnit.Mocks.Matchers.ParamsArrayMatcher(__paramsElementMatchers)");
+
+            EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
+        }
+
+        EmitParamsAnyArgOverload(writer, method, model, safeName, last, includeRefStructArgs, captureModelTypeParameters, receiverIsThis);
+    }
+
+    /// <summary>
+    /// Emits an overload whose <c>params</c> slot is the untyped <c>AnyArg</c> sentinel, matching the
+    /// whole packed array with <c>AnyMatcher&lt;T[]&gt;</c>. Without it, <c>Sum(Any())</c> would be
+    /// ambiguous between the whole-array <c>Arg&lt;T[]&gt;</c> overload and the params-expanded
+    /// <c>params Arg&lt;T&gt;[]</c> overload (AnyArg converts to both, and the normal-vs-expanded
+    /// tie-break only applies to identical parameter lists). The identity conversion to <c>AnyArg</c>
+    /// beats both user-defined conversions, preserving the pre-existing whole-array semantics.
+    /// </summary>
+    private static void EmitParamsAnyArgOverload(CodeWriter writer, MockMemberModel method, MockTypeModel model,
+        string safeName, MockParameterModel last, bool includeRefStructArgs, bool captureModelTypeParameters, bool receiverIsThis)
+    {
+        static string AnyArgLastParam(MockParameterModel p) => $"global::TUnit.Mocks.Arguments.AnyArg {p.Name}";
+
+        var paramList = GetArgParameterList(method, includeRefStructArgs, AnyArgLastParam);
+
+        // Two same-name params methods that differ only in element type (e.g. M(params int[]) and
+        // M(params string[])) would both produce this AnyArg-slotted signature — skip on collision.
+        foreach (var m in model.Methods)
+        {
+            if (m.MemberId == method.MemberId || m.Name != method.Name) continue;
+            if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
+            if (m.TypeParameters.Length != method.TypeParameters.Length) continue;
+            var mLast = m.Parameters.Length > 0 ? m.Parameters[m.Parameters.Length - 1] : null;
+            if (mLast is null || mLast.ParamsElementType is null || mLast.Direction != ParameterDirection.In) continue;
+            if (GetArgParameterList(m, includeRefStructArgs, AnyArgLastParam) == paramList) return;
+        }
+
+        var (useTypedWrapper, returnType, setupReturnType) = GetReturnTypeInfo(method, model, safeName);
+
+        var typeParams = captureModelTypeParameters
+            ? MockImplBuilder.GetTypeParameterList(method)
+            : GetCombinedTypeParameterList(model, method);
+        var constraints = captureModelTypeParameters
+            ? MockImplBuilder.GetConstraintClauses(method)
+            : GetCombinedConstraintClauses(model, method);
+
+        var safeMemberName = GetSafeMemberName(method.Name, model);
+        var fullParamList = captureModelTypeParameters
+            ? paramList
+            : BuildExtensionMethodParameterList(model, paramList);
+
+        var methodDeclarationPrefix = captureModelTypeParameters ? "public" : "public static";
+
+        writer.AppendLine($"/// <summary>Configure the mock setup for <c>{method.Name}</c> with its <c>params</c> parameter matched as a whole array by <c>Any()</c>.</summary>");
+        using (writer.Block($"{methodDeclarationPrefix} {returnType} {safeMemberName}{typeParams}({fullParamList}){constraints}"))
+        {
+            if (receiverIsThis)
+            {
+                writer.AppendLine("var mock = this;");
+            }
+
+            EmitOutParamDefaults(writer, method);
+
+            // AnyMatcher<T[]>.Instance: whole-array Any, identical to the Arg<T[]> overload with Any().
+            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
+                $"global::TUnit.Mocks.Matchers.AnyMatcher<{last.FullyQualifiedType}>.Instance");
+
+            EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
+        }
+    }
+
+    /// <summary>
+    /// Emits the <c>matchers</c> array for a params-method overload: leading matchable parameters
+    /// contribute <c>{name}.Matcher</c>, and the trailing params slot is filled with
+    /// <paramref name="paramsSlotExpression"/>. The params parameter is always <c>In</c> and never
+    /// a ref struct, so it is always the last matchable parameter.
+    /// </summary>
+    private static void EmitMatchersArrayWithParamsSlot(CodeWriter writer, MockMemberModel method,
+        bool includeRefStructArgs, string paramsSlotExpression)
+    {
+        var matchableParams = includeRefStructArgs
+            ? method.Parameters.Where(p => p.Direction != ParameterDirection.Out).ToList()
+            : method.Parameters.Where(p => p.Direction != ParameterDirection.Out && !p.IsRefStruct).ToList();
+
+        var matcherArgs = matchableParams
+            .Select((p, i) => i == matchableParams.Count - 1 ? paramsSlotExpression : $"{p.Name}.Matcher");
+        writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
     }
 
     private static string BuildExtensionMethodParameterList(MockTypeModel model, string paramList)

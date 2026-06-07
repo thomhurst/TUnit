@@ -32,6 +32,11 @@ public readonly struct Arg<T>
 
     /// <summary>Implicitly converts a raw value to an <see cref="Arg{T}"/> using exact equality matching.</summary>
     /// <param name="value">The value to match against.</param>
+    /// <exception cref="ArgumentException">
+    /// When <paramref name="value"/> is itself a boxed <see cref="Arg{T}"/> — e.g. <c>Is(1)</c>
+    /// converted into an <c>Arg&lt;object&gt;</c> slot, which could never match. Thrown by
+    /// <see cref="ExactMatcher{T}"/>.
+    /// </exception>
     public static implicit operator Arg<T>(T value) => new(new ExactMatcher<T>(value));
 
     /// <summary>Implicitly converts a predicate to an <see cref="Arg{T}"/> using predicate matching.</summary>

@@ -252,6 +252,48 @@ await Assert.That(nameArg.Values).Count().IsEqualTo(3);
 Capture works in both setup and verification contexts. Store the `Arg<T>` in a variable, then inspect `.Values` or `.Latest` after exercising the code.
 :::
 
+## Params Array Parameters
+
+Methods with a `params T[]` parameter support two matching styles: per-element and whole-array.
+
+```csharp
+public interface ICalculator
+{
+    int Sum(params int[] values);
+}
+```
+
+**Per-element** — pass one matcher per expected element. The setup matches only calls with exactly that many arguments, each satisfying its matcher:
+
+```csharp
+mock.Sum(Is(1), Is(2), Is(3)).Returns(6);   // matches Sum(1, 2, 3) only
+mock.Sum(Is(1), Any<int>()).Returns(9);     // matches Sum(1, <anything>)
+mock.Sum().Returns(0);                      // matches Sum() — zero arguments
+mock.Sum(1, 2).Returns(3);                  // raw values work too (exact match)
+```
+
+**Whole-array** — pass a single matcher for the packed array:
+
+```csharp
+mock.Sum(Any()).Returns(100);                          // any number of arguments, including none
+mock.Sum(Is<int[]>(a => a is { Length: > 2 })).Returns(7);  // predicate over the whole array
+```
+
+Both styles work for verification as well:
+
+```csharp
+mock.Sum(Is(1), Is(2)).WasCalled(Times.Once);
+mock.Sum(Any()).WasCalled(Times.Exactly(2));
+```
+
+:::tip params object[]
+For `params object[]` parameters, use raw values (`mock.Log(1, "two")`) or a typed matcher (`Is<object>(1)`). A bare `Is(1)` creates an `Arg<int>`, which cannot stand in for an `Arg<object>` element — TUnit.Mocks throws a descriptive error at setup time if you try.
+:::
+
+:::note
+Per-element matching is available only for `params T[]` **array** parameters. C# 13 `params` collections (e.g. `params IEnumerable<int>`) and `params Span<T>` fall back to whole-value matching — pass a single `Arg<T>` matcher for the whole collection.
+:::
+
 ## Ref Struct Parameters
 
 Regular `Arg<T>` matchers cannot be used with ref struct types like `ReadOnlySpan<T>` or `Span<T>` because ref structs cannot be generic type arguments. On **.NET 9+**, TUnit.Mocks provides `RefStructArg<T>` which uses the `allows ref struct` anti-constraint to make these parameters visible in the setup and verification API.
