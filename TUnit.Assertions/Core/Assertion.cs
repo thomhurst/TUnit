@@ -83,6 +83,13 @@ public abstract class Assertion<TValue> : IAssertion
     internal string InternalGetExpectation() => GetExpectation();
 
     /// <summary>
+    /// Internal accessor for CheckAsync(), allowing one assertion to delegate its check to another
+    /// (e.g. dictionary assertions that reuse the collection assertion logic while preserving
+    /// dictionary-specific chaining).
+    /// </summary>
+    internal Task<AssertionResult> InternalCheckAsync(EvaluationMetadata<TValue> metadata) => CheckAsync(metadata);
+
+    /// <summary>
     /// Internal accessor for the because message, used by And/OrAssertion to build combined error messages.
     /// </summary>
     internal string? InternalBecauseMessage => _becauseMessage;

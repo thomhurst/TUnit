@@ -809,5 +809,113 @@ public class DictionaryCollectionTests
             .And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
     }
 
+    // ===================================
+    // Count()/HasSingleItem()/size methods preserve dictionary continuation
+    // ===================================
+
+    [Test]
+    public async Task Dictionary_Count_Preserves_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L,
+            ["Other"] = 1L
+        };
+
+        await Assert.That(dictionary)
+            .Count().IsEqualTo(2).And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_Count_Comparison_Methods_Work()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L,
+            ["c"] = 3L
+        };
+
+        await Assert.That(dictionary).Count().IsGreaterThan(2);
+        await Assert.That(dictionary).Count().IsLessThanOrEqualTo(3).And.ContainsKey("a");
+        await Assert.That(dictionary).Count().IsNotEqualTo(0).And.IsNotEmpty();
+        await Assert.That(dictionary).Count().IsPositive();
+    }
+
+    [Test]
+    public async Task Dictionary_Count_Fails_With_Count_Message()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).Count().IsEqualTo(5));
+
+        await Assert.That(exception.Message).Contains("count");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Count()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L,
+            ["Other"] = 1L
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("Key").And.Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Dictionary_HasSingleItem_Preserves_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary)
+            .HasSingleItem().And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_Size_Methods_Preserve_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L,
+            ["c"] = 3L
+        };
+
+        await Assert.That(dictionary).HasAtLeast(2).And.ContainsKey("a");
+        await Assert.That(dictionary).HasAtMost(5).And.ContainsKey("b");
+        await Assert.That(dictionary).HasCountBetween(1, 5).And.ContainsKey("c");
+    }
+
+    [Test]
+    public async Task IDictionary_Count_And_HasSingleItem_Preserve_Continuation()
+    {
+        IDictionary<string, long> single = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(single)
+            .HasSingleItem().And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+
+        IDictionary<string, long> many = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L
+        };
+
+        await Assert.That(many)
+            .Count().IsEqualTo(2).And.ContainsKey("a");
+    }
+
     private sealed record Holder(long Inner);
 }
