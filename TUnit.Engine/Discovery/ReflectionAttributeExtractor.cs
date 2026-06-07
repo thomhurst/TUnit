@@ -184,6 +184,81 @@ internal static class ReflectionAttributeExtractor
         return dataSources.ToArray();
     }
 
+    /// <summary>
+    /// Extracts method-level data sources, upgrading plain <see cref="MethodDataSourceAttribute"/>s that
+    /// target an instance member to <see cref="InstanceMethodDataSourceAttribute"/> so the engine creates
+    /// a properly-constructed instance instead of Activator.CreateInstance, mirroring the conversion the
+    /// source generator performs at compile time (https://github.com/thomhurst/TUnit/issues/6162).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode requires dynamic access")]
+    public static IDataSourceAttribute[] ExtractMethodDataSources(
+        MethodInfo testMethod,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type testClass)
+    {
+        var dataSources = ExtractDataSources(testMethod);
+
+        for (var i = 0; i < dataSources.Length; i++)
+        {
+            if (dataSources[i] is MethodDataSourceAttribute methodDataSource
+                and not InstanceMethodDataSourceAttribute
+                && TargetsInstanceMember(methodDataSource, testClass))
+            {
+                var converted = methodDataSource.ClassProvidingDataSource is { } classProvidingDataSource
+                    ? new InstanceMethodDataSourceAttribute(classProvidingDataSource, methodDataSource.MethodNameProvidingDataSource)
+                    : new InstanceMethodDataSourceAttribute(methodDataSource.MethodNameProvidingDataSource);
+
+                converted.Arguments = methodDataSource.Arguments;
+                converted.SkipIfEmpty = methodDataSource.SkipIfEmpty;
+
+                dataSources[i] = converted;
+            }
+        }
+
+        return dataSources;
+    }
+
+    // Must stay in sync with MethodDataSourceAttribute.BindingFlags so the static/instance
+    // pre-check here agrees with the member GetDataRowsAsync resolves at data-generation time.
+    private const BindingFlags DataSourceMemberBindingFlags = BindingFlags.Public
+        | BindingFlags.NonPublic
+        | BindingFlags.Static
+        | BindingFlags.Instance
+        | BindingFlags.FlattenHierarchy;
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access")]
+    private static bool TargetsInstanceMember(MethodDataSourceAttribute methodDataSource, Type testClass)
+    {
+        var targetType = methodDataSource.ClassProvidingDataSource ?? testClass;
+        var memberName = methodDataSource.MethodNameProvidingDataSource;
+
+        try
+        {
+            if (targetType.GetMethod(memberName, DataSourceMemberBindingFlags) is { } method)
+            {
+                return !method.IsStatic;
+            }
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Ambiguous overloads - leave the attribute as-is and let runtime resolution handle it
+            return false;
+        }
+
+        if (targetType.GetProperty(memberName, DataSourceMemberBindingFlags) is { } property)
+        {
+            return property.GetMethod?.IsStatic != true;
+        }
+
+        if (targetType.GetField(memberName, DataSourceMemberBindingFlags) is { } field)
+        {
+            return !field.IsStatic;
+        }
+
+        return false;
+    }
+
     public static Attribute[] GetAllAttributes(Type testClass, MethodInfo testMethod)
     {
         return _allAttributesCache.GetOrAdd((testClass, testMethod), key =>
