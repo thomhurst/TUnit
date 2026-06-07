@@ -68,7 +68,13 @@ internal static class TestDataRowUnwrapper
     {
         if (values.Length == 1 && TryUnwrap(values[0], out var data, out var metadata))
         {
-            // Single TestDataRow<T> - unwrap it
+            // Single TestDataRow<T> - unwrap it.
+            // If the inner data is a Func<T>, invoke it so TestDataRow<Func<T>> behaves the same
+            // as a bare Func<T> data source (the Func is invoked, then tuples are spread into
+            // individual parameters). Bare Func values are invoked in DataSourceHelpers.ToObjectArray,
+            // but a Func wrapped in a TestDataRow is opaque there and only surfaces here.
+            data = DataSourceHelpers.InvokeIfFunc(data);
+
             // If the inner data is already an array, use it directly
             if (data is object?[] dataArray)
             {

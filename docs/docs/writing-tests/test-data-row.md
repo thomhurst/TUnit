@@ -108,6 +108,27 @@ public static IEnumerable<TestDataRow<Func<HttpClient>>> GetHttpClients()
 }
 ```
 
+The inner `Func<T>` is invoked before the test runs, exactly like a bare `IEnumerable<Func<T>>`
+data source. This means a `Func<T>` that returns a tuple is spread across the test method's
+parameters, and the resolved values are available to the parameterized `DisplayName`:
+
+```csharp
+public static IEnumerable<TestDataRow<Func<(int, int, int)>>> GetSums()
+{
+    yield return new(() => (1, 1, 2), DisplayName: "$arg1 + $arg2 = $arg3");
+    yield return new(() => (1, 2, 3), DisplayName: "$arg1 + $arg2 = $arg3");
+}
+
+[Test]
+[MethodDataSource(nameof(GetSums))]
+public async Task Adds(int a, int b, int expected)
+{
+    await Assert.That(a + b).IsEqualTo(expected);
+}
+```
+
+The two cases display as `1 + 1 = 2` and `1 + 2 = 3`.
+
 ## Skipping Individual Test Cases
 
 Use the `Skip` property to skip specific test cases while keeping others active:

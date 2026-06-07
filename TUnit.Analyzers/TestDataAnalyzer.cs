@@ -770,22 +770,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return ImmutableArray.Create(type);
         }
 
-        if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
-            && genericType.ToDisplayString().StartsWith("System.Func<"))
-        {
-            isFunc = true;
-            type = genericType.TypeArguments[0];
-        }
-
-        // Check for TestDataRow<T> wrapper - unwrap to get the inner data type
-        // This must come after Func<T> unwrapping so that Func<TestDataRow<T>> → TestDataRow<T> → T
+        // Unwrap Func<T> and TestDataRow<T> wrappers in any nesting order, so that Func<T>,
+        // TestDataRow<T>, Func<TestDataRow<T>>, and TestDataRow<Func<T>> all reduce to the inner T
+        // before the tuple check below. Looping handles either order without assuming which wraps which.
         var testDataRowTypeSymbol = context.Compilation.GetTypeByMetadataName("TUnit.Core.TestDataRow`1");
-        if (testDataRowTypeSymbol != null
-            && type is INamedTypeSymbol { IsGenericType: true } testDataRowType
-            && SymbolEqualityComparer.Default.Equals(testDataRowType.OriginalDefinition, testDataRowTypeSymbol))
+        bool unwrappedLayer;
+        do
         {
-            type = testDataRowType.TypeArguments[0];
+            unwrappedLayer = false;
+
+            if (type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } genericType
+                && genericType.ToDisplayString().StartsWith("System.Func<"))
+            {
+                isFunc = true;
+                type = genericType.TypeArguments[0];
+                unwrappedLayer = true;
+            }
+
+            if (testDataRowTypeSymbol != null
+                && type is INamedTypeSymbol { IsGenericType: true } testDataRowType
+                && SymbolEqualityComparer.Default.Equals(testDataRowType.OriginalDefinition, testDataRowTypeSymbol))
+            {
+                type = testDataRowType.TypeArguments[0];
+                unwrappedLayer = true;
+            }
         }
+        while (unwrappedLayer);
 
         if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
         {
