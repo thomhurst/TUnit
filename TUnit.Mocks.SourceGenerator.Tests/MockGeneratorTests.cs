@@ -31,6 +31,32 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Params_Array_Parameter()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IParamsSink
+            {
+                int Sum(params int[] values);
+                string Render(params object[] args);
+                string Combine(string prefix, params string[] parts);
+                T First<T>(params T[] items);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IParamsSink>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Multi_Method_Interface()
     {
         var source = """

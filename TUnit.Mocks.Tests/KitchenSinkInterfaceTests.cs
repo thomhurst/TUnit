@@ -67,6 +67,9 @@ public interface IKitchenSink : IEnumerable<string>, IAltNamed
 
     // ── Params array ──
     int Sum(params int[] values);
+    string Join(params string[] parts);
+    string Render(params object[] args);
+    T First<T>(params T[] items);
 
     // ── Tuple return ──
     (int Count, string Label) Describe();
@@ -398,6 +401,116 @@ public class KitchenSinkInterfaceTests
         await Assert.That(mock.Object.Sum()).IsEqualTo(100);
 
         mock.Sum(Any()).WasCalled(Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task Params_PerElement_Matchers()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Sum(Is(1), Is(2), Is(3)).Returns(6);
+
+        await Assert.That(mock.Object.Sum(1, 2, 3)).IsEqualTo(6);
+        await Assert.That(mock.Object.Sum(1, 2, 9)).IsEqualTo(0);
+        await Assert.That(mock.Object.Sum(1, 2)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Params_PerElement_Mixed_Any()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Sum(Is(1), Any<int>()).Returns(9);
+
+        await Assert.That(mock.Object.Sum(1, 50)).IsEqualTo(9);
+        await Assert.That(mock.Object.Sum(2, 50)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Params_PerElement_Verification()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Object.Sum(1, 2);
+
+        mock.Sum(Is(1), Is(2)).WasCalled(Times.Once);
+        mock.Sum(Is(9), Is(9)).WasNeverCalled();
+    }
+
+    [Test]
+    public async Task Params_Empty_Setup_Matches_Empty_Call_Only()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Sum().Returns(42);
+
+        await Assert.That(mock.Object.Sum()).IsEqualTo(42);
+        await Assert.That(mock.Object.Sum(1)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Params_PerElement_Capture()
+    {
+        var mock = IKitchenSink.Mock();
+        var first = Any<int>();
+        mock.Sum(first, Any<int>()).Returns(0);
+
+        mock.Object.Sum(7, 9);
+
+        await Assert.That(first.Latest).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Params_String_Elements_PerElement()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Join(Is("a"), Any<string>()).Returns("x");
+
+        await Assert.That(mock.Object.Join("a", "b")).IsEqualTo("x");
+        await Assert.That(mock.Object.Join("z", "b")).IsNotEqualTo("x");
+    }
+
+    [Test]
+    public async Task Params_Object_Elements_Raw_Values_And_Typed_Is()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Render(1, "two").Returns("matched");
+
+        await Assert.That(mock.Object.Render(1, "two")).IsEqualTo("matched");
+        await Assert.That(mock.Object.Render(2, "two")).IsNotEqualTo("matched");
+
+        var mock2 = IKitchenSink.Mock();
+        mock2.Render(Is<object>(1)).Returns("typed");
+
+        await Assert.That(mock2.Object.Render(1)).IsEqualTo("typed");
+    }
+
+    [Test]
+    public async Task Params_Object_Mistyped_Arg_Throws_Helpful_Error()
+    {
+        var mock = IKitchenSink.Mock();
+
+        // Is(1) is Arg<int>; converting it to the Arg<object> element slot would silently
+        // never match — the implicit conversion guard must throw instead.
+        var ex = Assert.Throws<ArgumentException>(() => mock.Render(Is(1)));
+
+        await Assert.That(ex.Message).Contains("Arg<Int32>");
+    }
+
+    [Test]
+    public async Task Params_Generic_PerElement()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.First(Is(1), Any<int>()).Returns(5);
+
+        await Assert.That(mock.Object.First(1, 9)).IsEqualTo(5);
+        await Assert.That(mock.Object.First(2, 9)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Params_WholeArray_Matchers_Still_Work()
+    {
+        var mock = IKitchenSink.Mock();
+        mock.Sum(Is<int[]>(a => a is { Length: > 2 })).Returns(100);
+
+        await Assert.That(mock.Object.Sum(1, 2, 3)).IsEqualTo(100);
+        await Assert.That(mock.Object.Sum(1, 2)).IsEqualTo(0);
     }
 
     // ── Tuple return ──

@@ -634,7 +634,13 @@ internal static class MemberDiscovery
                     DefaultValueExpression = p.HasExplicitDefaultValue ? FormatDefaultValue(p) : null,
                     IsValueType = p.Type.IsValueType,
                     IsRefStruct = p.Type.IsRefLikeType,
-                    SpanElementType = GetSpanElementType(p.Type)
+                    SpanElementType = GetSpanElementType(p.Type),
+                    IsParams = p.IsParams,
+                    // Only single-dimensional arrays get the params-expanded setup overload;
+                    // params collections (C# 13) and params spans degrade to whole-value matching.
+                    ParamsElementType = p.IsParams && p.Type is IArrayTypeSymbol paramsArray
+                        ? paramsArray.ElementType.GetFullyQualifiedNameWithNullability()
+                        : null
                 }).ToImmutableArray()
             ),
             TypeParameters = new EquatableArray<MockTypeParameterModel>(
