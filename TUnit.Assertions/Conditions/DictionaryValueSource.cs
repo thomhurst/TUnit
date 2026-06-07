@@ -19,6 +19,60 @@ public sealed class DictionaryValueSource<TValue> : ValueAssertion<TValue>
 }
 
 /// <summary>
+/// Shared value lookup for the <c>ContainsKey(key).And.Value</c> drill-in, used by both the read-only
+/// and mutable continuations (which cannot share a base due to the IReadOnlyDictionary vs IDictionary
+/// constraint). Existence/null is already validated by the ContainsKey pre-work, so a miss returns
+/// default rather than throwing — letting the pre-work's clean failure surface.
+/// </summary>
+internal static class DictionaryValueLookup
+{
+    public static TValue? Extract<TKey, TValue>(
+        IEnumerable<KeyValuePair<TKey, TValue>>? dictionary, TKey key, IEqualityComparer<TKey>? comparer)
+        where TKey : notnull
+    {
+        if (dictionary is null)
+        {
+            return default;
+        }
+
+        if (comparer is not null)
+        {
+            foreach (var pair in dictionary)
+            {
+                if (comparer.Equals(pair.Key, key))
+                {
+                    return pair.Value;
+                }
+            }
+
+            return default;
+        }
+
+        // No custom comparer: use the dictionary's own TryGetValue (O(1), and it honours the
+        // dictionary's internal comparer — which a default-equality scan would not).
+        if (dictionary is IReadOnlyDictionary<TKey, TValue> readOnly)
+        {
+            return readOnly.TryGetValue(key, out var value) ? value : default;
+        }
+
+        if (dictionary is IDictionary<TKey, TValue> mutable)
+        {
+            return mutable.TryGetValue(key, out var value) ? value : default;
+        }
+
+        foreach (var pair in dictionary)
+        {
+            if (EqualityComparer<TKey>.Default.Equals(pair.Key, key))
+            {
+                return pair.Value;
+            }
+        }
+
+        return default;
+    }
+}
+
+/// <summary>
 /// And continuation returned by <c>ContainsKey(key).And</c> on a read-only dictionary.
 /// Behaves like the standard <see cref="DictionaryAndContinuation{TDictionary,TKey,TValue}"/>
 /// but additionally carries the asserted key so the entry's value can be drilled into via
@@ -54,37 +108,11 @@ public class DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
     {
         get
         {
-            var key = _expectedKey;
-            var comparer = _comparer;
             Context.ExpressionBuilder.Append(".Value");
-            var valueContext = Context.Map<TValue>(dictionary => ExtractValue(dictionary, key, comparer));
+            var valueContext = Context.Map<TValue>(
+                dictionary => DictionaryValueLookup.Extract<TKey, TValue>(dictionary, _expectedKey, _comparer));
             return new DictionaryValueSource<TValue>(valueContext);
         }
-    }
-
-    private static TValue? ExtractValue(TDictionary? dictionary, TKey key, IEqualityComparer<TKey>? comparer)
-    {
-        // Existence/null is already validated by the ContainsKey pre-work; these guards just
-        // avoid throwing here so the pre-work's clean failure surfaces instead.
-        if (dictionary is null)
-        {
-            return default;
-        }
-
-        if (comparer is not null)
-        {
-            foreach (var pair in dictionary)
-            {
-                if (comparer.Equals(pair.Key, key))
-                {
-                    return pair.Value;
-                }
-            }
-
-            return default;
-        }
-
-        return dictionary.TryGetValue(key, out var value) ? value : default;
     }
 }
 
@@ -116,34 +144,10 @@ public class MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TVal
     {
         get
         {
-            var key = _expectedKey;
-            var comparer = _comparer;
             Context.ExpressionBuilder.Append(".Value");
-            var valueContext = Context.Map<TValue>(dictionary => ExtractValue(dictionary, key, comparer));
+            var valueContext = Context.Map<TValue>(
+                dictionary => DictionaryValueLookup.Extract<TKey, TValue>(dictionary, _expectedKey, _comparer));
             return new DictionaryValueSource<TValue>(valueContext);
         }
-    }
-
-    private static TValue? ExtractValue(TDictionary? dictionary, TKey key, IEqualityComparer<TKey>? comparer)
-    {
-        if (dictionary is null)
-        {
-            return default;
-        }
-
-        if (comparer is not null)
-        {
-            foreach (var pair in dictionary)
-            {
-                if (comparer.Equals(pair.Key, key))
-                {
-                    return pair.Value;
-                }
-            }
-
-            return default;
-        }
-
-        return dictionary.TryGetValue(key, out var value) ? value : default;
     }
 }
