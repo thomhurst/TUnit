@@ -249,4 +249,20 @@ public class VerificationTests
         mock.Greet("Bob").WasCalled(Times.Once);
         await Assert.That(true).IsTrue();
     }
+
+    [Test]
+    public async Task Greet_Returns_Configured_Value()
+    {
+        var mock = IGreeter.Mock();
+
+        mock.Greet(Any()).Returns("Hello!");
+
+        IGreeter greeter = mock;
+        var result = greeter.Greet("Alice");
+
+        await Assert.That(result).IsEqualTo("Hello!");
+
+        mock.Greet(Any()).WasCalled(Times.Once);
+        await Assert.That(mock.Greet(Any())).WasCalled(Times.Once);
+    }
 }
