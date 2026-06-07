@@ -929,6 +929,37 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task Method_Data_Source_With_TestDataRow_Func_Tuple_No_Error()
+    {
+        // TestDataRow<Func<(int,int,int)>> should unwrap the Func and spread the tuple across the
+        // three parameters (issue #6161). The Func is nested *inside* TestDataRow, so this exercises
+        // the opposite nesting order from Method_Data_Source_With_Func_TestDataRow_No_Error.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System;
+                using System.Collections.Generic;
+
+                public class MyClass
+                {
+                    [MethodDataSource(nameof(GetData))]
+                    [Test]
+                    public void MyTest(int a, int b, int c)
+                    {
+                    }
+
+                    public static IEnumerable<TestDataRow<Func<(int, int, int)>>> GetData()
+                    {
+                        yield return new(() => (1, 1, 2), DisplayName: "$arg1 + $arg2 = $arg3");
+                        yield return new(() => (1, 2, 3), DisplayName: "$arg1 + $arg2 = $arg3");
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task No_Warning_For_Immutable_Record()
     {
         await Verifier
