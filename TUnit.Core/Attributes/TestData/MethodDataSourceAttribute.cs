@@ -60,7 +60,7 @@ T>(string methodNameProvidingDataSource)
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 {
-    private const BindingFlags BindingFlags = System.Reflection.BindingFlags.Public
+    internal const BindingFlags BindingFlags = System.Reflection.BindingFlags.Public
         | System.Reflection.BindingFlags.NonPublic
         | System.Reflection.BindingFlags.Static
         | System.Reflection.BindingFlags.Instance
@@ -126,6 +126,25 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         ClassProvidingDataSource = classProvidingDataSource ?? throw new ArgumentNullException(nameof(classProvidingDataSource), "No class type was provided");
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
+    }
+
+    /// <summary>
+    /// Creates an <see cref="InstanceMethodDataSourceAttribute"/> copy of this attribute, preserving all
+    /// user-settable state. Used by reflection-mode discovery to mirror the conversion the source generator
+    /// performs at compile time for data sources that target instance members.
+    /// <see cref="Factory"/> is intentionally not copied: it is only populated by the source generator,
+    /// so it is always null on attributes discovered via reflection.
+    /// </summary>
+    internal InstanceMethodDataSourceAttribute ToInstanceVariant()
+    {
+        var converted = ClassProvidingDataSource is { } classProvidingDataSource
+            ? new InstanceMethodDataSourceAttribute(classProvidingDataSource, MethodNameProvidingDataSource)
+            : new InstanceMethodDataSourceAttribute(MethodNameProvidingDataSource);
+
+        converted.Arguments = Arguments;
+        converted.SkipIfEmpty = SkipIfEmpty;
+
+        return converted;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]

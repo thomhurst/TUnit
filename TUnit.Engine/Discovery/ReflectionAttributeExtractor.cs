@@ -204,27 +204,12 @@ internal static class ReflectionAttributeExtractor
                 and not InstanceMethodDataSourceAttribute
                 && TargetsInstanceMember(methodDataSource, testClass))
             {
-                var converted = methodDataSource.ClassProvidingDataSource is { } classProvidingDataSource
-                    ? new InstanceMethodDataSourceAttribute(classProvidingDataSource, methodDataSource.MethodNameProvidingDataSource)
-                    : new InstanceMethodDataSourceAttribute(methodDataSource.MethodNameProvidingDataSource);
-
-                converted.Arguments = methodDataSource.Arguments;
-                converted.SkipIfEmpty = methodDataSource.SkipIfEmpty;
-
-                dataSources[i] = converted;
+                dataSources[i] = methodDataSource.ToInstanceVariant();
             }
         }
 
         return dataSources;
     }
-
-    // Must stay in sync with MethodDataSourceAttribute.BindingFlags so the static/instance
-    // pre-check here agrees with the member GetDataRowsAsync resolves at data-generation time.
-    private const BindingFlags DataSourceMemberBindingFlags = BindingFlags.Public
-        | BindingFlags.NonPublic
-        | BindingFlags.Static
-        | BindingFlags.Instance
-        | BindingFlags.FlattenHierarchy;
 
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access")]
@@ -233,27 +218,24 @@ internal static class ReflectionAttributeExtractor
         var targetType = methodDataSource.ClassProvidingDataSource ?? testClass;
         var memberName = methodDataSource.MethodNameProvidingDataSource;
 
-        try
+        // GetMember returns all matching members (it never throws AmbiguousMatchException for
+        // overloads, unlike GetMethod). Conservatively treat the data source as instance-targeting
+        // if ANY matching member is an instance member, so the engine pre-creates a properly
+        // constructed test class instance for it.
+        foreach (var member in targetType.GetMember(memberName, MethodDataSourceAttribute.BindingFlags))
         {
-            if (targetType.GetMethod(memberName, DataSourceMemberBindingFlags) is { } method)
+            var isStatic = member switch
             {
-                return !method.IsStatic;
+                MethodBase method => method.IsStatic,
+                PropertyInfo property => property.GetMethod?.IsStatic == true,
+                FieldInfo field => field.IsStatic,
+                _ => true
+            };
+
+            if (!isStatic)
+            {
+                return true;
             }
-        }
-        catch (AmbiguousMatchException)
-        {
-            // Ambiguous overloads - leave the attribute as-is and let runtime resolution handle it
-            return false;
-        }
-
-        if (targetType.GetProperty(memberName, DataSourceMemberBindingFlags) is { } property)
-        {
-            return property.GetMethod?.IsStatic != true;
-        }
-
-        if (targetType.GetField(memberName, DataSourceMemberBindingFlags) is { } field)
-        {
-            return !field.IsStatic;
         }
 
         return false;
