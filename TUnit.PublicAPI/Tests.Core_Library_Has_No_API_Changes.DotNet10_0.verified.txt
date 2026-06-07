@@ -423,18 +423,6 @@ namespace
         public virtual string GetStandardOutput() { }
         public void RestoreExecutionContext() { }
     }
-    public class ContextProvider : .
-    {
-        public ContextProvider( serviceProvider, string testSessionId, string? testFilter) { }
-        public .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
-        public .GlobalContext GlobalContext { get; }
-        public .TestDiscoveryContext TestDiscoveryContext { get; }
-        public .TestSessionContext TestSessionContext { get; }
-        public .TestContext CreateTestContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken) { }
-        public .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly) { }
-        [.("Trimming", "IL2111", Justification="Type parameter is annotated at the method boundary.")]
-        public .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType) { }
-    }
     public class CultureExecutor : .DedicatedThreadExecutor
     {
         public CultureExecutor(.CultureInfo cultureInfo) { }
@@ -2897,15 +2885,6 @@ namespace .Services
         public GenericTypeResolver() { }
         public [] ResolveGenericClassArguments([.(..PublicConstructors)]  genericTypeDefinition, object?[] constructorArguments) { }
         public [] ResolveGenericMethodArguments(.MethodInfo genericMethodDefinition, object?[] runtimeArguments) { }
-    }
-    public interface IContextProvider
-    {
-        .BeforeTestDiscoveryContext BeforeTestDiscoveryContext { get; }
-        .TestDiscoveryContext TestDiscoveryContext { get; }
-        .TestSessionContext TestSessionContext { get; }
-        .TestContext CreateTestContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType, .TestBuilderContext testBuilderContext, .TestDetails testDetails, .CancellationToken cancellationToken);
-        .AssemblyHookContext GetOrCreateAssemblyContext(.Assembly assembly);
-        .ClassHookContext GetOrCreateClassContext([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  classType);
     }
     public static class ModeDetector
     {

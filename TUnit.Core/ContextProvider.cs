@@ -8,7 +8,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Builder for creating and managing the context hierarchy with proper parent-child relationships and singleton behavior
 /// </summary>
-public class ContextProvider(IServiceProvider serviceProvider, string testSessionId, string? testFilter) : IContextProvider
+internal class ContextProvider(IServiceProvider serviceProvider, string testSessionId, string? testFilter) : IContextProvider
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyContexts = new();
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();

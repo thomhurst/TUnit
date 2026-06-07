@@ -6,7 +6,7 @@ namespace TUnit.Core.Services;
 /// <summary>
 /// Interface for building and managing context hierarchies
 /// </summary>
-public interface IContextProvider
+internal interface IContextProvider
 {
     /// <summary>
     /// Gets or creates the discovery context
