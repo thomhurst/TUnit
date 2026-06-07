@@ -111,7 +111,9 @@ public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TTarget>
         _sourceContext = context;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TTarget> metadata)
+    // The mapped metadata is intentionally unused: validation runs against the original
+    // (pre-map) context so the original value/exception type is available for the message.
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TTarget> _)
     {
         var (value, exception) = await _sourceContext.GetAsync();
 
