@@ -17,7 +17,19 @@ public static class MockAssertionExtensions
     /// Generates the <c>WasCalled()</c> assertion on <see cref="IAssertionSource{ICallVerification}"/>.
     /// </summary>
     [GenerateAssertion(ExpectationMessage = "to have been called")]
-    public static AssertionResult WasCalled(ICallVerification verification)
+    public static AssertionResult WasCalled<T>(T verification) where T : ICallVerification
+    {
+        return WasCalled(verification, Times.AtLeastOnce);
+    }
+
+    /// <summary>
+    /// Asserts that the mock member was called the specified number of times.
+    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyMockCall).
+    /// </summary>
+    [GenerateAssertion(ExpectationMessage = "to have been called {times} times")]
+    public static AssertionResult WasCalled<T>(
+        this T verification,
+        Times times) where T : ICallVerification
     {
         if (verification is null)
         {
@@ -26,7 +38,7 @@ public static class MockAssertionExtensions
 
         try
         {
-            verification.WasCalled();
+            verification.WasCalled(times);
             return AssertionResult.Passed;
         }
         catch (MockVerificationException ex)
@@ -36,50 +48,26 @@ public static class MockAssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the mock member was called the specified number of times.
-    /// </summary>
-    public static WasCalledAssertion WasCalled(
-        this IAssertionSource<ICallVerification> source,
-        Times times,
-        [CallerArgumentExpression(nameof(times))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".WasCalled({expression})");
-        return new WasCalledAssertion(source.Context, times);
-    }
-
-    /// <summary>
-    /// Asserts that the mock member was called the specified number of times.
-    /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyMockCall).
-    /// </summary>
-    public static WasCalledAssertion WasCalled<T>(
-        this IAssertionSource<T> source,
-        Times times,
-        [CallerArgumentExpression(nameof(times))] string? expression = null) where T : ICallVerification
-    {
-        source.Context.ExpressionBuilder.Append($".WasCalled({expression})");
-        var mappedContext = source.Context.Map<ICallVerification>(v => v);
-        return new WasCalledAssertion(mappedContext, times);
-    }
-
-    /// <summary>
-    /// Asserts that the mock member was never called.
-    /// </summary>
-    public static WasNeverCalledAssertion WasNeverCalled(
-        this IAssertionSource<ICallVerification> source)
-    {
-        source.Context.ExpressionBuilder.Append(".WasNeverCalled()");
-        return new WasNeverCalledAssertion(source.Context);
-    }
-
-    /// <summary>
     /// Asserts that the mock member was never called.
     /// Generic overload for types implementing <see cref="ICallVerification"/> (e.g. PropertyMockCall).
     /// </summary>
-    public static WasNeverCalledAssertion WasNeverCalled<T>(
-        this IAssertionSource<T> source) where T : ICallVerification
+    [GenerateAssertion(ExpectationMessage = "to not have been called")]
+    public static AssertionResult WasNeverCalled<T>(
+        this T verification) where T : ICallVerification
     {
-        source.Context.ExpressionBuilder.Append(".WasNeverCalled()");
-        var mappedContext = source.Context.Map<ICallVerification>(v => v);
-        return new WasNeverCalledAssertion(mappedContext);
+        if (verification is null)
+        {
+            return AssertionResult.Failed("Verification target is null");
+        }
+
+        try
+        {
+            verification.WasNeverCalled();
+            return AssertionResult.Passed;
+        }
+        catch (MockVerificationException ex)
+        {
+            return AssertionResult.Failed(ex.Message);
+        }
     }
 }
