@@ -628,7 +628,7 @@ public class DictionaryCollectionTests
     }
 
     // ===================================
-    // ContainsKey(...).And.Value drill-in (#6185)
+    // ContainsKey(...).And.Value drill-in
     // ===================================
 
     [Test]

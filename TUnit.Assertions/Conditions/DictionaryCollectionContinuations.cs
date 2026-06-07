@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Text;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -68,9 +67,8 @@ public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
         int expected, CountComparison comparison, string expressionFragment)
     {
         _context.ExpressionBuilder.Append(expressionFragment);
-        var detached = new AssertionContext<TDictionary>(_context.Evaluation, new StringBuilder());
         var inner = new CollectionCountEqualsAssertion<TDictionary, KeyValuePair<TKey, TValue>>(
-            detached, null, expected, comparison);
+            _context.CreateDetached(), null, expected, comparison);
         return new DictionaryDelegatingAssertion<TDictionary, TKey, TValue>(_context, inner);
     }
 
@@ -120,9 +118,8 @@ public sealed class MutableDictionaryCountSource<TDictionary, TKey, TValue>
         int expected, CountComparison comparison, string expressionFragment)
     {
         _context.ExpressionBuilder.Append(expressionFragment);
-        var detached = new AssertionContext<TDictionary>(_context.Evaluation, new StringBuilder());
         var inner = new CollectionCountEqualsAssertion<TDictionary, KeyValuePair<TKey, TValue>>(
-            detached, null, expected, comparison);
+            _context.CreateDetached(), null, expected, comparison);
         return new MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>(_context, inner);
     }
 

@@ -63,16 +63,13 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     private MutableDictionaryAssertionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
         => new MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>(Context, inner);
 
-    private AssertionContext<TDictionary> DetachedContext()
-        => new(Context.Evaluation, new System.Text.StringBuilder());
-
     /// <summary>
     /// Asserts that the dictionary is empty while preserving mutable-dictionary-specific chaining.
     /// </summary>
     public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
     {
         Context.ExpressionBuilder.Append(".IsEmpty()");
-        return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -81,7 +78,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -100,7 +97,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem()
     {
         Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -112,7 +109,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     {
         Context.ExpressionBuilder.Append($".HasSingleItem({expression})");
         return Delegate(new HasSingleItemPredicateAssertion<TDictionary, KeyValuePair<TKey, TValue>>(
-            DetachedContext(), predicate, expression ?? "predicate"));
+            Context.CreateDetached(), predicate, expression ?? "predicate"));
     }
 
     /// <summary>
@@ -123,7 +120,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
         [CallerArgumentExpression(nameof(minCount))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".HasAtLeast({expression})");
-        return Delegate(new CollectionHasAtLeastAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), minCount));
+        return Delegate(new CollectionHasAtLeastAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), minCount));
     }
 
     /// <summary>
@@ -134,7 +131,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
         [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".HasAtMost({expression})");
-        return Delegate(new CollectionHasAtMostAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), maxCount));
+        return Delegate(new CollectionHasAtMostAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), maxCount));
     }
 
     /// <summary>
@@ -147,7 +144,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
         [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
     {
         Context.ExpressionBuilder.Append($".HasCountBetween({minExpression}, {maxExpression})");
-        return Delegate(new CollectionHasCountBetweenAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), min, max));
+        return Delegate(new CollectionHasCountBetweenAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), min, max));
     }
 
     /// <summary>

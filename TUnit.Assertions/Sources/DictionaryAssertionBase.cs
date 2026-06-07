@@ -60,15 +60,12 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
 
     // The collection methods below (IsEmpty, Count, HasSingleItem, size checks) are hidden with
     // `public new` so they return a dictionary-typed assertion instead of the collection-typed one
-    // from CollectionAssertionBase. This keeps dictionary-specific chaining (.And.ContainsKey, etc.)
-    // available afterwards. The check logic is reused from the existing collection assertions via a
-    // delegating wrapper built on a detached context (so it does not disturb And/Or pending links).
+    // from CollectionAssertionBase, keeping dictionary chaining (.And.ContainsKey, etc.) available.
+    // Each reuses the existing collection assertion's check logic via a delegating wrapper; the inner
+    // assertion is built on Context.CreateDetached() so its construction doesn't consume our pending link.
 
     private DictionaryAssertionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
         => new DictionaryDelegatingAssertion<TDictionary, TKey, TValue>(Context, inner);
-
-    private AssertionContext<TDictionary> DetachedContext()
-        => new(Context.Evaluation, new System.Text.StringBuilder());
 
     /// <summary>
     /// Asserts that the dictionary is empty while preserving dictionary-specific chaining.
@@ -76,7 +73,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
     {
         Context.ExpressionBuilder.Append(".IsEmpty()");
-        return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -85,7 +82,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -104,7 +101,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem()
     {
         Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext()));
+        return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
     }
 
     /// <summary>
@@ -116,7 +113,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     {
         Context.ExpressionBuilder.Append($".HasSingleItem({expression})");
         return Delegate(new HasSingleItemPredicateAssertion<TDictionary, KeyValuePair<TKey, TValue>>(
-            DetachedContext(), predicate, expression ?? "predicate"));
+            Context.CreateDetached(), predicate, expression ?? "predicate"));
     }
 
     /// <summary>
@@ -127,7 +124,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
         [CallerArgumentExpression(nameof(minCount))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".HasAtLeast({expression})");
-        return Delegate(new CollectionHasAtLeastAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), minCount));
+        return Delegate(new CollectionHasAtLeastAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), minCount));
     }
 
     /// <summary>
@@ -138,7 +135,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
         [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".HasAtMost({expression})");
-        return Delegate(new CollectionHasAtMostAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), maxCount));
+        return Delegate(new CollectionHasAtMostAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), maxCount));
     }
 
     /// <summary>
@@ -151,7 +148,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
         [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
     {
         Context.ExpressionBuilder.Append($".HasCountBetween({minExpression}, {maxExpression})");
-        return Delegate(new CollectionHasCountBetweenAssertion<TDictionary, KeyValuePair<TKey, TValue>>(DetachedContext(), min, max));
+        return Delegate(new CollectionHasCountBetweenAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), min, max));
     }
 
     /// <summary>

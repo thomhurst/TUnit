@@ -79,7 +79,7 @@ internal static class DictionaryValueLookup
 /// <see cref="Value"/>.
 /// Example: <c>await Assert.That(dict).ContainsKey("key").And.Value.IsEqualTo(123);</c>
 /// </summary>
-public class DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
+public sealed class DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
     : DictionaryAndContinuation<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
@@ -120,7 +120,7 @@ public class DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
 /// And continuation returned by <c>ContainsKey(key).And</c> on a mutable dictionary (IDictionary).
 /// Mutable twin of <see cref="DictionaryContainsKeyAndContinuation{TDictionary,TKey,TValue}"/>.
 /// </summary>
-public class MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
+public sealed class MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>
     : MutableDictionaryAndContinuation<TDictionary, TKey, TValue>
     where TDictionary : IDictionary<TKey, TValue>
     where TKey : notnull
