@@ -8,8 +8,11 @@ internal sealed class ExactMatcher<T> : Arguments.IArgumentMatcher<T>
     {
         // An Arg<X> can reach here boxed as the expected VALUE — e.g. Is(1) implicitly converted
         // into an Arg<object> slot, or Is<object>(someArg). Exact-matching the matcher struct
-        // itself can never succeed, so fail fast with guidance.
-        if (expected is not null && expected.GetType() is { IsConstructedGenericType: true } expectedType
+        // itself can never succeed, so fail fast with guidance. Arg<X> is a struct, so it can only
+        // be boxed into a reference-type slot — skip the check (and the GetType() boxing it would
+        // cost on a Nullable<T>) for value-type T, where it can never trigger.
+        if (!typeof(T).IsValueType
+            && expected is not null && expected.GetType() is { IsConstructedGenericType: true } expectedType
             && expectedType.GetGenericTypeDefinition() == typeof(Arguments.Arg<>))
         {
             throw new ArgumentException(

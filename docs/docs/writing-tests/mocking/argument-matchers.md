@@ -290,6 +290,10 @@ mock.Sum(Any()).WasCalled(Times.Exactly(2));
 For `params object[]` parameters, use raw values (`mock.Log(1, "two")`) or a typed matcher (`Is<object>(1)`). A bare `Is(1)` creates an `Arg<int>`, which cannot stand in for an `Arg<object>` element — TUnit.Mocks throws a descriptive error at setup time if you try.
 :::
 
+:::note
+Per-element matching is available only for `params T[]` **array** parameters. C# 13 `params` collections (e.g. `params IEnumerable<int>`) and `params Span<T>` fall back to whole-value matching — pass a single `Arg<T>` matcher for the whole collection.
+:::
+
 ## Ref Struct Parameters
 
 Regular `Arg<T>` matchers cannot be used with ref struct types like `ReadOnlySpan<T>` or `Span<T>` because ref structs cannot be generic type arguments. On **.NET 9+**, TUnit.Mocks provides `RefStructArg<T>` which uses the `allows ref struct` anti-constraint to make these parameters visible in the setup and verification API.

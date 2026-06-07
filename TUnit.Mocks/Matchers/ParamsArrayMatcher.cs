@@ -67,6 +67,26 @@ public sealed class ParamsArrayMatcher : IArgumentMatcher, ICapturingMatcher
     /// </summary>
     void ICapturingMatcher.ApplyCapture(object? value)
     {
+        // Mirror the index strategy of Matches: covariant fast-path for reference-element arrays,
+        // System.Array fallback for value-element arrays.
+        if (value is object?[] referenceArray)
+        {
+            if (referenceArray.Length != _elementMatchers.Length)
+            {
+                return;
+            }
+
+            for (var i = 0; i < _elementMatchers.Length; i++)
+            {
+                if (_elementMatchers[i] is ICapturingMatcher capturing)
+                {
+                    capturing.ApplyCapture(referenceArray[i]);
+                }
+            }
+
+            return;
+        }
+
         if (value is not Array array || array.Length != _elementMatchers.Length)
         {
             return;
@@ -81,5 +101,6 @@ public sealed class ParamsArrayMatcher : IArgumentMatcher, ICapturingMatcher
         }
     }
 
-    public string Describe() => $"[{string.Join(", ", _elementMatchers.Select(m => m.Describe()))}]";
+    public string Describe() =>
+        $"[{string.Join(", ", _elementMatchers.Select(m => m.Describe()))}] ({_elementMatchers.Length} element(s))";
 }
