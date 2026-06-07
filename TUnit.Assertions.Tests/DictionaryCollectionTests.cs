@@ -627,10 +627,6 @@ public class DictionaryCollectionTests
             .ContainsKey("HELLO", StringComparer.OrdinalIgnoreCase);
     }
 
-    // ===================================
-    // ContainsKey(...).And.Value drill-in
-    // ===================================
-
     [Test]
     public async Task Dictionary_ContainsKey_And_Value_IsEqualTo_Passes()
     {
@@ -808,10 +804,6 @@ public class DictionaryCollectionTests
             .IsNotEmpty()
             .And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
     }
-
-    // ===================================
-    // Count()/HasSingleItem()/size methods preserve dictionary continuation
-    // ===================================
 
     [Test]
     public async Task Dictionary_Count_Preserves_Dictionary_Continuation()

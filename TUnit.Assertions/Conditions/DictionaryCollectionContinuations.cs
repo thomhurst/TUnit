@@ -54,6 +54,8 @@ internal sealed class MutableDictionaryDelegatingAssertion<TDictionary, TKey, TV
 /// Count source for read-only dictionaries that preserves dictionary-specific chaining.
 /// Mirrors <see cref="CollectionCountSource{TCollection,TItem}"/> but returns dictionary-typed
 /// assertions so chains like <c>Count().IsEqualTo(2).And.ContainsKey("k")</c> keep working.
+/// NOTE: keep the method set in sync with <see cref="MutableDictionaryCountSource{TDictionary,TKey,TValue}"/>
+/// (separate classes are required by the IReadOnlyDictionary vs IDictionary constraint).
 /// </summary>
 public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
@@ -105,6 +107,7 @@ public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
 
 /// <summary>
 /// Mutable-dictionary twin of <see cref="DictionaryCountSource{TDictionary,TKey,TValue}"/>.
+/// NOTE: keep the method set in sync with <see cref="DictionaryCountSource{TDictionary,TKey,TValue}"/>.
 /// </summary>
 public sealed class MutableDictionaryCountSource<TDictionary, TKey, TValue>
     where TDictionary : IDictionary<TKey, TValue>

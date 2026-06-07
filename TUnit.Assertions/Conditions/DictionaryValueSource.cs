@@ -26,7 +26,7 @@ public sealed class DictionaryValueSource<TValue> : ValueAssertion<TValue>
 /// </summary>
 internal static class DictionaryValueLookup
 {
-    public static TValue? Extract<TKey, TValue>(
+    internal static TValue? Extract<TKey, TValue>(
         IEnumerable<KeyValuePair<TKey, TValue>>? dictionary, TKey key, IEqualityComparer<TKey>? comparer)
         where TKey : notnull
     {
