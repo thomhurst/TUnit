@@ -16,7 +16,7 @@ public static class MockAssertionExtensions
     /// Asserts that the mock member was called at least once.
     /// Generates the <c>WasCalled()</c> assertion on <see cref="IAssertionSource{ICallVerification}"/>.
     /// </summary>
-    [GenerateAssertion(ExpectationMessage = "to have been called")]
+    [GenerateAssertion(ExpectationMessage = "to have been called at least once")]
     public static AssertionResult WasCalled<T>(T verification) where T : ICallVerification
     {
         return WasCalled(verification, Times.AtLeastOnce);
@@ -43,7 +43,7 @@ public static class MockAssertionExtensions
         }
         catch (MockVerificationException ex)
         {
-            return AssertionResult.Failed(ex.Message);
+            return AssertionResult.Failed(ex.Message, ex);
         }
     }
 
@@ -67,7 +67,7 @@ public static class MockAssertionExtensions
         }
         catch (MockVerificationException ex)
         {
-            return AssertionResult.Failed(ex.Message);
+            return AssertionResult.Failed(ex.Message, ex);
         }
     }
 }

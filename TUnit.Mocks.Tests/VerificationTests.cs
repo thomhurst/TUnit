@@ -250,11 +250,6 @@ public class VerificationTests
         await Assert.That(true).IsTrue();
     }
 
-    public interface IGreeter
-    {
-        string Greet(string name);
-    }
-
     [Test]
     public async Task Greet_Returns_Configured_Value()
     {
