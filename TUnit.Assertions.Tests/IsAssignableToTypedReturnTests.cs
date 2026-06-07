@@ -66,4 +66,52 @@ public class IsAssignableToTypedReturnTests
             await Assert.That(obj).IsAssignableTo<IElement>();
         });
     }
+
+    [Test]
+    public async Task IsAssignableTo_ChainedAfterThrows_ChecksAndReturnsExceptionType()
+    {
+        // Dual-mode: when chained after Throws, the asserted "value" is the thrown
+        // exception, so IsAssignableTo validates the exception's type and returns it cast.
+        var result = await Assert.That(async () =>
+            {
+                throw new InvalidOperationException("boom");
+            })
+            .Throws<InvalidOperationException>()
+            .And
+            .IsAssignableTo<Exception>();
+
+        await Assert.That(result!.Message).IsEqualTo("boom");
+    }
+
+    [Test]
+    public async Task IsAssignableTo_ChainedAfterThrows_Fails_WhenExceptionNotAssignable()
+    {
+        await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
+        {
+            await Assert.That(async () =>
+                {
+                    throw new InvalidOperationException("boom");
+                })
+                .Throws<InvalidOperationException>()
+                .And
+                .IsAssignableTo<ArgumentException>();
+        });
+    }
+
+    [Test]
+    public async Task IsAssignableTo_EvaluatesSourceOnlyOnce()
+    {
+        // Regression guard for the dual-context design: CheckAsync reads the original
+        // context while the base reads the mapped context; both must resolve to a single
+        // cached evaluation of the source delegate.
+        var invocations = 0;
+
+        await Assert.That(() =>
+        {
+            invocations++;
+            return (object)new List<string> { "a" };
+        }).IsAssignableTo<IEnumerable<string>>();
+
+        await Assert.That(invocations).IsEqualTo(1);
+    }
 }
