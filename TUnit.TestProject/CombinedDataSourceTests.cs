@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -624,7 +625,7 @@ public class CombinedDataSourceTests
 
     public class NonSharedInstance;
 
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<NonSharedInstance, byte> SeenNonSharedInstances = new();
+    private static readonly ConcurrentDictionary<NonSharedInstance, byte> SeenNonSharedInstances = new();
 
     [Test]
     [CombinedDataSources]

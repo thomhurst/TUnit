@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -70,7 +71,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             valueSets[i] = GetAllArguments(dataGeneratorMetadata, parameterInformation[i]);
         }
 
-        foreach (var rowArray in GetMatrixValues(valueSets))
+        foreach (var rowArray in CartesianProductHelper.GetCartesianProduct(valueSets))
         {
             var excluded = false;
             foreach (var exclusion in exclusions)
@@ -244,55 +245,6 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         }
 
         throw new ArgumentNullException($"No MatrixAttribute found for parameter '{sourceGeneratedParameterInformation.Name}' and the parameter type '{resolvedType.Name}' cannot be auto-generated. Only bool and enum types support auto-generation.");
-    }
-
-    private static IEnumerable<object?[]> GetMatrixValues(IReadOnlyList<IReadOnlyList<object?>> elements)
-    {
-        var dimensionCount = elements.Count;
-
-        // Any empty dimension makes the product empty (matches the previous
-        // Aggregate/SelectMany behaviour where SelectMany over [] yields nothing).
-        for (var dimension = 0; dimension < dimensionCount; dimension++)
-        {
-            if (elements[dimension].Count == 0)
-            {
-                yield break;
-            }
-        }
-
-        // Odometer-style Cartesian product: the last dimension varies fastest,
-        // matching the previous Aggregate/SelectMany ordering exactly.
-        var indices = new int[dimensionCount];
-
-        while (true)
-        {
-            var row = new object?[dimensionCount];
-            for (var dimension = 0; dimension < dimensionCount; dimension++)
-            {
-                row[dimension] = elements[dimension][indices[dimension]];
-            }
-
-            yield return row;
-
-            // Advance the odometer from the rightmost dimension.
-            var position = dimensionCount - 1;
-            while (position >= 0)
-            {
-                if (++indices[position] < elements[position].Count)
-                {
-                    break;
-                }
-
-                indices[position] = 0;
-                position--;
-            }
-
-            // All dimensions wrapped back to zero: enumeration is complete.
-            if (position < 0)
-            {
-                yield break;
-            }
-        }
     }
 
 }

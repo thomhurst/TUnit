@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -115,7 +116,7 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         }
 
         // Compute Cartesian product of all parameter value factory sets
-        foreach (var combination in GetCartesianProduct(parameterValueFactorySets))
+        foreach (var combination in CartesianProductHelper.GetCartesianProduct(parameterValueFactorySets))
         {
             yield return async () =>
             {
@@ -240,52 +241,4 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         return valueFactories;
     }
 
-    private static IEnumerable<T[]> GetCartesianProduct<T>(IReadOnlyList<IReadOnlyList<T>> parameterValueSets)
-    {
-        var dimensionCount = parameterValueSets.Count;
-
-        // Any empty dimension makes the product empty (matches the previous
-        // Aggregate/SelectMany behaviour where SelectMany over [] yields nothing).
-        for (var dimension = 0; dimension < dimensionCount; dimension++)
-        {
-            if (parameterValueSets[dimension].Count == 0)
-            {
-                yield break;
-            }
-        }
-
-        // Odometer-style Cartesian product: the last dimension varies fastest,
-        // matching the previous Aggregate/SelectMany ordering exactly.
-        var indices = new int[dimensionCount];
-
-        while (true)
-        {
-            var row = new T[dimensionCount];
-            for (var dimension = 0; dimension < dimensionCount; dimension++)
-            {
-                row[dimension] = parameterValueSets[dimension][indices[dimension]];
-            }
-
-            yield return row;
-
-            // Advance the odometer from the rightmost dimension.
-            var position = dimensionCount - 1;
-            while (position >= 0)
-            {
-                if (++indices[position] < parameterValueSets[position].Count)
-                {
-                    break;
-                }
-
-                indices[position] = 0;
-                position--;
-            }
-
-            // All dimensions wrapped back to zero: enumeration is complete.
-            if (position < 0)
-            {
-                yield break;
-            }
-        }
-    }
 }
