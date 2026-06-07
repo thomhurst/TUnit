@@ -315,6 +315,7 @@ public class SessionActivityLifecycleTests
                                         DynamicallyAccessedMemberTypes.PublicMethods)]
             Type classType,
             TestBuilderContext testBuilderContext,
+            TestDetails testDetails,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }

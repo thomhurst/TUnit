@@ -36,12 +36,15 @@ public interface IContextProvider
         Type classType);
 
     /// <summary>
-    /// Creates a test context
+    /// Creates a test context. <paramref name="testDetails"/> is assigned before the context
+    /// becomes observable via <see cref="ClassHookContext.Tests"/> so hooks never see a
+    /// partially-built context.
     /// </summary>
     TestContext CreateTestContext(
         string testName,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,
+        TestDetails testDetails,
         CancellationToken cancellationToken);
 }

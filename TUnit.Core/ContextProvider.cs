@@ -85,11 +85,17 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,
+        TestDetails testDetails,
         CancellationToken cancellationToken)
     {
         var classContext = GetOrCreateClassContext(classType);
 
-        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken);
+        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken)
+        {
+            // Must be assigned before AddTest publishes the context via ClassHookContext.Tests —
+            // AfterEvery(Class) hooks can iterate Tests while sibling dynamic tests are still being built.
+            TestDetails = testDetails,
+        };
 
         classContext.AddTest(testContext);
 

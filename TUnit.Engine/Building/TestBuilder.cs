@@ -1081,9 +1081,8 @@ internal sealed class TestBuilder : ITestBuilder
             metadata.TestName,
             metadata.TestClassType,
             testBuilderContext,
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         return context;
     }
@@ -1180,9 +1179,8 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata
             },
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         return context;
     }
