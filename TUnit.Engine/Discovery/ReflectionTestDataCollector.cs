@@ -1090,7 +1090,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
-                DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
+                DataSources = ReflectionAttributeExtractor.ExtractMethodDataSources(testMethod, testClass),
                 ClassDataSources = classData != null
                     ? [new StaticDataSourceAttribute(new[] { classData })]
                     : ReflectionAttributeExtractor.ExtractDataSources(testClass),

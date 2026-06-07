@@ -184,6 +184,63 @@ internal static class ReflectionAttributeExtractor
         return dataSources.ToArray();
     }
 
+    /// <summary>
+    /// Extracts method-level data sources, upgrading plain <see cref="MethodDataSourceAttribute"/>s that
+    /// target an instance member to <see cref="InstanceMethodDataSourceAttribute"/> so the engine creates
+    /// a properly-constructed instance instead of Activator.CreateInstance, mirroring the conversion the
+    /// source generator performs at compile time (https://github.com/thomhurst/TUnit/issues/6162).
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode requires dynamic access")]
+    public static IDataSourceAttribute[] ExtractMethodDataSources(
+        MethodInfo testMethod,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type testClass)
+    {
+        var dataSources = ExtractDataSources(testMethod);
+
+        for (var i = 0; i < dataSources.Length; i++)
+        {
+            if (dataSources[i] is MethodDataSourceAttribute methodDataSource
+                and not InstanceMethodDataSourceAttribute
+                && TargetsInstanceMember(methodDataSource, testClass))
+            {
+                dataSources[i] = methodDataSource.ToInstanceVariant();
+            }
+        }
+
+        return dataSources;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode requires dynamic access")]
+    private static bool TargetsInstanceMember(MethodDataSourceAttribute methodDataSource, Type testClass)
+    {
+        var targetType = methodDataSource.ClassProvidingDataSource ?? testClass;
+        var memberName = methodDataSource.MethodNameProvidingDataSource;
+
+        // GetMember returns all matching members (it never throws AmbiguousMatchException for
+        // overloads, unlike GetMethod). Conservatively treat the data source as instance-targeting
+        // if ANY matching member is an instance member, so the engine pre-creates a properly
+        // constructed test class instance for it.
+        foreach (var member in targetType.GetMember(memberName, MethodDataSourceAttribute.BindingFlags))
+        {
+            var isStatic = member switch
+            {
+                MethodBase method => method.IsStatic,
+                PropertyInfo property => property.GetMethod?.IsStatic == true,
+                FieldInfo field => field.IsStatic,
+                _ => true
+            };
+
+            if (!isStatic)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static Attribute[] GetAllAttributes(Type testClass, MethodInfo testMethod)
     {
         return _allAttributesCache.GetOrAdd((testClass, testMethod), key =>

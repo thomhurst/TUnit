@@ -981,7 +981,7 @@ namespace
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
         public bool SkipIfEmpty { get; set; }
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__21))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__22))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]

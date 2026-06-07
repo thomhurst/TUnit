@@ -1560,8 +1560,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Find the data source method, property, or field
-        var dataSourceMember = targetType.GetMembers(methodName!).FirstOrDefault();
+        // Find the data source method, property, or field.
+        // Walk base types too: with [InheritsTests] (or a data member declared on a base class)
+        // the member may not be declared directly on the test class. Missing it here would emit
+        // a plain MethodDataSourceAttribute without a Factory, which falls back to
+        // Activator.CreateInstance at runtime and fails for classes without a parameterless
+        // constructor (https://github.com/thomhurst/TUnit/issues/6162).
+        ISymbol? dataSourceMember = null;
+        for (var searchType = targetType; searchType is not null; searchType = searchType.BaseType)
+        {
+            var members = searchType.GetMembers(methodName!);
+            if (members.Length > 0)
+            {
+                dataSourceMember = members[0];
+                break;
+            }
+        }
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
 

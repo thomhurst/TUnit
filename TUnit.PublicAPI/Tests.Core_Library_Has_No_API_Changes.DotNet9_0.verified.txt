@@ -1017,7 +1017,7 @@ namespace
             "rty.")]
         [.("Trimming", "IL2075", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__21))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__22))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
