@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
@@ -620,6 +621,22 @@ public class CombinedDataSourceTests
 
         // Verify IAsyncInitializer was called on Address (after nested objects)
         await Assert.That(address.IsValidated).IsTrue();
+    }
+
+    public class NonSharedInstance;
+
+    private static readonly ConcurrentDictionary<NonSharedInstance, byte> SeenNonSharedInstances = new();
+
+    [Test]
+    [CombinedDataSources]
+    public async Task CombinedDataSource_NonSharedClassDataSource_CreatesDistinctInstancePerTestCase(
+        [Arguments(1, 2)] int x,
+        [ClassDataSource<NonSharedInstance>] NonSharedInstance instance)
+    {
+        // ClassDataSource defaults to SharedType.None - each test case must get its OWN instance.
+        // Sharing one instance across the cartesian combinations causes a property-injection /
+        // initialization race during parallel test registration (#6177).
+        await Assert.That(SeenNonSharedInstances.TryAdd(instance, 0)).IsTrue();
     }
 
     [Test]

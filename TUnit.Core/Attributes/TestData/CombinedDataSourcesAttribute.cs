@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Enums;
 using TUnit.Core.Extensions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
@@ -101,23 +102,36 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
             throw new InvalidOperationException("CombinedDataSources requires test information but none is available. This may occur during static property initialization.");
         }
 
-        // For each parameter, collect all possible values (individual values, not arrays)
-        var parameterValueSets = new List<IReadOnlyList<object?>>();
+        // For each parameter, collect a factory per possible value (individual values, not arrays).
+        // Values are materialized per combination (not once up front) so that non-shared
+        // reference values - e.g. [ClassDataSource] with SharedType.None - produce a fresh
+        // instance for every test case instead of one instance shared across the cartesian
+        // product, which races during parallel property injection/initialization (#6177).
+        var parameterValueFactorySets = new List<IReadOnlyList<Func<Task<object?>>>>();
 
         foreach (var param in parameterInformation)
         {
-            var parameterValues = await GetParameterValues(param, dataGeneratorMetadata);
-            parameterValueSets.Add(parameterValues);
+            var parameterValueFactories = await GetParameterValueFactories(param, dataGeneratorMetadata);
+            parameterValueFactorySets.Add(parameterValueFactories);
         }
 
-        // Compute Cartesian product of all parameter value sets
-        foreach (var combination in GetCartesianProduct(parameterValueSets))
+        // Compute Cartesian product of all parameter value factory sets
+        foreach (var combination in CartesianProductHelper.GetCartesianProduct(parameterValueFactorySets))
         {
-            yield return () => Task.FromResult(combination)!;
+            yield return async () =>
+            {
+                var row = new object?[combination.Length];
+                for (var i = 0; i < combination.Length; i++)
+                {
+                    row[i] = await combination[i]();
+                }
+
+                return row;
+            };
         }
     }
 
-    private async Task<IReadOnlyList<object?>> GetParameterValues(ParameterMetadata parameterMetadata, DataGeneratorMetadata dataGeneratorMetadata)
+    private async Task<IReadOnlyList<Func<Task<object?>>>> GetParameterValueFactories(ParameterMetadata parameterMetadata, DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Get all IDataSourceAttribute attributes on this parameter
         // Prefer cached attributes from source generator for AOT compatibility
@@ -149,7 +163,7 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
             throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' has no data source attributes. All parameters must have at least one IDataSourceAttribute when using [CombinedDataSources].");
         }
 
-        var allValues = new List<object?>();
+        var allValueFactories = new List<Func<Task<object?>>>();
 
         // Process each data source attribute
         foreach (var dataSourceAttr in dataSourceAttributes)
@@ -179,23 +193,23 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
                 InstanceFactory = dataGeneratorMetadata.InstanceFactory
             };
 
-            // Get data rows from this data source (need to await async enumerable)
-            var dataRows = await ProcessDataSourceAsync(dataSourceAttr, singleParamMetadata);
+            // Get data row factories from this data source (need to await async enumerable)
+            var dataRowFactories = await ProcessDataSourceAsync(dataSourceAttr, singleParamMetadata);
 
-            allValues.AddRange(dataRows);
+            allValueFactories.AddRange(dataRowFactories);
         }
 
-        if (allValues.Count == 0)
+        if (allValueFactories.Count == 0)
         {
             throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' data sources produced no values.");
         }
 
-        return allValues;
+        return allValueFactories;
     }
 
-    private static async Task<List<object?>> ProcessDataSourceAsync(IDataSourceAttribute dataSourceAttr, DataGeneratorMetadata metadata)
+    private static async Task<List<Func<Task<object?>>>> ProcessDataSourceAsync(IDataSourceAttribute dataSourceAttr, DataGeneratorMetadata metadata)
     {
-        var values = new List<object?>();
+        var valueFactories = new List<Func<Task<object?>>>();
 
         // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSources
         // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSources we need
@@ -203,70 +217,28 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
         if (dataSourceAttr is ArgumentsAttribute argsAttr)
         {
             // Each value in Arguments should be a separate option for this parameter
-            values.AddRange(argsAttr.Values);
+            foreach (var value in argsAttr.Values)
+            {
+                valueFactories.Add(() => Task.FromResult(value));
+            }
         }
         else
         {
             await foreach (var dataRowFunc in dataSourceAttr.GetDataRowsAsync(metadata))
             {
-                var dataRow = await dataRowFunc();
-                if (dataRow != null && dataRow.Length > 0)
+                // Defer invocation: the row factory runs once per combination that uses it,
+                // so each test case gets its own value (fresh instance for non-shared sources).
+                valueFactories.Add(async () =>
                 {
+                    var dataRow = await dataRowFunc();
+
                     // Each data row should have exactly one element for this parameter
-                    values.Add(dataRow[0]);
-                }
+                    return dataRow is { Length: > 0 } ? dataRow[0] : null;
+                });
             }
         }
 
-        return values;
+        return valueFactories;
     }
 
-    private static IEnumerable<object?[]> GetCartesianProduct(IReadOnlyList<IReadOnlyList<object?>> parameterValueSets)
-    {
-        var dimensionCount = parameterValueSets.Count;
-
-        // Any empty dimension makes the product empty (matches the previous
-        // Aggregate/SelectMany behaviour where SelectMany over [] yields nothing).
-        for (var dimension = 0; dimension < dimensionCount; dimension++)
-        {
-            if (parameterValueSets[dimension].Count == 0)
-            {
-                yield break;
-            }
-        }
-
-        // Odometer-style Cartesian product: the last dimension varies fastest,
-        // matching the previous Aggregate/SelectMany ordering exactly.
-        var indices = new int[dimensionCount];
-
-        while (true)
-        {
-            var row = new object?[dimensionCount];
-            for (var dimension = 0; dimension < dimensionCount; dimension++)
-            {
-                row[dimension] = parameterValueSets[dimension][indices[dimension]];
-            }
-
-            yield return row;
-
-            // Advance the odometer from the rightmost dimension.
-            var position = dimensionCount - 1;
-            while (position >= 0)
-            {
-                if (++indices[position] < parameterValueSets[position].Count)
-                {
-                    break;
-                }
-
-                indices[position] = 0;
-                position--;
-            }
-
-            // All dimensions wrapped back to zero: enumeration is complete.
-            if (position < 0)
-            {
-                yield break;
-            }
-        }
-    }
 }
