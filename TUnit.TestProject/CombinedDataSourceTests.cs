@@ -622,6 +622,22 @@ public class CombinedDataSourceTests
         await Assert.That(address.IsValidated).IsTrue();
     }
 
+    public class NonSharedInstance;
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<NonSharedInstance, byte> SeenNonSharedInstances = new();
+
+    [Test]
+    [CombinedDataSources]
+    public async Task CombinedDataSource_NonSharedClassDataSource_CreatesDistinctInstancePerTestCase(
+        [Arguments(1, 2)] int x,
+        [ClassDataSource<NonSharedInstance>] NonSharedInstance instance)
+    {
+        // ClassDataSource defaults to SharedType.None - each test case must get its OWN instance.
+        // Sharing one instance across the cartesian combinations causes a property-injection /
+        // initialization race during parallel test registration (#6177).
+        await Assert.That(SeenNonSharedInstances.TryAdd(instance, 0)).IsTrue();
+    }
+
     [Test]
     [CombinedDataSources]
     public async Task CombinedDataSource_ComplexScenario_MultipleParametersWithMixedFeatures(
