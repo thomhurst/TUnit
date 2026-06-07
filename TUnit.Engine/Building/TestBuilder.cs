@@ -1078,12 +1078,10 @@ internal sealed class TestBuilder : ITestBuilder
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             testBuilderContext,
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         return context;
     }
@@ -1174,15 +1172,13 @@ internal sealed class TestBuilder : ITestBuilder
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails)
     {
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata
             },
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         return context;
     }

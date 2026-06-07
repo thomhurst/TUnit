@@ -309,12 +309,12 @@ public class SessionActivityLifecycleTests
             throw new NotSupportedException();
 
         public TestContext CreateTestContext(
-            string testName,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |
                                         DynamicallyAccessedMemberTypes.PublicProperties |
                                         DynamicallyAccessedMemberTypes.PublicMethods)]
             Type classType,
             TestBuilderContext testBuilderContext,
+            TestDetails testDetails,
             CancellationToken cancellationToken) =>
             throw new NotSupportedException();
     }

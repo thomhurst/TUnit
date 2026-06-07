@@ -8,7 +8,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Builder for creating and managing the context hierarchy with proper parent-child relationships and singleton behavior
 /// </summary>
-public class ContextProvider(IServiceProvider serviceProvider, string testSessionId, string? testFilter) : IContextProvider
+internal class ContextProvider(IServiceProvider serviceProvider, string testSessionId, string? testFilter) : IContextProvider
 {
     private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyContexts = new();
     private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
@@ -81,15 +81,20 @@ public class ContextProvider(IServiceProvider serviceProvider, string testSessio
     /// Creates a test context with proper parent hierarchy
     /// </summary>
     public TestContext CreateTestContext(
-        string testName,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,
+        TestDetails testDetails,
         CancellationToken cancellationToken)
     {
         var classContext = GetOrCreateClassContext(classType);
 
-        var testContext = new TestContext(testName, serviceProvider, classContext, testBuilderContext, cancellationToken);
+        var testContext = new TestContext(testDetails.TestName, serviceProvider, classContext, testBuilderContext, cancellationToken)
+        {
+            // Must be assigned before AddTest publishes the context via ClassHookContext.Tests —
+            // AfterEvery(Class) hooks can iterate Tests while sibling dynamic tests are still being built.
+            TestDetails = testDetails,
+        };
 
         classContext.AddTest(testContext);
 

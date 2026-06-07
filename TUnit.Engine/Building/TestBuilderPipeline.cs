@@ -265,13 +265,10 @@ internal sealed class TestBuilderPipeline
             var testBuilderContext = CreateTestBuilderContext(metadata);
 
             var context = _contextProvider.CreateTestContext(
-                metadata.TestName,
                 metadata.TestClassType,
                 testBuilderContext,
+                testDetails,
                 CancellationToken.None);
-
-            // Set the TestDetails on the context
-            context.Metadata.TestDetails = testDetails;
 
             // Set custom display name for dynamic tests if specified
             if (dynamicTestMetadata?.DisplayName != null)
@@ -392,13 +389,10 @@ internal sealed class TestBuilderPipeline
                     };
 
                     var context = _contextProvider.CreateTestContext(
-                        resolvedMetadata.TestName,
                         resolvedMetadata.TestClassType,
                         CreateTestBuilderContext(resolvedMetadata),
+                        testDetails,
                         CancellationToken.None);
-
-                    // Set the TestDetails on the context
-                    context.Metadata.TestDetails = testDetails;
 
                     // Set custom display name for dynamic tests if specified
                     if (dynamicMetadata.DisplayName != null)
@@ -473,12 +467,10 @@ internal sealed class TestBuilderPipeline
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             CreateTestBuilderContext(metadata),
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         var now = DateTimeOffset.UtcNow;
 
@@ -528,12 +520,10 @@ internal sealed class TestBuilderPipeline
         };
 
         var context = _contextProvider.CreateTestContext(
-            metadata.TestName,
             metadata.TestClassType,
             CreateTestBuilderContext(metadata),
+            testDetails,
             CancellationToken.None);
-
-        context.Metadata.TestDetails = testDetails;
 
         var now = DateTimeOffset.UtcNow;
 
