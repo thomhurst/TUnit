@@ -72,6 +72,15 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             // for this fixture's compilation context.
             await Assert.That(extensionFile!).DoesNotContain("><");
 
+            // Issue #5922: for a covariance-candidate receiver that also declares its own generic
+            // parameter, the generator emits BOTH the covariant overload (keeps subclass binding)
+            // and an inference-friendly pinned-receiver overload that omits the covariant TActual,
+            // so the common exact-type call site only needs the class's own type argument.
+            // Covariant overload: <TActual, T> receiver IAssertionSource<TActual>.
+            await Assert.That(extensionFile!).Contains("ConcreteReceiverWithExtraGenericMatches<TActual, T>(this IAssertionSource<TActual> source");
+            // Pinned overload: <T> only, receiver pinned to the concrete IAssertionSource<System.Exception>.
+            await Assert.That(extensionFile!).Contains("ConcreteReceiverWithExtraGenericMatches<T>(this IAssertionSource<System.Exception> source");
+
             // Compile-clean gate: parse + compile the generated source through Roslyn and
             // assert no error-severity diagnostic. Catches the entire class of emit-syntax
             // bugs (mis-paired brackets, wrong default rendering, adjacent generic blocks)
@@ -101,6 +110,26 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
                 .ToArray();
 
             await Assert.That(errors).IsEmpty();
+        });
+
+    [Test]
+    public Task ConcreteReceiverWithInferableGeneric() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "ConcreteReceiverWithInferableGenericAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+            var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("ConcreteReceiverWithInferableGenericTagged"));
+            await Assert.That(extensionFile).IsNotNull();
+
+            // Issue #5922: the own type parameter T is inferable from the `T tag` value argument, so
+            // the caller never names a type argument and the covariant overload binds on its own.
+            // Covariant overload IS emitted (keeps subclass binding).
+            await Assert.That(extensionFile!).Contains("ConcreteReceiverWithInferableGenericTagged<TActual, T>(this IAssertionSource<TActual> source");
+            // The pinned-receiver overload would be pure dead weight here, so it must NOT be emitted.
+            await Assert.That(extensionFile!).DoesNotContain("(this IAssertionSource<System.Exception> source");
         });
 
     [Test]
