@@ -375,7 +375,10 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         // Add OverloadResolutionPriority attribute if specified
         // For nullable overloads (generic with class constraint), increase priority by 1
-        // so they're preferred over the base nullable overload when source is non-nullable
+        // so they're preferred over the base nullable overload when source is non-nullable.
+        // The pinned-receiver overload intentionally shares the same priority as its covariant
+        // sibling (the priority is not pinnedReceiver-aware): the two are arity-disjoint and never
+        // both applicable, so the C# "more specific receiver" rule is the tiebreaker, not ORP.
         var effectivePriority = data.OverloadResolutionPriority;
         if (isNullableOverload)
         {

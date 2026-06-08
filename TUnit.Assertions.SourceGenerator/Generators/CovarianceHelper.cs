@@ -139,6 +139,11 @@ internal static class CovarianceHelper
     /// parameters) and at <c>System.Linq.Expressions.Expression&lt;...&gt;</c>. The bias is
     /// conservative: anything we cannot prove inferable is treated as non-inferable, which keeps the
     /// pinned overload (the pre-existing behaviour) rather than risk an ergonomic regression.
+    /// Known conservatism: a type parameter reachable only through a delegate nested inside another
+    /// generic (e.g. <c>IEnumerable&lt;Func&lt;T, bool&gt;&gt;</c>) is reported as non-inferable even
+    /// though the compiler could infer it from a concrete argument. This is intentional — the only
+    /// consequence is one redundant overload, which the "more specific receiver" rule still resolves
+    /// without ambiguity — so it should not be "fixed" into an over-aggressive heuristic.
     /// </summary>
     private static bool AppearsInInferablePosition(ITypeSymbol type, ITypeParameterSymbol typeParameter)
     {
