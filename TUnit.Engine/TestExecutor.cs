@@ -57,7 +57,7 @@ internal class TestExecutor
     /// This is called before creating test instances to ensure resources are available.
     /// Registers the corresponding After(TestSession) hook to run on cancellation.
     /// </summary>
-    public async Task EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
+    public async ValueTask EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
     {
         // Get or create and cache Before hooks - these run only once
         await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
@@ -100,6 +100,11 @@ internal class TestExecutor
         test.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
         await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+
+        // Note: the caller (TestCoordinator) restores ClassContext.RestoreExecutionContext() right
+        // before constructing the instance so AsyncLocals captured by BeforeAssembly/BeforeClass flow
+        // into the constructor. Restoring here wouldn't persist — the ambient ExecutionContext is
+        // reset when this async method returns to the caller.
     }
 
     /// <summary>
