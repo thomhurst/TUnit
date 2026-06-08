@@ -74,6 +74,10 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    // [Arguments] yields a single row, so deferring its enumeration would be pure overhead - always false.
+    public bool DeferEnumeration { get => false; set { } }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ArgumentsAttribute"/> class with the specified test argument values.
     /// </summary>
@@ -165,6 +169,10 @@ public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>
 
     /// <inheritdoc />
     public override bool SkipIfEmpty { get; set; }
+
+    /// <inheritdoc />
+    // [Arguments] yields a single row, so deferring its enumeration would be pure overhead - always false.
+    public override bool DeferEnumeration { get => false; set { } }
 
     public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {

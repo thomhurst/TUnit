@@ -18,4 +18,19 @@ public interface IDataSourceAttribute
     /// When true, if the data source returns no data, the test will be skipped instead of failing.
     /// </summary>
     bool SkipIfEmpty { get; set; }
+
+    /// <summary>
+    /// When <c>true</c>, this data source is not enumerated during test discovery. Instead, the test
+    /// appears as a single placeholder node, and the data rows are enumerated and executed at runtime
+    /// (each reported as a result nested under the placeholder). This avoids the IDE/test-explorer
+    /// overhead of expanding a data source that produces a large number of cases.
+    /// </summary>
+    /// <remarks>
+    /// If any data source on a test sets this to <c>true</c>, the entire test's case expansion is
+    /// deferred to runtime. Tests deferred this way cannot be targeted individually by a filter, and
+    /// other tests cannot <c>[DependsOn]</c> their rows (the rows do not exist until runtime).
+    /// Single-row sources (such as <c>[Arguments]</c>) ignore this flag — there is nothing to defer —
+    /// so setting it on them has no effect.
+    /// </remarks>
+    bool DeferEnumeration { get; set; }
 }

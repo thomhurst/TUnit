@@ -79,6 +79,12 @@ public class FsCheckPropertyAttribute : Attribute, ITestRegisteredEventReceiver,
     public bool SkipIfEmpty { get; set; }
 
     /// <summary>
+    /// Not used - FsCheck generates its own data during test execution (there are no discovery-time rows
+    /// to defer), so this is always false. Exists to satisfy the IDataSourceAttribute interface.
+    /// </summary>
+    public bool DeferEnumeration { get => false; set { } }
+
+    /// <summary>
     /// Called when the test is registered. Sets up the FsCheck property executor.
     /// </summary>
     public ValueTask OnTestRegistered(TestRegisteredContext context)

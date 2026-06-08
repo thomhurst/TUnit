@@ -13,6 +13,9 @@ internal sealed class DelegateDataSourceAttribute : Attribute, IDataSourceAttrib
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public bool DeferEnumeration { get; set; }
+
     public DelegateDataSourceAttribute(Func<DataGeneratorMetadata, IAsyncEnumerable<object?[]>> factory, bool isShared = false)
     {
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));

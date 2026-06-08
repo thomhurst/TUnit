@@ -8,6 +8,9 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : Attribute, IAsy
     /// <inheritdoc />
     public virtual bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public virtual bool DeferEnumeration { get; set; }
+
     protected abstract IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
     public IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)

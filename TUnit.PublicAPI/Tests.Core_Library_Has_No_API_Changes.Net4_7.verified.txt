@@ -79,12 +79,13 @@ namespace
     {
         public ArgumentsAttribute(params object?[]? values) { }
         public string[]? Categories { get; set; }
+        public bool DeferEnumeration { get; set; }
         public string? DisplayName { get; set; }
         public int Order { get; }
         public string? Skip { get; set; }
         public bool SkipIfEmpty { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__20))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__23))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -93,11 +94,12 @@ namespace
     {
         public ArgumentsAttribute(T value) { }
         public string[]? Categories { get; set; }
+        public override bool DeferEnumeration { get; set; }
         public string? DisplayName { get; set; }
         public int Order { get; }
         public string? Skip { get; set; }
         public override bool SkipIfEmpty { get; set; }
-        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__18))]
+        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__21))]
         public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -191,6 +193,7 @@ namespace
     public abstract class AsyncUntypedDataSourceGeneratorAttribute : , .IDataSourceAttribute
     {
         protected AsyncUntypedDataSourceGeneratorAttribute() { }
+        public virtual bool DeferEnumeration { get; set; }
         public virtual bool SkipIfEmpty { get; set; }
         public .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
@@ -860,6 +863,7 @@ namespace
     public interface IAccessesInstanceData { }
     public interface IDataSourceAttribute
     {
+        bool DeferEnumeration { get; set; }
         bool SkipIfEmpty { get; set; }
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
@@ -978,10 +982,11 @@ namespace
         public MethodDataSourceAttribute( classProvidingDataSource, string methodNameProvidingDataSource) { }
         public object?[] Arguments { get; set; }
         public ? ClassProvidingDataSource { get; }
+        public bool DeferEnumeration { get; set; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
         public bool SkipIfEmpty { get; set; }
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__22))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__26))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
@@ -1694,8 +1699,9 @@ namespace
     public abstract class TypedDataSourceAttribute<T> : , .IDataSourceAttribute, .ITypedDataSourceAttribute<T>
     {
         protected TypedDataSourceAttribute() { }
+        public virtual bool DeferEnumeration { get; set; }
         public virtual bool SkipIfEmpty { get; set; }
-        [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__5))]
+        [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__9))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public abstract .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }

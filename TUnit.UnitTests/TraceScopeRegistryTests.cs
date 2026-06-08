@@ -135,6 +135,8 @@ public class TraceScopeRegistryTests
 
         public bool SkipIfEmpty { get; set; }
 
+        public bool DeferEnumeration { get; set; }
+
         public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
             => throw new NotSupportedException("Not needed for registry tests");
 
@@ -147,6 +149,8 @@ public class TraceScopeRegistryTests
     private sealed class FakeNonTraceScopeDataSource : IDataSourceAttribute
     {
         public bool SkipIfEmpty { get; set; }
+
+        public bool DeferEnumeration { get; set; }
 
         public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
             => throw new NotSupportedException("Not needed for registry tests");

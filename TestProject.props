@@ -9,11 +9,17 @@
         Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
     <PropertyGroup>
-        <!-- Default test projects to net10.0 only. Multi-targeting (net472;net8;net9) is
-             expensive (4x compile work) and only matters for projects that snapshot output
-             across consumer TFMs (e.g. TUnit.PublicAPI, TUnit.Core.SourceGenerator.Tests).
-             Those projects set <TargetFrameworks> explicitly before this import. -->
-        <TargetFrameworks Condition="'$(TargetFrameworks)' == '' and '$(TargetFramework)' == ''">net10.0</TargetFrameworks>
+        <!-- Test projects multi-target net8.0;net9.0;net10.0 (the repo default also set in
+             Directory.Build.props). We re-assert it here gated ONLY on TargetFrameworks being
+             empty (NOT on TargetFramework=='') so it survives Visual Studio's design-time
+             evaluation: CPS probes each candidate TFM by passing TargetFramework=netX as a
+             global property, which makes a TargetFramework=='' guard evaluate false and leaves
+             TargetFrameworks empty. CPS then can't resolve TargetPath for the cross-targeting
+             outer build and faults the project load (InvalidProjectDataException). Keeping this
+             unconditional-when-empty mirrors Library.props, which never hit the bug.
+             Projects needing a different set (e.g. TUnit.PublicAPI with net472) assign
+             <TargetFrameworks> before this import; the guard below then leaves them untouched. -->
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0;net9.0;net10.0</TargetFrameworks>
 
         <OutputType>Exe</OutputType>
 

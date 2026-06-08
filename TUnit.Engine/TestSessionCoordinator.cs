@@ -24,6 +24,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly ITUnitMessageBus _messageBus;
     private readonly IStaticPropertyInitializer _staticPropertyInitializer;
     private readonly ObjectTracker _objectTracker;
+    private readonly DeferredTestExpander _deferredTestExpander;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -33,7 +34,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         TestLifecycleCoordinator lifecycleCoordinator,
         ITUnitMessageBus messageBus,
         IStaticPropertyInitializer staticPropertyInitializer,
-        ObjectTracker objectTracker)
+        ObjectTracker objectTracker,
+        DeferredTestExpander deferredTestExpander)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -44,6 +46,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _testScheduler = testScheduler;
         _staticPropertyInitializer = staticPropertyInitializer;
         _objectTracker = objectTracker;
+        _deferredTestExpander = deferredTestExpander;
     }
 
     public async Task ExecuteTests(
@@ -54,12 +57,20 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     {
         var testList = tests.ToList();
 
+        // Expand any deferred-enumeration placeholders into their real cases before counting/scheduling,
+        // so the children flow through the normal pipeline (correct hooks + lifecycle counting).
+        var expandedPlaceholders = await ExpandDeferredPlaceholdersAsync(testList, cancellationToken);
+
         InitializeEventReceivers(testList, cancellationToken);
 
         try
         {
             await PrepareTestOrchestrator(testList, cancellationToken);
             await ExecuteTestsCore(testList, cancellationToken);
+
+            // Children have now run: resolve each placeholder container to the aggregate of its cases so the
+            // IDE node the user ran gets a result (rather than "not run") that reflects its children.
+            await ReportDeferredPlaceholderResultsAsync(expandedPlaceholders);
         }
         finally
         {
@@ -90,6 +101,116 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         _eventReceiverOrchestrator.InitializeTestCounts(testList);
+    }
+
+    /// <summary>
+    /// Replaces every <see cref="DeferredEnumerationExecutableTest"/> in the list with the real test cases
+    /// produced by enumerating its data source. The placeholder is reported as a running container now (so the
+    /// IDE node the user ran shows as in-progress rather than "not run") and resolved to the aggregate of its
+    /// children later by <see cref="ReportDeferredPlaceholderResultsAsync"/>; the children are added to the
+    /// list, scheduled like any other test, and nested under the placeholder via their ParentTestId. If the
+    /// expansion itself throws, the placeholder is reported failed immediately. (Per-row data errors surface
+    /// as their own failed child via the standard data-generation-error path.) The returned list pairs each
+    /// successfully-expanded placeholder with its children so its final result can be reported post-run.
+    /// </summary>
+#if NET8_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+#endif
+    private async Task<List<(AbstractExecutableTest Placeholder, IReadOnlyList<AbstractExecutableTest> Children)>> ExpandDeferredPlaceholdersAsync(
+        List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
+    {
+        List<DeferredEnumerationExecutableTest>? placeholders = null;
+        foreach (var test in testList)
+        {
+            if (test is DeferredEnumerationExecutableTest placeholder)
+            {
+                (placeholders ??= []).Add(placeholder);
+            }
+        }
+
+        if (placeholders is null)
+        {
+            return [];
+        }
+
+        // Drop all placeholders in a single pass so none are scheduled as real tests (their Create/Invoke
+        // throw); their children are added back below.
+        testList.RemoveAll(static t => t is DeferredEnumerationExecutableTest);
+
+        var expanded = new List<(AbstractExecutableTest, IReadOnlyList<AbstractExecutableTest>)>(placeholders.Count);
+
+        foreach (var placeholder in placeholders)
+        {
+            placeholder.StartTime = DateTimeOffset.UtcNow;
+            placeholder.State = TestState.Running;
+            await _messageBus.InProgress(placeholder.Context);
+
+            try
+            {
+                var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
+                testList.AddRange(children);
+                expanded.Add((placeholder, children));
+            }
+            catch (Exception ex)
+            {
+                // Expansion itself failed (as opposed to a per-row data error, which becomes a failed
+                // child). Surface it on the placeholder node so the failure is visible.
+                await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
+                placeholder.EndTime = DateTimeOffset.UtcNow;
+                placeholder.SetResult(TestState.Failed, ex);
+                await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
+            }
+        }
+
+        return expanded;
+    }
+
+    /// <summary>
+    /// Reports the final result for each deferred placeholder once its children have executed: the placeholder
+    /// is a container whose outcome is the aggregate of its cases — failed if any case failed, skipped if every
+    /// case was skipped, otherwise passed. This resolves the IDE node the user ran without masking child
+    /// failures (which a fixed "passed" would).
+    /// </summary>
+    private async Task ReportDeferredPlaceholderResultsAsync(
+        List<(AbstractExecutableTest Placeholder, IReadOnlyList<AbstractExecutableTest> Children)> expandedPlaceholders)
+    {
+        foreach (var (placeholder, children) in expandedPlaceholders)
+        {
+            placeholder.EndTime = DateTimeOffset.UtcNow;
+
+            var failedCount = 0;
+            var skippedCount = 0;
+            foreach (var child in children)
+            {
+                switch (child.State)
+                {
+                    case TestState.Failed or TestState.Timeout or TestState.Cancelled:
+                        failedCount++;
+                        break;
+                    case TestState.Skipped:
+                        skippedCount++;
+                        break;
+                }
+            }
+
+            if (failedCount > 0)
+            {
+                var exception = new Exception($"{failedCount} of {children.Count} deferred test case(s) failed.");
+                placeholder.SetResult(TestState.Failed, exception);
+                await _messageBus.Failed(placeholder.Context, exception, placeholder.StartTime.GetValueOrDefault());
+            }
+            else if (children.Count > 0 && skippedCount == children.Count)
+            {
+                placeholder.State = TestState.Skipped;
+                await _messageBus.Skipped(placeholder.Context, "All deferred test cases were skipped");
+            }
+            else
+            {
+                placeholder.SetResult(TestState.Passed);
+                await _messageBus.Passed(placeholder.Context, placeholder.StartTime.GetValueOrDefault());
+            }
+        }
     }
 
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)

@@ -189,6 +189,16 @@ internal sealed class TestBuilder : ITestBuilder
 
             var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
+            // DeferEnumeration: emit a single placeholder node instead of enumerating the data source(s).
+            // The placeholder is built during both discovery and the execution build (so it matches the
+            // IDE's UID filter); DeferredTestExpander later re-runs this method with IgnoreDeferral set to
+            // produce the real cases. Skipped entirely when IgnoreDeferral is set (the expansion pass).
+            if (!buildingContext.IgnoreDeferral && HasDeferredDataSource(metadata))
+            {
+                tests.Add(await BuildDeferredPlaceholderAsync(metadata, testBuilderContext, cancellationToken));
+                return tests;
+            }
+
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources, cancellationToken))
             {
@@ -1096,6 +1106,67 @@ internal sealed class TestBuilder : ITestBuilder
             context);
 
         return _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
+    }
+
+    private static bool HasDeferredDataSource(TestMetadata metadata)
+    {
+        foreach (var dataSource in metadata.DataSources)
+        {
+            if (dataSource.DeferEnumeration)
+            {
+                return true;
+            }
+        }
+
+        foreach (var dataSource in metadata.ClassDataSources)
+        {
+            if (dataSource.DeferEnumeration)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Builds the single placeholder node for a test whose data source enumeration is deferred.
+    /// The placeholder carries no class/method data and is never executed as a real test — it exists
+    /// so discovery shows one node, and DeferredTestExpander uses its <see cref="TestMetadata"/> to build
+    /// the real cases at runtime.
+    /// </summary>
+    private async Task<AbstractExecutableTest> BuildDeferredPlaceholderAsync(
+        TestMetadata metadata,
+        TestBuilderContext testBuilderContext,
+        CancellationToken cancellationToken)
+    {
+        var testId = TestIdentifierService.GenerateDeferredPlaceholderTestId(metadata);
+
+        var testData = new TestData
+        {
+            TestClassInstanceFactory = static () => Task.FromResult<object>(PlaceholderInstance.Instance),
+            ClassDataSourceAttributeIndex = 0,
+            ClassDataLoopIndex = 0,
+            ClassData = [],
+            MethodDataSourceAttributeIndex = 0,
+            MethodDataLoopIndex = 0,
+            MethodData = [],
+            RepeatIndex = 0,
+            InheritanceDepth = metadata.InheritanceDepth,
+            ResolvedClassGenericArguments = Type.EmptyTypes,
+            ResolvedMethodGenericArguments = Type.EmptyTypes
+        };
+
+        var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext, cancellationToken);
+
+        return new DeferredEnumerationExecutableTest
+        {
+            TestId = testId,
+            Metadata = metadata,
+            Arguments = [],
+            ClassArguments = [],
+            Context = context
+        };
     }
 
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
