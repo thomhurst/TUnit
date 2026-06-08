@@ -164,6 +164,27 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
         sourceBuilder.AppendLine("{");
 
+        // When the receiver type is a covariance candidate AND the assertion class declares its
+        // own generic parameter(s), the covariant method signature is <TActual, T...>. Callers
+        // that name the class's own arguments (e.g. a non-inferable lambda type) must then also
+        // spell out the covariant TActual, because C# forbids partial type-argument specification.
+        // To restore inference for the common exact-receiver call site, additionally emit a
+        // pinned-receiver overload (IAssertionSource<TConcrete>) that omits TActual. The covariant
+        // overload is kept so a more-derived static receiver can still bind. See issue #5922.
+        var receiverType = data.AssertionBaseType.TypeArguments[0];
+        var hasOwnGenerics = data.ClassSymbol.IsGenericType && data.ClassSymbol.TypeParameters.Length > 0;
+        var needsPinnedOverload = CovarianceHelper.IsCovariantCandidate(receiverType) && hasOwnGenerics;
+
+        // Emit the covariant method plus, when warranted, the pinned-receiver overload.
+        void EmitMethod(IMethodSymbol constructor, bool negated)
+        {
+            GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false);
+            if (needsPinnedOverload)
+            {
+                GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false, pinnedReceiver: true);
+            }
+        }
+
         // Generate extension methods for each constructor
         foreach (var constructor in data.Constructors)
         {
@@ -173,12 +194,12 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             }
 
             // Generate positive assertion method
-            GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: false);
+            EmitMethod(constructor, negated: false);
 
             // Generate negated assertion method if requested
             if (!string.IsNullOrEmpty(data.NegatedMethodName))
             {
-                GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true, isNullableOverload: false);
+                EmitMethod(constructor, negated: true);
             }
         }
 
@@ -214,7 +235,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         AssertionExtensionData data,
         IMethodSymbol constructor,
         bool negated,
-        bool isNullableOverload)
+        bool isNullableOverload,
+        bool pinnedReceiver = false)
     {
         var methodName = negated ? data.NegatedMethodName : data.MethodName;
         var assertionType = data.ClassSymbol;
@@ -354,7 +376,9 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string? genericTypeParam = null;
         string? genericConstraint = null;
 
-        var isCovariantCandidate = !isNullableOverload
+        // pinnedReceiver suppresses covariance so the receiver is pinned to the concrete type
+        // (IAssertionSource<TConcrete>), dropping the TActual parameter for inference-friendly call sites.
+        var isCovariantCandidate = !isNullableOverload && !pinnedReceiver
             && CovarianceHelper.IsCovariantCandidate(typeParam);
         var typeParamDisplay = typeParam.ToDisplayString();
 

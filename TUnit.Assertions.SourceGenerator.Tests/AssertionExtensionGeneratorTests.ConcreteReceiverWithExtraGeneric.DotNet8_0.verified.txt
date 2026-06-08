@@ -28,6 +28,17 @@ public static partial class ConcreteReceiverWithExtraGenericAssertionExtensions
         source.Context.ExpressionBuilder.Append(")");
         return new ConcreteReceiverWithExtraGenericAssertion<T>(source.Context.Map<System.Exception>(static x => (System.Exception?)x), predicate);
     }
+
+    /// <summary>
+    /// Extension method for ConcreteReceiverWithExtraGenericAssertion.
+    /// </summary>
+    public static ConcreteReceiverWithExtraGenericAssertion<T> ConcreteReceiverWithExtraGenericMatches<T>(this IAssertionSource<System.Exception> source, System.Func<T, bool> predicate, [CallerArgumentExpression(nameof(predicate))] string? predicateExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append(".ConcreteReceiverWithExtraGenericMatches(");
+        source.Context.ExpressionBuilder.Append(predicateExpression);
+        source.Context.ExpressionBuilder.Append(")");
+        return new ConcreteReceiverWithExtraGenericAssertion<T>(source.Context, predicate);
+    }
 }
 
 ]
