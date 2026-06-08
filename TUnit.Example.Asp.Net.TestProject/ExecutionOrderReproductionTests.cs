@@ -89,9 +89,17 @@ public class ExecutionOrderReproductionTests : WebApplicationTest<WebApplication
         await Assert.That(testConfigApplied).IsEqualTo("true")
             .Because("Test configuration should have been applied before API started");
 
-        // Print the execution log
+        // Print the execution log. Snapshot under the lock first: ExecutionLog is a
+        // shared static list and parallel test instances may Add() to it via their
+        // lifecycle hooks while we enumerate, which would throw "Collection was modified".
+        List<string> executionLogSnapshot;
+        lock (Lock)
+        {
+            executionLogSnapshot = ExecutionLog.ToList();
+        }
+
         Console.WriteLine("\n=== FULL EXECUTION LOG ===");
-        foreach (var entry in ExecutionLog)
+        foreach (var entry in executionLogSnapshot)
         {
             Console.WriteLine(entry);
         }
