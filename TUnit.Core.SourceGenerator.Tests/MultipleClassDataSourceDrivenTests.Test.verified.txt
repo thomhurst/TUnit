@@ -88,7 +88,7 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 17,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -111,7 +111,7 @@ internal static class TUnit_TestProject_MultipleClassDataSourceDrivenTests__Test
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.MultipleClassDataSourceDrivenTests.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 23,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

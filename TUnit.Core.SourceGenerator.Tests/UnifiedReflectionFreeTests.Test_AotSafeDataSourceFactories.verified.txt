@@ -78,7 +78,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "c", new global:
         {
             MethodName = "TestWithDataSource",
             FullyQualifiedName = "TUnit.TestProject.AotDataSourceTest.TestWithDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

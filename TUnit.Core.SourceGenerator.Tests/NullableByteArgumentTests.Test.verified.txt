@@ -102,7 +102,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.NullableByteArgumentTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -125,7 +125,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte?), "byte2", new g
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.NullableByteArgumentTests.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

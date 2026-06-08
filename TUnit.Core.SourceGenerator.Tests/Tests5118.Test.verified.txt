@@ -75,7 +75,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "TestWithAsyncComplexData",
             FullyQualifiedName = "TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests.TestWithAsyncComplexData",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 22,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

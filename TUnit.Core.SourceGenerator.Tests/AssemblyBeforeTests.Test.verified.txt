@@ -58,7 +58,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblyBase1_BeforeAll1_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblyBase1_BeforeAll1_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblyBase1_BeforeAll1_0Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 5
     }
 );
@@ -198,7 +198,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblyBase2_BeforeAll2_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblyBase2_BeforeAll2_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblyBase2_BeforeAll2_0Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 20
     }
 );
@@ -338,7 +338,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblyBase3_BeforeAll3_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblyBase3_BeforeAll3_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblyBase3_BeforeAll3_0Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 35
     }
 );
@@ -478,7 +478,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp_0Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 50
     }
 );
@@ -551,7 +551,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext__AssemblyHookContext_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext__AssemblyHookContext_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext_1Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 56
     }
 );
@@ -621,7 +621,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp2_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp2_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUp2_0Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 62
     }
 );
@@ -695,7 +695,7 @@ namespace TUnit.Generated
         Order = 0,
         RegistrationIndex = __registrationIndex,
         Body = global::TUnit.Generated.Hooks.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext__AssemblyHookContext_CancellationToken_Before_Assembly.TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext__AssemblyHookContext_CancellationToken_Before_AssemblyInitializer.global_TUnit_TestProject_BeforeTests_AssemblySetupTests_BeforeAllSetUpWithContext_2Params_Body,
-        FilePath = @"",
+        FilePath = "",
         LineNumber = 68
     }
 );

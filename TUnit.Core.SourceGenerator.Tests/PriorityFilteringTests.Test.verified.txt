@@ -141,7 +141,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "High_1",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 12,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -159,7 +159,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "High_2",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 18,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -177,7 +177,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "High_3",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.High_3",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 24,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -195,7 +195,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "Medium_1",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 30,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -213,7 +213,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "Medium_2",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Medium_2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 36,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -231,7 +231,7 @@ internal static class TUnit_TestProject_PriorityFilteringTests__TestSource
         {
             MethodName = "Low_1",
             FullyQualifiedName = "TUnit.TestProject.PriorityFilteringTests.Low_1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 42,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

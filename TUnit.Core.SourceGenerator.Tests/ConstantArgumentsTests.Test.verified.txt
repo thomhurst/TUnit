@@ -214,7 +214,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "String1",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.String1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -236,7 +236,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "Int",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.Int",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 23,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -258,7 +258,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "Double",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.Double",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 30,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -280,7 +280,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "Float",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.Float",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 37,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -302,7 +302,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "Long",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.Long",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 44,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -324,7 +324,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "UInt",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.UInt",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 51,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -346,7 +346,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(ulong), "dummy", new g
         {
             MethodName = "ULong",
             FullyQualifiedName = "TUnit.TestProject.ConstantArgumentsTests.ULong",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 58,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

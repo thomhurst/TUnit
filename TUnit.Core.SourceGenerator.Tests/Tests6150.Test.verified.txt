@@ -100,7 +100,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(byte[][]), "data", new
         {
             MethodName = "JaggedArray",
             FullyQualifiedName = "TUnit.TestProject.Bugs._6150.Tests.JaggedArray",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

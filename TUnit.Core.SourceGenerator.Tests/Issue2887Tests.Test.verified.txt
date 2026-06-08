@@ -70,7 +70,7 @@ internal static class TUnit_TestProject_Bugs__Issue2887_ActualTestClass__TestSou
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.Bugs._Issue2887.ActualTestClass.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 26,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

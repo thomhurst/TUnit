@@ -65,7 +65,7 @@ internal static class TUnit_TestProject_SimpleTestClass__TestSource
         {
             MethodName = "NonGenericTest",
             FullyQualifiedName = "TUnit.TestProject.SimpleTestClass.NonGenericTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

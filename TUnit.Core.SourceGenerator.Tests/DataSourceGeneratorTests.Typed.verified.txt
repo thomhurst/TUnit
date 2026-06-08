@@ -136,7 +136,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
         {
             MethodName = "GeneratedData_Method",
             FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 12,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -163,7 +163,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
         {
             MethodName = "GeneratedData_Method2",
             FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 18,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -190,7 +190,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
         {
             MethodName = "GeneratedData_Method3",
             FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method3",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 24,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

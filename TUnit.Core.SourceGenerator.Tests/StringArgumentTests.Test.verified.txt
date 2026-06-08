@@ -101,7 +101,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new glob
         {
             MethodName = "Normal",
             FullyQualifiedName = "TUnit.TestProject.StringArgumentTests.Normal",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -134,7 +134,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "s", new glob
         {
             MethodName = "Nullable",
             FullyQualifiedName = "TUnit.TestProject.StringArgumentTests.Nullable",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 27,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

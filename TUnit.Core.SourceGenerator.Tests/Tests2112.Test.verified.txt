@@ -173,7 +173,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2112.Tests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -196,7 +196,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(long[]), "arr", new gl
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2112.Tests.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

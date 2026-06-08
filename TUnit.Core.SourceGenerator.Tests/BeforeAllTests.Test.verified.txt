@@ -76,7 +76,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests__TestSource
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.BeforeTests.SetupTests.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 98,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -94,7 +94,7 @@ internal static class TUnit_TestProject_BeforeTests_SetupTests__TestSource
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.BeforeTests.SetupTests.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 104,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -114,7 +115,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                     {
                         sourceBuilder.AppendLine(
                             $"""
-                             var context = new global::TUnit.Core.DynamicTestBuilderContext(@"{model.FilePath}", {model.LineNumber});
+                             var context = new global::TUnit.Core.DynamicTestBuilderContext({SymbolDisplay.FormatLiteral(model.FilePath, quote: true)}, {model.LineNumber});
                              """);
 
                         var receiver = model.IsStatic
@@ -157,7 +158,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                               new global::TUnit.Core.FailedDynamicTest<{{model.FullyQualifiedTypeName}}>
                               {
                                   MethodName = "{{model.MethodName}}",
-                                  TestFilePath = @"{{model.FilePath}}",
+                                  TestFilePath = {{SymbolDisplay.FormatLiteral(model.FilePath, quote: true)}},
                                   TestLineNumber = {{model.LineNumber}},
                                   Exception = exception
                               }

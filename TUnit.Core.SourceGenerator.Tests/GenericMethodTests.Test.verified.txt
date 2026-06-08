@@ -98,7 +98,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
         {
             MethodName = "AggregateBy_HasExpectedOutput<int, int, int>",
             FullyQualifiedName = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<int, int, int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -141,7 +141,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
         {
             MethodName = "AggregateBy_HasExpectedOutput<string, string, string>",
             FullyQualifiedName = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<string, string, string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

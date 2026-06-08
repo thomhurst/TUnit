@@ -197,7 +197,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "Int",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Int",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -219,7 +219,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "Double",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Double",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -241,7 +241,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "Float",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Float",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 22,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -263,7 +263,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "Long",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Long",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 29,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -285,7 +285,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "ULong",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.ULong",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 36,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -307,7 +307,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
         {
             MethodName = "UInt",
             FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.UInt",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 43,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -51,7 +51,7 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
         {
             MethodName = "TestMethod",
             FullyQualifiedName = "TUnit.TestProject.ConstrainedGenericTestClass<string>.TestMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 10,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -97,7 +97,7 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
         {
             MethodName = "TestMethod",
             FullyQualifiedName = "TUnit.TestProject.ConstrainedGenericTestClass<object>.TestMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 10,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

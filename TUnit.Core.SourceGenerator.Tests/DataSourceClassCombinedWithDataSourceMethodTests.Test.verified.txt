@@ -83,7 +83,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "i", new global:
         {
             MethodName = "DataSourceClassCombinedWithDataSourceMethodTest",
             FullyQualifiedName = "TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod.DataSourceClassCombinedWithDataSourceMethodTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 13,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

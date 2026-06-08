@@ -115,7 +115,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
         {
             MethodName = "Simple",
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.Simple",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -138,7 +138,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
         {
             MethodName = "WithMethodLevel",
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.WithMethodLevel",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 11,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -166,7 +166,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "arg2", new g
         {
             MethodName = "IgnoreParameters",
             FullyQualifiedName = "TUnit.TestProject.ClassAndMethodArgumentsTests.IgnoreParameters",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

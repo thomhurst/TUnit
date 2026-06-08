@@ -123,7 +123,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item15", new
         {
             MethodName = "Eight_Args",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1538.Tests.Eight_Args",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -166,7 +166,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "item15", new
         {
             MethodName = "SixteenArgs",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1538.Tests.SixteenArgs",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

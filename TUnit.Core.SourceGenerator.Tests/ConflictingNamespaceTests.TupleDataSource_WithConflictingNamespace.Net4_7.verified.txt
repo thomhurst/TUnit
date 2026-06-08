@@ -79,7 +79,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
         {
             MethodName = "DataSource_TupleMethod",
             FullyQualifiedName = "TUnit.TestProject.TupleDataSourceDrivenTests.DataSource_TupleMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -99,7 +99,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(short), "value", new g
         {
             MethodName = "Casted_Integer_To_Short_Converts",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1603.Tests.Casted_Integer_To_Short_Converts",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -121,7 +121,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(short), "value", new g
         {
             MethodName = "Integer_To_Short_Converts",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1603.Tests.Integer_To_Short_Converts",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -536,6 +536,22 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void SourcePathResolver_Strips_Workspace_Prefix_When_Path_Has_Doubled_Separators()
+    {
+        // Regression: an older source generator emitted FilePath into a verbatim literal while
+        // also escaping backslashes, so the runtime path carried doubled separators
+        // ("D:\\a\\refit\\refit\\..."). Replace('\\','/') then produced "D://a//refit//..."
+        // which failed the workspace prefix match and fell through to repo-name matching,
+        // yielding a bogus "/refit//src//..." that 404'd on raw.githubusercontent.com.
+        var relative = SourcePathResolver.ToRepoRelativePath(
+            @"D:\\a\\refit\\refit\\src\\Refit.Tests\\RestServiceExceptions.cs",
+            workspace: @"D:\a\refit\refit",
+            repo: "reactiveui/refit");
+
+        relative.ShouldBe("src/Refit.Tests/RestServiceExceptions.cs");
+    }
+
+    [Test]
     public void SourcePathResolver_Falls_Back_To_Repo_Name_When_No_Workspace()
     {
         // No workspace given; locate the repo name segment within the path instead.

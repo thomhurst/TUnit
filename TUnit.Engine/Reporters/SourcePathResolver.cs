@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace TUnit.Engine.Reporters;
@@ -35,7 +36,11 @@ internal static partial class SourcePathResolver
             return null;
         }
 
-        var normalized = filePath!.Replace('\\', '/');
+        // A doubled-separator path (e.g. an older source generator that emitted "D:\\a\\repo")
+        // becomes "D://a//repo" after this Replace; collapse repeated slashes so the workspace
+        // prefix and repo-name matching below still resolve. No real file path contains an empty
+        // path segment, so this is lossless for well-formed inputs.
+        var normalized = CollapseSlashes(filePath!.Replace('\\', '/'));
 
         // Deterministic builds collapse the workspace to "/_/", so check this first — in CI
         // the path will never start with the real GITHUB_WORKSPACE.
@@ -66,5 +71,31 @@ internal static partial class SourcePathResolver
         }
 
         return null;
+    }
+
+    // Squashes runs of '/' into a single separator. Returns the input unchanged when there is
+    // nothing to collapse (the common case) so we don't allocate on every resolve.
+    private static string CollapseSlashes(string path)
+    {
+        if (path.IndexOf("//", StringComparison.Ordinal) < 0)
+        {
+            return path;
+        }
+
+        var sb = new StringBuilder(path.Length);
+        var prevSlash = false;
+        foreach (var c in path)
+        {
+            var isSlash = c == '/';
+            if (isSlash && prevSlash)
+            {
+                continue;
+            }
+
+            sb.Append(c);
+            prevSlash = isSlash;
+        }
+
+        return sb.ToString();
     }
 }

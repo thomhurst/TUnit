@@ -339,7 +339,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "Transfer",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.Transfer",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -363,7 +363,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "SimpleDecimal",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.SimpleDecimal",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 29,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -385,7 +385,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "SmallDecimal",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.SmallDecimal",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 36,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -407,7 +407,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "MaxDecimal",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.MaxDecimal",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 43,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -429,7 +429,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "MinDecimal",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.MinDecimal",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 50,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -451,7 +451,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "ExplicitDecimalValue",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.ExplicitDecimalValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 57,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -473,7 +473,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "MultipleDecimals",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.MultipleDecimals",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 64,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -495,7 +495,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 73,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -519,7 +519,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "TransactionDiscountCalculations",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.TransactionDiscountCalculations",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 82,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -543,7 +543,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "Equality3",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.Equality3",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 91,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -565,7 +565,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "Equality4",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.Equality4",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 104,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -587,7 +587,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(decimal), "batchingSiz
         {
             MethodName = "TestMethod",
             FullyQualifiedName = "TUnit.TestProject.DecimalArgumentTests.TestMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 119,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -51,7 +51,7 @@ internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 6,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -140,7 +140,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 12,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -234,7 +234,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
         {
             MethodName = "Test3",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1889.DerivedTest.Test3",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 19,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

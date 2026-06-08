@@ -1245,7 +1245,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void WriteSourceLocationMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
-        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
+        // Emit the path via Roslyn's literal formatter rather than hand-rolling escaping. The
+        // previous code escaped backslashes into a verbatim (@"...") literal, which doubled every
+        // path separator on Windows — producing a runtime path like "D:\\a\\repo" that downstream
+        // source-link resolution couldn't map back to a repo-relative path. FormatLiteral handles
+        // backslashes, quotes and control chars correctly and emits the surrounding quotes.
+        writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
         writer.AppendLine($"StartColumnNumber = {testMethod.StartColumnNumber},");
         writer.AppendLine($"EndLineNumber = {testMethod.EndLineNumber},");

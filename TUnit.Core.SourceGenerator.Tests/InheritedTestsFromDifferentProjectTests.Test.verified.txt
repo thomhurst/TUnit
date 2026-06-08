@@ -128,7 +128,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -146,7 +146,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "GenericMethodDataSource",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.GenericMethodDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 14,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -179,7 +179,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "NonGenericMethodDataSource",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.NonGenericMethodDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 20,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -212,7 +212,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "VerifyInheritedCategoriesAreAvailable",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.VerifyInheritedCategoriesAreAvailable",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 26,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -291,7 +291,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         {
             MethodName = "BaseTest",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = new string[] { "BaseCategory" },
             Properties = global::System.Array.Empty<string>(),
@@ -371,7 +371,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
         {
             MethodName = "BaseTestWithMultipleCategories",
             FullyQualifiedName = "TUnit.TestProject.InheritedTestsFromDifferentProjectTests.BaseTestWithMultipleCategories",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = new string[] { "AnotherBaseCategory", "MultipleCategories" },
             Properties = global::System.Array.Empty<string>(),
