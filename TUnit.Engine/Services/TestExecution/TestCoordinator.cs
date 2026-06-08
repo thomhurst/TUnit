@@ -128,6 +128,11 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }
                 else
                 {
+                    // Run Before(TestSession/Assembly/Class) hooks (incl. BeforeEvery) before constructing
+                    // the instance so the documented lifecycle contract holds — hooks precede the
+                    // constructor (#6192). Hook tasks are cached, so ExecuteAsync's later awaits are no-ops.
+                    await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
+
                     test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
                     // Drop the cached eligible-objects list so any later consumer rebuilds it with the new ClassInstance included — the initial list was built before the instance existed.
@@ -349,6 +354,10 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             return;
         }
+
+        // Run Before(TestSession/Assembly/Class) hooks (incl. BeforeEvery) before constructing the
+        // instance so hooks precede the constructor (#6192). Cached, so ExecuteAsync re-awaits are no-ops.
+        await _testExecutor.EnsureClassAndAssemblyHooksExecutedAsync(test, cancellationToken).ConfigureAwait(false);
 
         test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 

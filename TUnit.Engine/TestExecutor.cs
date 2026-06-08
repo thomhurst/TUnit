@@ -63,6 +63,39 @@ internal class TestExecutor
     }
 
     /// <summary>
+    /// Ensures Before(TestSession), Before(Assembly) and Before(Class) hooks (including their
+    /// BeforeEvery counterparts) have executed before the test class instance is constructed, so the
+    /// documented lifecycle contract (hooks run before instantiation) holds — see issue #6192.
+    /// The hook tasks are cached in <see cref="BeforeHookTaskCache"/>, so the matching awaits later in
+    /// <see cref="ExecuteAsync"/> are no-ops. Only the pure cached getters are invoked here; the
+    /// After-hook pair registration stays single-sourced in ExecuteAsync to avoid double-registration.
+    /// </summary>
+    public async ValueTask EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        var testClass = test.Metadata.TestClassType;
+        var testAssembly = testClass.Assembly;
+
+        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
+            ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct),
+            cancellationToken).ConfigureAwait(false);
+
+        // Flow AsyncLocals captured by BeforeTestSession into the BeforeAssembly hook, and likewise
+        // BeforeAssembly into BeforeClass. This mirrors the RestoreExecutionContext chain in
+        // ExecuteAsync (the assembly/class hook tasks are cached, so when ExecuteAsync re-awaits them
+        // it re-applies the same captured contexts).
+        test.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
+
+        await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
+            testAssembly,
+            (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct),
+            cancellationToken).ConfigureAwait(false);
+
+        test.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
+
+        await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
