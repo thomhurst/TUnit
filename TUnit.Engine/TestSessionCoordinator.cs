@@ -128,11 +128,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             return;
         }
 
+        // Drop all placeholders in a single pass so none are scheduled as real tests (their Create/Invoke
+        // throw); their children are added back below.
+        testList.RemoveAll(static t => t is DeferredEnumerationExecutableTest);
+
         foreach (var placeholder in placeholders)
         {
-            // Remove the placeholder so it is never scheduled as a real test (its Create/Invoke throw).
-            testList.Remove(placeholder);
-
             try
             {
                 var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
@@ -144,9 +145,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
                 // child). Surface it on the placeholder node so the failure is visible.
                 await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
                 placeholder.StartTime = DateTimeOffset.UtcNow;
+                await _messageBus.InProgress(placeholder.Context);
                 placeholder.EndTime = DateTimeOffset.UtcNow;
                 placeholder.SetResult(TestState.Failed, ex);
-                await _messageBus.InProgress(placeholder.Context);
                 await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
             }
         }
