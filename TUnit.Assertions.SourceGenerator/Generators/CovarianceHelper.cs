@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -91,5 +92,91 @@ internal static class CovarianceHelper
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Determines whether EVERY one of an assertion class's own type parameters can be inferred by
+    /// the C# compiler from the constructor's value parameters (the parameters after the leading
+    /// <c>AssertionContext&lt;T&gt;</c>). When they all can, the caller never names a type argument,
+    /// the covariant <c>&lt;TActual, T...&gt;</c> overload binds on its own, and the inference-friendly
+    /// pinned-receiver overload would be pure dead weight — so callers of this gate the pinned overload
+    /// on the negation. See issue #5922.
+    /// </summary>
+    public static bool OwnGenericsAreInferable(IMethodSymbol constructor, ImmutableArray<ITypeParameterSymbol> ownTypeParameters)
+    {
+        if (ownTypeParameters.IsDefaultOrEmpty)
+        {
+            return true;
+        }
+
+        var valueParameters = constructor.Parameters.Skip(1).ToArray();
+
+        foreach (var typeParameter in ownTypeParameters)
+        {
+            var inferable = false;
+            foreach (var parameter in valueParameters)
+            {
+                if (AppearsInInferablePosition(parameter.Type, typeParameter))
+                {
+                    inferable = true;
+                    break;
+                }
+            }
+
+            if (!inferable)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Recursively determines whether <paramref name="typeParameter"/> appears in a position the
+    /// compiler can infer from an argument's type. Recurses through named-type arguments and array
+    /// elements, but stops at delegate boundaries (a lambda argument does not fix a delegate's type
+    /// parameters) and at <c>System.Linq.Expressions.Expression&lt;...&gt;</c>. The bias is
+    /// conservative: anything we cannot prove inferable is treated as non-inferable, which keeps the
+    /// pinned overload (the pre-existing behaviour) rather than risk an ergonomic regression.
+    /// </summary>
+    private static bool AppearsInInferablePosition(ITypeSymbol type, ITypeParameterSymbol typeParameter)
+    {
+        if (SymbolEqualityComparer.Default.Equals(type, typeParameter))
+        {
+            return true;
+        }
+
+        // A lambda/method-group argument does not fix a delegate's type parameters, and the same is
+        // true for an expression-tree built from one — so type parameters reachable only through these
+        // are not inferable.
+        if (type.TypeKind == TypeKind.Delegate || IsExpressionTree(type))
+        {
+            return false;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return AppearsInInferablePosition(arrayType.ElementType, typeParameter);
+        }
+
+        if (type is INamedTypeSymbol namedType)
+        {
+            foreach (var typeArgument in namedType.TypeArguments)
+            {
+                if (AppearsInInferablePosition(typeArgument, typeParameter))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsExpressionTree(ITypeSymbol type)
+    {
+        return type is INamedTypeSymbol { Name: "Expression", IsGenericType: true } named
+            && named.ContainingNamespace?.ToDisplayString() == "System.Linq.Expressions";
     }
 }

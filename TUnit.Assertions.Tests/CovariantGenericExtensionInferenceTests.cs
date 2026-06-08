@@ -5,9 +5,13 @@ namespace TUnit.Assertions.Tests;
 
 /// <summary>
 /// Issue #5922: an <see cref="AssertionExtensionAttribute"/> class that declares its own generic
-/// parameter over a concrete, non-sealed (covariance-candidate) receiver gets TWO generated
-/// overloads: a covariant <c>&lt;TActual, T&gt;</c> one (so a more-derived static receiver can
-/// bind) and an inference-friendly pinned <c>&lt;T&gt;</c> one whose receiver is the concrete type.
+/// parameter over a concrete, non-sealed (covariance-candidate) receiver gets a covariant
+/// <c>&lt;TActual, T&gt;</c> overload (so a more-derived static receiver can bind). When at least one
+/// own type parameter is NOT inferable from the value arguments (e.g. it appears only inside a
+/// <c>Func&lt;T, bool&gt;</c>), the generator ALSO emits an inference-friendly pinned <c>&lt;T&gt;</c>
+/// overload whose receiver is the concrete type, so the exact-receiver call site need only name the
+/// class's own argument. When every own type parameter IS inferable, no pinned overload is emitted —
+/// it would be redundant with the covariant overload.
 ///
 /// These tests are primarily a COMPILE-TIME guard: the call sites below only compile if overload
 /// resolution selects the right method without ambiguity (no CS0121). That is exactly what the
@@ -42,14 +46,15 @@ public class CovariantGenericExtensionInferenceTests
     }
 
     [Test]
-    public async Task Both_Overloads_Coexist_Without_Ambiguity_When_Type_Arg_Is_Inferable()
+    public async Task Inferable_Own_Generic_Binds_With_Full_Inference_And_No_Pinned_Overload()
     {
         var ex = new Exception("boom");
 
-        // Here the class's own type arg is inferable from the value argument, so NO type
-        // arguments are written. Both overloads are applicable for an exact Exception receiver;
-        // this only compiles because C#'s "more specific parameter types" rule prefers the
-        // pinned IAssertionSource<Exception> receiver over the covariant IAssertionSource<TActual>.
+        // Here the class's own type arg is inferable from the value argument (HasTag<int>(42)), so
+        // the caller writes NO type arguments. Because every own type parameter is inferable, the
+        // generator does NOT emit a pinned-receiver overload (it would be pure dead weight) — only
+        // the covariant overload exists, and it binds via full inference (TActual from the receiver,
+        // T from the value). There is therefore no second overload and no ambiguity to resolve.
         await Assert.That(ex).HasTag(42);
     }
 }
@@ -66,14 +71,16 @@ public class InferencePayloadMatchesAssertion<T> : Assertion<Exception>
         _predicate = predicate;
     }
 
+    // Always passes; this fixture is a compile-time overload-resolution guard only — the predicate
+    // is never evaluated, so its result does not matter.
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
         => Task.FromResult(AssertionResult.Passed);
 
     protected override string GetExpectation() => "to match the payload predicate";
 }
 
-/// <summary>Issue #5922 fixture: own generic parameter IS inferable (value argument), which
-/// exercises the case where both overloads are simultaneously applicable.</summary>
+/// <summary>Issue #5922 fixture: own generic parameter IS inferable (a plain value argument), so the
+/// generator emits only the covariant overload and no pinned-receiver overload.</summary>
 [AssertionExtension("HasTag")]
 public class InferenceTaggedExceptionAssertion<T> : Assertion<Exception>
 {
@@ -85,6 +92,7 @@ public class InferenceTaggedExceptionAssertion<T> : Assertion<Exception>
         _tag = tag;
     }
 
+    // Always passes; this fixture is a compile-time overload-resolution guard only.
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
         => Task.FromResult(AssertionResult.Passed);
 

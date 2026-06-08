@@ -171,19 +171,18 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // To restore inference for the common exact-receiver call site, additionally emit a
         // pinned-receiver overload (IAssertionSource<TConcrete>) that omits TActual. The covariant
         // overload is kept so a more-derived static receiver can still bind. See issue #5922.
+        //
+        // The pinned overload is only emitted when at least one of the class's own type parameters
+        // is NOT inferable from the constructor's value arguments. If every own type parameter is
+        // inferable (e.g. a `T tag` value parameter), the caller writes no type arguments at all and
+        // the covariant overload binds on its own — the pinned overload would be pure dead weight.
+        // Excluding that case also keeps the two overloads arity-disjoint (pinned <T...> vs covariant
+        // <TActual, T...>), so they are never both applicable and no OverloadResolutionPriority
+        // tiebreaker is required.
         var receiverType = data.AssertionBaseType.TypeArguments[0];
         var hasOwnGenerics = data.ClassSymbol.IsGenericType && data.ClassSymbol.TypeParameters.Length > 0;
-        var needsPinnedOverload = CovarianceHelper.IsCovariantCandidate(receiverType) && hasOwnGenerics;
-
-        // Emit the covariant method plus, when warranted, the pinned-receiver overload.
-        void EmitMethod(IMethodSymbol constructor, bool negated)
-        {
-            GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false);
-            if (needsPinnedOverload)
-            {
-                GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false, pinnedReceiver: true);
-            }
-        }
+        var receiverIsCovariantCandidate = CovarianceHelper.IsCovariantCandidate(receiverType) && hasOwnGenerics;
+        var ownTypeParameters = data.ClassSymbol.TypeParameters;
 
         // Generate extension methods for each constructor
         foreach (var constructor in data.Constructors)
@@ -193,13 +192,18 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                 continue;
             }
 
+            // The pinned overload only earns its place when a non-inferable own type parameter forces
+            // the caller to name type arguments; otherwise it is redundant with the covariant overload.
+            var emitPinned = receiverIsCovariantCandidate
+                && !CovarianceHelper.OwnGenericsAreInferable(constructor, ownTypeParameters);
+
             // Generate positive assertion method
-            EmitMethod(constructor, negated: false);
+            EmitMethod(sourceBuilder, data, constructor, negated: false, emitPinned);
 
             // Generate negated assertion method if requested
             if (!string.IsNullOrEmpty(data.NegatedMethodName))
             {
-                EmitMethod(constructor, negated: true);
+                EmitMethod(sourceBuilder, data, constructor, negated: true, emitPinned);
             }
         }
 
@@ -208,6 +212,24 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Add source to compilation
         var fileName = $"{data.ClassSymbol.Name}.Extensions.g.cs";
         context.AddSource(fileName, sourceBuilder.ToString());
+    }
+
+    /// <summary>
+    /// Emits the covariant extension method and, when <paramref name="emitPinned"/> is set, the
+    /// inference-friendly pinned-receiver overload alongside it.
+    /// </summary>
+    private static void EmitMethod(
+        StringBuilder sourceBuilder,
+        AssertionExtensionData data,
+        IMethodSymbol constructor,
+        bool negated,
+        bool emitPinned)
+    {
+        GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false);
+        if (emitPinned)
+        {
+            GenerateExtensionMethod(sourceBuilder, data, constructor, negated, isNullableOverload: false, pinnedReceiver: true);
+        }
     }
 
     private static bool IsValidConstructor(IMethodSymbol constructor)

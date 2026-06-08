@@ -113,6 +113,26 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
         });
 
     [Test]
+    public Task ConcreteReceiverWithInferableGeneric() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "ConcreteReceiverWithInferableGenericAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+            var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("ConcreteReceiverWithInferableGenericTagged"));
+            await Assert.That(extensionFile).IsNotNull();
+
+            // Issue #5922: the own type parameter T is inferable from the `T tag` value argument, so
+            // the caller never names a type argument and the covariant overload binds on its own.
+            // Covariant overload IS emitted (keeps subclass binding).
+            await Assert.That(extensionFile!).Contains("ConcreteReceiverWithInferableGenericTagged<TActual, T>(this IAssertionSource<TActual> source");
+            // The pinned-receiver overload would be pure dead weight here, so it must NOT be emitted.
+            await Assert.That(extensionFile!).DoesNotContain("(this IAssertionSource<System.Exception> source");
+        });
+
+    [Test]
     public Task AssertionWithOptionalParameter() => RunTest(
         Path.Combine(Sourcy.Git.RootDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
