@@ -8,6 +8,9 @@ internal class NoDataSource : IDataSourceAttribute
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public bool DeferEnumeration { get; set; }
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return static () => _emptyRowTask;

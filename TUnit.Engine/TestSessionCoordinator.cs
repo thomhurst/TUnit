@@ -24,6 +24,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly ITUnitMessageBus _messageBus;
     private readonly IStaticPropertyInitializer _staticPropertyInitializer;
     private readonly ObjectTracker _objectTracker;
+    private readonly DeferredTestExpander _deferredTestExpander;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -33,7 +34,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         TestLifecycleCoordinator lifecycleCoordinator,
         ITUnitMessageBus messageBus,
         IStaticPropertyInitializer staticPropertyInitializer,
-        ObjectTracker objectTracker)
+        ObjectTracker objectTracker,
+        DeferredTestExpander deferredTestExpander)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -44,6 +46,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _testScheduler = testScheduler;
         _staticPropertyInitializer = staticPropertyInitializer;
         _objectTracker = objectTracker;
+        _deferredTestExpander = deferredTestExpander;
     }
 
     public async Task ExecuteTests(
@@ -53,6 +56,10 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         CancellationToken cancellationToken)
     {
         var testList = tests.ToList();
+
+        // Expand any deferred-enumeration placeholders into their real cases before counting/scheduling,
+        // so the children flow through the normal pipeline (correct hooks + lifecycle counting).
+        await ExpandDeferredPlaceholdersAsync(testList, cancellationToken);
 
         InitializeEventReceivers(testList, cancellationToken);
 
@@ -90,6 +97,59 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         _eventReceiverOrchestrator.InitializeTestCounts(testList);
+    }
+
+    /// <summary>
+    /// Replaces every <see cref="DeferredEnumerationExecutableTest"/> in the list with the real test cases
+    /// produced by enumerating its data source. The placeholder itself is reported (Passed, or Failed if the
+    /// data source throws) so the IDE node it occupies gets a result; the children are added to the list and
+    /// scheduled like any other test, nested under the placeholder via their ParentTestId.
+    /// </summary>
+#if NET8_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+#endif
+    private async Task ExpandDeferredPlaceholdersAsync(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
+    {
+        List<DeferredEnumerationExecutableTest>? placeholders = null;
+        foreach (var test in testList)
+        {
+            if (test is DeferredEnumerationExecutableTest placeholder)
+            {
+                (placeholders ??= []).Add(placeholder);
+            }
+        }
+
+        if (placeholders is null)
+        {
+            return;
+        }
+
+        foreach (var placeholder in placeholders)
+        {
+            // Remove the placeholder so it is never scheduled as a real test (its Create/Invoke throw).
+            testList.Remove(placeholder);
+
+            placeholder.StartTime = DateTimeOffset.UtcNow;
+            await _messageBus.InProgress(placeholder.Context);
+
+            try
+            {
+                var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
+                testList.AddRange(children);
+
+                placeholder.EndTime = DateTimeOffset.UtcNow;
+                placeholder.SetResult(TestState.Passed);
+                await _messageBus.Passed(placeholder.Context, placeholder.StartTime.GetValueOrDefault());
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
+                placeholder.EndTime = DateTimeOffset.UtcNow;
+                placeholder.SetResult(TestState.Failed, ex);
+                await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
+            }
+        }
     }
 
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)

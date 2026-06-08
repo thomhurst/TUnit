@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
             'writing-tests/method-data-source',
             'writing-tests/class-data-source',
             'writing-tests/test-data-row',
+            'writing-tests/defer-enumeration',
             'writing-tests/matrix-tests',
             'writing-tests/combined-data-source',
             'writing-tests/nested-data-sources',

@@ -104,6 +104,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public bool DeferEnumeration { get; set; }
+
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
         if (methodNameProvidingDataSource is null or { Length: < 1 })
@@ -143,6 +146,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
         converted.Arguments = Arguments;
         converted.SkipIfEmpty = SkipIfEmpty;
+        converted.DeferEnumeration = DeferEnumeration;
 
         return converted;
     }

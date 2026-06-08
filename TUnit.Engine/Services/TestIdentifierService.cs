@@ -70,6 +70,41 @@ internal static class TestIdentifierService
         }
     }
 
+    /// <summary>
+    /// Generates a stable id for a deferred-enumeration placeholder (a single node that stands in for a
+    /// data source whose rows are expanded at runtime). Deterministic from metadata alone so it is
+    /// identical across the discovery build and the execution build (the IDE "run" filter carries this
+    /// id), and the <c>_Deferred</c> suffix guarantees it never collides with a real expanded row id.
+    /// </summary>
+    public static string GenerateDeferredPlaceholderTestId(TestMetadata metadata)
+    {
+        var methodMetadata = metadata.MethodMetadata;
+        var classMetadata = methodMetadata.Class;
+
+        var constructorParameters = classMetadata.Parameters;
+        var methodParameters = methodMetadata.Parameters;
+
+        var vsb = new ValueStringBuilder(stackalloc char[256]);
+
+        try
+        {
+            vsb.Append(methodMetadata.Class.Namespace);
+            vsb.Append('.');
+            WriteTypeNameWithGenerics(ref vsb, metadata.TestClassType);
+            WriteTypeWithParameters(ref vsb, constructorParameters);
+            vsb.Append('.');
+            vsb.Append(metadata.TestMethodName);
+            WriteTypeWithParameters(ref vsb, methodParameters);
+            vsb.Append("_Deferred");
+
+            return vsb.ToString();
+        }
+        finally
+        {
+            vsb.Dispose();
+        }
+    }
+
     public static string GenerateFailedTestId(TestMetadata metadata)
     {
         // For backward compatibility, use default combination values

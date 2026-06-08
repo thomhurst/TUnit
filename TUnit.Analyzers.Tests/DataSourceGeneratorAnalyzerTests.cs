@@ -141,6 +141,8 @@ public class DataSourceGeneratorAnalyzerTests
                 {
                     public bool SkipIfEmpty { get; set; }
 
+                    public bool DeferEnumeration { get; set; }
+
                     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
                     {
                         // Returns Foo instances as the test expects, not T

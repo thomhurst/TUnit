@@ -7,6 +7,9 @@ public abstract class TypedDataSourceAttribute<T> : Attribute, ITypedDataSourceA
     /// <inheritdoc />
     public virtual bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public virtual bool DeferEnumeration { get; set; }
+
     public abstract IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata);
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)

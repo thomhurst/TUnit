@@ -11,6 +11,9 @@ internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribut
     /// <inheritdoc />
     public bool SkipIfEmpty { get; set; }
 
+    /// <inheritdoc />
+    public bool DeferEnumeration { get; set; }
+
     public StaticDataSourceAttribute(params object?[][] data)
     {
         _data = data ?? throw new ArgumentNullException(nameof(data));

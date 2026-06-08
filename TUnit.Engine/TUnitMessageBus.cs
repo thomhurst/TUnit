@@ -25,6 +25,17 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     private bool? _isConsole;
     private bool IsConsole => _isConsole ??= serviceProvider.GetClientInfo().Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
 
+    // Tests created by expanding a deferred-enumeration placeholder (or runtime variants) carry a
+    // ParentTestId; surfacing it as the MTP parentTestNodeUid makes IDEs nest them under that node.
+    private TestNodeUpdateMessage CreateUpdateMessage(TestContext testContext, TestNode testNode)
+    {
+        var parentTestId = testContext.ParentTestId;
+
+        return parentTestId is null
+            ? new TestNodeUpdateMessage(_sessionSessionUid, testNode)
+            : new TestNodeUpdateMessage(_sessionSessionUid, testNode, new TestNodeUid(parentTestId));
+    }
+
     public ValueTask Discovered(TestContext testContext)
     {
         if (testContext.IsNotDiscoverable)
@@ -32,18 +43,14 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
             return ValueTask.CompletedTask;
         }
 
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance)
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this,
+            CreateUpdateMessage(testContext, testContext.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance))));
     }
 
     public ValueTask InProgress(TestContext testContext)
     {
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testContext.ToTestNode(InProgressTestNodeStateProperty.CachedInstance)
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this,
+            CreateUpdateMessage(testContext, testContext.ToTestNode(InProgressTestNodeStateProperty.CachedInstance))));
     }
 
     public ValueTask Passed(TestContext testContext, DateTimeOffset start)
@@ -55,10 +62,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var testNode = testContext.ToTestNode(PassedTestNodeStateProperty.CachedInstance);
 
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testNode
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this, CreateUpdateMessage(testContext, testNode)));
     }
 
     public ValueTask Failed(TestContext testContext, Exception exception, DateTimeOffset start)
@@ -76,10 +80,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         var testNode = testContext.ToTestNode(updateType);
 
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testNode
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this, CreateUpdateMessage(testContext, testNode)));
     }
 
     private Exception SimplifyStacktrace(Exception exception)
@@ -106,10 +107,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         var testNode = testContext.ToTestNode(new SkippedTestNodeStateProperty(reason));
 
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testNode
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this, CreateUpdateMessage(testContext, testNode)));
     }
 
     public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
@@ -118,10 +116,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
         var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty());
 #pragma warning restore CS0618
 
-        return new ValueTask(context.MessageBus.PublishAsync(this, new TestNodeUpdateMessage(
-            sessionUid: _sessionSessionUid,
-            testNode: testNode
-        )));
+        return new ValueTask(context.MessageBus.PublishAsync(this, CreateUpdateMessage(testContext, testNode)));
     }
 
     public ValueTask SessionArtifact(Artifact artifact)

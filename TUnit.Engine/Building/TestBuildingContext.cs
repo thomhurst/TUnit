@@ -15,5 +15,12 @@ internal record TestBuildingContext(
     /// <summary>
     /// The filter to apply during test building. Only relevant when IsForExecution is true.
     /// </summary>
-    ITestExecutionFilter? Filter
+    ITestExecutionFilter? Filter,
+
+    /// <summary>
+    /// When true, data sources marked with <c>DeferEnumeration</c> are expanded eagerly instead of
+    /// producing a single placeholder node. Set during runtime expansion of a deferred placeholder so
+    /// the real test cases are built (see <c>DeferredTestExpander</c>).
+    /// </summary>
+    bool IgnoreDeferral = false
 );

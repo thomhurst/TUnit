@@ -1636,6 +1636,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine(",");
         }
 
+        // Copy over DeferEnumeration if set so the test is enumerated at runtime instead of discovery.
+        // The hand-built initializer above only copies the named args it knows about, so this must be
+        // threaded explicitly (unlike the method-not-found path which round-trips all named arguments).
+        var deferProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "DeferEnumeration");
+        if (deferProperty is { Key: not null, Value.IsNull: false } && deferProperty.Value.Value is true)
+        {
+            writer.AppendLine("DeferEnumeration = true,");
+        }
+
         // Set the Factory property with a strongly-typed function
         writer.AppendLine("Factory = (dataGeneratorMetadata) =>");
         writer.AppendLine("{");
