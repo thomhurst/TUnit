@@ -880,11 +880,18 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public .<TValue> Value { get; }
+    }
     public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
         where TKey :  notnull
     {
         public DictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
+        public new .<TDictionary, TKey, TValue> And { get; }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -906,6 +913,19 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public .<TDictionary, TKey, TValue> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsLessThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsLessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsNotEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsPositive() { }
+        public .<TDictionary, TKey, TValue> IsZero() { }
+    }
     public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
         where TKey :  notnull
@@ -925,6 +945,7 @@ namespace .Conditions
     public class DictionaryMemberAssertionAdapter<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
         where TKey :  notnull { }
+    public sealed class DictionaryValueSource<TValue> : .<TValue> { }
     [.("HasFiles")]
     public class DirectoryHasFilesAssertion : .<.DirectoryInfo>
     {
@@ -1469,11 +1490,18 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public .<TValue> Value { get; }
+    }
     public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
         where TKey :  notnull
     {
         public MutableDictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
+        public new .<TDictionary, TKey, TValue> And { get; }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -1494,6 +1522,19 @@ namespace .Conditions
         public MutableDictionaryContainsValueAssertion(.<TDictionary> context, TValue expectedValue) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public sealed class MutableDictionaryCountSource<TDictionary, TKey, TValue>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        public .<TDictionary, TKey, TValue> IsEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsGreaterThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsLessThan(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsLessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsNotEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<TDictionary, TKey, TValue> IsPositive() { }
+        public .<TDictionary, TKey, TValue> IsZero() { }
     }
     public class MutableDictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
@@ -5412,9 +5453,17 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TDictionary, TKey, TValue> ContainsKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
         public .<TDictionary, TKey, TValue> ContainsValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> Count() { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public new .<TDictionary, TKey, TValue> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public new .<TDictionary, TKey, TValue> HasSingleItem() { }
+        public .<TDictionary, TKey, TValue> HasSingleItem(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> IsEmpty() { }
+        public new .<TDictionary, TKey, TValue> IsNotEmpty() { }
         public new .<TDictionary, TKey, TValue> IsNotNull() { }
         public new .<TDictionary, TKey, TValue> IsNull() { }
     }
@@ -5483,9 +5532,17 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TDictionary, TKey, TValue> ContainsKeyWithValue(TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null) { }
         public .<TDictionary, TKey, TValue> ContainsValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> Count() { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public new .<TDictionary, TKey, TValue> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public new .<TDictionary, TKey, TValue> HasSingleItem() { }
+        public .<TDictionary, TKey, TValue> HasSingleItem(<.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null) { }
+        public new .<TDictionary, TKey, TValue> IsEmpty() { }
+        public new .<TDictionary, TKey, TValue> IsNotEmpty() { }
         public new .<TDictionary, TKey, TValue> IsNotNull() { }
         public new .<TDictionary, TKey, TValue> IsNull() { }
     }

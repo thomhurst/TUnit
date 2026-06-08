@@ -33,6 +33,22 @@ public class MutableDictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : 
             Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
     }
 
+    /// <summary>
+    /// Returns an And continuation that, in addition to the usual dictionary chaining, exposes
+    /// <see cref="MutableDictionaryContainsKeyAndContinuation{TDictionary,TKey,TValue}.Value"/> to
+    /// drill into the value stored at the asserted key.
+    /// Example: <c>await Assert.That(dict).ContainsKey("key").And.Value.IsEqualTo(123);</c>
+    /// </summary>
+    public new MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> And
+    {
+        get
+        {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
+            return new MutableDictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>(
+                Context, InternalWrappedExecution ?? this, _expectedKey, _comparer);
+        }
+    }
+
     protected override string GetExpectation() => $"to contain key {_expectedKey}";
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)

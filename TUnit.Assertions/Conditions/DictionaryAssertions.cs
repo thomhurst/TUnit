@@ -39,6 +39,22 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
             Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
     }
 
+    /// <summary>
+    /// Returns an And continuation that, in addition to the usual dictionary chaining, exposes
+    /// <see cref="DictionaryContainsKeyAndContinuation{TDictionary,TKey,TValue}.Value"/> to drill
+    /// into the value stored at the asserted key.
+    /// Example: <c>await Assert.That(dict).ContainsKey("key").And.Value.IsEqualTo(123);</c>
+    /// </summary>
+    public new DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue> And
+    {
+        get
+        {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
+            return new DictionaryContainsKeyAndContinuation<TDictionary, TKey, TValue>(
+                Context, InternalWrappedExecution ?? this, _expectedKey, _comparer);
+        }
+    }
+
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
     {
         var value = metadata.Value;

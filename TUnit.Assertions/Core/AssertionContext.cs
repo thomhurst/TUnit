@@ -89,6 +89,13 @@ public sealed class AssertionContext<TValue>
         return Map(evalContext => evalContext.Map(asyncMapper));
     }
 
+    /// <summary>
+    /// Creates a detached context that shares this context's evaluation (so it sees the same value)
+    /// but has its own expression builder and no pending link. Used to construct an inner assertion
+    /// whose construction must NOT consume this context's And/Or pending link.
+    /// </summary>
+    internal AssertionContext<TValue> CreateDetached() => new(Evaluation, new StringBuilder());
+
     public AssertionContext<TException> MapException<TException>() where TException : Exception
     {
         return new AssertionContext<TException>(

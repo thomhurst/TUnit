@@ -56,6 +56,97 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
         return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
     }
 
+    // See DictionaryAssertionBase for the rationale: these `public new` collection methods return a
+    // mutable-dictionary-typed assertion (preserving .And.ContainsKey, etc.) and reuse the existing
+    // collection check logic via a delegating wrapper built on a detached context.
+
+    private MutableDictionaryAssertionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
+        => new MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>(Context, inner);
+
+    /// <summary>
+    /// Asserts that the dictionary is empty while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsEmpty()");
+        return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not empty while preserving mutable-dictionary-specific chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
+    }
+
+    /// <summary>
+    /// Gets the entry count for numeric assertions while preserving mutable-dictionary-specific chaining.
+    /// Example: await Assert.That(dict).Count().IsEqualTo(2).And.ContainsKey("key");
+    /// </summary>
+    public new MutableDictionaryCountSource<TDictionary, TKey, TValue> Count()
+    {
+        Context.ExpressionBuilder.Append(".Count()");
+        return new MutableDictionaryCountSource<TDictionary, TKey, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains exactly one entry while preserving mutable-dictionary chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem()
+    {
+        Context.ExpressionBuilder.Append(".HasSingleItem()");
+        return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains exactly one entry matching the predicate while preserving chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem(
+        Func<KeyValuePair<TKey, TValue>, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasSingleItem({expression})");
+        return Delegate(new HasSingleItemPredicateAssertion<TDictionary, KeyValuePair<TKey, TValue>>(
+            Context.CreateDetached(), predicate, expression ?? "predicate"));
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary has at least the specified number of entries while preserving chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasAtLeast(
+        int minCount,
+        [CallerArgumentExpression(nameof(minCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtLeast({expression})");
+        return Delegate(new CollectionHasAtLeastAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), minCount));
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary has at most the specified number of entries while preserving chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasAtMost(
+        int maxCount,
+        [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasAtMost({expression})");
+        return Delegate(new CollectionHasAtMostAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), maxCount));
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary entry count is between min and max (inclusive) while preserving chaining.
+    /// </summary>
+    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasCountBetween(
+        int min,
+        int max,
+        [CallerArgumentExpression(nameof(min))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCountBetween({minExpression}, {maxExpression})");
+        return Delegate(new CollectionHasCountBetweenAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached(), min, max));
+    }
+
     /// <summary>
     /// Asserts that the dictionary contains the specified key.
     /// Example: await Assert.That(dictionary).ContainsKey("key1");

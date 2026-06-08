@@ -626,4 +626,288 @@ public class DictionaryCollectionTests
         await Assert.That(dictionary)
             .ContainsKey("HELLO", StringComparer.OrdinalIgnoreCase);
     }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_IsEqualTo_Passes()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_IsEqualTo_Fails_When_Value_Different()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Key").And.Value.IsEqualTo(9999L));
+
+        await Assert.That(exception.Message).Contains("1234");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Fails_When_Key_Missing()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Missing").And.Value.IsEqualTo(1234L));
+
+        // The ContainsKey check runs first (pre-work), so a missing key fails with the
+        // standard "contain key" message rather than a raw KeyNotFoundException.
+        await Assert.That(exception.Message).Contains("contain key");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Member()
+    {
+        var dictionary = new Dictionary<string, Holder>
+        {
+            ["Key"] = new Holder(1234L)
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("Key").And.Value.Member(x => x.Inner, p => p.IsEqualTo(1234L));
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Supports_Other_Assertions()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsGreaterThan(1000L);
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsNotEqualTo(0L);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Then_Value_Level_And()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("Key").And.Value.IsGreaterThan(1000L).And.IsLessThan(2000L);
+    }
+
+    [Test]
+    public async Task Dictionary_And_Value_Still_Allows_Dictionary_Chaining()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L,
+            ["Other"] = 1L
+        };
+
+        // The And continuation still exposes the regular dictionary methods.
+        await Assert.That(dictionary).ContainsKey("Key").And.ContainsKey("Other");
+    }
+
+    [Test]
+    public async Task Dictionary_LongerChain_Then_Value()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["First"] = 1L,
+            ["Key"] = 1234L
+        };
+
+        // Earlier assertions in the chain run as pre-work before the value is read.
+        await Assert.That(dictionary)
+            .ContainsKey("First").And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_With_Comparer_And_Value()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Hello"] = 1234L
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("HELLO", StringComparer.OrdinalIgnoreCase).And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task IReadOnlyDictionary_ContainsKey_And_Value_IsEqualTo()
+    {
+        IReadOnlyDictionary<string, long> dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task IDictionary_ContainsKey_And_Value_IsEqualTo()
+    {
+        IDictionary<string, long> dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_IsNotEmpty_Preserves_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        // IsNotEmpty now keeps the dictionary continuation, so ContainsKey/.Value remain available.
+        await Assert.That(dictionary)
+            .IsNotEmpty()
+            .And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_IsEmpty_Preserves_Dictionary_Continuation()
+    {
+        var nonEmpty = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(nonEmpty)
+            .IsEmpty()
+            .Or.ContainsKey("Key");
+    }
+
+    [Test]
+    public async Task IDictionary_IsNotEmpty_Preserves_Dictionary_Continuation()
+    {
+        IDictionary<string, long> dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary)
+            .IsNotEmpty()
+            .And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_Count_Preserves_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L,
+            ["Other"] = 1L
+        };
+
+        await Assert.That(dictionary)
+            .Count().IsEqualTo(2).And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_Count_Comparison_Methods_Work()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L,
+            ["c"] = 3L
+        };
+
+        await Assert.That(dictionary).Count().IsGreaterThan(2);
+        await Assert.That(dictionary).Count().IsLessThanOrEqualTo(3).And.ContainsKey("a");
+        await Assert.That(dictionary).Count().IsNotEqualTo(0).And.IsNotEmpty();
+        await Assert.That(dictionary).Count().IsPositive();
+    }
+
+    [Test]
+    public async Task Dictionary_Count_Fails_With_Count_Message()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).Count().IsEqualTo(5));
+
+        await Assert.That(exception.Message).Contains("count");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Count()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L,
+            ["Other"] = 1L
+        };
+
+        await Assert.That(dictionary)
+            .ContainsKey("Key").And.Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Dictionary_HasSingleItem_Preserves_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(dictionary)
+            .HasSingleItem().And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+    }
+
+    [Test]
+    public async Task Dictionary_Size_Methods_Preserve_Dictionary_Continuation()
+    {
+        var dictionary = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L,
+            ["c"] = 3L
+        };
+
+        await Assert.That(dictionary).HasAtLeast(2).And.ContainsKey("a");
+        await Assert.That(dictionary).HasAtMost(5).And.ContainsKey("b");
+        await Assert.That(dictionary).HasCountBetween(1, 5).And.ContainsKey("c");
+    }
+
+    [Test]
+    public async Task IDictionary_Count_And_HasSingleItem_Preserve_Continuation()
+    {
+        IDictionary<string, long> single = new Dictionary<string, long>
+        {
+            ["Key"] = 1234L
+        };
+
+        await Assert.That(single)
+            .HasSingleItem().And.ContainsKey("Key").And.Value.IsEqualTo(1234L);
+
+        IDictionary<string, long> many = new Dictionary<string, long>
+        {
+            ["a"] = 1L,
+            ["b"] = 2L
+        };
+
+        await Assert.That(many)
+            .Count().IsEqualTo(2).And.ContainsKey("a");
+    }
+
+    private sealed record Holder(long Inner);
 }

@@ -109,6 +109,45 @@ public class CollectionTests
     }
 
     [Test]
+    public async Task Dictionary_size_and_count_methods()
+    {
+        IReadOnlyDictionary<string, int> dict = new Dictionary<string, int>
+        {
+            ["one"] = 1,
+            ["two"] = 2,
+        };
+
+        await dict.Should().NotBeEmpty();
+        await dict.Should().HaveAtLeast(1);
+        await dict.Should().HaveAtMost(5);
+        await dict.Should().HaveCountBetween(1, 3);
+
+        IReadOnlyDictionary<string, int> empty = new Dictionary<string, int>();
+        await empty.Should().BeEmpty();
+
+        IReadOnlyDictionary<string, int> single = new Dictionary<string, int> { ["only"] = 1 };
+        await single.Should().HaveSingleItem();
+    }
+
+    [Test]
+    public async Task MutableDictionary_size_and_count_methods()
+    {
+        IDictionary<string, int> dict = new Dictionary<string, int>
+        {
+            ["one"] = 1,
+            ["two"] = 2,
+        };
+
+        await dict.Should().NotBeEmpty();
+        await dict.Should().HaveAtLeast(1);
+        await dict.Should().HaveAtMost(5);
+        await dict.Should().HaveCountBetween(1, 3);
+
+        IDictionary<string, int> single = new Dictionary<string, int> { ["only"] = 1 };
+        await single.Should().HaveSingleItem();
+    }
+
+    [Test]
     public async Task HashSet_BeSupersetOf()
     {
         var set = new HashSet<string> { "apple", "banana", "cherry" };

@@ -117,6 +117,61 @@ public sealed partial class ShouldDictionarySource<TKey, TValue>
         var inner = ApplyBecause(new DictionaryAnyValueAssertion<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>(Context, predicate));
         return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
     }
+
+    // The count/size methods below are hand-written because the source DictionaryAssertion shadows the
+    // inherited collection methods (IsEmpty, HasSingleItem, ...) with dictionary-typed `public new`
+    // overloads whose abstract return type the Should generator can't construct. Without these the
+    // generated Be/Have counterparts would silently disappear from the dictionary Should surface.
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> BeEmpty()
+    {
+        Context.ExpressionBuilder.Append(".BeEmpty()");
+        var inner = ApplyBecause(new CollectionIsEmptyAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> NotBeEmpty()
+    {
+        Context.ExpressionBuilder.Append(".NotBeEmpty()");
+        var inner = ApplyBecause(new CollectionIsNotEmptyAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> HaveSingleItem()
+    {
+        Context.ExpressionBuilder.Append(".HaveSingleItem()");
+        var inner = ApplyBecause(new HasSingleItemAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> HaveAtLeast(
+        int minCount,
+        [CallerArgumentExpression(nameof(minCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append(".HaveAtLeast(").Append(expression).Append(')');
+        var inner = ApplyBecause(new CollectionHasAtLeastAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, minCount));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> HaveAtMost(
+        int maxCount,
+        [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append(".HaveAtMost(").Append(expression).Append(')');
+        var inner = ApplyBecause(new CollectionHasAtMostAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, maxCount));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IReadOnlyDictionary<TKey, TValue>> HaveCountBetween(
+        int min,
+        int max,
+        [CallerArgumentExpression(nameof(min))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HaveCountBetween({minExpression}, {maxExpression})");
+        var inner = ApplyBecause(new CollectionHasCountBetweenAssertion<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, min, max));
+        return new ShouldAssertion<IReadOnlyDictionary<TKey, TValue>>(Context, inner);
+    }
 }
 
 [ShouldGeneratePartial(typeof(MutableDictionaryAssertion<,>))]
@@ -226,6 +281,59 @@ public sealed partial class ShouldMutableDictionarySource<TKey, TValue>
     {
         Context.ExpressionBuilder.Append(".AnyValue(").Append(expression).Append(')');
         var inner = ApplyBecause(new MutableDictionaryAnyValueAssertion<IDictionary<TKey, TValue>, TKey, TValue>(Context, predicate));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    // See ShouldDictionarySource: hand-written because MutableDictionaryAssertion shadows the inherited
+    // collection methods with dictionary-typed `public new` overloads the Should generator can't construct.
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> BeEmpty()
+    {
+        Context.ExpressionBuilder.Append(".BeEmpty()");
+        var inner = ApplyBecause(new CollectionIsEmptyAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> NotBeEmpty()
+    {
+        Context.ExpressionBuilder.Append(".NotBeEmpty()");
+        var inner = ApplyBecause(new CollectionIsNotEmptyAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> HaveSingleItem()
+    {
+        Context.ExpressionBuilder.Append(".HaveSingleItem()");
+        var inner = ApplyBecause(new HasSingleItemAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> HaveAtLeast(
+        int minCount,
+        [CallerArgumentExpression(nameof(minCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append(".HaveAtLeast(").Append(expression).Append(')');
+        var inner = ApplyBecause(new CollectionHasAtLeastAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, minCount));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> HaveAtMost(
+        int maxCount,
+        [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append(".HaveAtMost(").Append(expression).Append(')');
+        var inner = ApplyBecause(new CollectionHasAtMostAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, maxCount));
+        return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
+    }
+
+    public ShouldAssertion<IDictionary<TKey, TValue>> HaveCountBetween(
+        int min,
+        int max,
+        [CallerArgumentExpression(nameof(min))] string? minExpression = null,
+        [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".HaveCountBetween({minExpression}, {maxExpression})");
+        var inner = ApplyBecause(new CollectionHasCountBetweenAssertion<IDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>(Context, min, max));
         return new ShouldAssertion<IDictionary<TKey, TValue>>(Context, inner);
     }
 }
