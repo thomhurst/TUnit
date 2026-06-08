@@ -27,6 +27,11 @@ internal class TestExecutor
     private readonly IContextProvider _contextProvider;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
+    // Cached hook-factory delegates so the per-test before-hook awaits don't allocate a fresh closure
+    // each time (these run on the hot path and the factory is only invoked on the first cache miss).
+    private readonly Func<CancellationToken, ValueTask> _beforeTestSessionHookFactory;
+    private readonly Func<Assembly, CancellationToken, ValueTask> _beforeAssemblyHookFactory;
+
     public TestExecutor(
         HookExecutor hookExecutor,
         TestLifecycleCoordinator lifecycleCoordinator,
@@ -41,6 +46,9 @@ internal class TestExecutor
         _afterHookPairTracker = afterHookPairTracker;
         _contextProvider = contextProvider;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+
+        _beforeTestSessionHookFactory = ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct);
+        _beforeAssemblyHookFactory = (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct);
     }
 
 
@@ -49,17 +57,54 @@ internal class TestExecutor
     /// This is called before creating test instances to ensure resources are available.
     /// Registers the corresponding After(TestSession) hook to run on cancellation.
     /// </summary>
-    public async Task EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
+    public async ValueTask EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
     {
         // Get or create and cache Before hooks - these run only once
         await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
-            ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct),
+            _beforeTestSessionHookFactory,
             cancellationToken).ConfigureAwait(false);
 
         // Register After Session hook to run on cancellation (guarantees cleanup)
         _afterHookPairTracker.RegisterAfterTestSessionHook(
             cancellationToken,
             () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken.None));
+    }
+
+    /// <summary>
+    /// Ensures Before(TestSession), Before(Assembly) and Before(Class) hooks (including their
+    /// BeforeEvery counterparts) have executed before the test class instance is constructed, so the
+    /// documented lifecycle contract (hooks run before instantiation) holds — see issue #6192.
+    /// The hook tasks are cached in <see cref="BeforeHookTaskCache"/>, so the matching awaits later in
+    /// <see cref="ExecuteAsync"/> are no-ops. Only the pure cached getters are invoked here; the
+    /// After-hook pair registration stays single-sourced in ExecuteAsync to avoid double-registration.
+    /// </summary>
+    public async ValueTask EnsureClassAndAssemblyHooksExecutedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        var testClass = test.Metadata.TestClassType;
+
+        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
+            _beforeTestSessionHookFactory,
+            cancellationToken).ConfigureAwait(false);
+
+        // Flow AsyncLocals captured by BeforeTestSession into the BeforeAssembly hook, and likewise
+        // BeforeAssembly into BeforeClass. This mirrors the RestoreExecutionContext chain in
+        // ExecuteAsync (the assembly/class hook tasks are cached, so when ExecuteAsync re-awaits them
+        // it re-applies the same captured contexts).
+        test.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
+
+        await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
+            testClass.Assembly,
+            _beforeAssemblyHookFactory,
+            cancellationToken).ConfigureAwait(false);
+
+        test.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
+
+        await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+
+        // Note: the caller (TestCoordinator) restores ClassContext.RestoreExecutionContext() right
+        // before constructing the instance so AsyncLocals captured by BeforeAssembly/BeforeClass flow
+        // into the constructor. Restoring here wouldn't persist — the ambient ExecutionContext is
+        // reset when this async method returns to the caller.
     }
 
     /// <summary>
@@ -88,7 +133,7 @@ internal class TestExecutor
 
             await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
                 testAssembly,
-                (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct),
+                _beforeAssemblyHookFactory,
                 cancellationToken).ConfigureAwait(false);
 
             // Register After Assembly hook to run on cancellation (guarantees cleanup)
