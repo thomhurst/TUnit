@@ -38,6 +38,9 @@ internal sealed class DeferredTestExpander
         // IgnoreDeferral re-runs the normal class x method x repeat expansion that discovery skipped.
         // Filter is null: these cases were selected by the placeholder matching the run filter, so the
         // children must not be re-filtered (they have different ids than the placeholder, like dynamic tests).
+        // IsForExecution: false matches the runtime-built-test precedent (TestRegistry / BuildTestsAsync);
+        // in the build path it only gates a pre-filter optimisation that is a no-op when Filter is null.
+        // Execution registration is done explicitly below via RegisterTestsAsync(isForExecution: true).
         var buildingContext = new TestBuildingContext(IsForExecution: false, Filter: null, IgnoreDeferral: true);
 
         var built = await _testBuilderPipeline

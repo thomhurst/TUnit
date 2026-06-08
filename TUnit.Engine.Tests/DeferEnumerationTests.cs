@@ -40,6 +40,21 @@ public class DeferEnumerationTests(TestMode testMode) : InvokableTestBase(testMo
     }
 
     [Test]
+    public async Task Deferred_Class_Data_Source_Expands_At_Runtime()
+    {
+        // Deferral on a class-level (constructor) data source: 5 class instances x 1 method = 5 cases
+        // + 1 placeholder container = 6.
+        await RunTestsWithFilter(
+            "/*/*/DeferEnumerationClassDataTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(6),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
     public async Task Deferred_Data_Source_Error_Surfaces_At_Runtime_Without_Crashing_Discovery()
     {
         // The throwing data source must not crash discovery; the error surfaces as a failed case, and the

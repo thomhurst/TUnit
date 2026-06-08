@@ -33,7 +33,8 @@ The placeholder is reported as a **container**: the individual cases (nested und
 Because the individual cases do not exist until runtime, a deferred test:
 
 - cannot have its individual rows selected/filtered from the IDE — you can only run the whole test;
-- cannot be targeted by another test's `[DependsOn]`.
+- cannot be targeted by another test's `[DependsOn]`;
+- adds **one extra entry** to flat result totals (TRX/console) — the placeholder container — per deferred test, so a 10‑row deferred source reports 11 results. Keep this in mind for CI dashboards or count-based quality gates that compare totals across runs.
 
 Use it for large data sets where reducing discovery overhead matters more than per-row selection.
 :::

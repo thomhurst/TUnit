@@ -73,9 +73,18 @@ internal static class TestIdentifierService
     /// <summary>
     /// Generates a stable id for a deferred-enumeration placeholder (a single node that stands in for a
     /// data source whose rows are expanded at runtime). Deterministic from metadata alone so it is
-    /// identical across the discovery build and the execution build (the IDE "run" filter carries this
-    /// id), and the <c>_Deferred</c> suffix guarantees it never collides with a real expanded row id.
+    /// identical across the discovery build and the execution build (the IDE "run" filter carries this id).
     /// </summary>
+    /// <remarks>
+    /// Cannot collide with a real test id despite the shared <c>_Deferred</c> token: every real id from
+    /// <see cref="GenerateTestId"/> has the form <c>...(ctorParams).{classIdx}.{classLoop}.Method(params).{methodIdx}.{methodLoop}.{repeat}</c>
+    /// — i.e. the method name is always preceded by two numeric data-index segments and followed by three
+    /// more. The placeholder id places the method name directly after the constructor params and ends in
+    /// <c>_Deferred</c> with none of those numeric segments, so the two id shapes can never be equal (a
+    /// method literally named <c>Foo_Deferred</c> still produces <c>...Foo_Deferred(params).i.j.k</c>, not
+    /// <c>...Foo(params)_Deferred</c>). Two placeholders only match if their method+params match, which
+    /// means the same method — impossible to declare twice.
+    /// </remarks>
     public static string GenerateDeferredPlaceholderTestId(TestMetadata metadata)
     {
         var methodMetadata = metadata.MethodMetadata;
