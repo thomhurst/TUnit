@@ -26,7 +26,7 @@ With the flag set:
 `DeferEnumeration` is available on any data source attribute (`[MethodDataSource]`, `[ClassDataSource]`, custom `DataSourceGenerator` attributes, etc.). If **any** data source on a test sets it, the entire test's case expansion is deferred. It has no effect on `[Arguments]` (a single inline row, so there is nothing to defer).
 
 :::info
-The placeholder node is reported as a passed container once its cases have been expanded. If the data source throws while enumerating, the error surfaces as a failed test result at run time (just as a non-deferred data source error would) instead of failing discovery for the whole assembly.
+The placeholder is a **container**, not a test: it is not reported as its own result, so it does not count toward your test totals, and the individual cases (nested under it) carry the real pass/fail results. If the data source itself throws while enumerating, the error surfaces as a failed result at run time (just as a non-deferred data source error would) instead of failing discovery for the whole assembly.
 :::
 
 :::warning Trade-offs

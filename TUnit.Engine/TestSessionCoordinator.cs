@@ -101,9 +101,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
     /// <summary>
     /// Replaces every <see cref="DeferredEnumerationExecutableTest"/> in the list with the real test cases
-    /// produced by enumerating its data source. The placeholder itself is reported (Passed, or Failed if the
-    /// data source throws) so the IDE node it occupies gets a result; the children are added to the list and
-    /// scheduled like any other test, nested under the placeholder via their ParentTestId.
+    /// produced by enumerating its data source. The placeholder is a container, not a test: its real results
+    /// are the children (added to the list, scheduled like any other test, and nested under the placeholder
+    /// via their ParentTestId), so it is NOT reported as a passed result on success — that would inflate test
+    /// counts and show the node green even when its children fail. A result is reported only if the expansion
+    /// itself throws, so that failure stays visible on the placeholder node. (Per-row data errors surface as
+    /// their own failed child via the standard data-generation-error path.)
     /// </summary>
 #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
@@ -130,23 +133,20 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             // Remove the placeholder so it is never scheduled as a real test (its Create/Invoke throw).
             testList.Remove(placeholder);
 
-            placeholder.StartTime = DateTimeOffset.UtcNow;
-            await _messageBus.InProgress(placeholder.Context);
-
             try
             {
                 var children = await _deferredTestExpander.ExpandAsync(placeholder, cancellationToken);
                 testList.AddRange(children);
-
-                placeholder.EndTime = DateTimeOffset.UtcNow;
-                placeholder.SetResult(TestState.Passed);
-                await _messageBus.Passed(placeholder.Context, placeholder.StartTime.GetValueOrDefault());
             }
             catch (Exception ex)
             {
+                // Expansion itself failed (as opposed to a per-row data error, which becomes a failed
+                // child). Surface it on the placeholder node so the failure is visible.
                 await _logger.LogErrorAsync($"Failed to expand deferred test '{placeholder.TestId}': {ex}");
+                placeholder.StartTime = DateTimeOffset.UtcNow;
                 placeholder.EndTime = DateTimeOffset.UtcNow;
                 placeholder.SetResult(TestState.Failed, ex);
+                await _messageBus.InProgress(placeholder.Context);
                 await _messageBus.Failed(placeholder.Context, ex, placeholder.StartTime.GetValueOrDefault());
             }
         }

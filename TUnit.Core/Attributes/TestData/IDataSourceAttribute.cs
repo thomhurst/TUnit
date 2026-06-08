@@ -29,6 +29,8 @@ public interface IDataSourceAttribute
     /// If any data source on a test sets this to <c>true</c>, the entire test's case expansion is
     /// deferred to runtime. Tests deferred this way cannot be targeted individually by a filter, and
     /// other tests cannot <c>[DependsOn]</c> their rows (the rows do not exist until runtime).
+    /// Single-row sources (such as <c>[Arguments]</c>) ignore this flag — there is nothing to defer —
+    /// so setting it on them has no effect.
     /// </remarks>
     bool DeferEnumeration { get; set; }
 }

@@ -5,9 +5,9 @@ namespace TUnit.Engine.Tests;
 
 /// <summary>
 /// Validates DeferEnumeration: a data source marked with it is NOT expanded during discovery (one
-/// placeholder node is shown) and is expanded into the real cases at runtime. The run-time counts below
-/// include the placeholder itself (reported once as a passed container), e.g. a 10-row source yields
-/// 10 cases + 1 placeholder = 11. Discovery-time collapse is covered by manual verification / list-tests.
+/// placeholder node is shown) and is expanded into the real cases at runtime. The placeholder is a
+/// container and is not reported as its own result, so the run-time counts below are exactly the number
+/// of data cases. Discovery-time collapse is covered by manual verification / list-tests.
 /// </summary>
 public class DeferEnumerationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
@@ -18,8 +18,8 @@ public class DeferEnumerationTests(TestMode testMode) : InvokableTestBase(testMo
             "/*/*/DeferEnumerationTests/Deferred",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(11),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(11),
+                result => result.ResultSummary.Counters.Total.ShouldBe(10),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(10),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
@@ -27,13 +27,13 @@ public class DeferEnumerationTests(TestMode testMode) : InvokableTestBase(testMo
     [Test]
     public async Task Deferred_Test_Honours_Repeat()
     {
-        // [Repeat(2)] => 3 runs per case; 10 cases => 30 + 1 placeholder = 31.
+        // [Repeat(2)] => 3 runs per case; 10 cases => 30 results (the placeholder is not counted).
         await RunTestsWithFilter(
             "/*/*/DeferEnumerationTests/DeferredWithRepeat",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(31),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(31),
+                result => result.ResultSummary.Counters.Total.ShouldBe(30),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(30),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
