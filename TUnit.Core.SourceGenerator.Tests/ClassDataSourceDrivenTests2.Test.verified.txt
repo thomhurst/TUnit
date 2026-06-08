@@ -84,7 +84,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
         {
             MethodName = "Base_Derived1",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 12,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -107,7 +107,7 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
         {
             MethodName = "Base_Derived2",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 18,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

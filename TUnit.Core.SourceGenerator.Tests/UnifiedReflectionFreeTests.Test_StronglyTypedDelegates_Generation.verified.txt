@@ -65,7 +65,7 @@ internal static class TUnit_TestProject_TypedDelegateTest__TestSource
         {
             MethodName = "TestWithDelegate",
             FullyQualifiedName = "TUnit.TestProject.TypedDelegateTest.TestWithDelegate",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

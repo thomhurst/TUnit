@@ -101,7 +101,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "Explicit",
             FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -125,7 +125,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "Implicit",
             FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 17,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

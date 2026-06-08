@@ -226,7 +226,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "DataSource_Class",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -248,7 +248,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "DataSource_Class_Generic",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.DataSource_Class_Generic",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -270,7 +270,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "IsInitialized_With_1_ClassDataSource",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_1_ClassDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 23,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -292,7 +292,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "IsInitialized_With_2_ClassDataSources",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_2_ClassDataSources",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 30,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -314,7 +314,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "IsInitialized_With_3_ClassDataSources",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_3_ClassDataSources",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 38,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -336,7 +336,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "IsInitialized_With_4_ClassDataSources",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_4_ClassDataSources",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 47,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -358,7 +358,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "IsInitialized_With_5_ClassDataSources",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests.IsInitialized_With_5_ClassDataSources",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 57,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

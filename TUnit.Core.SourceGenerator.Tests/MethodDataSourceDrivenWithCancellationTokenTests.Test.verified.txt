@@ -79,7 +79,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "MyTest",
             FullyQualifiedName = "TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 12,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

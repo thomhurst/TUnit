@@ -325,7 +325,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "DataSource_Method",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.DataSource_Method",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -349,7 +349,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "DataSource_Method",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.DataSource_Method",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 17,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -373,7 +373,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "EnumValue",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.EnumValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 26,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -397,7 +397,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "NullValue",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.NullValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 35,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -419,7 +419,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "EmptyString",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.EmptyString",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 42,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -441,7 +441,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "NonEmptyString",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.NonEmptyString",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 49,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -463,7 +463,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "BooleanString",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.BooleanString",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 56,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -487,7 +487,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "Type",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.Type",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 65,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -509,7 +509,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "IntegerArray",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.IntegerArray",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 72,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -531,7 +531,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "IntMaxValue",
             FullyQualifiedName = "TUnit.TestProject.DataDrivenTests.IntMaxValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 79,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

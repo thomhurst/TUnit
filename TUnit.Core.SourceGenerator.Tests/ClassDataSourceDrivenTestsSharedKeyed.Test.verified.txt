@@ -101,7 +101,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "DataSource_Class",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -124,7 +124,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
         {
             MethodName = "DataSource_Class_Generic",
             FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

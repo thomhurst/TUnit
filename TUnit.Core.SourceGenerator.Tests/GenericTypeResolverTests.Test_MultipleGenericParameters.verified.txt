@@ -51,7 +51,7 @@ internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
         {
             MethodName = "TestMethod",
             FullyQualifiedName = "TUnit.TestProject.MultiGenericTestClass<int,string>.TestMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -97,7 +97,7 @@ internal static class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
         {
             MethodName = "TestMethod",
             FullyQualifiedName = "TUnit.TestProject.MultiGenericTestClass<bool,double>.TestMethod",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

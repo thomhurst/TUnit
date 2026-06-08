@@ -504,7 +504,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "Params",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Params",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 5,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -526,7 +526,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "ParamsEnumerable",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.ParamsEnumerable",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -548,7 +548,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "Following_Non_Params",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.Following_Non_Params",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 25,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -570,7 +570,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "NonParamsStringArray",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 38,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -593,7 +593,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "NonParamsStringArray_SingleValue",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_SingleValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 47,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -615,7 +615,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "NonParamsStringArray_MultipleValues",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_MultipleValues",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 54,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -637,7 +637,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "NonParamsIntArray",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.NonParamsIntArray",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 61,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -659,7 +659,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "GenericStringArray",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.GenericStringArray",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 69,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -681,7 +681,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string[]), "names", ne
         {
             MethodName = "NonParamsStringArray_BeyondStaticCaseCap",
             FullyQualifiedName = "TUnit.TestProject.ArgsAsArrayTests.NonParamsStringArray_BeyondStaticCaseCap",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 78,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

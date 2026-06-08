@@ -76,7 +76,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "t", new glob
         {
             MethodName = "NullTest",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1692.Tests.NullTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 10,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

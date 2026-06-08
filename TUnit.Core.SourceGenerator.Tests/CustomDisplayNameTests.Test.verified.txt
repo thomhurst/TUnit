@@ -275,7 +275,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 11,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -293,7 +293,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "Test2",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test2",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 18,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -311,7 +311,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "Test3",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.Test3",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 25,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -334,7 +334,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "MethodDataSourceTest",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.MethodDataSourceTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 37,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -367,7 +367,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "TestParameterNamePrefixBug",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.TestParameterNamePrefixBug",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 45,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -391,7 +391,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "PasswordTest",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.PasswordTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 65,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -413,7 +413,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "SameClassConstantTest",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.SameClassConstantTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 72,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -431,7 +431,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "DifferentClassConstantTest",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.DifferentClassConstantTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 79,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -449,7 +449,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "password", n
         {
             MethodName = "NestedClassConstantTest",
             FullyQualifiedName = "TUnit.TestProject.CustomDisplayNameTests.NestedClassConstantTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 86,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

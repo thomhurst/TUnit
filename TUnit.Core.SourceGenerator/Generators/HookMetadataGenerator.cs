@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -720,7 +721,10 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (!isInstance)
         {
-            writer.AppendLine($"FilePath = @\"{hook.FilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\",");
+            // Emit the path via Roslyn's literal formatter rather than hand-rolling escaping —
+            // see the matching comment in TestMetadataGenerator. Hand-escaping a path into a
+            // verbatim literal doubles every separator on Windows, breaking source-link resolution.
+            writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(hook.FilePath, quote: true)},");
             writer.AppendLine($"LineNumber = {hook.LineNumber}");
         }
 

@@ -215,7 +215,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_SingleValue",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_SingleValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -258,7 +258,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_Tuples",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Tuples",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -301,7 +301,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_Enumerable",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Enumerable",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 23,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -344,7 +344,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_Func",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Func",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 30,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -387,7 +387,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_WithArguments",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_WithArguments",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 37,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -430,7 +430,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "AsyncMethodDataSource_ExternalClass",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_ExternalClass",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 44,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -473,7 +473,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "ValueTaskMethodDataSource_SingleValue",
             FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskMethodDataSource_SingleValue",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 51,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -88,7 +88,7 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
         {
             MethodName = "TestWithAssemblyRepeat",
             FullyQualifiedName = "TUnit.TestProject.AssemblyRepeatTests.TestWithAssemblyRepeat",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -106,7 +106,7 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
         {
             MethodName = "TestWithMethodRepeatOverride",
             FullyQualifiedName = "TUnit.TestProject.AssemblyRepeatTests.TestWithMethodRepeatOverride",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 14,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

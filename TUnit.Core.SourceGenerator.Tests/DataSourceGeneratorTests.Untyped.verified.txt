@@ -78,7 +78,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value4", new g
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.AutoDataTests.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

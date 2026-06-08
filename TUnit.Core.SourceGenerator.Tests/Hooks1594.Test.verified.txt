@@ -71,7 +71,7 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
         {
             MethodName = "Test1",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1594.MyTests.Test1",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -179,7 +179,7 @@ internal static class TUnit_TestProject_PropertySetterTests__TestSource
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.PropertySetterTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 69,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

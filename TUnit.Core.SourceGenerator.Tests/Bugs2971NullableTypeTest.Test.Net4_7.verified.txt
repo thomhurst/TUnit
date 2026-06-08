@@ -66,7 +66,7 @@ internal static class TUnit_TestProject_Bugs__2971_Tests__TestSource
         {
             MethodName = "SimpleTest",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2971.Tests.SimpleTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 19,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

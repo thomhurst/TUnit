@@ -67,7 +67,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2__TestSource
         {
             MethodName = "SecondTest",
             FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass2.SecondTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 11,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -143,7 +143,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
         {
             MethodName = "AssertClassName",
             FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass2.AssertClassName",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 6,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -218,7 +218,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
         {
             MethodName = "AssertClassName",
             FullyQualifiedName = "TUnit.TestProject.AbstractTests.ConcreteClass1.AssertClassName",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 6,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

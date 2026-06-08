@@ -150,7 +150,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         {
             MethodName = "GenericArgumentsTest<bool>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<bool>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -172,7 +172,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         {
             MethodName = "GenericArgumentsTest<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -194,7 +194,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         {
             MethodName = "GenericArgumentsTest<double>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<double>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -216,7 +216,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         {
             MethodName = "GenericArgumentsTest<string>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -238,7 +238,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
         {
             MethodName = "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

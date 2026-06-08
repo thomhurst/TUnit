@@ -235,7 +235,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "DefaultTest",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 14,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -278,7 +278,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "BasicTest",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 21,
             Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -321,7 +321,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "InheritedTimeoutAttribute",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 30,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -364,7 +364,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "DataTest",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 38,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -411,7 +411,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "DataSourceTest",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 48,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -479,7 +479,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "MatrixTest",
             FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 58,
             Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -608,7 +608,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "QuickTestDoesNotTimeout",
             FullyQualifiedName = "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 86,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),
@@ -733,7 +733,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
         {
             MethodName = "CancellationTokenIsTriggered",
             FullyQualifiedName = "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 106,
             Categories = new string[] { "Timeout Cancellation Token Tests" },
             Properties = global::System.Array.Empty<string>(),

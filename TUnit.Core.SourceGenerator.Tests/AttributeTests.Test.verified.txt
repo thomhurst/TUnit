@@ -77,7 +77,7 @@ internal static class TUnit_TestProject_AttributeTests__TestSource
         {
             MethodName = "MyTest",
             FullyQualifiedName = "TUnit.TestProject.AttributeTests.MyTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

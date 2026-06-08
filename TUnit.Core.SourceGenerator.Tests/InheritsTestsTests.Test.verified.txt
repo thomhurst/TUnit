@@ -97,7 +97,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.BaseClass.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 11,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -197,7 +197,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -297,7 +297,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests2.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -397,7 +397,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests3.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

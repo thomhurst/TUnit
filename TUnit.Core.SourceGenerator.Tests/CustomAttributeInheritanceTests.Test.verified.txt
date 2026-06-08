@@ -67,7 +67,7 @@ internal static class TUnit_TestProject_CustomAttributeInheritanceTests__TestSou
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.CustomAttributeInheritanceTests.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

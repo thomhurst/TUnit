@@ -124,7 +124,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         {
             MethodName = "TryParse_InvalidString_ReturnsFailure",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_InvalidString_ReturnsFailure",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -150,7 +150,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         {
             MethodName = "Parse_InvalidString_ThrowsException",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.Parse_InvalidString_ThrowsException",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 26,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -176,7 +176,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         {
             MethodName = "TryParse_ValidString_ReturnsAccountId",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_ValidString_ReturnsAccountId",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 38,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

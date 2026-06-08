@@ -103,7 +103,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "MethodDataSource",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1821.Tests.MethodDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 9,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -129,7 +129,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
         {
             MethodName = "MatrixDataSource",
             FullyQualifiedName = "TUnit.TestProject.Bugs._1821.Tests.MatrixDataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 16,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

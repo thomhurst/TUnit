@@ -51,7 +51,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
         {
             MethodName = "Should_Create_Instance",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeA>.Should_Create_Instance",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 35,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -97,7 +97,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
         {
             MethodName = "Should_Create_Instance",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeB>.Should_Create_Instance",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 35,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -182,7 +182,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             MethodName = "Should_Have_Number",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeA>.Should_Have_Number",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 59,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -254,7 +254,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
         {
             MethodName = "Should_Have_Number",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeB>.Should_Have_Number",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 59,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -421,7 +421,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         {
             MethodName = "GenericMethod_Should_Work<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 74,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -439,7 +439,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         {
             MethodName = "GenericMethod_Should_Work<string>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 74,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -457,7 +457,7 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
         {
             MethodName = "GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 74,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -576,7 +576,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         {
             MethodName = "GenericMethod_With_DataSource<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 97,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -619,7 +619,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
         {
             MethodName = "GenericMethod_With_DataSource<double>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<double>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 97,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -762,7 +762,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         {
             MethodName = "BothGeneric_Should_Work<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 117,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -780,7 +780,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         {
             MethodName = "BothGeneric_Should_Work<string>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 117,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -867,7 +867,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         {
             MethodName = "BothGeneric_Should_Work<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 117,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -885,7 +885,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
         {
             MethodName = "BothGeneric_Should_Work<string>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 117,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -966,7 +966,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
         {
             MethodName = "Should_Have_Label",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeA>.Should_Have_Label",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 144,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1012,7 +1012,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
         {
             MethodName = "Should_Have_Label",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeB>.Should_Have_Label",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 144,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1093,7 +1093,7 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
         {
             MethodName = "Should_Handle_Multiple_Type_Parameters",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeA,TypeC>.Should_Handle_Multiple_Type_Parameters",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 160,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1139,7 +1139,7 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
         {
             MethodName = "Should_Handle_Multiple_Type_Parameters",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeB,TypeC>.Should_Handle_Multiple_Type_Parameters",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 160,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1220,7 +1220,7 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
         {
             MethodName = "Should_Create_From_Base",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeA>.Should_Create_From_Base",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 184,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1266,7 +1266,7 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
         {
             MethodName = "Should_Create_From_Base",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeB>.Should_Create_From_Base",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 184,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1360,7 +1360,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
         {
             MethodName = "Should_Have_DataSource",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeA>.Should_Have_DataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 210,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1406,7 +1406,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
         {
             MethodName = "Should_Have_DataSource",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeB>.Should_Have_DataSource",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 210,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1546,7 +1546,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         {
             MethodName = "FullyGeneric_With_DataSources<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 236,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1589,7 +1589,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         {
             MethodName = "FullyGeneric_With_DataSources<double>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<double>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 236,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1703,7 +1703,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         {
             MethodName = "FullyGeneric_With_DataSources<int>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 236,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -1746,7 +1746,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
         {
             MethodName = "FullyGeneric_With_DataSources<double>",
             FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<double>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 236,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

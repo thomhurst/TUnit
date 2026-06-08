@@ -65,7 +65,7 @@ internal static class TUnit_TestProject_ConfigurationTest__TestSource
         {
             MethodName = "TestWithConfiguration",
             FullyQualifiedName = "TUnit.TestProject.ConfigurationTest.TestWithConfiguration",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

@@ -83,7 +83,7 @@ internal static class TUnit_TestProject_ClassConstructorTest__TestSource
         {
             MethodName = "Test",
             FullyQualifiedName = "TUnit.TestProject.ClassConstructorTest.Test",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

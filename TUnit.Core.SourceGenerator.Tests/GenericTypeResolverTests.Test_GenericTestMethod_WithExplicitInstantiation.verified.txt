@@ -88,7 +88,7 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
         {
             MethodName = "GenericTestMethod<int>",
             FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<int>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -106,7 +106,7 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
         {
             MethodName = "GenericTestMethod<string>",
             FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<string>",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 7,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

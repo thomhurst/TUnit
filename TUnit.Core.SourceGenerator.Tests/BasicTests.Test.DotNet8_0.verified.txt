@@ -89,7 +89,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
         {
             MethodName = "SynchronousTest",
             FullyQualifiedName = "TUnit.TestProject.BasicTests.SynchronousTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 5,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -107,7 +107,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
         {
             MethodName = "AsynchronousTest",
             FullyQualifiedName = "TUnit.TestProject.BasicTests.AsynchronousTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 11,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -125,7 +125,7 @@ internal static class TUnit_TestProject_BasicTests__TestSource
         {
             MethodName = "ValueTaskAsynchronousTest",
             FullyQualifiedName = "TUnit.TestProject.BasicTests.ValueTaskAsynchronousTest",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 17,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),

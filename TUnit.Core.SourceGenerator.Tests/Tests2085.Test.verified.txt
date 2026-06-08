@@ -99,7 +99,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
         {
             MethodName = "Double_SpecialConsts",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Double_SpecialConsts",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 8,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
@@ -121,7 +121,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
         {
             MethodName = "Float_SpecialConsts",
             FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Float_SpecialConsts",
-            FilePath = @"",
+            FilePath = "",
             LineNumber = 15,
             Categories = global::System.Array.Empty<string>(),
             Properties = global::System.Array.Empty<string>(),
