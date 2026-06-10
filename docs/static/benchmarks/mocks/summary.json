@@ -7,8 +7,8 @@
     "Setup",
     "Verification"
   ],
-  "timestamp": "2026-06-09",
-  "environment": "Ubuntu Latest • .NET SDK 10.0.300",
+  "timestamp": "2026-06-10",
+  "environment": "Ubuntu Latest • .NET SDK 10.0.301",
   "libraries": [
     "TUnit.Mocks",
     "Imposter",
