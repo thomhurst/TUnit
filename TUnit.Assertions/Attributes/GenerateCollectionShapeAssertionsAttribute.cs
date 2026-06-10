@@ -16,6 +16,6 @@ namespace TUnit.Assertions.Attributes;
 /// </para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class GenerateCollectionShapeAssertionsAttribute : Attribute
+internal sealed class GenerateCollectionShapeAssertionsAttribute : Attribute
 {
 }

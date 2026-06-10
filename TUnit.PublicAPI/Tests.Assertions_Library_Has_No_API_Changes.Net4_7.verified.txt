@@ -391,21 +391,6 @@ namespace .Attributes
         public string? ExpectationMessage { get; set; }
         public bool InlineMethodBody { get; set; }
     }
-    [(.Class, AllowMultiple=false, Inherited=false)]
-    public sealed class GenerateCollectionShapeAssertionsAttribute : 
-    {
-        public GenerateCollectionShapeAssertionsAttribute() { }
-    }
-    [(.Method, AllowMultiple=false, Inherited=false)]
-    public sealed class GenerateCollectionShapeCountOverloadsAttribute : 
-    {
-        public GenerateCollectionShapeCountOverloadsAttribute() { }
-    }
-    [(.Method, AllowMultiple=false, Inherited=false)]
-    public sealed class GenerateCollectionShapeSatisfiesOverloadsAttribute : 
-    {
-        public GenerateCollectionShapeSatisfiesOverloadsAttribute() { }
-    }
 }
 namespace .Chaining
 {
@@ -960,7 +945,6 @@ namespace .Conditions
     public class DictionaryMemberAssertionAdapter<TDictionary, TKey, TValue> : .<TDictionary, TKey, TValue>
         where TDictionary : .<TKey, TValue>
         where TKey :  notnull { }
-    [.]
     public sealed class DictionaryValueSource<TValue> : .<TValue> { }
     [.("HasFiles")]
     public class DirectoryHasFilesAssertion : .<.DirectoryInfo>

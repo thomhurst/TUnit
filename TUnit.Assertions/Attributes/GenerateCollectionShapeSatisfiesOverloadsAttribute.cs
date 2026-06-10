@@ -9,6 +9,6 @@ namespace TUnit.Assertions.Attributes;
 /// per-shape block in <c>CollectionItemSatisfiesExtensions.cs</c>. See issue #6185.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class GenerateCollectionShapeSatisfiesOverloadsAttribute : Attribute
+internal sealed class GenerateCollectionShapeSatisfiesOverloadsAttribute : Attribute
 {
 }

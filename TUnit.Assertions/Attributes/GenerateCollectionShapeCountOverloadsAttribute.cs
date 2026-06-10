@@ -9,6 +9,6 @@ namespace TUnit.Assertions.Attributes;
 /// <c>AssertionExtensions.cs</c> (#5707). See issue #6185.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class GenerateCollectionShapeCountOverloadsAttribute : Attribute
+internal sealed class GenerateCollectionShapeCountOverloadsAttribute : Attribute
 {
 }
