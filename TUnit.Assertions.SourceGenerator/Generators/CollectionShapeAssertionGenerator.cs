@@ -25,13 +25,18 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
     private static readonly SymbolDisplayFormat Fq = SymbolDisplayFormat.FullyQualifiedFormat
         .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
-    // Names already present on IAssertionSource<T> / ValueAssertion<T> / Assertion<T> / object, or that are
-    // pure infrastructure — forwarding them would be redundant or ambiguous.
+    // Methods that must NOT be forwarded onto the wrapper source. A new assertion method added to a shape's
+    // source class is forwarded automatically (the whole point); only add a name here if forwarding it would
+    // be redundant or ambiguous, in one of these groups:
     private static readonly HashSet<string> ExcludedNames = new()
     {
+        // Already declared on IAssertionSource<T> / ValueAssertion<T>, so the wrapper exposes them directly —
+        // re-forwarding would create ambiguous overloads.
         "IsNull", "IsNotNull", "IsTypeOf", "IsNotTypeOf",
         "IsAssignableTo", "IsNotAssignableTo", "IsAssignableFrom", "IsNotAssignableFrom",
+        // Assertion<T> lifecycle / evaluation infrastructure, not user-facing assertions.
         "GetExpectation", "CheckAsync", "AssertAsync", "GetAwaiter", "Because",
+        // System.Object members.
         "Equals", "GetHashCode", "ToString", "GetType",
     };
 
@@ -77,13 +82,19 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(wrappers, static (spc, model) => EmitWrapperAssertions(spc, model));
 
         // Emitter B — per-shape Satisfies overloads (replaces CollectionItemSatisfiesExtensions.cs).
+        // Collect() so the single output file is emitted exactly once even if more than one method ever
+        // carries the trigger attribute (two RegisterSourceOutput firings would add the same hint name twice).
         var satisfiesTrigger = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 SatisfiesAttribute,
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (_, _) => true)
-            .WithTrackingName("CollectionShapeSatisfiesTrigger");
-        context.RegisterSourceOutput(satisfiesTrigger, static (spc, _) => EmitSatisfiesOverloads(spc));
+            .WithTrackingName("CollectionShapeSatisfiesTrigger")
+            .Collect();
+        context.RegisterSourceOutput(satisfiesTrigger, static (spc, triggers) =>
+        {
+            if (triggers.Length > 0) EmitSatisfiesOverloads(spc);
+        });
 
         // Emitter C — per-shape Count(itemAssertion) overloads (replaces the #5707 block in AssertionExtensions.cs).
         var countTrigger = context.SyntaxProvider
@@ -91,8 +102,12 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
                 CountAttribute,
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (_, _) => true)
-            .WithTrackingName("CollectionShapeCountTrigger");
-        context.RegisterSourceOutput(countTrigger, static (spc, _) => EmitCountOverloads(spc));
+            .WithTrackingName("CollectionShapeCountTrigger")
+            .Collect();
+        context.RegisterSourceOutput(countTrigger, static (spc, triggers) =>
+        {
+            if (triggers.Length > 0) EmitCountOverloads(spc);
+        });
     }
 
     // Shapes for the single-template Emitters B and C, precomputed once from the static registry (the transform
