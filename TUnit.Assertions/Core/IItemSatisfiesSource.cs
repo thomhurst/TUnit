@@ -18,7 +18,7 @@ namespace TUnit.Assertions.Core;
 /// <typeparam name="TResult">The selector-specific assertion result type.</typeparam>
 public interface IItemSatisfiesSource<TItem, TResult> : IAssertionSource<TItem>
 {
-    [global::TUnit.Assertions.Attributes.GenerateCollectionShapeItemSourceOverloads]
+    [global::TUnit.Assertions.Attributes.GenerateCollectionShapeSatisfiesOverloads]
     TResult Satisfies<TSource>(Func<TSource, IAssertion?> assertion, string? expression = null)
         where TSource : IAssertionSourceFor<TItem, TSource>;
 }

@@ -449,20 +449,20 @@ namespace .Attributes
         public string? ExpectationMessage { get; set; }
         public bool InlineMethodBody { get; set; }
     }
+    [(.Class, AllowMultiple=false, Inherited=false)]
+    public sealed class GenerateCollectionShapeAssertionsAttribute : 
+    {
+        public GenerateCollectionShapeAssertionsAttribute() { }
+    }
     [(.Method, AllowMultiple=false, Inherited=false)]
     public sealed class GenerateCollectionShapeCountOverloadsAttribute : 
     {
         public GenerateCollectionShapeCountOverloadsAttribute() { }
     }
-    [(.Class, AllowMultiple=false, Inherited=false)]
-    public sealed class GenerateCollectionShapeDrillInsAttribute : 
-    {
-        public GenerateCollectionShapeDrillInsAttribute() { }
-    }
     [(.Method, AllowMultiple=false, Inherited=false)]
-    public sealed class GenerateCollectionShapeItemSourceOverloadsAttribute : 
+    public sealed class GenerateCollectionShapeSatisfiesOverloadsAttribute : 
     {
-        public GenerateCollectionShapeItemSourceOverloadsAttribute() { }
+        public GenerateCollectionShapeSatisfiesOverloadsAttribute() { }
     }
 }
 namespace .Chaining
@@ -3629,7 +3629,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<decimal> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class DictionaryValueSourceCollectionShapeDrillInExtensions
+    public static class DictionaryValueSourceCollectionShapeAssertions
     {
         public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
         public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }

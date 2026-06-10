@@ -2,14 +2,14 @@ using TUnit.Assertions.SourceGenerator.Generators;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class CollectionShapeFanOutGeneratorTests : TestsBase<CollectionShapeFanOutGenerator>
+internal class CollectionShapeAssertionGeneratorTests : TestsBase<CollectionShapeAssertionGenerator>
 {
     [Test]
-    public Task DrillIn_Emits_Full_Per_Shape_Surface() => RunTest(
+    public Task Emits_Full_Per_Shape_Assertion_Surface() => RunTest(
         Path.Combine(Sourcy.Git.RootDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
             "TestData",
-            "CollectionShapeDrillInSource.cs"),
+            "CollectionShapeAssertionSource.cs"),
         async generatedFiles =>
         {
             // Only Emitter A fires (no Satisfies / CountSpecialised triggers in the input).
@@ -31,7 +31,7 @@ internal class CollectionShapeFanOutGeneratorTests : TestsBase<CollectionShapeFa
             // Set shapes seed via the internal FromContext factory.
             await Assert.That(file).Contains("SetAssertion<TItem>.FromContext(source.Context)");
 
-            // Concrete shapes upcast their context (List<T> -> IList<T>) so the drill-in pre-work survives.
+            // Concrete shapes upcast their context (List<T> -> IList<T>) so the wrapper's pre-work survives.
             await Assert.That(file).Contains(
                 "Upcast<global::System.Collections.Generic.List<TItem>, global::System.Collections.Generic.IList<TItem>>(source.Context, x => x)");
 

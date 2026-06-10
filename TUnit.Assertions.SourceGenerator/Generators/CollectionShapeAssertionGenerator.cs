@@ -9,17 +9,17 @@ using TUnit.Assertions.SourceGenerator.Models;
 namespace TUnit.Assertions.SourceGenerator.Generators;
 
 /// <summary>
-/// Generates the collection-shape "fan-out" forwarding overloads that were previously hand-written once per
-/// (collection shape × method). Emitter A handles the full-surface <c>.Value</c>-style drill-in: a generic
-/// arity-1 assertion source marked with <c>[GenerateCollectionShapeDrillIns]</c> gets, for every collection
+/// Generates the per-collection-shape forwarding overloads that were previously hand-written once per
+/// (collection shape × method). Emitter A handles the full-surface <c>.Value</c>-style wrapper: a generic
+/// arity-1 assertion source marked with <c>[GenerateCollectionShapeAssertions]</c> gets, for every collection
 /// shape, one forwarding extension per public method of that shape's assertion source — reflected from the
 /// real <see cref="IMethodSymbol"/> so per-shape signature differences are always correct. See issue #6185.
 /// </summary>
 [Generator]
-public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
+public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
 {
-    private const string DrillInAttribute = "TUnit.Assertions.Attributes.GenerateCollectionShapeDrillInsAttribute";
-    private const string ItemSourceAttribute = "TUnit.Assertions.Attributes.GenerateCollectionShapeItemSourceOverloadsAttribute";
+    private const string AssertionsAttribute = "TUnit.Assertions.Attributes.GenerateCollectionShapeAssertionsAttribute";
+    private const string SatisfiesAttribute = "TUnit.Assertions.Attributes.GenerateCollectionShapeSatisfiesOverloadsAttribute";
     private const string CountAttribute = "TUnit.Assertions.Attributes.GenerateCollectionShapeCountOverloadsAttribute";
 
     private static readonly SymbolDisplayFormat Fq = SymbolDisplayFormat.FullyQualifiedFormat
@@ -47,7 +47,7 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
     // The shape -> source -> seed table. Only this small list is hardcoded; each source's method surface is
     // reflected. Mirrors the collection-shaped Assert.That overloads in Extensions/Assert.cs (and the shape set
     // the hand-written fan-out covered). Non-collection value-shapes that have That() overloads — Memory<T>,
-    // ReadOnlyMemory<T>, IAsyncEnumerable<T> — are intentionally excluded: they are not collection drill-in targets.
+    // ReadOnlyMemory<T>, IAsyncEnumerable<T> — are intentionally excluded: they are not collection-value wrappers.
     private static readonly ShapeRow[] Rows =
     {
         new("TUnit.Assertions.Sources.CollectionAssertion`1", "global::System.Collections.Generic.IEnumerable<{0}>", SeedKind.Ctor),
@@ -65,25 +65,25 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var drillIns = context.SyntaxProvider
+        var wrappers = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                DrillInAttribute,
+                AssertionsAttribute,
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
-                transform: static (ctx, ct) => BuildDrillInModel(ctx, ct))
+                transform: static (ctx, ct) => BuildWrapperModel(ctx, ct))
             .Where(static x => x is not null)
             .Select(static (x, _) => x!)
-            .WithTrackingName("CollectionShapeDrillInTargets");
+            .WithTrackingName("CollectionShapeAssertionTargets");
 
-        context.RegisterSourceOutput(drillIns, static (spc, model) => EmitDrillIn(spc, model));
+        context.RegisterSourceOutput(wrappers, static (spc, model) => EmitWrapperAssertions(spc, model));
 
         // Emitter B — per-shape Satisfies overloads (replaces CollectionItemSatisfiesExtensions.cs).
-        var itemSourceTrigger = context.SyntaxProvider
+        var satisfiesTrigger = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                ItemSourceAttribute,
+                SatisfiesAttribute,
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (_, _) => true)
-            .WithTrackingName("CollectionShapeItemSourceTrigger");
-        context.RegisterSourceOutput(itemSourceTrigger, static (spc, _) => EmitItemSourceOverloads(spc));
+            .WithTrackingName("CollectionShapeSatisfiesTrigger");
+        context.RegisterSourceOutput(satisfiesTrigger, static (spc, _) => EmitSatisfiesOverloads(spc));
 
         // Emitter C — per-shape Count(itemAssertion) overloads (replaces the #5707 block in AssertionExtensions.cs).
         var countTrigger = context.SyntaxProvider
@@ -138,7 +138,7 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
         return sb;
     }
 
-    private static void EmitItemSourceOverloads(SourceProductionContext context)
+    private static void EmitSatisfiesOverloads(SourceProductionContext context)
     {
         var sb = StartGeneratedFile(netStandardOnly: true);
         sb.AppendLine("/// <summary>Generated per-collection-shape <c>Satisfies</c> overloads (issue #6185).</summary>");
@@ -191,7 +191,7 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
     // Model (fully equatable — no ISymbol stored)
     // ---------------------------------------------------------------------------------------------------
 
-    private sealed record DrillInModel(
+    private sealed record WrapperModel(
         string WrapperName,
         string WrapperOpenType,
         ImmutableEquatableArray<ShapeModel> Shapes);
@@ -209,7 +209,7 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
     // Transform
     // ---------------------------------------------------------------------------------------------------
 
-    private static DrillInModel? BuildDrillInModel(GeneratorAttributeSyntaxContext context, CancellationToken ct)
+    private static WrapperModel? BuildWrapperModel(GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
         if (context.TargetSymbol is not INamedTypeSymbol target || target.TypeParameters.Length != 1)
         {
@@ -258,7 +258,7 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
             shapes.Add(new ShapeModel(receiver, row.NetGuard, methods));
         }
 
-        return new DrillInModel(target.Name, wrapperOpen, shapes.ToImmutableEquatableArray());
+        return new WrapperModel(target.Name, wrapperOpen, shapes.ToImmutableEquatableArray());
     }
 
     // Walk the source's base chain (stopping before Assertion<T>), collecting public ordinary instance
@@ -411,14 +411,14 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
     // Emit
     // ---------------------------------------------------------------------------------------------------
 
-    private static void EmitDrillIn(SourceProductionContext context, DrillInModel model)
+    private static void EmitWrapperAssertions(SourceProductionContext context, WrapperModel model)
     {
         var sb = StartGeneratedFile();
-        sb.AppendLine($"public static partial class {model.WrapperName}CollectionShapeDrillInExtensions");
+        sb.AppendLine($"public static partial class {model.WrapperName}CollectionShapeAssertions");
         sb.AppendLine("{");
 
         // Shared upcast helper: carries an already-captured PendingPreWork across an identity context map so
-        // a concrete shape (List<T>/Dictionary<K,V>) still runs the drill-in's pre-work (e.g. the ContainsKey
+        // a concrete shape (List<T>/Dictionary<K,V>) still runs the wrapper's pre-work (e.g. the ContainsKey
         // check) before reading the value.
         sb.AppendLine("    private static global::TUnit.Assertions.Core.AssertionContext<TTo> Upcast<TFrom, TTo>(");
         sb.AppendLine("        global::TUnit.Assertions.Core.AssertionContext<TFrom> context, global::System.Func<TFrom?, TTo?> upcast)");
@@ -462,6 +462,6 @@ public sealed class CollectionShapeFanOutGenerator : IIncrementalGenerator
 
         sb.AppendLine("}");
 
-        context.AddSource($"{model.WrapperName}.CollectionShapeDrillIns.g.cs", sb.ToString());
+        context.AddSource($"{model.WrapperName}.CollectionShapeAssertions.g.cs", sb.ToString());
     }
 }
