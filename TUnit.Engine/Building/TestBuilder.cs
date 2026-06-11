@@ -1605,10 +1605,15 @@ internal sealed class TestBuilder : ITestBuilder
         // Check for ClassConstructor attribute and set it early if present
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
-        var classConstructorAttribute = attributes
-            .Where(a => a is ClassConstructorAttribute)
-            .Cast<ClassConstructorAttribute>()
-            .FirstOrDefault();
+        ClassConstructorAttribute? classConstructorAttribute = null;
+        foreach (var attribute in attributes)
+        {
+            if (attribute is ClassConstructorAttribute cca)
+            {
+                classConstructorAttribute = cca;
+                break;
+            }
+        }
 
         if (classConstructorAttribute != null)
         {

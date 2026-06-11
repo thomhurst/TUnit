@@ -210,6 +210,11 @@ internal sealed class TestBuilderPipeline
         // Get dynamic test metadata for DisplayName support
         var dynamicTestMetadata = metadata as IDynamicTestMetadata;
 
+        // Hoist loop-invariant state so repeat iterations share one attribute dictionary and factory delegate
+        var attributes = metadata.GetOrCreateAttributes();
+        var attributesByType = attributes.ToAttributeDictionary();
+        Func<Task<object>> instanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, []));
+
         return await Enumerable.Range(0, repeatCount + 1)
             .SelectAsync(async repeatIndex =>
         {
@@ -218,7 +223,7 @@ internal sealed class TestBuilderPipeline
             var dynamicTestIndex = dynamicTestMetadata?.DynamicTestIndex ?? 0;
             var testData = new TestBuilder.TestData
             {
-                TestClassInstanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, [])),
+                TestClassInstanceFactory = instanceFactory,
                 ClassDataSourceAttributeIndex = 0,
                 ClassDataLoopIndex = 0,
                 ClassData = [],
@@ -239,9 +244,6 @@ internal sealed class TestBuilderPipeline
                 ? $"{baseDisplayName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                 : baseDisplayName;
 
-            // Get attributes first
-            var attributes = metadata.GetOrCreateAttributes();
-
             // Create TestDetails for dynamic tests
             var testDetails = new TestDetails(attributes)
             {
@@ -259,7 +261,7 @@ internal sealed class TestBuilderPipeline
                 TestEndColumnNumber = metadata.EndColumnNumber,
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
-                AttributesByType = attributes.ToAttributeDictionary()
+                AttributesByType = attributesByType
             };
 
             var testBuilderContext = CreateTestBuilderContext(metadata);
@@ -339,6 +341,10 @@ internal sealed class TestBuilderPipeline
                 // Get attributes for test details
                 var attributes = resolvedMetadata.GetOrCreateAttributes();
 
+                // Hoist loop-invariant state so repeat iterations share one attribute dictionary and factory delegate
+                var attributesByType = attributes.ToAttributeDictionary();
+                Func<Task<object>> instanceFactory = () => Task.FromResult(resolvedMetadata.InstanceFactory(Type.EmptyTypes, []));
+
                 // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                 // We'll create multiple test instances based on RepeatCount
                 // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
@@ -348,7 +354,7 @@ internal sealed class TestBuilderPipeline
                     // Create a simple TestData for ID generation
                     var testData = new TestBuilder.TestData
                     {
-                        TestClassInstanceFactory = () => Task.FromResult(resolvedMetadata.InstanceFactory(Type.EmptyTypes, [])),
+                        TestClassInstanceFactory = instanceFactory,
                         ClassDataSourceAttributeIndex = 0,
                         ClassDataLoopIndex = 0,
                         ClassData = [],
@@ -385,7 +391,7 @@ internal sealed class TestBuilderPipeline
                         TestEndColumnNumber = resolvedMetadata.EndColumnNumber,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
-                        AttributesByType = attributes.ToAttributeDictionary()
+                        AttributesByType = attributesByType
                     };
 
                     var context = _contextProvider.CreateTestContext(

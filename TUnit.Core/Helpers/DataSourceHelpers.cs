@@ -23,7 +23,8 @@ public static class DataSourceHelpers
             return null;
         }
 
-        if(value.GetType().IsGenericType && value.GetType().GetGenericTypeDefinition() == typeof(Func<>))
+        var type = value.GetType();
+        if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
             return ((Delegate)value).DynamicInvoke();
         }
@@ -426,30 +427,16 @@ public static class DataSourceHelpers
         // Try to use ITuple interface first for any ValueTuple type
         if (value is ITuple tuple)
         {
-            var result = new List<object?>();
-            var typeIndex = 0;
+            // Elements map 1:1 to expected parameters; nested tuples are kept as-is
+            var count = Math.Min(tuple.Length, expectedTypes.Length);
+            var result = new object?[count];
 
-            for (var i = 0; i < tuple.Length && typeIndex < expectedTypes.Length; i++)
+            for (var i = 0; i < count; i++)
             {
-                var element = tuple[i];
-                var expectedType = expectedTypes[typeIndex];
-
-                // Check if the expected type is a tuple type
-                if (TupleHelper.IsTupleType(expectedType) && IsTuple(element))
-                {
-                    // Keep nested tuple as-is
-                    result.Add(element);
-                    typeIndex++;
-                }
-                else
-                {
-                    // Add element normally
-                    result.Add(element);
-                    typeIndex++;
-                }
+                result[i] = tuple[i];
             }
 
-            return result.ToArray();
+            return result;
         }
 #endif
 
