@@ -7,6 +7,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Services;
 using TUnit.Engine.Utilities;
 
@@ -56,15 +57,7 @@ internal sealed class TestBuilderPipeline
 
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
-        ClassConstructorAttribute? classConstructorAttribute = null;
-        foreach (var attr in attributes)
-        {
-            if (attr is ClassConstructorAttribute cca)
-            {
-                classConstructorAttribute = cca;
-                break;
-            }
-        }
+        var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
 
         if (classConstructorAttribute != null)
         {
