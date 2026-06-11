@@ -17,10 +17,6 @@ internal class CollectionShapeAssertionGeneratorTests : TestsBase<CollectionShap
 
             var file = generatedFiles[0];
 
-            // Shared pre-work-preserving upcast helper is emitted once.
-            await Assert.That(file).Contains("AssertionContext<TTo> Upcast<TFrom, TTo>");
-            await Assert.That(file).Contains("context.PendingPreWork is { } preWork");
-
             // Per-shape signature fidelity reflected from the real symbols: ReadOnlyList.HasItemAt
             // carries an IEqualityComparer the IList overload does not.
             await Assert.That(file).Contains(
@@ -31,9 +27,10 @@ internal class CollectionShapeAssertionGeneratorTests : TestsBase<CollectionShap
             // Set shapes seed via the internal FromContext factory.
             await Assert.That(file).Contains("SetAssertion<TItem>.FromContext(source.Context)");
 
-            // Concrete shapes upcast their context (List<T> -> IList<T>) so the wrapper's pre-work survives.
+            // Concrete shapes upcast their context (List<T> -> IList<T>) via the shared pre-work-preserving
+            // helper on AssertionContext, so the wrapper's pre-work survives without emitting a helper per file.
             await Assert.That(file).Contains(
-                "Upcast<global::System.Collections.Generic.List<TItem>, global::System.Collections.Generic.IList<TItem>>(source.Context, x => x)");
+                "source.Context.MapPreservingPreWork<global::System.Collections.Generic.IList<TItem>>(x => x)");
 
             // Dictionary value shapes preserve dictionary-specific methods and the notnull key constraint.
             await Assert.That(file).Contains("DictionaryAssertion<TKey, TValue>(source.Context).ContainsKey");
