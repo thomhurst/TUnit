@@ -3165,6 +3165,435 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<decimal> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class DictionaryValueSourceCollectionShapeAssertions
+    {
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> All<TItem>(this .<TItem[]> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> All<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> All<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllKeys<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllKeys<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllKeys<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllValues<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllValues<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AllValues<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Any<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> Any<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Any<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Any<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Any<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyKey<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyKey<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyKey<TKey, TValue>(this .<.<TKey, TValue>> source, <TKey, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyValue<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyValue<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> AnyValue<TKey, TValue>(this .<.<TKey, TValue>> source, <TValue, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<TItem[], TItem> Contains<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> Contains<TItem>(this .<TItem[]> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<TItem[], TItem> Contains<TItem>(this .<TItem[]> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Contains<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKeyWithValue<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKeyWithValue<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsKeyWithValue<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, TValue expectedValue, [.("expectedKey")] string? keyExpression = null, [.("expectedValue")] string? valueExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> ContainsOnly<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> ContainsOnly<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> ContainsOnly<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> ContainsOnly<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> ContainsValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
+        public static .<.<TKey, TValue>, TKey, TValue> Count<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> Count<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> Count<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<TItem[], TItem> DoesNotContain<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> DoesNotContain<TItem>(this .<TItem[]> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<TItem[], TItem> DoesNotContain<TItem>(this .<TItem[]> source, TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, [.("expected")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> DoesNotContain<TKey, TValue>(this .<.<TKey, TValue>> source, .<TKey, TValue> expected, .<.<TKey, TValue>> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey expectedKey, [.("expectedKey")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> DoesNotContainValue<TKey, TValue>(this .<.<TKey, TValue>> source, TValue expectedValue, [.("expectedValue")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> DoesNotOverlap<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotOverlap<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> FirstItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> FirstItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> FirstItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtLeast<TItem>(this .<.<TItem>> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<TItem[], TItem> HasAtLeast<TItem>(this .<TItem[]> source, int minCount, [.("minCount")] string? expression = null) { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtLeast<TKey, TValue>(this .<.<TKey, TValue>> source, int minCount, [.("minCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtLeast<TKey, TValue>(this .<.<TKey, TValue>> source, int minCount, [.("minCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtLeast<TKey, TValue>(this .<.<TKey, TValue>> source, int minCount, [.("minCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasAtMost<TItem>(this .<.<TItem>> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<TItem[], TItem> HasAtMost<TItem>(this .<TItem[]> source, int maxCount, [.("maxCount")] string? expression = null) { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtMost<TKey, TValue>(this .<.<TKey, TValue>> source, int maxCount, [.("maxCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtMost<TKey, TValue>(this .<.<TKey, TValue>> source, int maxCount, [.("maxCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasAtMost<TKey, TValue>(this .<.<TKey, TValue>> source, int maxCount, [.("maxCount")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TItem>, TItem> HasCountBetween<TItem>(this .<.<TItem>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<TItem[], TItem> HasCountBetween<TItem>(this .<TItem[]> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasCountBetween<TKey, TValue>(this .<.<TKey, TValue>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasCountBetween<TKey, TValue>(this .<.<TKey, TValue>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasCountBetween<TKey, TValue>(this .<.<TKey, TValue>> source, int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> HasDistinctItems<TItem>(this .<TItem[]> source) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> HasDistinctItems<TItem>(this .<.<TItem>> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<TItem[], TItem> HasDistinctItems<TItem>(this .<TItem[]> source, .<TItem> comparer, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source, .<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source, .<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> HasDistinctItems<TKey, TValue>(this .<.<TKey, TValue>> source, .<.<TKey, TValue>> comparer, [.("comparer")] string? comparerExpression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> HasItemAt<TItem>(this .<.<TItem>> source, int index, TItem expected, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
+        public static .<.<TItem>, TItem> HasItemAt<TItem>(this .<.<TItem>> source, int index, TItem expected, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
+        public static .<.<TItem>, TItem> HasItemAt<TItem>(this .<.<TItem>> source, int index, TItem expected, .<TItem>? comparer = null, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> HasSingleItem<TItem>(this .<TItem[]> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TItem[], TItem> HasSingleItem<TItem>(this .<TItem[]> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> HasSingleItem<TKey, TValue>(this .<.<TKey, TValue>> source, <.<TKey, TValue>, bool> predicate, [.("predicate")] string? expression = null)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> IsEmpty<TItem>(this .<TItem[]> source) { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> IsInDescendingOrder<TItem>(this .<TItem[]> source) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInDescendingOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInDescendingOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInDescendingOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> IsInOrder<TItem>(this .<TItem[]> source) { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, .<TKey, TValue>> IsInOrder<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> IsNotEmpty<TItem>(this .<.<TItem>> source) { }
+        public static .<TItem[], TItem> IsNotEmpty<TItem>(this .<TItem[]> source) { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsNotEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsNotEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TKey, TValue>, TKey, TValue> IsNotEmpty<TKey, TValue>(this .<.<TKey, TValue>> source)
+            where TKey :  notnull { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<TItem[], TItem, TKey> IsOrderedBy<TItem, TKey>(this .<TItem[]> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<TItem[], TItem, TKey> IsOrderedBy<TItem, TKey>(this .<TItem[]> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<TItem[], TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<TItem[]> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<TItem[], TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<TItem[]> source, <TItem, TKey> keySelector, .<TKey>? comparer, [.("keySelector")] string? selectorExpression = null, [.("comparer")] string? comparerExpression = null) { }
+        public static .<.<TItem>, TItem> IsProperSubsetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsProperSubsetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsProperSupersetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsProperSupersetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsSubsetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsSubsetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsSupersetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> IsSupersetOf<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ItemAt<TItem>(this .<.<TItem>> source, int index, [.("index")] string? expression = null) { }
+        public static .<.<TItem>, TItem> ItemAt<TItem>(this .<.<TItem>> source, int index, [.("index")] string? indexExpression = null) { }
+        public static .<.<TItem>, TItem> ItemAt<TItem>(this .<.<TItem>> source, int index, [.("index")] string? expression = null) { }
+        public static .<.<TItem>, TItem> LastItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> LastItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> LastItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> Overlaps<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Overlaps<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> SetEquals<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+        public static .<.<TItem>, TItem> SetEquals<TItem>(this .<.<TItem>> source, .<TItem> other, [.("other")] string? expression = null) { }
+    }
     public static class DirectoryHasFilesAssertionExtensions
     {
         public static . HasFiles(this .<.DirectoryInfo> source) { }

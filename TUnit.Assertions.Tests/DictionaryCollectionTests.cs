@@ -765,6 +765,155 @@ public class DictionaryCollectionTests
         await Assert.That(dictionary).ContainsKey("Key").And.Value.IsEqualTo(1234L);
     }
 
+    // ── Collection-typed value drill-in (issue #6185 follow-up) ───────────────────────
+    // When the dictionary value is itself a collection, .Value must expose the collection
+    // surface (Count/Contains/IsEmpty/…) rather than binding to LINQ's Enumerable.Count (CS0411).
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Count_When_Value_Is_Collection()
+    {
+        IDictionary<string, IEnumerable<int>> dictionary = new Dictionary<string, IEnumerable<int>>
+        {
+            ["Key"] = new[] { 1, 2 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task IReadOnlyDictionary_ContainsKey_And_Value_Count_When_Value_Is_Collection()
+    {
+        IReadOnlyDictionary<string, IEnumerable<string>> dictionary = new Dictionary<string, IEnumerable<string>>
+        {
+            ["Key"] = new[] { "a", "b", "c" }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.Count().IsGreaterThan(2);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Collection_Contains_And_IsNotEmpty()
+    {
+        IDictionary<string, IEnumerable<int>> dictionary = new Dictionary<string, IEnumerable<int>>
+        {
+            ["Key"] = new[] { 10, 20, 30 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.Contains(20);
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsNotEmpty();
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Collection_Count_Fails_With_Count_Message()
+    {
+        IDictionary<string, IEnumerable<int>> dictionary = new Dictionary<string, IEnumerable<int>>
+        {
+            ["Key"] = new[] { 1, 2 }
+        };
+
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Key").And.Value.Count().IsEqualTo(5));
+
+        await Assert.That(exception.Message).Contains("count");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Collection_Fails_When_Key_Missing()
+    {
+        IDictionary<string, IEnumerable<int>> dictionary = new Dictionary<string, IEnumerable<int>>
+        {
+            ["Key"] = new[] { 1, 2 }
+        };
+
+        // The ContainsKey pre-work still runs first, so a missing key fails with the
+        // standard "contain key" message rather than reading the (absent) collection.
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Missing").And.Value.Count().IsEqualTo(2));
+
+        await Assert.That(exception.Message).Contains("contain key");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_List_HasItemAt()
+    {
+        IDictionary<string, IList<int>> dictionary = new Dictionary<string, IList<int>>
+        {
+            ["Key"] = new List<int> { 10, 20, 30 }
+        };
+
+        // List-specific surface (HasItemAt / ItemAt) is preserved, not degraded to a bare enumerable.
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.HasItemAt(1, 20);
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.ItemAt(2).IsEqualTo(30);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Set_IsSubsetOf()
+    {
+        IDictionary<string, ISet<int>> dictionary = new Dictionary<string, ISet<int>>
+        {
+            ["Key"] = new HashSet<int> { 1, 2 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.IsSubsetOf(new[] { 1, 2, 3 });
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_NestedDictionary_ContainsKey()
+    {
+        IDictionary<string, IDictionary<string, int>> dictionary = new Dictionary<string, IDictionary<string, int>>
+        {
+            ["Outer"] = new Dictionary<string, int> { ["Inner"] = 42 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Outer").And.Value.ContainsKey("Inner");
+        await Assert.That(dictionary).ContainsKey("Outer").And.Value.ContainsKeyWithValue("Inner", 42);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_Array_Count()
+    {
+        IDictionary<string, int[]> dictionary = new Dictionary<string, int[]>
+        {
+            ["Key"] = new[] { 1, 2, 3 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.Count().IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_ConcreteList_Count_And_MissingKey()
+    {
+        IDictionary<string, List<int>> dictionary = new Dictionary<string, List<int>>
+        {
+            ["Key"] = new List<int> { 1, 2 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Key").And.Value.Count().IsEqualTo(2);
+
+        // Concrete List<T> uses the upcast seed; the ContainsKey pre-work must still run first.
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Missing").And.Value.Count().IsEqualTo(2));
+
+        await Assert.That(exception.Message).Contains("contain key");
+    }
+
+    [Test]
+    public async Task Dictionary_ContainsKey_And_Value_ConcreteDictionary_ContainsKey_And_MissingKey()
+    {
+        IDictionary<string, Dictionary<string, int>> dictionary = new Dictionary<string, Dictionary<string, int>>
+        {
+            ["Outer"] = new Dictionary<string, int> { ["Inner"] = 7 }
+        };
+
+        await Assert.That(dictionary).ContainsKey("Outer").And.Value.ContainsKey("Inner");
+
+        // Concrete Dictionary<K,V> uses the upcast seed; the ContainsKey pre-work must still run first.
+        var exception = await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(
+            async () => await Assert.That(dictionary).ContainsKey("Missing").And.Value.ContainsKey("Inner"));
+
+        await Assert.That(exception.Message).Contains("contain key");
+    }
+
     [Test]
     public async Task Dictionary_IsNotEmpty_Preserves_Dictionary_Continuation()
     {

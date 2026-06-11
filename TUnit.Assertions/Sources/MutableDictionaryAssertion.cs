@@ -22,6 +22,15 @@ public class MutableDictionaryAssertion<TKey, TValue> : MutableDictionaryAsserti
     {
     }
 
+    /// <summary>
+    /// Seeds a mutable-dictionary assertion over an existing context (used by the dictionary <c>.Value</c>
+    /// drill-in when the value is itself a mutable dictionary).
+    /// </summary>
+    internal MutableDictionaryAssertion(AssertionContext<IDictionary<TKey, TValue>> context)
+        : base(context)
+    {
+    }
+
 #if !NETSTANDARD2_0
     public static MutableDictionaryAssertion<TKey, TValue> Create(IDictionary<TKey, TValue> item, string label) => new(item, label);
     public static MutableDictionaryAssertion<TKey, TValue> Create(Dictionary<TKey, TValue> item, string label) => new(item, label);

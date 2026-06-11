@@ -34,6 +34,11 @@ public class SetAssertion<TItem> : SetAssertionBase<ISet<TItem>, TItem>, IAssert
     /// <inheritdoc />
     protected override ISetAdapter<TItem> CreateSetAdapter(ISet<TItem> value) => new SetAdapter<TItem>(value);
 
+    /// <summary>
+    /// Seeds a set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static SetAssertion<TItem> FromContext(AssertionContext<ISet<TItem>> context) => new(context);
+
     /// <inheritdoc />
     AssertionContext<ISet<TItem>> IAssertionSource<ISet<TItem>>.Context => Context;
 
@@ -77,6 +82,11 @@ public class ReadOnlySetAssertion<TItem> : SetAssertionBase<IReadOnlySet<TItem>,
     /// <inheritdoc />
     protected override ISetAdapter<TItem> CreateSetAdapter(IReadOnlySet<TItem> value) => new ReadOnlySetAdapter<TItem>(value);
 
+    /// <summary>
+    /// Seeds a read-only set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static ReadOnlySetAssertion<TItem> FromContext(AssertionContext<IReadOnlySet<TItem>> context) => new(context);
+
     /// <inheritdoc />
     AssertionContext<IReadOnlySet<TItem>> IAssertionSource<IReadOnlySet<TItem>>.Context => Context;
 
@@ -119,6 +129,11 @@ public class HashSetAssertion<TItem> : SetAssertionBase<HashSet<TItem>, TItem>, 
 
     /// <inheritdoc />
     protected override ISetAdapter<TItem> CreateSetAdapter(HashSet<TItem> value) => new SetAdapter<TItem>(value);
+
+    /// <summary>
+    /// Seeds a hash-set assertion over an existing context (used by the dictionary <c>.Value</c> drill-in).
+    /// </summary>
+    internal static HashSetAssertion<TItem> FromContext(AssertionContext<HashSet<TItem>> context) => new(context);
 
     /// <inheritdoc />
     AssertionContext<HashSet<TItem>> IAssertionSource<HashSet<TItem>>.Context => Context;

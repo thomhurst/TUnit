@@ -10,6 +10,7 @@ namespace TUnit.Assertions.Conditions;
 /// Created via <c>ContainsKey(key).And.Value</c>.
 /// </summary>
 /// <typeparam name="TValue">The dictionary value type.</typeparam>
+[global::TUnit.Assertions.Attributes.GenerateCollectionShapeAssertions]
 public sealed class DictionaryValueSource<TValue> : ValueAssertion<TValue>
 {
     internal DictionaryValueSource(AssertionContext<TValue> context)

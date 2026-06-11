@@ -90,6 +90,27 @@ public sealed class AssertionContext<TValue>
     }
 
     /// <summary>
+    /// Maps to <typeparamref name="TNew"/> while preserving an already-captured <see cref="PendingPreWork"/>.
+    /// Plain <see cref="Map{TNew}(Func{TValue, TNew})"/> transfers a pending And/Or link as pre-work but does
+    /// not carry pre-work that was already captured (e.g. the <c>ContainsKey</c> check a dictionary
+    /// <c>.Value</c> drill-in holds). Used by generated collection-shape wrappers to identity-upcast a concrete
+    /// value shape (<c>List&lt;T&gt;</c> → <c>IList&lt;T&gt;</c>) without dropping that pre-work.
+    /// </summary>
+    internal AssertionContext<TNew> MapPreservingPreWork<TNew>(Func<TValue?, TNew?> mapper)
+    {
+        var mapped = Map(mapper);
+        if (PendingPreWork is { } preWork)
+        {
+            var existing = mapped.PendingPreWork;
+            mapped.PendingPreWork = existing is null
+                ? preWork
+                : async () => { await existing(); await preWork(); };
+        }
+
+        return mapped;
+    }
+
+    /// <summary>
     /// Creates a detached context that shares this context's evaluation (so it sees the same value)
     /// but has its own expression builder and no pending link. Used to construct an inner assertion
     /// whose construction must NOT consume this context's And/Or pending link.

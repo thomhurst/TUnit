@@ -21,6 +21,15 @@ public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<IReadOn
     {
     }
 
+    /// <summary>
+    /// Seeds a dictionary assertion over an existing context (used by the dictionary <c>.Value</c> drill-in
+    /// when the value is itself a read-only dictionary).
+    /// </summary>
+    internal DictionaryAssertion(AssertionContext<IReadOnlyDictionary<TKey, TValue>> context)
+        : base(context)
+    {
+    }
+
 #if !NETSTANDARD2_0
     public static DictionaryAssertion<TKey, TValue> Create(IReadOnlyDictionary<TKey, TValue> item, string label) => new(item, label);
 #endif
