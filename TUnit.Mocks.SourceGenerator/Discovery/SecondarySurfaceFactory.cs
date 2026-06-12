@@ -29,8 +29,8 @@ internal static class SecondarySurfaceFactory
     {
         /// <summary>Union members by full signature, first-wins — so members the union
         /// deduplicated against the primary resolve to the PRIMARY member's ID.</summary>
-        public readonly Dictionary<string, MockMemberModel> UnionMethods = new();
-        public readonly Dictionary<string, MockMemberModel> UnionProperties = new();
+        public readonly Dictionary<string, MockMemberModel> UnionMethods = new(System.StringComparer.Ordinal);
+        public readonly Dictionary<string, MockMemberModel> UnionProperties = new(System.StringComparer.Ordinal);
 
         public readonly HashSet<string> PrimaryMethodSignatures = new(System.StringComparer.Ordinal);
         public readonly HashSet<string> PrimaryMethodNameParams = new(System.StringComparer.Ordinal);
@@ -155,6 +155,8 @@ internal static class SecondarySurfaceFactory
             if (m.IsStaticAbstract || m.ExplicitInterfaceName is not null) continue;
             var nameParams = GetMethodNameParamsKey(m);
             if (context.PrimaryMethodSignatures.Contains(GetMethodSignatureKey(nameParams, m))) continue;
+            // Rename changes the extension's Name only; MemberId stays the standalone ordinal and
+            // ComputeMemberIdMap correlates by the ORIGINAL signature key, so the map is unaffected.
             methods.Add(context.PrimaryMethodNameParams.Contains(nameParams)
                 ? m with { Name = $"{shortName}_{m.Name}" } // same name+params, different return — would be ambiguous
                 : m);

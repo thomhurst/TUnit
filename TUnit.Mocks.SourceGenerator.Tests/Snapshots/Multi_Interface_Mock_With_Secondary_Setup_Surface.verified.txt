@@ -87,7 +87,9 @@ public static class IMultiLogger_IMultiDisposable_MockMemberExtensions
     {
         if (!engine.TryGetSecondaryMemberId(typeof(global::IMultiDisposable), localId, out var memberId))
         {
-            throw new global::System.InvalidOperationException("This mock was not created with 'IMultiDisposable' as a secondary interface. Create it with Mock.Of<IMultiLogger, IMultiDisposable>() to configure its members.");
+            throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof(global::IMultiDisposable))
+                ? "Member #" + localId + " of 'IMultiDisposable' has no setup mapping on this mock instance — it is not part of this combo's configurable surface."
+                : "This mock was not created with 'IMultiDisposable' as a secondary interface. Create it with Mock.Of<IMultiLogger, IMultiDisposable>() to configure its members.");
         }
         return memberId;
     }

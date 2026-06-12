@@ -61,4 +61,28 @@ public sealed partial class MockEngine<T> where T : class
         memberId = -1;
         return false;
     }
+
+    /// <summary>
+    /// True when this mock was created with <paramref name="interfaceType"/> as a secondary
+    /// interface. Used by generated <c>__Id</c> resolvers to distinguish "wrong mock" from
+    /// "registered, but this member has no mapping" when a lookup fails. Called by generated
+    /// code only.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool HasSecondaryInterface(Type interfaceType)
+    {
+        var maps = _secondaryMemberIdMaps;
+        if (maps is null)
+        {
+            return false;
+        }
+        foreach (var (type, _) in maps)
+        {
+            if (ReferenceEquals(type, interfaceType))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

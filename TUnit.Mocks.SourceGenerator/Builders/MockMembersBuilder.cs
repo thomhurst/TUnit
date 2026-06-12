@@ -184,7 +184,12 @@ internal static class MockMembersBuilder
         {
             using (writer.Block($"if (!engine.TryGetSecondaryMemberId(typeof({ifaceFqn}), localId, out var memberId))"))
             {
-                writer.AppendLine($"throw new global::System.InvalidOperationException(\"This mock was not created with '{ifaceDisplay}' as a secondary interface. Create it with Mock.Of<{primaryDisplay}, {ifaceDisplay}>() to configure its members.\");");
+                // Two distinct failure modes: the mock lacks the interface entirely (user error,
+                // actionable hint) vs. the interface is registered but this slot is unmapped
+                // (excluded member or a correlation gap — don't gaslight the user about Of<>).
+                writer.AppendLine($"throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof({ifaceFqn}))");
+                writer.AppendLine($"    ? \"Member #\" + localId + \" of '{ifaceDisplay}' has no setup mapping on this mock instance — it is not part of this combo's configurable surface.\"");
+                writer.AppendLine($"    : \"This mock was not created with '{ifaceDisplay}' as a secondary interface. Create it with Mock.Of<{primaryDisplay}, {ifaceDisplay}>() to configure its members.\");");
             }
             writer.AppendLine("return memberId;");
         }

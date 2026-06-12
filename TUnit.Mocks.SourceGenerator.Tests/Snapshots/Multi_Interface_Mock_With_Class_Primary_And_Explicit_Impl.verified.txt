@@ -71,7 +71,9 @@ public static class DataContext_IInfra_MockMemberExtensions
     {
         if (!engine.TryGetSecondaryMemberId(typeof(global::IInfra), localId, out var memberId))
         {
-            throw new global::System.InvalidOperationException("This mock was not created with 'IInfra' as a secondary interface. Create it with Mock.Of<DataContext, IInfra>() to configure its members.");
+            throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof(global::IInfra))
+                ? "Member #" + localId + " of 'IInfra' has no setup mapping on this mock instance — it is not part of this combo's configurable surface."
+                : "This mock was not created with 'IInfra' as a secondary interface. Create it with Mock.Of<DataContext, IInfra>() to configure its members.");
         }
         return memberId;
     }

@@ -77,7 +77,9 @@ public static class IConflictA_IConflictB_MockMemberExtensions
     {
         if (!engine.TryGetSecondaryMemberId(typeof(global::IConflictB), localId, out var memberId))
         {
-            throw new global::System.InvalidOperationException("This mock was not created with 'IConflictB' as a secondary interface. Create it with Mock.Of<IConflictA, IConflictB>() to configure its members.");
+            throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof(global::IConflictB))
+                ? "Member #" + localId + " of 'IConflictB' has no setup mapping on this mock instance — it is not part of this combo's configurable surface."
+                : "This mock was not created with 'IConflictB' as a secondary interface. Create it with Mock.Of<IConflictA, IConflictB>() to configure its members.");
         }
         return memberId;
     }
