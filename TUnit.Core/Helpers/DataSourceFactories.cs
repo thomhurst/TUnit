@@ -1,7 +1,8 @@
 // Sync helper variants (FromValue/FromEnumerable and their instance twins) are async iterators
 // with no await — intentional, so the data-source invocation stays deferred to first enumeration
-// with semantics identical to the previously generated per-call-site iterators.
-#pragma warning disable CS1998
+// with semantics identical to the previously generated per-call-site iterators. CS1998 is
+// suppressed only around those methods (not file-scope) so a genuine missing await elsewhere
+// still surfaces.
 
 using System.Collections;
 using System.ComponentModel;
@@ -32,6 +33,7 @@ namespace TUnit.Core.Helpers;
 #endif
 public static class DataSourceFactories
 {
+#pragma warning disable CS1998 // sync-only async iterators: deferred invocation, no await by design
     /// <summary>Data member declared as a single (non-enumerable, non-task) value.</summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValue(Func<object?> invoke)
     {
@@ -57,6 +59,7 @@ public static class DataSourceFactories
             yield return () => Task.FromResult<object?[]?>(DataSourceHelpers.ToObjectArray(result));
         }
     }
+#pragma warning restore CS1998
 
     /// <summary>Data member declared as <c>Task&lt;T&gt;</c>.</summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromTask<T>(Func<Task<T>> invoke)
@@ -107,6 +110,7 @@ public static class DataSourceFactories
         }
     }
 
+#pragma warning disable CS1998 // sync-only async iterators: deferred invocation, no await by design
     /// <summary>Instance data member declared as a single (non-enumerable, non-task) value.</summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object, object?> invoke)
     {
@@ -132,6 +136,7 @@ public static class DataSourceFactories
             yield return () => Task.FromResult<object?[]?>(DataSourceHelpers.ToObjectArray(result));
         }
     }
+#pragma warning restore CS1998
 
     /// <summary>Instance data member declared as <c>Task&lt;T&gt;</c>.</summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromInstanceTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<object, Task<T>> invoke)

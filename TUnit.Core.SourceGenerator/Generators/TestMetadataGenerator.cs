@@ -1714,11 +1714,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             kind = "AsyncEnumerable";
         }
+        else if (IsValueTask(returnType))
+        {
+            kind = "ValueTask";
+        }
         else if (IsTask(returnType))
         {
-            kind = returnType.ToDisplayString().StartsWith("System.Threading.Tasks.ValueTask")
-                ? "ValueTask"
-                : "Task";
+            kind = "Task";
         }
         else if (IsEnumerable(returnType))
         {
@@ -1774,11 +1776,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return InterfaceHelper.IsAsyncEnumerable(type);
     }
 
+    private static bool IsValueTask(ITypeSymbol type)
+    {
+        return type.ToDisplayString().StartsWith("System.Threading.Tasks.ValueTask");
+    }
+
     private static bool IsTask(ITypeSymbol type)
     {
-        var typeName = type.ToDisplayString();
-        return typeName.StartsWith("System.Threading.Tasks.Task") ||
-               typeName.StartsWith("System.Threading.Tasks.ValueTask");
+        return type.ToDisplayString().StartsWith("System.Threading.Tasks.Task");
     }
 
     private static bool IsEnumerable(ITypeSymbol type)
