@@ -137,17 +137,7 @@ public static class Mock
     /// <summary>Creates a mock implementing both T1 and T2 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
     public static Mock<T1> Of<T1, T2>(MockBehavior behavior, params object[] constructorArgs)
         where T1 : class where T2 : class
-    {
-        var key = GetMultiKey(typeof(T1), typeof(T2));
-        if (MockRegistry.TryGetMultiFactory(key, out var factory))
-        {
-            return (Mock<T1>)factory(behavior, constructorArgs);
-        }
-
-        throw new InvalidOperationException(
-            $"No multi-interface mock factory registered for types '{typeof(T1).FullName}' and '{typeof(T2).FullName}'. " +
-            $"Ensure the TUnit.Mocks source generator is referenced in your project.");
-    }
+        => OfMulti<T1>(behavior, constructorArgs, typeof(T1), typeof(T2));
 
     /// <summary>Creates a mock implementing T1, T2, and T3 using the configured default behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3>()
@@ -167,17 +157,7 @@ public static class Mock
     /// <summary>Creates a mock implementing T1, T2, and T3 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
     public static Mock<T1> Of<T1, T2, T3>(MockBehavior behavior, params object[] constructorArgs)
         where T1 : class where T2 : class where T3 : class
-    {
-        var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3));
-        if (MockRegistry.TryGetMultiFactory(key, out var factory))
-        {
-            return (Mock<T1>)factory(behavior, constructorArgs);
-        }
-
-        throw new InvalidOperationException(
-            $"No multi-interface mock factory registered for types '{typeof(T1).FullName}', '{typeof(T2).FullName}', and '{typeof(T3).FullName}'. " +
-            $"Ensure the TUnit.Mocks source generator is referenced in your project.");
-    }
+        => OfMulti<T1>(behavior, constructorArgs, typeof(T1), typeof(T2), typeof(T3));
 
     /// <summary>Creates a mock implementing T1, T2, T3, and T4 using the configured default behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3, T4>()
@@ -197,19 +177,23 @@ public static class Mock
     /// <summary>Creates a mock implementing T1, T2, T3, and T4 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
     public static Mock<T1> Of<T1, T2, T3, T4>(MockBehavior behavior, params object[] constructorArgs)
         where T1 : class where T2 : class where T3 : class where T4 : class
+        => OfMulti<T1>(behavior, constructorArgs, typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+
+    private static Mock<T1> OfMulti<T1>(MockBehavior behavior, object[] constructorArgs, params Type[] types)
+        where T1 : class
     {
-        var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+        var key = GetMultiKey(types);
         if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
             return (Mock<T1>)factory(behavior, constructorArgs);
         }
 
         throw new InvalidOperationException(
-            $"No multi-interface mock factory registered for types '{typeof(T1).FullName}', '{typeof(T2).FullName}', '{typeof(T3).FullName}', and '{typeof(T4).FullName}'. " +
+            $"No multi-interface mock factory registered for types {string.Join(", ", types.Select(t => $"'{t.FullName}'"))}. " +
             $"Ensure the TUnit.Mocks source generator is referenced in your project.");
     }
 
-    private static string GetMultiKey(params Type[] types)
+    private static string GetMultiKey(Type[] types)
     {
         return string.Join('|', types.Select(t => t.FullName ?? t.ToString()));
     }

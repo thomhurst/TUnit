@@ -489,20 +489,20 @@ internal static class MockImplBuilder
             {
                 if (prop.IsStaticAbstract) continue;
                 writer.AppendLine();
-                if (prop.IsIndexer)
+                if (prop.OwnerTypeIndex > 0)
                 {
-                    if (prop.OwnerTypeIndex > 0)
+                    if (prop.IsIndexer)
                     {
                         GenerateInterfaceIndexer(writer, prop);
                     }
                     else
                     {
-                        GeneratePartialIndexer(writer, prop);
+                        GenerateInterfaceProperty(writer, prop, model);
                     }
                 }
-                else if (prop.OwnerTypeIndex > 0)
+                else if (prop.IsIndexer)
                 {
-                    GenerateInterfaceProperty(writer, prop, model);
+                    GeneratePartialIndexer(writer, prop);
                 }
                 else
                 {

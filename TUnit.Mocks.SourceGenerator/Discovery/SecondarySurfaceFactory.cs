@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using TUnit.Mocks.SourceGenerator.Builders;
 using TUnit.Mocks.SourceGenerator.Models;
 
@@ -19,17 +18,77 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 ///
 /// 2. <see cref="BuildPairModel"/> — the pair model the members builder turns into that shared
 ///    extension surface (targeting Mock&lt;T1&gt;, member IDs = standalone ordinals).
+///
+/// Both consume a <see cref="SurfaceContext"/> built once per combo — the union lookups and the
+/// primary surface index are invariant across the combo's additional interfaces.
 /// </summary>
 internal static class SecondarySurfaceFactory
 {
+    /// <summary>Per-combo invariants: union member lookups and the primary's configurable surface.</summary>
+    internal sealed class SurfaceContext
+    {
+        /// <summary>Union members by full signature, first-wins — so members the union
+        /// deduplicated against the primary resolve to the PRIMARY member's ID.</summary>
+        public readonly Dictionary<string, MockMemberModel> UnionMethods = new();
+        public readonly Dictionary<string, MockMemberModel> UnionProperties = new();
+
+        public readonly HashSet<string> PrimaryMethodSignatures = new(System.StringComparer.Ordinal);
+        public readonly HashSet<string> PrimaryMethodNameParams = new(System.StringComparer.Ordinal);
+        public readonly HashSet<string> PrimaryPropertySignatures = new(System.StringComparer.Ordinal);
+        public readonly HashSet<string> PrimaryNames = new(System.StringComparer.Ordinal);
+        public readonly HashSet<string> PrimaryEventNames = new(System.StringComparer.Ordinal);
+    }
+
+    public static SurfaceContext CreateContext(MockTypeModel union, MockTypeModel primary)
+    {
+        var context = new SurfaceContext();
+
+        foreach (var m in union.Methods)
+        {
+            var key = GetMethodSignatureKey(GetMethodNameParamsKey(m), m);
+            if (!context.UnionMethods.ContainsKey(key)) context.UnionMethods.Add(key, m);
+        }
+        foreach (var p in union.Properties)
+        {
+            var key = GetPropertySignatureKey(p);
+            if (!context.UnionProperties.ContainsKey(key)) context.UnionProperties.Add(key, p);
+        }
+
+        // The primary's configurable surface, as the members builder filters it.
+        foreach (var m in primary.Methods)
+        {
+            if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
+            var nameParams = GetMethodNameParamsKey(m);
+            context.PrimaryMethodNameParams.Add(nameParams);
+            context.PrimaryMethodSignatures.Add(GetMethodSignatureKey(nameParams, m));
+            context.PrimaryNames.Add(m.Name);
+        }
+        foreach (var p in primary.Properties)
+        {
+            if (p.ExplicitInterfaceName is not null && !p.IsStaticAbstract) continue;
+            // Exclusion considers ALL primary properties (an identical-signature member is
+            // union-deduped onto the primary slot whether or not it's configurable), but rename
+            // decisions only consider names the builder actually exposes as extensions.
+            context.PrimaryPropertySignatures.Add(GetPropertySignatureKey(p));
+            if (p.IsConfigurableSurfaceProperty) context.PrimaryNames.Add(p.Name);
+        }
+        foreach (var e in primary.Events)
+        {
+            context.PrimaryNames.Add(e.Name);
+            context.PrimaryEventNames.Add(e.Name);
+        }
+
+        return context;
+    }
+
     /// <summary>
     /// Maps every member ID of <paramref name="standalone"/> (an additional interface's
-    /// standalone model) to the matching member's ID in <paramref name="union"/> (the combo's
-    /// multi-type model), correlating by full signature. Unmatched slots get -1.
-    /// Members the union deduplicated against the primary map to the PRIMARY member's ID,
-    /// so a setup made through either surface configures the same engine slot.
+    /// standalone model) to the matching member's ID in the combo's union model, correlating by
+    /// full signature. Unmatched slots get -1. Members the union deduplicated against the primary
+    /// map to the PRIMARY member's ID, so a setup made through either surface configures the same
+    /// engine slot.
     /// </summary>
-    public static EquatableArray<int> ComputeMemberIdMap(MockTypeModel standalone, MockTypeModel union)
+    public static EquatableArray<int> ComputeMemberIdMap(MockTypeModel standalone, SurfaceContext context)
     {
         var maxId = -1;
         foreach (var m in standalone.Methods)
@@ -53,31 +112,16 @@ internal static class SecondarySurfaceFactory
             map[i] = -1;
         }
 
-        // First-wins lookups: union order is primary first, so deduplicated members resolve
-        // to the primary's ID.
-        var unionMethods = new Dictionary<string, MockMemberModel>();
-        foreach (var m in union.Methods)
-        {
-            var key = GetMethodSignatureKey(m);
-            if (!unionMethods.ContainsKey(key)) unionMethods.Add(key, m);
-        }
-        var unionProperties = new Dictionary<string, MockMemberModel>();
-        foreach (var p in union.Properties)
-        {
-            var key = GetPropertySignatureKey(p);
-            if (!unionProperties.ContainsKey(key)) unionProperties.Add(key, p);
-        }
-
         foreach (var m in standalone.Methods)
         {
-            if (unionMethods.TryGetValue(GetMethodSignatureKey(m), out var um))
+            if (context.UnionMethods.TryGetValue(GetMethodSignatureKey(GetMethodNameParamsKey(m), m), out var um))
             {
                 map[m.MemberId] = um.MemberId;
             }
         }
         foreach (var p in standalone.Properties)
         {
-            if (unionProperties.TryGetValue(GetPropertySignatureKey(p), out var up))
+            if (context.UnionProperties.TryGetValue(GetPropertySignatureKey(p), out var up))
             {
                 map[p.MemberId] = up.MemberId;
                 if (p.HasSetter && up.HasSetter)
@@ -98,51 +142,43 @@ internal static class SecondarySurfaceFactory
     /// clashes with a different primary member are renamed with a short interface prefix
     /// (<c>mock.IBar_Tag</c>) to keep call sites unambiguous. Returns null when nothing remains.
     /// </summary>
-    public static MockTypeModel? BuildPairModel(MockTypeModel standalone, MockTypeModel primary, string interfaceFqn)
+    public static MockTypeModel? BuildPairModel(
+        MockTypeModel standalone, MockTypeModel primary, string interfaceFqn, SurfaceContext context)
     {
         var shortName = MockImplBuilder.StripNamespaceFromFqn(interfaceFqn);
 
-        // The primary's configurable surface, as the members builder filters it.
-        var primaryMethods = primary.Methods
-            .Where(m => m.ExplicitInterfaceName is null || m.IsStaticAbstract)
-            .ToList();
-        var primaryMethodSigs = new HashSet<string>(primaryMethods.Select(GetMethodSignatureKey));
-        var primaryMethodNameParams = new HashSet<string>(primaryMethods.Select(GetMethodNameParamsKey));
-        var primaryProperties = primary.Properties
-            .Where(p => p.ExplicitInterfaceName is null || p.IsStaticAbstract)
-            .ToList();
-        var primaryPropertySigs = new HashSet<string>(primaryProperties.Select(GetPropertySignatureKey));
-        var primaryNames = new HashSet<string>(System.StringComparer.Ordinal);
-        foreach (var m in primaryMethods) primaryNames.Add(m.Name);
-        foreach (var p in primaryProperties)
+        var methods = ImmutableArray.CreateBuilder<MockMemberModel>();
+        foreach (var m in standalone.Methods)
         {
-            if (!p.IsIndexer) primaryNames.Add(p.Name);
-        }
-        foreach (var e in primary.Events) primaryNames.Add(e.Name);
-        var primaryEventNames = new HashSet<string>(primary.Events.Select(e => e.Name), System.StringComparer.Ordinal);
-
-        var methods = standalone.Methods
-            .Where(m => !m.IsStaticAbstract)
-            .Where(m => m.ExplicitInterfaceName is null) // interface-internal shims, same as the single-type surface
-            .Where(m => !primaryMethodSigs.Contains(GetMethodSignatureKey(m)))
-            .Select(m => primaryMethodNameParams.Contains(GetMethodNameParamsKey(m))
+            // Static abstracts have no bridge on the multi path; explicit members are
+            // interface-internal shims — both excluded, same as the single-type surface.
+            if (m.IsStaticAbstract || m.ExplicitInterfaceName is not null) continue;
+            var nameParams = GetMethodNameParamsKey(m);
+            if (context.PrimaryMethodSignatures.Contains(GetMethodSignatureKey(nameParams, m))) continue;
+            methods.Add(context.PrimaryMethodNameParams.Contains(nameParams)
                 ? m with { Name = $"{shortName}_{m.Name}" } // same name+params, different return — would be ambiguous
-                : m)
-            .ToImmutableArray();
-        var properties = standalone.Properties
-            .Where(p => !p.IsStaticAbstract)
-            .Where(p => p.ExplicitInterfaceName is null)
-            .Where(p => !primaryPropertySigs.Contains(GetPropertySignatureKey(p)))
-            .Select(p => !p.IsIndexer && primaryNames.Contains(p.Name)
-                ? p with { Name = $"{shortName}_{p.Name}" }
-                : p)
-            .ToImmutableArray();
-        var events = standalone.Events
-            .Where(e => !e.IsStaticAbstract && e.ExplicitInterfaceName is null)
-            .Where(e => !primaryEventNames.Contains(e.Name)) // identical name = deduped onto the primary event
-            .ToImmutableArray();
+                : m);
+        }
 
-        if (methods.Length == 0 && properties.Length == 0 && events.Length == 0)
+        var properties = ImmutableArray.CreateBuilder<MockMemberModel>();
+        foreach (var p in standalone.Properties)
+        {
+            if (p.IsStaticAbstract || p.ExplicitInterfaceName is not null) continue;
+            if (context.PrimaryPropertySignatures.Contains(GetPropertySignatureKey(p))) continue;
+            properties.Add(!p.IsIndexer && context.PrimaryNames.Contains(p.Name)
+                ? p with { Name = $"{shortName}_{p.Name}" }
+                : p);
+        }
+
+        var events = ImmutableArray.CreateBuilder<MockEventModel>();
+        foreach (var e in standalone.Events)
+        {
+            if (e.IsStaticAbstract || e.ExplicitInterfaceName is not null) continue;
+            if (context.PrimaryEventNames.Contains(e.Name)) continue; // identical name = deduped onto the primary event
+            events.Add(e);
+        }
+
+        if (methods.Count == 0 && properties.Count == 0 && events.Count == 0)
         {
             return null;
         }
@@ -157,9 +193,9 @@ internal static class SecondarySurfaceFactory
             IsAbstract = primary.IsAbstract,
             IsPartialMock = false,
             TypeParameters = EquatableArray<MockTypeParameterModel>.Empty,
-            Methods = new EquatableArray<MockMemberModel>(methods),
-            Properties = new EquatableArray<MockMemberModel>(properties),
-            Events = new EquatableArray<MockEventModel>(events),
+            Methods = new EquatableArray<MockMemberModel>(methods.ToImmutable()),
+            Properties = new EquatableArray<MockMemberModel>(properties.ToImmutable()),
+            Events = new EquatableArray<MockEventModel>(events.ToImmutable()),
             AllInterfaces = primary.AllInterfaces,
             AdditionalInterfaceNames = new EquatableArray<string>(ImmutableArray.Create(interfaceFqn)),
             Constructors = EquatableArray<MockConstructorModel>.Empty,
@@ -167,19 +203,37 @@ internal static class SecondarySurfaceFactory
             IsPublic = primary.IsPublic && standalone.IsPublic,
             UseFallbackNamespace = primary.UseFallbackNamespace,
             IsSecondaryMemberSurface = true,
-            SecondaryInterfaceFqn = interfaceFqn,
             SecondaryMemberIdMaps = EquatableArray<EquatableArray<int>>.Empty
         };
     }
 
     private static string GetMethodNameParamsKey(MockMemberModel m)
-        => $"{m.Name}`{m.TypeParameters.Length}({string.Join(",", m.Parameters.Select(p => $"{p.Direction}:{p.FullyQualifiedType}"))})";
+    {
+        var sb = new System.Text.StringBuilder(m.Name).Append('`').Append(m.TypeParameters.Length).Append('(');
+        for (int i = 0; i < m.Parameters.Length; i++)
+        {
+            if (i > 0) sb.Append(',');
+            var p = m.Parameters[i];
+            sb.Append(p.Direction).Append(':').Append(p.FullyQualifiedType);
+        }
+        return sb.Append(')').ToString();
+    }
 
-    private static string GetMethodSignatureKey(MockMemberModel m)
-        => $"{GetMethodNameParamsKey(m)}:{m.ReturnType}";
+    private static string GetMethodSignatureKey(string nameParamsKey, MockMemberModel m)
+        => $"{nameParamsKey}:{m.ReturnType}";
 
     private static string GetPropertySignatureKey(MockMemberModel p)
-        => p.IsIndexer
-            ? $"this[{string.Join(",", p.Parameters.Select(q => q.FullyQualifiedType))}]:{p.ReturnType}"
-            : $"{p.Name}:{p.ReturnType}";
+    {
+        if (!p.IsIndexer)
+        {
+            return $"{p.Name}:{p.ReturnType}";
+        }
+        var sb = new System.Text.StringBuilder("this[");
+        for (int i = 0; i < p.Parameters.Length; i++)
+        {
+            if (i > 0) sb.Append(',');
+            sb.Append(p.Parameters[i].FullyQualifiedType);
+        }
+        return sb.Append("]:").Append(p.ReturnType).ToString();
+    }
 }

@@ -194,6 +194,7 @@ internal static class MockTypeDiscovery
 
         // Per additional interface: compute the standalone→union member-ID map (registered on the
         // engine by the factory) and build the pair model that generates the shared setup surface.
+        var surfaceContext = SecondarySurfaceFactory.CreateContext(multiTypeModel, singleTypeModel);
         var mapsBuilder = ImmutableArray.CreateBuilder<EquatableArray<int>>(additionalTypes.Count);
         var pairModels = new List<MockTypeModel>();
         foreach (var additionalType in additionalTypes)
@@ -205,10 +206,10 @@ internal static class MockTypeDiscovery
                 continue;
             }
 
-            mapsBuilder.Add(SecondarySurfaceFactory.ComputeMemberIdMap(standalone, multiTypeModel));
+            mapsBuilder.Add(SecondarySurfaceFactory.ComputeMemberIdMap(standalone, surfaceContext));
 
             var pairModel = SecondarySurfaceFactory.BuildPairModel(
-                standalone, singleTypeModel, additionalType.GetFullyQualifiedName());
+                standalone, singleTypeModel, additionalType.GetFullyQualifiedName(), surfaceContext);
             if (pairModel is not null)
             {
                 pairModels.Add(pairModel);

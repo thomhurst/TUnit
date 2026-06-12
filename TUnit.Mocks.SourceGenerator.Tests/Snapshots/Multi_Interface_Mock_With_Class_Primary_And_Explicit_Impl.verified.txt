@@ -44,10 +44,12 @@ file static class DataContext_IInfraPartialMockFactory
         global::TUnit.Mocks.MockRegistry.RegisterMultiFactory(string.Join("|", new[] { typeof(global::DataContext).FullName, typeof(global::IInfra).FullName }), Create);
     }
 
+    private static readonly int[] _secondaryMap0 = new int[] { 1 };
+
     private static global::TUnit.Mocks.Mock<global::DataContext> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::DataContext>(behavior);
-        engine.RegisterSecondaryInterface(typeof(global::IInfra), new int[] { 1 });
+        engine.RegisterSecondaryInterface(typeof(global::IInfra), _secondaryMap0);
         var impl = new DataContext_IInfraMockImpl(engine);
         engine.Raisable = impl;
         var mock = new global::TUnit.Mocks.Mock<global::DataContext>(impl, engine);
@@ -65,9 +67,9 @@ file static class DataContext_IInfraPartialMockFactory
 public static class DataContext_IInfra_MockMemberExtensions
 {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    internal static int __Id(global::TUnit.Mocks.Mock<global::DataContext> mock, int localId)
+    internal static int __Id(global::TUnit.Mocks.MockEngine<global::DataContext> engine, int localId)
     {
-        if (!global::TUnit.Mocks.MockRegistry.GetEngine(mock).TryGetSecondaryMemberId(typeof(global::IInfra), localId, out var memberId))
+        if (!engine.TryGetSecondaryMemberId(typeof(global::IInfra), localId, out var memberId))
         {
             throw new global::System.InvalidOperationException("This mock was not created with 'IInfra' as a secondary interface. Create it with Mock.Of<DataContext, IInfra>() to configure its members.");
         }
@@ -77,7 +79,13 @@ public static class DataContext_IInfra_MockMemberExtensions
     extension(global::TUnit.Mocks.Mock<global::DataContext> mock)
     {
         public global::TUnit.Mocks.PropertyMockCall<string> Instance
-            => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), __Id(mock, 0), 0, "Instance", true, false);
+        {
+            get
+            {
+                var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
+                return new(__engine, __Id(__engine, 0), 0, "Instance", true, false);
+            }
+        }
     }
 }
 

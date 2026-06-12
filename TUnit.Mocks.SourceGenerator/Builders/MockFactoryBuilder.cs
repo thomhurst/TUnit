@@ -57,6 +57,11 @@ internal static class MockFactoryBuilder
             }
             writer.AppendLine();
 
+            if (model.AdditionalInterfaceNames.Length > 0)
+            {
+                EmitSecondaryInterfaceMapFields(writer, model);
+            }
+
             {
                 var typeParams = MockImplBuilder.GetTypeParameterList(model);
                 var constraints = MockImplBuilder.GetConstraintClauses(model);
@@ -97,6 +102,24 @@ internal static class MockFactoryBuilder
     }
 
     /// <summary>
+    /// Emits one static readonly field per additional-interface member-ID map, so mock creation
+    /// registers a shared array instead of allocating a new one each time. Call at factory class
+    /// level when <see cref="MockTypeModel.AdditionalInterfaceNames"/> is non-empty.
+    /// </summary>
+    private static void EmitSecondaryInterfaceMapFields(CodeWriter writer, MockTypeModel model)
+    {
+        for (int i = 0; i < model.AdditionalInterfaceNames.Length; i++)
+        {
+            var map = GetSecondaryMap(model, i);
+            var arrayExpr = map.Length == 0
+                ? "global::System.Array.Empty<int>()"
+                : $"new int[] {{ {string.Join(", ", map)} }}";
+            writer.AppendLine($"private static readonly int[] _secondaryMap{i} = {arrayExpr};");
+        }
+        writer.AppendLine();
+    }
+
+    /// <summary>
     /// Registers the standalone→union member-ID map for each additional interface of a
     /// multi-type mock, so the shared per-(T1, Tn) setup extensions can translate their local
     /// ordinals to this combo's union IDs at runtime. No-op for single-type mocks.
@@ -105,16 +128,14 @@ internal static class MockFactoryBuilder
     {
         for (int i = 0; i < model.AdditionalInterfaceNames.Length; i++)
         {
-            var iface = model.AdditionalInterfaceNames[i];
-            var map = i < model.SecondaryMemberIdMaps.Length
-                ? model.SecondaryMemberIdMaps[i]
-                : EquatableArray<int>.Empty;
-            var arrayExpr = map.Length == 0
-                ? "global::System.Array.Empty<int>()"
-                : $"new int[] {{ {string.Join(", ", map)} }}";
-            writer.AppendLine($"engine.RegisterSecondaryInterface(typeof({iface}), {arrayExpr});");
+            writer.AppendLine($"engine.RegisterSecondaryInterface(typeof({model.AdditionalInterfaceNames[i]}), _secondaryMap{i});");
         }
     }
+
+    private static EquatableArray<int> GetSecondaryMap(MockTypeModel model, int index)
+        => index < model.SecondaryMemberIdMaps.Length
+            ? model.SecondaryMemberIdMaps[index]
+            : EquatableArray<int>.Empty;
 
     private static void EmitCreateInterfaceMockBody(CodeWriter writer, MockTypeModel model, string mockableType, string implTypeName, string wrapperTypeName)
     {
@@ -176,6 +197,11 @@ internal static class MockFactoryBuilder
                 }
             }
             writer.AppendLine();
+
+            if (model.AdditionalInterfaceNames.Length > 0)
+            {
+                EmitSecondaryInterfaceMapFields(writer, model);
+            }
 
             using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
             {

@@ -30,15 +30,13 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     /// True for the per-(primary, additional-interface) PAIR model that generates the setup/verify
     /// extension surface for one additional interface of a multi-type mock. Pair models carry the
     /// PRIMARY type's identity (<see cref="FullyQualifiedName"/> = T1, so extensions target
-    /// <c>Mock&lt;T1&gt;</c>) but the ADDITIONAL interface's standalone members, whose member IDs are
+    /// <c>Mock&lt;T1&gt;</c>) but the ADDITIONAL interface's standalone members
+    /// (<see cref="AdditionalInterfaceNames"/> holds that single interface), whose member IDs are
     /// local ordinals translated to the owning impl's union IDs at runtime via the map the factory
     /// registers on the engine. Equal pair models from different combos (Mock.Of&lt;T1,T2&gt; and
     /// Mock.Of&lt;T1,T2,T3&gt;) dedupe in the pipeline, so each pair surface is emitted exactly once.
     /// </summary>
     public bool IsSecondaryMemberSurface { get; init; }
-
-    /// <summary>The additional interface a pair model generates the surface for (empty otherwise).</summary>
-    public string SecondaryInterfaceFqn { get; init; } = "";
 
     /// <summary>
     /// On multi-type models only: one entry per <see cref="AdditionalInterfaceNames"/> element,
@@ -88,7 +86,6 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Constructors.Equals(other.Constructors)
             && HasStaticAbstractMembers == other.HasStaticAbstractMembers
             && IsSecondaryMemberSurface == other.IsSecondaryMemberSurface
-            && SecondaryInterfaceFqn == other.SecondaryInterfaceFqn
             && SecondaryMemberIdMaps.Equals(other.SecondaryMemberIdMaps);
     }
 
@@ -111,7 +108,6 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
             hash = hash * 31 + HasStaticAbstractMembers.GetHashCode();
             hash = hash * 31 + IsSecondaryMemberSurface.GetHashCode();
-            hash = hash * 31 + SecondaryInterfaceFqn.GetHashCode();
             hash = hash * 31 + SecondaryMemberIdMaps.GetHashCode();
             return hash;
         }

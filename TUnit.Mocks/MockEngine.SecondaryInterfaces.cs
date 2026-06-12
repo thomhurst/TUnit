@@ -9,7 +9,9 @@ public sealed partial class MockEngine<T> where T : class
     // secondary setup extensions, which are shared across all combos containing the pair)
     // to this impl's union member IDs. Registered once during factory construction, before
     // the mock is published — read-only afterwards, so no locking is needed.
-    private Dictionary<Type, int[]>? _secondaryMemberIdMaps;
+    // A flat pair array beats a Dictionary here: at most 3 entries, probed by reference
+    // equality on cached typeof() instances, and one small allocation per mock creation.
+    private (Type InterfaceType, int[] Map)[]? _secondaryMemberIdMaps;
 
     /// <summary>
     /// Registers the member-ID translation map for one additional interface of a multi-type mock.
@@ -18,7 +20,17 @@ public sealed partial class MockEngine<T> where T : class
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void RegisterSecondaryInterface(Type interfaceType, int[] memberIdMap)
     {
-        (_secondaryMemberIdMaps ??= new Dictionary<Type, int[]>())[interfaceType] = memberIdMap;
+        var existing = _secondaryMemberIdMaps;
+        if (existing is null)
+        {
+            _secondaryMemberIdMaps = new[] { (interfaceType, memberIdMap) };
+            return;
+        }
+
+        var expanded = new (Type, int[])[existing.Length + 1];
+        existing.CopyTo(expanded, 0);
+        expanded[existing.Length] = (interfaceType, memberIdMap);
+        _secondaryMemberIdMaps = expanded;
     }
 
     /// <summary>
@@ -30,24 +42,23 @@ public sealed partial class MockEngine<T> where T : class
     public bool TryGetSecondaryMemberId(Type interfaceType, int localMemberId, out int memberId)
     {
         var maps = _secondaryMemberIdMaps;
-        if (maps is not null
-            && maps.TryGetValue(interfaceType, out var map)
-            && (uint)localMemberId < (uint)map.Length
-            && map[localMemberId] >= 0)
+        if (maps is not null)
         {
-            memberId = map[localMemberId];
-            return true;
+            foreach (var (type, map) in maps)
+            {
+                if (ReferenceEquals(type, interfaceType))
+                {
+                    if ((uint)localMemberId < (uint)map.Length && map[localMemberId] >= 0)
+                    {
+                        memberId = map[localMemberId];
+                        return true;
+                    }
+                    break;
+                }
+            }
         }
 
         memberId = -1;
         return false;
     }
-
-    /// <summary>
-    /// True when this mock was created with <paramref name="interfaceType"/> as a secondary
-    /// interface. Called by generated code only.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool HasSecondaryInterface(Type interfaceType)
-        => _secondaryMemberIdMaps?.ContainsKey(interfaceType) == true;
 }

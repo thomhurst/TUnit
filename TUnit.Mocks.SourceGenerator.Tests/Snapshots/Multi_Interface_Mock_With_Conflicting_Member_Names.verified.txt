@@ -39,10 +39,12 @@ internal static class IConflictA_IConflictBMockFactory
         global::TUnit.Mocks.MockRegistry.RegisterMultiFactory(string.Join("|", new[] { typeof(global::IConflictA).FullName, typeof(global::IConflictB).FullName }), Create);
     }
 
+    private static readonly int[] _secondaryMap0 = new int[] { 1 };
+
     internal static global::TUnit.Mocks.Mock<global::IConflictA> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::IConflictA>(behavior);
-        engine.RegisterSecondaryInterface(typeof(global::IConflictB), new int[] { 1 });
+        engine.RegisterSecondaryInterface(typeof(global::IConflictB), _secondaryMap0);
         var impl = new IConflictA_IConflictBMockImpl(engine);
         engine.Raisable = impl;
         var mock = new global::TUnit.Mocks.Mock<global::IConflictA>(impl, engine);
@@ -53,7 +55,7 @@ internal static class IConflictA_IConflictBMockFactory
     {
         if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IConflictA' does not support constructor arguments, but {constructorArgs.Length} were provided.");
         var engine = new global::TUnit.Mocks.MockEngine<global::IConflictA>(behavior);
-        engine.RegisterSecondaryInterface(typeof(global::IConflictB), new int[] { 1 });
+        engine.RegisterSecondaryInterface(typeof(global::IConflictB), _secondaryMap0);
         var impl = new IConflictA_IConflictBMockImpl(engine);
         engine.Raisable = impl;
         var mock = new global::TUnit.Mocks.Mock<global::IConflictA>(impl, engine);
@@ -71,9 +73,9 @@ internal static class IConflictA_IConflictBMockFactory
 public static class IConflictA_IConflictB_MockMemberExtensions
 {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    internal static int __Id(global::TUnit.Mocks.Mock<global::IConflictA> mock, int localId)
+    internal static int __Id(global::TUnit.Mocks.MockEngine<global::IConflictA> engine, int localId)
     {
-        if (!global::TUnit.Mocks.MockRegistry.GetEngine(mock).TryGetSecondaryMemberId(typeof(global::IConflictB), localId, out var memberId))
+        if (!engine.TryGetSecondaryMemberId(typeof(global::IConflictB), localId, out var memberId))
         {
             throw new global::System.InvalidOperationException("This mock was not created with 'IConflictB' as a secondary interface. Create it with Mock.Of<IConflictA, IConflictB>() to configure its members.");
         }
@@ -83,7 +85,13 @@ public static class IConflictA_IConflictB_MockMemberExtensions
     extension(global::TUnit.Mocks.Mock<global::IConflictA> mock)
     {
         public global::TUnit.Mocks.PropertyMockCall<int> IConflictB_Tag
-            => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), __Id(mock, 0), 0, "IConflictB_Tag", true, false);
+        {
+            get
+            {
+                var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
+                return new(__engine, __Id(__engine, 0), 0, "IConflictB_Tag", true, false);
+            }
+        }
     }
 }
 

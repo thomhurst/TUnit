@@ -104,6 +104,16 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     /// </summary>
     public bool HasRefStructParams => Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
 
+    /// <summary>
+    /// True when this property can appear as an extension property on the generated
+    /// <c>Mock&lt;T&gt;</c> setup surface (ref-struct and static-abstract-interface returns can't
+    /// flow through <c>PropertyMockCall&lt;T&gt;</c>; indexers get Item/SetItem methods instead).
+    /// Shared between the members builder and the secondary-surface rename logic so the two
+    /// definitions of "exposed property" can't drift. Derived — not part of equality.
+    /// </summary>
+    public bool IsConfigurableSurfaceProperty
+        => !IsIndexer && !IsRefStructReturn && !IsReturnTypeStaticAbstractInterface && (HasGetter || HasSetter);
+
     public bool Equals(MockMemberModel? other)
     {
         if (other is null) return false;

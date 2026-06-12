@@ -91,6 +91,9 @@ internal static class MemberDiscovery
     private static MockMemberModel Tag(MockMemberModel model, int ownerTypeIndex)
         => ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex };
 
+    private static MockEventModel Tag(MockEventModel model, int ownerTypeIndex)
+        => ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex };
+
     /// <summary>
     /// Collects the mockable members of one type into the shared state.
     /// <paramref name="ownerTypeIndex"/>: 0 = the primary type, n = 1-based index into the
@@ -115,8 +118,7 @@ internal static class MemberDiscovery
         // If it's a class, also include its own members
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
-            ProcessClassMembers(typeSymbol, compilationAssembly, compilation, state.Methods, state.Properties, state.Events,
-                state.SeenMethods, state.SeenFullMethods, state.SeenProperties, state.SeenEvents, ref state.MemberIdCounter);
+            ProcessClassMembers(typeSymbol, compilationAssembly, compilation, state);
         }
 
         foreach (var iface in interfaces)
@@ -127,7 +129,7 @@ internal static class MemberDiscovery
             {
                 if (member.IsStatic)
                 {
-                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, state.Methods, state.Properties, state.Events, state.SeenMethods, state.SeenProperties, state.SeenEvents, ref state.MemberIdCounter, compilation);
+                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, state, compilation);
                     continue;
                 }
 
@@ -263,8 +265,7 @@ internal static class MemberDiscovery
                         if (!state.SeenEvents.Add(key)) continue;
 
                         var explicitName = RequiresExplicitImpl(primaryClassSymbol, evt) ? interfaceFqn : null;
-                        var model = CreateEventModel(evt, explicitName, interfaceFqn);
-                        state.Events.Add(ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex });
+                        state.Events.Add(Tag(CreateEventModel(evt, explicitName, interfaceFqn), ownerTypeIndex));
                         break;
                     }
                 }
@@ -276,15 +277,17 @@ internal static class MemberDiscovery
         ITypeSymbol typeSymbol,
         IAssemblySymbol? compilationAssembly,
         Compilation compilation,
-        List<MockMemberModel> methods,
-        List<MockMemberModel> properties,
-        List<MockEventModel> events,
-        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
-        HashSet<string> seenFullMethods,
-        Dictionary<string, int?> seenProperties,
-        HashSet<string> seenEvents,
-        ref int memberIdCounter)
+        DiscoveryState state)
     {
+        var methods = state.Methods;
+        var properties = state.Properties;
+        var events = state.Events;
+        var seenMethods = state.SeenMethods;
+        var seenFullMethods = state.SeenFullMethods;
+        var seenProperties = state.SeenProperties;
+        var seenEvents = state.SeenEvents;
+        ref int memberIdCounter = ref state.MemberIdCounter;
+
         // Walk up the class hierarchy
         var current = typeSymbol;
         while (current != null && current.SpecialType != SpecialType.System_Object)
@@ -1114,19 +1117,13 @@ internal static class MemberDiscovery
         ISymbol member,
         ITypeSymbol typeSymbol,
         string interfaceFqn,
-        List<MockMemberModel> methods,
-        List<MockMemberModel> properties,
-        List<MockEventModel> events,
-        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
-        Dictionary<string, int?> seenProperties,
-        HashSet<string> seenEvents,
-        ref int memberIdCounter,
+        DiscoveryState state,
         Compilation compilation)
     {
         if (!member.IsAbstract) return;
         if (!ShouldCollectStaticAbstractFromInterfaces(typeSymbol)) return;
 
-        CollectStaticAbstractMember(member, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
+        CollectStaticAbstractMember(member, interfaceFqn, state, compilation);
     }
 
     /// <summary>
@@ -1156,15 +1153,17 @@ internal static class MemberDiscovery
     private static void CollectStaticAbstractMember(
         ISymbol member,
         string interfaceFqn,
-        List<MockMemberModel> methods,
-        List<MockMemberModel> properties,
-        List<MockEventModel> events,
-        Dictionary<string, (int Index, ITypeSymbol? ReturnType)> seenMethods,
-        Dictionary<string, int?> seenProperties,
-        HashSet<string> seenEvents,
-        ref int memberIdCounter,
+        DiscoveryState state,
         Compilation compilation)
     {
+        var methods = state.Methods;
+        var properties = state.Properties;
+        var events = state.Events;
+        var seenMethods = state.SeenMethods;
+        var seenProperties = state.SeenProperties;
+        var seenEvents = state.SeenEvents;
+        ref int memberIdCounter = ref state.MemberIdCounter;
+
         switch (member)
         {
             case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:

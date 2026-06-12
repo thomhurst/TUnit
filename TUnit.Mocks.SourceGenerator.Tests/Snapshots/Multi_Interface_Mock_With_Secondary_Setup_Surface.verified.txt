@@ -49,10 +49,12 @@ internal static class IMultiLogger_IMultiDisposableMockFactory
         global::TUnit.Mocks.MockRegistry.RegisterMultiFactory(string.Join("|", new[] { typeof(global::IMultiLogger).FullName, typeof(global::IMultiDisposable).FullName }), Create);
     }
 
+    private static readonly int[] _secondaryMap0 = new int[] { 2, 3 };
+
     internal static global::TUnit.Mocks.Mock<global::IMultiLogger> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
     {
         var engine = new global::TUnit.Mocks.MockEngine<global::IMultiLogger>(behavior);
-        engine.RegisterSecondaryInterface(typeof(global::IMultiDisposable), new int[] { 2, 3 });
+        engine.RegisterSecondaryInterface(typeof(global::IMultiDisposable), _secondaryMap0);
         var impl = new IMultiLogger_IMultiDisposableMockImpl(engine);
         engine.Raisable = impl;
         var mock = new global::TUnit.Mocks.Mock<global::IMultiLogger>(impl, engine);
@@ -63,7 +65,7 @@ internal static class IMultiLogger_IMultiDisposableMockFactory
     {
         if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::IMultiLogger' does not support constructor arguments, but {constructorArgs.Length} were provided.");
         var engine = new global::TUnit.Mocks.MockEngine<global::IMultiLogger>(behavior);
-        engine.RegisterSecondaryInterface(typeof(global::IMultiDisposable), new int[] { 2, 3 });
+        engine.RegisterSecondaryInterface(typeof(global::IMultiDisposable), _secondaryMap0);
         var impl = new IMultiLogger_IMultiDisposableMockImpl(engine);
         engine.Raisable = impl;
         var mock = new global::TUnit.Mocks.Mock<global::IMultiLogger>(impl, engine);
@@ -81,9 +83,9 @@ internal static class IMultiLogger_IMultiDisposableMockFactory
 public static class IMultiLogger_IMultiDisposable_MockMemberExtensions
 {
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    internal static int __Id(global::TUnit.Mocks.Mock<global::IMultiLogger> mock, int localId)
+    internal static int __Id(global::TUnit.Mocks.MockEngine<global::IMultiLogger> engine, int localId)
     {
-        if (!global::TUnit.Mocks.MockRegistry.GetEngine(mock).TryGetSecondaryMemberId(typeof(global::IMultiDisposable), localId, out var memberId))
+        if (!engine.TryGetSecondaryMemberId(typeof(global::IMultiDisposable), localId, out var memberId))
         {
             throw new global::System.InvalidOperationException("This mock was not created with 'IMultiDisposable' as a secondary interface. Create it with Mock.Of<IMultiLogger, IMultiDisposable>() to configure its members.");
         }
@@ -93,13 +95,20 @@ public static class IMultiLogger_IMultiDisposable_MockMemberExtensions
     public static global::TUnit.Mocks.VoidMockMethodCall Dispose(this global::TUnit.Mocks.Mock<global::IMultiLogger> mock)
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), __Id(mock, 0), "Dispose", matchers);
+        var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
+        return new global::TUnit.Mocks.VoidMockMethodCall(__engine, __Id(__engine, 0), "Dispose", matchers);
     }
 
     extension(global::TUnit.Mocks.Mock<global::IMultiLogger> mock)
     {
         public global::TUnit.Mocks.PropertyMockCall<bool> IsDisposed
-            => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock), __Id(mock, 1), 0, "IsDisposed", true, false);
+        {
+            get
+            {
+                var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
+                return new(__engine, __Id(__engine, 1), 0, "IsDisposed", true, false);
+            }
+        }
     }
 }
 
