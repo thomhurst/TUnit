@@ -37,11 +37,7 @@ internal static class MockFactoryBuilder
                 if (model.AdditionalInterfaceNames.Length > 0)
                 {
                     // Register as multi-interface factory with compound key
-                    var allTypes = new[] { model.FullyQualifiedName }
-                        .Concat(model.AdditionalInterfaceNames)
-                        .Select(t => $"typeof({t}).FullName");
-                    var keyExpr = "string.Join(\"|\", new[] { " + string.Join(", ", allTypes) + " })";
-                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterMultiFactory({keyExpr}, Create);");
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterMultiFactory({GetMultiKeyExpression(model)}, Create);");
                 }
                 else if (model.TypeParameters.Length > 0)
                 {
@@ -82,6 +78,16 @@ internal static class MockFactoryBuilder
         }
     }
 
+    /// <summary>Compound registry key expression for multi-type mocks — must match
+    /// <c>Mock.GetMultiKey</c> ("T1.FullName|T2.FullName|...").</summary>
+    private static string GetMultiKeyExpression(MockTypeModel model)
+    {
+        var allTypes = new[] { model.FullyQualifiedName }
+            .Concat(model.AdditionalInterfaceNames)
+            .Select(t => $"typeof({t}).FullName");
+        return "string.Join(\"|\", new[] { " + string.Join(", ", allTypes) + " })";
+    }
+
     private static string GetOpenGeneratedTypeOfExpression(string baseName, MockTypeModel model)
     {
         if (model.TypeParameters.Length == 0)
@@ -90,9 +96,30 @@ internal static class MockFactoryBuilder
         return $"typeof({baseName}<{new string(',', model.TypeParameters.Length - 1)}>)";
     }
 
+    /// <summary>
+    /// Registers the standalone→union member-ID map for each additional interface of a
+    /// multi-type mock, so the shared per-(T1, Tn) setup extensions can translate their local
+    /// ordinals to this combo's union IDs at runtime. No-op for single-type mocks.
+    /// </summary>
+    private static void EmitSecondaryInterfaceRegistrations(CodeWriter writer, MockTypeModel model)
+    {
+        for (int i = 0; i < model.AdditionalInterfaceNames.Length; i++)
+        {
+            var iface = model.AdditionalInterfaceNames[i];
+            var map = i < model.SecondaryMemberIdMaps.Length
+                ? model.SecondaryMemberIdMaps[i]
+                : EquatableArray<int>.Empty;
+            var arrayExpr = map.Length == 0
+                ? "global::System.Array.Empty<int>()"
+                : $"new int[] {{ {string.Join(", ", map)} }}";
+            writer.AppendLine($"engine.RegisterSecondaryInterface(typeof({iface}), {arrayExpr});");
+        }
+    }
+
     private static void EmitCreateInterfaceMockBody(CodeWriter writer, MockTypeModel model, string mockableType, string implTypeName, string wrapperTypeName)
     {
         writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{mockableType}>(behavior);");
+        EmitSecondaryInterfaceRegistrations(writer, model);
         writer.AppendLine($"var impl = new {implTypeName}(engine);");
         writer.AppendLine("engine.Raisable = impl;");
         if (MockWrapperTypeBuilder.CanGenerateWrapper(model))
@@ -136,13 +163,24 @@ internal static class MockFactoryBuilder
             writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
             using (writer.Block("internal static void Register()"))
             {
-                writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterFactory<{model.FullyQualifiedName}>(Create);");
+                if (model.AdditionalInterfaceNames.Length > 0)
+                {
+                    // Multi-type partial mock (Mock.Of<Class, IExtra>()): register under the
+                    // compound key only — RegisterFactory<T1> here would clash with the
+                    // single-type model's factory for the same class.
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterMultiFactory({GetMultiKeyExpression(model)}, Create);");
+                }
+                else
+                {
+                    writer.AppendLine($"global::TUnit.Mocks.MockRegistry.RegisterFactory<{model.FullyQualifiedName}>(Create);");
+                }
             }
             writer.AppendLine();
 
             using (writer.Block($"private static global::TUnit.Mocks.Mock<{model.FullyQualifiedName}> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)"))
             {
                 writer.AppendLine($"var engine = new global::TUnit.Mocks.MockEngine<{model.FullyQualifiedName}>(behavior);");
+                EmitSecondaryInterfaceRegistrations(writer, model);
 
                 GenerateConstructorDispatch(writer, model, safeName);
 

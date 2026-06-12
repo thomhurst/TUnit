@@ -39,6 +39,12 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public bool IsStaticAbstract { get; init; }
 
     /// <summary>
+    /// Which type in a multi-type mock owns this event: 0 = the primary type,
+    /// n = 1-based index into <see cref="MockTypeModel.AdditionalInterfaceNames"/>.
+    /// </summary>
+    public int OwnerTypeIndex { get; init; }
+
+    /// <summary>
     /// Structured representation of raise parameters. Use this instead of parsing RaiseParameters
     /// by comma — which breaks for generic types like Func&lt;int, string&gt;.
     /// </summary>
@@ -59,6 +65,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && DeclaringInterfaceName == other.DeclaringInterfaceName
             && OverrideAccessModifier == other.OverrideAccessModifier
             && IsStaticAbstract == other.IsStaticAbstract
+            && OwnerTypeIndex == other.OwnerTypeIndex
             && RaiseParameterList == other.RaiseParameterList
             && ObsoleteAttribute == other.ObsoleteAttribute;
     }
@@ -75,6 +82,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + OverrideAccessModifier.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
+            hash = hash * 31 + OwnerTypeIndex;
             return hash;
         }
     }

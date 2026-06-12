@@ -82,6 +82,93 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Multi_Interface_Mock_With_Secondary_Setup_Surface()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IMultiLogger
+            {
+                void Log(string message);
+                string LastMessage { get; }
+            }
+
+            public interface IMultiDisposable
+            {
+                void Dispose();
+                bool IsDisposed { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Multi_Interface_Mock_With_Class_Primary_And_Explicit_Impl()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IInfra
+            {
+                string Instance { get; }
+            }
+
+            public class DataContext : IInfra
+            {
+                public virtual string GetName() => "real";
+                string IInfra.Instance => "real-instance";
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<DataContext, IInfra>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Multi_Interface_Mock_With_Conflicting_Member_Names()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IConflictA
+            {
+                string Tag { get; }
+            }
+
+            public interface IConflictB
+            {
+                int Tag { get; }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConflictA, IConflictB>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Properties()
     {
         var source = """

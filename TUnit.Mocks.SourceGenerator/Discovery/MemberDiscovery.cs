@@ -18,20 +18,95 @@ internal static class MemberDiscovery
     /// <summary>Sentinel entry for non-mockable members (sealed, non-virtual) that block the interface loop.</summary>
     private static readonly (int Index, ITypeSymbol? ReturnType) NonMockableEntry = (-1, null);
 
+    /// <summary>
+    /// Mutable accumulation state shared by the single- and multi-type member walks.
+    /// Both walks run the exact same collector over the primary type, so the primary's
+    /// members receive identical dense member IDs in both models — the setup extensions
+    /// are generated from the single-type model but dispatch against the multi impl's engine,
+    /// so this prefix-ID invariant is load-bearing.
+    /// </summary>
+    private sealed class DiscoveryState
+    {
+        public readonly List<MockMemberModel> Methods = new();
+        public readonly List<MockMemberModel> Properties = new();
+        public readonly List<MockEventModel> Events = new();
+        public readonly Dictionary<string, (int Index, ITypeSymbol? ReturnType)> SeenMethods = new();
+        public readonly HashSet<string> SeenFullMethods = new();
+        public readonly Dictionary<string, int?> SeenProperties = new();
+        public readonly HashSet<string> SeenEvents = new();
+        /// <summary>
+        /// Explicit interface impls collected for members blocked by a non-mockable class member,
+        /// keyed "interfaceFqn|memberKey". Prevents duplicate explicit impls when the same base
+        /// interface is reachable through multiple additional interfaces.
+        /// </summary>
+        public readonly HashSet<string> SeenExplicitImpls = new();
+        public int MemberIdCounter;
+
+        public (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events) ToResult() => (
+            new EquatableArray<MockMemberModel>(Methods.ToImmutableArray()),
+            new EquatableArray<MockMemberModel>(Properties.ToImmutableArray()),
+            new EquatableArray<MockEventModel>(Events.ToImmutableArray())
+        );
+    }
+
     public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
         DiscoverMembers(ITypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
-        var methods = new List<MockMemberModel>();
-        var properties = new List<MockMemberModel>();
-        var events = new List<MockEventModel>();
+        var state = new DiscoveryState();
+        CollectMembers(typeSymbol, compilationAssembly, compilation, state, ownerTypeIndex: 0, primaryClassSymbol: null);
+        return state.ToResult();
+    }
 
-        var seenMethods = new Dictionary<string, (int Index, ITypeSymbol? ReturnType)>();
-        var seenFullMethods = new HashSet<string>();
-        var seenProperties = new Dictionary<string, int?>();
-        var seenEvents = new HashSet<string>();
+    /// <summary>
+    /// Discovers members from multiple type symbols, merging and deduplicating across all.
+    /// Used for multi-interface mocks like Mock.Of&lt;T1, T2&gt;(). Dedup is first-wins, so members
+    /// shared with the primary keep <c>OwnerTypeIndex == 0</c> and a single setup extension.
+    /// Note: the first element may be a class when invoked from
+    /// <c>MockTypeDiscovery.TransformToModels</c> with <c>isPartialMock == true</c>, so the
+    /// <see cref="TryCollectStaticAbstractFromInterface"/> TypeKind guard is genuinely required.
+    /// </summary>
+    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
+        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols, IAssemblySymbol? compilationAssembly, Compilation compilation)
+    {
+        var state = new DiscoveryState();
+        var primaryClass = typeSymbols[0].TypeKind == TypeKind.Class ? typeSymbols[0] : null;
+        for (int i = 0; i < typeSymbols.Length; i++)
+        {
+            CollectMembers(typeSymbols[i], compilationAssembly, compilation, state,
+                ownerTypeIndex: i, primaryClassSymbol: i > 0 ? primaryClass : null);
+        }
+        return state.ToResult();
+    }
 
-        int memberIdCounter = 0;
+    /// <summary>
+    /// Returns true when an additional-interface member must be emitted as an explicit interface
+    /// implementation because the class primary already implements it (explicitly or non-virtually) —
+    /// explicit re-implementation is the only way the mock can intercept interface dispatch
+    /// (e.g. DbContext explicitly implements IInfrastructure&lt;IServiceProvider&gt;.Instance).
+    /// </summary>
+    private static bool RequiresExplicitImpl(INamedTypeSymbol? primaryClassSymbol, ISymbol interfaceMember)
+        => primaryClassSymbol is not null
+            && primaryClassSymbol.FindImplementationForInterfaceMember(interfaceMember) is not null;
 
+    private static MockMemberModel Tag(MockMemberModel model, int ownerTypeIndex)
+        => ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex };
+
+    /// <summary>
+    /// Collects the mockable members of one type into the shared state.
+    /// <paramref name="ownerTypeIndex"/>: 0 = the primary type, n = 1-based index into the
+    /// additional interfaces of a multi-type mock.
+    /// <paramref name="primaryClassSymbol"/>: non-null only when walking an additional interface
+    /// of a class-primary multi mock — members the class already implements are then collected as
+    /// explicit interface impls (interception), instead of skipped (the single-type behavior, #5673).
+    /// </summary>
+    private static void CollectMembers(
+        ITypeSymbol typeSymbol,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        DiscoveryState state,
+        int ownerTypeIndex,
+        INamedTypeSymbol? primaryClassSymbol)
+    {
         // Collect all interfaces to scan
         var interfaces = typeSymbol.TypeKind == TypeKind.Interface
             ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
@@ -40,20 +115,19 @@ internal static class MemberDiscovery
         // If it's a class, also include its own members
         if (typeSymbol.TypeKind == TypeKind.Class)
         {
-            ProcessClassMembers(typeSymbol, compilationAssembly, compilation, methods, properties, events,
-                seenMethods, seenFullMethods, seenProperties, seenEvents, ref memberIdCounter);
+            ProcessClassMembers(typeSymbol, compilationAssembly, compilation, state.Methods, state.Properties, state.Events,
+                state.SeenMethods, state.SeenFullMethods, state.SeenProperties, state.SeenEvents, ref state.MemberIdCounter);
         }
 
         foreach (var iface in interfaces)
         {
-            string? explicitInterfaceName = null;
             var interfaceFqn = iface.GetFullyQualifiedName();
 
             foreach (var member in iface.GetMembers())
             {
                 if (member.IsStatic)
                 {
-                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
+                    TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, state.Methods, state.Properties, state.Events, state.SeenMethods, state.SeenProperties, state.SeenEvents, ref state.MemberIdCounter, compilation);
                     continue;
                 }
 
@@ -63,6 +137,9 @@ internal static class MemberDiscovery
                 // EntityEntry explicitly implements IInfrastructure<InternalEntityEntry>.Instance).
                 // The inherited impl satisfies the interface; the mock only needs to override
                 // what the class walk already collected (virtual/abstract/override members).
+                // (Additional-interface walks never take this branch — there typeSymbol is the
+                // interface itself; the class-implemented members are intercepted via
+                // RequiresExplicitImpl below instead.)
                 if (typeSymbol.TypeKind == TypeKind.Class
                     && typeSymbol.FindImplementationForInterfaceMember(member) is not null)
                 {
@@ -74,25 +151,36 @@ internal static class MemberDiscovery
                     case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
                     {
                         var key = GetMethodKey(method);
-                        if (seenMethods.TryGetValue(key, out var existing))
+                        if (state.SeenMethods.TryGetValue(key, out var existing))
                         {
                             // Same name+params already seen. Check if return type differs
                             // (e.g. IEnumerable<T>.GetEnumerator vs IEnumerable.GetEnumerator).
                             var fullKey = GetFullMethodKey(method);
-                            if (!seenFullMethods.Add(fullKey)) continue; // true duplicate
+                            if (!state.SeenFullMethods.Add(fullKey))
+                            {
+                                // Exact signature already seen. Normally a true duplicate — but when
+                                // the prior sighting is a non-mockable class member (NonMockableEntry)
+                                // and we're walking an additional interface, re-implement explicitly
+                                // so the mock intercepts interface dispatch anyway.
+                                if (primaryClassSymbol is null || existing.Index != NonMockableEntry.Index) continue;
+                                if (!state.SeenExplicitImpls.Add($"{interfaceFqn}|{fullKey}")) continue;
+                                state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: false, compilation: compilation), ownerTypeIndex));
+                                break;
+                            }
 
                             // Signature collision with different return type → explicit interface impl.
                             // Delegation is safe only if the public method's return type implements
                             // the explicit impl's return type (e.g. IEnumerator<T> : IEnumerator).
                             var canDelegate = existing.ReturnType is not null
                                 && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation));
+                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation), ownerTypeIndex));
                         }
                         else
                         {
-                            seenMethods[key] = (methods.Count, method.ReturnType);
-                            seenFullMethods.Add(GetFullMethodKey(method));
-                            methods.Add(CreateMethodModel(method, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilation: compilation));
+                            var explicitName = RequiresExplicitImpl(primaryClassSymbol, method) ? interfaceFqn : null;
+                            state.SeenMethods[key] = (state.Methods.Count, method.ReturnType);
+                            state.SeenFullMethods.Add(GetFullMethodKey(method));
+                            state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, explicitName, interfaceFqn, compilation: compilation), ownerTypeIndex));
                         }
                         break;
                     }
@@ -100,27 +188,47 @@ internal static class MemberDiscovery
                     case IPropertySymbol property when !property.IsIndexer:
                     {
                         var key = $"P:{property.Name}";
-                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        if (state.SeenProperties.TryGetValue(key, out var existingIndex))
                         {
                             if (existingIndex.HasValue)
                             {
                                 // Check if return type differs (e.g. IFoo.Tag:string vs IBar.Tag:int)
-                                var existingProp = properties[existingIndex.Value];
+                                var existingProp = state.Properties[existingIndex.Value];
                                 if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
                                 {
                                     // Signature collision with different return type → explicit interface impl
-                                    properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation));
+                                    state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                                 }
-                                else
+                                else if (primaryClassSymbol is not null
+                                    && ((!existingProp.HasGetter && property.GetMethod is not null)
+                                        || (!existingProp.HasSetter && property.SetMethod is not null)))
                                 {
-                                    MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
+                                    // Class-primary additional walk: the existing model may be an
+                                    // override of a base virtual, and an override can't add accessors
+                                    // the base lacks (CS0546) — satisfy the interface explicitly instead.
+                                    if (state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                                    {
+                                        state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
+                                    }
                                 }
+                                else if (primaryClassSymbol is null)
+                                {
+                                    MergePropertyAccessors(state.Properties, existingIndex.Value, property, ref state.MemberIdCounter, compilationAssembly);
+                                }
+                                // else: class-primary walk and the existing member already covers
+                                // every accessor the interface needs — plain dedup.
+                            }
+                            else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                            {
+                                // Blocked by a non-mockable class member — intercept via explicit impl.
+                                state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                             }
                         }
                         else
                         {
-                            seenProperties[key] = properties.Count;
-                            properties.Add(CreatePropertyModel(property, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly, compilation));
+                            var explicitName = RequiresExplicitImpl(primaryClassSymbol, property) ? interfaceFqn : null;
+                            state.SeenProperties[key] = state.Properties.Count;
+                            state.Properties.Add(Tag(CreatePropertyModel(property, ref state.MemberIdCounter, explicitName, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                         }
                         break;
                     }
@@ -129,17 +237,22 @@ internal static class MemberDiscovery
                     {
                         var paramTypes = string.Join(',', indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
                         var key = $"I:[{paramTypes}]";
-                        if (seenProperties.TryGetValue(key, out var existingIndex))
+                        if (state.SeenProperties.TryGetValue(key, out var existingIndex))
                         {
                             if (existingIndex.HasValue)
                             {
-                                MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter, compilationAssembly);
+                                MergePropertyAccessors(state.Properties, existingIndex.Value, indexer, ref state.MemberIdCounter, compilationAssembly);
+                            }
+                            else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
+                            {
+                                state.Properties.Add(Tag(CreateIndexerModel(indexer, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                             }
                         }
                         else
                         {
-                            seenProperties[key] = properties.Count;
-                            properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, explicitInterfaceName, interfaceFqn, compilationAssembly, compilation));
+                            var explicitName = RequiresExplicitImpl(primaryClassSymbol, indexer) ? interfaceFqn : null;
+                            state.SeenProperties[key] = state.Properties.Count;
+                            state.Properties.Add(Tag(CreateIndexerModel(indexer, ref state.MemberIdCounter, explicitName, interfaceFqn, compilationAssembly, compilation), ownerTypeIndex));
                         }
                         break;
                     }
@@ -147,149 +260,16 @@ internal static class MemberDiscovery
                     case IEventSymbol evt:
                     {
                         var key = $"E:{evt.Name}";
-                        if (!seenEvents.Add(key)) continue;
+                        if (!state.SeenEvents.Add(key)) continue;
 
-                        events.Add(CreateEventModel(evt, explicitInterfaceName, interfaceFqn));
+                        var explicitName = RequiresExplicitImpl(primaryClassSymbol, evt) ? interfaceFqn : null;
+                        var model = CreateEventModel(evt, explicitName, interfaceFqn);
+                        state.Events.Add(ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex });
                         break;
                     }
                 }
             }
         }
-
-        return (
-            new EquatableArray<MockMemberModel>(methods.ToImmutableArray()),
-            new EquatableArray<MockMemberModel>(properties.ToImmutableArray()),
-            new EquatableArray<MockEventModel>(events.ToImmutableArray())
-        );
-    }
-
-    /// <summary>
-    /// Discovers members from multiple type symbols, merging and deduplicating across all.
-    /// Used for multi-interface mocks like Mock.Of&lt;T1, T2&gt;().
-    /// Note: the first element may be a class when invoked from
-    /// <c>MockTypeDiscovery.TransformToModels</c> with <c>isPartialMock == true</c>, so the
-    /// <see cref="TryCollectStaticAbstractFromInterface"/> TypeKind guard is genuinely required.
-    /// </summary>
-    public static (EquatableArray<MockMemberModel> Methods, EquatableArray<MockMemberModel> Properties, EquatableArray<MockEventModel> Events)
-        DiscoverMembersFromMultipleTypes(INamedTypeSymbol[] typeSymbols, IAssemblySymbol? compilationAssembly, Compilation compilation)
-    {
-        var methods = new List<MockMemberModel>();
-        var properties = new List<MockMemberModel>();
-        var events = new List<MockEventModel>();
-
-        var seenMethods = new Dictionary<string, (int Index, ITypeSymbol? ReturnType)>();
-        var seenFullMethods = new HashSet<string>();
-        var seenProperties = new Dictionary<string, int?>();
-        var seenEvents = new HashSet<string>();
-
-        int memberIdCounter = 0;
-
-        foreach (var typeSymbol in typeSymbols)
-        {
-            // Collect all interfaces to scan (the type itself + its inherited interfaces)
-            var interfaces = typeSymbol.TypeKind == TypeKind.Interface
-                ? new[] { typeSymbol }.Concat(typeSymbol.AllInterfaces)
-                : typeSymbol.AllInterfaces.AsEnumerable();
-
-            foreach (var iface in interfaces)
-            {
-                var interfaceFqn = iface.GetFullyQualifiedName();
-
-                foreach (var member in iface.GetMembers())
-                {
-                    if (member.IsStatic)
-                    {
-                        TryCollectStaticAbstractFromInterface(member, typeSymbol, interfaceFqn, methods, properties, events, seenMethods, seenProperties, seenEvents, ref memberIdCounter, compilation);
-                        continue;
-                    }
-
-                    switch (member)
-                    {
-                        case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
-                        {
-                            var key = GetMethodKey(method);
-                            if (seenMethods.TryGetValue(key, out var existing))
-                            {
-                                var fullKey = GetFullMethodKey(method);
-                                if (!seenFullMethods.Add(fullKey)) continue;
-
-                                var canDelegate = existing.ReturnType is not null
-                                    && CanDelegateReturnType(existing.ReturnType, method.ReturnType);
-                                methods.Add(CreateMethodModel(method, ref memberIdCounter,
-                                    interfaceFqn, declaringInterfaceName: interfaceFqn, explicitInterfaceCanDelegate: canDelegate, compilation: compilation));
-                            }
-                            else
-                            {
-                                seenMethods[key] = (methods.Count, method.ReturnType);
-                                seenFullMethods.Add(GetFullMethodKey(method));
-                                methods.Add(CreateMethodModel(method, ref memberIdCounter,
-                                    null, declaringInterfaceName: interfaceFqn, compilation: compilation));
-                            }
-                            break;
-                        }
-
-                        case IPropertySymbol property when !property.IsIndexer:
-                        {
-                            var key = $"P:{property.Name}";
-                            if (seenProperties.TryGetValue(key, out var existingIndex))
-                            {
-                                if (existingIndex.HasValue)
-                                {
-                                    var existingProp = properties[existingIndex.Value];
-                                    if (existingProp.ReturnType != property.Type.GetFullyQualifiedNameWithNullability())
-                                    {
-                                        properties.Add(CreatePropertyModel(property, ref memberIdCounter, interfaceFqn, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
-                                    }
-                                    else
-                                    {
-                                        MergePropertyAccessors(properties, existingIndex.Value, property, ref memberIdCounter, compilationAssembly);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                seenProperties[key] = properties.Count;
-                                properties.Add(CreatePropertyModel(property, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
-                            }
-                            break;
-                        }
-
-                        case IPropertySymbol indexer when indexer.IsIndexer:
-                        {
-                            var paramTypes = string.Join(',', indexer.Parameters.Select(p => p.Type.GetFullyQualifiedName()));
-                            var key = $"I:[{paramTypes}]";
-                            if (seenProperties.TryGetValue(key, out var existingIndex))
-                            {
-                                if (existingIndex.HasValue)
-                                {
-                                    MergePropertyAccessors(properties, existingIndex.Value, indexer, ref memberIdCounter, compilationAssembly);
-                                }
-                            }
-                            else
-                            {
-                                seenProperties[key] = properties.Count;
-                                properties.Add(CreateIndexerModel(indexer, ref memberIdCounter, null, declaringInterfaceName: interfaceFqn, compilationAssembly: compilationAssembly, compilation: compilation));
-                            }
-                            break;
-                        }
-
-                        case IEventSymbol evt:
-                        {
-                            var key = $"E:{evt.Name}";
-                            if (!seenEvents.Add(key)) continue;
-                            events.Add(CreateEventModel(evt, null, declaringInterfaceName: interfaceFqn));
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return (
-            new EquatableArray<MockMemberModel>(methods.ToImmutableArray()),
-            new EquatableArray<MockMemberModel>(properties.ToImmutableArray()),
-            new EquatableArray<MockEventModel>(events.ToImmutableArray())
-        );
     }
 
     private static void ProcessClassMembers(

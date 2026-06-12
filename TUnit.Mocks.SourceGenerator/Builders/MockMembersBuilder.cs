@@ -54,7 +54,11 @@ internal static class MockMembersBuilder
     public static string Build(MockTypeModel model)
     {
         var writer = new CodeWriter();
-        var safeName = MockImplBuilder.GetSafeName(model.FullyQualifiedName);
+        // Pair models (the per-(T1, Tn) secondary surface of multi-type mocks) carry the
+        // primary's FullyQualifiedName, so the composite name disambiguates per interface.
+        var safeName = model.IsSecondaryMemberSurface
+            ? MockImplBuilder.GetCompositeSafeName(model)
+            : MockImplBuilder.GetSafeName(model.FullyQualifiedName);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var instanceEvents = model.Events.Where(e => !e.IsStaticAbstract).ToArray();
         var hasEvents = instanceEvents.Length > 0;
@@ -70,6 +74,11 @@ internal static class MockMembersBuilder
             // Extension methods class
             using (writer.Block($"{model.Visibility} static class {safeName}_MockMemberExtensions"))
             {
+                if (model.IsSecondaryMemberSurface)
+                {
+                    EmitSecondaryMemberIdResolver(writer, model, mockableType);
+                }
+
                 bool firstMember = true;
 
                 // Pre-compute which methods need their `out` parameters kept in the extension
@@ -135,7 +144,12 @@ internal static class MockMembersBuilder
                 // setup/verify extensions. When the mocked interface already declares a member of
                 // that name, we skip the corresponding polyfill to avoid a CS0111 duplicate — the
                 // framework operation is still reachable via the static helper (Mock.Reset(m), …).
-                GenerateMockControlPolyfills(writer, model, isFirstMember: firstMember);
+                // Secondary-member files skip them — the primary _MockMembers file already emits
+                // polyfills for Mock<T1>, and a duplicate would be a CS0121 at every call site.
+                if (!model.IsSecondaryMemberSurface)
+                {
+                    GenerateMockControlPolyfills(writer, model, isFirstMember: firstMember);
+                }
             }
 
             // Generate unified sealed classes for qualifying methods
@@ -153,6 +167,38 @@ internal static class MockMembersBuilder
 
         return writer.ToString();
     }
+
+    /// <summary>
+    /// Emits the <c>__Id</c> resolver every secondary-surface extension routes its member ID
+    /// through: the IDs baked into the pair surface are the interface's standalone ordinals, and
+    /// the engine translates them to the owning combo's union IDs via the map its factory
+    /// registered. Mocks created without this secondary interface have no map — the resolver
+    /// throws instead of letting the setup silently target a member ID the impl never dispatches.
+    /// </summary>
+    private static void EmitSecondaryMemberIdResolver(CodeWriter writer, MockTypeModel model, string mockableType)
+    {
+        var ifaceFqn = model.SecondaryInterfaceFqn;
+        var ifaceDisplay = ifaceFqn.Replace("global::", "");
+        var primaryDisplay = model.FullyQualifiedName.Replace("global::", "");
+
+        writer.AppendLine("[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]");
+        using (writer.Block($"internal static int __Id(global::TUnit.Mocks.Mock<{mockableType}> mock, int localId)"))
+        {
+            using (writer.Block($"if (!global::TUnit.Mocks.MockRegistry.GetEngine(mock).TryGetSecondaryMemberId(typeof({ifaceFqn}), localId, out var memberId))"))
+            {
+                writer.AppendLine($"throw new global::System.InvalidOperationException(\"This mock was not created with '{ifaceDisplay}' as a secondary interface. Create it with Mock.Of<{primaryDisplay}, {ifaceDisplay}>() to configure its members.\");");
+            }
+            writer.AppendLine("return memberId;");
+        }
+        writer.AppendLine();
+    }
+
+    /// <summary>
+    /// Member-ID expression for an extension body: the literal ID for normal surfaces, or a
+    /// runtime <c>__Id</c> translation for secondary (pair) surfaces.
+    /// </summary>
+    private static string FormatMemberId(MockTypeModel model, int memberId)
+        => model.IsSecondaryMemberSurface ? $"__Id(mock, {memberId})" : memberId.ToString();
 
     /// <summary>
     /// Emits namespace-scoped delegate types so non-span ref struct out/ref values can travel
@@ -1017,22 +1063,24 @@ internal static class MockMembersBuilder
             ? $", {MockImplBuilder.TypeArgumentsArrayLiteral(method)}"
             : "";
 
+        var memberIdExpr = FormatMemberId(model, method.MemberId);
+
         if (useTypedWrapper)
         {
             var wrapperName = GetWrapperTypeName(safeName, method, model);
-            writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new {wrapperName}(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
         }
         else
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {method.MemberId}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
         }
     }
 
@@ -1263,8 +1311,8 @@ internal static class MockMembersBuilder
                 if (!first) writer.AppendLine();
                 first = false;
 
-                var getterMemberId = prop.HasGetter ? prop.MemberId.ToString() : "0";
-                var setterMemberId = prop.HasSetter ? prop.SetterMemberId.ToString() : "0";
+                var getterMemberId = prop.HasGetter ? FormatMemberId(model, prop.MemberId) : "0";
+                var setterMemberId = prop.HasSetter ? FormatMemberId(model, prop.SetterMemberId) : "0";
                 var hasGetter = prop.HasGetter ? "true" : "false";
                 var hasSetter = prop.HasSetter ? "true" : "false";
 
@@ -1302,7 +1350,7 @@ internal static class MockMembersBuilder
             using (writer.Block($"public static global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}> Item{typeParams}({getterParams}){constraints}"))
             {
                 writer.AppendLine($"var matchers = {matcherList};");
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {indexer.MemberId}, \"get_Item\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {FormatMemberId(model, indexer.MemberId)}, \"get_Item\", matchers);");
             }
         }
 
@@ -1319,7 +1367,7 @@ internal static class MockMembersBuilder
             using (writer.Block($"public static global::TUnit.Mocks.VoidMockMethodCall SetItem{typeParams}({setterParams}){constraints}"))
             {
                 writer.AppendLine($"var matchers = {setterMatcherList};");
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {indexer.SetterMemberId}, \"set_Item\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), {FormatMemberId(model, indexer.SetterMemberId)}, \"set_Item\", matchers);");
             }
         }
     }

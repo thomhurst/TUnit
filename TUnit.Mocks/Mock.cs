@@ -127,11 +127,21 @@ public static class Mock
     /// <summary>Creates a mock implementing both T1 and T2 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2>(MockBehavior behavior)
         where T1 : class where T2 : class
+        => Of<T1, T2>(behavior, Array.Empty<object>());
+
+    /// <summary>Creates a mock implementing both T1 and T2 using the configured default behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2>(params object[] constructorArgs)
+        where T1 : class where T2 : class
+        => Of<T1, T2>(DefaultBehavior, constructorArgs);
+
+    /// <summary>Creates a mock implementing both T1 and T2 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2>(MockBehavior behavior, params object[] constructorArgs)
+        where T1 : class where T2 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2));
         if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, Array.Empty<object>());
+            return (Mock<T1>)factory(behavior, constructorArgs);
         }
 
         throw new InvalidOperationException(
@@ -147,11 +157,21 @@ public static class Mock
     /// <summary>Creates a mock implementing T1, T2, and T3 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3>(MockBehavior behavior)
         where T1 : class where T2 : class where T3 : class
+        => Of<T1, T2, T3>(behavior, Array.Empty<object>());
+
+    /// <summary>Creates a mock implementing T1, T2, and T3 using the configured default behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2, T3>(params object[] constructorArgs)
+        where T1 : class where T2 : class where T3 : class
+        => Of<T1, T2, T3>(DefaultBehavior, constructorArgs);
+
+    /// <summary>Creates a mock implementing T1, T2, and T3 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2, T3>(MockBehavior behavior, params object[] constructorArgs)
+        where T1 : class where T2 : class where T3 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3));
         if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, Array.Empty<object>());
+            return (Mock<T1>)factory(behavior, constructorArgs);
         }
 
         throw new InvalidOperationException(
@@ -167,11 +187,21 @@ public static class Mock
     /// <summary>Creates a mock implementing T1, T2, T3, and T4 with specified behavior.</summary>
     public static Mock<T1> Of<T1, T2, T3, T4>(MockBehavior behavior)
         where T1 : class where T2 : class where T3 : class where T4 : class
+        => Of<T1, T2, T3, T4>(behavior, Array.Empty<object>());
+
+    /// <summary>Creates a mock implementing T1, T2, T3, and T4 using the configured default behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2, T3, T4>(params object[] constructorArgs)
+        where T1 : class where T2 : class where T3 : class where T4 : class
+        => Of<T1, T2, T3, T4>(DefaultBehavior, constructorArgs);
+
+    /// <summary>Creates a mock implementing T1, T2, T3, and T4 with specified behavior, optionally passing constructor arguments when T1 is a concrete class.</summary>
+    public static Mock<T1> Of<T1, T2, T3, T4>(MockBehavior behavior, params object[] constructorArgs)
+        where T1 : class where T2 : class where T3 : class where T4 : class
     {
         var key = GetMultiKey(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
         if (MockRegistry.TryGetMultiFactory(key, out var factory))
         {
-            return (Mock<T1>)factory(behavior, Array.Empty<object>());
+            return (Mock<T1>)factory(behavior, constructorArgs);
         }
 
         throw new InvalidOperationException(

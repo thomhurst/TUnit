@@ -260,6 +260,28 @@ mock.Object.Log("test");
 
 Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 
+Members of the secondary interfaces appear directly on the mock, just like the primary's — setup, verify, and event raising all work the same way:
+
+```csharp
+var mock = Mock.Of<ILogger, IDisposable>();
+
+mock.IsDisposed.Returns(true);      // IDisposable property setup
+mock.Dispose().WasCalled();         // IDisposable verification
+```
+
+When a secondary member's name collides with a member of another interface on the mock, it is exposed with a short interface prefix instead (e.g. `mock.IDisposable_Tag`).
+
+The primary type can also be a concrete class — useful for types like EF Core's `DbContext` that implement infrastructure interfaces explicitly:
+
+```csharp
+var mock = Mock.Of<DbContext, IInfrastructure<IServiceProvider>>();
+mock.Instance.Returns(serviceProvider);
+
+((IInfrastructure<IServiceProvider>)mock.Object).Instance; // serviceProvider
+```
+
+Constructor arguments for class primaries are supported: `Mock.Of<MyService, IExtra>(arg1, arg2)`.
+
 ## Setup Chaining
 
 Setup methods return chain objects that support additional behaviors:

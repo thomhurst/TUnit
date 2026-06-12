@@ -63,7 +63,14 @@ public class MockGenerator : IIncrementalGenerator
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
         {
-            if (model.IsDelegateType)
+            if (model.IsSecondaryMemberSurface)
+            {
+                // Pair model: the shared setup/verify surface for one additional interface of a
+                // multi-type mock. Emitted once per (primary, interface) pair across all combos.
+                var secondaryMembersSource = MockMembersBuilder.Build(model);
+                spc.AddSource($"{GetSafeFileName(model)}_MockSecondaryMembers.g.cs", secondaryMembersSource);
+            }
+            else if (model.IsDelegateType)
             {
                 // Delegate mock: generate members and delegate factory (no impl class)
                 GenerateDelegateMock(spc, model);
@@ -75,8 +82,8 @@ public class MockGenerator : IIncrementalGenerator
             }
             else if (model.AdditionalInterfaceNames.Length > 0)
             {
-                // Multi-interface mock: generate ONLY impl + factory
-                // Members/raise come from the single-type model (also emitted)
+                // Multi-interface mock: generate impl + factory + secondary-member setup
+                // extensions. Primary members/raise come from the single-type model (also emitted).
                 GenerateMultiInterfaceMock(spc, model);
             }
             else
