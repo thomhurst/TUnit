@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -488,19 +488,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // TestEntry array
+            // TestEntry array — entries built via the shared TestEntryFactory so each call site
+            // is a single factory call instead of a large object initializer (#6227)
             writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{concreteClassName}>[] Entries_{groupIndex} = new global::TUnit.Core.TestEntry<{concreteClassName}>[]");
             writer.AppendLine("{");
             writer.Indent();
             for (var i = 0; i < entries.Count; i++)
             {
                 var entry = entries[i];
-                writer.AppendLine($"new global::TUnit.Core.TestEntry<{concreteClassName}>");
-                writer.AppendLine("{");
+                writer.AppendLine($"global::TUnit.Core.TestEntryFactory.Create<{concreteClassName}>(");
                 writer.Indent();
                 EmitTestEntryFields(writer, testMethod, entry, i, groupIndex);
                 writer.Unindent();
-                writer.AppendLine("},");
             }
             writer.Unindent();
             writer.AppendLine("};");
@@ -1072,38 +1071,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? $"{displayClassName}.{methodName}"
             : $"{namespaceName}.{displayClassName}.{methodName}";
 
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
-        var hasDataSource = HasDataSources(testMethod);
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        var dependsOn = ExtractDependsOn(testMethod);
-        var dependsOnArray = dependsOn.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
-
-        writer.AppendLine($"MethodName = \"{EscapeString(entry.TestName)}\",");
-        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        WriteSourceLocationMetadata(writer, testMethod);
-        writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"Properties = {propertiesArray},");
-        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
-        writer.AppendLine($"RepeatCount = {repeatCount},");
-        writer.AppendLine($"DependsOn = {dependsOnArray},");
-        writer.AppendLine($"MethodMetadata = __mm_0,");
-        writer.AppendLine($"CreateInstance = __CreateInstance_{groupIndex},");
-        writer.AppendLine($"InvokeBody = __Invoke_{groupIndex},");
-        writer.AppendLine($"MethodIndex = {entryIndex},");
-        writer.AppendLine($"CreateAttributes = __Attributes_{groupIndex},");
-        writer.AppendLine($"AttributeGroupIndex = {entryIndex},");
+        writer.AppendLine($"methodName: \"{EscapeString(entry.TestName)}\",");
+        writer.AppendLine($"fullyQualifiedName: \"{EscapeString(fullyQualifiedName)}\",");
+        WriteSourceLocationArguments(writer, testMethod);
+        WriteFilterDataArguments(writer, testMethod);
 
         // Data sources
         EmitConcreteDataSources(writer, testMethod, entry);
@@ -1112,7 +1083,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var depsExpr = PreGenerateDependenciesExpression(testMethod.MethodSymbol);
         if (depsExpr != null)
         {
-            writer.AppendLine($"Dependencies = {depsExpr},");
+            writer.AppendLine($"dependencies: {depsExpr},");
+        }
+
+        writer.AppendLine($"methodMetadata: __mm_0,");
+        writer.AppendLine($"createInstance: __CreateInstance_{groupIndex},");
+        writer.AppendLine($"invokeBody: __Invoke_{groupIndex},");
+        writer.AppendLine($"methodIndex: {entryIndex},");
+        writer.AppendLine($"createAttributes: __Attributes_{groupIndex},");
+        writer.AppendLine($"attributeGroupIndex: {entryIndex}),");
+    }
+
+    /// <summary>
+    /// Writes the optional filter-data named arguments (categories, properties, hasDataSource,
+    /// repeatCount, dependsOn) for a TestEntryFactory.Create call, omitting factory defaults.
+    /// </summary>
+    private static void WriteFilterDataArguments(CodeWriter writer, TestMethodMetadata testMethod)
+    {
+        var categories = ExtractCategories(testMethod);
+        if (categories.Count > 0)
+        {
+            writer.AppendLine($"categories: new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }},");
+        }
+
+        var properties = ExtractProperties(testMethod);
+        if (properties.Length > 0)
+        {
+            writer.AppendLine($"properties: new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }},");
+        }
+
+        if (HasDataSources(testMethod))
+        {
+            writer.AppendLine("hasDataSource: true,");
+        }
+
+        var repeatCount = ExtractRepeatCount(testMethod);
+        if (repeatCount != 0)
+        {
+            writer.AppendLine($"repeatCount: {repeatCount},");
+        }
+
+        var dependsOn = ExtractDependsOn(testMethod);
+        if (dependsOn.Length > 0)
+        {
+            writer.AppendLine($"dependsOn: new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }},");
         }
     }
 
@@ -1180,7 +1194,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
-            writer.AppendLine($"TestDataSources = {dsWriter},");
+            writer.AppendLine($"testDataSources: {dsWriter},");
         }
 
         if (classDataSources.Length > 0)
@@ -1195,7 +1209,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
-            writer.AppendLine($"ClassDataSources = {dsWriter},");
+            writer.AppendLine($"classDataSources: {dsWriter},");
         }
     }
 
@@ -1255,6 +1269,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"StartColumnNumber = {testMethod.StartColumnNumber},");
         writer.AppendLine($"EndLineNumber = {testMethod.EndLineNumber},");
         writer.AppendLine($"EndColumnNumber = {testMethod.EndColumnNumber},");
+    }
+
+    /// <summary>
+    /// Named-argument twin of <see cref="WriteSourceLocationMetadata"/> for TestEntryFactory.Create
+    /// call sites. Column/end-location values are omitted when zero (the factory default) — snapshot
+    /// scrubbing removes these lines anyway, so presence differences across Roslyn versions are benign.
+    /// </summary>
+    private static void WriteSourceLocationArguments(CodeWriter writer, TestMethodMetadata testMethod)
+    {
+        writer.AppendLine($"filePath: {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
+        writer.AppendLine($"lineNumber: {testMethod.LineNumber},");
+        if (testMethod.StartColumnNumber != 0)
+        {
+            writer.AppendLine($"startColumnNumber: {testMethod.StartColumnNumber},");
+        }
+        if (testMethod.EndLineNumber != 0)
+        {
+            writer.AppendLine($"endLineNumber: {testMethod.EndLineNumber},");
+        }
+        if (testMethod.EndColumnNumber != 0)
+        {
+            writer.AppendLine($"endColumnNumber: {testMethod.EndColumnNumber},");
+        }
     }
 
     private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, TestMethodMetadata testMethod)
@@ -1645,389 +1682,91 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("DeferEnumeration = true,");
         }
 
-        // Set the Factory property with a strongly-typed function
-        writer.AppendLine("Factory = (dataGeneratorMetadata) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // If we have arguments, capture them in local variables
-        if (hasArguments)
-        {
-            writer.AppendLine("// Capture Arguments from the attribute");
-            writer.Append("var arguments = ");
-            WriteTypedConstant(writer, argumentsProperty.Value);
-            writer.AppendLine(";");
-            writer.AppendLine();
-        }
-
-        // Generate the factory implementation
-        if (dataSourceMethod != null)
-        {
-            GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, hasArguments);
-        }
-        else if (dataSourceProperty != null)
-        {
-            GeneratePropertyDataSourceFactory(writer, dataSourceProperty, targetType);
-        }
-
-        writer.Unindent();
-        writer.AppendLine("}");
+        // Set the Factory property as a single expression calling a shared TUnit.Core helper.
+        // The helper holds the (previously inlined) async iterator body, so each call site avoids
+        // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
+        // invocation is emitted, as a static lambda.
+        writer.Append("Factory = static dataGeneratorMetadata => ");
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, hasArguments ? argumentsProperty.Value : (TypedConstant?)null);
+        writer.AppendLine(",");
 
         writer.Unindent();
         writer.AppendLine("},");
     }
 
-    private static void GenerateMethodDataSourceFactory(CodeWriter writer, IMethodSymbol dataSourceMethod, ITypeSymbol targetType, bool hasArguments)
+    /// <summary>
+    /// Emits a call to a <c>TUnit.Core.Helpers.DataSourceFactories</c> helper, passing the
+    /// data source member invocation as a static lambda. The helper is selected from the
+    /// member's declared return type (mirroring the previous inline-iterator branch order)
+    /// and whether the member is static or instance-based.
+    /// </summary>
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, TypedConstant? arguments)
     {
-        var isStatic = dataSourceMethod.IsStatic;
-        var returnType = dataSourceMethod.ReturnType;
+        var dataSourceMethod = dataSourceMember as IMethodSymbol;
+        var dataSourceProperty = dataSourceMember as IPropertySymbol;
+
+        var returnType = dataSourceMethod?.ReturnType ?? dataSourceProperty!.Type;
+        var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty!.IsStatic;
         var fullyQualifiedType = targetType.GloballyQualified();
 
-        // Generate async enumerable that yields Func<Task<object?[]?>>
-        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Build the method call with arguments if needed
-        string methodCall;
-        if (hasArguments && dataSourceMethod.Parameters.Length > 0)
-        {
-            // Use the captured arguments
-            var argsList = string.Join(", ", dataSourceMethod.Parameters.Select((p, i) =>
-                $"(({p.Type.GloballyQualified()})arguments[{i}])"));
-            methodCall = $"{dataSourceMethod.Name}({argsList})";
-        }
-        else
-        {
-            methodCall = $"{dataSourceMethod.Name}()";
-        }
-
-        // For collections (IEnumerable, IAsyncEnumerable), we need to evaluate once to iterate
-        // For single values, we'll generate a lambda that invokes the method each time
-        returnType.ToDisplayString();
-
+        string kind;
         if (IsAsyncEnumerable(returnType))
         {
-            // IAsyncEnumerable<T> - must evaluate once to iterate
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("await foreach (var item in result)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
+            kind = "AsyncEnumerable";
         }
         else if (IsTask(returnType))
         {
-            // Task<T> - must evaluate and await once
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("var taskResult = await result;");
-            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("foreach (var item in enumerable)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(taskResult));");
-            writer.Unindent();
-            writer.AppendLine("}");
+            kind = returnType.ToDisplayString().StartsWith("System.Threading.Tasks.ValueTask")
+                ? "ValueTask"
+                : "Task";
         }
         else if (IsEnumerable(returnType))
         {
-            // IEnumerable<T>
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("foreach (var item in enumerable)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
-            writer.Unindent();
-            writer.AppendLine("}");
+            kind = "Enumerable";
         }
         else
         {
-            // Single value
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{methodCall};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            kind = "Value";
         }
 
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
+        var helper = isStatic
+            ? $"global::TUnit.Core.Helpers.DataSourceFactories.From{kind}"
+            : $"global::TUnit.Core.Helpers.DataSourceFactories.FromInstance{kind}";
 
+        var hasArguments = arguments != null && dataSourceMethod is { Parameters.Length: > 0 };
 
-        writer.AppendLine("return Factory();");
-    }
-
-    private static void GeneratePropertyDataSourceFactory(CodeWriter writer, IPropertySymbol dataSourceProperty, ITypeSymbol targetType)
-    {
-        var isStatic = dataSourceProperty.IsStatic;
-        var returnType = dataSourceProperty.Type;
-        var fullyQualifiedType = targetType.GloballyQualified();
-
-        // Generate async enumerable that yields Func<Task<object?[]?>>
-        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Properties don't have arguments, just access them
-        var propertyAccess = dataSourceProperty.Name;
-
-        if (IsAsyncEnumerable(returnType))
+        string memberAccess;
+        if (dataSourceMethod != null)
         {
-            // IAsyncEnumerable<T> - must evaluate once to iterate
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("await foreach (var item in result)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
-        else if (IsTask(returnType))
-        {
-            // Task<T> - must evaluate and await once
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("var taskResult = await result;");
-            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("foreach (var item in enumerable)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(taskResult));");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
-        else if (IsEnumerable(returnType))
-        {
-            // IEnumerable<T>
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("foreach (var item in enumerable)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
-            writer.Unindent();
-            writer.AppendLine("}");
+            memberAccess = hasArguments
+                ? $"{dataSourceMethod.Name}({string.Join(", ", dataSourceMethod.Parameters.Select((p, i) => $"(({p.Type.GloballyQualified()})arguments[{i}])"))})"
+                : $"{dataSourceMethod.Name}()";
         }
         else
         {
-            // Single value
-            if (isStatic)
-            {
-                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
-            }
-            else
-            {
-                writer.AppendLine("object? instance;");
-                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine("else");
-                writer.AppendLine("{");
-                writer.Indent();
-                writer.AppendLine("throw new global::System.InvalidOperationException(\"Instance method data source requires TestClassInstance. This should have been provided by the engine.\");");
-                writer.Unindent();
-                writer.AppendLine("}");
-                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
-            }
-            writer.AppendLine();
-            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            memberAccess = dataSourceProperty!.Name;
         }
 
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
+        var receiver = isStatic ? fullyQualifiedType : $"(({fullyQualifiedType})instance)";
+        var lambdaHeader = isStatic ? "static () =>" : "static instance =>";
+        var metadataArgument = isStatic ? "" : "dataGeneratorMetadata, ";
 
-
-        writer.AppendLine("return Factory();");
+        if (hasArguments)
+        {
+            writer.AppendLine($"{helper}({metadataArgument}{lambdaHeader}");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.Append("var arguments = ");
+            WriteTypedConstant(writer, arguments!.Value);
+            writer.AppendLine(";");
+            writer.AppendLine($"return {receiver}.{memberAccess};");
+            writer.Unindent();
+            writer.Append("})");
+        }
+        else
+        {
+            writer.Append($"{helper}({metadataArgument}{lambdaHeader} {receiver}.{memberAccess})");
+        }
     }
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
@@ -3157,32 +2896,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? $"{simpleClassName}.{methodName}"
             : $"{namespaceName}.{simpleClassName}.{methodName}";
 
-        var categories = ExtractCategories(testMethod);
-        var categoriesArray = categories.Count == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", categories.Select(c => $"\"{EscapeString(c)}\""))} }}";
-
-        var properties = ExtractProperties(testMethod);
-        var propertiesArray = properties.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", properties.Select(p => $"\"{EscapeString(p)}\""))} }}";
-
-        var hasDataSource = HasDataSources(testMethod);
-        var repeatCount = ExtractRepeatCount(testMethod);
-
-        var dependsOn = ExtractDependsOn(testMethod);
-        var dependsOnArray = dependsOn.Length == 0
-            ? "global::System.Array.Empty<string>()"
-            : $"new string[] {{ {string.Join(", ", dependsOn.Select(d => $"\"{EscapeString(d)}\""))} }}";
-
-        writer.AppendLine($"MethodName = \"{EscapeString(methodName)}\",");
-        writer.AppendLine($"FullyQualifiedName = \"{EscapeString(fullyQualifiedName)}\",");
-        WriteSourceLocationMetadata(writer, testMethod);
-        writer.AppendLine($"Categories = {categoriesArray},");
-        writer.AppendLine($"Properties = {propertiesArray},");
-        writer.AppendLine($"HasDataSource = {(hasDataSource ? "true" : "false")},");
-        writer.AppendLine($"RepeatCount = {repeatCount},");
-        writer.AppendLine($"DependsOn = {dependsOnArray},");
+        writer.AppendLine($"methodName: \"{EscapeString(methodName)}\",");
+        writer.AppendLine($"fullyQualifiedName: \"{EscapeString(fullyQualifiedName)}\",");
+        WriteSourceLocationArguments(writer, testMethod);
+        WriteFilterDataArguments(writer, testMethod);
 
         return writer.ToString();
     }
@@ -3625,36 +3342,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
-            // TestEntry<T>[] array — all entries share the same 3 delegates
+            // TestEntry<T>[] array — all entries share the same 3 delegates and are built via the
+            // shared TestEntryFactory so each call site is a single factory call instead of a
+            // large object initializer (#6227)
             writer.AppendLine($"public static readonly global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[] Entries = new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>[]");
             writer.AppendLine("{");
             writer.Indent();
             foreach (var method in classGroup.Methods)
             {
-                writer.AppendLine($"new global::TUnit.Core.TestEntry<{classGroup.ClassFullyQualified}>");
-                writer.AppendLine("{");
+                writer.AppendLine($"global::TUnit.Core.TestEntryFactory.Create<{classGroup.ClassFullyQualified}>(");
                 writer.Indent();
                 writer.AppendRaw(method.TestEntryDataFieldsCode);
-                writer.AppendLine($"MethodMetadata = __mm_{method.MethodIndex},");
-                writer.AppendLine($"CreateInstance = __CreateInstance,");
-                writer.AppendLine($"InvokeBody = __Invoke,");
-                writer.AppendLine($"MethodIndex = {method.MethodIndex},");
-                writer.AppendLine($"CreateAttributes = __Attributes,");
-                writer.AppendLine($"AttributeGroupIndex = {method.AttributeGroupIndex},");
                 if (method.TestDataSourcesCode != null)
                 {
-                    writer.AppendLine($"TestDataSources = {method.TestDataSourcesCode},");
+                    writer.AppendLine($"testDataSources: {method.TestDataSourcesCode},");
                 }
                 if (method.ClassDataSourcesCode != null)
                 {
-                    writer.AppendLine($"ClassDataSources = {method.ClassDataSourcesCode},");
+                    writer.AppendLine($"classDataSources: {method.ClassDataSourcesCode},");
                 }
                 if (method.DependenciesCode != null)
                 {
-                    writer.AppendLine($"Dependencies = {method.DependenciesCode},");
+                    writer.AppendLine($"dependencies: {method.DependenciesCode},");
                 }
+                writer.AppendLine($"methodMetadata: __mm_{method.MethodIndex},");
+                writer.AppendLine($"createInstance: __CreateInstance,");
+                writer.AppendLine($"invokeBody: __Invoke,");
+                writer.AppendLine($"methodIndex: {method.MethodIndex},");
+                writer.AppendLine($"createAttributes: __Attributes,");
+                writer.AppendLine($"attributeGroupIndex: {method.AttributeGroupIndex}),");
                 writer.Unindent();
-                writer.AppendLine("},");
             }
             writer.Unindent();
             writer.AppendLine("};");

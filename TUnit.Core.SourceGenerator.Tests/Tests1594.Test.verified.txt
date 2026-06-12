@@ -67,29 +67,23 @@ internal static class TUnit_TestProject_Bugs__1594_MyTests__TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1594.MyTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1594.MyTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1594.MyTests>
-        {
-            MethodName = "Test1",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1594.MyTests.Test1",
-            FilePath = "",
-            LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1594.MyTests>(
+            methodName: "Test1",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1594.MyTests.Test1",
+            filePath: "",
+            lineNumber: 15,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1594.MyFixture>()
 {Shared = global::TUnit.Core.SharedType.None,},
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

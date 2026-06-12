@@ -94,92 +94,44 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "expected", n
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericMethodTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericMethodTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericMethodTests>
-        {
-            MethodName = "AggregateBy_HasExpectedOutput<int, int, int>",
-            FullyQualifiedName = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<int, int, int>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericMethodTests>(
+            methodName: "AggregateBy_HasExpectedOutput<int, int, int>",
+            fullyQualifiedName: "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<int, int, int>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_Numeric_TestData()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.GenericMethodTests>
-        {
-            MethodName = "AggregateBy_HasExpectedOutput<string, string, string>",
-            FullyQualifiedName = "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<string, string, string>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.GenericMethodTests>(
+            methodName: "AggregateBy_HasExpectedOutput<string, string, string>",
+            fullyQualifiedName: "TUnit.TestProject.GenericMethodTests.AggregateBy_HasExpectedOutput<string, string, string>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_String_TestData")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.GenericMethodTests.AggregateBy_String_TestData()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration

@@ -132,87 +132,69 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataSourceGeneratorTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataSourceGeneratorTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataSourceGeneratorTests>
-        {
-            MethodName = "GeneratedData_Method",
-            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method",
-            FilePath = "",
-            LineNumber = 12,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
+            methodName: "GeneratedData_Method",
+            fullyQualifiedName: "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method",
+            filePath: "",
+            lineNumber: 12,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>(),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataSourceGeneratorTests>
-        {
-            MethodName = "GeneratedData_Method2",
-            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method2",
-            FilePath = "",
-            LineNumber = 18,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
+            methodName: "GeneratedData_Method2",
+            fullyQualifiedName: "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method2",
+            filePath: "",
+            lineNumber: 18,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DataSourceGeneratorTests>
-        {
-            MethodName = "GeneratedData_Method3",
-            FullyQualifiedName = "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method3",
-            FilePath = "",
-            LineNumber = 24,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_2,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DataSourceGeneratorTests>(
+            methodName: "GeneratedData_Method3",
+            fullyQualifiedName: "TUnit.TestProject.DataSourceGeneratorTests.GeneratedData_Method3",
+            filePath: "",
+            lineNumber: 24,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
     new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
 },
-        },
+            methodMetadata: __mm_2,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 2,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

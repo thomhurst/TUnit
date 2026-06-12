@@ -75,139 +75,45 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>
-        {
-            MethodName = "MyTest",
-            FullyQualifiedName = "TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest",
-            FilePath = "",
-            LineNumber = 12,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests>(
+            methodName: "MyTest",
+            fullyQualifiedName: "TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.MyTest",
+            filePath: "",
+            lineNumber: 12,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("T")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T();
-                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.T()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("FuncT")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT();
-                yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.FuncT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.EnumerableFuncT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("ArrayT")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayT()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests.ArrayFuncT()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

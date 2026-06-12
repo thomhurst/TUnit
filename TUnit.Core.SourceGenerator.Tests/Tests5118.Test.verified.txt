@@ -71,42 +71,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>
-        {
-            MethodName = "TestWithAsyncComplexData",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests.TestWithAsyncComplexData",
-            FilePath = "",
-            LineNumber = 22,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests>(
+            methodName: "TestWithAsyncComplexData",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._5118.AsyncClassMethodDataSourceTests.TestWithAsyncComplexData",
+            filePath: "",
+            lineNumber: 22,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetAsyncTestData")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._5118.AsyncTestDataSources.GetAsyncTestData();
-                await foreach (var item in result)
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromAsyncEnumerable(static () => global::TUnit.TestProject.Bugs._5118.AsyncTestDataSources.GetAsyncTestData()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

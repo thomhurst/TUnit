@@ -169,7 +169,13 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
             .ScrubFilePaths()
             .ScrubLinesContaining("StartColumnNumber = ")
             .ScrubLinesContaining("EndLineNumber = ")
-            .ScrubLinesContaining("EndColumnNumber = ");
+            .ScrubLinesContaining("EndColumnNumber = ")
+            // Named-argument forms emitted at TestEntryFactory.Create call sites — these lines
+            // are also omitted entirely when the value is zero, which combined with this scrubbing
+            // keeps snapshots stable across Roslyn versions that report different column spans.
+            .ScrubLinesContaining("startColumnNumber: ")
+            .ScrubLinesContaining("endLineNumber: ")
+            .ScrubLinesContaining("endColumnNumber: ");
 
         if (runTestOptions.VerifyConfigurator != null)
         {

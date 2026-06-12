@@ -27,6 +27,9 @@ internal class Bugs2971NullableTypeTest : TestsBase
                 .ScrubLinesContaining("StartColumnNumber = ")
                 .ScrubLinesContaining("EndLineNumber = ")
                 .ScrubLinesContaining("EndColumnNumber = ")
+                .ScrubLinesContaining("startColumnNumber: ")
+                .ScrubLinesContaining("endLineNumber: ")
+                .ScrubLinesContaining("endColumnNumber: ")
                 .UniqueForTargetFrameworkAndVersion();
         });
 

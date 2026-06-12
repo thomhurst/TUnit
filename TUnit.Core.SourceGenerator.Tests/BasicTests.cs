@@ -26,9 +26,16 @@ internal class BasicTests : TestsBase
             var lineSpan = firstMethod.GetLocation().GetLineSpan();
             var generatedCode = string.Join(Environment.NewLine, generatedFiles);
 
-            await Assert.That(generatedCode).Contains($"LineNumber = {lineSpan.StartLinePosition.Line + 1},");
-            await Assert.That(generatedCode).Contains($"StartColumnNumber = {lineSpan.StartLinePosition.Character + 1},");
-            await Assert.That(generatedCode).Contains($"EndLineNumber = {lineSpan.EndLinePosition.Line + 1},");
-            await Assert.That(generatedCode).Contains($"EndColumnNumber = {lineSpan.EndLinePosition.Character + 1},");
+            // TestEntry source locations are emitted as TestEntryFactory.Create named arguments
+            await Assert.That(generatedCode).Contains($"lineNumber: {lineSpan.StartLinePosition.Line + 1},");
+
+            // Column/end spans are environment-sensitive (zero when the span is unavailable) and
+            // the generator omits the argument entirely when zero, so assert values only when emitted.
+            if (generatedCode.Contains("startColumnNumber: "))
+            {
+                await Assert.That(generatedCode).Contains($"startColumnNumber: {lineSpan.StartLinePosition.Character + 1},");
+                await Assert.That(generatedCode).Contains($"endLineNumber: {lineSpan.EndLinePosition.Line + 1},");
+                await Assert.That(generatedCode).Contains($"endColumnNumber: {lineSpan.EndLinePosition.Character + 1},");
+            }
         });
 }

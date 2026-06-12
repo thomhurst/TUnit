@@ -75,71 +75,29 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "value3", new g
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>
-        {
-            MethodName = "DataSource_TupleMethod",
-            FullyQualifiedName = "TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests>(
+            methodName: "DataSource_TupleMethod",
+            fullyQualifiedName: "TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.DataSource_TupleMethod",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.TupleMethod()),
     },
     new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests.NamedTupleMethod()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

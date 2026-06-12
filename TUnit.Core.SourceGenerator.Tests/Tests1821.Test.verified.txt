@@ -99,58 +99,46 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "value", new 
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1821.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1821.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1821.Tests>
-        {
-            MethodName = "MethodDataSource",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1821.Tests.MethodDataSource",
-            FilePath = "",
-            LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1821.Tests>(
+            methodName: "MethodDataSource",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1821.Tests.MethodDataSource",
+            filePath: "",
+            lineNumber: 9,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.InstanceMethodDataSourceAttribute("DataSource"),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1821.Tests>
-        {
-            MethodName = "MatrixDataSource",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1821.Tests.MatrixDataSource",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1821.Tests>(
+            methodName: "MatrixDataSource",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1821.Tests.MatrixDataSource",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>(),
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

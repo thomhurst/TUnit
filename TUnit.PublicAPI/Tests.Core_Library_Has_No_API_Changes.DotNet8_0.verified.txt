@@ -1540,6 +1540,33 @@ namespace
         public new static .TestDiscoveryContext? Current { get; }
         public void AddTests(.<.TestContext> tests) { }
     }
+    public static class TestEntryFactory
+    {
+        public static .TestEntry<T> Create<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(
+                    string methodName,
+                    string fullyQualifiedName,
+                    string filePath,
+                    int lineNumber,
+                    .MethodMetadata methodMetadata,
+                    <[], object?[], T> createInstance,
+                    <T, int, object?[], .CancellationToken, .> invokeBody,
+                    int methodIndex,
+                    <int, []> createAttributes,
+                    int attributeGroupIndex,
+                    int startColumnNumber = 0,
+                    int endLineNumber = 0,
+                    int endColumnNumber = 0,
+                    bool hasDataSource = false,
+                    int repeatCount = 0,
+                    string[]? categories = null,
+                    string[]? properties = null,
+                    string[]? dependsOn = null,
+                    .TestDependency[]? dependencies = null,
+                    .IDataSourceAttribute[]? testDataSources = null,
+                    .IDataSourceAttribute[]? classDataSources = null,
+                    .InjectableProperty[]? injectableProperties = null)
+            where T :  class { }
+    }
     public readonly struct TestEntryFilterData
     {
         public required string[] Categories { get; init; }
@@ -2215,6 +2242,29 @@ namespace .Helpers
         public static .<object?[]> ConvertToObjectArrays(object? data) { }
         public static object?[] UnwrapTuple(. tuple) { }
         public static .<.<object?[]>> WrapTaskEnumerableAsObjectArrays<T>(.<.<T>> task) { }
+    }
+    public static class DataSourceFactories
+    {
+        [.(typeof(..<FromAsyncEnumerable>d__4<T>))]
+        public static .<<.<object?[]?>>> FromAsyncEnumerable<T>(<.<T>> invoke) { }
+        [.(typeof(..<FromEnumerable>d__1))]
+        public static .<<.<object?[]?>>> FromEnumerable(<object?> invoke) { }
+        [.(typeof(..<FromInstanceAsyncEnumerable>d__9<T>))]
+        public static .<<.<object?[]?>>> FromInstanceAsyncEnumerable<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
+        [.(typeof(..<FromInstanceEnumerable>d__6))]
+        public static .<<.<object?[]?>>> FromInstanceEnumerable(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
+        [.(typeof(..<FromInstanceTask>d__7<T>))]
+        public static .<<.<object?[]?>>> FromInstanceTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
+        [.(typeof(..<FromInstanceValue>d__5))]
+        public static .<<.<object?[]?>>> FromInstanceValue(.DataGeneratorMetadata dataGeneratorMetadata, <object, object?> invoke) { }
+        [.(typeof(..<FromInstanceValueTask>d__8<T>))]
+        public static .<<.<object?[]?>>> FromInstanceValueTask<T>(.DataGeneratorMetadata dataGeneratorMetadata, <object, .<T>> invoke) { }
+        [.(typeof(..<FromTask>d__2<T>))]
+        public static .<<.<object?[]?>>> FromTask<T>(<.<T>> invoke) { }
+        [.(typeof(..<FromValue>d__0))]
+        public static .<<.<object?[]?>>> FromValue(<object?> invoke) { }
+        [.(typeof(..<FromValueTask>d__3<T?>?))]
+        public static .<<.<object?[]?>>> FromValueTask<T>(<.<T>> invoke) { }
     }
     public static class DataSourceHelpers
     {

@@ -97,54 +97,42 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-        {
-            MethodName = "Explicit",
-            FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
+            methodName: "Explicit",
+            fullyQualifiedName: "TUnit.TestProject.ArgumentWithImplicitConverterTests.Explicit",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>
-        {
-            MethodName = "Implicit",
-            FullyQualifiedName = "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
-            FilePath = "",
-            LineNumber = 17,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ArgumentWithImplicitConverterTests>(
+            methodName: "Implicit",
+            fullyQualifiedName: "TUnit.TestProject.ArgumentWithImplicitConverterTests.Implicit",
+            filePath: "",
+            lineNumber: 17,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
