@@ -173,15 +173,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestBuilderContext.Current = testBuilderContext;
 
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
-            ClassConstructorAttribute? classConstructorAttribute = null;
-            foreach (var attr in attributes)
-            {
-                if (attr is ClassConstructorAttribute cca)
-                {
-                    classConstructorAttribute = cca;
-                    break;
-                }
-            }
+            var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
@@ -1605,10 +1597,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Check for ClassConstructor attribute and set it early if present
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
-        var classConstructorAttribute = attributes
-            .Where(a => a is ClassConstructorAttribute)
-            .Cast<ClassConstructorAttribute>()
-            .FirstOrDefault();
+        var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
 
         if (classConstructorAttribute != null)
         {

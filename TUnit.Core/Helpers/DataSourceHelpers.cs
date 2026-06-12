@@ -23,7 +23,8 @@ public static class DataSourceHelpers
             return null;
         }
 
-        if(value.GetType().IsGenericType && value.GetType().GetGenericTypeDefinition() == typeof(Func<>))
+        var type = value.GetType();
+        if(type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>))
         {
             return ((Delegate)value).DynamicInvoke();
         }
@@ -74,6 +75,18 @@ public static class DataSourceHelpers
         return [() => Task.FromResult<object?>(value)];
     }
 
+#if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    private static object?[] CopyTupleElements(ITuple tuple, int count)
+    {
+        var result = new object?[count];
+        for (var i = 0; i < count; i++)
+        {
+            result[i] = tuple[i];
+        }
+        return result;
+    }
+#endif
+
     /// <summary>
     /// AOT-compatible tuple unwrapping that handles common tuple types without reflection
     /// </summary>
@@ -88,13 +101,7 @@ public static class DataSourceHelpers
         // Try to use ITuple interface first for any ValueTuple type (available in .NET Core 3.0+)
         if (value is ITuple tuple)
         {
-            var length = tuple.Length;
-            var result = new object?[length];
-            for (var i = 0; i < length; i++)
-            {
-                result[i] = tuple[i];
-            }
-            return result;
+            return CopyTupleElements(tuple, tuple.Length);
         }
 #endif
 
@@ -426,30 +433,8 @@ public static class DataSourceHelpers
         // Try to use ITuple interface first for any ValueTuple type
         if (value is ITuple tuple)
         {
-            var result = new List<object?>();
-            var typeIndex = 0;
-
-            for (var i = 0; i < tuple.Length && typeIndex < expectedTypes.Length; i++)
-            {
-                var element = tuple[i];
-                var expectedType = expectedTypes[typeIndex];
-
-                // Check if the expected type is a tuple type
-                if (TupleHelper.IsTupleType(expectedType) && IsTuple(element))
-                {
-                    // Keep nested tuple as-is
-                    result.Add(element);
-                    typeIndex++;
-                }
-                else
-                {
-                    // Add element normally
-                    result.Add(element);
-                    typeIndex++;
-                }
-            }
-
-            return result.ToArray();
+            // Elements are copied 1:1, capped at the expected parameter count
+            return CopyTupleElements(tuple, Math.Min(tuple.Length, expectedTypes.Length));
         }
 #endif
 
