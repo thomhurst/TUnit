@@ -95,50 +95,38 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(float), "d", new globa
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>
-        {
-            MethodName = "Double_SpecialConsts",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Double_SpecialConsts",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2085.Tests>(
+            methodName: "Double_SpecialConsts",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2085.Tests.Double_SpecialConsts",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2085.Tests>
-        {
-            MethodName = "Float_SpecialConsts",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2085.Tests.Float_SpecialConsts",
-            FilePath = "",
-            LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2085.Tests>(
+            methodName: "Float_SpecialConsts",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2085.Tests.Float_SpecialConsts",
+            filePath: "",
+            lineNumber: 15,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

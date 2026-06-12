@@ -62,24 +62,17 @@ internal static class TUnit_TestProject_Bugs__2971_Tests__TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2971.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2971.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2971.Tests>
-        {
-            MethodName = "SimpleTest",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2971.Tests.SimpleTest",
-            FilePath = "",
-            LineNumber = 19,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2971.Tests>(
+            methodName: "SimpleTest",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2971.Tests.SimpleTest",
+            filePath: "",
+            lineNumber: 19,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

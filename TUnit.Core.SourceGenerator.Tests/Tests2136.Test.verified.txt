@@ -146,116 +146,86 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "expected", n
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
-        {
-            MethodName = "GenericArgumentsTest<bool>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<bool>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
+            methodName: "GenericArgumentsTest<bool>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<bool>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(true, "True"),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
-        {
-            MethodName = "GenericArgumentsTest<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<int>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
+            methodName: "GenericArgumentsTest<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<int>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1, "1"),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
-        {
-            MethodName = "GenericArgumentsTest<double>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<double>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 2,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
+            methodName: "GenericArgumentsTest<double>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<double>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
-        {
-            MethodName = "GenericArgumentsTest<string>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<string>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 3,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 3,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 2,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 2),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
+            methodName: "GenericArgumentsTest<string>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<string>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._2136.Tests>
-        {
-            MethodName = "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 4,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 4,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 3,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 3),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._2136.Tests>(
+            methodName: "GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._2136.Tests.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 4,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 4),
     };
 }
 internal static partial class TUnit_TestRegistration

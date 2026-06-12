@@ -80,52 +80,40 @@ internal static class TUnit_TestProject_ClassDataSourceDrivenTests2__TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
-        {
-            MethodName = "Base_Derived1",
-            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived1",
-            FilePath = "",
-            LineNumber = 12,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(
+            methodName: "Base_Derived1",
+            fullyQualifiedName: "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived1",
+            filePath: "",
+            lineNumber: 12,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTests2>
-        {
-            MethodName = "Base_Derived2",
-            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived2",
-            FilePath = "",
-            LineNumber = 18,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTests2>(
+            methodName: "Base_Derived2",
+            fullyQualifiedName: "TUnit.TestProject.ClassDataSourceDrivenTests2.Base_Derived2",
+            filePath: "",
+            lineNumber: 18,
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived1>(),
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Derived2>(),
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

@@ -231,297 +231,141 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "DefaultTest",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
-            FilePath = "",
-            LineNumber = 14,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "DefaultTest",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DefaultTest",
+            filePath: "",
+            lineNumber: 14,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "BasicTest",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
-            FilePath = "",
-            LineNumber = 21,
-            Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 1,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "BasicTest",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.BasicTest",
+            filePath: "",
+            lineNumber: 21,
+            categories: new string[] { "Blah", "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "InheritedTimeoutAttribute",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
-            FilePath = "",
-            LineNumber = 30,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_2,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 2,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 1),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "InheritedTimeoutAttribute",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.InheritedTimeoutAttribute",
+            filePath: "",
+            lineNumber: 30,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "DataTest",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
-            FilePath = "",
-            LineNumber = 38,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_3,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 3,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 3,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_2,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 2,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 2),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "DataTest",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DataTest",
+            filePath: "",
+            lineNumber: 38,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "DataSourceTest",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
-            FilePath = "",
-            LineNumber = 48,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_4,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 4,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 4,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_3,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 3,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 3),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "DataSourceTest",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.DataSourceTest",
+            filePath: "",
+            lineNumber: 48,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutCancellationTokenTests>
-        {
-            MethodName = "MatrixTest",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
-            FilePath = "",
-            LineNumber = 58,
-            Categories = new string[] { "Blah", "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_5,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 5,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 5,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_4,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 4,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 4),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutCancellationTokenTests>(
+            methodName: "MatrixTest",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutCancellationTokenTests.MatrixTest",
+            filePath: "",
+            lineNumber: 58,
+            categories: new string[] { "Blah", "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MatrixDataSourceAttribute(),
 },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutCancellationTokenTests.DataSource()),
     },
 },
-        },
+            methodMetadata: __mm_5,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 5,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 5),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -604,49 +448,26 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TimeoutDoesNotFireTests>
-        {
-            MethodName = "QuickTestDoesNotTimeout",
-            FullyQualifiedName = "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
-            FilePath = "",
-            LineNumber = 86,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TimeoutDoesNotFireTests>(
+            methodName: "QuickTestDoesNotTimeout",
+            fullyQualifiedName: "TUnit.TestProject.TimeoutDoesNotFireTests.QuickTestDoesNotTimeout",
+            filePath: "",
+            lineNumber: 86,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.TimeoutDoesNotFireTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.TimeoutDoesNotFireTests.DataSource()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -729,49 +550,26 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threadi
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.CancellationTokenTriggeredTests>
-        {
-            MethodName = "CancellationTokenIsTriggered",
-            FullyQualifiedName = "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
-            FilePath = "",
-            LineNumber = 106,
-            Categories = new string[] { "Timeout Cancellation Token Tests" },
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.CancellationTokenTriggeredTests>(
+            methodName: "CancellationTokenIsTriggered",
+            fullyQualifiedName: "TUnit.TestProject.CancellationTokenTriggeredTests.CancellationTokenIsTriggered",
+            filePath: "",
+            lineNumber: 106,
+            categories: new string[] { "Timeout Cancellation Token Tests" },
+            hasDataSource: true,
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.CancellationTokenTriggeredTests.DataSource();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.CancellationTokenTriggeredTests.DataSource()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

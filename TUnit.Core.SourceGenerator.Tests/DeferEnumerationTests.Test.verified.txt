@@ -102,94 +102,47 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>
-        {
-            MethodName = "Deferred",
-            FullyQualifiedName = "TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.Deferred",
-            FilePath = "",
-            LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>(
+            methodName: "Deferred",
+            fullyQualifiedName: "TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.Deferred",
+            filePath: "",
+            lineNumber: 9,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TenValues")
     {
         DeferEnumeration = true,
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>
-        {
-            MethodName = "DeferredWithRepeat",
-            FullyQualifiedName = "TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.DeferredWithRepeat",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 2,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests>(
+            methodName: "DeferredWithRepeat",
+            fullyQualifiedName: "TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.DeferredWithRepeat",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            repeatCount: 2,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TenValues")
     {
         DeferEnumeration = true,
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.DeferEnumerationTests.DeferEnumerationTests.TenValues()),
     },
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration

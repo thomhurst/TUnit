@@ -120,24 +120,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>
-        {
-            MethodName = "TryParse_InvalidString_ReturnsFailure",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_InvalidString_ReturnsFailure",
-            FilePath = "",
-            LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
+            methodName: "TryParse_InvalidString_ReturnsFailure",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1304.Tests.TryParse_InvalidString_ReturnsFailure",
+            filePath: "",
+            lineNumber: 9,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("\"2c48c152-7cb7-4f51-8f01-704454f36e60\""),
     new global::TUnit.Core.ArgumentsAttribute("invalidNotAGui"),
@@ -145,25 +134,19 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
     new global::TUnit.Core.ArgumentsAttribute(" "),
     new global::TUnit.Core.ArgumentsAttribute(null),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>
-        {
-            MethodName = "Parse_InvalidString_ThrowsException",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.Parse_InvalidString_ThrowsException",
-            FilePath = "",
-            LineNumber = 26,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
+            methodName: "Parse_InvalidString_ThrowsException",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1304.Tests.Parse_InvalidString_ThrowsException",
+            filePath: "",
+            lineNumber: 26,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("\"2c48c152-7cb7-4f51-8f01-704454f36e60\""),
     new global::TUnit.Core.ArgumentsAttribute("invalidNotAGui"),
@@ -171,30 +154,29 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
     new global::TUnit.Core.ArgumentsAttribute(" "),
     new global::TUnit.Core.ArgumentsAttribute(null),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1304.Tests>
-        {
-            MethodName = "TryParse_ValidString_ReturnsAccountId",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1304.Tests.TryParse_ValidString_ReturnsAccountId",
-            FilePath = "",
-            LineNumber = 38,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_2,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1304.Tests>(
+            methodName: "TryParse_ValidString_ReturnsAccountId",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1304.Tests.TryParse_ValidString_ReturnsAccountId",
+            filePath: "",
+            lineNumber: 38,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("2c48c152-7cb7-4f51-8f01-704454f36e60"),
     new global::TUnit.Core.ArgumentsAttribute("00000000-0000-0000-0000-000000000000"),
 },
-        },
+            methodMetadata: __mm_2,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 2,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

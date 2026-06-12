@@ -93,30 +93,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.BaseClass>
-        {
-            MethodName = "Test",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.BaseClass.Test",
-            FilePath = "",
-            LineNumber = 11,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1924.None.BaseClass>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1924.None.BaseClass.Test",
+            filePath: "",
+            lineNumber: 11,
+            hasDataSource: true,
+            repeatCount: 10,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -193,30 +188,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests>
-        {
-            MethodName = "Test",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests.Test",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1924.None.Tests>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1924.None.Tests.Test",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            repeatCount: 10,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -293,30 +283,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests2>
-        {
-            MethodName = "Test",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests2.Test",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1924.None.Tests2>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1924.None.Tests2.Test",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            repeatCount: 10,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -393,30 +378,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._1924.None.Tests3>
-        {
-            MethodName = "Test",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._1924.None.Tests3.Test",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 10,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._1924.None.Tests3>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._1924.None.Tests3.Test",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            repeatCount: 10,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
     new global::TUnit.Core.ArgumentsAttribute(2),
     new global::TUnit.Core.ArgumentsAttribute(3),
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

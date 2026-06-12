@@ -211,307 +211,139 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_SingleValue",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_SingleValue",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_SingleValue",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_SingleValue",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethod()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_Tuples",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Tuples",
-            FilePath = "",
-            LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_Tuples",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Tuples",
+            filePath: "",
+            lineNumber: 15,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithTuples")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithTuples()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_Enumerable",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Enumerable",
-            FilePath = "",
-            LineNumber = 23,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_2,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_Enumerable",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Enumerable",
+            filePath: "",
+            lineNumber: 23,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncEnumerableDataMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncEnumerableDataMethod()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_Func",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Func",
-            FilePath = "",
-            LineNumber = 30,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_3,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 3,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_2,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 2,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_Func",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_Func",
+            filePath: "",
+            lineNumber: 30,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncFuncDataMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncFuncDataMethod()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_WithArguments",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_WithArguments",
-            FilePath = "",
-            LineNumber = 37,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_4,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 4,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_3,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 3,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_WithArguments",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_WithArguments",
+            filePath: "",
+            lineNumber: 37,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithArgs")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncDataMethodWithArgs()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "AsyncMethodDataSource_ExternalClass",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_ExternalClass",
-            FilePath = "",
-            LineNumber = 44,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_5,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 5,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_4,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 4,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "AsyncMethodDataSource_ExternalClass",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.AsyncMethodDataSource_ExternalClass",
+            filePath: "",
+            lineNumber: 44,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.AsyncExternalDataSource), "GetData")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncExternalDataSource.GetData();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncExternalDataSource.GetData()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>
-        {
-            MethodName = "ValueTaskMethodDataSource_SingleValue",
-            FullyQualifiedName = "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskMethodDataSource_SingleValue",
-            FilePath = "",
-            LineNumber = 51,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_6,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 6,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_5,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 5,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests>(
+            methodName: "ValueTaskMethodDataSource_SingleValue",
+            fullyQualifiedName: "TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskMethodDataSource_SingleValue",
+            filePath: "",
+            lineNumber: 51,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("ValueTaskDataMethod")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests.ValueTaskDataMethod()),
     },
 },
-        },
+            methodMetadata: __mm_6,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 6,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

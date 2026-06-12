@@ -98,24 +98,13 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>
-        {
-            MethodName = "TypedArguments",
-            FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.TypedArguments",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ExpectedArgumentTypeTests>(
+            methodName: "TypedArguments",
+            fullyQualifiedName: "TUnit.TestProject.ExpectedArgumentTypeTests.TypedArguments",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(0d, typeof(double)),
     new global::TUnit.Core.ArgumentsAttribute(0f, typeof(float)),
@@ -131,25 +120,19 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
     new global::TUnit.Core.ArgumentsAttribute((ulong)0, typeof(ulong)),
     new global::TUnit.Core.ArgumentsAttribute(0UL, typeof(ulong)),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ExpectedArgumentTypeTests>
-        {
-            MethodName = "EnumTypes",
-            FullyQualifiedName = "TUnit.TestProject.ExpectedArgumentTypeTests.EnumTypes",
-            FilePath = "",
-            LineNumber = 25,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ExpectedArgumentTypeTests>(
+            methodName: "EnumTypes",
+            fullyQualifiedName: "TUnit.TestProject.ExpectedArgumentTypeTests.EnumTypes",
+            filePath: "",
+            lineNumber: 25,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.ByteEnum.Default, typeof(global::TUnit.TestProject.ByteEnum), typeof(byte)),
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.SByteEnum.Default, typeof(global::TUnit.TestProject.SByteEnum), typeof(sbyte)),
@@ -160,7 +143,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Type), 
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int64Enum.Default, typeof(global::TUnit.TestProject.Int64Enum), typeof(long)),
     new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt64Enum.Default, typeof(global::TUnit.TestProject.UInt64Enum), typeof(ulong)),
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

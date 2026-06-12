@@ -47,24 +47,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "Should_Create_Instance",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeA>.Should_Create_Instance",
-            FilePath = "",
-            LineNumber = 35,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "Should_Create_Instance",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeA>.Should_Create_Instance",
+            filePath: "",
+            lineNumber: 35,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -93,24 +86,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassNoDataSource_T_Sh
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "Should_Create_Instance",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeB>.Should_Create_Instance",
-            FilePath = "",
-            LineNumber = 35,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "Should_Create_Instance",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassNoDataSource<TypeB>.Should_Create_Instance",
+            filePath: "",
+            lineNumber: 35,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -178,49 +164,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "Should_Have_Number",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeA>.Should_Have_Number",
-            FilePath = "",
-            LineNumber = 59,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "Should_Have_Number",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeA>.Should_Have_Number",
+            filePath: "",
+            lineNumber: 59,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>.GetNumbers();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>.GetNumbers()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -250,49 +212,25 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new gl
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "Should_Have_Number",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeB>.Should_Have_Number",
-            FilePath = "",
-            LineNumber = 59,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "Should_Have_Number",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<TypeB>.Should_Have_Number",
+            filePath: "",
+            lineNumber: 59,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetNumbers")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>.GetNumbers();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassWithMethodDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>.GetNumbers()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -417,60 +355,39 @@ internal static class TUnit_TestProject_Bugs__4431_NonGenericClassWithGenericMet
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>
-        {
-            MethodName = "GenericMethod_Should_Work<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<int>",
-            FilePath = "",
-            LineNumber = 74,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>
-        {
-            MethodName = "GenericMethod_Should_Work<string>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<string>",
-            FilePath = "",
-            LineNumber = 74,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>
-        {
-            MethodName = "GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
-            FilePath = "",
-            LineNumber = 74,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 2,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
+            methodName: "GenericMethod_Should_Work<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<int>",
+            filePath: "",
+            lineNumber: 74,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
+            methodName: "GenericMethod_Should_Work<string>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<string>",
+            filePath: "",
+            lineNumber: 74,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod>(
+            methodName: "GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethod.GenericMethod_Should_Work<global::TUnit.TestProject.Bugs._4431.TypeA>",
+            filePath: "",
+            lineNumber: 74,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 2,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 2),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -572,92 +489,44 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "input", new 
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>
-        {
-            MethodName = "GenericMethod_With_DataSource<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<int>",
-            FilePath = "",
-            LineNumber = 97,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(
+            methodName: "GenericMethod_With_DataSource<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<int>",
+            filePath: "",
+            lineNumber: 97,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GetStrings();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GetStrings()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>
-        {
-            MethodName = "GenericMethod_With_DataSource<double>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<double>",
-            FilePath = "",
-            LineNumber = 97,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource>(
+            methodName: "GenericMethod_With_DataSource<double>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GenericMethod_With_DataSource<double>",
+            filePath: "",
+            lineNumber: 97,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetStrings")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GetStrings();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.NonGenericClassWithGenericMethodAndDataSource.GetStrings()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -758,42 +627,28 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "BothGeneric_Should_Work<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<int>",
-            FilePath = "",
-            LineNumber = 117,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "BothGeneric_Should_Work<string>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<string>",
-            FilePath = "",
-            LineNumber = 117,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "BothGeneric_Should_Work<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<int>",
+            filePath: "",
+            lineNumber: 117,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "BothGeneric_Should_Work<string>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeA>.BothGeneric_Should_Work<string>",
+            filePath: "",
+            lineNumber: 117,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -863,42 +718,28 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithGenericMethod
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "BothGeneric_Should_Work<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<int>",
-            FilePath = "",
-            LineNumber = 117,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "BothGeneric_Should_Work<string>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<string>",
-            FilePath = "",
-            LineNumber = 117,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 1,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "BothGeneric_Should_Work<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<int>",
+            filePath: "",
+            lineNumber: 117,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "BothGeneric_Should_Work<string>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithGenericMethod<TypeB>.BothGeneric_Should_Work<string>",
+            filePath: "",
+            lineNumber: 117,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 1,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -962,24 +803,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "Should_Have_Label",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeA>.Should_Have_Label",
-            FilePath = "",
-            LineNumber = 144,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "Should_Have_Label",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeA>.Should_Have_Label",
+            filePath: "",
+            lineNumber: 144,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1008,24 +842,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithConstructor_T
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "Should_Have_Label",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeB>.Should_Have_Label",
-            FilePath = "",
-            LineNumber = 144,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "Should_Have_Label",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithConstructor<TypeB>.Should_Have_Label",
+            filePath: "",
+            lineNumber: 144,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -1089,24 +916,17 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>
-        {
-            MethodName = "Should_Handle_Multiple_Type_Parameters",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeA,TypeC>.Should_Handle_Multiple_Type_Parameters",
-            FilePath = "",
-            LineNumber = 160,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeA, global::TUnit.TestProject.Bugs._4431.TypeC>>(
+            methodName: "Should_Handle_Multiple_Type_Parameters",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeA,TypeC>.Should_Handle_Multiple_Type_Parameters",
+            filePath: "",
+            lineNumber: 160,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1135,24 +955,17 @@ internal static class TUnit_TestProject_Bugs__4431_MultipleTypeParameters_T1_T2_
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>
-        {
-            MethodName = "Should_Handle_Multiple_Type_Parameters",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeB,TypeC>.Should_Handle_Multiple_Type_Parameters",
-            FilePath = "",
-            LineNumber = 160,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.MultipleTypeParameters<global::TUnit.TestProject.Bugs._4431.TypeB, global::TUnit.TestProject.Bugs._4431.TypeC>>(
+            methodName: "Should_Handle_Multiple_Type_Parameters",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.MultipleTypeParameters<TypeB,TypeC>.Should_Handle_Multiple_Type_Parameters",
+            filePath: "",
+            lineNumber: 160,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -1216,24 +1029,17 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "Should_Create_From_Base",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeA>.Should_Create_From_Base",
-            FilePath = "",
-            LineNumber = 184,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "Should_Create_From_Base",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeA>.Should_Create_From_Base",
+            filePath: "",
+            lineNumber: 184,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1262,24 +1068,17 @@ internal static class TUnit_TestProject_Bugs__4431_DerivedGenericClass_T_Should_
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "Should_Create_From_Base",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeB>.Should_Create_From_Base",
-            FilePath = "",
-            LineNumber = 184,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.DerivedGenericClass<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "Should_Create_From_Base",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.DerivedGenericClass<TypeB>.Should_Create_From_Base",
+            filePath: "",
+            lineNumber: 184,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -1356,24 +1155,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "Should_Have_DataSource",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeA>.Should_Have_DataSource",
-            FilePath = "",
-            LineNumber = 210,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "Should_Have_DataSource",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeA>.Should_Have_DataSource",
+            filePath: "",
+            lineNumber: 210,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1402,24 +1194,17 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "Should_Have_DataSource",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeB>.Should_Have_DataSource",
-            FilePath = "",
-            LineNumber = 210,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "Should_Have_DataSource",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<TypeB>.Should_Have_DataSource",
+            filePath: "",
+            lineNumber: 210,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration
@@ -1542,92 +1327,44 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "FullyGeneric_With_DataSources<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<int>",
-            FilePath = "",
-            LineNumber = 236,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "FullyGeneric_With_DataSources<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<int>",
+            filePath: "",
+            lineNumber: 236,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>.GetBooleans();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>.GetBooleans()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>
-        {
-            MethodName = "FullyGeneric_With_DataSources<double>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<double>",
-            FilePath = "",
-            LineNumber = 236,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>>(
+            methodName: "FullyGeneric_With_DataSources<double>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeA>.FullyGeneric_With_DataSources<double>",
+            filePath: "",
+            lineNumber: 236,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>.GetBooleans();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeA>.GetBooleans()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
     private static global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1699,92 +1436,44 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "flag", new glo
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "FullyGeneric_With_DataSources<int>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<int>",
-            FilePath = "",
-            LineNumber = 236,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "FullyGeneric_With_DataSources<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<int>",
+            filePath: "",
+            lineNumber: 236,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>.GetBooleans();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>.GetBooleans()),
     },
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>
-        {
-            MethodName = "FullyGeneric_With_DataSources<double>",
-            FullyQualifiedName = "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<double>",
-            FilePath = "",
-            LineNumber = 236,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_1,
-            InvokeBody = __Invoke_1,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_1,
-            AttributeGroupIndex = 1,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>>(
+            methodName: "FullyGeneric_With_DataSources<double>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<TypeB>.FullyGeneric_With_DataSources<double>",
+            filePath: "",
+            lineNumber: 236,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("GetBooleans")
     {
-        Factory = (dataGeneratorMetadata) =>
-        {
-            async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()
-            {
-                var result = global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>.GetBooleans();
-                if (result is global::System.Collections.IEnumerable enumerable && !(result is string))
-                {
-                    foreach (var item in enumerable)
-                    {
-                        yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));
-                    }
-                }
-                else
-                {
-                    yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));
-                }
-            }
-            return Factory();
-        }
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(static () => global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<global::TUnit.TestProject.Bugs._4431.TypeB>.GetBooleans()),
     },
 },
-        },
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 1,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration

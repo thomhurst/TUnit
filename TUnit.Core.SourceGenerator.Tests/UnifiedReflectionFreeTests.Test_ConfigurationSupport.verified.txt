@@ -61,24 +61,17 @@ internal static class TUnit_TestProject_ConfigurationTest__TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConfigurationTest>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConfigurationTest>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ConfigurationTest>
-        {
-            MethodName = "TestWithConfiguration",
-            FullyQualifiedName = "TUnit.TestProject.ConfigurationTest.TestWithConfiguration",
-            FilePath = "",
-            LineNumber = 7,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ConfigurationTest>(
+            methodName: "TestWithConfiguration",
+            fullyQualifiedName: "TUnit.TestProject.ConfigurationTest.TestWithConfiguration",
+            filePath: "",
+            lineNumber: 7,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

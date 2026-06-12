@@ -97,52 +97,40 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::TUnit.TestProj
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
-        {
-            MethodName = "DataSource_Class",
-            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class",
-            FilePath = "",
-            LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(
+            methodName: "DataSource_Class",
+            fullyQualifiedName: "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class",
+            filePath: "",
+            lineNumber: 9,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
 {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>
-        {
-            MethodName = "DataSource_Class_Generic",
-            FullyQualifiedName = "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic",
-            FilePath = "",
-            LineNumber = 16,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed>(
+            methodName: "DataSource_Class_Generic",
+            fullyQualifiedName: "TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed.DataSource_Class_Generic",
+            filePath: "",
+            lineNumber: 16,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>()
 {Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
 },
-        },
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

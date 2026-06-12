@@ -193,138 +193,102 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(uint), "i", new global
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "Int",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Int",
-            FilePath = "",
-            LineNumber = 8,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "Int",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Int",
+            filePath: "",
+            lineNumber: 8,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "Double",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Double",
-            FilePath = "",
-            LineNumber = 15,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "Double",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Double",
+            filePath: "",
+            lineNumber: 15,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1.1),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "Float",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Float",
-            FilePath = "",
-            LineNumber = 22,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_2,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 2,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "Float",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Float",
+            filePath: "",
+            lineNumber: 22,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1.1f),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "Long",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.Long",
-            FilePath = "",
-            LineNumber = 29,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_3,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 3,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_2,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 2,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "Long",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.Long",
+            filePath: "",
+            lineNumber: 29,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1L),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "ULong",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.ULong",
-            FilePath = "",
-            LineNumber = 36,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_4,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 4,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_3,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 3,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "ULong",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.ULong",
+            filePath: "",
+            lineNumber: 36,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1UL),
 },
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.NumberArgumentTests>
-        {
-            MethodName = "UInt",
-            FullyQualifiedName = "TUnit.TestProject.NumberArgumentTests.UInt",
-            FilePath = "",
-            LineNumber = 43,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = true,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_5,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 5,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-            TestDataSources = new global::TUnit.Core.IDataSourceAttribute[]
+            methodMetadata: __mm_4,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 4,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.NumberArgumentTests>(
+            methodName: "UInt",
+            fullyQualifiedName: "TUnit.TestProject.NumberArgumentTests.UInt",
+            filePath: "",
+            lineNumber: 43,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(1U),
 },
-        },
+            methodMetadata: __mm_5,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 5,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
     };
 }
 internal static partial class TUnit_TestRegistration

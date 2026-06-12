@@ -84,42 +84,28 @@ internal static class TUnit_TestProject_TestClass_GenericTestMethod_TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>
-        {
-            MethodName = "GenericTestMethod<int>",
-            FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<int>",
-            FilePath = "",
-            LineNumber = 7,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 0,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.TestClass>
-        {
-            MethodName = "GenericTestMethod<string>",
-            FullyQualifiedName = "TUnit.TestProject.TestClass.GenericTestMethod<string>",
-            FilePath = "",
-            LineNumber = 7,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 0,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance_0,
-            InvokeBody = __Invoke_0,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes_0,
-            AttributeGroupIndex = 1,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TestClass>(
+            methodName: "GenericTestMethod<int>",
+            fullyQualifiedName: "TUnit.TestProject.TestClass.GenericTestMethod<int>",
+            filePath: "",
+            lineNumber: 7,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.TestClass>(
+            methodName: "GenericTestMethod<string>",
+            fullyQualifiedName: "TUnit.TestProject.TestClass.GenericTestMethod<string>",
+            filePath: "",
+            lineNumber: 7,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration

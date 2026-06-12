@@ -84,42 +84,30 @@ internal static class TUnit_TestProject_AssemblyRepeatTests__TestSource
     }
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>[]
     {
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>
-        {
-            MethodName = "TestWithAssemblyRepeat",
-            FullyQualifiedName = "TUnit.TestProject.AssemblyRepeatTests.TestWithAssemblyRepeat",
-            FilePath = "",
-            LineNumber = 9,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 3,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_0,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 0,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 0,
-        },
-        new global::TUnit.Core.TestEntry<global::TUnit.TestProject.AssemblyRepeatTests>
-        {
-            MethodName = "TestWithMethodRepeatOverride",
-            FullyQualifiedName = "TUnit.TestProject.AssemblyRepeatTests.TestWithMethodRepeatOverride",
-            FilePath = "",
-            LineNumber = 14,
-            Categories = global::System.Array.Empty<string>(),
-            Properties = global::System.Array.Empty<string>(),
-            HasDataSource = false,
-            RepeatCount = 1,
-            DependsOn = global::System.Array.Empty<string>(),
-            MethodMetadata = __mm_1,
-            CreateInstance = __CreateInstance,
-            InvokeBody = __Invoke,
-            MethodIndex = 1,
-            CreateAttributes = __Attributes,
-            AttributeGroupIndex = 1,
-        },
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AssemblyRepeatTests>(
+            methodName: "TestWithAssemblyRepeat",
+            fullyQualifiedName: "TUnit.TestProject.AssemblyRepeatTests.TestWithAssemblyRepeat",
+            filePath: "",
+            lineNumber: 9,
+            repeatCount: 3,
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 0,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.AssemblyRepeatTests>(
+            methodName: "TestWithMethodRepeatOverride",
+            fullyQualifiedName: "TUnit.TestProject.AssemblyRepeatTests.TestWithMethodRepeatOverride",
+            filePath: "",
+            lineNumber: 14,
+            repeatCount: 1,
+            methodMetadata: __mm_1,
+            createInstance: __CreateInstance,
+            invokeBody: __Invoke,
+            methodIndex: 1,
+            createAttributes: __Attributes,
+            attributeGroupIndex: 1),
     };
 }
 internal static partial class TUnit_TestRegistration
