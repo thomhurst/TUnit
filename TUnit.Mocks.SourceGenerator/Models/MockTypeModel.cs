@@ -27,6 +27,26 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public bool HasStaticAbstractMembers { get; init; }
 
     /// <summary>
+    /// True for the per-(primary, additional-interface) PAIR model that generates the setup/verify
+    /// extension surface for one additional interface of a multi-type mock. Pair models carry the
+    /// PRIMARY type's identity (<see cref="FullyQualifiedName"/> = T1, so extensions target
+    /// <c>Mock&lt;T1&gt;</c>) but the ADDITIONAL interface's standalone members
+    /// (<see cref="AdditionalInterfaceNames"/> holds that single interface), whose member IDs are
+    /// local ordinals translated to the owning impl's union IDs at runtime via the map the factory
+    /// registers on the engine. Equal pair models from different combos (Mock.Of&lt;T1,T2&gt; and
+    /// Mock.Of&lt;T1,T2,T3&gt;) dedupe in the pipeline, so each pair surface is emitted exactly once.
+    /// </summary>
+    public bool IsSecondaryMemberSurface { get; init; }
+
+    /// <summary>
+    /// On multi-type models only: one entry per <see cref="AdditionalInterfaceNames"/> element,
+    /// mapping that interface's standalone member IDs (the pair surface's local ordinals,
+    /// indexed positionally) to this combo's union member IDs (-1 = unmapped). Emitted into the
+    /// factory as <c>engine.RegisterSecondaryInterface(typeof(Tn), map)</c>.
+    /// </summary>
+    public EquatableArray<EquatableArray<int>> SecondaryMemberIdMaps { get; init; } = EquatableArray<EquatableArray<int>>.Empty;
+
+    /// <summary>
     /// True if the mocked type's effective accessibility is public (the type itself and all
     /// containing types are public). When false, generated wrapper/extension types must be
     /// declared <c>internal</c> to avoid CS9338/CS0051 inconsistent accessibility errors.
@@ -64,7 +84,9 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && AllInterfaces.Equals(other.AllInterfaces)
             && AdditionalInterfaceNames.Equals(other.AdditionalInterfaceNames)
             && Constructors.Equals(other.Constructors)
-            && HasStaticAbstractMembers == other.HasStaticAbstractMembers;
+            && HasStaticAbstractMembers == other.HasStaticAbstractMembers
+            && IsSecondaryMemberSurface == other.IsSecondaryMemberSurface
+            && SecondaryMemberIdMaps.Equals(other.SecondaryMemberIdMaps);
     }
 
     public override int GetHashCode()
@@ -85,6 +107,8 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + Events.GetHashCode();
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
             hash = hash * 31 + HasStaticAbstractMembers.GetHashCode();
+            hash = hash * 31 + IsSecondaryMemberSurface.GetHashCode();
+            hash = hash * 31 + SecondaryMemberIdMaps.GetHashCode();
             return hash;
         }
     }

@@ -147,7 +147,17 @@ internal static class MockTypeDiscovery
         if (singleTypeModel is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
-        // Build multi-type model (generates impl + factory only)
+        // Transitive auto-mock factories over the primary AND additional interfaces — without
+        // these, members returning user interfaces reference CreateAutoMock factories that are
+        // never generated when only Mock.Of<T1,T2>() appears in the assembly.
+        var visited = new HashSet<string>();
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly, compilation);
+        foreach (var additionalType in additionalTypes)
+        {
+            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(additionalType, visited, maxDepth: 3, compilationAssembly, compilation));
+        }
+
+        // Build multi-type model (generates impl + factory)
         var allTypes = new[] { namedType }.Concat(additionalTypes).ToArray();
         var (methods, properties, events) = MemberDiscovery.DiscoverMembersFromMultipleTypes(allTypes, compilationAssembly, compilation);
 
@@ -176,11 +186,47 @@ internal static class MockTypeDiscovery
             AdditionalInterfaceNames = new EquatableArray<string>(additionalInterfaceNames.MoveToImmutable()),
             Constructors = singleTypeModel.Constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
-            IsPublic = IsEffectivelyPublic(namedType),
+            // The secondary setup extensions surface additional-interface types in public
+            // signatures, so the whole multi model must drop to internal if ANY type is.
+            IsPublic = IsEffectivelyPublic(namedType) && additionalTypes.All(IsEffectivelyPublic),
             UseFallbackNamespace = singleTypeModel.UseFallbackNamespace
         };
 
-        return ImmutableArray.Create(singleTypeModel, multiTypeModel);
+        // Per additional interface: compute the standalone→union member-ID map (registered on the
+        // engine by the factory) and build the pair model that generates the shared setup surface.
+        var surfaceContext = SecondarySurfaceFactory.CreateContext(multiTypeModel, singleTypeModel);
+        var mapsBuilder = ImmutableArray.CreateBuilder<EquatableArray<int>>(additionalTypes.Count);
+        var pairModels = new List<MockTypeModel>();
+        foreach (var additionalType in additionalTypes)
+        {
+            var standalone = BuildSingleTypeModel(additionalType, isPartialMock: false, compilationAssembly, compilation);
+            if (standalone is null)
+            {
+                mapsBuilder.Add(EquatableArray<int>.Empty);
+                continue;
+            }
+
+            mapsBuilder.Add(SecondarySurfaceFactory.ComputeMemberIdMap(standalone, surfaceContext));
+
+            var pairModel = SecondarySurfaceFactory.BuildPairModel(
+                standalone, singleTypeModel, additionalType.GetFullyQualifiedName(), surfaceContext);
+            if (pairModel is not null)
+            {
+                pairModels.Add(pairModel);
+            }
+        }
+
+        multiTypeModel = multiTypeModel with
+        {
+            SecondaryMemberIdMaps = new EquatableArray<EquatableArray<int>>(mapsBuilder.MoveToImmutable())
+        };
+
+        var resultBuilder = ImmutableArray.CreateBuilder<MockTypeModel>(2 + pairModels.Count + transitiveModels.Count);
+        resultBuilder.Add(singleTypeModel);
+        resultBuilder.Add(multiTypeModel);
+        resultBuilder.AddRange(pairModels);
+        resultBuilder.AddRange(transitiveModels);
+        return resultBuilder.MoveToImmutable();
     }
 
     /// <summary>

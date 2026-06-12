@@ -449,7 +449,13 @@ internal static class MockImplBuilder
         var typeParams = GetTypeParameterList(model);
         var constraints = GetConstraintClauses(model);
 
-        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {model.FullyQualifiedName}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
+        var baseTypes = model.FullyQualifiedName;
+        if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            baseTypes += ", " + string.Join(", ", model.AdditionalInterfaceNames);
+        }
+
+        using (writer.Block($"file sealed class {safeName}MockImpl{typeParams} : {baseTypes}, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject{constraints}"))
         {
             writer.AppendLine($"private readonly global::TUnit.Mocks.MockEngine<{mockableType}> _engine;");
             writer.AppendLine();
@@ -459,12 +465,23 @@ internal static class MockImplBuilder
             // Generate constructors that pass through to base
             GeneratePartialConstructors(writer, model, safeName);
 
-            // Methods — skip static abstract (they're in bridge DIMs)
+            // Methods — skip static abstract (they're in bridge DIMs).
+            // Members owned by an additional interface (OwnerTypeIndex >= 1) come from the
+            // interface walk, not the class walk — emit them interface-style ((re-)implementation,
+            // explicit when flagged), never as `override` of a base member that may be
+            // non-virtual or explicitly implemented.
             foreach (var method in model.Methods)
             {
                 if (method.IsStaticAbstract) continue;
                 writer.AppendLine();
-                GeneratePartialMethod(writer, method, model);
+                if (method.OwnerTypeIndex > 0)
+                {
+                    GenerateInterfaceMethod(writer, method, model);
+                }
+                else
+                {
+                    GeneratePartialMethod(writer, method, model);
+                }
             }
 
             // Properties — skip static abstract (they're in bridge DIMs)
@@ -472,7 +489,18 @@ internal static class MockImplBuilder
             {
                 if (prop.IsStaticAbstract) continue;
                 writer.AppendLine();
-                if (prop.IsIndexer)
+                if (prop.OwnerTypeIndex > 0)
+                {
+                    if (prop.IsIndexer)
+                    {
+                        GenerateInterfaceIndexer(writer, prop);
+                    }
+                    else
+                    {
+                        GenerateInterfaceProperty(writer, prop, model);
+                    }
+                }
+                else if (prop.IsIndexer)
                 {
                     GeneratePartialIndexer(writer, prop);
                 }
@@ -487,7 +515,14 @@ internal static class MockImplBuilder
             {
                 if (evt.IsStaticAbstract) continue;
                 writer.AppendLine();
-                GeneratePartialEvent(writer, evt);
+                if (evt.OwnerTypeIndex > 0)
+                {
+                    GenerateEvent(writer, evt);
+                }
+                else
+                {
+                    GeneratePartialEvent(writer, evt);
+                }
             }
 
             // IRaisable.RaiseEvent dispatch
@@ -1666,7 +1701,7 @@ internal static class MockImplBuilder
     /// Strips the global:: prefix and namespace from a fully qualified name,
     /// returning just the type name (sanitized for use in identifiers).
     /// </summary>
-    private static string StripNamespaceFromFqn(string fqn)
+    internal static string StripNamespaceFromFqn(string fqn)
     {
         var name = StripGlobalPrefix(fqn);
 

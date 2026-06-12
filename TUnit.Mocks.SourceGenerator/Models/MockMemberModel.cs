@@ -49,6 +49,14 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string? AutoMockFactoryMethod { get; init; }
 
     /// <summary>
+    /// Which type in a multi-type mock owns this member: 0 = the primary type,
+    /// n = 1-based index into <see cref="MockTypeModel.AdditionalInterfaceNames"/>.
+    /// Always 0 for single-type mocks. Members shared between the primary and an
+    /// additional interface keep the first occurrence (0) — dedup is first-wins.
+    /// </summary>
+    public int OwnerTypeIndex { get; init; }
+
+    /// <summary>
     /// True when the (unwrapped) return type is an interface that has static abstract members
     /// without a most specific implementation. Such types cannot be used as generic type arguments
     /// (CS8920), so the generator must fall back to the void wrapper path.
@@ -96,6 +104,16 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     /// </summary>
     public bool HasRefStructParams => Parameters.Any(p => p.IsRefStruct && p.Direction != ParameterDirection.Out);
 
+    /// <summary>
+    /// True when this property can appear as an extension property on the generated
+    /// <c>Mock&lt;T&gt;</c> setup surface (ref-struct and static-abstract-interface returns can't
+    /// flow through <c>PropertyMockCall&lt;T&gt;</c>; indexers get Item/SetItem methods instead).
+    /// Shared between the members builder and the secondary-surface rename logic so the two
+    /// definitions of "exposed property" can't drift. Derived — not part of equality.
+    /// </summary>
+    public bool IsConfigurableSurfaceProperty
+        => !IsIndexer && !IsRefStructReturn && !IsReturnTypeStaticAbstractInterface && (HasGetter || HasSetter);
+
     public bool Equals(MockMemberModel? other)
     {
         if (other is null) return false;
@@ -128,6 +146,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
             && AutoMockFactoryMethod == other.AutoMockFactoryMethod
+            && OwnerTypeIndex == other.OwnerTypeIndex
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
             && SpanReturnElementType == other.SpanReturnElementType
             && ObsoleteAttribute == other.ObsoleteAttribute
@@ -149,6 +168,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + GetterAccessModifier.GetHashCode();
             hash = hash * 31 + SetterAccessModifier.GetHashCode();
             hash = hash * 31 + (AutoMockFactoryMethod?.GetHashCode() ?? 0);
+            hash = hash * 31 + OwnerTypeIndex;
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();
