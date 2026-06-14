@@ -24,6 +24,7 @@ public class GetPackageProjectsModule : Module<List<File>>
             Sourcy.DotNet.Projects.TUnit_AspNetCore,
             Sourcy.DotNet.Projects.TUnit_AspNetCore_Core,
             Sourcy.DotNet.Projects.TUnit_Aspire,
+            Sourcy.DotNet.Projects.TUnit_Aspire_Core,
             Sourcy.DotNet.Projects.TUnit_OpenTelemetry,
             Sourcy.DotNet.Projects.TUnit_FsCheck,
             Sourcy.DotNet.Projects.TUnit_Mocks,
