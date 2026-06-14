@@ -88,10 +88,12 @@ public class AsyncVoidAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static IMethodSymbol? GetEnclosingMethod(ISymbol? symbol)
     {
-        // Walk out of nested lambdas/anonymous methods to the real enclosing method.
+        // Walk out of nested lambdas, anonymous methods, and local functions to the
+        // real enclosing method, so a lambda nested inside a local function of a test
+        // is still scoped to that test rather than treating the local function as a boundary.
         while (symbol is IMethodSymbol method)
         {
-            if (method.MethodKind != MethodKind.AnonymousFunction)
+            if (method.MethodKind is not (MethodKind.AnonymousFunction or MethodKind.LocalFunction))
             {
                 return method;
             }

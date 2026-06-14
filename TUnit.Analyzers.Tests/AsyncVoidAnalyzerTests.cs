@@ -247,6 +247,42 @@ public class AsyncVoidAnalyzerTests
     }
 
     [Test]
+    public async Task Async_Void_Lambda_In_Local_Function_In_Test_Raises_Error()
+    {
+        // A local function is not a boundary: a lambda nested inside one within a test
+        // is still scoped to the test and must be flagged. See #6190 review.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    public void Test()
+                    {
+                        void Helper()
+                        {
+                            Action action = {|#0:async () =>
+                            {
+                                await Task.Delay(1);
+                            }|};
+                        }
+
+                        Helper();
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.AsyncVoidMethod)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
     public async Task Async_Void_Hook_Raises_Error()
     {
         await Verifier
