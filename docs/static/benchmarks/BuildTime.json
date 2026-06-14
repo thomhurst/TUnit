@@ -1,43 +1,43 @@
 {
-  "timestamp": "2026-06-07T00:51:01.523Z",
+  "timestamp": "2026-06-14T00:53:32.671Z",
   "category": "BuildTime",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.300",
-    "host": ".NET 10.0.8 (10.0.8, 10.0.826.23019), X64 RyuJIT x86-64-v4"
+    "sdk": ".NET SDK 10.0.301",
+    "host": ".NET 10.0.9 (10.0.9, 10.0.926.27113), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "Build_TUnit",
-      "Version": "1.50.0",
-      "Mean": "969.1 ms",
-      "Error": "19.13 ms",
-      "StdDev": "42.79 ms",
-      "Median": "965.8 ms"
+      "Version": "1.54.0",
+      "Mean": "954.0 ms",
+      "Error": "19.03 ms",
+      "StdDev": "33.32 ms",
+      "Median": "952.6 ms"
     },
     {
       "Method": "Build_NUnit",
       "Version": "4.6.1",
-      "Mean": "899.7 ms",
-      "Error": "15.40 ms",
-      "StdDev": "14.41 ms",
-      "Median": "896.1 ms"
+      "Mean": "919.6 ms",
+      "Error": "16.38 ms",
+      "StdDev": "18.20 ms",
+      "Median": "918.1 ms"
     },
     {
       "Method": "Build_MSTest",
       "Version": "4.2.3",
-      "Mean": "1,039.1 ms",
-      "Error": "20.13 ms",
-      "StdDev": "19.77 ms",
-      "Median": "1,038.9 ms"
+      "Mean": "1,061.5 ms",
+      "Error": "21.03 ms",
+      "StdDev": "46.60 ms",
+      "Median": "1,048.9 ms"
     },
     {
       "Method": "Build_xUnit3",
       "Version": "3.2.2",
-      "Mean": "888.5 ms",
-      "Error": "17.53 ms",
-      "StdDev": "18.76 ms",
-      "Median": "889.2 ms"
+      "Mean": "935.1 ms",
+      "Error": "11.39 ms",
+      "StdDev": "10.66 ms",
+      "Median": "935.9 ms"
     }
   ]
 }
