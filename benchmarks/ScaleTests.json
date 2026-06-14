@@ -1,51 +1,51 @@
 {
-  "timestamp": "2026-06-07T00:51:01.522Z",
+  "timestamp": "2026-06-14T00:53:32.670Z",
   "category": "ScaleTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.300",
-    "host": ".NET 10.0.8 (10.0.8, 10.0.826.23019), X64 RyuJIT x86-64-v4"
+    "sdk": ".NET SDK 10.0.301",
+    "host": ".NET 10.0.9 (10.0.9, 10.0.926.27113), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.50.0",
-      "Mean": "357.70 ms",
-      "Error": "8.481 ms",
-      "StdDev": "25.005 ms",
-      "Median": "357.32 ms"
+      "Version": "1.54.0",
+      "Mean": "278.51 ms",
+      "Error": "3.391 ms",
+      "StdDev": "3.006 ms",
+      "Median": "279.06 ms"
     },
     {
       "Method": "NUnit",
       "Version": "4.6.1",
-      "Mean": "587.04 ms",
-      "Error": "11.557 ms",
-      "StdDev": "17.298 ms",
-      "Median": "588.62 ms"
+      "Mean": "514.73 ms",
+      "Error": "10.145 ms",
+      "StdDev": "14.549 ms",
+      "Median": "514.84 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.2.3",
-      "Mean": "574.83 ms",
-      "Error": "11.473 ms",
-      "StdDev": "21.266 ms",
-      "Median": "572.35 ms"
+      "Mean": "520.92 ms",
+      "Error": "10.122 ms",
+      "StdDev": "11.250 ms",
+      "Median": "523.50 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "3.2.2",
-      "Mean": "568.45 ms",
-      "Error": "11.309 ms",
-      "StdDev": "25.756 ms",
-      "Median": "569.57 ms"
+      "Mean": "521.52 ms",
+      "Error": "10.187 ms",
+      "StdDev": "13.600 ms",
+      "Median": "516.36 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.50.0",
-      "Mean": "20.60 ms",
-      "Error": "0.662 ms",
-      "StdDev": "1.921 ms",
-      "Median": "20.50 ms"
+      "Version": "1.54.0",
+      "Mean": "17.79 ms",
+      "Error": "0.402 ms",
+      "StdDev": "1.127 ms",
+      "Median": "17.52 ms"
     }
   ]
 }
