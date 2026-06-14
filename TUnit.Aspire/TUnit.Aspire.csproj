@@ -7,21 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
-  </ItemGroup>
-
-  <!-- Aspire is server-side only — remove browser platform support from Library.props -->
-  <ItemGroup>
-    <SupportedPlatform Remove="browser" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
-    <ProjectReference Include="..\TUnit.OpenTelemetry\TUnit.OpenTelemetry.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Testing" />
+    <ProjectReference Include="..\TUnit.Aspire.Core\TUnit.Aspire.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

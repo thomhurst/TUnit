@@ -8,6 +8,16 @@ TUnit provides first-class support for [Aspire](https://aspire.dev/get-started/w
 dotnet add package TUnit.Aspire
 ```
 
+:::tip Shared test-infrastructure libraries
+
+`TUnit.Aspire` references the `TUnit` metapackage, which marks the consuming project as a test project. If you are building a **shared library** of common testing infrastructure (one that is referenced by your actual test projects rather than run directly), reference `TUnit.Aspire.Core` instead — it depends only on `TUnit.Core` and won't flag the project as a test project. Your test projects then bring in `TUnit.Aspire` (or `TUnit` directly) themselves.
+
+```bash
+dotnet add package TUnit.Aspire.Core
+```
+
+:::
+
 :::info Prerequisites
 
 - An Aspire AppHost project in your solution
