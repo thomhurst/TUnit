@@ -188,4 +188,86 @@ public class AsyncVoidAnalyzerTests
                     .WithLocation(0)
             );
     }
+
+    [Test]
+    public async Task Async_Void_NonTest_Method_Raises_No_Error()
+    {
+        // An async void method that is not a test or hook (e.g. an event handler)
+        // must not be flagged just because the project references TUnit. See #6190.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public event EventHandler? Ticked;
+
+                    public void Setup()
+                    {
+                        Ticked += OnTicked;
+                    }
+
+                    private async void OnTicked(object? sender, EventArgs e)
+                    {
+                        await Task.Delay(1);
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Async_Void_EventHandler_Lambda_In_NonTest_Method_Raises_No_Error()
+    {
+        // An async void lambda subscribed to an event from a non-test method is legitimate.
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    public event EventHandler? Ticked;
+
+                    public void Setup()
+                    {
+                        Ticked += async (sender, e) =>
+                        {
+                            await Task.Delay(1);
+                        };
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Async_Void_Hook_Raises_Error()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.Threading.Tasks;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Before(HookType.Test)]
+                    public async void {|#0:Setup|}()
+                    {
+                        await Task.Delay(1);
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.AsyncVoidMethod)
+                    .WithLocation(0)
+            );
+    }
 }
