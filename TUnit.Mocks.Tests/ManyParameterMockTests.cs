@@ -55,6 +55,15 @@ public interface IBoundarySeventeen
         int _10, int _11, int _12, int _13, int _14, int _15, int _16, int _17);
 }
 
+public interface ILongMethodSignatures
+{
+    // The exact shape from issue #6254: an async method with 20 reference-type parameters.
+    Task SomeMethod(string _1, string _2, string _3, string _4, string _5,
+        string _6, string _7, string _8, string _9, string _10,
+        string _11, string _12, string _13, string _14, string _15,
+        string _16, string _17, string _18, string _19, string _20);
+}
+
 public interface IExtremeThirtyTwo
 {
     Task<int> Big(int _1, int _2, int _3, int _4, int _5, int _6, int _7, int _8,
@@ -206,6 +215,25 @@ public class ManyParameterMockTests
         mock.Sum(AnyArgs()).WasCalled(Times.Once);
     }
 
+    [Test]
+    public async Task IssueRepro_TwentyStringParams_UntypedSurfaceWorks()
+    {
+        // Direct regression for the issue #6254 repro shape. No setup: the call completes with the
+        // default (completed) task. An untyped Throws on a past-limit method is also exercised here
+        // (the typed Throws overload is absent above the arity limit).
+        var mock = ILongMethodSignatures.Mock();
+
+        await mock.Object.SomeMethod("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+            "11", "12", "13", "14", "15", "16", "17", "18", "19", "20");
+        mock.SomeMethod(AnyArgs()).WasCalled(Times.Once);
+
+        mock.SomeMethod(AnyArgs()).Throws(new InvalidOperationException("boom"));
+        await Assert.That(async () => await mock.Object.SomeMethod(
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"))
+            .Throws<InvalidOperationException>();
+    }
+
     #endregion
 
     #region Count: well past the limit
@@ -234,14 +262,18 @@ public class ManyParameterMockTests
         var mock = IMixedTypedTwelve.Mock();
         var widget = new ManyParamWidget("gadget");
 
-        string? capturedString = "unset";
-        int capturedInt = 0;
-        bool capturedBool = false;
+        string? capturedString = null;
+        int capturedInt = default;
+        bool capturedBool = default;
+        double capturedDouble = default;
+        long capturedLong = default;
+        char capturedChar = default;
         ManyParamColor capturedColor = default;
         ManyParamWidget capturedWidget = null!;
         ManyParamMoney capturedMoney = default;
-        string? capturedNullableString = "unset";
-        int? capturedNullableInt = -1;
+        string? capturedNullableString = null;
+        int? capturedNullableInt = null;
+        byte capturedByte = default;
 
         // Typed Callback(Action<string,int,bool,...,string?,int?,byte>). The generator casts each
         // object?[] slot back to its declared type — non-nullable slots use the null-forgiving
@@ -251,11 +283,15 @@ public class ManyParameterMockTests
             capturedString = s;
             capturedInt = i;
             capturedBool = b;
+            capturedDouble = d;
+            capturedLong = l;
+            capturedChar = c;
             capturedColor = col;
             capturedWidget = w;
             capturedMoney = m;
             capturedNullableString = ns;
             capturedNullableInt = ni;
+            capturedByte = bt;
         });
 
         await mock.Object.Build("hello", 42, true, 3.14, 99L, 'z',
@@ -264,11 +300,15 @@ public class ManyParameterMockTests
         await Assert.That(capturedString).IsEqualTo("hello");
         await Assert.That(capturedInt).IsEqualTo(42);
         await Assert.That(capturedBool).IsTrue();
+        await Assert.That(capturedDouble).IsEqualTo(3.14);
+        await Assert.That(capturedLong).IsEqualTo(99L);
+        await Assert.That(capturedChar).IsEqualTo('z');
         await Assert.That(capturedColor).IsEqualTo(ManyParamColor.Blue);
         await Assert.That(capturedWidget).IsSameReferenceAs(widget);
         await Assert.That(capturedMoney.Amount).IsEqualTo(12.5m);
         await Assert.That(capturedNullableString).IsNull();
         await Assert.That(capturedNullableInt).IsNull();
+        await Assert.That(capturedByte).IsEqualTo((byte)7);
     }
 
     [Test]
@@ -435,8 +475,10 @@ public class ManyParameterMockTests
         var mock = IBoundarySeventeen.Mock();
         var svc = mock.Object;
 
-        await svc.Sum(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
-        await svc.Sum(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+        for (var call = 0; call < 2; call++)
+        {
+            await svc.Sum(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+        }
 
         mock.Sum(AnyArgs()).WasCalled(Times.Exactly(2));
         mock.Sum(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0).WasNeverCalled();
