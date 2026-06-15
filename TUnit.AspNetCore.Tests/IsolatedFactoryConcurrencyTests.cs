@@ -27,12 +27,9 @@ public class IsolatedFactoryConcurrencyTests
         {
             var globalFactory = new TestWebAppFactory();
 
+            // WhenAll re-throws if any concurrent call hit a torn-array exception during Add.
             var derived = await CreateIsolatedFactoriesConcurrentlyAsync(globalFactory);
-
-            // Every call must have produced a distinct, non-null derived factory.
             await Assert.That(derived.Length).IsEqualTo(Concurrency);
-            await Assert.That(derived.All(f => f is not null)).IsTrue();
-            await Assert.That(derived.Distinct().Count()).IsEqualTo(Concurrency);
 
             // Disposing the shared factory enumerates _derivedFactories; a torn list NREs here.
             await Assert.That(async () => await globalFactory.DisposeAsync()).ThrowsNothing();

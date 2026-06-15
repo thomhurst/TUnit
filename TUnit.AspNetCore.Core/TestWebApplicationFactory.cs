@@ -26,14 +26,11 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     // belong to its own request pipeline vs. a sibling factory's.
     private readonly CorrelationScope _correlationScope = new();
 
-    // Serializes WithWebHostBuilder calls. The shared (e.g. PerTestSession) GlobalFactory
-    // has GetIsolatedFactory invoked from every test's parallel Before(Test) hook, and
-    // WithWebHostBuilder mutates the base factory's internal _derivedFactories List<T>
-    // with no synchronization of its own. Concurrent List.Add tears the backing array
-    // (lost entries / null slots), which surfaces much later as a NullReferenceException
-    // when the GlobalFactory is disposed and enumerates that list. WithWebHostBuilder is
-    // synchronous and the work inside is fast configuration, so a plain lock is enough;
-    // the expensive host build is throttled separately by ServerInitSemaphore.
+    // Serializes WithWebHostBuilder, which mutates the base factory's internal
+    // _derivedFactories List<T> with no synchronization. Concurrent calls (one per
+    // parallel Before(Test) hook on a shared factory) tear the backing array, surfacing
+    // later as a NullReferenceException when the disposed factory enumerates it. The call
+    // is synchronous fast configuration, so a plain lock suffices.
     private readonly object _isolationLock = new();
 
     public WebApplicationFactory<TEntryPoint> GetIsolatedFactory(
