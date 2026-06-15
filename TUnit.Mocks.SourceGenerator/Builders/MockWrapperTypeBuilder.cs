@@ -91,16 +91,7 @@ internal static class MockWrapperTypeBuilder
     {
         var interfaceName = method.ExplicitInterfaceName ?? method.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
-        // When the method is an explicit interface impl on the underlying object,
-        // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
-        // When the member also satisfies other interface slots, cast as well — otherwise
-        // `Object.M()` can be ambiguous (CS0121) where Object's type inherits M() from
-        // multiple interfaces (e.g. a diamond), or could bind to the wrong slot (#6252).
-        var target = method.ExplicitInterfaceName is not null || method.AdditionalExplicitInterfaceNames.Length > 0
-            ? CastTarget(interfaceName)
-            : "Object";
-
-        EmitMethodForward(writer, method, interfaceName, target);
+        EmitMethodForward(writer, method, interfaceName, GetPrimaryTarget(method, interfaceName));
 
         // Additional explicit forwards for distinct interface slots this member also satisfies
         // (base members hidden by `new`, or inherited from multiple interfaces). Each slot needs

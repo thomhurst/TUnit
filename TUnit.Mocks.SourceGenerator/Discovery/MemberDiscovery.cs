@@ -101,14 +101,9 @@ internal static class MemberDiscovery
     private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn)
     {
         var existing = members[index];
-        var ownSlot = existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName;
-        if (ownSlot == interfaceFqn) return;
-        var current = existing.AdditionalExplicitInterfaceNames.AsImmutableArray();
-        if (current.Contains(interfaceFqn)) return;
-        members[index] = existing with
-        {
-            AdditionalExplicitInterfaceNames = new EquatableArray<string>(current.Add(interfaceFqn))
-        };
+        var updated = AppendDistinctSlot(existing.AdditionalExplicitInterfaceNames,
+            existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName, interfaceFqn, out var changed);
+        if (changed) members[index] = existing with { AdditionalExplicitInterfaceNames = updated };
     }
 
     /// <summary>Event counterpart of <see cref="RecordAdditionalWrapperInterface"/>. Locates the
@@ -119,16 +114,26 @@ internal static class MemberDiscovery
         {
             var e = events[i];
             if (e.IsStaticAbstract || e.Name != eventName) continue;
-            var ownSlot = e.ExplicitInterfaceName ?? e.DeclaringInterfaceName;
-            if (ownSlot == interfaceFqn) return;
-            var current = e.AdditionalExplicitInterfaceNames.AsImmutableArray();
-            if (current.Contains(interfaceFqn)) return;
-            events[i] = e with
-            {
-                AdditionalExplicitInterfaceNames = new EquatableArray<string>(current.Add(interfaceFqn))
-            };
+            var updated = AppendDistinctSlot(e.AdditionalExplicitInterfaceNames,
+                e.ExplicitInterfaceName ?? e.DeclaringInterfaceName, interfaceFqn, out var changed);
+            if (changed) events[i] = e with { AdditionalExplicitInterfaceNames = updated };
             return;
         }
+    }
+
+    /// <summary>Returns <paramref name="slots"/> with <paramref name="interfaceFqn"/> appended,
+    /// setting <paramref name="changed"/>. No-op (returns the input) when <paramref name="interfaceFqn"/>
+    /// already is the member's own slot (<paramref name="ownSlot"/>) or is already recorded — so the
+    /// caller can skip allocating a new model record.</summary>
+    private static EquatableArray<string> AppendDistinctSlot(
+        EquatableArray<string> slots, string? ownSlot, string interfaceFqn, out bool changed)
+    {
+        changed = false;
+        if (ownSlot == interfaceFqn) return slots;
+        var array = slots.AsImmutableArray();
+        if (array.Contains(interfaceFqn)) return slots;
+        changed = true;
+        return new EquatableArray<string>(array.Add(interfaceFqn));
     }
 
     private static MockMemberModel Tag(MockMemberModel model, int ownerTypeIndex)
