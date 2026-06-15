@@ -2050,6 +2050,89 @@ public class MockGeneratorTests : SnapshotTestBase
         return VerifyGeneratorOutput(source);
     }
 
+    [Test]
+    public void Interface_Hiding_Base_Members_With_New_Forwards_All_Slots_In_Wrapper()
+    {
+        // Regression #6252: IDerived hides IBase members with `new`. IBase.X and IDerived.X are
+        // distinct interface slots; the wrapper forwards each member as an explicit impl, which
+        // satisfies only the slot it names — so each hidden base slot needs its own explicit
+        // forward (cast to that interface) or the build fails with CS0535.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IBase
+            {
+                void SomeMethod();
+                int Prop { get; }
+                event System.Action Evt;
+            }
+
+            public interface IDerived : IBase
+            {
+                new void SomeMethod();
+                new int Prop { get; }
+                new event System.Action Evt;
+            }
+
+            public class TestUsage
+            {
+                void M() { var mock = Mock.Of<IDerived>(); }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        // Both the derived slot and the hidden base slot are forwarded explicitly.
+        AssertContains(output, "void global::IDerived.SomeMethod()");
+        AssertContains(output, "void global::IBase.SomeMethod()");
+        AssertContains(output, "((global::IBase)Object).SomeMethod()");
+        AssertContains(output, "int global::IDerived.Prop");
+        AssertContains(output, "int global::IBase.Prop");
+        AssertContains(output, "global::IDerived.Evt");
+        AssertContains(output, "global::IBase.Evt");
+
+        AssertNoGeneratedError(source, "CS0535");
+    }
+
+    [Test]
+    public void Interface_Inheriting_Identical_Member_From_Multiple_Interfaces_Forwards_Both_Slots()
+    {
+        // Regression #6252 (diamond): IDiamondC inherits an identically-signed Go() from two
+        // unrelated interfaces. One impl satisfies both slots, but the wrapper must forward both —
+        // and BOTH forwards (including the primary) must cast, else `Object.Go()` is ambiguous (CS0121).
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IDiamondA { void Go(); }
+            public interface IDiamondB { void Go(); }
+            public interface IDiamondC : IDiamondA, IDiamondB { }
+
+            public class TestUsage
+            {
+                void M() { var mock = Mock.Of<IDiamondC>(); }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        AssertContains(output, "((global::IDiamondA)Object).Go()");
+        AssertContains(output, "((global::IDiamondB)Object).Go()");
+
+        AssertNoGeneratedError(source, "CS0121");
+        AssertNoGeneratedError(source, "CS0535");
+    }
+
+    private static void AssertNoGeneratedError(string source, string errorId)
+    {
+        foreach (var diagnostic in GetGeneratedCompilationErrors(source))
+        {
+            if (string.Equals(diagnostic.Id, errorId, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException($"Generated code produced {errorId}: {diagnostic}");
+            }
+        }
+    }
+
     private static string GetGeneratedOutput(string source, IEnumerable<Microsoft.CodeAnalysis.MetadataReference>? additionalReferences = null)
         => string.Join(Environment.NewLine, RunGenerator(source, additionalReferences));
 

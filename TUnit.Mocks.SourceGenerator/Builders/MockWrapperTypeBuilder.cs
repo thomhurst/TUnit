@@ -93,8 +93,11 @@ internal static class MockWrapperTypeBuilder
 
         // When the method is an explicit interface impl on the underlying object,
         // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
-        var target = method.ExplicitInterfaceName is not null
-            ? CastTarget(method.ExplicitInterfaceName)
+        // When the member also satisfies other interface slots, cast as well — otherwise
+        // `Object.M()` can be ambiguous (CS0121) where Object's type inherits M() from
+        // multiple interfaces (e.g. a diamond), or could bind to the wrong slot (#6252).
+        var target = method.ExplicitInterfaceName is not null || method.AdditionalExplicitInterfaceNames.Length > 0
+            ? CastTarget(interfaceName)
             : "Object";
 
         EmitMethodForward(writer, method, interfaceName, target);
@@ -137,7 +140,8 @@ internal static class MockWrapperTypeBuilder
 
     private static void GeneratePropertyForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        EmitPropertyForward(writer, prop, GetForwardingInterfaceName(prop, model), GetForwardingTarget(prop));
+        var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
 
         foreach (var extra in prop.AdditionalExplicitInterfaceNames)
         {
@@ -163,7 +167,8 @@ internal static class MockWrapperTypeBuilder
 
     private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        EmitIndexerForward(writer, prop, GetForwardingInterfaceName(prop, model), GetForwardingTarget(prop));
+        var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
 
         foreach (var extra in prop.AdditionalExplicitInterfaceNames)
         {
@@ -196,11 +201,13 @@ internal static class MockWrapperTypeBuilder
     private static string GetForwardingInterfaceName(MockMemberModel member, MockTypeModel model)
         => member.ExplicitInterfaceName ?? member.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
-    // When the member is an explicit interface impl on the underlying object,
-    // we must cast to access the correct member.
-    private static string GetForwardingTarget(MockMemberModel member)
-        => member.ExplicitInterfaceName is not null
-            ? $"(({member.ExplicitInterfaceName})Object)"
+    // The forwarding target for a member's *primary* slot. Normally the untyped `Object`, but cast
+    // to the slot's interface when the member is an explicit interface impl on the underlying object,
+    // or when it also satisfies other slots — otherwise `Object.X` may be ambiguous (CS0121) or bind
+    // to the wrong slot (#6252).
+    private static string GetPrimaryTarget(MockMemberModel member, string interfaceName)
+        => member.ExplicitInterfaceName is not null || member.AdditionalExplicitInterfaceNames.Length > 0
+            ? CastTarget(interfaceName)
             : "Object";
 
     private static string GetAccessorObsoletePrefix(string obsoleteAttribute)
@@ -208,7 +215,12 @@ internal static class MockWrapperTypeBuilder
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
     {
-        EmitEventForward(writer, evt, evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName, "Object");
+        var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
+        // Event forwards historically target the untyped `Object`; only cast when the event also
+        // satisfies other slots, to avoid an ambiguous `Object.Evt` (diamond) while keeping output
+        // unchanged for the common single-slot case (#6252).
+        var target = evt.AdditionalExplicitInterfaceNames.Length > 0 ? CastTarget(interfaceName) : "Object";
+        EmitEventForward(writer, evt, interfaceName, target);
 
         foreach (var extra in evt.AdditionalExplicitInterfaceNames)
         {
