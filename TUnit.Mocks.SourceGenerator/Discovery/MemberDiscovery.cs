@@ -88,6 +88,49 @@ internal static class MemberDiscovery
         => primaryClassSymbol is not null
             && primaryClassSymbol.FindImplementationForInterfaceMember(interfaceMember) is not null;
 
+    /// <summary>
+    /// Records that the member at <paramref name="index"/> must additionally be forwarded as an
+    /// explicit implementation of <paramref name="interfaceFqn"/> in the generated wrapper type.
+    /// Used when an identically-signed member is dropped during dedup but represents a distinct
+    /// interface slot (a base member hidden by <c>new</c>, or one inherited from multiple
+    /// interfaces): the shared impl satisfies every slot implicitly, but the wrapper forwards
+    /// explicitly and an explicit impl satisfies only the one slot it names (#6252). No-op when
+    /// the interface already matches the member's own slot or is already recorded. Only meaningful
+    /// for single-interface mocks — the only ones with a wrapper.
+    /// </summary>
+    private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn)
+    {
+        var existing = members[index];
+        var ownSlot = existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName;
+        if (ownSlot == interfaceFqn) return;
+        var current = existing.AdditionalExplicitInterfaceNames.AsImmutableArray();
+        if (current.Contains(interfaceFqn)) return;
+        members[index] = existing with
+        {
+            AdditionalExplicitInterfaceNames = new EquatableArray<string>(current.Add(interfaceFqn))
+        };
+    }
+
+    /// <summary>Event counterpart of <see cref="RecordAdditionalWrapperInterface"/>. Locates the
+    /// surviving (non-static) event model by name, since the event seen-set is keyed by name only.</summary>
+    private static void RecordAdditionalWrapperInterfaceForEvent(List<MockEventModel> events, string eventName, string interfaceFqn)
+    {
+        for (int i = 0; i < events.Count; i++)
+        {
+            var e = events[i];
+            if (e.IsStaticAbstract || e.Name != eventName) continue;
+            var ownSlot = e.ExplicitInterfaceName ?? e.DeclaringInterfaceName;
+            if (ownSlot == interfaceFqn) return;
+            var current = e.AdditionalExplicitInterfaceNames.AsImmutableArray();
+            if (current.Contains(interfaceFqn)) return;
+            events[i] = e with
+            {
+                AdditionalExplicitInterfaceNames = new EquatableArray<string>(current.Add(interfaceFqn))
+            };
+            return;
+        }
+    }
+
     private static MockMemberModel Tag(MockMemberModel model, int ownerTypeIndex)
         => ownerTypeIndex == 0 ? model : model with { OwnerTypeIndex = ownerTypeIndex };
 
@@ -164,7 +207,19 @@ internal static class MemberDiscovery
                                 // the prior sighting is a non-mockable class member (NonMockableEntry)
                                 // and we're walking an additional interface, re-implement explicitly
                                 // so the mock intercepts interface dispatch anyway.
-                                if (primaryClassSymbol is null || existing.Index != NonMockableEntry.Index) continue;
+                                if (primaryClassSymbol is null || existing.Index != NonMockableEntry.Index)
+                                {
+                                    // Single-interface mocks generate a wrapper that forwards each member
+                                    // as an explicit interface impl, which satisfies only the slot it names.
+                                    // This duplicate is a distinct slot (base member hidden by `new`, or one
+                                    // inherited from multiple interfaces) — record it so the wrapper also
+                                    // forwards that slot, else the build fails with CS0535 (#6252).
+                                    if (primaryClassSymbol is null && existing.Index >= 0)
+                                    {
+                                        RecordAdditionalWrapperInterface(state.Methods, existing.Index, interfaceFqn);
+                                    }
+                                    continue;
+                                }
                                 if (!state.SeenExplicitImpls.Add($"{interfaceFqn}|{fullKey}")) continue;
                                 state.Methods.Add(Tag(CreateMethodModel(method, ref state.MemberIdCounter, interfaceFqn, interfaceFqn, explicitInterfaceCanDelegate: false, compilation: compilation), ownerTypeIndex));
                                 break;
@@ -216,6 +271,9 @@ internal static class MemberDiscovery
                                 else if (primaryClassSymbol is null)
                                 {
                                     MergePropertyAccessors(state.Properties, existingIndex.Value, property, ref state.MemberIdCounter, compilationAssembly);
+                                    // Distinct slot hidden by `new` (or inherited twice) — the wrapper
+                                    // needs its own explicit forward for it too (#6252).
+                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn);
                                 }
                                 // else: class-primary walk and the existing member already covers
                                 // every accessor the interface needs — plain dedup.
@@ -244,6 +302,12 @@ internal static class MemberDiscovery
                             if (existingIndex.HasValue)
                             {
                                 MergePropertyAccessors(state.Properties, existingIndex.Value, indexer, ref state.MemberIdCounter, compilationAssembly);
+                                // Distinct indexer slot hidden by `new` (or inherited twice) — the
+                                // wrapper needs its own explicit forward for it too (#6252).
+                                if (primaryClassSymbol is null)
+                                {
+                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn);
+                                }
                             }
                             else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
                             {
@@ -262,7 +326,16 @@ internal static class MemberDiscovery
                     case IEventSymbol evt:
                     {
                         var key = $"E:{evt.Name}";
-                        if (!state.SeenEvents.Add(key)) continue;
+                        if (!state.SeenEvents.Add(key))
+                        {
+                            // Distinct event slot hidden by `new` (or inherited twice) — the wrapper
+                            // needs its own explicit forward for it too (#6252).
+                            if (primaryClassSymbol is null)
+                            {
+                                RecordAdditionalWrapperInterfaceForEvent(state.Events, evt.Name, interfaceFqn);
+                            }
+                            continue;
+                        }
 
                         var explicitName = RequiresExplicitImpl(primaryClassSymbol, evt) ? interfaceFqn : null;
                         state.Events.Add(Tag(CreateEventModel(evt, explicitName, interfaceFqn), ownerTypeIndex));

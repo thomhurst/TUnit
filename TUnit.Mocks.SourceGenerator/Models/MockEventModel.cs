@@ -35,6 +35,14 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     /// Used by the wrapper type builder for correct explicit interface forwarding.
     /// </summary>
     public string? DeclaringInterfaceName { get; init; }
+
+    /// <summary>
+    /// Extra interface FQNs whose identically-named event slot this event also satisfies but
+    /// which the generated wrapper must forward explicitly. Populated when a base-interface
+    /// event is hidden by a <c>new</c> event (or inherited from multiple interfaces). See
+    /// <see cref="MockMemberModel.AdditionalExplicitInterfaceNames"/> (#6252).
+    /// </summary>
+    public EquatableArray<string> AdditionalExplicitInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public string OverrideAccessModifier { get; init; } = "public";
     public bool IsStaticAbstract { get; init; }
 
@@ -63,6 +71,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && EventArgsType == other.EventArgsType
             && ExplicitInterfaceName == other.ExplicitInterfaceName
             && DeclaringInterfaceName == other.DeclaringInterfaceName
+            && AdditionalExplicitInterfaceNames.Equals(other.AdditionalExplicitInterfaceNames)
             && OverrideAccessModifier == other.OverrideAccessModifier
             && IsStaticAbstract == other.IsStaticAbstract
             && OwnerTypeIndex == other.OwnerTypeIndex
@@ -80,6 +89,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + RaiseParameterList.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + AdditionalExplicitInterfaceNames.GetHashCode();
             hash = hash * 31 + OverrideAccessModifier.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             hash = hash * 31 + OwnerTypeIndex;

@@ -90,17 +90,32 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateMethodForwarding(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         var interfaceName = method.ExplicitInterfaceName ?? method.DeclaringInterfaceName ?? model.FullyQualifiedName;
+
+        // When the method is an explicit interface impl on the underlying object,
+        // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
+        var target = method.ExplicitInterfaceName is not null
+            ? CastTarget(method.ExplicitInterfaceName)
+            : "Object";
+
+        EmitMethodForward(writer, method, interfaceName, target);
+
+        // Additional explicit forwards for distinct interface slots this member also satisfies
+        // (base members hidden by `new`, or inherited from multiple interfaces). Each slot needs
+        // its own explicit impl, cast to that interface so the right slot is hit on Object (#6252).
+        foreach (var extra in method.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitMethodForward(writer, method, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitMethodForward(CodeWriter writer, MockMemberModel method, string interfaceName, string target)
+    {
         var paramList = MockImplBuilder.GetParameterList(method);
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
         var constraints = MockImplBuilder.GetConstraintClauses(method, forExplicitImplementation: true);
         var argPassList = MockImplBuilder.GetArgPassList(method);
         var returnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
-
-        // When the method is an explicit interface impl on the underlying object,
-        // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
-        var target = method.ExplicitInterfaceName is not null
-            ? $"(({method.ExplicitInterfaceName})Object)"
-            : "Object";
 
         // Copy the source member's [Obsolete] attribute onto the forward so the call to
         // Object.{name}(...) inside this method is allowed by the compiler (a member
@@ -122,9 +137,18 @@ internal static class MockWrapperTypeBuilder
 
     private static void GeneratePropertyForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitPropertyForward(writer, prop, GetForwardingInterfaceName(prop, model), GetForwardingTarget(prop));
+
+        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitPropertyForward(writer, prop, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitPropertyForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    {
         var returnType = prop.ReturnType;
-        var target = GetForwardingTarget(prop);
 
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
@@ -139,11 +163,20 @@ internal static class MockWrapperTypeBuilder
 
     private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
-        var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitIndexerForward(writer, prop, GetForwardingInterfaceName(prop, model), GetForwardingTarget(prop));
+
+        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitIndexerForward(writer, prop, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitIndexerForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    {
         var returnType = prop.ReturnType;
         var paramList = MockImplBuilder.GetParameterList(prop);
         var argPassList = MockImplBuilder.GetArgPassList(prop);
-        var target = GetForwardingTarget(prop);
 
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
@@ -154,6 +187,11 @@ internal static class MockWrapperTypeBuilder
 
         writer.AppendLine($"{returnType} {interfaceName}.this[{paramList}] {{ {getter}{setter}}}");
     }
+
+    // Cast the underlying Object to a specific interface so an explicit forward dispatches to
+    // that interface's slot (necessary when distinct slots share a signature — e.g. a `new`-hidden
+    // base member, or wrapping a real object whose explicit impls differ per interface).
+    private static string CastTarget(string interfaceFqn) => $"(({interfaceFqn})Object)";
 
     private static string GetForwardingInterfaceName(MockMemberModel member, MockTypeModel model)
         => member.ExplicitInterfaceName ?? member.DeclaringInterfaceName ?? model.FullyQualifiedName;
@@ -170,10 +208,19 @@ internal static class MockWrapperTypeBuilder
 
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
     {
-        var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
+        EmitEventForward(writer, evt, evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName, "Object");
 
+        foreach (var extra in evt.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitEventForward(writer, evt, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitEventForward(CodeWriter writer, MockEventModel evt, string interfaceName, string target)
+    {
         writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
-        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{EscapeIdentifier(evt.Name)} {{ add => Object.{EscapeIdentifier(evt.Name)} += value; remove => Object.{EscapeIdentifier(evt.Name)} -= value; }}");
+        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{EscapeIdentifier(evt.Name)} {{ add => {target}.{EscapeIdentifier(evt.Name)} += value; remove => {target}.{EscapeIdentifier(evt.Name)} -= value; }}");
     }
 
 }
