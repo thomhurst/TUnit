@@ -1265,6 +1265,33 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Wrap_Mock_Without_Parameterless_Constructor()
+    {
+        // Issue #6253: the wrapper must chain to a base constructor with default arguments
+        // (here `: base(default(string)!)`) since there is no parameterless constructor.
+        var source = """
+            using TUnit.Mocks;
+
+            public class RealClass
+            {
+                private readonly string _param;
+                public RealClass(string param) { _param = param; }
+                public virtual string Describe() => _param;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Wrap(new RealClass("value"));
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task GenerateMock_Attribute_With_Concrete_Class()
     {
         var source = """

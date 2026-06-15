@@ -153,53 +153,53 @@ internal static class MockImplBuilder
     {
         var mockableType = GetMockableTypeName(model);
 
-        if (model.Constructors.Length == 0)
+        // The wrap factory always constructs via `new XxxWrapMockImpl(engine, instance)` — it never
+        // forwards user-supplied constructor args (the wrapped instance is already built). Every member
+        // delegates to _wrappedInstance, so the wrapper's own base sub-object is never observed; we only
+        // need to chain to *an* accessible base constructor. Emit a single (engine, wrappedInstance) ctor.
+        writer.AppendLine(SetsRequiredMembersAttribute);
+        using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance){GetWrapBaseInitializer(model)}"))
         {
-            writer.AppendLine(SetsRequiredMembersAttribute);
-            using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance)"))
+            writer.AppendLine("_engine = engine;");
+            writer.AppendLine("_wrappedInstance = wrappedInstance;");
+            if (model.HasStaticAbstractMembers)
             {
-                writer.AppendLine("_engine = engine;");
-                writer.AppendLine("_wrappedInstance = wrappedInstance;");
-                if (model.HasStaticAbstractMembers)
-                {
-                    EmitStaticEngineAssignment(writer, model, safeName);
-                }
-            }
-            return;
-        }
-
-        foreach (var ctor in model.Constructors)
-        {
-            if (ctor.Parameters.Length == 0)
-            {
-                writer.AppendLine(SetsRequiredMembersAttribute);
-                using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance) : base()"))
-                {
-                    writer.AppendLine("_engine = engine;");
-                    writer.AppendLine("_wrappedInstance = wrappedInstance;");
-                    if (model.HasStaticAbstractMembers)
-                    {
-                        EmitStaticEngineAssignment(writer, model, safeName);
-                    }
-                }
-            }
-            else
-            {
-                var paramList = string.Join(", ", ctor.Parameters.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
-                var argList = string.Join(", ", ctor.Parameters.Select(p => p.Name));
-                writer.AppendLine(SetsRequiredMembersAttribute);
-                using (writer.Block($"internal {safeName}WrapMockImpl(global::TUnit.Mocks.MockEngine<{mockableType}> engine, {model.FullyQualifiedName} wrappedInstance, {paramList}) : base({argList})"))
-                {
-                    writer.AppendLine("_engine = engine;");
-                    writer.AppendLine("_wrappedInstance = wrappedInstance;");
-                    if (model.HasStaticAbstractMembers)
-                    {
-                        EmitStaticEngineAssignment(writer, model, safeName);
-                    }
-                }
+                EmitStaticEngineAssignment(writer, model, safeName);
             }
         }
     }
+
+    /// <summary>
+    /// Base-constructor initializer for a wrap mock's single constructor. No explicit constructors →
+    /// implicit parameterless base(); an explicit parameterless constructor → <c>: base()</c>; otherwise
+    /// chains to the fewest-parameter accessible constructor with default arguments (the base state is
+    /// never used, so the values are irrelevant — this just satisfies C#'s base-call requirement, #6253).
+    /// </summary>
+    private static string GetWrapBaseInitializer(MockTypeModel model)
+    {
+        if (model.Constructors.Length == 0)
+        {
+            return "";
+        }
+
+        if (model.Constructors.Any(c => c.Parameters.Length == 0))
+        {
+            return " : base()";
+        }
+
+        // No accessible parameterless constructor. Prefer a constructor without `ref` parameters
+        // (those can't take an inline default expression), then the fewest parameters.
+        var ctor = model.Constructors
+            .OrderBy(c => c.Parameters.Any(p => p.Direction == ParameterDirection.Ref) ? 1 : 0)
+            .ThenBy(c => c.Parameters.Length)
+            .First();
+        var baseArgs = string.Join(", ", ctor.Parameters.Select(GetWrapBaseArgument));
+        return $" : base({baseArgs})";
+    }
+
+    private static string GetWrapBaseArgument(MockParameterModel p) => p.Direction == ParameterDirection.Out
+        ? "out _"
+        : $"default({p.FullyQualifiedType})!";
 
     private static void GenerateWrapMethod(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
