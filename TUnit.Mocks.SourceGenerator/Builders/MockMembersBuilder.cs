@@ -15,8 +15,21 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 /// </summary>
 internal static class MockMembersBuilder
 {
+    // Non-async methods only get a typed wrapper (and thus typed parameter overloads) up to this
+    // many matchable params; past it they fall back to the untyped setup surface. Must stay
+    // <= MaxDelegateParams so the typed overloads it permits never exceed the BCL delegate arity.
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
+
+    // BCL System.Func<>/System.Action<> support at most 16 input type arguments
+    // (Func<T1..T16,TResult> / Action<T1..T16>).
+    private const int MaxDelegateParams = 16;
+
+    // The typed Returns/ReturnsAsync/Callback/Throws overloads build Func<>/Action<> from the
+    // parameter list, so they can only be emitted up to the BCL arity limit (else CS0305). Methods
+    // with more parameters still get the wrapper and its untyped setup surface.
+    private static bool CanEmitTypedParamOverloads(List<MockParameterModel> nonOutParams)
+        => nonOutParams.Count >= 1 && nonOutParams.Count <= MaxDelegateParams;
 
     private const string PriorityMinusOneAttribute =
         "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]";
@@ -258,7 +271,11 @@ internal static class MockMembersBuilder
 
     private static bool ShouldGenerateTypedWrapper(MockMemberModel method, MockTypeModel model, bool hasEvents)
     {
-        // Async methods need a typed wrapper for the generated ReturnsAsync() method
+        // Async methods need a typed wrapper for the generated ReturnsAsync() method, so they are
+        // emitted regardless of parameter count (bypassing the MaxTypedParams ceiling below). The
+        // typed parameter overloads inside the wrapper are still bounded by MaxDelegateParams at
+        // their emit sites (see CanEmitTypedParamOverloads), which is what keeps Func<>/Action<>
+        // within the BCL arity limit for high-parameter-count methods.
         if (method.IsAsync) return true;
 
         // Exclude out params and ref struct params (can't be boxed or used as type args)
@@ -464,8 +481,8 @@ internal static class MockMembersBuilder
                 EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask);
             }
 
-            // Typed parameter overloads (only for methods with typed params)
-            if (nonOutParams.Count >= 1)
+            // Typed parameter overloads (only for methods with typed params within the arity limit).
+            if (CanEmitTypedParamOverloads(nonOutParams))
             {
                 writer.AppendLine();
                 if (hasRefStructParams)
@@ -598,8 +615,8 @@ internal static class MockMembersBuilder
                 EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask);
             }
 
-            // Typed parameter overloads (only for methods with typed params)
-            if (nonOutParams.Count >= 1)
+            // Typed parameter overloads (only for methods with typed params within the arity limit).
+            if (CanEmitTypedParamOverloads(nonOutParams))
             {
                 writer.AppendLine();
                 if (hasRefStructParams)
