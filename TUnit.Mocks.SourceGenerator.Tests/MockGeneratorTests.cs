@@ -1292,6 +1292,37 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Method_With_More_Params_Than_Func_Action_Arity()
+    {
+        // Issue #6254: an async method with more parameters than the BCL Func<>/Action<> arity
+        // limit (16 inputs) must not emit typed Returns/ReturnsAsync/Callback/Throws overloads —
+        // doing so produced CS0305. The wrapper is still generated (for the untyped ReturnsAsync
+        // surface); only the parameter-typed convenience overloads are omitted.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface ILongMethodSignatures
+            {
+                Task SomeMethod(string _1, string _2, string _3, string _4, string _5,
+                    string _6, string _7, string _8, string _9, string _10,
+                    string _11, string _12, string _13, string _14, string _15,
+                    string _16, string _17, string _18, string _19, string _20);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ILongMethodSignatures>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task GenerateMock_Attribute_With_Concrete_Class()
     {
         var source = """

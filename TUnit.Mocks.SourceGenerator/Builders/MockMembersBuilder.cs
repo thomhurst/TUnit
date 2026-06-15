@@ -18,6 +18,12 @@ internal static class MockMembersBuilder
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
+    // BCL System.Func<>/System.Action<> support at most 16 input type arguments
+    // (Func<T1..T16,TResult> / Action<T1..T16>). Methods with more matchable parameters
+    // than this cannot have typed Returns/ReturnsAsync/Callback/Throws overloads emitted —
+    // doing so produces CS0305. Such methods still get the untyped setup surface.
+    private const int MaxDelegateParams = 16;
+
     private const string PriorityMinusOneAttribute =
         "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]";
 
@@ -464,8 +470,9 @@ internal static class MockMembersBuilder
                 EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask);
             }
 
-            // Typed parameter overloads (only for methods with typed params)
-            if (nonOutParams.Count >= 1)
+            // Typed parameter overloads (only for methods with typed params, and only when the
+            // parameter count fits within the BCL Func<>/Action<> arity limit — see MaxDelegateParams).
+            if (nonOutParams.Count >= 1 && nonOutParams.Count <= MaxDelegateParams)
             {
                 writer.AppendLine();
                 if (hasRefStructParams)
@@ -598,8 +605,9 @@ internal static class MockMembersBuilder
                 EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask);
             }
 
-            // Typed parameter overloads (only for methods with typed params)
-            if (nonOutParams.Count >= 1)
+            // Typed parameter overloads (only for methods with typed params, and only when the
+            // parameter count fits within the BCL Func<>/Action<> arity limit — see MaxDelegateParams).
+            if (nonOutParams.Count >= 1 && nonOutParams.Count <= MaxDelegateParams)
             {
                 writer.AppendLine();
                 if (hasRefStructParams)
