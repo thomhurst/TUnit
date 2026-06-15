@@ -15,6 +15,9 @@ namespace TUnit.Mocks.SourceGenerator.Builders;
 /// </summary>
 internal static class MockMembersBuilder
 {
+    // Non-async methods only get a typed wrapper (and thus typed parameter overloads) up to this
+    // many matchable params; past it they fall back to the untyped setup surface. Must stay
+    // <= MaxDelegateParams so the typed overloads it permits never exceed the BCL delegate arity.
     private const int MaxTypedParams = 8;
     private const int MaxFuncOverloadParams = 4;
 
@@ -268,7 +271,11 @@ internal static class MockMembersBuilder
 
     private static bool ShouldGenerateTypedWrapper(MockMemberModel method, MockTypeModel model, bool hasEvents)
     {
-        // Async methods need a typed wrapper for the generated ReturnsAsync() method
+        // Async methods need a typed wrapper for the generated ReturnsAsync() method, so they are
+        // emitted regardless of parameter count (bypassing the MaxTypedParams ceiling below). The
+        // typed parameter overloads inside the wrapper are still bounded by MaxDelegateParams at
+        // their emit sites (see CanEmitTypedParamOverloads), which is what keeps Func<>/Action<>
+        // within the BCL arity limit for high-parameter-count methods.
         if (method.IsAsync) return true;
 
         // Exclude out params and ref struct params (can't be boxed or used as type args)
