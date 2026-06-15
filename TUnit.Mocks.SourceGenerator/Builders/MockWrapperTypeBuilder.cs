@@ -90,17 +90,26 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateMethodForwarding(CodeWriter writer, MockMemberModel method, MockTypeModel model)
     {
         var interfaceName = method.ExplicitInterfaceName ?? method.DeclaringInterfaceName ?? model.FullyQualifiedName;
+
+        EmitMethodForward(writer, method, interfaceName, GetPrimaryTarget(method, interfaceName));
+
+        // Additional explicit forwards for distinct interface slots this member also satisfies
+        // (base members hidden by `new`, or inherited from multiple interfaces). Each slot needs
+        // its own explicit impl, cast to that interface so the right slot is hit on Object (#6252).
+        foreach (var extra in method.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitMethodForward(writer, method, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitMethodForward(CodeWriter writer, MockMemberModel method, string interfaceName, string target)
+    {
         var paramList = MockImplBuilder.GetParameterList(method);
         var typeParams = MockImplBuilder.GetTypeParameterList(method);
         var constraints = MockImplBuilder.GetConstraintClauses(method, forExplicitImplementation: true);
         var argPassList = MockImplBuilder.GetArgPassList(method);
         var returnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
-
-        // When the method is an explicit interface impl on the underlying object,
-        // we must cast to call the correct method (e.g. ((IEnumerable)Object).GetEnumerator()).
-        var target = method.ExplicitInterfaceName is not null
-            ? $"(({method.ExplicitInterfaceName})Object)"
-            : "Object";
 
         // Copy the source member's [Obsolete] attribute onto the forward so the call to
         // Object.{name}(...) inside this method is allowed by the compiler (a member
@@ -123,8 +132,18 @@ internal static class MockWrapperTypeBuilder
     private static void GeneratePropertyForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
+
+        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitPropertyForward(writer, prop, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitPropertyForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    {
         var returnType = prop.ReturnType;
-        var target = GetForwardingTarget(prop);
 
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
@@ -140,10 +159,20 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var interfaceName = GetForwardingInterfaceName(prop, model);
+        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
+
+        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitIndexerForward(writer, prop, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitIndexerForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    {
         var returnType = prop.ReturnType;
         var paramList = MockImplBuilder.GetParameterList(prop);
         var argPassList = MockImplBuilder.GetArgPassList(prop);
-        var target = GetForwardingTarget(prop);
 
         writer.AppendLineIfNotEmpty(prop.ObsoleteAttribute);
 
@@ -155,14 +184,21 @@ internal static class MockWrapperTypeBuilder
         writer.AppendLine($"{returnType} {interfaceName}.this[{paramList}] {{ {getter}{setter}}}");
     }
 
+    // Cast the underlying Object to a specific interface so an explicit forward dispatches to
+    // that interface's slot (necessary when distinct slots share a signature — e.g. a `new`-hidden
+    // base member, or wrapping a real object whose explicit impls differ per interface).
+    private static string CastTarget(string interfaceFqn) => $"(({interfaceFqn})Object)";
+
     private static string GetForwardingInterfaceName(MockMemberModel member, MockTypeModel model)
         => member.ExplicitInterfaceName ?? member.DeclaringInterfaceName ?? model.FullyQualifiedName;
 
-    // When the member is an explicit interface impl on the underlying object,
-    // we must cast to access the correct member.
-    private static string GetForwardingTarget(MockMemberModel member)
-        => member.ExplicitInterfaceName is not null
-            ? $"(({member.ExplicitInterfaceName})Object)"
+    // The forwarding target for a member's *primary* slot. Normally the untyped `Object`, but cast
+    // to the slot's interface when the member is an explicit interface impl on the underlying object,
+    // or when it also satisfies other slots — otherwise `Object.X` may be ambiguous (CS0121) or bind
+    // to the wrong slot (#6252).
+    private static string GetPrimaryTarget(MockMemberModel member, string interfaceName)
+        => member.ExplicitInterfaceName is not null || member.AdditionalExplicitInterfaceNames.Length > 0
+            ? CastTarget(interfaceName)
             : "Object";
 
     private static string GetAccessorObsoletePrefix(string obsoleteAttribute)
@@ -171,9 +207,23 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateEventForwarding(CodeWriter writer, MockEventModel evt, MockTypeModel model)
     {
         var interfaceName = evt.ExplicitInterfaceName ?? evt.DeclaringInterfaceName ?? model.FullyQualifiedName;
+        // Event forwards historically target the untyped `Object`; only cast when the event also
+        // satisfies other slots, to avoid an ambiguous `Object.Evt` (diamond) while keeping output
+        // unchanged for the common single-slot case (#6252).
+        var target = evt.AdditionalExplicitInterfaceNames.Length > 0 ? CastTarget(interfaceName) : "Object";
+        EmitEventForward(writer, evt, interfaceName, target);
 
+        foreach (var extra in evt.AdditionalExplicitInterfaceNames)
+        {
+            writer.AppendLine();
+            EmitEventForward(writer, evt, extra, CastTarget(extra));
+        }
+    }
+
+    private static void EmitEventForward(CodeWriter writer, MockEventModel evt, string interfaceName, string target)
+    {
         writer.AppendLineIfNotEmpty(evt.ObsoleteAttribute);
-        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{EscapeIdentifier(evt.Name)} {{ add => Object.{EscapeIdentifier(evt.Name)} += value; remove => Object.{EscapeIdentifier(evt.Name)} -= value; }}");
+        writer.AppendLine($"event {evt.EventHandlerType} {interfaceName}.{EscapeIdentifier(evt.Name)} {{ add => {target}.{EscapeIdentifier(evt.Name)} += value; remove => {target}.{EscapeIdentifier(evt.Name)} -= value; }}");
     }
 
 }

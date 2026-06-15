@@ -36,6 +36,18 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     /// Used by the wrapper type builder for correct explicit interface forwarding.
     /// </summary>
     public string? DeclaringInterfaceName { get; init; }
+
+    /// <summary>
+    /// Extra interface FQNs whose identically-signed member slot this single member also
+    /// satisfies, but which the generated wrapper type must implement with its own explicit
+    /// interface forward. Populated when a base-interface member is hidden by a <c>new</c>
+    /// member, or when identical members are inherited from multiple interfaces: the shared
+    /// impl implements every slot implicitly, but the wrapper forwards explicitly, and an
+    /// explicit impl satisfies only the one slot it names — so each shadowed base slot needs
+    /// its own forward or the build fails with CS0535 (#6252). Empty in the common case and
+    /// consumed only by <see cref="Builders.MockWrapperTypeBuilder"/> (single-interface mocks).
+    /// </summary>
+    public EquatableArray<string> AdditionalExplicitInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public string NullableAnnotation { get; init; } = "None";
     public string SmartDefault { get; init; } = "default!";
     public string UnwrappedSmartDefault { get; init; } = "default!";
@@ -135,6 +147,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && ExplicitInterfaceName == other.ExplicitInterfaceName
             && ExplicitInterfaceCanDelegate == other.ExplicitInterfaceCanDelegate
             && DeclaringInterfaceName == other.DeclaringInterfaceName
+            && AdditionalExplicitInterfaceNames.Equals(other.AdditionalExplicitInterfaceNames)
             && NullableAnnotation == other.NullableAnnotation
             && SmartDefault == other.SmartDefault
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
@@ -173,6 +186,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
+            hash = hash * 31 + AdditionalExplicitInterfaceNames.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             hash = hash * 31 + GetterObsoleteAttribute.GetHashCode();
             hash = hash * 31 + SetterObsoleteAttribute.GetHashCode();
