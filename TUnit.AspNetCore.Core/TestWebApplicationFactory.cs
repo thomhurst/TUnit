@@ -26,6 +26,16 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
     // belong to its own request pipeline vs. a sibling factory's.
     private readonly CorrelationScope _correlationScope = new();
 
+    // Serializes WithWebHostBuilder calls. The shared (e.g. PerTestSession) GlobalFactory
+    // has GetIsolatedFactory invoked from every test's parallel Before(Test) hook, and
+    // WithWebHostBuilder mutates the base factory's internal _derivedFactories List<T>
+    // with no synchronization of its own. Concurrent List.Add tears the backing array
+    // (lost entries / null slots), which surfaces much later as a NullReferenceException
+    // when the GlobalFactory is disposed and enumerates that list. WithWebHostBuilder is
+    // synchronous and the work inside is fast configuration, so a plain lock is enough;
+    // the expensive host build is throttled separately by ServerInitSemaphore.
+    private readonly object _isolationLock = new();
+
     public WebApplicationFactory<TEntryPoint> GetIsolatedFactory(
         TestContext testContext,
         WebApplicationTestOptions options,
@@ -33,43 +43,46 @@ public abstract class TestWebApplicationFactory<TEntryPoint> : WebApplicationFac
         Action<WebHostBuilderContext, IConfigurationBuilder> configureIsolatedAppConfiguration,
         Action<IWebHostBuilder>? configureWebHostBuilder = null)
     {
-        return WithWebHostBuilder(builder =>
+        lock (_isolationLock)
         {
-            var configurationBuilder = new ConfigurationManager();
-            ConfigureStartupConfiguration(configurationBuilder);
-
-            foreach (var keyValuePair in configurationBuilder.AsEnumerable())
+            return WithWebHostBuilder(builder =>
             {
-                builder.UseSetting(keyValuePair.Key, keyValuePair.Value);
-            }
+                var configurationBuilder = new ConfigurationManager();
+                ConfigureStartupConfiguration(configurationBuilder);
 
-            builder
-                .ConfigureAppConfiguration(configureIsolatedAppConfiguration)
-                .ConfigureTestServices(services =>
+                foreach (var keyValuePair in configurationBuilder.AsEnumerable())
                 {
-                    configureIsolatedServices(services);
-                    services.AddSingleton(testContext);
-                    services.AddTUnitLogging(testContext);
+                    builder.UseSetting(keyValuePair.Key, keyValuePair.Value);
+                }
 
-                    if (options.AutoPropagateHttpClientFactory)
+                builder
+                    .ConfigureAppConfiguration(configureIsolatedAppConfiguration)
+                    .ConfigureTestServices(services =>
                     {
-                        services.TryAddEnumerable(
-                            ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, TUnitHttpClientFilter>());
-                    }
+                        configureIsolatedServices(services);
+                        services.AddSingleton(testContext);
+                        services.AddTUnitLogging(testContext);
 
-                    if (options.AutoConfigureOpenTelemetry)
-                    {
-                        AddTUnitOpenTelemetry(services, _correlationScope);
-                    }
-                });
+                        if (options.AutoPropagateHttpClientFactory)
+                        {
+                            services.TryAddEnumerable(
+                                ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, TUnitHttpClientFilter>());
+                        }
 
-            if (options.EnableHttpExchangeCapture)
-            {
-                builder.ConfigureTestServices(services => services.AddHttpExchangeCapture());
-            }
+                        if (options.AutoConfigureOpenTelemetry)
+                        {
+                            AddTUnitOpenTelemetry(services, _correlationScope);
+                        }
+                    });
 
-            configureWebHostBuilder?.Invoke(builder);
-        });
+                if (options.EnableHttpExchangeCapture)
+                {
+                    builder.ConfigureTestServices(services => services.AddHttpExchangeCapture());
+                }
+
+                configureWebHostBuilder?.Invoke(builder);
+            });
+        }
     }
 
     protected virtual void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
