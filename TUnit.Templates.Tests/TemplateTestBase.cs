@@ -34,6 +34,18 @@ public abstract partial class TemplateTestBase : IDisposable
                 .AddScrubber(ScrubVersions, "vbproj")
             );
 
+    protected TemplateVerifierOptions OptionsWithFramework(string framework) =>
+        new TemplateVerifierOptions(TemplateShortName)
+        {
+            TemplatePath = Path.Combine(TestContext.OutputDirectory!, "content", TemplateShortName),
+            TemplateSpecificArgs = ["--framework", framework],
+        }.WithCustomScrubbers(
+            ScrubbersDefinition.Empty
+                .AddScrubber(ScrubVersions, "csproj")
+                .AddScrubber(ScrubVersions, "fsproj")
+                .AddScrubber(ScrubVersions, "vbproj")
+            );
+
     private const string ScrubbedVersion = "0.0.0-scrubbed";
 
     private static void ScrubVersions(StringBuilder sb)
