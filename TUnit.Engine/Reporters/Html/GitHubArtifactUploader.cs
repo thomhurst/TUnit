@@ -1,8 +1,10 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using TUnit.Engine.Configuration;
 
 namespace TUnit.Engine.Reporters.Html;
 
@@ -19,6 +21,7 @@ internal static class GitHubArtifactUploader
         string filePath,
         string runtimeToken,
         string resultsUrl,
+        int? retentionDays,
         CancellationToken cancellationToken)
     {
         var (workflowRunBackendId, workflowJobRunBackendId) = ExtractBackendIds(runtimeToken);
@@ -30,6 +33,7 @@ internal static class GitHubArtifactUploader
 
         var origin = new Uri(resultsUrl).GetLeftPart(UriPartial.Authority);
         var fileName = Path.GetFileName(filePath);
+        var expiresAt = ComputeExpiresAt(retentionDays, ReadMaxRetentionDays(), DateTime.UtcNow);
 
         // Step 1: CreateArtifact (deduplicate name on 409 conflict)
         var createUrl = $"{origin}/twirp/github.actions.results.api.v1.ArtifactService/CreateArtifact";
@@ -49,7 +53,7 @@ internal static class GitHubArtifactUploader
                 _ => $"{nameWithoutExt}-{GetShortJobId(workflowJobRunBackendId)}-{nameAttempt}{ext}",
             };
 
-            var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, artifactName);
+            var createBody = BuildCreateArtifactJson(workflowRunBackendId, workflowJobRunBackendId, artifactName, expiresAt);
 
             signedUploadUrl = await RetryAsync(async () =>
             {
@@ -147,7 +151,7 @@ internal static class GitHubArtifactUploader
             : jobRunBackendId;
     }
 
-    private static string BuildCreateArtifactJson(string runId, string jobId, string fileName)
+    private static string BuildCreateArtifactJson(string runId, string jobId, string fileName, string? expiresAt)
     {
         using var ms = new MemoryStream();
         using var w = new Utf8JsonWriter(ms);
@@ -157,9 +161,45 @@ internal static class GitHubArtifactUploader
         w.WriteString("name", fileName);
         w.WriteNumber("version", 7);
         w.WriteString("mime_type", "text/html");
+        if (expiresAt is not null)
+        {
+            // google.protobuf.Timestamp in proto3 canonical JSON form (RFC 3339, UTC).
+            w.WriteString("expires_at", expiresAt);
+        }
         w.WriteEndObject();
         w.Flush();
         return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    private static int? ReadMaxRetentionDays()
+    {
+        var raw = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRetentionDays);
+        return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var days) && days > 0
+            ? days
+            : null;
+    }
+
+    /// <summary>
+    /// Translates a requested retention period into the <c>expires_at</c> timestamp the
+    /// GitHub artifact API expects, clamping to the repository maximum when one is set.
+    /// Returns <see langword="null"/> when no (valid) retention was requested, leaving the
+    /// artifact on GitHub's default retention.
+    /// </summary>
+    internal static string? ComputeExpiresAt(int? retentionDays, int? maxRetentionDays, DateTime utcNow)
+    {
+        if (retentionDays is not > 0)
+        {
+            return null;
+        }
+
+        var days = retentionDays.Value;
+        if (maxRetentionDays is > 0 && days > maxRetentionDays.Value)
+        {
+            Console.WriteLine($"Warning: TUNIT_ARTIFACT_RETENTION_DAYS ({days}) exceeds the repository maximum ({maxRetentionDays.Value}); clamping to {maxRetentionDays.Value}.");
+            days = maxRetentionDays.Value;
+        }
+
+        return utcNow.AddDays(days).ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
     }
 
     private static string BuildFinalizeArtifactJson(string runId, string jobId, string fileName, long size, string sha256Hash)
