@@ -79,11 +79,13 @@
 ## Roslyn Version Projects
 
 Multi-targeting for Roslyn API compatibility:
+
 - `*.Roslyn414`, `*.Roslyn44`, `*.Roslyn47`
 
 ## Dual-Mode Architecture
 
 Changes to core engine metadata collection must work in both modes:
+
 - **Source-gen**: `TUnit.Core.SourceGenerator` → compile-time
 - **Reflection**: `TUnit.Engine` → runtime
 

@@ -20,11 +20,13 @@ Each framework implements the following test categories:
 ## Running Benchmarks
 
 ### Build all projects first:
+
 ```bash
 dotnet build -c Release
 ```
 
 ### Run specific benchmark categories:
+
 ```bash
 # Build benchmarks (measures compilation time)
 dotnet run -c Release --project Tests.Benchmark -- --filter "*BuildBenchmarks*"
@@ -47,6 +49,7 @@ dotnet run -c Release --project Tests.Benchmark -- --filter "*RuntimeBenchmarks*
 ```
 
 ### Run all benchmarks:
+
 ```bash
 dotnet run -c Release --project Tests.Benchmark
 ```

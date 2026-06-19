@@ -2,9 +2,10 @@
 
 Begin gathering requirements for: $ARGUMENTS
 
-## Full Workflow:
+## Full Workflow
 
 ### Phase 1: Initial Setup & Codebase Analysis
+
 1. Create timestamp-based folder: requirements/YYYY-MM-DD-HHMM-[slug]
 2. Extract slug from $ARGUMENTS (e.g., "add user profile" → "user-profile")
 3. Create initial files:
@@ -18,6 +19,7 @@ Begin gathering requirements for: $ARGUMENTS
    - Note patterns and conventions
 
 ### Phase 2: Context Discovery Questions
+
 6. Generate the five most important yes/no questions to understand the problem space:
    - Questions informed by codebase structure
    - Questions about user interactions and workflows
@@ -30,6 +32,7 @@ Begin gathering requirements for: $ARGUMENTS
    - Only after all questions are asked, record answers in 02-discovery-answers.md as received and update metadata.json. Not before.
 
 ### Phase 3: Targeted Context Gathering (Autonomous)
+
 7. After all discovery questions answered:
    - Use mcp__RepoPrompt__search (if available) to find specific files based on discovery answers
    - Use mcp__RepoPrompt__set_selection and read_selected_files (if available) to batch read relevant code
@@ -44,6 +47,7 @@ Begin gathering requirements for: $ARGUMENTS
      - Integration points identified
 
 ### Phase 4: Expert Requirements Questions
+
 8. Now ask questions like a senior developer who knows the codebase:
    - Write the top 5 most pressing unanswered detailed yes/no questions to 04-detail-questions.md
    - Questions should be as if you were speaking to the product manager who knows nothing of the code
@@ -53,6 +57,7 @@ Begin gathering requirements for: $ARGUMENTS
    - Only after all questions are asked, record answers in 05-detail-answers.md as received
 
 ### Phase 5: Requirements Documentation
+
 9. Generate comprehensive requirements spec in 06-requirements-spec.md:
    - Problem statement and solution overview
    - Functional requirements based on all answers
@@ -61,9 +66,10 @@ Begin gathering requirements for: $ARGUMENTS
    - Acceptance criteria
    - Assumptions for any unanswered questions
 
-## Question Formats:
+## Question Formats
 
 ### Discovery Questions (Phase 2):
+
 ```
 ## Q1: Will users interact with this feature through a visual interface?
 **Default if unknown:** Yes (most features have some UI component)
@@ -81,7 +87,7 @@ Begin gathering requirements for: $ARGUMENTS
 **Default if unknown:** No (most features require connectivity)
 ```
 
-### Expert Questions (Phase 4):
+### Expert Questions (Phase 4)
 ```
 ## Q7: Should we extend the existing UserService at services/UserService.ts?
 **Default if unknown:** Yes (maintains architectural consistency)
@@ -91,6 +97,7 @@ Begin gathering requirements for: $ARGUMENTS
 ```
 
 ## Important Rules:
+
 - ONLY yes/no questions with smart defaults
 - ONE question at a time
 - Write ALL questions to file BEFORE asking any
@@ -99,7 +106,7 @@ Begin gathering requirements for: $ARGUMENTS
 - Document WHY each default makes sense
 - Use tools available if recommended ones aren't installed or available
 
-## Metadata Structure:
+## Metadata Structure
 ```json
 {
   "id": "feature-slug",
@@ -117,6 +124,7 @@ Begin gathering requirements for: $ARGUMENTS
 ```
 
 ## Phase Transitions:
+
 - After each phase, announce: "Phase complete. Starting [next phase]..."
 - Save all work before moving to next phase
 - User can check progress anytime with /requirements-status

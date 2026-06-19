@@ -27,6 +27,7 @@ A modern .NET testing framework. Tests are source-generated at compile time, run
 ## Getting Started
 
 ### Using the Project Template (Recommended)
+
 ```bash
 dotnet new install TUnit.Templates
 dotnet new TUnit -n "MyTestProject"
@@ -35,6 +36,7 @@ dotnet run
 ```
 
 ### Manual Installation
+
 ```bash
 dotnet add package TUnit
 ```

@@ -1,6 +1,7 @@
 # TUnit Development Guide for AI Assistants
 
 ## Table of Contents
+
 - [Critical Rules - READ FIRST](#critical-rules---read-first)
 - [Quick Reference](#quick-reference)
 - [Project Overview](#project-overview)
@@ -80,6 +81,7 @@ dotnet test TUnit.Core.SourceGenerator.Tests
 ```
 
 **Why TUnit.TestProject is special:**
+
 - Contains negative test cases (tests that verify failures work correctly)
 - Tests error messages, diagnostics, and exception handling
 - Performance tests excluded by default
@@ -90,6 +92,7 @@ dotnet test TUnit.Core.SourceGenerator.Tests
 ---
 
 ### Most Common Commands
+
 ```bash
 # Run all tests (automatically excludes TUnit.TestProject integration tests)
 dotnet test
@@ -116,6 +119,7 @@ dotnet publish -c Release -p:PublishAot=true
 ```
 
 ### Snapshot Workflow Quick Ref
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ 1. Make change to source generator or public API       │
@@ -128,6 +132,7 @@ dotnet publish -c Release -p:PublishAot=true
 ```
 
 ### Test Filter Syntax
+
 ```bash
 # Single test
 --treenode-filter "/TUnit.TestProject/Namespace/ClassName/TestMethodName"
@@ -149,12 +154,14 @@ dotnet publish -c Release -p:PublishAot=true
 ### What is TUnit?
 
 TUnit is a **modern .NET testing framework** that prioritizes:
+
 - **Performance**: Source-generated tests, parallel by default
 - **Modern .NET**: Native AOT, trimming, latest C# features
 - **Microsoft.Testing.Platform**: Not VSTest (legacy)
 - **Developer Experience**: Fluent assertions, minimal boilerplate
 
 ### Key Differentiators
+
 - **Compile-time test discovery** via source generators
 - **Parallel execution** by default with dependency management
 - **Dual execution modes** (source-gen + reflection) for flexibility
@@ -218,10 +225,12 @@ TUnit has two execution paths that **MUST** behave identically:
 | **TUnit.Playwright** | Playwright integration | Browser testing |
 
 ### Roslyn Version Projects
+
 - `*.Roslyn414`, `*.Roslyn44`, `*.Roslyn47`: Multi-targeting for different Roslyn versions
 - Ensures compatibility across VS versions and .NET SDK versions
 
 ### Test Projects
+
 - **TUnit.TestProject**: Integration tests (uses TUnit to test itself)
 - **TUnit.Engine.Tests**: Engine-specific tests
 - **TUnit.Assertions.Tests**: Assertion library tests
@@ -871,6 +880,7 @@ git status  # Ensure no .received.txt files are staged
 ### Tests Pass Locally But Fail in CI
 
 **Common Causes**:
+
 1. **Snapshot mismatch**: Forgot to commit `.verified.txt` files
 2. **Platform differences**: Line ending issues (CRLF vs LF)
 3. **Timing issues**: Race conditions in parallel tests
@@ -917,6 +927,7 @@ dotnet test --treenode-filter "/*/*/*/YourTest*"
 **Problem**: `dotnet publish -p:PublishAot=true` fails
 
 **Common Causes**:
+
 1. Dynamic code generation (not supported in AOT)
 2. Reflection without proper annotations
 3. Missing `[DynamicallyAccessedMembers]` attributes
@@ -954,6 +965,7 @@ dotnet trace collect -- dotnet test
 ```
 
 **Common Causes**:
+
 - Added LINQ in hot path (use loops instead)
 - Missing caching of reflection results
 - Unnecessary allocations (use object pooling)
@@ -996,10 +1008,10 @@ Before committing ANY code, verify:
 
 ## Additional Resources
 
-- **Documentation**: https://tunit.dev
+- **Documentation**: <https://tunit.dev>
 - **Contributing Guide**: `.github/CONTRIBUTING.md`
-- **Issues**: https://github.com/thomhurst/TUnit/issues
-- **Discussions**: https://github.com/thomhurst/TUnit/discussions
+- **Issues**: <https://github.com/thomhurst/TUnit/issues>
+- **Discussions**: <https://github.com/thomhurst/TUnit/discussions>
 
 ---
 
@@ -1008,6 +1020,7 @@ Before committing ANY code, verify:
 TUnit aims to be: **fast, modern, reliable, and enjoyable to use**.
 
 Every change should advance these goals:
+
 - **Fast**: Optimize for performance. Millions of tests depend on it.
 - **Modern**: Leverage latest .NET features. Support AOT, trimming, latest C#.
 - **Reliable**: Dual-mode parity. Comprehensive tests. No breaking changes without major version bump.
