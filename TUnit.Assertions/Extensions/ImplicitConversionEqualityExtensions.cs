@@ -1,8 +1,6 @@
-// Gated to .NET 9+ because these overloads rely on [OverloadResolutionPriority] to
-// lose to the source-generated single-generic IsEqualTo / IsNotEqualTo on same-type
-// calls, and that attribute is silently dropped on net8.0 / netstandard2.0 (Polyfill
-// does not supply it), causing CS0121. See issue #5765.
-#if NET9_0_OR_GREATER
+// These overloads rely on [OverloadResolutionPriority] (honored only by C# 13+) to lose to the
+// source-generated same-type IsEqualTo / IsNotEqualTo. TUnit raises consumer LangVersion so the
+// attribute is honored on every target (see TUnit.Assertions.props). Issues #5765, #6276, #6280.
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -151,4 +149,3 @@ internal static class ImplicitConversionCache
         return null;
     }
 }
-#endif

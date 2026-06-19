@@ -20,6 +20,18 @@
         <TUnitReflectionScanner Condition="'$(IsVBProject)' == 'true' or '$(IsFSharpProject)' == 'true'">true</TUnitReflectionScanner>
     </PropertyGroup>
 
+    <!--
+      TUnit's Assert.That(...) overloads are disambiguated with [OverloadResolutionPriority],
+      which only C# 13+ honors. net8.0-and-earlier projects default to C# 12 and silently ignore
+      it, breaking overload resolution (CS0411/CS0121; issues #6276, #6280). This default MUST
+      live in .props, not .targets: the SDK sets the target-framework default LangVersion during
+      the .targets phase, so a .targets default (Condition="'$(LangVersion)' == ''") never wins.
+      Consumers can still override LangVersion explicitly.
+    -->
+    <PropertyGroup>
+        <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+    </PropertyGroup>
+
     <ItemGroup>
         <!--
           !!! IMPORTANT !!!

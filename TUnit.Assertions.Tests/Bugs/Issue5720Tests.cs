@@ -1,5 +1,3 @@
-// Gated to match ImplicitConversionEqualityExtensions.cs — see issue #5765.
-#if NET9_0_OR_GREATER
 namespace TUnit.Assertions.Tests.Bugs;
 
 /// <summary>
@@ -193,5 +191,3 @@ public class Issue5720Tests
             $"No implicit conversion operator from '{typeof(UnrelatedType)}' to '{typeof(string)}' was found.");
     }
 }
-
-#endif
