@@ -12,11 +12,15 @@ public static class PropertySourceRegistry
     private static readonly ConcurrentDictionary<Type, IPropertySource> _sources = new();
 
     /// <summary>
-    /// Registers a property source for a type. Called by generated code.
+    /// Registers a property source for a type. Called by generated code from a static field
+    /// initializer on the consolidated registration <c>.cctor</c> (so N per-class module
+    /// initializers collapse into one merged <c>.cctor</c>).
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static void Register(Type type, IPropertySource source)
+    public static int Register(Type type, IPropertySource source)
     {
         _sources[type] = source;
+        return 0;
     }
 
     /// <summary>

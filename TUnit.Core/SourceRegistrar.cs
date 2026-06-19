@@ -35,12 +35,15 @@ public class SourceRegistrar
     }
 
     /// <summary>
-    /// Registers a test source.
+    /// Registers a dynamic test source. Returns a dummy value so it can be used as a static field
+    /// initializer on the consolidated registration <c>.cctor</c>, collapsing per-source module
+    /// initializers into one merged <c>.cctor</c>.
     /// </summary>
     /// <param name="testSource">The test source to register.</param>
-    public static void RegisterDynamic(IDynamicTestSource testSource)
+    public static int RegisterDynamic(IDynamicTestSource testSource)
     {
         Sources.DynamicTestSources.Enqueue(testSource);
+        return 0;
     }
 
     /// <summary>

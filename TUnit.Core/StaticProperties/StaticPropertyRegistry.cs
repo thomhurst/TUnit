@@ -12,11 +12,15 @@ public static class StaticPropertyRegistry
     private static readonly ConcurrentDictionary<string, object> _initializedValues = new();
 
     /// <summary>
-    /// Register a static property for initialization
+    /// Register a static property for initialization. Called by generated code from a static field
+    /// initializer on the consolidated registration <c>.cctor</c> (so the per-assembly module
+    /// initializer collapses into one merged <c>.cctor</c>).
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static void Register(StaticPropertyMetadata metadata)
+    public static int Register(StaticPropertyMetadata metadata)
     {
         _registeredProperties.Add(metadata);
+        return 0;
     }
 
     /// <summary>

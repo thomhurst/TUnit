@@ -1199,7 +1199,7 @@ namespace
         public static .PropertyDataSource[]? GetPropertyDataSources( type) { }
         public static .PropertyInjectionData[]? GetPropertyInjectionData( type) { }
         public static ..IPropertySource? GetSource( type) { }
-        public static void Register( type, ..IPropertySource source) { }
+        public static int Register( type, ..IPropertySource source) { }
     }
     [(.Assembly, AllowMultiple=false, Inherited=false)]
     public sealed class ReflectionModeAttribute : 
@@ -1293,7 +1293,7 @@ namespace
         public SourceRegistrar() { }
         public static bool IsEnabled { get; set; }
         public static void RegisterAssembly(<.Assembly> assemblyLoader) { }
-        public static void RegisterDynamic(.IDynamicTestSource testSource) { }
+        public static int RegisterDynamic(.IDynamicTestSource testSource) { }
         public static int RegisterEntries<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T>(<.TestEntry<T>[]> factory)
             where T :  class { }
         public static void RegisterGlobalInitializer(<.> initializer) { }
@@ -1854,7 +1854,7 @@ namespace .Converters
 {
     public static class AotConverterRegistry
     {
-        public static void Register(. converter) { }
+        public static int Register(. converter) { }
         public static void Register<TSource, TTarget>(<TSource, TTarget> converter) { }
         public static bool TryConvert( sourceType,  targetType, object? value, out object? result) { }
         public static bool TryGetConverter( sourceType,  targetType, out .? converter) { }
@@ -1920,7 +1920,7 @@ namespace .Discovery
     {
         public static .[]? GetProperties( type) { }
         public static bool HasRegistration( type) { }
-        public static void Register( type, .[] properties) { }
+        public static int Register( type, .[] properties) { }
     }
 }
 namespace .Enums
@@ -3059,7 +3059,7 @@ namespace .StaticProperties
     public static class StaticPropertyRegistry
     {
         public static .<.> GetRegisteredProperties() { }
-        public static void Register(. metadata) { }
+        public static int Register(. metadata) { }
         public static bool TryGetInitializedValue( declaringType, string propertyName, out object? value) { }
     }
 }

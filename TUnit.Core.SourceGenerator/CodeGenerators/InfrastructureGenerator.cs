@@ -449,12 +449,18 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine();
 
                 // Trigger consolidated registration .cctors.
-                // Per-class/per-method test sources and per-hook sources contribute static field
-                // initializers to shared partial classes. RunClassConstructor forces each .cctor
-                // to execute, performing all registrations in ONE JIT-compiled method per class.
-                // No try/catch needed — InfrastructureGenerator always emits both shell classes.
+                // Test sources, hooks, property injection sources, AOT converters, static property
+                // initializers and dynamic test sources each contribute static field initializers to
+                // a shared partial class per concern. RunClassConstructor forces each .cctor to
+                // execute, performing all registrations in ONE JIT-compiled method per concern instead
+                // of N per-file [ModuleInitializer] methods.
+                // No try/catch needed — InfrastructureGenerator always emits these shell classes.
                 sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);");
                 sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);");
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_PropertyRegistration).TypeHandle);");
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_ConverterRegistration).TypeHandle);");
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_StaticPropertyRegistration).TypeHandle);");
+                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_DynamicTestRegistration).TypeHandle);");
                 sourceBuilder.AppendLine();
 
                 sourceBuilder.AppendLine("try");
@@ -479,6 +485,14 @@ public class InfrastructureGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("internal static partial class TUnit_TestRegistration { }");
         sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
         sourceBuilder.AppendLine("internal static partial class TUnit_HookRegistration { }");
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_PropertyRegistration { }");
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_ConverterRegistration { }");
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_StaticPropertyRegistration { }");
+        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+        sourceBuilder.AppendLine("internal static partial class TUnit_DynamicTestRegistration { }");
         sourceBuilder.Unindent();
         sourceBuilder.AppendLine("}");
 

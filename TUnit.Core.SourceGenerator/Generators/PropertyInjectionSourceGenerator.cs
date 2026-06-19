@@ -583,16 +583,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var sb = new StringBuilder();
         WriteFileHeader(sb);
 
-        // Module initializer
-        sb.AppendLine($"internal static class {model.SafeClassName}_PropertyInjectionInitializer");
+        sb.AppendLine("namespace TUnit.Core");
         sb.AppendLine("{");
-        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sb.AppendLine("    public static void Initialize()");
-        sb.AppendLine("    {");
-        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ClassFullyQualifiedName}), new {sourceClassName}());");
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
-        sb.AppendLine();
 
         // Property source class
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
@@ -651,6 +643,18 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine("#endif");
             }
         }
+
+        sb.AppendLine("}");
+
+        // Contribute a static field initializer to the shared TUnit_PropertyRegistration partial
+        // instead of a per-class [ModuleInitializer]. All contributions merge into one .cctor.
+        sb.AppendLine("namespace TUnit.Generated");
+        sb.AppendLine("{");
+        sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
+        sb.AppendLine("{");
+        sb.AppendLine($"static readonly int _r_{model.SafeClassName}_PropSource = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ClassFullyQualifiedName}), new global::TUnit.Core.{sourceClassName}());");
+        sb.AppendLine("}");
+        sb.AppendLine("}");
 
         context.AddSource(fileName, sb.ToString());
     }
@@ -757,26 +761,24 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("namespace TUnit.Generated;");
         sb.AppendLine();
 
-        sb.AppendLine($"internal static class {model.SafeTypeName}_InitializerPropertiesInitializer");
+        // Contribute a static field initializer to the shared TUnit_PropertyRegistration partial
+        // instead of a per-type [ModuleInitializer]. All contributions merge into one .cctor.
+        sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sb.AppendLine("    public static void Initialize()");
+        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_InitProps = InitializerPropertyRegistry.Register(typeof({model.TypeFullyQualified}), new InitializerPropertyInfo[]");
         sb.AppendLine("    {");
-        sb.AppendLine($"        InitializerPropertyRegistry.Register(typeof({model.TypeFullyQualified}), new InitializerPropertyInfo[]");
-        sb.AppendLine("        {");
 
         foreach (var prop in model.Properties)
         {
-            sb.AppendLine("            new InitializerPropertyInfo");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                PropertyName = \"{prop.PropertyName}\",");
-            sb.AppendLine($"                PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
-            sb.AppendLine($"                GetValue = static obj => (({model.TypeFullyQualified})obj).{prop.PropertyName}");
-            sb.AppendLine("            },");
+            sb.AppendLine("        new InitializerPropertyInfo");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            PropertyName = \"{prop.PropertyName}\",");
+            sb.AppendLine($"            PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
+            sb.AppendLine($"            GetValue = static obj => (({model.TypeFullyQualified})obj).{prop.PropertyName}");
+            sb.AppendLine("        },");
         }
 
-        sb.AppendLine("        });");
-        sb.AppendLine("    }");
+        sb.AppendLine("    });");
         sb.AppendLine("}");
 
         context.AddSource(fileName, sb.ToString());
@@ -794,16 +796,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var sb = new StringBuilder();
         WriteFileHeader(sb);
 
-        // Module initializer
-        sb.AppendLine($"internal static class {model.SafeTypeName}_Generic_PropertyInjectionInitializer");
+        sb.AppendLine("namespace TUnit.Core");
         sb.AppendLine("{");
-        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sb.AppendLine("    public static void Initialize()");
-        sb.AppendLine("    {");
-        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new {sourceClassName}());");
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
-        sb.AppendLine();
 
         // Property source class
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
@@ -862,6 +856,18 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
+        sb.AppendLine("}");
+
+        // Contribute a static field initializer to the shared TUnit_PropertyRegistration partial
+        // instead of a per-type [ModuleInitializer]. All contributions merge into one .cctor.
+        sb.AppendLine("namespace TUnit.Generated");
+        sb.AppendLine("{");
+        sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
+        sb.AppendLine("{");
+        sb.AppendLine($"static readonly int _r_{model.SafeTypeName}_Generic_PropSource = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new global::TUnit.Core.{sourceClassName}());");
+        sb.AppendLine("}");
+        sb.AppendLine("}");
+
         context.AddSource(fileName, sb.ToString());
     }
 
@@ -881,26 +887,24 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("namespace TUnit.Generated;");
         sb.AppendLine();
 
-        sb.AppendLine($"internal static class {model.SafeTypeName}_Generic_InitializerPropertiesInitializer");
+        // Contribute a static field initializer to the shared TUnit_PropertyRegistration partial
+        // instead of a per-type [ModuleInitializer]. All contributions merge into one .cctor.
+        sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sb.AppendLine("    public static void Initialize()");
+        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_Generic_InitProps = InitializerPropertyRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new InitializerPropertyInfo[]");
         sb.AppendLine("    {");
-        sb.AppendLine($"        InitializerPropertyRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new InitializerPropertyInfo[]");
-        sb.AppendLine("        {");
 
         foreach (var prop in model.InitializerProperties)
         {
-            sb.AppendLine("            new InitializerPropertyInfo");
-            sb.AppendLine("            {");
-            sb.AppendLine($"                PropertyName = \"{prop.PropertyName}\",");
-            sb.AppendLine($"                PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
-            sb.AppendLine($"                GetValue = static obj => (({model.ConcreteTypeFullyQualified})obj).{prop.PropertyName}");
-            sb.AppendLine("            },");
+            sb.AppendLine("        new InitializerPropertyInfo");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            PropertyName = \"{prop.PropertyName}\",");
+            sb.AppendLine($"            PropertyType = typeof({prop.PropertyTypeFullyQualified}),");
+            sb.AppendLine($"            GetValue = static obj => (({model.ConcreteTypeFullyQualified})obj).{prop.PropertyName}");
+            sb.AppendLine("        },");
         }
 
-        sb.AppendLine("        });");
-        sb.AppendLine("    }");
+        sb.AppendLine("    });");
         sb.AppendLine("}");
 
         context.AddSource(fileName, sb.ToString());
@@ -919,8 +923,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("using TUnit.Core.Interfaces.SourceGenerator;");
         sb.AppendLine("using TUnit.Core.Enums;");
         sb.AppendLine("using System.Linq;");
-        sb.AppendLine();
-        sb.AppendLine("namespace TUnit.Core;");
         sb.AppendLine();
     }
 

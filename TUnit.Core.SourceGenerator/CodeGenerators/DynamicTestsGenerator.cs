@@ -95,40 +95,46 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("using global::TUnit.Core;");
             sourceBuilder.AppendLine("using global::TUnit.Core.Extensions;");
             sourceBuilder.AppendLine();
-            sourceBuilder.AppendLine("namespace TUnit.SourceGenerated;");
-            sourceBuilder.AppendLine();
-            sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
-            sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
-            using (sourceBuilder.BeginBlock($"file partial class {className} : global::TUnit.Core.IDynamicTestSource"))
+            using (sourceBuilder.BeginBlock("namespace TUnit.SourceGenerated"))
             {
-                sourceBuilder.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-                using (sourceBuilder.BeginBlock("public static void Initialise()"))
+                sourceBuilder.AppendLine("[global::System.Diagnostics.StackTraceHidden]");
+                sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+                sourceBuilder.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"TUnit\", \"{typeof(DynamicTestsGenerator).Assembly.GetName().Version}\")]");
+                using (sourceBuilder.BeginBlock($"file partial class {className} : global::TUnit.Core.IDynamicTestSource"))
                 {
-                    sourceBuilder.AppendLine($"global::TUnit.Core.SourceRegistrar.RegisterDynamic(new {className}());");
+                    using (sourceBuilder.BeginBlock("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.AbstractDynamicTest> CollectDynamicTests(string sessionId)"))
+                    {
+                        using (sourceBuilder.BeginBlock("try"))
+                        {
+                            sourceBuilder.AppendLine(
+                                $"""
+                                 var context = new global::TUnit.Core.DynamicTestBuilderContext({SymbolDisplay.FormatLiteral(model.FilePath, quote: true)}, {model.LineNumber});
+                                 """);
+
+                            var receiver = model.IsStatic
+                                ? model.FullyQualifiedTypeName
+                                : $"new {model.FullyQualifiedTypeName}()";
+
+                            sourceBuilder.AppendLine($"{receiver}.{model.MethodName}(context);");
+                            sourceBuilder.AppendLine("return context.Tests;");
+                        }
+                        using (sourceBuilder.BeginBlock("catch (global::System.Exception exception)"))
+                        {
+                            GenerateFailedTestCode(sourceBuilder, model);
+                        }
+                    }
                 }
+            }
 
-                sourceBuilder.EnsureNewLine();
-                using (sourceBuilder.BeginBlock("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.AbstractDynamicTest> CollectDynamicTests(string sessionId)"))
+            // Contribute a static field initializer to the shared TUnit_DynamicTestRegistration
+            // partial (declared by InfrastructureGenerator) instead of a per-file [ModuleInitializer].
+            // All contributions merge into one .cctor triggered once via RunClassConstructor.
+            sourceBuilder.EnsureNewLine();
+            using (sourceBuilder.BeginBlock("namespace TUnit.Generated"))
+            {
+                using (sourceBuilder.BeginBlock("internal static partial class TUnit_DynamicTestRegistration"))
                 {
-                    using (sourceBuilder.BeginBlock("try"))
-                    {
-                        sourceBuilder.AppendLine(
-                            $"""
-                             var context = new global::TUnit.Core.DynamicTestBuilderContext({SymbolDisplay.FormatLiteral(model.FilePath, quote: true)}, {model.LineNumber});
-                             """);
-
-                        var receiver = model.IsStatic
-                            ? model.FullyQualifiedTypeName
-                            : $"new {model.FullyQualifiedTypeName}()";
-
-                        sourceBuilder.AppendLine($"{receiver}.{model.MethodName}(context);");
-                        sourceBuilder.AppendLine("return context.Tests;");
-                    }
-                    using (sourceBuilder.BeginBlock("catch (global::System.Exception exception)"))
-                    {
-                        GenerateFailedTestCode(sourceBuilder, model);
-                    }
+                    sourceBuilder.AppendLine($"static readonly int _r_Dynamic_{className}_{model.MethodName} = global::TUnit.Core.SourceRegistrar.RegisterDynamic(new global::TUnit.SourceGenerated.{className}());");
                 }
             }
 

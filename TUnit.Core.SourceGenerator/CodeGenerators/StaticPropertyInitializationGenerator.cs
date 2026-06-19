@@ -205,35 +205,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Module initializer that registers static property metadata");
-        writer.AppendLine("/// </summary>");
-        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Register each property with metadata
-        foreach (var propertyData in staticProperties)
-        {
-            var typeName = propertyData.Property.ContainingType.GloballyQualified;
-            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
-
-            writer.AppendLine("global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({propertyData.Property.GloballyQualifiedType}),");
-            writer.AppendLine($"DeclaringType = typeof({typeName}),");
-            writer.AppendLine($"InitializerAsync = {methodName}");
-            writer.Unindent();
-            writer.AppendLine("});");
-        }
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
         // Generate individual property initializer methods that return the value and set the property
         var generatedMethods = new HashSet<string>();
         foreach (var propertyData in staticProperties)
@@ -250,8 +221,57 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("}");
+        writer.AppendLine();
+
+        // Contribute static field initializers to the shared TUnit_StaticPropertyRegistration partial
+        // (declared by InfrastructureGenerator). The compiler merges all contributions into one .cctor,
+        // triggered once via RunClassConstructor — replacing the per-assembly [ModuleInitializer].
+        writer.AppendLine("namespace TUnit.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("internal static partial class TUnit_StaticPropertyRegistration");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        var registeredFields = new HashSet<string>();
+        foreach (var propertyData in staticProperties)
+        {
+            var typeName = propertyData.Property.ContainingType.GloballyQualified;
+            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
+            var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}";
+
+            if (!registeredFields.Add(fieldName))
+            {
+                continue;
+            }
+
+            writer.AppendLine($"static readonly int {fieldName} = global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({propertyData.Property.GloballyQualifiedType}),");
+            writer.AppendLine($"DeclaringType = typeof({typeName}),");
+            writer.AppendLine($"InitializerAsync = global::TUnit.Core.Generated.StaticPropertyInitializer.{methodName}");
+            writer.Unindent();
+            writer.AppendLine("});");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         return writer.ToString();
+    }
+
+    private static string SafeName(string globallyQualified)
+    {
+        var sb = new StringBuilder(globallyQualified.Length);
+        foreach (var c in globallyQualified)
+        {
+            sb.Append(char.IsLetterOrDigit(c) ? c : '_');
+        }
+        return sb.ToString();
     }
 
     private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData)
@@ -264,7 +284,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Initializer for {typeName}.{propertyName}");
         writer.AppendLine("/// </summary>");
-        writer.AppendLine($"private static async global::System.Threading.Tasks.Task<object?> {methodName}()");
+        writer.AppendLine($"internal static async global::System.Threading.Tasks.Task<object?> {methodName}()");
         writer.AppendLine("{");
         writer.Indent();
 

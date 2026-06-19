@@ -14,11 +14,15 @@ public static class InitializerPropertyRegistry
     private static readonly ConcurrentDictionary<Type, InitializerPropertyInfo[]> Registry = new();
 
     /// <summary>
-    /// Registers property metadata for a type. Called by generated code.
+    /// Registers property metadata for a type. Called by generated code from a static field
+    /// initializer on the consolidated registration <c>.cctor</c> (so N per-file module
+    /// initializers collapse into one merged <c>.cctor</c>).
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static void Register(Type type, InitializerPropertyInfo[] properties)
+    public static int Register(Type type, InitializerPropertyInfo[] properties)
     {
         Registry[type] = properties;
+        return 0;
     }
 
     /// <summary>
