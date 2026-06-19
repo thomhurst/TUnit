@@ -9,6 +9,9 @@ internal static class EnvironmentConstants
     public const string EnableJUnitReporter = "TUNIT_ENABLE_JUNIT_REPORTER";
     public const string GitHubReporterStyle = "TUNIT_GITHUB_REPORTER_STYLE";
 
+    // TUnit-specific: how long (in days) the auto-uploaded HTML report artifact is kept
+    public const string ArtifactRetentionDays = "TUNIT_ARTIFACT_RETENTION_DAYS";
+
     // TUnit-specific: Execution
     public const string ExecutionMode = "TUNIT_EXECUTION_MODE";
     public const string MaxParallelTests = "TUNIT_MAX_PARALLEL_TESTS";
@@ -36,6 +39,10 @@ internal static class EnvironmentConstants
     public const string ActionsResultsUrl = "ACTIONS_RESULTS_URL";
     public const string GitHubRepository = "GITHUB_REPOSITORY";
     public const string GitHubRunId = "GITHUB_RUN_ID";
+
+    // Repository/organization maximum artifact retention (set by GitHub on the runner).
+    // Used to clamp TUNIT_ARTIFACT_RETENTION_DAYS so the API does not reject the request.
+    public const string GitHubRetentionDays = "GITHUB_RETENTION_DAYS";
 
     // GitHub Actions context (for CI metadata in reports)
     public const string GitHubSha = "GITHUB_SHA";

@@ -786,7 +786,8 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         {
             try
             {
-                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken!, resultsUrl!, cancellationToken);
+                var retentionDays = ParseRetentionDays();
+                artifactId = await GitHubArtifactUploader.UploadAsync(filePath, runtimeToken!, resultsUrl!, retentionDays, cancellationToken);
 
                 if (artifactId is not null)
                 {
@@ -811,5 +812,22 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                 _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
             }
         }
+    }
+
+    private static int? ParseRetentionDays()
+    {
+        var raw = Environment.GetEnvironmentVariable(EnvironmentConstants.ArtifactRetentionDays);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var days) && days > 0)
+        {
+            return days;
+        }
+
+        Console.WriteLine($"Warning: Ignoring invalid {EnvironmentConstants.ArtifactRetentionDays} value '{raw}' (expected a positive integer number of days).");
+        return null;
     }
 }

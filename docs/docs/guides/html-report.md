@@ -93,6 +93,23 @@ If you prefer not to expose the runtime token, you can upload the report yoursel
     path: '**/*-report.html'
 ```
 
+### Setting Artifact Retention
+
+By default the uploaded artifact uses your repository's default retention period. To keep
+the report for a shorter time (and stay under your Actions storage quota), set the
+`TUNIT_ARTIFACT_RETENTION_DAYS` environment variable to the number of days you want:
+
+```yaml
+- name: Run Tests
+  run: dotnet run --project MyTests
+  env:
+    TUNIT_ARTIFACT_RETENTION_DAYS: 5
+```
+
+The value must be a positive integer. If it exceeds your repository/organization maximum,
+TUnit clamps it to that maximum. This applies only to the automatic upload (Option A); the
+manual `upload-artifact` step (Option B) has its own [`retention-days`](https://github.com/actions/upload-artifact#retention-period) input.
+
 ### Viewing the Report
 
 After the workflow run completes:
