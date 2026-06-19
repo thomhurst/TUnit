@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -393,4 +392,3 @@ public class CollectionOverloadResolutionTests
         await Assert.That(collection).Contains(1);
     }
 }
-#endif

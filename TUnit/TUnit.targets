@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
-    <PropertyGroup>
-        <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
-    </PropertyGroup>
+    <!-- LangVersion default moved to TUnit.props: a .targets default never wins against the SDK's
+         target-framework LangVersion default (set during the .targets phase). See #6276/#6280. -->
 
 </Project>
