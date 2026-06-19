@@ -88,6 +88,11 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         {
             var className = model.MinimalTypeName;
 
+            // Disambiguator (stable within a build) so distinct sources that share a minimal type
+            // name + method name — different namespaces, or same-named overloads on different lines —
+            // get unique generated file names AND unique fields on the shared registration partial.
+            var uniqueSuffix = ((uint)$"{model.FullyQualifiedTypeName}.{model.MethodName}#{model.LineNumber}".GetHashCode()).ToString("x8");
+
             using var sourceBuilder = new CodeWriter();
 
             sourceBuilder.AppendLine("using global::System.Linq;");
@@ -134,13 +139,13 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             {
                 using (sourceBuilder.BeginBlock("internal static partial class TUnit_DynamicTestRegistration"))
                 {
-                    sourceBuilder.AppendLine($"static readonly int _r_Dynamic_{className}_{model.MethodName} = global::TUnit.Core.SourceRegistrar.RegisterDynamic(new global::TUnit.SourceGenerated.{className}());");
+                    sourceBuilder.AppendLine($"static readonly int _r_Dynamic_{className}_{model.MethodName}_{uniqueSuffix} = global::TUnit.Core.SourceRegistrar.RegisterDynamic(new global::TUnit.SourceGenerated.{className}());");
                 }
             }
 
             // Deterministic filename - no GUID needed since file keyword prevents collisions
             // and each method is unique within its type
-            context.AddSource($"Dynamic_{className}_{model.MethodName}.g.cs", sourceBuilder.ToString());
+            context.AddSource($"Dynamic_{className}_{model.MethodName}_{uniqueSuffix}.g.cs", sourceBuilder.ToString());
         }
         catch (Exception ex)
         {

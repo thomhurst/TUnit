@@ -238,7 +238,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             var typeName = propertyData.Property.ContainingType.GloballyQualified;
             var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
-            var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}";
+            // SafeName maps every non-alphanumeric char to '_', so distinct types whose names differ
+            // only in '.' vs '_' (e.g. A_B.C vs A.B_C) would collide. Append a stable per-build hash of
+            // the fully-qualified type + property to keep each merged-.cctor field unique.
+            var stableHash = ((uint)$"{typeName}.{propertyData.Property.Name}".GetHashCode()).ToString("x8");
+            var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
 
             if (!registeredFields.Add(fieldName))
             {
