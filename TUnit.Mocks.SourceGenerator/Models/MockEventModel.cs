@@ -40,7 +40,8 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     /// Extra interface FQNs whose identically-named event slot this event also satisfies but
     /// which the generated wrapper must forward explicitly. Populated when a base-interface
     /// event is hidden by a <c>new</c> event (or inherited from multiple interfaces). See
-    /// <see cref="MockMemberModel.AdditionalExplicitInterfaceNames"/> (#6252).
+    /// <see cref="MockMemberModel.AdditionalExplicitSlots"/> (#6252). Events have no asymmetric
+    /// accessors, so this stays a plain name list (unlike the property/method slot model).
     /// </summary>
     public EquatableArray<string> AdditionalExplicitInterfaceNames { get; init; } = EquatableArray<string>.Empty;
     public string OverrideAccessModifier { get; init; } = "public";

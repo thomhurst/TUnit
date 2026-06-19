@@ -96,10 +96,10 @@ internal static class MockWrapperTypeBuilder
         // Additional explicit forwards for distinct interface slots this member also satisfies
         // (base members hidden by `new`, or inherited from multiple interfaces). Each slot needs
         // its own explicit impl, cast to that interface so the right slot is hit on Object (#6252).
-        foreach (var extra in method.AdditionalExplicitInterfaceNames)
+        foreach (var extra in method.AdditionalExplicitSlots)
         {
             writer.AppendLine();
-            EmitMethodForward(writer, method, extra, CastTarget(extra));
+            EmitMethodForward(writer, method, extra.InterfaceName, CastTarget(extra.InterfaceName));
         }
     }
 
@@ -132,16 +132,18 @@ internal static class MockWrapperTypeBuilder
     private static void GeneratePropertyForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var interfaceName = GetForwardingInterfaceName(prop, model);
-        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
+        // The primary forward emits the declaring slot's OWN accessors, not the merged set, so an
+        // asymmetric `new`-hidden slot doesn't gain an accessor it never declared (CS0550, #6263).
+        EmitPropertyForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName), prop.OwnHasGetter, prop.OwnHasSetter);
 
-        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        foreach (var extra in prop.AdditionalExplicitSlots)
         {
             writer.AppendLine();
-            EmitPropertyForward(writer, prop, extra, CastTarget(extra));
+            EmitPropertyForward(writer, prop, extra.InterfaceName, CastTarget(extra.InterfaceName), extra.HasGetter, extra.HasSetter);
         }
     }
 
-    private static void EmitPropertyForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    private static void EmitPropertyForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target, bool hasGetter, bool hasSetter)
     {
         var returnType = prop.ReturnType;
 
@@ -150,8 +152,8 @@ internal static class MockWrapperTypeBuilder
         // Per-accessor [Obsolete] is injected inline so the property line stays a one-liner.
         var getterAttr = GetAccessorObsoletePrefix(prop.GetterObsoleteAttribute);
         var setterAttr = GetAccessorObsoletePrefix(prop.SetterObsoleteAttribute);
-        var getter = prop.HasGetter ? $"{getterAttr}get => {target}.{EscapeIdentifier(prop.Name)}; " : "";
-        var setter = prop.HasSetter ? $"{setterAttr}set => {target}.{EscapeIdentifier(prop.Name)} = value; " : "";
+        var getter = hasGetter ? $"{getterAttr}get => {target}.{EscapeIdentifier(prop.Name)}; " : "";
+        var setter = hasSetter ? $"{setterAttr}set => {target}.{EscapeIdentifier(prop.Name)} = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.{EscapeIdentifier(prop.Name)} {{ {getter}{setter}}}");
     }
@@ -159,16 +161,16 @@ internal static class MockWrapperTypeBuilder
     private static void GenerateIndexerForwarding(CodeWriter writer, MockMemberModel prop, MockTypeModel model)
     {
         var interfaceName = GetForwardingInterfaceName(prop, model);
-        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName));
+        EmitIndexerForward(writer, prop, interfaceName, GetPrimaryTarget(prop, interfaceName), prop.OwnHasGetter, prop.OwnHasSetter);
 
-        foreach (var extra in prop.AdditionalExplicitInterfaceNames)
+        foreach (var extra in prop.AdditionalExplicitSlots)
         {
             writer.AppendLine();
-            EmitIndexerForward(writer, prop, extra, CastTarget(extra));
+            EmitIndexerForward(writer, prop, extra.InterfaceName, CastTarget(extra.InterfaceName), extra.HasGetter, extra.HasSetter);
         }
     }
 
-    private static void EmitIndexerForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target)
+    private static void EmitIndexerForward(CodeWriter writer, MockMemberModel prop, string interfaceName, string target, bool hasGetter, bool hasSetter)
     {
         var returnType = prop.ReturnType;
         var paramList = MockImplBuilder.GetParameterList(prop);
@@ -178,8 +180,8 @@ internal static class MockWrapperTypeBuilder
 
         var getterAttr = GetAccessorObsoletePrefix(prop.GetterObsoleteAttribute);
         var setterAttr = GetAccessorObsoletePrefix(prop.SetterObsoleteAttribute);
-        var getter = prop.HasGetter ? $"{getterAttr}get => {target}[{argPassList}]; " : "";
-        var setter = prop.HasSetter ? $"{setterAttr}set => {target}[{argPassList}] = value; " : "";
+        var getter = hasGetter ? $"{getterAttr}get => {target}[{argPassList}]; " : "";
+        var setter = hasSetter ? $"{setterAttr}set => {target}[{argPassList}] = value; " : "";
 
         writer.AppendLine($"{returnType} {interfaceName}.this[{paramList}] {{ {getter}{setter}}}");
     }
@@ -197,7 +199,7 @@ internal static class MockWrapperTypeBuilder
     // or when it also satisfies other slots — otherwise `Object.X` may be ambiguous (CS0121) or bind
     // to the wrong slot (#6252).
     private static string GetPrimaryTarget(MockMemberModel member, string interfaceName)
-        => member.ExplicitInterfaceName is not null || member.AdditionalExplicitInterfaceNames.Length > 0
+        => member.ExplicitInterfaceName is not null || member.AdditionalExplicitSlots.Length > 0
             ? CastTarget(interfaceName)
             : "Object";
 
