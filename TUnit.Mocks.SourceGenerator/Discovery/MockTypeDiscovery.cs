@@ -151,10 +151,10 @@ internal static class MockTypeDiscovery
         // these, members returning user interfaces reference CreateAutoMock factories that are
         // never generated when only Mock.Of<T1,T2>() appears in the assembly.
         var visited = new HashSet<string>();
-        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly, compilation);
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, compilationAssembly, compilation);
         foreach (var additionalType in additionalTypes)
         {
-            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(additionalType, visited, maxDepth: 3, compilationAssembly, compilation));
+            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(additionalType, visited, compilationAssembly, compilation));
         }
 
         // Build multi-type model (generates impl + factory)
@@ -231,18 +231,31 @@ internal static class MockTypeDiscovery
 
     /// <summary>
     /// Walks the members of a type and discovers interface return types that need mock factories
-    /// generated for auto-mocking support. Recurses up to maxDepth levels.
+    /// generated for auto-mocking support. Recurses over the full transitive closure; the
+    /// <paramref name="visited"/> set both prevents cycles and bounds the walk to the finite set
+    /// of distinct reachable interfaces. The closure must be complete — every auto-mockable return
+    /// type that a generated impl references must itself be generated, otherwise the boundary type
+    /// references a factory that was never emitted (CS0400). See issue #6264.
     /// </summary>
     private static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
-        INamedTypeSymbol type, HashSet<string> visited, int maxDepth, IAssemblySymbol? compilationAssembly, Compilation compilation)
+        INamedTypeSymbol type, HashSet<string> visited, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
         var results = new List<MockTypeModel>();
-        if (maxDepth <= 0) return results;
+        // Mark the entry type as visited so a member returning it (a self-cycle) is skipped.
+        visited.Add(NormalizeTransitiveInterfaceReturnType(type).GetFullyQualifiedName());
+        CollectTransitiveInterfaceTypes(type, visited, results, compilationAssembly, compilation);
+        return results;
+    }
 
-        var canonicalType = NormalizeTransitiveInterfaceReturnType(type);
-        var fqn = canonicalType.GetFullyQualifiedName();
-        visited.Add(fqn);
-
+    /// <summary>
+    /// Recursive worker for <see cref="DiscoverTransitiveInterfaceTypes"/>. Appends directly into
+    /// the shared <paramref name="results"/> accumulator (no per-frame list / merge) and records
+    /// each discovered type in <paramref name="visited"/> before recursing.
+    /// </summary>
+    private static void CollectTransitiveInterfaceTypes(
+        INamedTypeSymbol type, HashSet<string> visited, List<MockTypeModel> results,
+        IAssemblySymbol? compilationAssembly, Compilation compilation)
+    {
         // Collect all members from the type and its interfaces
         var members = new List<ISymbol>(type.GetMembers());
         foreach (var iface in type.AllInterfaces)
@@ -286,19 +299,16 @@ internal static class MockTypeDiscovery
             if (HasStaticAbstractMembers(namedReturn))
                 continue;
 
-            var returnFqn = namedReturn.GetFullyQualifiedName();
-            if (visited.Contains(returnFqn)) continue;
-            visited.Add(returnFqn);
+            // Add returns false if already discovered/visited — skip without re-walking.
+            if (!visited.Add(namedReturn.GetFullyQualifiedName())) continue;
 
             var model = BuildSingleTypeModel(namedReturn, isPartialMock: false, compilationAssembly, compilation);
             if (model is null) continue;
 
             results.Add(model);
-            // Recurse into the transitive type's members
-            results.AddRange(DiscoverTransitiveInterfaceTypes(namedReturn, visited, maxDepth - 1, compilationAssembly, compilation));
+            // Recurse into the transitive type's members, accumulating into the same list.
+            CollectTransitiveInterfaceTypes(namedReturn, visited, results, compilationAssembly, compilation);
         }
-
-        return results;
     }
 
     /// <summary>
@@ -388,7 +398,7 @@ internal static class MockTypeDiscovery
             return ImmutableArray<MockTypeModel>.Empty;
 
         var visited = new HashSet<string>();
-        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, maxDepth: 3, compilationAssembly, compilation);
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, compilationAssembly, compilation);
 
         if (transitiveModels.Count == 0)
             return ImmutableArray.Create(model);
