@@ -2182,6 +2182,46 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public void Interface_Hiding_Property_With_New_And_Different_Accessors_Forwards_Per_Slot_Accessors()
+    {
+        // Regression #6263: IDerived hides a base property with `new` AND a different accessor set.
+        // IBase.Prop (get-only) and IDerived.Prop (get+set) are distinct slots. The shared impl holds
+        // the merged accessors, but each explicit wrapper forward must emit only the accessors ITS
+        // slot declares — else the base forward adds a `set` IBase never had (CS0550). Both directions.
+        var source = """
+            using TUnit.Mocks;
+
+            public interface IBase { string Prop { get; } }
+            public interface IDerived : IBase { new string Prop { get; set; } }
+
+            public interface IRwBase { string Other { get; set; } }
+            public interface IRoDerived : IRwBase { new string Other { get; } }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var a = Mock.Of<IDerived>();
+                    var b = Mock.Of<IRoDerived>();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        // Derived slot keeps both accessors; the get-only base slot forward must NOT emit a setter.
+        AssertContains(output, "string global::IDerived.Prop { get => ((global::IDerived)Object).Prop; set => ((global::IDerived)Object).Prop = value; }");
+        AssertContains(output, "string global::IBase.Prop { get => ((global::IBase)Object).Prop; }");
+
+        // Reverse: derived drops the setter, base keeps it.
+        AssertContains(output, "string global::IRoDerived.Other { get => ((global::IRoDerived)Object).Other; }");
+        AssertContains(output, "string global::IRwBase.Other { get => ((global::IRwBase)Object).Other; set => ((global::IRwBase)Object).Other = value; }");
+
+        AssertNoGeneratedError(source, "CS0550");
+        AssertNoGeneratedError(source, "CS0535");
+    }
+
+    [Test]
     public void Interface_Inheriting_Identical_Member_From_Multiple_Interfaces_Forwards_Both_Slots()
     {
         // Regression #6252 (diamond): IDiamondC inherits an identically-signed Go() from two

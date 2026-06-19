@@ -38,16 +38,28 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string? DeclaringInterfaceName { get; init; }
 
     /// <summary>
-    /// Extra interface FQNs whose identically-signed member slot this single member also
-    /// satisfies, but which the generated wrapper type must implement with its own explicit
-    /// interface forward. Populated when a base-interface member is hidden by a <c>new</c>
-    /// member, or when identical members are inherited from multiple interfaces: the shared
-    /// impl implements every slot implicitly, but the wrapper forwards explicitly, and an
-    /// explicit impl satisfies only the one slot it names — so each shadowed base slot needs
-    /// its own forward or the build fails with CS0535 (#6252). Empty in the common case and
-    /// consumed only by <see cref="Builders.MockWrapperTypeBuilder"/> (single-interface mocks).
+    /// Extra interface slots whose identically-signed member this single member also satisfies,
+    /// but which the generated wrapper type must implement with its own explicit interface forward.
+    /// Populated when a base-interface member is hidden by a <c>new</c> member, or when identical
+    /// members are inherited from multiple interfaces: the shared impl implements every slot
+    /// implicitly, but the wrapper forwards explicitly, and an explicit impl satisfies only the one
+    /// slot it names — so each shadowed base slot needs its own forward or the build fails with
+    /// CS0535 (#6252). Each slot carries its own accessor presence so the forward emits only the
+    /// accessors that interface declares (asymmetric <c>new</c> hiding — CS0550, #6263). Empty in the
+    /// common case and consumed only by <see cref="Builders.MockWrapperTypeBuilder"/> (single-interface mocks).
     /// </summary>
-    public EquatableArray<string> AdditionalExplicitInterfaceNames { get; init; } = EquatableArray<string>.Empty;
+    public EquatableArray<MockExplicitInterfaceSlot> AdditionalExplicitSlots { get; init; } = EquatableArray<MockExplicitInterfaceSlot>.Empty;
+
+    /// <summary>
+    /// The accessors declared by this member's <em>own</em> primary slot
+    /// (<see cref="DeclaringInterfaceName"/>), before <c>MergePropertyAccessors</c> widened
+    /// <see cref="HasGetter"/>/<see cref="HasSetter"/> to the union across all shadowed slots.
+    /// The wrapper's primary explicit forward emits from these so it doesn't add an accessor the
+    /// declaring interface lacks (CS0550, #6263). Equal to <see cref="HasGetter"/>/<see cref="HasSetter"/>
+    /// in the common (non-shadowing) case, keeping generated output byte-identical. Unused for methods.
+    /// </summary>
+    public bool OwnHasGetter { get; init; }
+    public bool OwnHasSetter { get; init; }
     public string NullableAnnotation { get; init; } = "None";
     public string SmartDefault { get; init; } = "default!";
     public string UnwrappedSmartDefault { get; init; } = "default!";
@@ -147,7 +159,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && ExplicitInterfaceName == other.ExplicitInterfaceName
             && ExplicitInterfaceCanDelegate == other.ExplicitInterfaceCanDelegate
             && DeclaringInterfaceName == other.DeclaringInterfaceName
-            && AdditionalExplicitInterfaceNames.Equals(other.AdditionalExplicitInterfaceNames)
+            && AdditionalExplicitSlots.Equals(other.AdditionalExplicitSlots)
+            && OwnHasGetter == other.OwnHasGetter
+            && OwnHasSetter == other.OwnHasSetter
             && NullableAnnotation == other.NullableAnnotation
             && SmartDefault == other.SmartDefault
             && UnwrappedSmartDefault == other.UnwrappedSmartDefault
@@ -186,7 +200,9 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + ExplicitInterfaceCanDelegate.GetHashCode();
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
-            hash = hash * 31 + AdditionalExplicitInterfaceNames.GetHashCode();
+            hash = hash * 31 + AdditionalExplicitSlots.GetHashCode();
+            hash = hash * 31 + OwnHasGetter.GetHashCode();
+            hash = hash * 31 + OwnHasSetter.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             hash = hash * 31 + GetterObsoleteAttribute.GetHashCode();
             hash = hash * 31 + SetterObsoleteAttribute.GetHashCode();

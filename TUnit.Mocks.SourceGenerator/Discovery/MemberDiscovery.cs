@@ -98,12 +98,27 @@ internal static class MemberDiscovery
     /// the interface already matches the member's own slot or is already recorded. Only meaningful
     /// for single-interface mocks — the only ones with a wrapper.
     /// </summary>
-    private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn)
+    /// <param name="slotHasGetter">/<param name="slotHasSetter">: the accessors declared by the
+    /// shadowed slot itself, so the wrapper forward for it emits only those (asymmetric <c>new</c>
+    /// hiding — CS0550, #6263). Both true for methods, where accessor presence is irrelevant.</param>
+    private static void RecordAdditionalWrapperInterface(List<MockMemberModel> members, int index, string interfaceFqn,
+        bool slotHasGetter, bool slotHasSetter)
     {
         var existing = members[index];
-        var updated = AppendDistinctSlot(existing.AdditionalExplicitInterfaceNames,
-            existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName, interfaceFqn, out var changed);
-        if (changed) members[index] = existing with { AdditionalExplicitInterfaceNames = updated };
+        var ownSlot = existing.ExplicitInterfaceName ?? existing.DeclaringInterfaceName;
+        if (ownSlot == interfaceFqn) return;
+        var array = existing.AdditionalExplicitSlots.AsImmutableArray();
+        if (array.Any(s => s.InterfaceName == interfaceFqn)) return;
+        var slot = new MockExplicitInterfaceSlot
+        {
+            InterfaceName = interfaceFqn,
+            HasGetter = slotHasGetter,
+            HasSetter = slotHasSetter
+        };
+        members[index] = existing with
+        {
+            AdditionalExplicitSlots = new EquatableArray<MockExplicitInterfaceSlot>(array.Add(slot))
+        };
     }
 
     /// <summary>Event counterpart of <see cref="RecordAdditionalWrapperInterface"/>. Locates the
@@ -221,7 +236,7 @@ internal static class MemberDiscovery
                                     // forwards that slot, else the build fails with CS0535 (#6252).
                                     if (primaryClassSymbol is null && existing.Index >= 0)
                                     {
-                                        RecordAdditionalWrapperInterface(state.Methods, existing.Index, interfaceFqn);
+                                        RecordAdditionalWrapperInterface(state.Methods, existing.Index, interfaceFqn, slotHasGetter: true, slotHasSetter: true);
                                     }
                                     continue;
                                 }
@@ -277,8 +292,11 @@ internal static class MemberDiscovery
                                 {
                                     MergePropertyAccessors(state.Properties, existingIndex.Value, property, ref state.MemberIdCounter, compilationAssembly);
                                     // Distinct slot hidden by `new` (or inherited twice) — the wrapper
-                                    // needs its own explicit forward for it too (#6252).
-                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn);
+                                    // needs its own explicit forward for it too (#6252), emitting only
+                                    // the accessors this slot declares (#6263).
+                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
+                                        IsAccessorAccessible(property.GetMethod, compilationAssembly),
+                                        IsAccessorAccessible(property.SetMethod, compilationAssembly));
                                 }
                                 // else: class-primary walk and the existing member already covers
                                 // every accessor the interface needs — plain dedup.
@@ -308,10 +326,13 @@ internal static class MemberDiscovery
                             {
                                 MergePropertyAccessors(state.Properties, existingIndex.Value, indexer, ref state.MemberIdCounter, compilationAssembly);
                                 // Distinct indexer slot hidden by `new` (or inherited twice) — the
-                                // wrapper needs its own explicit forward for it too (#6252).
+                                // wrapper needs its own explicit forward for it too (#6252), emitting
+                                // only the accessors this slot declares (#6263).
                                 if (primaryClassSymbol is null)
                                 {
-                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn);
+                                    RecordAdditionalWrapperInterface(state.Properties, existingIndex.Value, interfaceFqn,
+                                        IsAccessorAccessible(indexer.GetMethod, compilationAssembly),
+                                        IsAccessorAccessible(indexer.SetMethod, compilationAssembly));
                                 }
                             }
                             else if (primaryClassSymbol is not null && state.SeenExplicitImpls.Add($"{interfaceFqn}|{key}"))
@@ -781,6 +802,8 @@ internal static class MemberDiscovery
             IsProperty = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            OwnHasGetter = hasGetter,
+            OwnHasSetter = hasSetter,
             SetterMemberId = setterId,
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
@@ -874,6 +897,8 @@ internal static class MemberDiscovery
             IsIndexer = true,
             HasGetter = hasGetter,
             HasSetter = hasSetter,
+            OwnHasGetter = hasGetter,
+            OwnHasSetter = hasSetter,
             Parameters = new EquatableArray<MockParameterModel>(
                 indexer.Parameters.Select(p => new MockParameterModel
                 {
