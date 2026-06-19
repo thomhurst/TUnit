@@ -542,7 +542,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.AppendLine();
 
         var converterIndex = 0;
-        var registrations = new List<string>();
+        var converterClassNames = new List<string>();
 
         foreach (var conversion in conversions)
         {
@@ -646,7 +646,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.AppendLine("}");
             writer.AppendLine();
 
-            registrations.Add(converterClassName);
+            converterClassNames.Add(converterClassName);
         }
 
         // Contribute static field initializers to the shared TUnit_ConverterRegistration partial
@@ -657,7 +657,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        foreach (var converterClassName in registrations)
+        foreach (var converterClassName in converterClassNames)
         {
             writer.AppendLine($"static readonly int _r_{converterClassName} = global::TUnit.Core.Converters.AotConverterRegistry.Register(new {converterClassName}());");
         }

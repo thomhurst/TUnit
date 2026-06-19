@@ -33,6 +33,19 @@ public class InfrastructureGenerator : IIncrementalGenerator
         "7cec85d7bea7798e", // .NET Core
     ];
 
+    // Shared partial-class shells in TUnit.Generated, one per registration concern. Per-file
+    // generated code contributes static field initializers to these; the compiler merges each into
+    // a single .cctor, triggered once from the module initializer below via RunClassConstructor.
+    private static readonly string[] RegistrationShells =
+    [
+        "TUnit_TestRegistration",
+        "TUnit_HookRegistration",
+        "TUnit_PropertyRegistration",
+        "TUnit_ConverterRegistration",
+        "TUnit_StaticPropertyRegistration",
+        "TUnit_DynamicTestRegistration",
+    ];
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -455,12 +468,10 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 // execute, performing all registrations in ONE JIT-compiled method per concern instead
                 // of N per-file [ModuleInitializer] methods.
                 // No try/catch needed — InfrastructureGenerator always emits these shell classes.
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_PropertyRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_ConverterRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_StaticPropertyRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_DynamicTestRegistration).TypeHandle);");
+                foreach (var shell in RegistrationShells)
+                {
+                    sourceBuilder.AppendLine($"global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.{shell}).TypeHandle);");
+                }
                 sourceBuilder.AppendLine();
 
                 sourceBuilder.AppendLine("try");
@@ -481,18 +492,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("namespace TUnit.Generated");
         sourceBuilder.AppendLine("{");
         sourceBuilder.Indent();
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_TestRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_HookRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_PropertyRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_ConverterRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_StaticPropertyRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_DynamicTestRegistration { }");
+        foreach (var shell in RegistrationShells)
+        {
+            sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+            sourceBuilder.AppendLine($"internal static partial class {shell} {{ }}");
+        }
         sourceBuilder.Unindent();
         sourceBuilder.AppendLine("}");
 
