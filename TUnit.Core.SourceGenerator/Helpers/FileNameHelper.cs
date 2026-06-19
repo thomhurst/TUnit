@@ -179,9 +179,11 @@ internal static class FileNameHelper
 
     /// <summary>
     /// Computes a deterministic hash code for a string (FNV-1a).
-    /// Unlike string.GetHashCode(), this is stable across processes and platforms.
+    /// Unlike string.GetHashCode(), this is stable across processes and platforms,
+    /// so it is safe to bake into generated identifiers and hint names that must stay
+    /// consistent across compiler restarts (preserving Roslyn's incremental cache).
     /// </summary>
-    private static uint GetStableHashCode(string str)
+    public static uint GetStableHashCode(string str)
     {
         unchecked
         {

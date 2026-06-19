@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 using TUnit.Core.SourceGenerator.Models;
 
@@ -577,7 +578,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static void GeneratePropertyInjectionSource(SourceProductionContext context, ClassPropertyInjectionModel model)
     {
-        var sourceClassName = $"PropertyInjectionSource_{Math.Abs(model.ClassFullyQualifiedName.GetHashCode()):x}";
+        // Stable (per-build deterministic) hash of the full type name. SafeClassName collapses every
+        // separator to '_', so two types whose FQNs differ only in '.' vs '_' share a SafeClassName;
+        // the hash keeps both the source-class name and the merged-.cctor field unique.
+        var stableHash = FileNameHelper.GetStableHashCode(model.ClassFullyQualifiedName).ToString("x8");
+        var sourceClassName = $"PropertyInjectionSource_{stableHash}";
         var fileName = $"{model.SafeClassName}_PropertyInjection.g.cs";
 
         var sb = new StringBuilder();
@@ -652,7 +657,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("{");
         sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine($"static readonly int _r_{model.SafeClassName}_PropSource = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ClassFullyQualifiedName}), new global::TUnit.Core.{sourceClassName}());");
+        sb.AppendLine($"static readonly int _r_{model.SafeClassName}_PropSource_{stableHash} = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ClassFullyQualifiedName}), new global::TUnit.Core.{sourceClassName}());");
         sb.AppendLine("}");
         sb.AppendLine("}");
 
@@ -752,6 +757,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateInitializerPropertySource(SourceProductionContext context, AsyncInitializerModel model)
     {
         var fileName = $"{model.SafeTypeName}_InitializerProperties.g.cs";
+        var stableHash = FileNameHelper.GetStableHashCode(model.TypeFullyQualified).ToString("x8");
 
         var sb = new StringBuilder();
         WriteGeneratedFileHeader(sb);
@@ -765,7 +771,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // instead of a per-type [ModuleInitializer]. All contributions merge into one .cctor.
         sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_InitProps = InitializerPropertyRegistry.Register(typeof({model.TypeFullyQualified}), new InitializerPropertyInfo[]");
+        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_InitProps_{stableHash} = InitializerPropertyRegistry.Register(typeof({model.TypeFullyQualified}), new InitializerPropertyInfo[]");
         sb.AppendLine("    {");
 
         foreach (var prop in model.Properties)
@@ -790,7 +796,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     /// </summary>
     private static void GenerateGenericPropertyInjectionSource(SourceProductionContext context, ConcreteGenericTypeModel model)
     {
-        var sourceClassName = $"PropertyInjectionSource_Generic_{Math.Abs(model.ConcreteTypeFullyQualified.GetHashCode()):x}";
+        // See GeneratePropertyInjectionSource: deterministic hash disambiguates SafeTypeName collisions.
+        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8");
+        var sourceClassName = $"PropertyInjectionSource_Generic_{stableHash}";
         var fileName = $"{model.SafeTypeName}_Generic_PropertyInjection.g.cs";
 
         var sb = new StringBuilder();
@@ -864,7 +872,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("{");
         sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine($"static readonly int _r_{model.SafeTypeName}_Generic_PropSource = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new global::TUnit.Core.{sourceClassName}());");
+        sb.AppendLine($"static readonly int _r_{model.SafeTypeName}_Generic_PropSource_{stableHash} = global::TUnit.Core.PropertySourceRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new global::TUnit.Core.{sourceClassName}());");
         sb.AppendLine("}");
         sb.AppendLine("}");
 
@@ -878,6 +886,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateGenericInitializerPropertySource(SourceProductionContext context, ConcreteGenericTypeModel model)
     {
         var fileName = $"{model.SafeTypeName}_Generic_InitializerProperties.g.cs";
+        var stableHash = FileNameHelper.GetStableHashCode(model.ConcreteTypeFullyQualified).ToString("x8");
 
         var sb = new StringBuilder();
         WriteGeneratedFileHeader(sb);
@@ -891,7 +900,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // instead of a per-type [ModuleInitializer]. All contributions merge into one .cctor.
         sb.AppendLine("internal static partial class TUnit_PropertyRegistration");
         sb.AppendLine("{");
-        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_Generic_InitProps = InitializerPropertyRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new InitializerPropertyInfo[]");
+        sb.AppendLine($"    static readonly int _r_{model.SafeTypeName}_Generic_InitProps_{stableHash} = InitializerPropertyRegistry.Register(typeof({model.ConcreteTypeFullyQualified}), new InitializerPropertyInfo[]");
         sb.AppendLine("    {");
 
         foreach (var prop in model.InitializerProperties)

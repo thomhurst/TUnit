@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
@@ -239,9 +240,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             var typeName = propertyData.Property.ContainingType.GloballyQualified;
             var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
             // SafeName maps every non-alphanumeric char to '_', so distinct types whose names differ
-            // only in '.' vs '_' (e.g. A_B.C vs A.B_C) would collide. Append a stable per-build hash of
-            // the fully-qualified type + property to keep each merged-.cctor field unique.
-            var stableHash = ((uint)$"{typeName}.{propertyData.Property.Name}".GetHashCode()).ToString("x8");
+            // only in '.' vs '_' (e.g. A_B.C vs A.B_C) would collide. Append a deterministic hash of
+            // the fully-qualified type + property to keep each merged-.cctor field unique. FNV-1a (not
+            // string.GetHashCode) so the field name is stable across compiler restarts.
+            var stableHash = FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8");
             var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
 
             if (!registeredFields.Add(fieldName))

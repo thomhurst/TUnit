@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models.Extracted;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators;
@@ -88,10 +89,11 @@ public class DynamicTestsGenerator : IIncrementalGenerator
         {
             var className = model.MinimalTypeName;
 
-            // Disambiguator (stable within a build) so distinct sources that share a minimal type
-            // name + method name — different namespaces, or same-named overloads on different lines —
-            // get unique generated file names AND unique fields on the shared registration partial.
-            var uniqueSuffix = ((uint)$"{model.FullyQualifiedTypeName}.{model.MethodName}#{model.LineNumber}".GetHashCode()).ToString("x8");
+            // Disambiguator so distinct sources that share a minimal type name + method name —
+            // different namespaces, or same-named overloads on different lines — get unique generated
+            // file names AND unique fields on the shared registration partial. FNV-1a (not
+            // string.GetHashCode) so the file/field names stay stable across compiler restarts.
+            var uniqueSuffix = FileNameHelper.GetStableHashCode($"{model.FullyQualifiedTypeName}.{model.MethodName}#{model.LineNumber}").ToString("x8");
 
             using var sourceBuilder = new CodeWriter();
 
