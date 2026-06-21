@@ -59,6 +59,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
             BeforeTestDiscoveryContext.Current = serviceProvider.ContextProvider.BeforeTestDiscoveryContext;
             TestDiscoveryContext.Current = serviceProvider.ContextProvider.TestDiscoveryContext;
+            // Expose the engine-wide abort token on the session context so session-scoped
+            // fixtures (containers, Aspire apps, etc.) can observe run cancellation and tear
+            // themselves down.
+            serviceProvider.ContextProvider.TestSessionContext.SessionCancellationToken = serviceProvider.CancellationToken.Token;
             TestSessionContext.Current = serviceProvider.ContextProvider.TestSessionContext;
 
             serviceProvider.Initializer.Initialize();

@@ -59,6 +59,20 @@ public class TestSessionContext : Context
 
     public required string? TestFilter { get; init; }
 
+    /// <summary>
+    /// The engine-wide cancellation token for this test session. Signalled when the run is
+    /// aborted (e.g. Ctrl+C, IDE stop, or process exit). Session-scoped fixtures
+    /// (<see cref="Interfaces.IAsyncInitializer"/> implementations such as long-running
+    /// containers or distributed applications) can observe this to abort startup and tear
+    /// themselves down promptly on an abort request.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see cref="System.Threading.CancellationToken.None"/> until the engine
+    /// populates it at the start of execution. Per-test cancellation flows through
+    /// <see cref="TestContext.CancellationToken"/> instead; this token spans the whole session.
+    /// </remarks>
+    public CancellationToken SessionCancellationToken { get; internal set; }
+
     private readonly Lock _lock = new();
     private readonly List<AssemblyHookContext> _assemblies = [];
     private ClassHookContext[]? _cachedTestClasses;
