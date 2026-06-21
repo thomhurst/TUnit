@@ -9,7 +9,7 @@ sidebar_position: 9
 > Compilation time from a clean build across frameworks — how long it takes to build an identical test project.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-06-14** from the latest CI run.
+This benchmark was automatically generated on **2026-06-21** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.301
 :::
@@ -20,10 +20,10 @@ Compilation time comparison across frameworks:
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.54.0 | 954.0 ms | 952.6 ms | 33.32 ms |
-| Build_NUnit | 4.6.1 | 919.6 ms | 918.1 ms | 18.20 ms |
-| Build_MSTest | 4.2.3 | 1,061.5 ms | 1,048.9 ms | 46.60 ms |
-| Build_xUnit3 | 3.2.2 | 935.1 ms | 935.9 ms | 10.66 ms |
+| **TUnit** | 1.56.18 | 959.6 ms | 954.8 ms | 16.36 ms |
+| Build_NUnit | 4.6.1 | 946.9 ms | 939.9 ms | 17.64 ms |
+| Build_MSTest | 4.2.3 | 1,048.0 ms | 1,049.6 ms | 52.40 ms |
+| Build_xUnit3 | 3.2.2 | 895.6 ms | 893.5 ms | 6.42 ms |
 
 ## 📈 Visual Comparison
 
@@ -61,8 +61,8 @@ Compilation time comparison across frameworks:
 xychart-beta
   title "Build Time Comparison"
   x-axis ["Build_TUnit", "Build_NUnit", "Build_MSTest", "Build_xUnit3"]
-  y-axis "Time (ms)" 0 --> 1274
-  bar [954, 919.6, 1061.5, 935.1]
+  y-axis "Time (ms)" 0 --> 1258
+  bar [959.6, 946.9, 1048, 895.6]
 ```
 
 ---
@@ -71,4 +71,4 @@ xychart-beta
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-06-14T00:53:32.671Z*
+*Last generated: 2026-06-21T00:53:41.573Z*
