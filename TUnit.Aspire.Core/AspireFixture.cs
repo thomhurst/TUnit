@@ -551,13 +551,33 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
     }
 
+    private const int TimelineHead = 80;
+    private const int TimelineTail = 120;
+
     private void RecordTransition(StateTransition transition)
     {
         _timeline.Enqueue(transition);
 
-        // Bound the timeline so a flapping resource can't grow it without limit.
-        while (_timeline.Count > 200 && _timeline.TryDequeue(out _))
+        // Bound the timeline so a flapping resource can't grow it without limit, but keep BOTH
+        // the earliest transitions (the startup story — most diagnostic) and the most recent
+        // ones, dropping only the churn in the middle. Only the monitor task writes, so the
+        // drain/refill is safe; reads happen after it stops.
+        if (_timeline.Count > (TimelineHead + TimelineTail) * 2)
         {
+            var all = _timeline.ToArray();
+            while (_timeline.TryDequeue(out _))
+            {
+            }
+
+            foreach (var t in all.Take(TimelineHead))
+            {
+                _timeline.Enqueue(t);
+            }
+
+            foreach (var t in all.Skip(all.Length - TimelineTail))
+            {
+                _timeline.Enqueue(t);
+            }
         }
     }
 
@@ -568,25 +588,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return "none";
         }
 
-        var worst = HealthStatus.Healthy;
-        var anyPending = false;
-
-        foreach (var report in reports)
-        {
-            if (report.Status is { } status)
-            {
-                if (status < worst)
-                {
-                    worst = status;
-                }
-            }
-            else
-            {
-                anyPending = true;
-            }
-        }
-
-        return anyPending && worst == HealthStatus.Healthy ? "Pending" : worst.ToString();
+        // Per-check signature (not just the worst aggregate) so two checks flipping in opposite
+        // directions still register as a change, and the timeline shows which check moved.
+        return string.Join(", ", reports
+            .OrderBy(r => r.Name, StringComparer.Ordinal)
+            .Select(r => $"{r.Name}:{r.Status?.ToString() ?? "Pending"}"));
     }
 
     private static async Task StopMonitorAsync(CancellationTokenSource monitorCts, Task monitorTask)
@@ -675,13 +681,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{visibleNames.Count})");
         }));
 
-        // Fail-fast path: complete as soon as ANY resource enters a terminal failure state.
-        // Watch Exited too — a container that crash-exits cleanly never reports FailedToStart,
-        // so without it we would wait the full timeout for an already-dead resource.
-        string[] failureStates = [KnownResourceStates.FailedToStart, KnownResourceStates.Exited];
+        // Fail-fast path: complete as soon as ANY resource enters a genuine failure state.
+        // Watch a non-zero Exited too — a container that crash-exits cleanly never reports
+        // FailedToStart, so without it we would wait the full timeout for an already-dead
+        // resource. A clean (code 0) exit is excluded so successful one-shot resources
+        // (migration runners, seeders) aren't mis-reported as failures (see IsFailureState).
         var failureTasks = visibleNames.Select(async name =>
         {
-            await notificationService.WaitForResourceAsync(name, failureStates, failureCts.Token);
+            await notificationService.WaitForResourceAsync(name, evt => IsFailureState(evt.Snapshot), failureCts.Token);
             return name;
         }).ToList();
         var anyFailureTask = Task.WhenAny(failureTasks);
@@ -860,6 +867,31 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         || StateEquals(state, KnownResourceStates.Waiting)
         || StateEquals(state, KnownResourceStates.NotStarted)
         || StateEquals(state, KnownResourceStates.Building);
+
+    private static bool IsReadyState(string state)
+        => StateEquals(state, KnownResourceStates.Running)
+        || StateEquals(state, KnownResourceStates.Finished);
+
+    /// <summary>
+    /// Whether a snapshot represents a genuine startup failure. <c>FailedToStart</c> always counts;
+    /// <c>Exited</c> counts only with a non-zero exit code, so a one-shot resource (migration runner,
+    /// seeder) that exits cleanly with code 0 isn't mis-reported as a failure.
+    /// </summary>
+    private static bool IsFailureState(CustomResourceSnapshot snapshot)
+    {
+        var state = snapshot.State?.Text;
+        if (state is null)
+        {
+            return false;
+        }
+
+        if (StateEquals(state, KnownResourceStates.FailedToStart))
+        {
+            return true;
+        }
+
+        return StateEquals(state, KnownResourceStates.Exited) && snapshot.ExitCode is not (null or 0);
+    }
 
     /// <summary>Scans recent log lines for high-confidence failure signatures. Heuristic; a miss
     /// just falls through to state-based classification.</summary>
@@ -1045,12 +1077,20 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             return null;
         }
 
+        // Surface the first dependency that is actually blocking (not yet ready), rather than
+        // just the first declared one — a resource can wait on several. The full artifact lists
+        // them all via AppendDependencyChain.
         foreach (var wait in waits)
         {
             var depName = wait.Resource.Name;
             if (notificationService.TryGetCurrentState(depName, out var dep) && dep is not null)
             {
                 var depState = dep.Snapshot.State?.Text ?? "unknown";
+                if (IsReadyState(depState))
+                {
+                    continue;
+                }
+
                 return dep.Snapshot.ExitCode is int code
                     ? $"'{depName}' ({depState}, exit code {code})"
                     : $"'{depName}' ({depState})";
@@ -1076,10 +1116,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     private string FormatTimeline() => FormatTimeline(_timeline.ToArray());
 
-    /// <summary>Renders the recorded transitions as a relative-time timeline; "" when there's nothing useful.</summary>
+    /// <summary>Renders the recorded transitions as a relative-time timeline; "" only when empty.
+    /// A single transition (e.g. an immediate jump to FailedToStart) is still worth showing.</summary>
     internal static string FormatTimeline(StateTransition[] transitions)
     {
-        if (transitions.Length < 2)
+        if (transitions.Length == 0)
         {
             return string.Empty;
         }
@@ -1115,9 +1156,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var concise = new StringBuilder().Append(headline);
         var full = new StringBuilder().AppendLine(headline);
 
-        foreach (var name in problemResources)
+        // Collect every resource's logs in parallel — each has its own short timeout, so doing
+        // them sequentially would compound the delay on an already-failed test's teardown.
+        var collected = await Task.WhenAll(problemResources.Select(async name =>
+            (name, logLines: (IReadOnlyList<string>)await CollectResourceLogLinesAsync(app, name))));
+
+        foreach (var (name, logLines) in collected)
         {
-            var logLines = await CollectResourceLogLinesAsync(app, name);
             var diagnosis = DiagnoseResource(notificationService, name, logLines);
 
             concise.AppendLine().Append($"  {name}: {DescribeState(diagnosis)}");
@@ -1260,7 +1305,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         try
         {
             var directory = TestContext.OutputDirectory ?? Path.GetTempPath();
-            var fileName = $"aspire-diagnostics-{typeof(TAppHost).Name}-{DateTime.Now:yyyyMMdd-HHmmss-fff}.log";
+            var fileName = $"aspire-diagnostics-{typeof(TAppHost).Name}-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.log";
             var path = Path.Combine(directory, fileName);
 
             await File.WriteAllTextAsync(path, content);
@@ -1283,9 +1328,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
             return $"Full startup diagnostics (timeline + untruncated logs) written to: {path}";
         }
-        catch
+        catch (Exception ex)
         {
-            // Diagnostics must never mask the underlying startup failure.
+            // Diagnostics must never mask the underlying startup failure — surface the
+            // artifact-write problem via the progress log but otherwise carry on.
+            LogProgress($"(failed to write diagnostics artifact: {ex.Message})");
             return null;
         }
     }

@@ -117,11 +117,15 @@ public class AspireDiagnosticsTests
     }
 
     [Test]
-    public async Task FormatTimeline_FewerThanTwoEntries_IsEmpty()
-    {
-        StateTransition[] single = [new(TimeSpan.Zero, "api", "(none)", "Starting", null)];
+    public async Task FormatTimeline_NoEntries_IsEmpty()
+        => await Assert.That(FormatTimeline([])).IsEmpty();
 
-        await Assert.That(FormatTimeline(single)).IsEmpty();
+    [Test]
+    public async Task FormatTimeline_SingleEntry_StillRenders()
+    {
+        StateTransition[] single = [new(TimeSpan.Zero, "api", "(none)", "FailedToStart", null)];
+
+        await Assert.That(FormatTimeline(single)).Contains("[api] (none) -> FailedToStart");
     }
 
     [Test]
