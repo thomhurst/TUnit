@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -29,6 +31,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 {
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
+
+    // Captured state-transition timeline (recorded by the background monitor), folded into the
+    // exception when startup fails so the failure tells the whole story in one place. Guarded by
+    // a lock because the monitor records into it while a failing path reads it (the monitor is
+    // still running when diagnostics are built — it's stopped in InitializeAsync's finally).
+    private readonly List<StateTransition> _timeline = [];
+    private readonly object _timelineGate = new();
+    private Stopwatch? _timelineClock;
 
     /// <summary>
     /// The running Aspire distributed application.
@@ -81,7 +91,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                 {
                     foreach (var line in batch)
                     {
-                        testContext.Output.WriteLine($"[{resourceName}] {line}");
+                        testContext.Output.WriteLine($"[{resourceName}] {line.Content}");
                     }
                 }
             }
@@ -97,6 +107,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     // --- Configuration hooks (virtual) ---
 
     private static readonly Stream StdErr = Console.OpenStandardError();
+    private static readonly object StdErrGate = new();
 
     /// <summary>
     /// Logs progress messages during initialization. Override to route to a custom logger.
@@ -107,8 +118,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     protected virtual void LogProgress(string message)
     {
         var bytes = Encoding.UTF8.GetBytes($"[Aspire] {message}{Environment.NewLine}");
-        StdErr.Write(bytes, 0, bytes.Length);
-        StdErr.Flush();
+
+        // The background resource monitor and the main init thread both log concurrently, and
+        // separate fixture instances share this static stream — lock so lines never splice.
+        lock (StdErrGate)
+        {
+            StdErr.Write(bytes, 0, bytes.Length);
+            StdErr.Flush();
+        }
     }
 
     /// <summary>
@@ -262,52 +279,55 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var resourceList = string.Join(", ", model.Resources.Select(r => r.Name));
         LogProgress($"Starting application with resources: [{resourceList}]");
 
-        // Monitor resource state changes in the background during startup.
-        // This provides real-time visibility into container health check failures,
-        // SSL errors, etc. that would otherwise be invisible during StartAsync().
+        // Monitor resource state changes in the background, covering BOTH startup and the
+        // resource-wait phase, so the captured timeline includes health-check-wait hangs.
+        // This also provides real-time visibility into container health check failures, SSL
+        // errors, etc. that would otherwise be invisible until a timeout fires.
+        _timelineClock = Stopwatch.StartNew();
         using var monitorCts = new CancellationTokenSource();
         var monitorTask = MonitorResourceEventsAsync(_app, monitorCts.Token);
+        var notificationService = _app.Services.GetRequiredService<ResourceNotificationService>();
 
-        using var startCts = new CancellationTokenSource(ResourceTimeout);
         try
         {
-            await _app.StartAsync(startCts.Token);
+            using (var startCts = new CancellationTokenSource(ResourceTimeout))
+            {
+                try
+                {
+                    await _app.StartAsync(startCts.Token);
+                }
+                catch (OperationCanceledException) when (startCts.IsCancellationRequested)
+                {
+                    var headline = $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start.";
+                    throw new TimeoutException(
+                        await BuildDiagnosticsAndAttachAsync(_app, notificationService, headline,
+                            model.Resources.Select(r => r.Name).ToList()));
+                }
+            }
+
+            LogProgress($"Application started in {sw.Elapsed.TotalSeconds:0.0}s. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
+
+            using (var cts = new CancellationTokenSource(ResourceTimeout))
+            {
+                try
+                {
+                    await WaitForResourcesAsync(_app, cts.Token);
+                    LogProgress("All resources ready.");
+                }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                {
+                    // Fallback for custom WaitForResourcesAsync overrides that don't use the default
+                    // fail-fast helper (which throws its own rich TimeoutException first).
+                    var headline = $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for Aspire resources to be ready (wait behavior: {WaitBehavior}).";
+                    throw new TimeoutException(
+                        await BuildDiagnosticsAndAttachAsync(_app, notificationService, headline,
+                            model.Resources.Select(r => r.Name).ToList()));
+                }
+            }
         }
-        catch (OperationCanceledException) when (startCts.IsCancellationRequested)
+        finally
         {
             await StopMonitorAsync(monitorCts, monitorTask);
-
-            // Collect resource logs so the timeout error shows WHY startup hung
-            var sb = new StringBuilder();
-            sb.Append($"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start.");
-
-            await AppendResourceLogsAsync(sb, _app, model.Resources.Select(r => r.Name));
-
-            throw new TimeoutException(sb.ToString());
-        }
-
-        await StopMonitorAsync(monitorCts, monitorTask);
-
-        LogProgress($"Application started in {sw.Elapsed.TotalSeconds:0.0}s. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
-        using var cts = new CancellationTokenSource(ResourceTimeout);
-
-        try
-        {
-            await WaitForResourcesAsync(_app, cts.Token);
-            LogProgress("All resources ready.");
-        }
-        catch (OperationCanceledException) when (cts.IsCancellationRequested)
-        {
-            // Fallback for custom WaitForResourcesAsync overrides that don't use the
-            // default fail-fast helper. The default implementation throws its own
-            // TimeoutException with resource logs before this catch is reached.
-            var resourceNames = string.Join(", ", model.Resources.Select(r => $"'{r.Name}'"));
-
-            throw new TimeoutException(
-                $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for Aspire resources to be ready. " +
-                $"Resources: [{resourceNames}]. " +
-                $"Wait behavior: {WaitBehavior}. " +
-                $"Consider increasing ResourceTimeout, checking resource health, or using WatchResourceLogs() to diagnose startup issues.");
         }
     }
 
@@ -484,7 +504,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         try
         {
             var notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
-            var trackedStates = new ConcurrentDictionary<string, string>();
+
+            // Single-consumer loop, so plain dictionaries are safe here.
+            var trackedStates = new Dictionary<string, string>();
+            var trackedHealth = new Dictionary<string, string>();
 
             await foreach (var evt in notificationService.WatchAsync(cancellationToken))
             {
@@ -496,12 +519,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                     continue;
                 }
 
-                // Only log when state actually changes
                 var previousState = trackedStates.GetValueOrDefault(name);
-                if (state != previousState)
+                var stateChanged = state != previousState;
+
+                var healthSignature = HealthSignature(evt.Snapshot.HealthReports);
+                var healthChanged = healthSignature != trackedHealth.GetValueOrDefault(name);
+
+                // Only log to stderr when the state text actually changes (unchanged behavior).
+                if (stateChanged)
                 {
                     trackedStates[name] = state;
                     LogProgress($"  [{name}] {previousState ?? "unknown"} -> {state}");
+                }
+
+                // Record a timeline entry on a state OR health transition so the captured story
+                // includes health-check deltas (HealthStatus is null off-Running, so diff reports).
+                if ((stateChanged || healthChanged) && _timelineClock is { } clock)
+                {
+                    trackedHealth[name] = healthSignature;
+                    RecordTransition(new StateTransition(
+                        clock.Elapsed, name, previousState ?? "(none)", state,
+                        healthChanged ? $"health: {healthSignature}" : null));
                 }
             }
         }
@@ -516,6 +554,51 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
     }
 
+    private const int TimelineHead = 80;
+    private const int TimelineTail = 120;
+
+    private void RecordTransition(StateTransition transition)
+    {
+        lock (_timelineGate)
+        {
+            _timeline.Add(transition);
+
+            // Bound the timeline so a flapping resource can't grow it without limit, but keep
+            // BOTH the earliest transitions (the startup story — most diagnostic) and the most
+            // recent ones, dropping only the churn in the middle. Trim infrequently (only past
+            // double the kept size).
+            if (_timeline.Count > (TimelineHead + TimelineTail) * 2)
+            {
+                TrimTimeline(_timeline, TimelineHead, TimelineTail);
+            }
+        }
+    }
+
+    /// <summary>Drops the middle of an over-long timeline, preserving the first <paramref name="head"/>
+    /// and last <paramref name="tail"/> entries. Pure (operates on the passed list) for unit testing.</summary>
+    internal static void TrimTimeline(List<StateTransition> timeline, int head, int tail)
+    {
+        var excess = timeline.Count - (head + tail);
+        if (excess > 0)
+        {
+            timeline.RemoveRange(head, excess);
+        }
+    }
+
+    private static string HealthSignature(ImmutableArray<HealthReportSnapshot> reports)
+    {
+        if (reports.IsDefaultOrEmpty)
+        {
+            return "none";
+        }
+
+        // Per-check signature (not just the worst aggregate) so two checks flipping in opposite
+        // directions still register as a change, and the timeline shows which check moved.
+        return string.Join(", ", reports
+            .OrderBy(r => r.Name, StringComparer.Ordinal)
+            .Select(r => $"{r.Name}:{r.Status?.ToString() ?? "Pending"}"));
+    }
+
     private static async Task StopMonitorAsync(CancellationTokenSource monitorCts, Task monitorTask)
     {
         await monitorCts.CancelAsync();
@@ -527,24 +610,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         catch (OperationCanceledException)
         {
             // Expected
-        }
-    }
-
-    /// <summary>
-    /// Appends resource logs for the given resource names to a <see cref="StringBuilder"/>.
-    /// Only includes resources that have logs available.
-    /// </summary>
-    private async Task AppendResourceLogsAsync(StringBuilder sb, DistributedApplication app, IEnumerable<string> resourceNames)
-    {
-        foreach (var name in resourceNames)
-        {
-            var logs = await CollectResourceLogsAsync(app, name);
-            if (logs != "  (no logs available)")
-            {
-                sb.AppendLine().AppendLine();
-                sb.AppendLine($"--- {name} logs ---");
-                sb.Append(logs);
-            }
         }
     }
 
@@ -620,10 +685,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             LogProgress($"  Resource '{name}' is {targetState} ({readyResources.Count}/{visibleNames.Count})");
         }));
 
-        // Fail-fast path: complete as soon as ANY resource enters FailedToStart
+        // Fail-fast path: complete as soon as ANY resource enters a genuine failure state.
+        // Watch a non-zero Exited too — a container that crash-exits cleanly never reports
+        // FailedToStart, so without it we would wait the full timeout for an already-dead
+        // resource. A clean (code 0) exit is excluded so successful one-shot resources
+        // (migration runners, seeders) aren't mis-reported as failures (see IsFailureState).
         var failureTasks = visibleNames.Select(async name =>
         {
-            await notificationService.WaitForResourceAsync(name, KnownResourceStates.FailedToStart, failureCts.Token);
+            await notificationService.WaitForResourceAsync(name, evt => IsFailureState(evt.Snapshot), failureCts.Token);
             return name;
         }).ToList();
         var anyFailureTask = Task.WhenAny(failureTasks);
@@ -637,13 +706,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             {
                 failureCts.Cancel();
                 var failedName = await await anyFailureTask;
-                var logs = await CollectResourceLogsAsync(app, failedName);
 
+                var headline = $"Resource '{failedName}' failed to start.";
                 throw new InvalidOperationException(
-                    $"Resource '{failedName}' failed to start." +
-                    $"{Environment.NewLine}{Environment.NewLine}" +
-                    $"--- {failedName} logs ---{Environment.NewLine}" +
-                    logs);
+                    await BuildDiagnosticsAndAttachAsync(
+                        app, notificationService, headline, [failedName], readyResources.ToArray()));
             }
 
             // All resources are ready - cancel the failure watchers
@@ -652,50 +719,34 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Timeout - report which resources are ready vs. still pending, with logs
+            // Timeout - diagnose each pending resource (state, exit code, health, dependencies)
+            // and attach the full timeline + untruncated logs as an artifact.
             failureCts.Cancel();
 
             var readySet = new HashSet<string>(readyResources);
             var pending = visibleNames.Where(n => !readySet.Contains(n)).ToList();
 
-            var sb = new StringBuilder();
-            sb.Append("Resources not ready: [");
-            sb.AppendJoin(", ", pending.Select(n => $"'{n}'"));
-            sb.Append(']');
-
-            if (readySet.Count > 0)
-            {
-                sb.Append(". Resources ready: [");
-                sb.AppendJoin(", ", readySet.Select(n => $"'{n}'"));
-                sb.Append(']');
-            }
-
-            foreach (var name in pending)
-            {
-                var logs = await CollectResourceLogsAsync(app, name);
-                sb.AppendLine().AppendLine();
-                sb.AppendLine($"--- {name} logs ---");
-                sb.Append(logs);
-            }
-
-            throw new TimeoutException(sb.ToString());
+            var headline = $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for resource(s) to become {targetState}.";
+            throw new TimeoutException(
+                await BuildDiagnosticsAndAttachAsync(app, notificationService, headline, pending, readySet));
         }
     }
 
     /// <summary>
-    /// Collects recent log lines from a resource via the <see cref="ResourceLoggerService"/>.
-    /// Returns the last <paramref name="maxLines"/> lines, or "(no logs available)" if none.
-    /// Uses a short timeout to avoid hanging if the log service is unresponsive.
+    /// Collects buffered log lines from a resource via the <see cref="ResourceLoggerService"/>.
+    /// Returns the raw line content (error/stderr lines prefixed with <c>E&gt;</c>), or an empty
+    /// list if none are available. Uses a short timeout to avoid hanging if the log service is
+    /// unresponsive; <see cref="ResourceLoggerService.WatchAsync(string)"/> replays the buffered
+    /// backlog first, so logs from an already-exited resource are still captured.
     /// </summary>
-    private async Task<string> CollectResourceLogsAsync(
+    private static async Task<List<string>> CollectResourceLogLinesAsync(
         DistributedApplication app,
-        string resourceName,
-        int maxLines = 20)
+        string resourceName)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
         var lines = new List<string>();
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         try
         {
@@ -704,27 +755,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             {
                 foreach (var line in batch)
                 {
-                    lines.Add($"  {line}");
+                    lines.Add(line.IsErrorMessage ? $"E> {line.Content}" : line.Content);
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            // Expected - we use a short timeout to collect buffered logs
+            // Expected - we use a short timeout to collect buffered logs.
         }
 
-        if (lines.Count == 0)
-        {
-            return "  (no logs available)";
-        }
-
-        if (lines.Count > maxLines)
-        {
-            return $"  ... ({lines.Count - maxLines} earlier lines omitted){Environment.NewLine}" +
-                   string.Join(Environment.NewLine, lines.Skip(lines.Count - maxLines));
-        }
-
-        return string.Join(Environment.NewLine, lines);
+        return lines;
     }
 
     /// <summary>
@@ -783,6 +823,535 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
 
         return waitable;
+    }
+
+    // --- Diagnostics ---
+
+    /// <summary>Why a resource failed or never became ready — used to attach an actionable hint.</summary>
+    internal enum ResourceFailureClass
+    {
+        Unknown,
+        ContainerRuntimeDown,
+        ImagePullFailure,
+        PortInUse,
+        OutOfMemory,
+        NonZeroExit,
+        CrashedNoCode,
+        HealthCheckFailing,
+        NeverStarted,
+    }
+
+    /// <summary>A single resource's classified failure state plus a one-line detail and hint.</summary>
+    internal readonly record struct ResourceDiagnosis(
+        string Name,
+        string State,
+        int? ExitCode,
+        ResourceFailureClass Class,
+        string? Detail,
+        string? Hint);
+
+    /// <summary>One recorded state/health transition in the startup timeline.</summary>
+    internal readonly record struct StateTransition(
+        TimeSpan Elapsed,
+        string Resource,
+        string From,
+        string To,
+        string? HealthDelta);
+
+    private static bool StateEquals(string state, string known)
+        => string.Equals(state, known, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsTerminalState(string state)
+        => StateEquals(state, KnownResourceStates.FailedToStart)
+        || StateEquals(state, KnownResourceStates.Exited)
+        || StateEquals(state, KnownResourceStates.Finished);
+
+    private static bool IsPendingState(string state)
+        => StateEquals(state, KnownResourceStates.Starting)
+        || StateEquals(state, KnownResourceStates.Waiting)
+        || StateEquals(state, KnownResourceStates.NotStarted)
+        || StateEquals(state, KnownResourceStates.Building);
+
+    private static bool IsReadyState(string state)
+        => StateEquals(state, KnownResourceStates.Running)
+        || StateEquals(state, KnownResourceStates.Finished);
+
+    /// <summary>
+    /// Whether a snapshot represents a genuine startup failure. <c>FailedToStart</c> always counts;
+    /// <c>Exited</c> counts only with a non-zero exit code, so a one-shot resource (migration runner,
+    /// seeder) that exits cleanly with code 0 isn't mis-reported as a failure.
+    /// </summary>
+    private static bool IsFailureState(CustomResourceSnapshot snapshot)
+    {
+        var state = snapshot.State?.Text;
+        if (state is null)
+        {
+            return false;
+        }
+
+        if (StateEquals(state, KnownResourceStates.FailedToStart))
+        {
+            return true;
+        }
+
+        return StateEquals(state, KnownResourceStates.Exited) && snapshot.ExitCode is not (null or 0);
+    }
+
+    /// <summary>Scans recent log lines for high-confidence failure signatures. Heuristic; a miss
+    /// just falls through to state-based classification.</summary>
+    internal static ResourceFailureClass? ScanLogSignatures(IReadOnlyList<string>? lines)
+    {
+        if (lines is null)
+        {
+            return null;
+        }
+
+        const StringComparison Ci = StringComparison.OrdinalIgnoreCase;
+
+        foreach (var line in lines)
+        {
+            if (line.Contains("cannot connect to the docker daemon", Ci)
+                || line.Contains("is the docker daemon running", Ci)
+                || line.Contains("error during connect", Ci))
+            {
+                return ResourceFailureClass.ContainerRuntimeDown;
+            }
+
+            if (line.Contains("address already in use", Ci)
+                || line.Contains("port is already allocated", Ci)
+                || line.Contains("bind: address already in use", Ci))
+            {
+                return ResourceFailureClass.PortInUse;
+            }
+
+            if (line.Contains("pull access denied", Ci)
+                || line.Contains("manifest unknown", Ci)
+                || line.Contains("repository does not exist", Ci)
+                || line.Contains("not found: manifest", Ci)
+                || line.Contains("no such image", Ci))
+            {
+                return ResourceFailureClass.ImagePullFailure;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Pure classification used by <see cref="DiagnoseResource"/>; separated for unit testing.</summary>
+    internal static ResourceFailureClass Classify(
+        string state, int? exitCode, bool runningButUnhealthy, IReadOnlyList<string>? logLines)
+    {
+        if (exitCode == 137)
+        {
+            return ResourceFailureClass.OutOfMemory;
+        }
+
+        if (ScanLogSignatures(logLines) is { } signature)
+        {
+            return signature;
+        }
+
+        if (StateEquals(state, KnownResourceStates.RuntimeUnhealthy))
+        {
+            return ResourceFailureClass.ContainerRuntimeDown;
+        }
+
+        if (runningButUnhealthy)
+        {
+            return ResourceFailureClass.HealthCheckFailing;
+        }
+
+        if (IsTerminalState(state))
+        {
+            return exitCode is int code && code != 0
+                ? ResourceFailureClass.NonZeroExit
+                : ResourceFailureClass.CrashedNoCode;
+        }
+
+        if (IsPendingState(state))
+        {
+            return ResourceFailureClass.NeverStarted;
+        }
+
+        return ResourceFailureClass.Unknown;
+    }
+
+    /// <summary>Maps a failure class to a single actionable hint, or <c>null</c> when nothing specific applies.</summary>
+    internal static string? HintFor(ResourceFailureClass cls) => cls switch
+    {
+        ResourceFailureClass.ContainerRuntimeDown =>
+            "The container runtime is not reachable. Is Docker/Podman running? Start it (e.g. Docker Desktop, or `sudo systemctl start docker`) and retry.",
+        ResourceFailureClass.ImagePullFailure =>
+            "The container image could not be pulled. Check the image name/tag, registry authentication (`docker login`), and network access.",
+        ResourceFailureClass.PortInUse =>
+            "A required port is already in use. Stop the process holding it, or avoid pinning host ports in tests so Aspire can pick a free one.",
+        ResourceFailureClass.OutOfMemory =>
+            "Exit code 137 means the container was killed (OOM / SIGKILL). Increase the container memory limit or the resources allocated to Docker.",
+        ResourceFailureClass.NonZeroExit =>
+            "The process exited with a non-zero code on startup. The logs usually show the cause (bad config, missing connection string, failed migration).",
+        ResourceFailureClass.HealthCheckFailing =>
+            "The container is Running but its health check never passed. It started but isn't ready yet — check the health endpoint, slow startup, or raise ResourceTimeout.",
+        ResourceFailureClass.NeverStarted =>
+            "The resource never reached Running. It is still booting or blocked on a dependency — check the logs and the dependency chain.",
+        ResourceFailureClass.CrashedNoCode =>
+            "The resource entered a failed state without an exit code. Check the logs and the container runtime.",
+        _ => null,
+    };
+
+    /// <summary>One-line human description of a resource's failure state for the concise exception message.</summary>
+    internal static string DescribeState(in ResourceDiagnosis d) => d.Class switch
+    {
+        ResourceFailureClass.OutOfMemory => $"{d.State}, exit code {d.ExitCode} (OOM / SIGKILL)",
+        ResourceFailureClass.NonZeroExit => $"{d.State}, exit code {d.ExitCode}",
+        ResourceFailureClass.CrashedNoCode => $"{d.State} (no exit code)",
+        ResourceFailureClass.HealthCheckFailing => d.Detail is { Length: > 0 } health
+            ? $"Running but not Healthy ({health})"
+            : "Running but not Healthy",
+        ResourceFailureClass.NeverStarted => d.Detail is { Length: > 0 } dependency
+            ? $"{d.State}, waiting on {dependency}"
+            : $"still {d.State} (never reached Running)",
+        ResourceFailureClass.ContainerRuntimeDown => $"{d.State} — container runtime unreachable",
+        ResourceFailureClass.ImagePullFailure => $"{d.State} — image pull failed",
+        ResourceFailureClass.PortInUse => $"{d.State} — port already in use",
+        _ => d.State,
+    };
+
+    /// <summary>Reads a resource's current Aspire snapshot and classifies why it failed or is not ready.</summary>
+    private ResourceDiagnosis DiagnoseResource(
+        ResourceNotificationService notificationService,
+        string name,
+        ResourceEvent? ev,
+        IReadOnlyList<string>? recentLogLines)
+    {
+        var state = "unknown";
+        int? exitCode = null;
+        var runningButUnhealthy = false;
+        string? detail = null;
+
+        if (ev is not null)
+        {
+            var snapshot = ev.Snapshot;
+            state = snapshot.State?.Text ?? "unknown";
+            exitCode = snapshot.ExitCode;
+
+            if (StateEquals(state, KnownResourceStates.Running)
+                && FirstFailingHealthReport(snapshot.HealthReports) is { } report)
+            {
+                runningButUnhealthy = true;
+                detail = SummarizeHealthReport(report);
+            }
+            else if (StateEquals(state, KnownResourceStates.Waiting))
+            {
+                detail = SummarizeDependencies(notificationService, ev.Resource);
+            }
+        }
+
+        var cls = Classify(state, exitCode, runningButUnhealthy, recentLogLines);
+        return new ResourceDiagnosis(name, state, exitCode, cls, detail, HintFor(cls));
+    }
+
+    private static HealthReportSnapshot? FirstFailingHealthReport(ImmutableArray<HealthReportSnapshot> reports)
+    {
+        if (reports.IsDefaultOrEmpty)
+        {
+            return null;
+        }
+
+        foreach (var report in reports)
+        {
+            if (report.Status != HealthStatus.Healthy)
+            {
+                return report;
+            }
+        }
+
+        return null;
+    }
+
+    private static string SummarizeHealthReport(HealthReportSnapshot report)
+    {
+        var status = report.Status?.ToString() ?? "Pending";
+        var reason = FirstLine(report.Description) ?? FirstLine(report.ExceptionText);
+        return reason is null ? $"{report.Name} {status}" : $"{report.Name} {status}: {reason}";
+    }
+
+    private static string? SummarizeDependencies(ResourceNotificationService notificationService, IResource resource)
+    {
+        if (!resource.TryGetAnnotationsOfType<WaitAnnotation>(out var waits))
+        {
+            return null;
+        }
+
+        // Surface the first dependency that is actually blocking (not yet ready), rather than
+        // just the first declared one — a resource can wait on several. The full artifact lists
+        // them all via AppendDependencyChain.
+        foreach (var wait in waits)
+        {
+            var depName = wait.Resource.Name;
+            if (notificationService.TryGetCurrentState(depName, out var dep) && dep is not null)
+            {
+                var depState = dep.Snapshot.State?.Text ?? "unknown";
+                if (IsReadyState(depState))
+                {
+                    continue;
+                }
+
+                return dep.Snapshot.ExitCode is int code
+                    ? $"'{depName}' ({depState}, exit code {code})"
+                    : $"'{depName}' ({depState})";
+            }
+
+            return $"'{depName}'";
+        }
+
+        return null;
+    }
+
+    private static string? FirstLine(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return null;
+        }
+
+        var idx = text.IndexOfAny(['\r', '\n']);
+        var line = (idx >= 0 ? text[..idx] : text).Trim();
+        return line.Length == 0 ? null : line;
+    }
+
+    private string FormatTimeline()
+    {
+        lock (_timelineGate)
+        {
+            return FormatTimeline(_timeline.ToArray());
+        }
+    }
+
+    /// <summary>Renders the recorded transitions as a relative-time timeline; "" only when empty.
+    /// A single transition (e.g. an immediate jump to FailedToStart) is still worth showing.</summary>
+    internal static string FormatTimeline(StateTransition[] transitions)
+    {
+        if (transitions.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var origin = transitions[0].Elapsed;
+        var sb = new StringBuilder();
+
+        foreach (var t in transitions)
+        {
+            var seconds = (t.Elapsed - origin).TotalSeconds;
+            sb.Append($"  +{seconds,5:0.0}s  [{t.Resource}] {t.From} -> {t.To}");
+            if (t.HealthDelta is { Length: > 0 })
+            {
+                sb.Append($"   ({t.HealthDelta})");
+            }
+            sb.AppendLine();
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Builds a concise diagnosis for the exception message, writes the full timeline + untruncated
+    /// resource logs to an attached artifact, and returns the concise text plus an artifact pointer.
+    /// </summary>
+    private async Task<string> BuildDiagnosticsAndAttachAsync(
+        DistributedApplication app,
+        ResourceNotificationService notificationService,
+        string headline,
+        IReadOnlyList<string> problemResources,
+        IReadOnlyCollection<string>? readyResources = null)
+    {
+        var concise = new StringBuilder().Append(headline);
+        var full = new StringBuilder().AppendLine(headline);
+
+        // Collect every resource's logs in parallel — each has its own short timeout, so doing
+        // them sequentially would compound the delay on an already-failed test's teardown.
+        var collected = await Task.WhenAll(problemResources.Select(async name =>
+            (name, logLines: (IReadOnlyList<string>)await CollectResourceLogLinesAsync(app, name))));
+
+        foreach (var (name, logLines) in collected)
+        {
+            // Read the snapshot once and thread it through both the diagnosis and the rendering,
+            // rather than each re-querying live state mid-render.
+            notificationService.TryGetCurrentState(name, out var ev);
+            var diagnosis = DiagnoseResource(notificationService, name, ev, logLines);
+
+            concise.AppendLine().Append($"  {name}: {DescribeState(diagnosis)}");
+            if (diagnosis.Hint is not null)
+            {
+                concise.AppendLine().Append($"     Hint: {diagnosis.Hint}");
+            }
+
+            AppendResourceDiagnosticBlock(full, notificationService, name, ev, diagnosis, logLines);
+        }
+
+        if (readyResources is { Count: > 0 })
+        {
+            var readyList = string.Join(", ", readyResources.Select(n => $"'{n}'"));
+            concise.AppendLine().Append($"  Ready: [{readyList}]");
+            full.AppendLine().AppendLine($"Ready resources: [{readyList}]");
+        }
+
+        var timeline = FormatTimeline();
+        if (timeline.Length > 0)
+        {
+            full.AppendLine().AppendLine("--- startup timeline ---").Append(timeline);
+        }
+
+        var pointer = await TryWriteDiagnosticsArtifactAsync(full.ToString());
+        if (pointer is not null)
+        {
+            concise.AppendLine().AppendLine().Append(pointer);
+        }
+
+        return concise.ToString();
+    }
+
+    private void AppendResourceDiagnosticBlock(
+        StringBuilder sb,
+        ResourceNotificationService notificationService,
+        string name,
+        ResourceEvent? ev,
+        in ResourceDiagnosis diagnosis,
+        IReadOnlyList<string> logLines)
+    {
+        sb.AppendLine().AppendLine($"--- {name} diagnostics ---");
+        sb.AppendLine($"  State:      {diagnosis.State}");
+        if (diagnosis.ExitCode is int code)
+        {
+            sb.AppendLine($"  Exit code:  {code}");
+        }
+        if (diagnosis.Hint is not null)
+        {
+            sb.AppendLine($"  Hint:       {diagnosis.Hint}");
+        }
+
+        if (ev is not null)
+        {
+            AppendHealthReports(sb, ev.Snapshot.HealthReports);
+            AppendDependencyChain(sb, notificationService, ev.Resource);
+        }
+
+        sb.AppendLine($"  Logs ({(logLines.Count == 0 ? "none" : logLines.Count + " line(s)")}):");
+        if (logLines.Count == 0)
+        {
+            sb.AppendLine("    (no logs available)");
+        }
+        else
+        {
+            foreach (var line in logLines)
+            {
+                sb.Append("    ").AppendLine(line);
+            }
+        }
+    }
+
+    private static void AppendHealthReports(StringBuilder sb, ImmutableArray<HealthReportSnapshot> reports)
+    {
+        if (reports.IsDefaultOrEmpty)
+        {
+            return;
+        }
+
+        var failing = reports.Where(r => r.Status != HealthStatus.Healthy).ToList();
+        if (failing.Count == 0)
+        {
+            return;
+        }
+
+        sb.AppendLine("  Health checks:");
+        foreach (var report in failing)
+        {
+            var status = report.Status?.ToString() ?? "Pending";
+            sb.Append($"    [{report.Name}] {status}");
+            if (FirstLine(report.Description) is { } description)
+            {
+                sb.Append($" — {description}");
+            }
+            sb.AppendLine();
+
+            if (!string.IsNullOrWhiteSpace(report.ExceptionText))
+            {
+                foreach (var line in report.ExceptionText.Split('\n'))
+                {
+                    sb.Append("        ").AppendLine(line.TrimEnd('\r'));
+                }
+            }
+        }
+    }
+
+    private static void AppendDependencyChain(StringBuilder sb, ResourceNotificationService notificationService, IResource resource)
+    {
+        if (!resource.TryGetAnnotationsOfType<WaitAnnotation>(out var waits))
+        {
+            return;
+        }
+
+        var list = waits.ToList();
+        if (list.Count == 0)
+        {
+            return;
+        }
+
+        sb.AppendLine("  Waiting on dependencies:");
+        foreach (var wait in list)
+        {
+            var depName = wait.Resource.Name;
+            string description;
+            if (notificationService.TryGetCurrentState(depName, out var dep) && dep is not null)
+            {
+                var depState = dep.Snapshot.State?.Text ?? "unknown";
+                description = dep.Snapshot.ExitCode is int code ? $"{depState}, exit code {code}" : depState;
+            }
+            else
+            {
+                description = "unknown";
+            }
+
+            sb.AppendLine($"    - {depName} [{wait.WaitType}] -> {description}");
+        }
+    }
+
+    private async Task<string?> TryWriteDiagnosticsArtifactAsync(string content)
+    {
+        try
+        {
+            var directory = TestContext.OutputDirectory ?? Path.GetTempPath();
+            // Include a GUID so two fixtures of the same TAppHost timing out in the same
+            // millisecond can't race to the same path and overwrite each other's artifact.
+            var fileName = $"aspire-diagnostics-{typeof(TAppHost).Name}-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.log";
+            var path = Path.Combine(directory, fileName);
+
+            await File.WriteAllTextAsync(path, content);
+
+            var artifact = new Artifact
+            {
+                File = new FileInfo(path),
+                DisplayName = $"Aspire startup diagnostics ({typeof(TAppHost).Name})",
+                Description = "Full Aspire resource startup timeline and logs.",
+            };
+
+            if (TestContext.Current is { } testContext)
+            {
+                testContext.Output.AttachArtifact(artifact);
+            }
+            else if (TestSessionContext.Current is { } sessionContext)
+            {
+                sessionContext.AddArtifact(artifact);
+            }
+
+            return $"Full startup diagnostics (timeline + untruncated logs) written to: {path}";
+        }
+        catch (Exception ex)
+        {
+            // Diagnostics must never mask the underlying startup failure — surface the
+            // artifact-write problem via the progress log but otherwise carry on.
+            LogProgress($"(failed to write diagnostics artifact: {ex.Message})");
+            return null;
+        }
     }
 
     private sealed class ResourceLogWatcher(CancellationTokenSource cts) : IAsyncDisposable
