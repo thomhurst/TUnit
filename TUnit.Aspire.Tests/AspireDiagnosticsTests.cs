@@ -129,6 +129,36 @@ public class AspireDiagnosticsTests
     }
 
     [Test]
+    public async Task TrimTimeline_KeepsHeadAndTail_DropsMiddle()
+    {
+        var list = new List<StateTransition>();
+        for (var i = 0; i < 400; i++)
+        {
+            list.Add(new StateTransition(TimeSpan.FromSeconds(i), "r", i.ToString(), (i + 1).ToString(), null));
+        }
+
+        TrimTimeline(list, head: 80, tail: 120);
+
+        await Assert.That(list.Count).IsEqualTo(200);
+        await Assert.That(list[0].From).IsEqualTo("0");      // earliest startup transition preserved
+        await Assert.That(list[^1].To).IsEqualTo("400");     // most recent transition preserved
+    }
+
+    [Test]
+    public async Task TrimTimeline_UnderCap_LeavesUnchanged()
+    {
+        var list = new List<StateTransition>
+        {
+            new(TimeSpan.Zero, "r", "(none)", "Starting", null),
+            new(TimeSpan.FromSeconds(1), "r", "Starting", "Running", null),
+        };
+
+        TrimTimeline(list, head: 80, tail: 120);
+
+        await Assert.That(list.Count).IsEqualTo(2);
+    }
+
+    [Test]
     public async Task FormatTimeline_MultipleEntries_RendersTransitions()
     {
         StateTransition[] transitions =

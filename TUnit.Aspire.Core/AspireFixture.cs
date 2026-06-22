@@ -33,8 +33,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     private OtlpReceiver? _otlpReceiver;
 
     // Captured state-transition timeline (recorded by the background monitor), folded into the
-    // exception when startup fails so the failure tells the whole story in one place.
-    private readonly ConcurrentQueue<StateTransition> _timeline = new();
+    // exception when startup fails so the failure tells the whole story in one place. Guarded by
+    // a lock because the monitor records into it while a failing path reads it (the monitor is
+    // still running when diagnostics are built — it's stopped in InitializeAsync's finally).
+    private readonly List<StateTransition> _timeline = [];
+    private readonly object _timelineGate = new();
     private Stopwatch? _timelineClock;
 
     /// <summary>
@@ -556,28 +559,29 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
     private void RecordTransition(StateTransition transition)
     {
-        _timeline.Enqueue(transition);
-
-        // Bound the timeline so a flapping resource can't grow it without limit, but keep BOTH
-        // the earliest transitions (the startup story — most diagnostic) and the most recent
-        // ones, dropping only the churn in the middle. Only the monitor task writes, so the
-        // drain/refill is safe; reads happen after it stops.
-        if (_timeline.Count > (TimelineHead + TimelineTail) * 2)
+        lock (_timelineGate)
         {
-            var all = _timeline.ToArray();
-            while (_timeline.TryDequeue(out _))
-            {
-            }
+            _timeline.Add(transition);
 
-            foreach (var t in all.Take(TimelineHead))
+            // Bound the timeline so a flapping resource can't grow it without limit, but keep
+            // BOTH the earliest transitions (the startup story — most diagnostic) and the most
+            // recent ones, dropping only the churn in the middle. Trim infrequently (only past
+            // double the kept size).
+            if (_timeline.Count > (TimelineHead + TimelineTail) * 2)
             {
-                _timeline.Enqueue(t);
+                TrimTimeline(_timeline, TimelineHead, TimelineTail);
             }
+        }
+    }
 
-            foreach (var t in all.Skip(all.Length - TimelineTail))
-            {
-                _timeline.Enqueue(t);
-            }
+    /// <summary>Drops the middle of an over-long timeline, preserving the first <paramref name="head"/>
+    /// and last <paramref name="tail"/> entries. Pure (operates on the passed list) for unit testing.</summary>
+    internal static void TrimTimeline(List<StateTransition> timeline, int head, int tail)
+    {
+        var excess = timeline.Count - (head + tail);
+        if (excess > 0)
+        {
+            timeline.RemoveRange(head, excess);
         }
     }
 
@@ -1016,6 +1020,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     private ResourceDiagnosis DiagnoseResource(
         ResourceNotificationService notificationService,
         string name,
+        ResourceEvent? ev,
         IReadOnlyList<string>? recentLogLines)
     {
         var state = "unknown";
@@ -1023,7 +1028,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var runningButUnhealthy = false;
         string? detail = null;
 
-        if (notificationService.TryGetCurrentState(name, out var ev) && ev is not null)
+        if (ev is not null)
         {
             var snapshot = ev.Snapshot;
             state = snapshot.State?.Text ?? "unknown";
@@ -1114,7 +1119,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         return line.Length == 0 ? null : line;
     }
 
-    private string FormatTimeline() => FormatTimeline(_timeline.ToArray());
+    private string FormatTimeline()
+    {
+        lock (_timelineGate)
+        {
+            return FormatTimeline(_timeline.ToArray());
+        }
+    }
 
     /// <summary>Renders the recorded transitions as a relative-time timeline; "" only when empty.
     /// A single transition (e.g. an immediate jump to FailedToStart) is still worth showing.</summary>
@@ -1163,7 +1174,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
 
         foreach (var (name, logLines) in collected)
         {
-            var diagnosis = DiagnoseResource(notificationService, name, logLines);
+            // Read the snapshot once and thread it through both the diagnosis and the rendering,
+            // rather than each re-querying live state mid-render.
+            notificationService.TryGetCurrentState(name, out var ev);
+            var diagnosis = DiagnoseResource(notificationService, name, ev, logLines);
 
             concise.AppendLine().Append($"  {name}: {DescribeState(diagnosis)}");
             if (diagnosis.Hint is not null)
@@ -1171,7 +1185,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                 concise.AppendLine().Append($"     Hint: {diagnosis.Hint}");
             }
 
-            AppendResourceDiagnosticBlock(full, notificationService, name, diagnosis, logLines);
+            AppendResourceDiagnosticBlock(full, notificationService, name, ev, diagnosis, logLines);
         }
 
         if (readyResources is { Count: > 0 })
@@ -1200,6 +1214,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         StringBuilder sb,
         ResourceNotificationService notificationService,
         string name,
+        ResourceEvent? ev,
         in ResourceDiagnosis diagnosis,
         IReadOnlyList<string> logLines)
     {
@@ -1214,7 +1229,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             sb.AppendLine($"  Hint:       {diagnosis.Hint}");
         }
 
-        if (notificationService.TryGetCurrentState(name, out var ev) && ev is not null)
+        if (ev is not null)
         {
             AppendHealthReports(sb, ev.Snapshot.HealthReports);
             AppendDependencyChain(sb, notificationService, ev.Resource);
@@ -1305,7 +1320,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         try
         {
             var directory = TestContext.OutputDirectory ?? Path.GetTempPath();
-            var fileName = $"aspire-diagnostics-{typeof(TAppHost).Name}-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}.log";
+            // Include a GUID so two fixtures of the same TAppHost timing out in the same
+            // millisecond can't race to the same path and overwrite each other's artifact.
+            var fileName = $"aspire-diagnostics-{typeof(TAppHost).Name}-{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}-{Guid.NewGuid():N}.log";
             var path = Path.Combine(directory, fileName);
 
             await File.WriteAllTextAsync(path, content);
