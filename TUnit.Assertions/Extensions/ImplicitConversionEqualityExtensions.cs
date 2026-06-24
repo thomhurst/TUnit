@@ -26,11 +26,9 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Adds <c>IsEqualTo</c> overloads accepting an expected value of a different type when the
 /// source type defines an implicit conversion operator to that type. Defined as a partial of
-/// the source-generated <c>EqualsAssertionExtensions</c> so it shares the containing type. When
-/// both this and the same-type overload are applicable (e.g. enum or value-type sources), the
-/// trailing <c>params</c> array makes this overload lose to the same-type one on every compiler;
-/// see the file header for why <see cref="OverloadResolutionPriorityAttribute"/> alone is not
-/// sufficient (issue #6296).
+/// the source-generated <c>EqualsAssertionExtensions</c> so it shares the containing type. The
+/// trailing <c>params</c> array on each overload keeps it from displacing the same-type overload
+/// for same-type calls (e.g. enum or value-type sources) — see the file header for the why.
 ///
 /// Enables ergonomic comparison of wrapper Value Objects against their wrapped primitive,
 /// e.g. <c>await Assert.That(productCode).IsEqualTo("Example")</c> when
@@ -50,8 +48,7 @@ public static partial class EqualsAssertionExtensions
         this IAssertionSource<TValue> source,
         TOther? expected,
         [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
-        // Forces expanded-form applicability so a same-type call loses to the same-type
-        // IsEqualTo<TValue> overload on every compiler. Never read. See file header.
+        // Expanded-form-only marker so a same-type call loses to the same-type overload; never read. See file header.
         params object[] _)
     {
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
@@ -81,8 +78,7 @@ public static partial class NotEqualsAssertionExtensions
         this IAssertionSource<TValue> source,
         TOther? notExpected,
         [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null,
-        // Forces expanded-form applicability so a same-type call loses to the same-type
-        // IsNotEqualTo<TValue> overload on every compiler. Never read. See file header.
+        // Expanded-form-only marker so a same-type call loses to the same-type overload; never read. See file header.
         params object[] _)
     {
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
