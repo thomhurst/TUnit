@@ -3203,6 +3203,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Cookie> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class CrossTypeOverloadMarker { }
     public static class CultureInfoAssertionExtensions
     {
         [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
@@ -4357,7 +4358,7 @@ namespace .Extensions
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
         [.(-1)]
-        public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null, params object[] _) { }
+        public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null, params .[] _) { }
     }
     public static class EquatableAssertionExtensions
     {
@@ -5310,7 +5311,7 @@ namespace .Extensions
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
         [.(-1)]
-        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null, params object[] _) { }
+        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null, params .[] _) { }
     }
     public static class NotEquivalentToAssertionExtensions
     {

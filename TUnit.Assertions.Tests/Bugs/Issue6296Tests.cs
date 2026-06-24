@@ -13,12 +13,15 @@ namespace TUnit.Assertions.Tests.Bugs;
 /// solely by the Roslyn that ships with the .NET 9 SDK and later — NOT by LangVersion. The
 /// .NET 8 SDK's compiler ignores it, so the call stayed ambiguous regardless of LangVersion.
 ///
-/// The fix gives the cross-type overloads a trailing <c>params object[]</c>, making them
-/// applicable only in expanded form so they lose to the normal-form same-type overload via
-/// the compiler-version-independent "normal beats expanded" tie-break. The body of each test
-/// below would not compile before the fix when built with the .NET 8 SDK — successful
-/// compilation IS the regression assertion; the runtime assertions confirm the same-type
-/// overload (default equality), not the implicit-conversion overload, is the one selected.
+/// The fix gives the cross-type overloads a trailing <c>params CrossTypeOverloadMarker[]</c>,
+/// making them applicable only in expanded form so they lose to the normal-form same-type
+/// overload via the compiler-version-independent "normal beats expanded" tie-break. The marker
+/// element type (rather than <c>object</c>) has no accessible constructor, so a stray trailing
+/// argument — e.g. <c>IsEqualTo("x", StringComparer.Ordinal)</c> on a value-object source — is a
+/// compile error instead of being silently swallowed and discarded (PR #6313 review). The body
+/// of each test below would not compile before the fix when built with the .NET 8 SDK —
+/// successful compilation IS the regression assertion; the runtime assertions confirm the
+/// same-type overload (default equality), not the implicit-conversion overload, is selected.
 /// </summary>
 public class Issue6296Tests
 {
@@ -61,6 +64,25 @@ public class Issue6296Tests
         var other = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
         await Assert.That(async () => await Assert.That(value).IsEqualTo(other))
+            .Throws<AssertionException>();
+    }
+
+    // The expanded-form marker on the cross-type overload must not steal a genuine
+    // same-type-with-comparer call: the second positional argument is an IEqualityComparer,
+    // which would land in the marker's params array if the marker were `params object[]`.
+    // CrossTypeOverloadMarker has no accessible ctor, so this binds to the real same-type
+    // comparer overload and the comparer is actually applied (PR #6313 review, finding #1).
+    [Test]
+    public async Task String_IsEqualTo_SameType_WithComparer_BindsComparerOverload()
+    {
+        await Assert.That("VALUE").IsEqualTo("value", StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Test]
+    public async Task String_IsEqualTo_SameType_WithComparer_Fails_When_ComparerRejects()
+    {
+        await Assert.That(async () =>
+                await Assert.That("VALUE").IsEqualTo("value", StringComparer.Ordinal))
             .Throws<AssertionException>();
     }
 }
