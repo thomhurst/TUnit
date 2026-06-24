@@ -4357,7 +4357,7 @@ namespace .Extensions
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
         [.(-1)]
-        public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null, params object[] _) { }
     }
     public static class EquatableAssertionExtensions
     {
@@ -5310,7 +5310,7 @@ namespace .Extensions
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
         [.(-1)]
-        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null) { }
+        public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null, params object[] _) { }
     }
     public static class NotEquivalentToAssertionExtensions
     {
