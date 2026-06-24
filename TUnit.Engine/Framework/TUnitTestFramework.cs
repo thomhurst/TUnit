@@ -69,7 +69,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
             await serviceProvider.HookDelegateBuilder.InitializeAsync();
 
-            serviceProvider.CancellationToken.Initialise();
+            // Link the platform's run-abort token (IDE stop, CI runner cancel, --abort) so it
+            // flows through the engine token to session-scoped fixtures, alongside the OS signal
+            // handlers (Ctrl+C / process exit) wired up inside Initialise.
+            serviceProvider.CancellationToken.Initialise(context.CancellationToken);
 
             await _requestHandler.HandleRequestAsync((TestExecutionRequest) context.Request, serviceProvider, context, GetFilter(context));
         }
