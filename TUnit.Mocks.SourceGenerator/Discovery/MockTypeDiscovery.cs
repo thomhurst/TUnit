@@ -544,25 +544,27 @@ internal static class MockTypeDiscovery
     // ─── T.Mock() static extension discovery ─────────────────────────
 
     /// <summary>
-    /// Syntax predicate: matches T.Mock() — a static extension invocation where the
-    /// left-hand side is a type name (not a variable/field access).
-    /// Works for both interfaces (e.g. IFoo.Mock()) and classes (e.g. MyService.Mock()).
+    /// Syntax predicate: matches any <c>X.Mock()</c> invocation.
+    /// Works for both interfaces (e.g. <c>IFoo.Mock()</c>) and classes (e.g. <c>MyService.Mock()</c>).
     /// </summary>
+    /// <remarks>
+    /// This is intentionally only a cheap name gate. Whether the left-hand side is actually a
+    /// mockable <em>type</em> (rather than a variable, field, namespace, or other expression) is
+    /// decided in <see cref="TransformMockExtensionInvocation"/> off the resolved symbol — so the
+    /// syntactic shape of the type reference doesn't matter. A simple name (<c>IFoo.Mock()</c>) and
+    /// an alias parse as <see cref="IdentifierNameSyntax"/>, but a fully-qualified reference
+    /// (<c>Namespace.IFoo.Mock()</c>) parses as a <see cref="MemberAccessExpressionSyntax"/> in
+    /// expression position — gating on syntax kind here dropped that form. See issue #6298.
+    /// </remarks>
     public static bool IsMockExtensionInvocation(SyntaxNode node, CancellationToken ct)
     {
-        if (node is not InvocationExpressionSyntax
+        return node is InvocationExpressionSyntax
+        {
+            Expression: MemberAccessExpressionSyntax
             {
-                Expression: MemberAccessExpressionSyntax
-                {
-                    Name: IdentifierNameSyntax { Identifier.ValueText: "Mock" },
-                    Expression: var lhs
-                }
-            })
-            return false;
-
-        // Static extension calls use a type name on the left — never a variable or member access.
-        // GenericNameSyntax handles IFoo<T>.Mock().
-        return lhs is IdentifierNameSyntax or GenericNameSyntax or QualifiedNameSyntax or AliasQualifiedNameSyntax;
+                Name: IdentifierNameSyntax { Identifier.ValueText: "Mock" }
+            }
+        };
     }
 
     /// <summary>
