@@ -40,6 +40,29 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     private readonly object _timelineGate = new();
     private Stopwatch? _timelineClock;
 
+    // Single-shot teardown so the run-abort callback and the normal DisposeAsync path
+    // converge on the same StopAsync/DisposeAsync work instead of racing each other.
+    private readonly object _teardownGate = new();
+    private Task? _teardownTask;
+    private CancellationTokenRegistration _abortRegistration;
+
+    /// <summary>
+    /// The run-abort token whose lifetime governs this fixture. Defaults to the test session's
+    /// cancellation token (Ctrl+C, IDE stop, process exit), which matches the lifetime of a
+    /// session- or class-scoped fixture. It is linked into the startup and resource-wait
+    /// operations so an abort interrupts them promptly instead of blocking for the full
+    /// <see cref="ResourceTimeout"/>, and triggers teardown of the Aspire application.
+    /// Override-provided <see cref="WaitForResourcesAsync"/> implementations should honor it too.
+    /// </summary>
+    /// <remarks>
+    /// Override this only if the fixture is genuinely per-test (<c>Shared = SharedType.None</c>)
+    /// and you want a per-test token folded in. Do NOT return a per-test token from a shared
+    /// fixture: it is cancelled when the first consuming test ends, which would tear the shared
+    /// application down underneath every later test.
+    /// </remarks>
+    protected virtual CancellationToken RunCancellationToken =>
+        TestSessionContext.Current?.SessionCancellationToken ?? CancellationToken.None;
+
     /// <summary>
     /// The running Aspire distributed application.
     /// </summary>
@@ -198,7 +221,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// Override for full control over the resource waiting logic.
     /// </summary>
     /// <param name="app">The running distributed application.</param>
-    /// <param name="cancellationToken">A cancellation token that will be cancelled after <see cref="ResourceTimeout"/>.</param>
+    /// <param name="cancellationToken">A cancellation token that is cancelled after <see cref="ResourceTimeout"/>
+    /// or when the test run is aborted (see <see cref="RunCancellationToken"/>).</param>
     protected virtual async Task WaitForResourcesAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
         var notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
@@ -258,8 +282,12 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             LogProgress($"OTLP receiver listening on port {_otlpReceiver!.Port}");
         }
 
+        // Register before CreateAsync/BuildAsync so an abort during early AppHost creation still
+        // begins fixture teardown instead of waiting for normal failed-initializer disposal.
+        RegisterAbortTeardown();
+
         LogProgress($"Creating distributed application builder for {typeof(TAppHost).Name}...");
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost);
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<TAppHost>(Args, ConfigureAppHost, RunCancellationToken);
         ConfigureBuilder(builder);
         RemoveResources(builder);
 
@@ -272,7 +300,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         LogProgress($"Builder created in {sw.Elapsed.TotalSeconds:0.0}s");
 
         LogProgress("Building application...");
-        _app = await builder.BuildAsync();
+        _app = await builder.BuildAsync(RunCancellationToken);
         LogProgress($"Application built in {sw.Elapsed.TotalSeconds:0.0}s");
 
         var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
@@ -288,31 +316,44 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         var monitorTask = MonitorResourceEventsAsync(_app, monitorCts.Token);
         var notificationService = _app.Services.GetRequiredService<ResourceNotificationService>();
 
+        // Linked to the run-abort token so an abort interrupts startup promptly; the timeout
+        // is layered on top via CancelAfter.
+        using var startCts = CancellationTokenSource.CreateLinkedTokenSource(RunCancellationToken);
+        startCts.CancelAfter(ResourceTimeout);
         try
         {
-            using (var startCts = new CancellationTokenSource(ResourceTimeout))
+            try
             {
-                try
-                {
-                    await _app.StartAsync(startCts.Token);
-                }
-                catch (OperationCanceledException) when (startCts.IsCancellationRequested)
-                {
-                    var headline = $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start.";
-                    throw new TimeoutException(
-                        await BuildDiagnosticsAndAttachAsync(_app, notificationService, headline,
-                            model.Resources.Select(r => r.Name).ToList()));
-                }
+                await _app.StartAsync(startCts.Token);
+            }
+            catch (OperationCanceledException) when (RunCancellationToken.IsCancellationRequested)
+            {
+                // Run aborted — propagate cancellation; DisposeAsync (and the abort callback) tear down.
+                throw;
+            }
+            catch (OperationCanceledException) when (startCts.IsCancellationRequested)
+            {
+                var headline = $"Timed out after {ResourceTimeout.TotalSeconds:0}s waiting for the Aspire application to start.";
+                throw new TimeoutException(
+                    await BuildDiagnosticsAndAttachAsync(_app, notificationService, headline,
+                        model.Resources.Select(r => r.Name).ToList()));
             }
 
             LogProgress($"Application started in {sw.Elapsed.TotalSeconds:0.0}s. Waiting for resources (timeout: {ResourceTimeout.TotalSeconds:0}s, behavior: {WaitBehavior})...");
 
-            using (var cts = new CancellationTokenSource(ResourceTimeout))
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(RunCancellationToken))
             {
+                cts.CancelAfter(ResourceTimeout);
+
                 try
                 {
                     await WaitForResourcesAsync(_app, cts.Token);
                     LogProgress("All resources ready.");
+                }
+                catch (OperationCanceledException) when (RunCancellationToken.IsCancellationRequested)
+                {
+                    // Run aborted — propagate cancellation; teardown is handled by DisposeAsync / abort callback.
+                    throw;
                 }
                 catch (OperationCanceledException) when (cts.IsCancellationRequested)
                 {
@@ -362,6 +403,54 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// </summary>
     public virtual async ValueTask DisposeAsync()
     {
+        _abortRegistration.Dispose();
+        await StopAndDisposeAsync();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Registers the run-abort token so an aborted test run begins tearing down the Aspire
+    /// application immediately, in parallel with the rest of session shutdown. The callback and
+    /// the normal <see cref="DisposeAsync"/> path share a single teardown task, so the work runs
+    /// exactly once regardless of which fires first.
+    /// </summary>
+    private void RegisterAbortTeardown()
+    {
+        if (!RunCancellationToken.CanBeCanceled)
+        {
+            return;
+        }
+
+        _abortRegistration = RunCancellationToken.Register(static state =>
+        {
+            var fixture = (AspireFixture<TAppHost>) state!;
+            fixture.LogProgress("Test run aborted — tearing down Aspire application...");
+            // Fire-and-forget: don't block the thread raising cancellation. Log errors here too
+            // in case the host kills the process before DisposeAsync observes the shared task.
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await fixture.StopAndDisposeAsync();
+                }
+                catch (Exception ex)
+                {
+                    fixture.LogProgress($"Teardown error on abort: {ex.Message}");
+                }
+            });
+        }, this);
+    }
+
+    private Task StopAndDisposeAsync()
+    {
+        lock (_teardownGate)
+        {
+            return _teardownTask ??= StopAndDisposeCoreAsync();
+        }
+    }
+
+    private async Task StopAndDisposeCoreAsync()
+    {
         if (_otlpReceiver is not null && _app is not null)
         {
             // Give the SUT's BatchSpanProcessor a chance to flush trailing spans while the
@@ -387,8 +476,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             await _otlpReceiver.DisposeAsync();
             _otlpReceiver = null;
         }
-
-        GC.SuppressFinalize(this);
     }
 
     // --- OTLP Telemetry ---
@@ -719,6 +806,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // A run-abort cancels the linked token too — surface it as cancellation, not a
+            // misleading resource timeout, so the engine sees the abort and teardown proceeds.
+            if (RunCancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+
             // Timeout - diagnose each pending resource (state, exit code, health, dependencies)
             // and attach the full timeline + untruncated logs as an artifact.
             failureCts.Cancel();

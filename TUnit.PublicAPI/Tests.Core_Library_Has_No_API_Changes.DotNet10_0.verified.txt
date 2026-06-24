@@ -1722,6 +1722,7 @@ namespace
         public .<.TestContext> AllTests { get; }
         public .<.AssemblyHookContext> Assemblies { get; }
         public required string Id { get; init; }
+        public .CancellationToken SessionCancellationToken { get; }
         public .<.ClassHookContext> TestClasses { get; }
         public .TestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
