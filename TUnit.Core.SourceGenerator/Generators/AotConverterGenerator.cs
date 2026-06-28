@@ -538,8 +538,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.AppendLine("using System;");
         writer.AppendLine("using TUnit.Core.Converters;");
         writer.AppendLine();
-        writer.AppendLine("namespace TUnit.Generated;");
-        writer.AppendLine();
+        writer.AppendLine("namespace TUnit.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
 
         var converterIndex = 0;
         var converterClassNames = new List<string>();
@@ -661,6 +662,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             writer.AppendLine($"static readonly int _r_{converterClassName} = global::TUnit.Core.Converters.AotConverterRegistry.Register(new {converterClassName}());");
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("}");
