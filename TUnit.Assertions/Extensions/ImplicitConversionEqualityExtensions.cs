@@ -1,7 +1,29 @@
-// These overloads rely on [OverloadResolutionPriority] (honored only by C# 13+) to lose to the
-// source-generated same-type IsEqualTo / IsNotEqualTo. TUnit raises consumer LangVersion so the
-// attribute is honored on every target (see TUnit.Assertions.props). Issues #5765, #6276, #6280.
+// These cross-type overloads must lose to the source-generated same-type IsEqualTo / IsNotEqualTo
+// when the expected argument is the same type as the source (e.g. Guid vs Guid), where both are
+// applicable. Two layered mechanisms achieve that:
+//
+//  1. The trailing `params CrossTypeOverloadMarker[]` makes each overload applicable only in
+//     EXPANDED form, so a same-type call binds to the normal-form same-type overload via the C#
+//     "normal beats expanded" tie-break (§12.6.4.2). This is honored by EVERY Roslyn version,
+//     including the .NET 8 SDK's compiler, which is the only mechanism that fixes #6296.
+//  2. [OverloadResolutionPriority(-1)] is kept as a redundant signal for completeness on modern
+//     compilers, but it is NOT load-bearing — it is honored only by Roslyn 4.12+ (.NET 9 SDK and
+//     later), so consumers pinned to the .NET 8 SDK via global.json never see its effect.
+//
+// Why CrossTypeOverloadMarker and not `params object[]`: an `object[]` marker is applicable in
+// expanded form to ANY trailing argument, so a call like
+// `Assert.That(productCode).IsEqualTo("x", StringComparer.OrdinalIgnoreCase)` would silently bind
+// here and DISCARD the comparer — a false-pass footgun for a test framework (PR #6313 review).
+// CrossTypeOverloadMarker has no accessible constructor, so callers can never supply an element:
+// the overload stays applicable only with ZERO trailing args (the tie-break case), and any stray
+// trailing argument is a compile error again, exactly as it was before #6296.
+//
+// History: #5765 / #6276 / #6280 tried to fix this purely via ORP + a LangVersion bump in
+// TUnit.Assertions.props. That bump is a no-op for the real failure because ORP honoring tracks
+// the build SDK's Roslyn version, not LangVersion — see #6296. The `params` tie-break is what
+// makes this compiler-version-independent. The unused `_` parameter is never read.
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -13,9 +35,9 @@ namespace TUnit.Assertions.Extensions;
 /// <summary>
 /// Adds <c>IsEqualTo</c> overloads accepting an expected value of a different type when the
 /// source type defines an implicit conversion operator to that type. Defined as a partial of
-/// the source-generated <c>EqualsAssertionExtensions</c> so it lives in the same containing
-/// type as the original overload — required for <see cref="OverloadResolutionPriorityAttribute"/>
-/// to disambiguate calls where both overloads are applicable (e.g. enum or value-type sources).
+/// the source-generated <c>EqualsAssertionExtensions</c> so it shares the containing type. The
+/// trailing <c>params</c> array on each overload keeps it from displacing the same-type overload
+/// for same-type calls (e.g. enum or value-type sources) — see the file header for the why.
 ///
 /// Enables ergonomic comparison of wrapper Value Objects against their wrapped primitive,
 /// e.g. <c>await Assert.That(productCode).IsEqualTo("Example")</c> when
@@ -34,7 +56,10 @@ public static partial class EqualsAssertionExtensions
     public static EqualsAssertion<TOther> IsEqualTo<TValue, TOther>(
         this IAssertionSource<TValue> source,
         TOther? expected,
-        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+        [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null,
+        // Expanded-form-only marker so a same-type call loses to the same-type overload; never read.
+        // Element type has no accessible ctor, so stray trailing args stay a compile error. See file header.
+        params CrossTypeOverloadMarker[] _)
     {
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression})");
@@ -62,13 +87,30 @@ public static partial class NotEqualsAssertionExtensions
     public static NotEqualsAssertion<TOther> IsNotEqualTo<TValue, TOther>(
         this IAssertionSource<TValue> source,
         TOther? notExpected,
-        [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null)
+        [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null,
+        // Expanded-form-only marker so a same-type call loses to the same-type overload; never read.
+        // Element type has no accessible ctor, so stray trailing args stay a compile error. See file header.
+        params CrossTypeOverloadMarker[] _)
     {
         var converter = ImplicitConversionCache.GetConverter<TValue, TOther>();
         source.Context.ExpressionBuilder.Append($".IsNotEqualTo({notExpectedExpression})");
         var mapped = source.Context.Map(converter);
         return new NotEqualsAssertion<TOther>(mapped, notExpected!);
     }
+}
+
+/// <summary>
+/// Marker element type for the trailing <c>params</c> on the cross-type
+/// <c>IsEqualTo</c> / <c>IsNotEqualTo</c> overloads. Its only purpose is to make those overloads
+/// applicable solely in <em>expanded</em> form so a same-type call loses to the same-type overload
+/// (see <see cref="EqualsAssertionExtensions"/>). It has no accessible constructor, so callers can
+/// never pass an element — the overloads bind only with zero trailing arguments, and any stray
+/// trailing argument remains a compile error rather than being silently discarded. Never instantiated.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public sealed class CrossTypeOverloadMarker
+{
+    private CrossTypeOverloadMarker() { }
 }
 
 /// <summary>
