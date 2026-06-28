@@ -210,10 +210,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         var generatedMethods = new HashSet<string>();
         foreach (var propertyData in staticProperties)
         {
-            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
+            var methodName = GetInitializerMethodName(propertyData);
             if (generatedMethods.Add(methodName))
             {
-                GenerateIndividualPropertyInitializer(writer, propertyData);
+                GenerateIndividualPropertyInitializer(writer, propertyData, methodName);
             }
         }
 
@@ -238,12 +238,12 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         foreach (var propertyData in staticProperties)
         {
             var typeName = propertyData.Property.ContainingType.GloballyQualified;
-            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
+            var methodName = GetInitializerMethodName(propertyData);
             // SafeName maps every non-alphanumeric char to '_', so distinct types whose names differ
             // only in '.' vs '_' (e.g. A_B.C vs A.B_C) would collide. Append a deterministic hash of
             // the fully-qualified type + property to keep each merged-.cctor field unique. FNV-1a (not
             // string.GetHashCode) so the field name is stable across compiler restarts.
-            var stableHash = FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8");
+            var stableHash = GetStableHash(propertyData);
             var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
 
             if (!registeredFields.Add(fieldName))
@@ -270,6 +270,20 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return writer.ToString();
     }
 
+    // Stable FNV-1a hash of the fully-qualified type + property name. Shared by the initializer
+    // method name and the registration field name so that distinct types which share a simple name
+    // (e.g. Acme.Tests.MyFixture vs Acme.Shared.MyFixture) produce distinct, non-colliding methods.
+    private static string GetStableHash(PropertyWithDataSourceModel propertyData)
+    {
+        var typeName = propertyData.Property.ContainingType.GloballyQualified;
+        return FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8");
+    }
+
+    private static string GetInitializerMethodName(PropertyWithDataSourceModel propertyData)
+    {
+        return $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}_{GetStableHash(propertyData)}";
+    }
+
     private static string SafeName(string globallyQualified)
     {
         var sb = new StringBuilder(globallyQualified.Length);
@@ -280,11 +294,10 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 
-    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData)
+    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData, string methodName)
     {
         var propertyName = propertyData.Property.Name;
         var typeName = propertyData.Property.ContainingType.GloballyQualified;
-        var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
 
         writer.AppendLine();
         writer.AppendLine("/// <summary>");
