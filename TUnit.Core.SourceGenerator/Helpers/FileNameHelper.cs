@@ -179,9 +179,11 @@ internal static class FileNameHelper
 
     /// <summary>
     /// Computes a deterministic hash code for a string (FNV-1a).
-    /// Unlike string.GetHashCode(), this is stable across processes and platforms.
+    /// Unlike string.GetHashCode(), this is stable across processes and platforms,
+    /// so it is safe to bake into generated identifiers and hint names that must stay
+    /// consistent across compiler restarts (preserving Roslyn's incremental cache).
     /// </summary>
-    private static uint GetStableHashCode(string str)
+    public static uint GetStableHashCode(string str)
     {
         unchecked
         {
@@ -193,6 +195,20 @@ internal static class FileNameHelper
             }
             return hash;
         }
+    }
+
+    /// <summary>
+    /// Sanitizes a string into a safe C# identifier fragment by mapping every
+    /// non-alphanumeric character to '_'. Used for generated field/method names.
+    /// </summary>
+    public static string SafeName(string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        foreach (var c in value)
+        {
+            sb.Append(char.IsLetterOrDigit(c) ? c : '_');
+        }
+        return sb.ToString();
     }
 
     /// <summary>

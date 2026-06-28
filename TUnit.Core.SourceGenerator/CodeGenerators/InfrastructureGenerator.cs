@@ -33,6 +33,19 @@ public class InfrastructureGenerator : IIncrementalGenerator
         "7cec85d7bea7798e", // .NET Core
     ];
 
+    // Shared partial-class shells in TUnit.Generated, one per registration concern. Per-file
+    // generated code contributes static field initializers to these; the compiler merges each into
+    // a single .cctor, triggered once from the module initializer below via RunClassConstructor.
+    private static readonly string[] RegistrationShells =
+    [
+        "TUnit_TestRegistration",
+        "TUnit_HookRegistration",
+        "TUnit_PropertyRegistration",
+        "TUnit_ConverterRegistration",
+        "TUnit_StaticPropertyRegistration",
+        "TUnit_DynamicTestRegistration",
+    ];
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabledProvider = context.AnalyzerConfigOptionsProvider
@@ -449,12 +462,16 @@ public class InfrastructureGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine();
 
                 // Trigger consolidated registration .cctors.
-                // Per-class/per-method test sources and per-hook sources contribute static field
-                // initializers to shared partial classes. RunClassConstructor forces each .cctor
-                // to execute, performing all registrations in ONE JIT-compiled method per class.
-                // No try/catch needed — InfrastructureGenerator always emits both shell classes.
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);");
-                sourceBuilder.AppendLine("global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);");
+                // Test sources, hooks, property injection sources, AOT converters, static property
+                // initializers and dynamic test sources each contribute static field initializers to
+                // a shared partial class per concern. RunClassConstructor forces each .cctor to
+                // execute, performing all registrations in ONE JIT-compiled method per concern instead
+                // of N per-file [ModuleInitializer] methods.
+                // No try/catch needed — InfrastructureGenerator always emits these shell classes.
+                foreach (var shell in RegistrationShells)
+                {
+                    sourceBuilder.AppendLine($"global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.{shell}).TypeHandle);");
+                }
                 sourceBuilder.AppendLine();
 
                 sourceBuilder.AppendLine("try");
@@ -475,10 +492,11 @@ public class InfrastructureGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("namespace TUnit.Generated");
         sourceBuilder.AppendLine("{");
         sourceBuilder.Indent();
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_TestRegistration { }");
-        sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
-        sourceBuilder.AppendLine("internal static partial class TUnit_HookRegistration { }");
+        foreach (var shell in RegistrationShells)
+        {
+            sourceBuilder.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]");
+            sourceBuilder.AppendLine($"internal static partial class {shell} {{ }}");
+        }
         sourceBuilder.Unindent();
         sourceBuilder.AppendLine("}");
 

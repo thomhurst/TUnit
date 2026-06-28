@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
@@ -205,43 +206,14 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Module initializer that registers static property metadata");
-        writer.AppendLine("/// </summary>");
-        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Register each property with metadata
-        foreach (var propertyData in staticProperties)
-        {
-            var typeName = propertyData.Property.ContainingType.GloballyQualified;
-            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
-
-            writer.AppendLine("global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({propertyData.Property.GloballyQualifiedType}),");
-            writer.AppendLine($"DeclaringType = typeof({typeName}),");
-            writer.AppendLine($"InitializerAsync = {methodName}");
-            writer.Unindent();
-            writer.AppendLine("});");
-        }
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
         // Generate individual property initializer methods that return the value and set the property
         var generatedMethods = new HashSet<string>();
         foreach (var propertyData in staticProperties)
         {
-            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
+            var methodName = GetInitializerMethodName(propertyData);
             if (generatedMethods.Add(methodName))
             {
-                GenerateIndividualPropertyInitializer(writer, propertyData);
+                GenerateIndividualPropertyInitializer(writer, propertyData, methodName);
             }
         }
 
@@ -250,21 +222,78 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("}");
+        writer.AppendLine();
+
+        // Contribute static field initializers to the shared TUnit_StaticPropertyRegistration partial
+        // (declared by InfrastructureGenerator). The compiler merges all contributions into one .cctor,
+        // triggered once via RunClassConstructor — replacing the per-assembly [ModuleInitializer].
+        writer.AppendLine("namespace TUnit.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("internal static partial class TUnit_StaticPropertyRegistration");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        var registeredFields = new HashSet<string>();
+        foreach (var propertyData in staticProperties)
+        {
+            var typeName = propertyData.Property.ContainingType.GloballyQualified;
+            var methodName = GetInitializerMethodName(propertyData);
+            // SafeName maps every non-alphanumeric char to '_', so distinct types whose names differ
+            // only in '.' vs '_' (e.g. A_B.C vs A.B_C) would collide. Append a deterministic hash of
+            // the fully-qualified type + property to keep each merged-.cctor field unique. FNV-1a (not
+            // string.GetHashCode) so the field name is stable across compiler restarts.
+            var stableHash = GetStableHash(propertyData);
+            var fieldName = $"_r_{FileNameHelper.SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
+
+            if (!registeredFields.Add(fieldName))
+            {
+                continue;
+            }
+
+            writer.AppendLine($"static readonly int {fieldName} = global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({propertyData.Property.GloballyQualifiedType}),");
+            writer.AppendLine($"DeclaringType = typeof({typeName}),");
+            writer.AppendLine($"InitializerAsync = global::TUnit.Core.Generated.StaticPropertyInitializer.{methodName}");
+            writer.Unindent();
+            writer.AppendLine("});");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         return writer.ToString();
     }
 
-    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData)
+    // Stable FNV-1a hash of the fully-qualified type + property name. Shared by the initializer
+    // method name and the registration field name so that distinct types which share a simple name
+    // (e.g. Acme.Tests.MyFixture vs Acme.Shared.MyFixture) produce distinct, non-colliding methods.
+    private static string GetStableHash(PropertyWithDataSourceModel propertyData)
+    {
+        var typeName = propertyData.Property.ContainingType.GloballyQualified;
+        return FileNameHelper.GetStableHashCode($"{typeName}.{propertyData.Property.Name}").ToString("x8");
+    }
+
+    private static string GetInitializerMethodName(PropertyWithDataSourceModel propertyData)
+    {
+        return $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}_{GetStableHash(propertyData)}";
+    }
+
+    private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData, string methodName)
     {
         var propertyName = propertyData.Property.Name;
         var typeName = propertyData.Property.ContainingType.GloballyQualified;
-        var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
 
         writer.AppendLine();
         writer.AppendLine("/// <summary>");
         writer.AppendLine($"/// Initializer for {typeName}.{propertyName}");
         writer.AppendLine("/// </summary>");
-        writer.AppendLine($"private static async global::System.Threading.Tasks.Task<object?> {methodName}()");
+        writer.AppendLine($"internal static async global::System.Threading.Tasks.Task<object?> {methodName}()");
         writer.AppendLine("{");
         writer.Indent();
 

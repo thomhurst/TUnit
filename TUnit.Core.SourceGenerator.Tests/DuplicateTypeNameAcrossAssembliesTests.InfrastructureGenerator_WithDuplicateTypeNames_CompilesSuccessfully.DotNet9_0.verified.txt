@@ -101,6 +101,10 @@ file static class TUnitInfrastructure
         }
         global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_TestRegistration).TypeHandle);
         global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_HookRegistration).TypeHandle);
+        global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_PropertyRegistration).TypeHandle);
+        global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_ConverterRegistration).TypeHandle);
+        global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_StaticPropertyRegistration).TypeHandle);
+        global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::TUnit.Generated.TUnit_DynamicTestRegistration).TypeHandle);
         try
         {
             global::TUnit.Core.GlobalContext.Current.GlobalLogger.LogDebug("[ModuleInitializer:TestsBase`1] TUnit infrastructure initialized");
@@ -114,4 +118,12 @@ namespace TUnit.Generated
     internal static partial class TUnit_TestRegistration { }
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
     internal static partial class TUnit_HookRegistration { }
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+    internal static partial class TUnit_PropertyRegistration { }
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+    internal static partial class TUnit_ConverterRegistration { }
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+    internal static partial class TUnit_StaticPropertyRegistration { }
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+    internal static partial class TUnit_DynamicTestRegistration { }
 }

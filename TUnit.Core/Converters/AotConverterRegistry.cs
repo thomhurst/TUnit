@@ -10,11 +10,15 @@ public static class AotConverterRegistry
     private static readonly ConcurrentDictionary<(Type Source, Type Target), IAotConverter> Converters = new();
 
     /// <summary>
-    /// Registers a converter
+    /// Registers a converter. Called by generated code from a static field initializer on the
+    /// consolidated registration <c>.cctor</c> (so the per-assembly module initializer collapses
+    /// into one merged <c>.cctor</c>).
+    /// Returns a dummy value for use as a static field initializer.
     /// </summary>
-    public static void Register(IAotConverter converter)
+    public static int Register(IAotConverter converter)
     {
         Converters.TryAdd((converter.SourceType, converter.TargetType), converter);
+        return 0;
     }
 
     /// <summary>

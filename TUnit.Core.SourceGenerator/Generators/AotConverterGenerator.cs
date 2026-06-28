@@ -538,11 +538,12 @@ public class AotConverterGenerator : IIncrementalGenerator
         writer.AppendLine("using System;");
         writer.AppendLine("using TUnit.Core.Converters;");
         writer.AppendLine();
-        writer.AppendLine("namespace TUnit.Generated;");
-        writer.AppendLine();
+        writer.AppendLine("namespace TUnit.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
 
         var converterIndex = 0;
-        var registrations = new List<string>();
+        var converterClassNames = new List<string>();
 
         foreach (var conversion in conversions)
         {
@@ -646,23 +647,20 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.AppendLine("}");
             writer.AppendLine();
 
-            registrations.Add($"AotConverterRegistry.Register(new {converterClassName}());");
+            converterClassNames.Add(converterClassName);
         }
 
-        writer.AppendLine("internal static class AotConverterRegistration");
+        // Contribute static field initializers to the shared TUnit_ConverterRegistration partial
+        // (declared by InfrastructureGenerator). The compiler merges all contributions into one
+        // .cctor, triggered once via RunClassConstructor from the single module initializer —
+        // avoiding a separate [ModuleInitializer] method here.
+        writer.AppendLine("internal static partial class TUnit_ConverterRegistration");
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-        writer.AppendLine("[global::System.Diagnostics.CodeAnalysis.SuppressMessage(\"Performance\", \"CA2255:The 'ModuleInitializer' attribute should not be used in libraries\",");
-        writer.AppendLine("    Justification = \"Test framework needs to register AOT converters for conversion operators\")]");
-        writer.AppendLine("public static void Initialize()");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var registration in registrations)
+        foreach (var converterClassName in converterClassNames)
         {
-            writer.AppendLine(registration);
+            writer.AppendLine($"static readonly int _r_{converterClassName} = global::TUnit.Core.Converters.AotConverterRegistry.Register(new {converterClassName}());");
         }
 
         writer.Unindent();
