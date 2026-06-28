@@ -244,7 +244,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             // the fully-qualified type + property to keep each merged-.cctor field unique. FNV-1a (not
             // string.GetHashCode) so the field name is stable across compiler restarts.
             var stableHash = GetStableHash(propertyData);
-            var fieldName = $"_r_{SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
+            var fieldName = $"_r_{FileNameHelper.SafeName(typeName)}_{propertyData.Property.Name}_{stableHash}";
 
             if (!registeredFields.Add(fieldName))
             {
@@ -282,16 +282,6 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
     private static string GetInitializerMethodName(PropertyWithDataSourceModel propertyData)
     {
         return $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}_{GetStableHash(propertyData)}";
-    }
-
-    private static string SafeName(string globallyQualified)
-    {
-        var sb = new StringBuilder(globallyQualified.Length);
-        foreach (var c in globallyQualified)
-        {
-            sb.Append(char.IsLetterOrDigit(c) ? c : '_');
-        }
-        return sb.ToString();
     }
 
     private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSourceModel propertyData, string methodName)

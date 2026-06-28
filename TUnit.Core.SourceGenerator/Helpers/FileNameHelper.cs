@@ -198,6 +198,20 @@ internal static class FileNameHelper
     }
 
     /// <summary>
+    /// Sanitizes a string into a safe C# identifier fragment by mapping every
+    /// non-alphanumeric character to '_'. Used for generated field/method names.
+    /// </summary>
+    public static string SafeName(string value)
+    {
+        var sb = new StringBuilder(value.Length);
+        foreach (var c in value)
+        {
+            sb.Append(char.IsLetterOrDigit(c) ? c : '_');
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>
     /// Sanitizes a string to be safe for use in a filename.
     /// Replaces invalid characters with underscores.
     /// </summary>
