@@ -3,6 +3,7 @@
 ### New Rules
 
 #### Test Method and Structure Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0001 | Usage | Error | Test argument types don't match method parameters
@@ -15,6 +16,7 @@ TUnit0051 | Usage | Error | Test class must be public
 TUnit0052 | Usage | Warning | Multiple constructors found without [TestConstructor] attribute
 
 #### Data Source and Parameter Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0004 | Usage | Error | Data source method not found
@@ -35,6 +37,7 @@ TUnit0056 | Usage | Error | Instance data source methods must use [InstanceMetho
 TUnit0060 | Usage | Info | Data source may produce no tests - ensure it provides at least one test case
 
 #### Hook and Lifecycle Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0016 | Usage | Error | Hook methods must not be static
@@ -48,6 +51,7 @@ TUnit0057 | Usage | Info | Hook context parameter available - consider adding fo
 TUnit0058 | Usage | Error | Hook method has unknown parameters - check expected parameter types for this hook
 
 #### Attribute and Metadata Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0017 | Usage | Error | [Explicit] attribute cannot be on both method and class - choose one location
@@ -59,12 +63,14 @@ TUnit0059 | Usage | Warning | Abstract test class with data sources requires [In
 TUnit0033 | Usage | Error | Circular or conflicting test dependencies detected
 
 #### Async and Execution Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0015 | Usage | Error | Methods with [Timeout] must have a CancellationToken parameter
 TUnit0031 | Usage | Error | Async void methods and lambdas not allowed - return Task instead
 
 #### AOT Compatibility Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0300 | Usage | Warning | Generic types may not be AOT-compatible - ensure all combinations are known at compile time
@@ -72,6 +78,7 @@ TUnit0301 | Usage | Warning | Tuple usage may not be AOT-compatible - consider u
 TUnit0302 | Usage | Warning | Custom conversion operators may not be AOT-compatible - use explicit casting
 
 #### Best Practices and Warnings
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnit0018 | Usage | Warning | Test methods should not assign instance fields/properties - consider using static fields or [NotInParallel]
@@ -80,6 +87,7 @@ TUnit0034 | Usage | Error | Do not declare a Main method in test projects - TUni
 TUnit0055 | Usage | Warning | Do not overwrite Console.Out/Error - it breaks TUnit logging
 
 #### Migration and Legacy Support
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUXU0001 | Usage | Info | XUnit code can be migrated to TUnit

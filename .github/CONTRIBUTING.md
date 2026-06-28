@@ -5,6 +5,7 @@ First off, thanks for taking the time to contribute! ❤️
 All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
 
 > And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
+>
 > - Star the project
 > - Tweet about it
 > - Refer this project in your project's readme
@@ -96,6 +97,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/thomhu
 - **Explain why this enhancement would be useful** to most TUnit users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
 ### Improving The Documentation
+
 If you think the documentation could be improved, feel free to add to and tweak the docs!
 
 The documentation is generated from files within this repository, so you can fork, clone and create a PR to update the documentation.
@@ -141,25 +143,32 @@ dotnet build -p:EmitCompilerGeneratedFiles=true
 When contributing code to TUnit, please keep these important requirements in mind:
 
 #### Dual-Mode Implementation
+
 TUnit supports both source-generated and reflection-based test discovery. **All changes that affect test discovery or execution must work identically in both modes:**
+
 - Source Generator path: `TUnit.Core.SourceGenerator`
 - Reflection path: `TUnit.Engine`
 
 #### Snapshot Testing
+
 If your changes affect the source generator output or public APIs:
+
 1. Run the relevant tests: `dotnet test TUnit.Core.SourceGenerator.Tests` or `dotnet test TUnit.PublicAPI`
 2. Review any `.received.txt` files generated
 3. If the changes are intentional, rename them to `.verified.txt`
 4. Commit the `.verified.txt` files with your changes
 
 #### Performance Considerations
+
 TUnit is designed to handle millions of tests. When contributing:
+
 - Minimize allocations in hot paths (test discovery, execution)
 - Avoid LINQ in performance-critical code
 - Cache reflection results
 - Use `ValueTask` for potentially-sync operations
 
 #### AOT Compatibility
+
 All code must work with Native AOT and IL trimming. Add appropriate `[DynamicallyAccessedMembers]` annotations when using reflection.
 
 For detailed development guidelines, see the [CLAUDE.md](https://github.com/thomhurst/TUnit/blob/main/CLAUDE.md) file in the repository root.

@@ -17,6 +17,7 @@ Show current requirement gathering progress and continue.
    - Continue from last unanswered question
 
 ## Status Display Format:
+
 ```
 📋 Active Requirement: [name]
 Started: [time ago]
@@ -30,6 +31,7 @@ Next Question:
 ```
 
 ## Continuation Flow:
+
 1. Read next unanswered question from file
 2. Present to user with default
 3. Accept yes/no/idk response
@@ -38,5 +40,6 @@ Next Question:
 6. Move to next question or phase
 
 ## Phase Transitions:
+
 - Discovery complete → Run context gathering → Generate detail questions
 - Detail complete → Generate final requirements spec

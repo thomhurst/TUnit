@@ -3,6 +3,7 @@
 ### New Rules
 
 #### Assertion Usage Rules
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnitAssertions0001 | Usage | Warning | Don't mix 'Or' & 'And' operators in assertions - use parentheses to clarify precedence
@@ -10,6 +11,7 @@ TUnitAssertions0002 | Usage | Error | Assert statements must be awaited - all TU
 TUnitAssertions0004 | Usage | Error | Assert.Multiple requires 'using' statement for proper scoping
 
 #### Assertion Best Practices
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnitAssertions0003 | Usage | Warning | Don't provide CallerArgumentExpression parameter values - let the compiler handle it
@@ -19,6 +21,7 @@ TUnitAssertions0007 | Usage | Error | Cast dynamic values to 'object?' when usin
 TUnitAssertions0008 | Usage | Error | Await ValueTask before passing to Assert.That() - use 'await' keyword
 
 #### Migration Support
+
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUnitAssertions0009 | Usage | Info | XUnit assertion can be migrated to TUnit assertion syntax

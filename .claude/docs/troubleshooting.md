@@ -13,6 +13,7 @@ If changes are unintentional, investigate what modified the source generator out
 ## Tests Pass Locally, Fail in CI
 
 **Common Causes**:
+
 1. Forgot to commit `.verified.txt` files
 2. Line ending differences (CRLF vs LF)
 3. Race conditions in parallel tests
@@ -35,6 +36,7 @@ obj/Debug/net9.0/generated/TUnit.Core.SourceGenerator/
 ```
 
 **Common Issues**:
+
 - Attribute not checked in reflection path
 - Different data expansion logic
 - Missing hook invocation in one mode
@@ -46,6 +48,7 @@ obj/Debug/net9.0/generated/TUnit.Core.SourceGenerator/
 See `mandatory-rules.md` for annotation patterns.
 
 **Common Causes**:
+
 - Reflection without `[DynamicallyAccessedMembers]`
 - Dynamic code generation
 
@@ -60,6 +63,7 @@ dotnet run -c Release
 ```
 
 **Common Causes**:
+
 - Missing reflection cache
 - Allocations in hot paths
 - Blocking on async

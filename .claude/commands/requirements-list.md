@@ -17,6 +17,7 @@ Display all requirements with their status and summaries.
    - Then by date (newest first)
 
 ## Display Format:
+
 ```
 📚 Requirements Documentation
 

@@ -54,6 +54,7 @@ dotnet run -c Release
 ```
 
 **When to run**:
+
 - Before/after changes to test discovery
 - Before/after changes to test execution
 - Before/after changes to argument expansion
