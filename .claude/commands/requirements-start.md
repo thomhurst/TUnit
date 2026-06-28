@@ -68,7 +68,7 @@ Begin gathering requirements for: $ARGUMENTS
 
 ## Question Formats
 
-### Discovery Questions (Phase 2):
+### Discovery Questions (Phase 2)
 
 ```
 ## Q1: Will users interact with this feature through a visual interface?
@@ -88,6 +88,7 @@ Begin gathering requirements for: $ARGUMENTS
 ```
 
 ### Expert Questions (Phase 4)
+
 ```
 ## Q7: Should we extend the existing UserService at services/UserService.ts?
 **Default if unknown:** Yes (maintains architectural consistency)
@@ -96,7 +97,7 @@ Begin gathering requirements for: $ARGUMENTS
 **Default if unknown:** No (based on similar features not requiring schema changes)
 ```
 
-## Important Rules:
+## Important Rules
 
 - ONLY yes/no questions with smart defaults
 - ONE question at a time
@@ -123,7 +124,7 @@ Begin gathering requirements for: $ARGUMENTS
 }
 ```
 
-## Phase Transitions:
+## Phase Transitions
 
 - After each phase, announce: "Phase complete. Starting [next phase]..."
 - Save all work before moving to next phase
