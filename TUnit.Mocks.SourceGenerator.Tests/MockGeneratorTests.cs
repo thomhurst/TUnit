@@ -1448,6 +1448,35 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Static_Extension_Discovery_Via_Qualified_Name()
+    {
+        // Namespace.IFoo.Mock() — a fully-qualified reference parses as a member-access
+        // expression (not a qualified-name) in expression position. Generation must still
+        // trigger off the resolved symbol regardless of the syntactic shape. See issue #6298.
+        var source = """
+            using TUnit.Mocks;
+
+            namespace MyNamespace
+            {
+                public interface ITestInterface
+                {
+                    string Method();
+                }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = MyNamespace.ITestInterface.Mock();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task External_Interface_With_Indexer_Static_Extension_Discovery()
     {
         var externalSource = """
