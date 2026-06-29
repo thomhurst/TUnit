@@ -35,6 +35,13 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
     private readonly OtlpReceiverDiagnostics _diagnostics = new();
+
+    // service.name values seen on incoming OTLP *log* records. Recorded for every parsed log
+    // record regardless of trace-id match — presence here means OTLP logging reached us at all.
+    // TUnit.Aspire uses it to tell a resource that exported correlated logs from one that only
+    // wrote raw console output, so it can hint at missing OpenTelemetry log export in the SUT.
+    private readonly ConcurrentDictionary<string, byte> _seenLogServiceNames = new(StringComparer.OrdinalIgnoreCase);
+
     private string? _upstreamEndpoint;
     private IReadOnlyDictionary<string, string>? _upstreamHeaders;
     private Task? _listenTask;
@@ -58,6 +65,17 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     /// silent drops in user environments via <see cref="WriteDiagnosticsSummary"/>.
     /// </summary>
     internal OtlpReceiverDiagnostics Diagnostics => _diagnostics;
+
+    /// <summary>
+    /// Returns <c>true</c> if at least one OTLP log record carrying the given <c>service.name</c>
+    /// resource attribute has been received (whether or not its trace id matched a registered
+    /// test). Used by TUnit.Aspire to distinguish a resource that exported telemetry from one
+    /// that only wrote to the console, so it can hint at missing OpenTelemetry log export.
+    /// </summary>
+    internal bool HasSeenLogsFrom(string serviceName) => _seenLogServiceNames.ContainsKey(serviceName);
+
+    /// <summary>Snapshot of all <c>service.name</c> values seen on incoming OTLP log records.</summary>
+    internal IReadOnlyCollection<string> SeenLogServiceNames => _seenLogServiceNames.Keys.ToArray();
 
     /// <summary>
     /// Creates a new OTLP receiver.
@@ -324,7 +342,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             if (path == "/v1/logs")
             {
                 Interlocked.Increment(ref _diagnostics.LogsRequests);
-                ProcessLogs(body, _diagnostics);
+                ProcessLogs(body);
             }
             else if (path == "/v1/traces")
             {
@@ -531,8 +549,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             ? ((ActivityStatusCode)code).ToString()
             : nameof(ActivityStatusCode.Unset);
 
-    private static void ProcessLogs(byte[] body, OtlpReceiverDiagnostics diag)
+    private void ProcessLogs(byte[] body)
     {
+        var diag = _diagnostics;
         List<OtlpLogRecord> records;
         try
         {
@@ -549,6 +568,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
         foreach (var record in records)
         {
+            // Record the source service even when the record has no usable trace id — its
+            // presence proves OTLP logging is wired, which is exactly what the Aspire
+            // missing-telemetry hint checks for.
+            if (!string.IsNullOrEmpty(record.ResourceName))
+            {
+                _seenLogServiceNames.TryAdd(record.ResourceName, 0);
+            }
+
             if (string.IsNullOrEmpty(record.TraceId))
             {
                 Interlocked.Increment(ref diag.LogsRecordsNoTraceId);
