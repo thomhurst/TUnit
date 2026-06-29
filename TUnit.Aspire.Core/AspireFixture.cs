@@ -459,15 +459,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         {
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();
 
-            var names = new List<string>();
-            foreach (var resource in model.Resources)
-            {
-                if (ShouldWaitForResource(resource))
-                {
-                    names.Add(resource.Name);
-                }
-            }
-
+            // Inline (not GetWaitableResourceNames) to avoid its LogProgress side effect at test-end.
+            var names = model.Resources.Where(ShouldWaitForResource).Select(r => r.Name).ToList();
             if (names.Count == 0)
             {
                 return;
@@ -479,7 +472,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // Collect in parallel — each resource has its own short timeout, so collecting
             // sequentially would compound the delay onto an already-failed test's teardown.
             var collected = await Task.WhenAll(names.Select(async name =>
-                (name, errors: await CollectResourceErrorLinesAsync(app, name, timeout, max))));
+                (name, errors: await CollectResourceLogLinesAsync(app, name, timeout, errorsOnly: true, max: max))));
 
             foreach (var (name, errors) in collected)
             {
@@ -503,53 +496,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // The Aspire application was torn down concurrently (e.g. a run abort raced this
             // test's completion) — there is nothing left to collect.
         }
-    }
-
-    /// <summary>
-    /// Collects up to <paramref name="max"/> of the most recent error (stderr) log lines from a
-    /// resource via the <see cref="ResourceLoggerService"/>. <see cref="ResourceLoggerService.WatchAsync(string)"/>
-    /// replays the buffered backlog before tailing live output, so lines from an already-exited
-    /// resource are still captured; the stream never completes on its own, so a short timeout
-    /// bounds the live-tail wait.
-    /// </summary>
-    private static async Task<List<string>> CollectResourceErrorLinesAsync(
-        DistributedApplication app,
-        string resourceName,
-        TimeSpan timeout,
-        int max)
-    {
-        var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
-        var errors = new List<string>();
-
-        using var cts = new CancellationTokenSource(timeout);
-
-        try
-        {
-            await foreach (var batch in loggerService.WatchAsync(resourceName)
-                .WithCancellation(cts.Token))
-            {
-                foreach (var line in batch)
-                {
-                    if (line.IsErrorMessage)
-                    {
-                        errors.Add(line.Content);
-                    }
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Expected — the short timeout fires once the backlog has replayed and the live
-            // tail goes quiet.
-        }
-
-        // Keep only the most recent `max` lines (the backlog can be large on a long run).
-        if (max >= 0 && errors.Count > max)
-        {
-            errors.RemoveRange(0, errors.Count - max);
-        }
-
-        return errors;
     }
 
     /// <summary>
@@ -744,22 +690,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         try
         {
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-            var projects = model.Resources.OfType<ProjectResource>().ToList();
-            if (projects.Count == 0)
+
+            // Only resources we've NOT already seen export OTLP logs are hint candidates. Filtering
+            // first means a correctly-wired SUT (every resource seen) opens zero console probes.
+            // The fixture injects OTEL_SERVICE_NAME = resource name (see ConfigureOtlpEndpoints), so
+            // an SUT using the default service name matches by resource name here; one that overrides
+            // its service name may produce a false hint — hence the soft wording below.
+            var candidates = model.Resources.OfType<ProjectResource>()
+                .Where(p => !receiver.HasSeenLogsFrom(p.Name))
+                .ToList();
+            if (candidates.Count == 0)
             {
                 return;
             }
 
             // Probe console output in parallel — each probe has its own short timeout.
-            var probed = await Task.WhenAll(projects.Select(async p =>
+            var probed = await Task.WhenAll(candidates.Select(async p =>
                 (p.Name, hasConsoleOutput: await ResourceProducedConsoleOutputAsync(app, p.Name))));
 
             foreach (var (name, hasConsoleOutput) in probed)
             {
-                // The fixture injects OTEL_SERVICE_NAME = resource name (see ConfigureOtlpEndpoints),
-                // so an SUT using the default service name matches by resource name here. An SUT
-                // that overrides its service name may produce a false hint — hence the soft wording.
-                if (hasConsoleOutput && !receiver.HasSeenLogsFrom(name))
+                if (hasConsoleOutput)
                 {
                     LogProgress(
                         $"Resource '{name}' produced console output but sent no correlated OpenTelemetry logs to TUnit, " +
@@ -1057,20 +1008,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     }
 
     /// <summary>
-    /// Collects buffered log lines from a resource via the <see cref="ResourceLoggerService"/>.
-    /// Returns the raw line content (error/stderr lines prefixed with <c>E&gt;</c>), or an empty
-    /// list if none are available. Uses a short timeout to avoid hanging if the log service is
-    /// unresponsive; <see cref="ResourceLoggerService.WatchAsync(string)"/> replays the buffered
-    /// backlog first, so logs from an already-exited resource are still captured.
+    /// Collects buffered log lines from a resource via the <see cref="ResourceLoggerService"/>,
+    /// or an empty list if none are available. <see cref="ResourceLoggerService.WatchAsync(string)"/>
+    /// replays the buffered backlog before tailing live output (so logs from an already-exited
+    /// resource are still captured) and never completes on its own, so <paramref name="timeout"/>
+    /// bounds the wait.
     /// </summary>
+    /// <param name="timeout">Time budget for collection. Defaults to 5 seconds.</param>
+    /// <param name="errorsOnly">When <c>true</c>, keeps only stderr lines (raw content). When
+    /// <c>false</c> (default), keeps every line, prefixing stderr lines with <c>E&gt;</c>.</param>
+    /// <param name="max">When &gt;= 0, keeps only the most recent <paramref name="max"/> lines.</param>
     private static async Task<List<string>> CollectResourceLogLinesAsync(
         DistributedApplication app,
-        string resourceName)
+        string resourceName,
+        TimeSpan? timeout = null,
+        bool errorsOnly = false,
+        int max = -1)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
         var lines = new List<string>();
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
         try
         {
@@ -1079,13 +1037,29 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             {
                 foreach (var line in batch)
                 {
-                    lines.Add(line.IsErrorMessage ? $"E> {line.Content}" : line.Content);
+                    if (errorsOnly)
+                    {
+                        if (line.IsErrorMessage)
+                        {
+                            lines.Add(line.Content);
+                        }
+                    }
+                    else
+                    {
+                        lines.Add(line.IsErrorMessage ? $"E> {line.Content}" : line.Content);
+                    }
                 }
             }
         }
         catch (OperationCanceledException)
         {
             // Expected - we use a short timeout to collect buffered logs.
+        }
+
+        // Keep only the most recent `max` lines (the backlog can be large on a long run).
+        if (max >= 0 && lines.Count > max)
+        {
+            lines.RemoveRange(0, lines.Count - max);
         }
 
         return lines;
