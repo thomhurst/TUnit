@@ -714,8 +714,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // an SUT using the default service name matches by resource name here; one that overrides
             // its service name may produce a false hint — hence the soft wording below.
             var candidates = model.Resources.OfType<ProjectResource>()
-                .Where(ShouldWaitForResource)
-                .Where(p => !receiver.HasSeenLogsFrom(p.Name))
+                .Where(p => ShouldWaitForResource(p) && !receiver.HasSeenLogsFrom(p.Name))
                 .ToList();
             if (candidates.Count == 0)
             {
@@ -1068,9 +1067,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
                         continue;
                     }
 
-                    var content = errorsOnly || !line.IsErrorMessage
-                        ? line.Content
-                        : $"E> {line.Content}";
+                    var content = !errorsOnly && line.IsErrorMessage
+                        ? $"E> {line.Content}"
+                        : line.Content;
 
                     if (bounded)
                     {
