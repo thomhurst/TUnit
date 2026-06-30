@@ -551,7 +551,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
     private void ProcessLogs(byte[] body)
     {
-        var diag = _diagnostics;
         List<OtlpLogRecord> records;
         try
         {
@@ -559,12 +558,12 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Interlocked.Increment(ref diag.LogsParseFailures);
+            Interlocked.Increment(ref _diagnostics.LogsParseFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/logs body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 
-        Interlocked.Add(ref diag.LogsRecordsParsed, records.Count);
+        Interlocked.Add(ref _diagnostics.LogsRecordsParsed, records.Count);
 
         foreach (var record in records)
         {
@@ -578,7 +577,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
             if (string.IsNullOrEmpty(record.TraceId))
             {
-                Interlocked.Increment(ref diag.LogsRecordsNoTraceId);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsNoTraceId);
                 continue;
             }
 
@@ -586,14 +585,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var contextId = TraceRegistry.GetContextId(record.TraceId);
             if (contextId is null)
             {
-                Interlocked.Increment(ref diag.LogsRecordsTraceNotRegistered);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsTraceNotRegistered);
                 continue;
             }
 
             var testContext = TestContext.GetById(contextId);
             if (testContext is null)
             {
-                Interlocked.Increment(ref diag.LogsRecordsTestContextMissing);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsTestContextMissing);
                 continue;
             }
 
@@ -604,7 +603,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 : $"[{record.ResourceName}] ";
 
             testContext.Output.WriteLine($"{prefix}[{severity}] {record.Body}");
-            Interlocked.Increment(ref diag.LogsRecordsRouted);
+            Interlocked.Increment(ref _diagnostics.LogsRecordsRouted);
         }
     }
 

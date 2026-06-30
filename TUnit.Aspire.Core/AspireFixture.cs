@@ -704,9 +704,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
                 return;
             }
 
-            // Probe console output in parallel — each probe has its own short timeout.
+            // Probe console output in parallel — each probe has its own short timeout, reusing the
+            // same bound as the on-failure dump so extending one extends both.
+            var probeTimeout = FailureLogCollectionTimeout;
             var probed = await Task.WhenAll(candidates.Select(async p =>
-                (p.Name, hasConsoleOutput: await ResourceProducedConsoleOutputAsync(app, p.Name))));
+                (p.Name, hasConsoleOutput: await ResourceProducedConsoleOutputAsync(app, p.Name, probeTimeout))));
 
             foreach (var (name, hasConsoleOutput) in probed)
             {
@@ -736,11 +738,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// <c>false</c> if none arrives within a short window. Short-circuits on the first line so it
     /// doesn't pull the full backlog.
     /// </summary>
-    private static async Task<bool> ResourceProducedConsoleOutputAsync(DistributedApplication app, string resourceName)
+    private static async Task<bool> ResourceProducedConsoleOutputAsync(DistributedApplication app, string resourceName, TimeSpan timeout)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        using var cts = new CancellationTokenSource(timeout);
 
         try
         {
@@ -1026,7 +1028,13 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         int max = -1)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
-        var lines = new List<string>();
+
+        // When a cap is set, keep only the most recent `max` lines in a sliding window so memory
+        // stays proportional to `max` — the backlog can be large on a long run with a shared fixture,
+        // and buffering it all just to discard the head would allocate it twice over.
+        var bounded = max >= 0;
+        var window = bounded ? new Queue<string>(max + 1) : null;
+        var all = bounded ? null : new List<string>();
 
         using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
@@ -1037,16 +1045,26 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             {
                 foreach (var line in batch)
                 {
-                    if (errorsOnly)
+                    if (errorsOnly && !line.IsErrorMessage)
                     {
-                        if (line.IsErrorMessage)
+                        continue;
+                    }
+
+                    var content = errorsOnly || !line.IsErrorMessage
+                        ? line.Content
+                        : $"E> {line.Content}";
+
+                    if (bounded)
+                    {
+                        window!.Enqueue(content);
+                        if (window.Count > max)
                         {
-                            lines.Add(line.Content);
+                            window.Dequeue();
                         }
                     }
                     else
                     {
-                        lines.Add(line.IsErrorMessage ? $"E> {line.Content}" : line.Content);
+                        all!.Add(content);
                     }
                 }
             }
@@ -1056,13 +1074,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // Expected - we use a short timeout to collect buffered logs.
         }
 
-        // Keep only the most recent `max` lines (the backlog can be large on a long run).
-        if (max >= 0 && lines.Count > max)
-        {
-            lines.RemoveRange(0, lines.Count - max);
-        }
-
-        return lines;
+        return bounded ? window!.ToList() : all!;
     }
 
     /// <summary>
