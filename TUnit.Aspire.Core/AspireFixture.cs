@@ -218,6 +218,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// Time budget for collecting a resource's buffered logs on test failure. The log stream
     /// never completes on its own (it tails live output), so this bounds the wait after the
     /// backlog replays. Default: 2 seconds.
+    /// <para>
+    /// Also bounds the per-resource console-output probe used by the missing-telemetry hint
+    /// (<see cref="WarnOnMissingTelemetry"/>) at session end, so raising it for slow log
+    /// collection also lengthens that teardown probe for any resource not seen exporting OTLP logs.
+    /// </para>
     /// </summary>
     protected virtual TimeSpan FailureLogCollectionTimeout => TimeSpan.FromSeconds(2);
 
@@ -451,6 +456,18 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     {
         var app = _app;
         if (!DumpResourceLogsOnFailure || app is null || context.Execution.Result?.State != TestState.Failed)
+        {
+            return;
+        }
+
+        // OnTestEnd fires once per retry attempt — the end-event receivers run inside the retried
+        // test body (see RetryHelper.ExecuteWithRetry), and TestContext.Output is shared across all
+        // attempts. Dumping on a non-final attempt would leak that attempt's failure logs into the
+        // output of a test that ultimately passes on retry. Only dump on the final attempt. (A custom
+        // retry predicate that declines mid-way terminates as Failed before the limit; in that rarer
+        // case we forgo the dump rather than risk leaking it — the default per-exception retry, which
+        // always runs to the limit on failure, dumps exactly once on the terminal attempt.)
+        if (context.Execution.CurrentRetryAttempt < context.Metadata.TestDetails.RetryLimit)
         {
             return;
         }
@@ -697,6 +714,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // an SUT using the default service name matches by resource name here; one that overrides
             // its service name may produce a false hint — hence the soft wording below.
             var candidates = model.Resources.OfType<ProjectResource>()
+                .Where(ShouldWaitForResource)
                 .Where(p => !receiver.HasSeenLogsFrom(p.Name))
                 .ToList();
             if (candidates.Count == 0)

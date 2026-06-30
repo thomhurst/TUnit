@@ -42,6 +42,9 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     // wrote raw console output, so it can hint at missing OpenTelemetry log export in the SUT.
     private readonly ConcurrentDictionary<string, byte> _seenLogServiceNames = new(StringComparer.OrdinalIgnoreCase);
 
+    // Cached so passing it to the parser doesn't allocate a delegate per /v1/logs request.
+    private readonly Action<string> _recordSeenLogService;
+
     private string? _upstreamEndpoint;
     private IReadOnlyDictionary<string, string>? _upstreamHeaders;
     private Task? _listenTask;
@@ -88,6 +91,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     {
         (_listener, Port) = CreateListener();
         UpstreamEndpoint = upstreamEndpoint;
+        _recordSeenLogService = name => _seenLogServiceNames.TryAdd(name, 0);
     }
 
     /// <summary>
@@ -554,7 +558,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
         List<OtlpLogRecord> records;
         try
         {
-            records = OtlpLogParser.Parse(body);
+            // The callback records the source service for *every* incoming log record — including
+            // ones the parser drops for lacking a trace id — so the Aspire missing-telemetry hint
+            // sees that OTLP logging reached us even from a resource that only emits untraced logs.
+            records = OtlpLogParser.Parse(body, _recordSeenLogService);
         }
         catch (Exception ex)
         {
@@ -567,14 +574,6 @@ internal sealed class OtlpReceiver : IAsyncDisposable
 
         foreach (var record in records)
         {
-            // Record the source service even when the record has no usable trace id — its
-            // presence proves OTLP logging is wired, which is exactly what the Aspire
-            // missing-telemetry hint checks for.
-            if (!string.IsNullOrEmpty(record.ResourceName))
-            {
-                _seenLogServiceNames.TryAdd(record.ResourceName, 0);
-            }
-
             if (string.IsNullOrEmpty(record.TraceId))
             {
                 Interlocked.Increment(ref _diagnostics.LogsRecordsNoTraceId);
