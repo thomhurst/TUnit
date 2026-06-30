@@ -287,6 +287,70 @@ public class OtlpReceiverIngestionTests
         await Assert.That(TraceRegistry.GetContextId(derivedTraceId)).IsEqualTo(TestContext.Current!.Id);
     }
 
+    [Test]
+    public async Task Receiver_LogWithServiceName_RecordsSeenService()
+    {
+        await using var receiver = new OtlpReceiver();
+        receiver.Start();
+
+        // Deliberately use an unregistered trace id — the service name must still be recorded,
+        // since its presence (not trace correlation) is what the Aspire wiring hint checks.
+        var traceId = Guid.NewGuid().ToString("N");
+        var body = BuildLogsExportRequest("my-service", traceId, "hello from sut");
+
+        using var client = new HttpClient();
+        using var content = new ByteArrayContent(body);
+        content.Headers.ContentType = new("application/x-protobuf");
+        await client.PostAsync($"http://127.0.0.1:{receiver.Port}/v1/logs", content);
+
+        await receiver.WhenIdle();
+
+        await Assert.That(receiver.HasSeenLogsFrom("my-service")).IsTrue();
+        await Assert.That(receiver.HasSeenLogsFrom("MY-SERVICE")).IsTrue(); // case-insensitive
+        await Assert.That(receiver.HasSeenLogsFrom("other-service")).IsFalse();
+        await Assert.That(receiver.SeenLogServiceNames).Contains("my-service");
+        await Assert.That(receiver.Diagnostics.LogsRecordsParsed).IsEqualTo(1);
+    }
+
+    private static byte[] BuildLogsExportRequest(string serviceName, string traceId, string body)
+    {
+        // KeyValue { key = "service.name", value = AnyValue(serviceName) }
+        using var kvStream = new MemoryStream();
+        WriteStringField(kvStream, 1, "service.name");
+        WriteField(kvStream, 2, BuildAnyValue(serviceName));
+
+        // Resource { attributes (field 1) = [kv] }
+        using var resourceStream = new MemoryStream();
+        WriteField(resourceStream, 1, kvStream.ToArray());
+
+        // LogRecord { severity_text (3), body (5), trace_id (9) }
+        using var logRecordStream = new MemoryStream();
+        WriteStringField(logRecordStream, 3, "INFO");
+        WriteField(logRecordStream, 5, BuildAnyValue(body));
+        WriteField(logRecordStream, 9, Convert.FromHexString(traceId));
+
+        // ScopeLogs { log_records (field 2) = [logRecord] }
+        using var scopeLogsStream = new MemoryStream();
+        WriteField(scopeLogsStream, 2, logRecordStream.ToArray());
+
+        // ResourceLogs { resource (1), scope_logs (2) }
+        using var resourceLogsStream = new MemoryStream();
+        WriteField(resourceLogsStream, 1, resourceStream.ToArray());
+        WriteField(resourceLogsStream, 2, scopeLogsStream.ToArray());
+
+        // ExportLogsServiceRequest { resource_logs (field 1) = [resourceLogs] }
+        using var exportStream = new MemoryStream();
+        WriteField(exportStream, 1, resourceLogsStream.ToArray());
+        return exportStream.ToArray();
+    }
+
+    private static byte[] BuildAnyValue(string stringValue)
+    {
+        using var stream = new MemoryStream();
+        WriteStringField(stream, 1, stringValue); // AnyValue.string_value = field 1
+        return stream.ToArray();
+    }
+
     private static byte[] BuildMultiSpanBatch(string traceId, int spanCount)
     {
         // Build N sibling spans that all share traceId but have distinct spanIds. This

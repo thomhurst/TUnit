@@ -26,7 +26,7 @@ namespace TUnit.Aspire;
 /// or subclass to customize behavior via the virtual configuration hooks.
 /// </para>
 /// </remarks>
-public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
+public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITestEndEventReceiver
     where TAppHost : class
 {
     private DistributedApplication? _app;
@@ -201,6 +201,38 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     /// Resource wait timeout. Default: 60 seconds.
     /// </summary>
     protected virtual TimeSpan ResourceTimeout => TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// When <c>true</c> (default), if a test fails, recent error log lines from each waited-on
+    /// resource are appended to that test's output. These are raw console/stderr lines from the
+    /// resource (resource-scoped, NOT request-correlated) — a coarse fallback for resources that
+    /// don't export OpenTelemetry logs. Correlated per-request SUT logs already flow live to the
+    /// owning test via the OTLP receiver when <see cref="EnableTelemetryCollection"/> is on.
+    /// </summary>
+    protected virtual bool DumpResourceLogsOnFailure => true;
+
+    /// <summary>Maximum (most-recent) error log lines captured per resource for the on-failure dump. Default: 50.</summary>
+    protected virtual int MaxFailureLogLinesPerResource => 50;
+
+    /// <summary>
+    /// Time budget for collecting a resource's buffered logs on test failure. The log stream
+    /// never completes on its own (it tails live output), so this bounds the wait after the
+    /// backlog replays. Default: 2 seconds.
+    /// <para>
+    /// Also bounds the per-resource console-output probe used by the missing-telemetry hint
+    /// (<see cref="WarnOnMissingTelemetry"/>) at session end, so raising it for slow log
+    /// collection also lengthens that teardown probe for any resource not seen exporting OTLP logs.
+    /// </para>
+    /// </summary>
+    protected virtual TimeSpan FailureLogCollectionTimeout => TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// When <c>true</c> (default), emits a one-time hint at session end for any project resource
+    /// that produced console output but never sent correlated OpenTelemetry logs to TUnit — the
+    /// usual symptom of missing OTLP log export in the SUT (e.g. Aspire ServiceDefaults not
+    /// wired). Only meaningful when <see cref="EnableTelemetryCollection"/> is on.
+    /// </summary>
+    protected virtual bool WarnOnMissingTelemetry => true;
 
     /// <summary>
     /// Which resources to wait for. Default: <see cref="ResourceWaitBehavior.AllHealthy"/>.
@@ -409,6 +441,81 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     }
 
     /// <summary>
+    /// On test failure, appends recent error log lines from each waited-on resource to the test's
+    /// output. TUnit invokes this on every test that consumes the fixture (event receivers found
+    /// on injected data-source objects fire per test). Best-effort: it never throws into the test
+    /// result — a log-collection race against a torn-down app is swallowed.
+    /// </summary>
+    /// <remarks>
+    /// These lines are resource-scoped, not request-correlated: on a shared (session/class) fixture
+    /// the buffer spans the whole run, so output may include lines from earlier tests. For precise
+    /// per-request correlation, rely on the OTLP receiver (<see cref="EnableTelemetryCollection"/>),
+    /// which routes a SUT's logs to the originating test live, via trace context.
+    /// </remarks>
+    public async ValueTask OnTestEnd(TestContext context)
+    {
+        var app = _app;
+        if (!DumpResourceLogsOnFailure || app is null || context.Execution.Result?.State != TestState.Failed)
+        {
+            return;
+        }
+
+        // OnTestEnd fires once per retry attempt — the end-event receivers run inside the retried
+        // test body (see RetryHelper.ExecuteWithRetry), and TestContext.Output is shared across all
+        // attempts. Dumping on a non-final attempt would leak that attempt's failure logs into the
+        // output of a test that ultimately passes on retry. Only dump on the final attempt. (A custom
+        // retry predicate that declines mid-way terminates as Failed before the limit; in that rarer
+        // case we forgo the dump rather than risk leaking it — the default per-exception retry, which
+        // always runs to the limit on failure, dumps exactly once on the terminal attempt.)
+        if (context.Execution.CurrentRetryAttempt < context.Metadata.TestDetails.RetryLimit)
+        {
+            return;
+        }
+
+        try
+        {
+            var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+
+            // Inline (not GetWaitableResourceNames) to avoid its LogProgress side effect at test-end.
+            var names = model.Resources.Where(ShouldWaitForResource).Select(r => r.Name).ToList();
+            if (names.Count == 0)
+            {
+                return;
+            }
+
+            var timeout = FailureLogCollectionTimeout;
+            var max = MaxFailureLogLinesPerResource;
+
+            // Collect in parallel — each resource has its own short timeout, so collecting
+            // sequentially would compound the delay onto an already-failed test's teardown.
+            var collected = await Task.WhenAll(names.Select(async name =>
+                (name, errors: await CollectResourceLogLinesAsync(app, name, timeout, errorsOnly: true, max: max))));
+
+            foreach (var (name, errors) in collected)
+            {
+                if (errors.Count == 0)
+                {
+                    continue;
+                }
+
+                var sb = new StringBuilder();
+                sb.AppendLine($"--- [{name}] {errors.Count} recent error log line(s) (resource-scoped, not request-correlated) ---");
+                foreach (var line in errors)
+                {
+                    sb.Append("  ").AppendLine(line);
+                }
+
+                context.Output.WriteLine(sb.ToString());
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // The Aspire application was torn down concurrently (e.g. a run abort raced this
+            // test's completion) — there is nothing left to collect.
+        }
+    }
+
+    /// <summary>
     /// Registers the run-abort token so an aborted test run begins tearing down the Aspire
     /// application immediately, in parallel with the rest of session shutdown. The callback and
     /// the normal <see cref="DisposeAsync"/> path share a single teardown task, so the work runs
@@ -459,6 +566,15 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             // last set of spans never reaches us.
             LogProgress("Draining OTLP receiver...");
             await _otlpReceiver.DrainAsync();
+
+            // After the drain the receiver's seen-services set is as complete as it will get,
+            // and the app is still up so console logs are collectable — the only window where
+            // both signals the missing-telemetry hint needs are available. Skip on a run abort:
+            // the telemetry picture is incomplete then, so the hint would be misleading noise.
+            if (WarnOnMissingTelemetry && !RunCancellationToken.IsCancellationRequested)
+            {
+                await EmitTelemetryWiringHintsAsync(_app, _otlpReceiver);
+            }
         }
 
         if (_app is not null)
@@ -578,6 +694,90 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
                     }));
             }
         }
+    }
+
+    /// <summary>
+    /// Emits a one-time hint for any project resource that produced console output but never sent
+    /// correlated OpenTelemetry logs to TUnit — the typical symptom of an SUT missing OTLP log
+    /// export (e.g. it doesn't call <c>AddServiceDefaults()</c>/<c>ConfigureOpenTelemetry()</c>).
+    /// Without it, the resource's logs can't be routed to the owning test and the gap is silent.
+    /// </summary>
+    private async Task EmitTelemetryWiringHintsAsync(DistributedApplication app, OtlpReceiver receiver)
+    {
+        try
+        {
+            var model = app.Services.GetRequiredService<DistributedApplicationModel>();
+
+            // Only resources we've NOT already seen export OTLP logs are hint candidates. Filtering
+            // first means a correctly-wired SUT (every resource seen) opens zero console probes.
+            // The fixture injects OTEL_SERVICE_NAME = resource name (see ConfigureOtlpEndpoints), so
+            // an SUT using the default service name matches by resource name here; one that overrides
+            // its service name may produce a false hint — hence the soft wording below.
+            var candidates = model.Resources.OfType<ProjectResource>()
+                .Where(p => ShouldWaitForResource(p) && !receiver.HasSeenLogsFrom(p.Name))
+                .ToList();
+            if (candidates.Count == 0)
+            {
+                return;
+            }
+
+            // Probe console output in parallel — each probe has its own short timeout, reusing the
+            // same bound as the on-failure dump so extending one extends both.
+            var probeTimeout = FailureLogCollectionTimeout;
+            var probed = await Task.WhenAll(candidates.Select(async p =>
+                (p.Name, hasConsoleOutput: await ResourceProducedConsoleOutputAsync(app, p.Name, probeTimeout))));
+
+            foreach (var (name, hasConsoleOutput) in probed)
+            {
+                if (hasConsoleOutput)
+                {
+                    LogProgress(
+                        $"Resource '{name}' produced console output but sent no correlated OpenTelemetry logs to TUnit, " +
+                        "so its logs can't be routed to the owning test. If you expect correlated SUT logs, ensure the " +
+                        "service calls AddServiceDefaults()/ConfigureOpenTelemetry() and exports OTLP logs (UseOtlpExporter). " +
+                        "Set WarnOnMissingTelemetry => false to silence this.");
+                }
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // App torn down concurrently — skip the hint rather than fail teardown.
+        }
+        catch (Exception ex)
+        {
+            // A diagnostic hint must never break teardown.
+            LogProgress($"(failed to evaluate telemetry wiring hints: {ex.Message})");
+        }
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> as soon as a resource has produced any console/stderr output, or
+    /// <c>false</c> if none arrives within a short window. Short-circuits on the first line so it
+    /// doesn't pull the full backlog.
+    /// </summary>
+    private static async Task<bool> ResourceProducedConsoleOutputAsync(DistributedApplication app, string resourceName, TimeSpan timeout)
+    {
+        var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
+
+        using var cts = new CancellationTokenSource(timeout);
+
+        try
+        {
+            await foreach (var batch in loggerService.WatchAsync(resourceName)
+                .WithCancellation(cts.Token))
+            {
+                if (batch.Count > 0)
+                {
+                    return true;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // No output within the window.
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -827,20 +1027,33 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
     }
 
     /// <summary>
-    /// Collects buffered log lines from a resource via the <see cref="ResourceLoggerService"/>.
-    /// Returns the raw line content (error/stderr lines prefixed with <c>E&gt;</c>), or an empty
-    /// list if none are available. Uses a short timeout to avoid hanging if the log service is
-    /// unresponsive; <see cref="ResourceLoggerService.WatchAsync(string)"/> replays the buffered
-    /// backlog first, so logs from an already-exited resource are still captured.
+    /// Collects buffered log lines from a resource via the <see cref="ResourceLoggerService"/>,
+    /// or an empty list if none are available. <see cref="ResourceLoggerService.WatchAsync(string)"/>
+    /// replays the buffered backlog before tailing live output (so logs from an already-exited
+    /// resource are still captured) and never completes on its own, so <paramref name="timeout"/>
+    /// bounds the wait.
     /// </summary>
+    /// <param name="timeout">Time budget for collection. Defaults to 5 seconds.</param>
+    /// <param name="errorsOnly">When <c>true</c>, keeps only stderr lines (raw content). When
+    /// <c>false</c> (default), keeps every line, prefixing stderr lines with <c>E&gt;</c>.</param>
+    /// <param name="max">When &gt;= 0, keeps only the most recent <paramref name="max"/> lines.</param>
     private static async Task<List<string>> CollectResourceLogLinesAsync(
         DistributedApplication app,
-        string resourceName)
+        string resourceName,
+        TimeSpan? timeout = null,
+        bool errorsOnly = false,
+        int max = -1)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
-        var lines = new List<string>();
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        // When a cap is set, keep only the most recent `max` lines in a sliding window so memory
+        // stays proportional to `max` — the backlog can be large on a long run with a shared fixture,
+        // and buffering it all just to discard the head would allocate it twice over.
+        var bounded = max >= 0;
+        var window = bounded ? new Queue<string>(max + 1) : null;
+        var all = bounded ? null : new List<string>();
+
+        using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(5));
 
         try
         {
@@ -849,7 +1062,27 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             {
                 foreach (var line in batch)
                 {
-                    lines.Add(line.IsErrorMessage ? $"E> {line.Content}" : line.Content);
+                    if (errorsOnly && !line.IsErrorMessage)
+                    {
+                        continue;
+                    }
+
+                    var content = !errorsOnly && line.IsErrorMessage
+                        ? $"E> {line.Content}"
+                        : line.Content;
+
+                    if (bounded)
+                    {
+                        window!.Enqueue(content);
+                        if (window.Count > max)
+                        {
+                            window.Dequeue();
+                        }
+                    }
+                    else
+                    {
+                        all!.Add(content);
+                    }
                 }
             }
         }
@@ -858,7 +1091,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable
             // Expected - we use a short timeout to collect buffered logs.
         }
 
-        return lines;
+        return bounded ? window!.ToList() : all!;
     }
 
     /// <summary>

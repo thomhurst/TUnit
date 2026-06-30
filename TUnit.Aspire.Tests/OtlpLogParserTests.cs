@@ -69,6 +69,27 @@ public class OtlpLogParserTests
     }
 
     [Test]
+    public async Task Parse_UntracedLogRecord_StillReportsSeenService()
+    {
+        // A resource that exports OTLP logs but emits only untraced records (e.g. startup/background
+        // logs with no active Activity) is correctly wired — the missing-telemetry hint must not
+        // flag it. The seen-service callback fires even though the record is dropped from results.
+        var data = OtlpProtobufBuilder.BuildExportLogsServiceRequest(
+            "background-worker",
+            new LogRecordSpec
+            {
+                SeverityNumber = 9,
+                Body = "Startup log with no trace context",
+            });
+
+        var seen = new List<string>();
+        var records = OtlpLogParser.Parse(data, name => seen.Add(name));
+
+        await Assert.That(records).IsEmpty();
+        await Assert.That(seen).Contains("background-worker");
+    }
+
+    [Test]
     public async Task Parse_MixOfTracedAndUntracedLogs_OnlyReturnsTraced()
     {
         var traceId = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";

@@ -35,6 +35,16 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly ConcurrentDictionary<int, Task> _inflightTasks = new();
     private readonly OtlpReceiverDiagnostics _diagnostics = new();
+
+    // service.name values seen on incoming OTLP *log* records. Recorded for every parsed log
+    // record regardless of trace-id match — presence here means OTLP logging reached us at all.
+    // TUnit.Aspire uses it to tell a resource that exported correlated logs from one that only
+    // wrote raw console output, so it can hint at missing OpenTelemetry log export in the SUT.
+    private readonly ConcurrentDictionary<string, byte> _seenLogServiceNames = new(StringComparer.OrdinalIgnoreCase);
+
+    // Cached so passing it to the parser doesn't allocate a delegate per /v1/logs request.
+    private readonly Action<string> _recordSeenLogService;
+
     private string? _upstreamEndpoint;
     private IReadOnlyDictionary<string, string>? _upstreamHeaders;
     private Task? _listenTask;
@@ -60,6 +70,17 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     internal OtlpReceiverDiagnostics Diagnostics => _diagnostics;
 
     /// <summary>
+    /// Returns <c>true</c> if at least one OTLP log record carrying the given <c>service.name</c>
+    /// resource attribute has been received (whether or not its trace id matched a registered
+    /// test). Used by TUnit.Aspire to distinguish a resource that exported telemetry from one
+    /// that only wrote to the console, so it can hint at missing OpenTelemetry log export.
+    /// </summary>
+    internal bool HasSeenLogsFrom(string serviceName) => _seenLogServiceNames.ContainsKey(serviceName);
+
+    /// <summary>Snapshot of all <c>service.name</c> values seen on incoming OTLP log records.</summary>
+    internal IReadOnlyCollection<string> SeenLogServiceNames => _seenLogServiceNames.Keys.ToArray();
+
+    /// <summary>
     /// Creates a new OTLP receiver.
     /// </summary>
     /// <param name="upstreamEndpoint">
@@ -70,6 +91,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
     {
         (_listener, Port) = CreateListener();
         UpstreamEndpoint = upstreamEndpoint;
+        _recordSeenLogService = name => _seenLogServiceNames.TryAdd(name, 0);
     }
 
     /// <summary>
@@ -324,7 +346,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             if (path == "/v1/logs")
             {
                 Interlocked.Increment(ref _diagnostics.LogsRequests);
-                ProcessLogs(body, _diagnostics);
+                ProcessLogs(body);
             }
             else if (path == "/v1/traces")
             {
@@ -531,27 +553,30 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             ? ((ActivityStatusCode)code).ToString()
             : nameof(ActivityStatusCode.Unset);
 
-    private static void ProcessLogs(byte[] body, OtlpReceiverDiagnostics diag)
+    private void ProcessLogs(byte[] body)
     {
         List<OtlpLogRecord> records;
         try
         {
-            records = OtlpLogParser.Parse(body);
+            // The callback records the source service for *every* incoming log record — including
+            // ones the parser drops for lacking a trace id — so the Aspire missing-telemetry hint
+            // sees that OTLP logging reached us even from a resource that only emits untraced logs.
+            records = OtlpLogParser.Parse(body, _recordSeenLogService);
         }
         catch (Exception ex)
         {
-            Interlocked.Increment(ref diag.LogsParseFailures);
+            Interlocked.Increment(ref _diagnostics.LogsParseFailures);
             Trace.WriteLine($"[TUnit.OpenTelemetry] Failed to parse /v1/logs body: {ex.GetType().Name}: {ex.Message}");
             return;
         }
 
-        Interlocked.Add(ref diag.LogsRecordsParsed, records.Count);
+        Interlocked.Add(ref _diagnostics.LogsRecordsParsed, records.Count);
 
         foreach (var record in records)
         {
             if (string.IsNullOrEmpty(record.TraceId))
             {
-                Interlocked.Increment(ref diag.LogsRecordsNoTraceId);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsNoTraceId);
                 continue;
             }
 
@@ -559,14 +584,14 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             var contextId = TraceRegistry.GetContextId(record.TraceId);
             if (contextId is null)
             {
-                Interlocked.Increment(ref diag.LogsRecordsTraceNotRegistered);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsTraceNotRegistered);
                 continue;
             }
 
             var testContext = TestContext.GetById(contextId);
             if (testContext is null)
             {
-                Interlocked.Increment(ref diag.LogsRecordsTestContextMissing);
+                Interlocked.Increment(ref _diagnostics.LogsRecordsTestContextMissing);
                 continue;
             }
 
@@ -577,7 +602,7 @@ internal sealed class OtlpReceiver : IAsyncDisposable
                 : $"[{record.ResourceName}] ";
 
             testContext.Output.WriteLine($"{prefix}[{severity}] {record.Body}");
-            Interlocked.Increment(ref diag.LogsRecordsRouted);
+            Interlocked.Increment(ref _diagnostics.LogsRecordsRouted);
         }
     }
 

@@ -32,7 +32,13 @@ internal readonly record struct OtlpLogRecord(
 /// </summary>
 internal static class OtlpLogParser
 {
-    public static List<OtlpLogRecord> Parse(ReadOnlySpan<byte> data)
+    /// <param name="onResourceSeen">
+    /// Invoked with each non-empty <c>service.name</c> that produced a log record, <em>before</em>
+    /// the trace-id filter drops untraced records. Lets a consumer record that OTLP logging reached
+    /// it at all — independent of whether any record carried a usable trace id (records without one
+    /// are still excluded from the returned list, per the correlation contract).
+    /// </param>
+    public static List<OtlpLogRecord> Parse(ReadOnlySpan<byte> data, Action<string>? onResourceSeen = null)
     {
         var results = new List<OtlpLogRecord>();
         var reader = new ProtobufReader(data);
@@ -43,7 +49,7 @@ internal static class OtlpLogParser
             if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
             {
                 var embedded = reader.ReadEmbeddedMessage();
-                ParseResourceLogs(embedded, results);
+                ParseResourceLogs(embedded, results, onResourceSeen);
             }
             else
             {
@@ -56,9 +62,10 @@ internal static class OtlpLogParser
 
     // Assumes Resource (field 1) precedes ScopeLogs (field 2) in the wire format,
     // which is true for all known OTel SDK implementations.
-    private static void ParseResourceLogs(ProtobufReader reader, List<OtlpLogRecord> results)
+    private static void ParseResourceLogs(ProtobufReader reader, List<OtlpLogRecord> results, Action<string>? onResourceSeen)
     {
         var resourceName = "";
+        var sawLogRecord = false;
 
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
@@ -72,12 +79,21 @@ internal static class OtlpLogParser
             {
                 // ScopeLogs
                 var embedded = reader.ReadEmbeddedMessage();
-                ParseScopeLogs(embedded, resourceName, results);
+                sawLogRecord |= ParseScopeLogs(embedded, resourceName, results);
             }
             else
             {
                 reader.Skip(wireType);
             }
+        }
+
+        // Signal the source service once — independent of the trace-id filter that drops untraced
+        // records from `results` — as long as it emitted at least one log record. Presence (not
+        // correlation) is what the missing-telemetry hint checks for. Done once per resource rather
+        // than per record to avoid redundant work for a noisy resource.
+        if (sawLogRecord && !string.IsNullOrEmpty(resourceName))
+        {
+            onResourceSeen?.Invoke(resourceName);
         }
     }
 
@@ -104,13 +120,18 @@ internal static class OtlpLogParser
         return "";
     }
 
-    private static void ParseScopeLogs(ProtobufReader reader, string resourceName, List<OtlpLogRecord> results)
+    // Returns whether any LogRecord was present, so the caller can signal the source service once
+    // per resource (even when every record is dropped by the trace-id filter).
+    private static bool ParseScopeLogs(ProtobufReader reader, string resourceName, List<OtlpLogRecord> results)
     {
+        var sawLogRecord = false;
+
         // ScopeLogs: field 2 = repeated LogRecord
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
             if (fieldNumber == 2 && wireType == WireType.LengthDelimited)
             {
+                sawLogRecord = true;
                 var embedded = reader.ReadEmbeddedMessage();
                 var record = ParseLogRecord(embedded, resourceName);
                 if (record is not null)
@@ -123,6 +144,8 @@ internal static class OtlpLogParser
                 reader.Skip(wireType);
             }
         }
+
+        return sawLogRecord;
     }
 
     private static OtlpLogRecord? ParseLogRecord(ProtobufReader reader, string resourceName)
