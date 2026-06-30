@@ -80,7 +80,18 @@ internal sealed class TestDiscoveryService : IDataProducer
         // ITestRegisteredEventReceiver can access dependency information and any state set by After(TestDiscovery) hooks
         await InvokePostResolutionEventsInParallelAsync(allTests).ConfigureAwait(false);
 
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, allTests) : allTests;
+        // Apply the filter during discovery too — not just execution — so `--list-tests
+        // --treenode-filter X` lists exactly the tests a run with X would execute. Only filter
+        // when a real filter is present: bare `--list-tests` and IDE Test Explorer discovery send
+        // null/NopFilter and must keep listing everything (including [Explicit] tests, which
+        // FilterTests would otherwise strip). Filtering is side-effect-free (MatchesTest only
+        // compares paths/properties), so unlike argument registration it is safe outside execution.
+#pragma warning disable TPEXP
+        var hasRealFilter = filter is not (null or NopFilter);
+#pragma warning restore TPEXP
+        var filteredTests = (isForExecution || hasRealFilter)
+            ? _testFilterService.FilterTests(filter, allTests)
+            : allTests;
 
         if (isForExecution)
         {
