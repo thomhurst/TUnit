@@ -31,36 +31,19 @@ public class AspireDiagnosticsTests
         => await Assert.That(Classify("Finished", -532462766, runningButUnhealthy: false, logLines: null))
             .IsEqualTo(ResourceFailureClass.NonZeroExit);
 
-    // --- IsFailureState: the fail-fast trigger. #6342 = Finished + non-zero was previously missed. ---
-
+    // The fail-fast trigger. #6342 = Finished + non-zero was previously missed (a crashed .NET
+    // project reaches Finished, not Exited). Clean (code 0) exits stay non-failures so a one-shot
+    // resource (migration runner, seeder) that finishes successfully isn't mis-reported.
     [Test]
-    public async Task IsFailureState_FinishedWithNonZeroExit_IsFailure()
-        => await Assert.That(IsFailureState("Finished", -532462766)).IsTrue();
-
-    [Test]
-    public async Task IsFailureState_ExitedWithNonZeroExit_IsFailure()
-        => await Assert.That(IsFailureState("Exited", 1)).IsTrue();
-
-    [Test]
-    public async Task IsFailureState_FailedToStart_IsFailure()
-        => await Assert.That(IsFailureState("FailedToStart", null)).IsTrue();
-
-    // A one-shot resource (migration runner, seeder) that finishes cleanly must NOT be a failure.
-    [Test]
-    public async Task IsFailureState_FinishedWithZeroExit_IsNotFailure()
-        => await Assert.That(IsFailureState("Finished", 0)).IsFalse();
-
-    [Test]
-    public async Task IsFailureState_ExitedWithZeroExit_IsNotFailure()
-        => await Assert.That(IsFailureState("Exited", 0)).IsFalse();
-
-    [Test]
-    public async Task IsFailureState_Running_IsNotFailure()
-        => await Assert.That(IsFailureState("Running", null)).IsFalse();
-
-    [Test]
-    public async Task IsFailureState_NullState_IsNotFailure()
-        => await Assert.That(IsFailureState(null, null)).IsFalse();
+    [Arguments("Finished", -532462766, true)] // #6342: the crashed-project case
+    [Arguments("Exited", 1, true)]
+    [Arguments("FailedToStart", null, true)]  // launch failure fails regardless of exit code
+    [Arguments("Finished", 0, false)]         // one-shot finished cleanly
+    [Arguments("Exited", 0, false)]
+    [Arguments("Running", null, false)]
+    [Arguments(null, null, false)]
+    public async Task IsFailureState_ClassifiesStateAndExitCode(string? state, int? exitCode, bool expected)
+        => await Assert.That(IsFailureState(state, exitCode)).IsEqualTo(expected);
 
     [Test]
     public async Task Classify_TerminalWithNoExitCode_IsCrashedNoCode()
