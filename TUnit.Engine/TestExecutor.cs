@@ -247,11 +247,25 @@ internal class TestExecutor
             {
                 if (testTimeout.HasValue)
                 {
-                    var timeoutMessage = $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
+                    // Own the linked timeout source across the whole test lifecycle rather than letting
+                    // TimeoutHelper dispose it on return. The body can hand Context.CancellationToken to
+                    // app/user code (EF Core, Respawn, an ASP.NET host) that only touches it during
+                    // teardown; disposing it the moment the body returned left those captured copies
+                    // pointing at a disposed source, so a synchronous .WaitHandle wait in an After(Test)
+                    // hook / OnDispose threw ObjectDisposedException (fixes #6339). It lives on the context
+                    // and is disposed once by TestCoordinator after every teardown phase has run. A prior
+                    // retry attempt's source (if any) is released here before the new one replaces it.
+                    var context = executableTest.Context;
+                    context.TimeoutCancellationSource?.Dispose();
+                    var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    context.TimeoutCancellationSource = testBodyTimeoutCts;
+
+                    var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
                     await TimeoutHelper.ExecuteWithTimeoutAsync(
                         ct => ExecuteTestAsync(executableTest, ct).AsTask(),
                         testTimeout.Value,
+                        testBodyTimeoutCts,
                         cancellationToken,
                         timeoutMessage).ConfigureAwait(false);
                 }
@@ -278,11 +292,12 @@ internal class TestExecutor
 #endif
                 executableTest.Context.Execution.TestEnd ??= DateTimeOffset.UtcNow;
 
-                // The timeout path (TimeoutHelper) set Context.CancellationToken to a linked CTS
-                // token that is disposed the moment the test body returns. Restore the still-valid
-                // outer token — colocated here with the timeout call that mutated it — so the
-                // test-end event receivers, After(Test)/AfterEvery(Test) hooks, and any retry
-                // back-off never observe a disposed CancellationTokenSource (fixes #6339).
+                // The timeout path set Context.CancellationToken to the linked timeout token, which
+                // is cancelled once the timeout fires. Restore the still-valid, non-cancelled outer
+                // token — colocated here with the timeout call that mutated it — so the test-end event
+                // receivers, After(Test)/AfterEvery(Test) hooks, and any retry back-off observe a live
+                // token via the context property. (The source itself is kept alive on the context and
+                // disposed later by TestCoordinator, so token copies captured mid-body stay valid — #6339.)
                 if (testTimeout.HasValue)
                 {
                     executableTest.Context.CancellationToken = cancellationToken;
@@ -335,9 +350,6 @@ internal class TestExecutor
             {
                 hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
             }
-
-#if NET
-#endif
         }
 
         if (capturedException is SkipTestException)

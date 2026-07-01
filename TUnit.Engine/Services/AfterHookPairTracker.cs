@@ -32,8 +32,8 @@ internal sealed class AfterHookPairTracker
     //
     // Safety of single registration: The CancellationToken passed in is always the session-scoped
     // token (or a derivative from Parallel.ForEachAsync which is itself linked to the session CT).
-    // Per-test timeout tokens are applied inside TestExecutor via TimeoutHelper.CreateLinkedTokenSource
-    // scoped to the test body only — they never reach this method. Therefore when the session cancels,
+    // Per-test timeout tokens are applied inside TestExecutor via a linked source scoped to the test
+    // body only — they never reach this method. Therefore when the session cancels,
     // the first test's registered CT still fires regardless of whether that test has completed.
     private readonly ConcurrentHashSet<Assembly> _assemblyHookRegistered = new();
     private readonly ConcurrentHashSet<Type> _classHookRegistered = new();

@@ -13,6 +13,13 @@ public partial class TestContext
     // Internal backing fields and properties
     internal CancellationToken CancellationToken { get; set; }
     internal CancellationTokenSource? LinkedCancellationTokens { get; set; }
+
+    // Linked source backing the per-test timeout token. Owned for the whole test lifecycle — the body
+    // plus every teardown phase (After(Test) hooks, instance/OnDispose, object cleanup, After(Class)/
+    // After(Assembly)) — and disposed once at the end in TestCoordinator. Keeping it alive that long
+    // means a token copy captured mid-body and later touched by a synchronous .WaitHandle wait never
+    // observes a disposed CancellationTokenSource (#6339). Only allocated for tests that have a timeout.
+    internal CancellationTokenSource? TimeoutCancellationSource { get; set; }
     internal TestPhase Phase { get; set; } = TestPhase.Execution;
     internal TestResult? Result { get; set; }
     internal string? SkipReason { get; set; }
