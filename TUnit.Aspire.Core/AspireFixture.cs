@@ -32,6 +32,15 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
 
+    // Resolved once at the start of InitializeAsync so the Options virtual isn't re-invoked,
+    // and so teardown reads the same instance the startup path used.
+    private AspireFixtureOptions? _options;
+
+    // Live resource-log forwarding (opt-in via Options.ForwardResourceLogs). The pump tasks tail
+    // WatchAsync until the CTS (linked to RunCancellationToken) is cancelled in teardown.
+    private CancellationTokenSource? _logForwardCts;
+    private Task? _logForwardTask;
+
     // Captured state-transition timeline (recorded by the background monitor), folded into the
     // exception when startup fails so the failure tells the whole story in one place. Guarded by
     // a lock because the monitor records into it while a failing path reads it (the monitor is
@@ -105,26 +114,98 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         var cts = new CancellationTokenSource();
         var loggerService = App.Services.GetRequiredService<ResourceLoggerService>();
 
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await foreach (var batch in loggerService.WatchAsync(resourceName)
-                    .WithCancellation(cts.Token))
-                {
-                    foreach (var line in batch)
-                    {
-                        testContext.Output.WriteLine($"[{resourceName}] {line.Content}");
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected when the watcher is disposed
-            }
-        });
+        _ = PumpResourceLogsAsync(loggerService, resourceName,
+            line => testContext.Output.WriteLine($"[{resourceName}] {line}"), cts.Token);
 
         return new ResourceLogWatcher(cts);
+    }
+
+    /// <summary>
+    /// Reads a resource's console output via <see cref="ResourceLoggerService.WatchAsync(string)"/>
+    /// and hands each raw line to <paramref name="write"/> until <paramref name="token"/> is
+    /// cancelled. The stream replays the buffered backlog before tailing live output (so logs from
+    /// an already-exited resource are still delivered) and never completes on its own, so the token
+    /// is the only way it ends.
+    /// </summary>
+    private static async Task PumpResourceLogsAsync(ResourceLoggerService loggerService,
+        string resourceName, Action<string> write, CancellationToken token)
+    {
+        try
+        {
+            await foreach (var batch in loggerService.WatchAsync(resourceName)
+                .WithCancellation(token))
+            {
+                foreach (var line in batch)
+                {
+                    // LogLine is a readonly record struct — use .Content, never ToString().
+                    write(line.Content);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when the watcher is disposed or the fixture is torn down.
+        }
+    }
+
+    /// <summary>
+    /// Starts one background pump per selected resource, forwarding each line into the owning
+    /// test's captured output (see <see cref="AspireFixtureOptions.ForwardResourceLogs"/>).
+    /// </summary>
+    private void StartForwardingResourceLogs(DistributedApplication app,
+        DistributedApplicationModel model, AspireFixtureOptions options)
+    {
+        var names = SelectResourceLogNames(model.Resources, options);
+        if (names.Count == 0)
+        {
+            return;
+        }
+
+        // The pumps run on background threads where TestContext.Current (an AsyncLocal) does not
+        // flow, so it would read null there. Capture the owning context now and write to that
+        // fixed sink; a null owner (session-shared init outside a test) falls back to stderr.
+        var owner = TestContext.Current;
+
+        LogProgress($"Forwarding resource logs: [{string.Join(", ", names)}]");
+
+        _logForwardCts = CancellationTokenSource.CreateLinkedTokenSource(RunCancellationToken);
+        var token = _logForwardCts.Token;
+        var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
+
+        _logForwardTask = Task.WhenAll(names.Select(name => Task.Run(() =>
+            PumpResourceLogsAsync(loggerService, name,
+                line => WriteForwardedLine(owner, name, line), token), token)));
+    }
+
+    /// <summary>
+    /// The resources whose logs to forward: the explicit <see cref="AspireFixtureOptions.ResourceLogNames"/>
+    /// subset when supplied, otherwise every resource <see cref="ShouldWaitForResource"/> selects.
+    /// </summary>
+    internal List<string> SelectResourceLogNames(IEnumerable<IResource> resources, AspireFixtureOptions options)
+    {
+        if (options.ResourceLogNames is { Count: > 0 } named)
+        {
+            var wanted = new HashSet<string>(named, StringComparer.Ordinal);
+            return resources.Select(r => r.Name).Where(wanted.Contains).ToList();
+        }
+
+        return resources.Where(ShouldWaitForResource).Select(r => r.Name).ToList();
+    }
+
+    /// <summary>
+    /// Writes one forwarded log line, prefixed with the resource name, to the owning test's
+    /// output — or to stderr (<see cref="LogProgress"/>) when there is no owning test context.
+    /// </summary>
+    private void WriteForwardedLine(TestContext? owner, string resourceName, string content)
+    {
+        if (owner is not null)
+        {
+            owner.Output.WriteLine($"  [{resourceName}] {content}");
+        }
+        else
+        {
+            LogProgress($"  [{resourceName}] {content}");
+        }
     }
 
     // --- Configuration hooks (virtual) ---
@@ -196,6 +277,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// OTLP endpoint so both TUnit and the dashboard receive data.
     /// </remarks>
     protected virtual bool EnableTelemetryCollection => true;
+
+    /// <summary>
+    /// Optional additional configuration. Override to opt in to features such as live resource
+    /// log forwarding:
+    /// <code>
+    /// protected override AspireFixtureOptions Options => new() { ForwardResourceLogs = true };
+    /// </code>
+    /// Default: an all-defaults instance (no behaviour change).
+    /// </summary>
+    protected virtual AspireFixtureOptions Options { get; } = new();
 
     /// <summary>
     /// Resource wait timeout. Default: 60 seconds.
@@ -306,6 +397,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     {
         var sw = Stopwatch.StartNew();
 
+        // Resolve the options hook once — overrides may construct a fresh instance per get.
+        _options = Options;
+
         // Start OTLP receiver before building the app so we can inject the endpoint
         if (EnableTelemetryCollection)
         {
@@ -338,6 +432,14 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         var model = _app.Services.GetRequiredService<DistributedApplicationModel>();
         var resourceList = string.Join(", ", model.Resources.Select(r => r.Name));
         LogProgress($"Starting application with resources: [{resourceList}]");
+
+        // Subscribe to resource logs BEFORE StartAsync: a resource that crashes during boot makes
+        // StartAsync throw/hang, so a post-start subscribe would never run and miss the crash logs.
+        // WatchAsync replays the backlog, so the earliest lines are still delivered.
+        if (_options.ForwardResourceLogs)
+        {
+            StartForwardingResourceLogs(_app, model, _options);
+        }
 
         // Monitor resource state changes in the background, covering BOTH startup and the
         // resource-wait phase, so the captured timeline includes health-check-wait hangs.
@@ -558,6 +660,29 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
     private async Task StopAndDisposeCoreAsync()
     {
+        // Stop the resource-log pumps first so nothing writes to the owner's output while the
+        // application is being torn down (a write to an already-finished test would leak, mirroring
+        // the OnTestEnd retry-leak concern). Boot-phase logs were already delivered live before this.
+        if (_logForwardCts is not null)
+        {
+            _logForwardCts.Cancel();
+            try
+            {
+                if (_logForwardTask is not null)
+                {
+                    await _logForwardTask;
+                }
+            }
+            catch
+            {
+                // Best-effort: pump tasks observe cancellation internally; ignore any straggler.
+            }
+
+            _logForwardCts.Dispose();
+            _logForwardCts = null;
+            _logForwardTask = null;
+        }
+
         if (_otlpReceiver is not null && _app is not null)
         {
             // Give the SUT's BatchSpanProcessor a chance to flush trailing spans while the
