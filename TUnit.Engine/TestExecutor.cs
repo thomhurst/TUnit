@@ -296,6 +296,15 @@ internal class TestExecutor
         }
         finally
         {
+            // The timeout path (TimeoutHelper) set Context.CancellationToken to a linked CTS token
+            // that is disposed the moment the test body returns. Restore the still-valid outer token
+            // before the test-end event receivers, After(Test)/AfterEvery(Test) hooks, and any retry
+            // back-off run, so they never observe a disposed CancellationTokenSource (fixes #6339).
+            if (testTimeout.HasValue)
+            {
+                executableTest.Context.CancellationToken = cancellationToken;
+            }
+
             // After hooks must use CancellationToken.None to ensure cleanup runs even when cancelled
             // This matches the pattern used for After Class/Assembly hooks in TestCoordinator
 
