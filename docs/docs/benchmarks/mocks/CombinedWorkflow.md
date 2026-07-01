@@ -9,7 +9,7 @@ sidebar_position: 3
 > Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-06-30** from the latest CI run.
+This benchmark was automatically generated on **2026-07-01** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.301
 :::
@@ -20,12 +20,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1.981 μs | 0.0387 μs | 0.0529 μs | 6.23 KB |
-| Imposter | 2.882 μs | 0.0572 μs | 0.1466 μs | 15.71 KB |
-| Mockolate | 1.660 μs | 0.0260 μs | 0.0661 μs | 7.36 KB |
-| Moq | 407.063 μs | 3.0269 μs | 2.8314 μs | 36.44 KB |
-| NSubstitute | 18.166 μs | 0.1465 μs | 0.1299 μs | 26.72 KB |
-| FakeItEasy | 18.546 μs | 0.2344 μs | 0.2078 μs | 25.52 KB |
+| **TUnit.Mocks** | 2.115 μs | 0.0366 μs | 0.0343 μs | 6.23 KB |
+| Imposter | 2.841 μs | 0.0563 μs | 0.1493 μs | 15.71 KB |
+| Mockolate | 1.765 μs | 0.0254 μs | 0.0212 μs | 7.36 KB |
+| Moq | 416.331 μs | 3.7703 μs | 3.3423 μs | 36.65 KB |
+| NSubstitute | 17.815 μs | 0.1622 μs | 0.1517 μs | 26.72 KB |
+| FakeItEasy | 18.735 μs | 0.2936 μs | 0.2746 μs | 25.63 KB |
 
 ```mermaid
 %%{init: {
@@ -51,8 +51,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (μs)" 0 --> 489
-  bar [1.981, 2.882, 1.66, 407.063, 18.166, 18.546]
+  y-axis "Time (μs)" 0 --> 500
+  bar [2.115, 2.841, 1.765, 416.331, 17.815, 18.735]
 ```
 
 ## 🎯 Key Insights
@@ -65,4 +65,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-06-30T03:28:32.223Z*
+*Last generated: 2026-07-01T03:29:08.803Z*
