@@ -1,4 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
+using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
@@ -18,7 +19,7 @@ public class ResourceLogSelectionTests
     public async Task ExplicitNames_ReturnsOnlyTheNamedSubset_Ordinal()
     {
         IReadOnlyList<IResource> resources =
-            [new FakeCompute("api"), new FakeCompute("chat"), new FakeCompute("db"), new FakeCompute("cache")];
+            [new FakeComputeResource("api"), new FakeComputeResource("chat"), new FakeComputeResource("db"), new FakeComputeResource("cache")];
 
         var names = Fixture.SelectResourceLogNames(resources,
             new AspireFixtureOptions { ResourceLogNames = ["chat", "api", "missing"] });
@@ -34,7 +35,7 @@ public class ResourceLogSelectionTests
     [Test]
     public async Task ExplicitNames_AreCaseSensitive()
     {
-        IReadOnlyList<IResource> resources = [new FakeCompute("chat")];
+        IReadOnlyList<IResource> resources = [new FakeComputeResource("chat")];
 
         var names = Fixture.SelectResourceLogNames(resources,
             new AspireFixtureOptions { ResourceLogNames = ["Chat"] });
@@ -45,12 +46,12 @@ public class ResourceLogSelectionTests
     [Test]
     public async Task NoNames_FallsBackToWaitableResources()
     {
-        var parent = new FakeCompute("api");
+        var parent = new FakeComputeResource("api");
         IReadOnlyList<IResource> resources =
         [
-            new FakeCompute("api"),          // compute, no parent  -> waited on
-            new FakeResource("db-password"), // non-compute         -> excluded
-            new FakeChildCompute("api-pdb", parent), // compute w/ parent -> excluded
+            new FakeComputeResource("api"),                    // compute, no parent -> waited on
+            new FakeNonComputeResource("db-password"),         // non-compute        -> excluded
+            new FakeChildComputeResource("api-pdb", parent),   // compute w/ parent  -> excluded
         ];
 
         var names = Fixture.SelectResourceLogNames(resources, new AspireFixtureOptions());
@@ -63,31 +64,12 @@ public class ResourceLogSelectionTests
     [Test]
     public async Task EmptyNames_IsTreatedAsNoNames()
     {
-        IReadOnlyList<IResource> resources = [new FakeCompute("api"), new FakeResource("param")];
+        IReadOnlyList<IResource> resources = [new FakeComputeResource("api"), new FakeNonComputeResource("param")];
 
         var names = Fixture.SelectResourceLogNames(resources,
             new AspireFixtureOptions { ResourceLogNames = [] });
 
         await Assert.That(names).Contains("api");
         await Assert.That(names).DoesNotContain("param");
-    }
-
-    private sealed class FakeResource(string name) : IResource
-    {
-        public string Name { get; } = name;
-        public ResourceAnnotationCollection Annotations { get; } = [];
-    }
-
-    private sealed class FakeCompute(string name) : IComputeResource
-    {
-        public string Name { get; } = name;
-        public ResourceAnnotationCollection Annotations { get; } = [];
-    }
-
-    private sealed class FakeChildCompute(string name, IResource parent) : IComputeResource, IResourceWithParent
-    {
-        public string Name { get; } = name;
-        public ResourceAnnotationCollection Annotations { get; } = [];
-        public IResource Parent { get; } = parent;
     }
 }

@@ -32,10 +32,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
 
-    // Resolved once at the start of InitializeAsync so the Options virtual isn't re-invoked,
-    // and so teardown reads the same instance the startup path used.
-    private AspireFixtureOptions? _options;
-
     // Live resource-log forwarding (opt-in via Options.ForwardResourceLogs). The pump tasks tail
     // WatchAsync until the CTS (linked to RunCancellationToken) is cancelled in teardown.
     private CancellationTokenSource? _logForwardCts;
@@ -162,8 +158,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         }
 
         // The pumps run on background threads where TestContext.Current (an AsyncLocal) does not
-        // flow, so it would read null there. Capture the owning context now and write to that
-        // fixed sink; a null owner (session-shared init outside a test) falls back to stderr.
+        // flow, so it would read null there. Resolve the sink once here on the init thread: the
+        // owning test's output, or stderr when init runs outside a test (session-shared fixture).
         var owner = TestContext.Current;
 
         LogProgress($"Forwarding resource logs: [{string.Join(", ", names)}]");
@@ -172,9 +168,16 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         var token = _logForwardCts.Token;
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
 
-        _logForwardTask = Task.WhenAll(names.Select(name => Task.Run(() =>
-            PumpResourceLogsAsync(loggerService, name,
-                line => WriteForwardedLine(owner, name, line), token), token)));
+        // Bind the sink per resource once, so the per-line path is a single write with no branch.
+        // PumpResourceLogsAsync is async and yields at its first await, so calling it directly
+        // (no Task.Run) still runs the pumps concurrently without an extra thread-pool hop.
+        _logForwardTask = Task.WhenAll(names.Select(name =>
+        {
+            Action<string> write = owner is not null
+                ? line => owner.Output.WriteLine($"  [{name}] {line}")
+                : line => LogProgress($"  [{name}] {line}");
+            return PumpResourceLogsAsync(loggerService, name, write, token);
+        }));
     }
 
     /// <summary>
@@ -190,22 +193,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         }
 
         return resources.Where(ShouldWaitForResource).Select(r => r.Name).ToList();
-    }
-
-    /// <summary>
-    /// Writes one forwarded log line, prefixed with the resource name, to the owning test's
-    /// output — or to stderr (<see cref="LogProgress"/>) when there is no owning test context.
-    /// </summary>
-    private void WriteForwardedLine(TestContext? owner, string resourceName, string content)
-    {
-        if (owner is not null)
-        {
-            owner.Output.WriteLine($"  [{resourceName}] {content}");
-        }
-        else
-        {
-            LogProgress($"  [{resourceName}] {content}");
-        }
     }
 
     // --- Configuration hooks (virtual) ---
@@ -397,9 +384,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     {
         var sw = Stopwatch.StartNew();
 
-        // Resolve the options hook once — overrides may construct a fresh instance per get.
-        _options = Options;
-
         // Start OTLP receiver before building the app so we can inject the endpoint
         if (EnableTelemetryCollection)
         {
@@ -436,9 +420,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         // Subscribe to resource logs BEFORE StartAsync: a resource that crashes during boot makes
         // StartAsync throw/hang, so a post-start subscribe would never run and miss the crash logs.
         // WatchAsync replays the backlog, so the earliest lines are still delivered.
-        if (_options.ForwardResourceLogs)
+        var options = Options;
+        if (options.ForwardResourceLogs)
         {
-            StartForwardingResourceLogs(_app, model, _options);
+            StartForwardingResourceLogs(_app, model, options);
         }
 
         // Monitor resource state changes in the background, covering BOTH startup and the
@@ -668,10 +653,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             _logForwardCts.Cancel();
             try
             {
-                if (_logForwardTask is not null)
-                {
-                    await _logForwardTask;
-                }
+                await _logForwardTask!; // set alongside the CTS in StartForwardingResourceLogs
             }
             catch
             {
@@ -679,8 +661,6 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             }
 
             _logForwardCts.Dispose();
-            _logForwardCts = null;
-            _logForwardTask = null;
         }
 
         if (_otlpReceiver is not null && _app is not null)

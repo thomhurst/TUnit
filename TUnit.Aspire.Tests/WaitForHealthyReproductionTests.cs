@@ -1,5 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
@@ -98,7 +99,7 @@ public class WaitForHealthyReproductionTests(IntegrationTestFixture fixture)
     public async Task ShouldWaitForResource_IncludesComputeResource()
     {
         var inspectable = new InspectableFixture();
-        var regular = new FakeContainerResource("my-container");
+        var regular = new FakeComputeResource("my-container");
 
         await Assert.That(inspectable.TestShouldWaitForResource(regular)).IsTrue();
     }
@@ -114,8 +115,8 @@ public class WaitForHealthyReproductionTests(IntegrationTestFixture fixture)
     public async Task ShouldWaitForResource_ExcludesIResourceWithParent()
     {
         var inspectable = new InspectableFixture();
-        var regular = new FakeContainerResource("my-container");
-        var rebuilder = new FakeRebuilderResource("my-container-rebuilder", regular);
+        var regular = new FakeComputeResource("my-container");
+        var rebuilder = new FakeChildComputeResource("my-container-rebuilder", regular);
 
         await Assert.That(inspectable.TestShouldWaitForResource(rebuilder)).IsFalse();
     }
@@ -136,31 +137,5 @@ public class WaitForHealthyReproductionTests(IntegrationTestFixture fixture)
     {
         public bool TestShouldWaitForResource(IResource resource)
             => ShouldWaitForResource(resource);
-    }
-
-    /// <summary>A plain IComputeResource with no parent.</summary>
-    private sealed class FakeContainerResource(string name) : IComputeResource
-    {
-        public string Name => name;
-        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
-    }
-
-    /// <summary>A non-compute resource (e.g. ParameterResource, ConnectionStringResource).</summary>
-    private sealed class FakeNonComputeResource(string name) : IResource
-    {
-        public string Name => name;
-        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
-    }
-
-    /// <summary>
-    /// Simulates ProjectRebuilderResource from Aspire 13.2.0:
-    /// an IComputeResource that also implements IResourceWithParent.
-    /// </summary>
-    private sealed class FakeRebuilderResource(string name, IResource parent)
-        : IComputeResource, IResourceWithParent
-    {
-        public string Name => name;
-        public ResourceAnnotationCollection Annotations { get; } = new ResourceAnnotationCollection();
-        public IResource Parent => parent;
     }
 }
