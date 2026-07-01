@@ -231,6 +231,10 @@ internal static class OtlpLogParser
                         case "exception.stacktrace":
                             exceptionStackTrace = value;
                             break;
+                        default:
+                            // ParseExceptionAttribute already filters to the three exception.* keys;
+                            // any other attribute arrives with an empty value and is ignored.
+                            break;
                     }
 
                     break;
