@@ -1099,7 +1099,10 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
                 failureCts.Cancel();
                 var failedName = await await anyFailureTask;
 
-                var headline = $"Resource '{failedName}' failed to start.";
+                // "failed during startup" (not "failed to start") because the trigger covers both a
+                // launch failure (FailedToStart) and a crash-exit that reached a terminal state
+                // (Exited/Finished with a non-zero code) — see IsFailureState.
+                var headline = $"Aspire startup aborted: resource '{failedName}' failed during startup.";
                 throw new InvalidOperationException(
                     await BuildDiagnosticsAndAttachAsync(
                         app, notificationService, headline, [failedName], readyResources.ToArray()));
@@ -1308,14 +1311,24 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         => StateEquals(state, KnownResourceStates.Running)
         || StateEquals(state, KnownResourceStates.Finished);
 
-    /// <summary>
-    /// Whether a snapshot represents a genuine startup failure. <c>FailedToStart</c> always counts;
-    /// <c>Exited</c> counts only with a non-zero exit code, so a one-shot resource (migration runner,
-    /// seeder) that exits cleanly with code 0 isn't mis-reported as a failure.
-    /// </summary>
     private static bool IsFailureState(CustomResourceSnapshot snapshot)
+        => IsFailureState(snapshot.State?.Text, snapshot.ExitCode);
+
+    /// <summary>
+    /// Whether a state + exit code represents a genuine startup failure. <c>FailedToStart</c> always
+    /// counts. A crash-exit lands in <c>Exited</c> (containers) or <c>Finished</c> (projects and
+    /// executables — e.g. a .NET process that throws an unhandled exception ends Finished with a
+    /// non-zero exit code, NOT Exited), so either terminal state with a non-zero exit code counts.
+    /// A clean (code 0) exit is excluded so a one-shot resource (migration runner, seeder) that
+    /// finishes successfully isn't mis-reported as a failure.
+    /// </summary>
+    /// <remarks>
+    /// Watching only <c>Exited</c> here was the root cause of #6342: a crashed project resource
+    /// reaches <c>Finished</c>, never becomes healthy, and — unseen by the fail-fast watcher — the
+    /// wait blocked for the entire <see cref="ResourceTimeout"/> instead of aborting immediately.
+    /// </remarks>
+    internal static bool IsFailureState(string? state, int? exitCode)
     {
-        var state = snapshot.State?.Text;
         if (state is null)
         {
             return false;
@@ -1326,7 +1339,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             return true;
         }
 
-        return StateEquals(state, KnownResourceStates.Exited) && snapshot.ExitCode is not (null or 0);
+        return (StateEquals(state, KnownResourceStates.Exited) || StateEquals(state, KnownResourceStates.Finished))
+            && exitCode is not (null or 0);
     }
 
     /// <summary>Scans recent log lines for high-confidence failure signatures. Heuristic; a miss
@@ -1430,11 +1444,43 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         _ => null,
     };
 
+    /// <summary>
+    /// Human-readable interpretation of a process exit code, or <c>null</c> when nothing specific is
+    /// known. Turns an opaque number like -532462766 (0xE0434352) into ".NET unhandled exception".
+    /// Covers the common Windows NTSTATUS/HRESULT crash codes (surfaced as the sign-extended 32-bit
+    /// value) and POSIX 128+signal codes.
+    /// </summary>
+    internal static string? DecodeExitCode(int exitCode) => exitCode switch
+    {
+        // Windows: DCP reports the raw 32-bit code sign-extended into an int, hence the negatives.
+        unchecked((int)0xE0434352) => ".NET unhandled exception",
+        unchecked((int)0xC0000005) => "access violation (native crash)",
+        unchecked((int)0xC00000FD) => "stack overflow",
+        unchecked((int)0xC000013A) => "terminated by Ctrl+C",
+        // POSIX: a process killed by signal N exits with 128 + N.
+        134 => "SIGABRT (abort)",
+        137 => "SIGKILL (often OOM)",
+        139 => "SIGSEGV (segmentation fault)",
+        143 => "SIGTERM",
+        _ => null,
+    };
+
+    /// <summary>Formats an exit code with its decoded meaning when known: "1", or "-532462766 (.NET unhandled exception)".</summary>
+    internal static string FormatExitCode(int? exitCode)
+    {
+        if (exitCode is not int code)
+        {
+            return "(unknown)";
+        }
+
+        return DecodeExitCode(code) is { } meaning ? $"{code} ({meaning})" : code.ToString();
+    }
+
     /// <summary>One-line human description of a resource's failure state for the concise exception message.</summary>
     internal static string DescribeState(in ResourceDiagnosis d) => d.Class switch
     {
         ResourceFailureClass.OutOfMemory => $"{d.State}, exit code {d.ExitCode} (OOM / SIGKILL)",
-        ResourceFailureClass.NonZeroExit => $"{d.State}, exit code {d.ExitCode}",
+        ResourceFailureClass.NonZeroExit => $"{d.State}, exit code {FormatExitCode(d.ExitCode)}",
         ResourceFailureClass.CrashedNoCode => $"{d.State} (no exit code)",
         ResourceFailureClass.HealthCheckFailing => d.Detail is { Length: > 0 } health
             ? $"Running but not Healthy ({health})"
@@ -1559,6 +1605,36 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         }
     }
 
+    /// <summary>
+    /// Elapsed time (relative to the first recorded transition) at which <paramref name="name"/>
+    /// most recently entered a terminal state, or <c>null</c> when the timeline has no such
+    /// transition. Lets the concise message report "exited after 41.3s" by reusing the timeline the
+    /// background monitor already records, rather than separately instrumenting the wait.
+    /// </summary>
+    private TimeSpan? TerminalElapsedFor(string name)
+    {
+        lock (_timelineGate)
+        {
+            if (_timeline.Count == 0)
+            {
+                return null;
+            }
+
+            var origin = _timeline[0].Elapsed;
+            for (var i = _timeline.Count - 1; i >= 0; i--)
+            {
+                var transition = _timeline[i];
+                if (string.Equals(transition.Resource, name, StringComparison.Ordinal)
+                    && IsTerminalState(transition.To))
+                {
+                    return transition.Elapsed - origin;
+                }
+            }
+
+            return null;
+        }
+    }
+
     /// <summary>Renders the recorded transitions as a relative-time timeline; "" only when empty.
     /// A single transition (e.g. an immediate jump to FailedToStart) is still worth showing.</summary>
     internal static string FormatTimeline(StateTransition[] transitions)
@@ -1599,6 +1675,19 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         var concise = new StringBuilder().Append(headline);
         var full = new StringBuilder().AppendLine(headline);
 
+        // The reverse dependency graph — which resources declared a WaitFor on a failed one — lets
+        // the message name the downstream work that was blocked. Resolve the model defensively: a
+        // concurrently torn-down app throws ObjectDisposedException, in which case awaiters are
+        // simply omitted rather than masking the underlying failure.
+        DistributedApplicationModel? model = null;
+        try
+        {
+            model = app.Services.GetRequiredService<DistributedApplicationModel>();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
         // Collect every resource's logs in parallel — each has its own short timeout, so doing
         // them sequentially would compound the delay on an already-failed test's teardown.
         var collected = await Task.WhenAll(problemResources.Select(async name =>
@@ -1612,12 +1701,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             var diagnosis = DiagnoseResource(notificationService, name, ev, logLines);
 
             concise.AppendLine().Append($"  {name}: {DescribeState(diagnosis)}");
+            if (TerminalElapsedFor(name) is { } elapsed)
+            {
+                concise.Append($" after {elapsed.TotalSeconds:0.0}s");
+            }
+
+            List<string> awaiters = model is null ? [] : FindAwaiters(model.Resources, name);
+            if (awaiters.Count > 0)
+            {
+                concise.AppendLine().Append($"     Awaited by: {string.Join(", ", awaiters)}");
+            }
+
             if (diagnosis.Hint is not null)
             {
                 concise.AppendLine().Append($"     Hint: {diagnosis.Hint}");
             }
 
-            AppendResourceDiagnosticBlock(full, notificationService, name, ev, diagnosis, logLines);
+            AppendResourceDiagnosticBlock(full, notificationService, name, ev, diagnosis, logLines, awaiters);
         }
 
         if (readyResources is { Count: > 0 })
@@ -1648,13 +1748,23 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         string name,
         ResourceEvent? ev,
         in ResourceDiagnosis diagnosis,
-        IReadOnlyList<string> logLines)
+        IReadOnlyList<string> logLines,
+        IReadOnlyList<string> awaiters)
     {
         sb.AppendLine().AppendLine($"--- {name} diagnostics ---");
         sb.AppendLine($"  State:      {diagnosis.State}");
         if (diagnosis.ExitCode is int code)
         {
-            sb.AppendLine($"  Exit code:  {code}");
+            sb.Append($"  Exit code:  {code}");
+            if (DecodeExitCode(code) is { } meaning)
+            {
+                sb.Append($" ({meaning})");
+            }
+            sb.AppendLine();
+        }
+        if (awaiters.Count > 0)
+        {
+            sb.AppendLine($"  Awaited by: {string.Join(", ", awaiters)}");
         }
         if (diagnosis.Hint is not null)
         {
@@ -1745,6 +1855,28 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
             sb.AppendLine($"    - {depName} [{wait.WaitType}] -> {description}");
         }
+    }
+
+    /// <summary>
+    /// Names of resources that declared a <see cref="WaitAnnotation"/> on <paramref name="target"/> —
+    /// the reverse of <see cref="AppendDependencyChain"/>. These are the downstream resources whose
+    /// own startup was gated on <paramref name="target"/> and were therefore blocked when it failed,
+    /// so the failure message can point at the work that didn't run ("Awaited by: media, web").
+    /// </summary>
+    internal static List<string> FindAwaiters(IEnumerable<IResource> resources, string target)
+    {
+        var awaiters = new List<string>();
+
+        foreach (var resource in resources)
+        {
+            if (resource.TryGetAnnotationsOfType<WaitAnnotation>(out var waits)
+                && waits.Any(w => string.Equals(w.Resource.Name, target, StringComparison.Ordinal)))
+            {
+                awaiters.Add(resource.Name);
+            }
+        }
+
+        return awaiters;
     }
 
     private async Task<string?> TryWriteDiagnosticsArtifactAsync(string content)
