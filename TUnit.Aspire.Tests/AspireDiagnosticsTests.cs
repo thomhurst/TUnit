@@ -1,3 +1,5 @@
+using Aspire.Hosting.ApplicationModel;
+using TUnit.Aspire.Tests.Helpers;
 using TUnit.Assertions;
 using TUnit.Assertions.Extensions;
 using TUnit.Core;
@@ -22,6 +24,43 @@ public class AspireDiagnosticsTests
     public async Task Classify_TerminalWithNonZeroExit_IsNonZeroExit()
         => await Assert.That(Classify("FailedToStart", 1, runningButUnhealthy: false, logLines: null))
             .IsEqualTo(ResourceFailureClass.NonZeroExit);
+
+    // A crashed .NET project reaches Finished (not Exited) with a non-zero exit code — #6342.
+    [Test]
+    public async Task Classify_FinishedWithNonZeroExit_IsNonZeroExit()
+        => await Assert.That(Classify("Finished", -532462766, runningButUnhealthy: false, logLines: null))
+            .IsEqualTo(ResourceFailureClass.NonZeroExit);
+
+    // --- IsFailureState: the fail-fast trigger. #6342 = Finished + non-zero was previously missed. ---
+
+    [Test]
+    public async Task IsFailureState_FinishedWithNonZeroExit_IsFailure()
+        => await Assert.That(IsFailureState("Finished", -532462766)).IsTrue();
+
+    [Test]
+    public async Task IsFailureState_ExitedWithNonZeroExit_IsFailure()
+        => await Assert.That(IsFailureState("Exited", 1)).IsTrue();
+
+    [Test]
+    public async Task IsFailureState_FailedToStart_IsFailure()
+        => await Assert.That(IsFailureState("FailedToStart", null)).IsTrue();
+
+    // A one-shot resource (migration runner, seeder) that finishes cleanly must NOT be a failure.
+    [Test]
+    public async Task IsFailureState_FinishedWithZeroExit_IsNotFailure()
+        => await Assert.That(IsFailureState("Finished", 0)).IsFalse();
+
+    [Test]
+    public async Task IsFailureState_ExitedWithZeroExit_IsNotFailure()
+        => await Assert.That(IsFailureState("Exited", 0)).IsFalse();
+
+    [Test]
+    public async Task IsFailureState_Running_IsNotFailure()
+        => await Assert.That(IsFailureState("Running", null)).IsFalse();
+
+    [Test]
+    public async Task IsFailureState_NullState_IsNotFailure()
+        => await Assert.That(IsFailureState(null, null)).IsFalse();
 
     [Test]
     public async Task Classify_TerminalWithNoExitCode_IsCrashedNoCode()
@@ -114,6 +153,83 @@ public class AspireDiagnosticsTests
             Detail: "'migrations' (Exited, exit code 1)", Hint: null);
 
         await Assert.That(DescribeState(diagnosis)).Contains("waiting on 'migrations'");
+    }
+
+    // --- Exit-code decoding (#6342): turn opaque numbers into human-readable causes. ---
+
+    [Test]
+    public async Task DecodeExitCode_DotNetUnhandledException_IsDescribed()
+        => await Assert.That(DecodeExitCode(-532462766)).Contains(".NET unhandled exception");
+
+    [Test]
+    public async Task DecodeExitCode_AccessViolation_IsDescribed()
+        => await Assert.That(DecodeExitCode(unchecked((int)0xC0000005))).Contains("access violation");
+
+    [Test]
+    public async Task DecodeExitCode_Sigkill_MentionsOom()
+        => await Assert.That(DecodeExitCode(137)).Contains("SIGKILL");
+
+    [Test]
+    public async Task DecodeExitCode_UnknownCode_IsNull()
+        => await Assert.That(DecodeExitCode(1)).IsNull();
+
+    [Test]
+    public async Task FormatExitCode_KnownCode_IncludesNumberAndMeaning()
+    {
+        var formatted = FormatExitCode(-532462766);
+
+        await Assert.That(formatted).Contains("-532462766");
+        await Assert.That(formatted).Contains(".NET unhandled exception");
+    }
+
+    [Test]
+    public async Task FormatExitCode_UnknownCode_IsBareNumber()
+        => await Assert.That(FormatExitCode(1)).IsEqualTo("1");
+
+    [Test]
+    public async Task FormatExitCode_Null_IsUnknown()
+        => await Assert.That(FormatExitCode(null)).IsEqualTo("(unknown)");
+
+    [Test]
+    public async Task DescribeState_NonZeroExit_DecodesExitCode()
+    {
+        var diagnosis = new ResourceDiagnosis(
+            "chat", "Finished", -532462766, ResourceFailureClass.NonZeroExit, null, null);
+
+        var description = DescribeState(diagnosis);
+
+        await Assert.That(description).Contains("Finished");
+        await Assert.That(description).Contains(".NET unhandled exception");
+    }
+
+    // --- Reverse dependency graph (#6342): who was awaiting the failed resource. ---
+
+    [Test]
+    public async Task FindAwaiters_ReturnsResourcesThatWaitOnTarget()
+    {
+        var chat = new FakeComputeResource("chat");
+        var media = new FakeComputeResource("media");
+        var web = new FakeComputeResource("web");
+        var unrelated = new FakeComputeResource("db");
+
+        media.Annotations.Add(new WaitAnnotation(chat, WaitType.WaitUntilHealthy, 0));
+        web.Annotations.Add(new WaitAnnotation(chat, WaitType.WaitUntilHealthy, 0));
+
+        var awaiters = FindAwaiters([chat, media, web, unrelated], "chat");
+
+        await Assert.That(awaiters).Contains("media");
+        await Assert.That(awaiters).Contains("web");
+        await Assert.That(awaiters).DoesNotContain("db");
+        await Assert.That(awaiters).DoesNotContain("chat");
+    }
+
+    [Test]
+    public async Task FindAwaiters_NoWaiters_IsEmpty()
+    {
+        var chat = new FakeComputeResource("chat");
+        var db = new FakeComputeResource("db");
+
+        await Assert.That(FindAwaiters([chat, db], "chat")).IsEmpty();
     }
 
     [Test]
