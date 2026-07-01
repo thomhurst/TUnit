@@ -312,6 +312,118 @@ public class OtlpReceiverIngestionTests
         await Assert.That(receiver.Diagnostics.LogsRecordsParsed).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Parser_LogWithExceptionAttributes_ExtractsAndFormatsException()
+    {
+        var traceId = Guid.NewGuid().ToString("N");
+        const string stackTrace = "System.InvalidOperationException: boom\n   at Sut.Fail()";
+        var body = BuildLogsExportRequestWithException(
+            "my-service",
+            traceId,
+            "Could not say hello",
+            exceptionType: "System.InvalidOperationException",
+            exceptionMessage: "boom",
+            exceptionStackTrace: stackTrace);
+
+        var records = OtlpLogParser.Parse(body);
+
+        await Assert.That(records.Count).IsEqualTo(1);
+        var record = records[0];
+        await Assert.That(record.Body).IsEqualTo("Could not say hello");
+        await Assert.That(record.ExceptionType).IsEqualTo("System.InvalidOperationException");
+        await Assert.That(record.ExceptionMessage).IsEqualTo("boom");
+        await Assert.That(record.ExceptionStackTrace).IsEqualTo(stackTrace);
+        await Assert.That(record.HasException).IsTrue();
+        // Full stack trace preferred over the discrete type/message fields.
+        await Assert.That(record.FormatException()).IsEqualTo(stackTrace);
+    }
+
+    [Test]
+    public async Task Parser_LogWithoutException_HasNoExceptionDetail()
+    {
+        var traceId = Guid.NewGuid().ToString("N");
+        var body = BuildLogsExportRequest("my-service", traceId, "just a log line");
+
+        var records = OtlpLogParser.Parse(body);
+
+        await Assert.That(records.Count).IsEqualTo(1);
+        var record = records[0];
+        await Assert.That(record.HasException).IsFalse();
+        await Assert.That(record.FormatException()).IsNull();
+    }
+
+    [Test]
+    public async Task Parser_ExceptionTypeAndMessageOnly_FormatsAsTypeColonMessage()
+    {
+        var traceId = Guid.NewGuid().ToString("N");
+        var body = BuildLogsExportRequestWithException(
+            "my-service",
+            traceId,
+            "boom happened",
+            exceptionType: "System.InvalidOperationException",
+            exceptionMessage: "boom",
+            exceptionStackTrace: "");
+
+        var records = OtlpLogParser.Parse(body);
+
+        await Assert.That(records.Count).IsEqualTo(1);
+        var record = records[0];
+        await Assert.That(record.HasException).IsTrue();
+        // No stack trace available → fall back to "type: message".
+        await Assert.That(record.FormatException()).IsEqualTo("System.InvalidOperationException: boom");
+    }
+
+    private static byte[] BuildLogsExportRequestWithException(
+        string serviceName,
+        string traceId,
+        string body,
+        string exceptionType,
+        string exceptionMessage,
+        string exceptionStackTrace)
+    {
+        // KeyValue { key = "service.name", value = AnyValue(serviceName) }
+        using var kvStream = new MemoryStream();
+        WriteStringField(kvStream, 1, "service.name");
+        WriteField(kvStream, 2, BuildAnyValue(serviceName));
+
+        using var resourceStream = new MemoryStream();
+        WriteField(resourceStream, 1, kvStream.ToArray());
+
+        // LogRecord { severity_text (3), body (5), attributes (6)*, trace_id (9) }
+        using var logRecordStream = new MemoryStream();
+        WriteStringField(logRecordStream, 3, "ERROR");
+        WriteField(logRecordStream, 5, BuildAnyValue(body));
+        WriteExceptionAttribute(logRecordStream, "exception.type", exceptionType);
+        WriteExceptionAttribute(logRecordStream, "exception.message", exceptionMessage);
+        WriteExceptionAttribute(logRecordStream, "exception.stacktrace", exceptionStackTrace);
+        WriteField(logRecordStream, 9, Convert.FromHexString(traceId));
+
+        using var scopeLogsStream = new MemoryStream();
+        WriteField(scopeLogsStream, 2, logRecordStream.ToArray());
+
+        using var resourceLogsStream = new MemoryStream();
+        WriteField(resourceLogsStream, 1, resourceStream.ToArray());
+        WriteField(resourceLogsStream, 2, scopeLogsStream.ToArray());
+
+        using var exportStream = new MemoryStream();
+        WriteField(exportStream, 1, resourceLogsStream.ToArray());
+        return exportStream.ToArray();
+    }
+
+    private static void WriteExceptionAttribute(MemoryStream logRecordStream, string key, string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
+        // KeyValue { key (1), value = AnyValue (2) } written to LogRecord.attributes (field 6).
+        using var kvStream = new MemoryStream();
+        WriteStringField(kvStream, 1, key);
+        WriteField(kvStream, 2, BuildAnyValue(value));
+        WriteField(logRecordStream, 6, kvStream.ToArray());
+    }
+
     private static byte[] BuildLogsExportRequest(string serviceName, string traceId, string body)
     {
         // KeyValue { key = "service.name", value = AnyValue(serviceName) }
