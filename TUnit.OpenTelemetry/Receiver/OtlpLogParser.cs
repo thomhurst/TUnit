@@ -13,12 +13,51 @@ namespace TUnit.OpenTelemetry.Receiver;
 /// other value types (int, bool, kvlist, array) are not currently extracted.
 /// </param>
 /// <param name="ResourceName">The <c>service.name</c> resource attribute, if present.</param>
+/// <param name="ExceptionType">
+/// The <c>exception.type</c> log attribute, if present. Populated by the OTLP log exporter
+/// (OpenTelemetry .NET 1.8.0+) whenever a log record carries an exception. Empty otherwise.
+/// </param>
+/// <param name="ExceptionMessage">The <c>exception.message</c> log attribute, if present. Empty otherwise.</param>
+/// <param name="ExceptionStackTrace">
+/// The <c>exception.stacktrace</c> log attribute, if present. In OpenTelemetry .NET this is the
+/// full <c>Exception.ToString()</c> (type, message, and stack), so it already subsumes the type
+/// and message fields. Empty otherwise.
+/// </param>
 internal readonly record struct OtlpLogRecord(
     string TraceId,
     string SeverityText,
     int SeverityNumber,
     string Body,
-    string ResourceName);
+    string ResourceName,
+    string ExceptionType = "",
+    string ExceptionMessage = "",
+    string ExceptionStackTrace = "")
+{
+    /// <summary>
+    /// Renders the exception attributes into a single human-readable block, or <c>null</c> when the
+    /// record carries no exception. Prefers <see cref="ExceptionStackTrace"/> (the full
+    /// <c>ToString()</c>); otherwise falls back to <c>type: message</c> from the discrete fields.
+    /// </summary>
+    public string? FormatException()
+    {
+        if (!string.IsNullOrEmpty(ExceptionStackTrace))
+        {
+            return ExceptionStackTrace;
+        }
+
+        if (!string.IsNullOrEmpty(ExceptionType) && !string.IsNullOrEmpty(ExceptionMessage))
+        {
+            return $"{ExceptionType}: {ExceptionMessage}";
+        }
+
+        if (!string.IsNullOrEmpty(ExceptionType))
+        {
+            return ExceptionType;
+        }
+
+        return string.IsNullOrEmpty(ExceptionMessage) ? null : ExceptionMessage;
+    }
+}
 
 /// <summary>
 /// Minimal parser for OTLP ExportLogsServiceRequest protobuf messages.
@@ -154,6 +193,9 @@ internal static class OtlpLogParser
         var severityNumber = 0;
         var severityText = "";
         var body = "";
+        var exceptionType = "";
+        var exceptionMessage = "";
+        var exceptionStackTrace = "";
 
         while (reader.TryReadTag(out var fieldNumber, out var wireType))
         {
@@ -170,6 +212,31 @@ internal static class OtlpLogParser
                 case 5 when wireType == WireType.LengthDelimited:
                     var bodyMsg = reader.ReadEmbeddedMessage();
                     body = ParseAnyValueString(bodyMsg);
+                    break;
+
+                // LogRecord.attributes (field 6) — OpenTelemetry's OTLP log exporter attaches the
+                // exception.* semantic-convention attributes here whenever a record carries an
+                // exception. Pull those three out so the exception can be surfaced alongside the body
+                // (the body alone is often just the log message, not the failure detail).
+                case 6 when wireType == WireType.LengthDelimited:
+                    var (key, value) = ParseExceptionAttribute(reader.ReadEmbeddedMessage());
+                    switch (key)
+                    {
+                        case "exception.type":
+                            exceptionType = value;
+                            break;
+                        case "exception.message":
+                            exceptionMessage = value;
+                            break;
+                        case "exception.stacktrace":
+                            exceptionStackTrace = value;
+                            break;
+                        default:
+                            // ParseExceptionAttribute already filters to the three exception.* keys;
+                            // any other attribute arrives with an empty value and is ignored.
+                            break;
+                    }
+
                     break;
 
                 case 9 when wireType == WireType.LengthDelimited:
@@ -192,7 +259,15 @@ internal static class OtlpLogParser
             return null;
         }
 
-        return new OtlpLogRecord(traceId, severityText, severityNumber, body, resourceName);
+        return new OtlpLogRecord(
+            traceId,
+            severityText,
+            severityNumber,
+            body,
+            resourceName,
+            exceptionType,
+            exceptionMessage,
+            exceptionStackTrace);
     }
 
     private static string ParseAnyValueString(ProtobufReader reader)
@@ -209,6 +284,34 @@ internal static class OtlpLogParser
         }
 
         return "";
+    }
+
+    // Like ParseKeyValue, but materialises the value string only for the exception.* keys the
+    // receiver renders. A log record can carry many attributes (scopes, custom fields); parsing
+    // every value — some large — just to discard it would waste allocations on the ingest hot
+    // path. Assumes key (field 1) precedes value (field 2), which holds for all known OTel encoders.
+    private static (string Key, string Value) ParseExceptionAttribute(ProtobufReader reader)
+    {
+        var key = "";
+
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                key = reader.ReadString();
+            }
+            else if (fieldNumber == 2 && wireType == WireType.LengthDelimited
+                && key is "exception.type" or "exception.message" or "exception.stacktrace")
+            {
+                return (key, ParseAnyValueString(reader.ReadEmbeddedMessage()));
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+
+        return (key, "");
     }
 
     private static (string Key, string Value) ParseKeyValue(ProtobufReader reader)
