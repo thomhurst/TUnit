@@ -32,10 +32,17 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     private DistributedApplication? _app;
     private OtlpReceiver? _otlpReceiver;
 
-    // Live resource-log forwarding (opt-in via Options.ForwardResourceLogs). The pump tasks tail
-    // WatchAsync until the CTS (linked to RunCancellationToken) is cancelled in teardown.
+    // Live resource-log forwarding (opt-in via Options.ForwardResourceLogs) and/or retained log
+    // buffering (opt-in via Options.RetainResourceLogs). One background pump per selected resource
+    // tails WatchAsync until the CTS (linked to RunCancellationToken) is cancelled in teardown; the
+    // same pump feeds both features when both are on.
     private CancellationTokenSource? _logForwardCts;
     private Task? _logForwardTask;
+
+    // Retained per-resource rolling log buffers (populated only when Options.RetainResourceLogs is
+    // on). Kept alive past teardown so GetResourceLogsAsync still returns buffered lines after the
+    // app is disposed. Null when retention is off.
+    private ConcurrentDictionary<string, BoundedLogBuffer>? _logBuffers;
 
     // Captured state-transition timeline (recorded by the background monitor), folded into the
     // exception when startup fails so the failure tells the whole story in one place. Guarded by
@@ -95,6 +102,147 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     public async Task<string?> GetConnectionStringAsync(string resourceName, CancellationToken cancellationToken = default)
         => await App.GetConnectionStringAsync(resourceName, cancellationToken);
 
+    // --- Resource diagnostics helpers (issue #6343) ---
+
+    /// <summary>
+    /// Returns the most recent log lines for a resource — up to <paramref name="maxLines"/> (all of
+    /// them when negative), oldest first.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When <see cref="AspireFixtureOptions.RetainResourceLogs"/> is enabled and the resource was
+    /// selected for retention, the lines come from the in-memory buffer, so this is reliable even
+    /// for a resource that has already exited — and even after the application has been disposed.
+    /// </para>
+    /// <para>
+    /// Otherwise it falls back to a best-effort live read of Aspire's
+    /// <c>ResourceLoggerService.WatchAsync</c> backlog, which can return an empty list for a resource
+    /// that already exited (the "(no logs available)" race). Enable retention for reliable
+    /// post-mortem retrieval. Returns an empty list when the application is not initialized.
+    /// </para>
+    /// </remarks>
+    /// <param name="resourceName">The resource whose logs to retrieve.</param>
+    /// <param name="maxLines">The maximum number of most-recent lines to return. Default: 200.</param>
+    public async Task<IReadOnlyList<string>> GetResourceLogsAsync(string resourceName, int maxLines = 200)
+    {
+        if (_logBuffers is not null && _logBuffers.TryGetValue(resourceName, out var buffer))
+        {
+            return buffer.Snapshot(maxLines);
+        }
+
+        var app = _app;
+        if (app is null)
+        {
+            return [];
+        }
+
+        try
+        {
+            // Raw content (markErrors: false) so the returned lines match the retained-buffer path,
+            // which stores line.Content verbatim — the same public call must not reformat lines
+            // based on whether retention happens to be on.
+            return await CollectResourceLogLinesAsync(app, resourceName, max: maxLines, markErrors: false);
+        }
+        catch (ObjectDisposedException)
+        {
+            // The app was disposed concurrently (e.g. a run-abort raced this post-mortem read) —
+            // there is nothing left to collect. Keep the helper non-throwing.
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Returns a point-in-time snapshot of a resource's lifecycle state (name, state, exit code,
+    /// start/stop timestamps, health), or <c>null</c> when the resource is unknown or the application
+    /// has not been initialized (or has been disposed).
+    /// </summary>
+    /// <param name="resourceName">The resource to introspect.</param>
+    public ResourceSnapshot? GetResourceSnapshot(string resourceName)
+    {
+        var app = _app;
+        if (app is null)
+        {
+            return null;
+        }
+
+        ResourceNotificationService notificationService;
+        try
+        {
+            notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
+        }
+        catch (ObjectDisposedException)
+        {
+            return null;
+        }
+
+        if (!notificationService.TryGetCurrentState(resourceName, out var ev) || ev is null)
+        {
+            return null;
+        }
+
+        var snapshot = ev.Snapshot;
+        return new ResourceSnapshot(
+            resourceName,
+            snapshot.State?.Text,
+            snapshot.ExitCode,
+            snapshot.StartTimeStamp,
+            snapshot.StopTimeStamp,
+            snapshot.HealthStatus?.ToString());
+    }
+
+    /// <summary>
+    /// Produces a single human-readable diagnostics report for every waited-on resource: current
+    /// state, decoded exit code, health, dependency chain, and the last <paramref name="maxLinesPerResource"/>
+    /// log lines (from the retained buffer when available, otherwise a best-effort live read).
+    /// Best-effort and non-throwing — intended for on-demand or post-mortem use in a test or a
+    /// consumer's own failure handler.
+    /// </summary>
+    /// <param name="maxLinesPerResource">Maximum log lines to include per resource. Default: 200.</param>
+    public async Task<string> DumpResourceDiagnosticsAsync(int maxLinesPerResource = 200)
+    {
+        var app = _app;
+        if (app is null)
+        {
+            return "Aspire application not initialized.";
+        }
+
+        DistributedApplicationModel model;
+        ResourceNotificationService notificationService;
+        try
+        {
+            model = app.Services.GetRequiredService<DistributedApplicationModel>();
+            notificationService = app.Services.GetRequiredService<ResourceNotificationService>();
+        }
+        catch (ObjectDisposedException)
+        {
+            return "Aspire application has been disposed.";
+        }
+
+        var names = model.Resources.Where(ShouldWaitForResource).Select(r => r.Name).ToList();
+        if (names.Count == 0)
+        {
+            return "No waited-on resources to diagnose.";
+        }
+
+        // Pull each resource's logs in parallel — the fallback read has its own short timeout, so
+        // doing them sequentially would compound the delay.
+        var collected = await Task.WhenAll(names.Select(async name =>
+            (name, logs: await GetResourceLogsAsync(name, maxLinesPerResource))));
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"=== Aspire resource diagnostics ({typeof(TAppHost).Name}) ===");
+
+        foreach (var (name, logs) in collected)
+        {
+            notificationService.TryGetCurrentState(name, out var ev);
+            var diagnosis = DiagnoseResource(notificationService, name, ev, logs);
+            var awaiters = FindAwaiters(model.Resources, name);
+            AppendResourceDiagnosticBlock(sb, notificationService, name, ev, diagnosis, logs, awaiters);
+        }
+
+        return sb.ToString();
+    }
+
     /// <summary>
     /// Subscribes to logs from the named resource and routes them to the current test's output.
     /// Dispose the returned value to stop watching.
@@ -145,12 +293,22 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     }
 
     /// <summary>
-    /// Starts one background pump per selected resource, forwarding each line into the owning
-    /// test's captured output (see <see cref="AspireFixtureOptions.ForwardResourceLogs"/>).
+    /// Starts one background pump per selected resource when live forwarding
+    /// (<see cref="AspireFixtureOptions.ForwardResourceLogs"/>) and/or retained buffering
+    /// (<see cref="AspireFixtureOptions.RetainResourceLogs"/>) is enabled. A single pump feeds both:
+    /// it forwards each line into the owning test's captured output and/or appends it to the
+    /// resource's rolling buffer. No-op when neither feature is on.
     /// </summary>
-    private void StartForwardingResourceLogs(DistributedApplication app,
+    private void StartResourceLogPumps(DistributedApplication app,
         DistributedApplicationModel model, AspireFixtureOptions options)
     {
+        var forward = options.ForwardResourceLogs;
+        var retain = options.RetainResourceLogs;
+        if (!forward && !retain)
+        {
+            return;
+        }
+
         var names = SelectResourceLogNames(model.Resources, options);
         if (names.Count == 0)
         {
@@ -158,24 +316,55 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         }
 
         // The pumps run on background threads where TestContext.Current (an AsyncLocal) does not
-        // flow, so it would read null there. Resolve the sink once here on the init thread: the
-        // owning test's output, or stderr when init runs outside a test (session-shared fixture).
-        var owner = TestContext.Current;
+        // flow, so it would read null there. Resolve the forwarding sink once here on the init
+        // thread: the owning test's output, or stderr when init runs outside a test (session-shared
+        // fixture). Only needed when forwarding.
+        var owner = forward ? TestContext.Current : null;
 
-        LogProgress($"Forwarding resource logs: [{string.Join(", ", names)}]");
+        if (retain)
+        {
+            _logBuffers = new ConcurrentDictionary<string, BoundedLogBuffer>(StringComparer.Ordinal);
+        }
+
+        var capacity = options.ResourceLogBufferCapacity;
+
+        if (forward)
+        {
+            LogProgress($"Forwarding resource logs: [{string.Join(", ", names)}]");
+        }
+
+        if (retain)
+        {
+            LogProgress($"Retaining resource logs (up to {Math.Max(1, capacity)} line(s)/resource): [{string.Join(", ", names)}]");
+        }
 
         _logForwardCts = CancellationTokenSource.CreateLinkedTokenSource(RunCancellationToken);
         var token = _logForwardCts.Token;
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
 
-        // Bind the sink per resource once, so the per-line path is a single write with no branch.
-        // PumpResourceLogsAsync is async and yields at its first await, so calling it directly
-        // (no Task.Run) still runs the pumps concurrently without an extra thread-pool hop.
+        // Bind each resource's sink once, so the per-line path is a single write with no per-line
+        // branch. PumpResourceLogsAsync is async and yields at its first await, so calling it
+        // directly (no Task.Run) still runs the pumps concurrently without an extra thread-pool hop.
         _logForwardTask = Task.WhenAll(names.Select(name =>
         {
-            Action<string> write = owner is not null
-                ? line => owner.Output.WriteLine($"  [{name}] {line}")
-                : line => LogProgress($"  [{name}] {line}");
+            var buffer = retain ? _logBuffers!.GetOrAdd(name, _ => new BoundedLogBuffer(capacity)) : null;
+
+            Action<string>? forwardSink = null;
+            if (forward)
+            {
+                forwardSink = owner is not null
+                    ? line => owner.Output.WriteLine($"  [{name}] {line}")
+                    : line => LogProgress($"  [{name}] {line}");
+            }
+
+            Action<string> write = (forwardSink, buffer) switch
+            {
+                (not null, not null) => line => { buffer.Add(line); forwardSink(line); },
+                (not null, null) => forwardSink,
+                (null, not null) => buffer.Add,
+                _ => static _ => { }, // unreachable: forward || retain guaranteed above
+            };
+
             return PumpResourceLogsAsync(loggerService, name, write, token);
         }));
     }
@@ -382,6 +571,48 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// </summary>
     public virtual async Task InitializeAsync()
     {
+        try
+        {
+            await InitializeCoreAsync();
+        }
+        catch (Exception ex) when (ShouldAutoDumpStartupDiagnostics(ex))
+        {
+            // Self-document a failed boot to the progress log (stderr) when the caller opted into
+            // verbose resource logging. This is a separate channel from the diagnostics already
+            // embedded in the thrown exception (which reach the test result), and it also covers the
+            // failure paths that don't build their own diagnostics (e.g. a raw StartAsync/BuildAsync
+            // throw). A diagnostics dump must never mask the original failure, so we always rethrow.
+            await EmitStartupDiagnosticsDumpAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Whether a failed <see cref="InitializeAsync"/> should emit a resource-diagnostics dump to the
+    /// progress log. Gated on the same opt-in as live log forwarding
+    /// (<see cref="AspireFixtureOptions.ForwardResourceLogs"/>), needs a built application to
+    /// introspect, and is skipped on a run abort (an incomplete picture that would only mislead).
+    /// </summary>
+    private bool ShouldAutoDumpStartupDiagnostics(Exception ex)
+        => Options.ForwardResourceLogs
+        && _app is not null
+        && !(ex is OperationCanceledException && RunCancellationToken.IsCancellationRequested);
+
+    private async Task EmitStartupDiagnosticsDumpAsync()
+    {
+        try
+        {
+            var dump = await DumpResourceDiagnosticsAsync();
+            LogProgress($"Startup failed — resource diagnostics:{Environment.NewLine}{dump}");
+        }
+        catch (Exception dumpEx)
+        {
+            LogProgress($"(failed to dump resource diagnostics after startup failure: {dumpEx.Message})");
+        }
+    }
+
+    private async Task InitializeCoreAsync()
+    {
         var sw = Stopwatch.StartNew();
 
         // Start OTLP receiver before building the app so we can inject the endpoint
@@ -419,12 +650,9 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
         // Subscribe to resource logs BEFORE StartAsync: a resource that crashes during boot makes
         // StartAsync throw/hang, so a post-start subscribe would never run and miss the crash logs.
-        // WatchAsync replays the backlog, so the earliest lines are still delivered.
-        var options = Options;
-        if (options.ForwardResourceLogs)
-        {
-            StartForwardingResourceLogs(_app, model, options);
-        }
+        // WatchAsync replays the backlog, so the earliest lines are still delivered. Covers both
+        // live forwarding and the retained buffer (self-guards when neither is enabled).
+        StartResourceLogPumps(_app, model, Options);
 
         // Monitor resource state changes in the background, covering BOTH startup and the
         // resource-wait phase, so the captured timeline includes health-check-wait hangs.
@@ -653,7 +881,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             _logForwardCts.Cancel();
             try
             {
-                await _logForwardTask!; // set alongside the CTS in StartForwardingResourceLogs
+                await _logForwardTask!; // set alongside the CTS in StartResourceLogPumps
             }
             catch
             {
@@ -1143,14 +1371,18 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
     /// </summary>
     /// <param name="timeout">Time budget for collection. Defaults to 5 seconds.</param>
     /// <param name="errorsOnly">When <c>true</c>, keeps only stderr lines (raw content). When
-    /// <c>false</c> (default), keeps every line, prefixing stderr lines with <c>E&gt;</c>.</param>
+    /// <c>false</c> (default), keeps every line.</param>
     /// <param name="max">When &gt;= 0, keeps only the most recent <paramref name="max"/> lines.</param>
+    /// <param name="markErrors">When <c>true</c> (default) and not <paramref name="errorsOnly"/>,
+    /// stderr lines are prefixed with <c>E&gt;</c> (used for the diagnostics artifact). Pass
+    /// <c>false</c> to return raw <c>Content</c>, matching the retained-buffer path.</param>
     private static async Task<List<string>> CollectResourceLogLinesAsync(
         DistributedApplication app,
         string resourceName,
         TimeSpan? timeout = null,
         bool errorsOnly = false,
-        int max = -1)
+        int max = -1,
+        bool markErrors = true)
     {
         var loggerService = app.Services.GetRequiredService<ResourceLoggerService>();
 
@@ -1175,7 +1407,7 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
                         continue;
                     }
 
-                    var content = !errorsOnly && line.IsErrorMessage
+                    var content = !errorsOnly && markErrors && line.IsErrorMessage
                         ? $"E> {line.Content}"
                         : line.Content;
 
