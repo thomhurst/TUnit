@@ -606,9 +606,10 @@ internal sealed class OtlpReceiver : IAsyncDisposable
             // When the SUT logged an exception, the OTLP body is usually just the message
             // template — the actual stack trace lives in the exception.* attributes. Surface it
             // so a failing test shows *why* it failed, not only that an error was logged.
-            if (record.HasException)
+            var exceptionDetail = record.FormatException();
+            if (exceptionDetail is not null)
             {
-                testContext.Output.WriteLine($"{prefix}{record.FormatException()}");
+                testContext.Output.WriteLine($"{prefix}[{severity}] {exceptionDetail}");
             }
 
             Interlocked.Increment(ref _diagnostics.LogsRecordsRouted);

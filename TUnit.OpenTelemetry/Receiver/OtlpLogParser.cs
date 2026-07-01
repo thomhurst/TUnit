@@ -34,14 +34,6 @@ internal readonly record struct OtlpLogRecord(
     string ExceptionStackTrace = "")
 {
     /// <summary>
-    /// <c>true</c> when the record carries any OTel exception semantic-convention attribute.
-    /// </summary>
-    public bool HasException =>
-        !string.IsNullOrEmpty(ExceptionStackTrace)
-        || !string.IsNullOrEmpty(ExceptionType)
-        || !string.IsNullOrEmpty(ExceptionMessage);
-
-    /// <summary>
     /// Renders the exception attributes into a single human-readable block, or <c>null</c> when the
     /// record carries no exception. Prefers <see cref="ExceptionStackTrace"/> (the full
     /// <c>ToString()</c>); otherwise falls back to <c>type: message</c> from the discrete fields.
@@ -227,8 +219,7 @@ internal static class OtlpLogParser
                 // exception. Pull those three out so the exception can be surfaced alongside the body
                 // (the body alone is often just the log message, not the failure detail).
                 case 6 when wireType == WireType.LengthDelimited:
-                    var attribute = reader.ReadEmbeddedMessage();
-                    var (key, value) = ParseKeyValue(attribute);
+                    var (key, value) = ParseExceptionAttribute(reader.ReadEmbeddedMessage());
                     switch (key)
                     {
                         case "exception.type":
@@ -289,6 +280,34 @@ internal static class OtlpLogParser
         }
 
         return "";
+    }
+
+    // Like ParseKeyValue, but materialises the value string only for the exception.* keys the
+    // receiver renders. A log record can carry many attributes (scopes, custom fields); parsing
+    // every value — some large — just to discard it would waste allocations on the ingest hot
+    // path. Assumes key (field 1) precedes value (field 2), which holds for all known OTel encoders.
+    private static (string Key, string Value) ParseExceptionAttribute(ProtobufReader reader)
+    {
+        var key = "";
+
+        while (reader.TryReadTag(out var fieldNumber, out var wireType))
+        {
+            if (fieldNumber == 1 && wireType == WireType.LengthDelimited)
+            {
+                key = reader.ReadString();
+            }
+            else if (fieldNumber == 2 && wireType == WireType.LengthDelimited
+                && key is "exception.type" or "exception.message" or "exception.stacktrace")
+            {
+                return (key, ParseAnyValueString(reader.ReadEmbeddedMessage()));
+            }
+            else
+            {
+                reader.Skip(wireType);
+            }
+        }
+
+        return (key, "");
     }
 
     private static (string Key, string Value) ParseKeyValue(ProtobufReader reader)
