@@ -9,9 +9,9 @@ namespace TUnit.TestProject.Bugs._6339;
 /// When a test is subject to a timeout (an explicit <c>[Timeout]</c> or a configured
 /// <c>DefaultTestTimeout</c>), the engine ran the body with a linked <see cref="CancellationTokenSource"/>
 /// token stored on <c>TestContext.Execution.CancellationToken</c>. That source was disposed the moment the
-/// body returned, so an <c>[After(Test)]</c> hook that read the context token and did anything source-touching
-/// on it (e.g. <see cref="CancellationTokenSource.CreateLinkedTokenSource(CancellationToken)"/>, common in
-/// ASP.NET Core integration cleanup via EF Core / Respawn / HttpClient) threw
+/// body returned, so an <c>[After(Test)]</c> hook that read the context token and touched the underlying
+/// source (e.g. accessing <see cref="CancellationToken.WaitHandle"/> — what a synchronous wait inside
+/// ASP.NET Core integration cleanup via EF Core / Respawn / SemaphoreSlim ends up doing) threw
 /// <see cref="ObjectDisposedException"/> "The CancellationTokenSource has been disposed."
 ///
 /// The body completes fast (no actual timeout) so this is a plain passing test — the regression is the
@@ -23,10 +23,7 @@ public class TimeoutAfterHookTokenTests
     [Test]
     [Timeout(30_000)]
     [EngineTest(ExpectedResult.Pass)]
-    public async Task Body_Completes_Then_After_Hook_Uses_Context_Token()
-    {
-        await Task.CompletedTask;
-    }
+    public Task Body_Completes_Then_After_Hook_Uses_Context_Token() => Task.CompletedTask;
 
     [After(Test)]
     public void After_Hook_Can_Use_Context_Cancellation_Token(TestContext context)
