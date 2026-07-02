@@ -56,7 +56,7 @@
     "qs": "6.15.3",
     "dompurify": "3.4.11",
     "node-forge": "1.4.0",
-    "picomatch": "4.0.4",
+    "picomatch": "4.0.5",
     "svgo": "4.0.1",
     "yaml": "2.9.0"
   }
