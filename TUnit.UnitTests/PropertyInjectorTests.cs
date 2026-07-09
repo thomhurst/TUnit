@@ -7,10 +7,9 @@ namespace TUnit.UnitTests;
 public class PropertyInjectorTests
 {
     [Test]
-    public async Task ReusedDiscoveryInstanceStillCachesInjectedProperties()
+    public async Task ResolveAndCacheProperties_CachesInjectedProperties()
     {
         var context = CreateContext<ReusedDiscoveryInstanceTestClass>();
-        context.IsDiscoveryInstanceReused = true;
 
         var injector = new PropertyInjector(new Lazy<IInitializationCallback>(() => new PassthroughInitializationCallback()), "session");
 

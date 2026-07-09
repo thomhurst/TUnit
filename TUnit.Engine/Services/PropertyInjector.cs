@@ -48,8 +48,7 @@ internal sealed class PropertyInjector
         TestContext testContext,
         CancellationToken cancellationToken = default)
     {
-        // Even when the first data row reuses a discovery instance, this test still
-        // needs its own cached property values so shared fixtures get ref-counted.
+        // Resolve cached property values here so shared fixtures get ref-counted before execution.
         var plan = PropertyInjectionCache.GetOrCreatePlan(testClassType);
 
         if (!plan.HasProperties)
