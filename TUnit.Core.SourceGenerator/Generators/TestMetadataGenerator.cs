@@ -1636,11 +1636,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Determine if the data source is static or instance-based
         var isStatic = dataSourceMethod?.IsStatic ?? dataSourceProperty?.GetMethod?.IsStatic ?? true;
 
-        // Use InstanceMethodDataSourceAttribute for instance-based data sources
-        // This implements IAccessesInstanceData which tells the engine to create an instance early
-        var attrTypeName = isStatic
-            ? "global::TUnit.Core.MethodDataSourceAttribute"
-            : "global::TUnit.Core.InstanceMethodDataSourceAttribute";
+        // InstanceMethodDataSourceAttribute means "use the test class instance". If the
+        // attribute explicitly targets a separate provider type, create that provider in
+        // the generated factory instead of asking the engine for the test instance.
+        var usesTestClassInstance = !isStatic && CanUseTestClassInstance(typeSymbol, targetType);
+        var canGenerateFactory = isStatic || usesTestClassInstance || CanCreateProviderInstance(targetType);
+
+        if (!canGenerateFactory)
+        {
+            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+            writer.AppendLine($"{generatedCode},");
+            return;
+        }
+
+        var attrTypeName = usesTestClassInstance
+            ? "global::TUnit.Core.InstanceMethodDataSourceAttribute"
+            : "global::TUnit.Core.MethodDataSourceAttribute";
 
         if (attr.ConstructorArguments is
             [
@@ -1650,6 +1661,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // MethodDataSource(Type, string) constructor - only available on MethodDataSourceAttribute
             // For instance data sources, we still use the same constructor signature
             writer.AppendLine($"new {attrTypeName}(typeof({typeArg.GloballyQualified()}), \"{methodName}\")");
+        }
+        else if (attr.AttributeClass is { IsGenericType: true } && !isStatic && !usesTestClassInstance)
+        {
+            writer.AppendLine($"new {attrTypeName}(typeof({targetType.GloballyQualified()}), \"{methodName}\")");
         }
         else
         {
@@ -1687,7 +1702,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, hasArguments ? argumentsProperty.Value : (TypedConstant?)null);
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null);
         writer.AppendLine(",");
 
         writer.Unindent();
@@ -1700,7 +1715,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, TypedConstant? arguments)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
         var dataSourceProperty = dataSourceMember as IPropertySymbol;
@@ -1731,7 +1746,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             kind = "Value";
         }
 
-        var helper = isStatic
+        var helper = isStatic || !usesTestClassInstance
             ? $"global::TUnit.Core.Helpers.DataSourceFactories.From{kind}"
             : $"global::TUnit.Core.Helpers.DataSourceFactories.FromInstance{kind}";
 
@@ -1749,9 +1764,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             memberAccess = dataSourceProperty!.Name;
         }
 
-        var receiver = isStatic ? fullyQualifiedType : $"(({fullyQualifiedType})instance)";
-        var lambdaHeader = isStatic ? "static () =>" : "static instance =>";
-        var metadataArgument = isStatic ? "" : "dataGeneratorMetadata, ";
+        var receiver = isStatic
+            ? fullyQualifiedType
+            : usesTestClassInstance
+                ? $"(({fullyQualifiedType})instance)"
+                : $"new {fullyQualifiedType}()";
+        var lambdaHeader = usesTestClassInstance ? "static instance =>" : "static () =>";
+        var metadataArgument = usesTestClassInstance ? "dataGeneratorMetadata, " : "";
 
         if (hasArguments)
         {
@@ -1774,6 +1793,42 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
         return InterfaceHelper.IsAsyncEnumerable(type);
+    }
+
+    private static bool CanUseTestClassInstance(ITypeSymbol testClassType, ITypeSymbol targetType)
+    {
+        if (SymbolEqualityComparer.Default.Equals(testClassType, targetType))
+        {
+            return true;
+        }
+
+        for (var baseType = testClassType.BaseType; baseType is not null; baseType = baseType.BaseType)
+        {
+            if (SymbolEqualityComparer.Default.Equals(baseType, targetType))
+            {
+                return true;
+            }
+        }
+
+        return targetType.TypeKind == TypeKind.Interface
+               && testClassType.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, targetType));
+    }
+
+    private static bool CanCreateProviderInstance(ITypeSymbol targetType)
+    {
+        if (targetType.IsValueType)
+        {
+            return true;
+        }
+
+        if (targetType is not INamedTypeSymbol { TypeKind: TypeKind.Class, IsAbstract: false } namedType)
+        {
+            return false;
+        }
+
+        return namedType.InstanceConstructors.Any(ctor =>
+            ctor.Parameters.Length == 0
+            && ctor.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal or Accessibility.ProtectedOrInternal);
     }
 
     private static bool IsValueTask(ITypeSymbol type)
