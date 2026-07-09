@@ -234,8 +234,11 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         SeparatedSyntaxList<ArgumentSyntax> args,
         MemberAccessExpressionSyntax memberAccess)
     {
-        if (args.Count < 2)
-            return null;
+        if (args.Count == 1)
+            return ConvertBooleanAssertThat(node, args[0], null);
+
+        if (args.Count >= 2 && IsMessageArgument(args[1]) && IsBooleanExpression(args[0].Expression))
+            return ConvertBooleanAssertThat(node, args[0], GetMessageArgument(args[1]));
 
         var actualValue = args[0].Expression.ToString();
         var constraintArg = args[1].Expression;
@@ -271,6 +274,69 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             IntroducesAwait = true,
             TodoComment = todoComment
         };
+    }
+
+    private AssertionConversion ConvertBooleanAssertThat(InvocationExpressionSyntax node, ArgumentSyntax actualArgument, string? message)
+    {
+        var actualValue = actualArgument.Expression.ToString();
+        var assertion = message != null
+            ? $"await Assert.That({actualValue}).IsTrue().Because({message})"
+            : $"await Assert.That({actualValue}).IsTrue()";
+
+        return new AssertionConversion
+        {
+            Kind = AssertionConversionKind.True,
+            OriginalText = node.ToString(),
+            ReplacementCode = assertion,
+            IntroducesAwait = true
+        };
+    }
+
+    private bool IsBooleanExpression(ExpressionSyntax expression)
+    {
+        try
+        {
+            var type = SemanticModel.GetTypeInfo(expression).ConvertedType
+                ?? SemanticModel.GetTypeInfo(expression).Type;
+
+            if (type != null)
+            {
+                return type.SpecialType == SpecialType.System_Boolean;
+            }
+        }
+        catch
+        {
+            // Fall back to NUnit's Assert.That(bool) syntax when semantic info is unavailable.
+        }
+
+        return true;
+    }
+
+    private bool IsMessageArgument(ArgumentSyntax arg)
+    {
+        if (arg.NameColon?.Name.Identifier.Text is "message")
+            return true;
+
+        if (arg.Expression is LiteralExpressionSyntax literal &&
+            literal.IsKind(SyntaxKind.StringLiteralExpression))
+        {
+            return true;
+        }
+
+        if (arg.Expression is InterpolatedStringExpressionSyntax)
+            return true;
+
+        try
+        {
+            var type = SemanticModel.GetTypeInfo(arg.Expression).ConvertedType
+                ?? SemanticModel.GetTypeInfo(arg.Expression).Type;
+
+            return type?.SpecialType == SpecialType.System_String;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private (AssertionConversionKind, string?, string?) AnalyzeConstraint(ExpressionSyntax constraint)
@@ -1903,11 +1969,12 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         // [Range(1L, 100L)] -> [MatrixRange<long>(1L, 100L)]
         // [Range(1.0f, 5.0f)] -> [MatrixRange<float>(1.0f, 5.0f)]
 
-        if (attr.ArgumentList?.Arguments.Count < 2)
+        var argumentList = attr.ArgumentList;
+        if (argumentList is null || argumentList.Arguments.Count < 2)
             return null;
 
         // Determine the type from the first argument literal or the parameter type
-        var firstArg = attr.ArgumentList.Arguments[0].Expression.ToString();
+        var firstArg = argumentList.Arguments[0].Expression.ToString();
         var typeArg = InferRangeType(firstArg, parameter);
 
         return new ParameterAttributeConversion
@@ -1951,6 +2018,131 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     {
         // NUnit doesn't have common base types to remove like xUnit's IClassFixture
         return false;
+    }
+
+    protected override CompilationUnitSyntax AnalyzeSpecialInvocations(CompilationUnitSyntax root)
+    {
+        var currentRoot = AnalyzeNUnitTestContextInvocations(root);
+        return AnalyzeNUnitTestContextDirectoryProperties(currentRoot);
+    }
+
+    private CompilationUnitSyntax AnalyzeNUnitTestContextInvocations(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+        var testContextCalls = OriginalRoot.DescendantNodes()
+            .OfType<InvocationExpressionSyntax>()
+            .Select(call => (Call: call, ReplacementCode: GetNUnitTestContextInvocationReplacement(call)))
+            .Where(x => x.ReplacementCode != null);
+
+        foreach (var (originalCall, replacementCode) in testContextCalls)
+        {
+            currentRoot = AddInvocationReplacement(
+                currentRoot,
+                originalCall,
+                replacementCode!,
+                "NUnitTestContextInvocationAnalysis");
+        }
+
+        return currentRoot;
+    }
+
+    private string? GetNUnitTestContextInvocationReplacement(InvocationExpressionSyntax invocation)
+    {
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+            return null;
+
+        var methodName = memberAccess.Name.Identifier.Text;
+        var arguments = invocation.ArgumentList.ToString();
+
+        if (methodName == "WriteLine")
+        {
+            if (memberAccess.Expression is MemberAccessExpressionSyntax outAccess &&
+                outAccess.Name.Identifier.Text == "Out" &&
+                IsNUnitTestContextExpression(outAccess.Expression))
+            {
+                return $"Console.Out.WriteLine{arguments}";
+            }
+
+            if (IsNUnitTestContextExpression(memberAccess.Expression))
+            {
+                return $"Console.WriteLine{arguments}";
+            }
+        }
+
+        if (methodName == "AddTestAttachment" && IsNUnitTestContextExpression(memberAccess.Expression))
+        {
+            return BuildAttachArtifactCall(invocation.ArgumentList.Arguments);
+        }
+
+        return null;
+    }
+
+    private CompilationUnitSyntax AnalyzeNUnitTestContextDirectoryProperties(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+        var directoryProperties = OriginalRoot.DescendantNodes()
+            .OfType<MemberAccessExpressionSyntax>()
+            .Where(IsNUnitTestContextDirectoryProperty);
+
+        foreach (var originalExpression in directoryProperties)
+        {
+            currentRoot = AddExpressionReplacement(
+                currentRoot,
+                originalExpression,
+                "System.AppContext.BaseDirectory",
+                "NUnitTestContextDirectoryAnalysis");
+        }
+
+        return currentRoot;
+    }
+
+    private bool IsNUnitTestContextDirectoryProperty(MemberAccessExpressionSyntax memberAccess)
+    {
+        if (memberAccess.Name.Identifier.Text is not ("TestDirectory" or "WorkDirectory"))
+            return false;
+
+        return IsNUnitTestContextExpression(memberAccess.Expression);
+    }
+
+    private bool IsNUnitTestContextExpression(ExpressionSyntax expression)
+    {
+        try
+        {
+            if (IsNUnitTestContextType(SemanticModel.GetTypeInfo(expression).Type))
+                return true;
+
+            if (SemanticModel.GetSymbolInfo(expression).Symbol is INamedTypeSymbol namedType &&
+                IsNUnitTestContextType(namedType))
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // Fall back to syntax below.
+        }
+
+        return expression.ToString() is "TestContext" or "TestContext.CurrentContext";
+    }
+
+    private static bool IsNUnitTestContextType(ITypeSymbol? type)
+    {
+        return type?.ToDisplayString() == "NUnit.Framework.TestContext";
+    }
+
+    private static string? BuildAttachArtifactCall(SeparatedSyntaxList<ArgumentSyntax> args)
+    {
+        if (args.Count < 1)
+            return null;
+
+        if (args.Count < 2)
+        {
+            return $"TestContext.Current!.Output.AttachArtifact{SyntaxFactory.ArgumentList(args)}";
+        }
+
+        var filePath = args[0].Expression.ToString();
+        var description = args[1].Expression.ToString();
+        return $"TestContext.Current!.Output.AttachArtifact({filePath}, description: {description})";
     }
 
     protected override void AnalyzeUsings()

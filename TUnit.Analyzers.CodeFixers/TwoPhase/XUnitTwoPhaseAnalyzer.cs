@@ -1754,41 +1754,11 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
         foreach (var originalCall in testOutputHelperCalls)
         {
-            try
-            {
-                // Build the Console.WriteLine replacement
-                var arguments = originalCall.ArgumentList.ToString();
-                var replacementCode = $"Console.WriteLine{arguments}";
-
-                var replacement = new InvocationReplacement
-                {
-                    ReplacementCode = replacementCode,
-                    OriginalText = originalCall.ToString()
-                };
-
-                Plan.InvocationReplacements.Add(replacement);
-
-                // Find corresponding node in current tree
-                var nodeToAnnotate = currentRoot.DescendantNodes()
-                    .OfType<InvocationExpressionSyntax>()
-                    .FirstOrDefault(n => n.Span == originalCall.Span);
-
-                if (nodeToAnnotate != null)
-                {
-                    var annotatedNode = nodeToAnnotate.WithAdditionalAnnotations(replacement.Annotation);
-                    currentRoot = currentRoot.ReplaceNode(nodeToAnnotate, annotatedNode);
-                }
-            }
-            catch (Exception ex)
-            {
-                Plan.Failures.Add(new ConversionFailure
-                {
-                    Phase = "TestOutputHelperAnalysis",
-                    Description = ex.Message,
-                    OriginalCode = originalCall.ToString(),
-                    Exception = ex
-                });
-            }
+            currentRoot = AddInvocationReplacement(
+                currentRoot,
+                originalCall,
+                $"Console.WriteLine{originalCall.ArgumentList}",
+                "TestOutputHelperAnalysis");
         }
 
         return currentRoot;

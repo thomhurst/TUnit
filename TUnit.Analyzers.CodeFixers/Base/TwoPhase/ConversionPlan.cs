@@ -71,6 +71,11 @@ public class ConversionPlan
     public List<InvocationReplacement> InvocationReplacements { get; } = new();
 
     /// <summary>
+    /// Expressions to replace (e.g., TestContext.CurrentContext.TestDirectory → System.AppContext.BaseDirectory)
+    /// </summary>
+    public List<ExpressionReplacement> ExpressionReplacements { get; } = new();
+
+    /// <summary>
     /// TheoryData conversions (TheoryData&lt;T&gt; → IEnumerable&lt;T&gt;)
     /// </summary>
     public List<TheoryDataConversion> TheoryDataConversions { get; } = new();
@@ -111,6 +116,7 @@ public class ConversionPlan
         ConstructorParameterRemovals.Count > 0 ||
         RecordExceptionConversions.Count > 0 ||
         InvocationReplacements.Count > 0 ||
+        ExpressionReplacements.Count > 0 ||
         TheoryDataConversions.Count > 0 ||
         ParameterAttributes.Count > 0 ||
         UsingsToAdd.Count > 0 ||
@@ -472,6 +478,17 @@ public class InvocationReplacement : ConversionTarget
 {
     /// <summary>
     /// The new invocation code (e.g., "Console.WriteLine(args)")
+    /// </summary>
+    public required string ReplacementCode { get; init; }
+}
+
+/// <summary>
+/// Represents an expression to replace (e.g., TestContext.CurrentContext.TestDirectory → System.AppContext.BaseDirectory)
+/// </summary>
+public class ExpressionReplacement : ConversionTarget
+{
+    /// <summary>
+    /// The new expression code (e.g., "System.AppContext.BaseDirectory")
     /// </summary>
     public required string ReplacementCode { get; init; }
 }

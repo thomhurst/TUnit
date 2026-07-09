@@ -488,6 +488,82 @@ public abstract class MigrationAnalyzer
         return root;
     }
 
+    protected CompilationUnitSyntax AddInvocationReplacement(
+        CompilationUnitSyntax root,
+        InvocationExpressionSyntax originalCall,
+        string replacementCode,
+        string phase)
+    {
+        try
+        {
+            var replacement = new InvocationReplacement
+            {
+                ReplacementCode = replacementCode,
+                OriginalText = originalCall.ToString()
+            };
+
+            Plan.InvocationReplacements.Add(replacement);
+
+            var nodeToAnnotate = root.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>()
+                .FirstOrDefault(n => n.Span == originalCall.Span);
+
+            return nodeToAnnotate == null
+                ? root
+                : root.ReplaceNode(nodeToAnnotate, nodeToAnnotate.WithAdditionalAnnotations(replacement.Annotation));
+        }
+        catch (Exception ex)
+        {
+            Plan.Failures.Add(new ConversionFailure
+            {
+                Phase = phase,
+                Description = ex.Message,
+                OriginalCode = originalCall.ToString(),
+                Exception = ex
+            });
+
+            return root;
+        }
+    }
+
+    protected CompilationUnitSyntax AddExpressionReplacement(
+        CompilationUnitSyntax root,
+        ExpressionSyntax originalExpression,
+        string replacementCode,
+        string phase)
+    {
+        try
+        {
+            var replacement = new ExpressionReplacement
+            {
+                ReplacementCode = replacementCode,
+                OriginalText = originalExpression.ToString()
+            };
+
+            Plan.ExpressionReplacements.Add(replacement);
+
+            var nodeToAnnotate = root.DescendantNodes()
+                .OfType<ExpressionSyntax>()
+                .FirstOrDefault(n => n.Span == originalExpression.Span && n.Kind() == originalExpression.Kind());
+
+            return nodeToAnnotate == null
+                ? root
+                : root.ReplaceNode(nodeToAnnotate, nodeToAnnotate.WithAdditionalAnnotations(replacement.Annotation));
+        }
+        catch (Exception ex)
+        {
+            Plan.Failures.Add(new ConversionFailure
+            {
+                Phase = phase,
+                Description = ex.Message,
+                OriginalCode = originalExpression.ToString(),
+                Exception = ex
+            });
+
+            return root;
+        }
+    }
+
     /// <summary>
     /// Analyzes TheoryData fields/properties for conversion to IEnumerable.
     /// </summary>

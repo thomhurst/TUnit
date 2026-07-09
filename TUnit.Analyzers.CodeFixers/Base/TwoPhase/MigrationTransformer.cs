@@ -32,52 +32,90 @@ public class MigrationTransformer
         // 1. Record.Exception conversions (before assertions - may affect structure)
         currentRoot = TransformRecordExceptionCalls(currentRoot);
 
-        // 2. Invocation replacements (ITestOutputHelper → Console)
+        // 2. Expression replacements (TestContext directory properties, etc.)
+        currentRoot = TransformExpressionReplacements(currentRoot);
+
+        // 3. Invocation replacements (ITestOutputHelper → Console)
         currentRoot = TransformInvocationReplacements(currentRoot);
 
-        // 3. TheoryData conversions (TheoryData<T> → IEnumerable<T>)
+        // 4. TheoryData conversions (TheoryData<T> → IEnumerable<T>)
         currentRoot = TransformTheoryData(currentRoot);
 
-        // 4. Assertions (may introduce await)
+        // 5. Assertions (may introduce await)
         currentRoot = TransformAssertions(currentRoot);
 
-        // 4. Method signatures (add async/Task based on new awaits)
+        // 6. Method signatures (add async/Task based on new awaits)
         currentRoot = TransformMethodSignatures(currentRoot);
 
-        // 5. Add method attributes (e.g., [Before(Test)])
+        // 7. Add method attributes (e.g., [Before(Test)])
         currentRoot = AddMethodAttributes(currentRoot);
 
-        // 6. Attributes
+        // 8. Attributes
         currentRoot = TransformAttributes(currentRoot);
 
-        // 6b. Parameter attributes (e.g., [Range] → [MatrixRange])
+        // 9. Parameter attributes (e.g., [Range] → [MatrixRange])
         currentRoot = TransformParameterAttributes(currentRoot);
 
-        // 7. Remove attributes
+        // 10. Remove attributes
         currentRoot = RemoveAttributes(currentRoot);
 
-        // 8. Remove base types
+        // 11. Remove base types
         currentRoot = RemoveBaseTypes(currentRoot);
 
-        // 9. Add base types (e.g., IAsyncInitializer)
+        // 12. Add base types (e.g., IAsyncInitializer)
         currentRoot = AddBaseTypes(currentRoot);
 
-        // 10. Add class attributes (e.g., ClassDataSource)
+        // 13. Add class attributes (e.g., ClassDataSource)
         currentRoot = AddClassAttributes(currentRoot);
 
-        // 11. Remove members
+        // 14. Remove members
         currentRoot = RemoveMembers(currentRoot);
 
-        // 12. Remove constructor parameters
+        // 15. Remove constructor parameters
         currentRoot = RemoveConstructorParameters(currentRoot);
 
-        // 13. Update usings (last, pure syntax)
+        // 16. Update usings (last, pure syntax)
         currentRoot = TransformUsings(currentRoot);
 
-        // 14. Add TODO comments for failures
+        // 17. Add TODO comments for failures
         if (_plan.HasFailures)
         {
             currentRoot = AddFailureComments(currentRoot);
+        }
+
+        return currentRoot;
+    }
+
+    private CompilationUnitSyntax TransformExpressionReplacements(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+
+        foreach (var replacement in _plan.ExpressionReplacements)
+        {
+            try
+            {
+                var expression = currentRoot.DescendantNodes()
+                    .OfType<ExpressionSyntax>()
+                    .FirstOrDefault(i => i.HasAnnotation(replacement.Annotation));
+
+                if (expression == null) continue;
+
+                var newExpression = SyntaxFactory.ParseExpression(replacement.ReplacementCode);
+
+                currentRoot = currentRoot.ReplaceNode(expression, newExpression
+                    .WithLeadingTrivia(expression.GetLeadingTrivia())
+                    .WithTrailingTrivia(expression.GetTrailingTrivia()));
+            }
+            catch (Exception ex)
+            {
+                _plan.Failures.Add(new ConversionFailure
+                {
+                    Phase = "ExpressionReplacementTransformation",
+                    Description = ex.Message,
+                    OriginalCode = replacement.OriginalText,
+                    Exception = ex
+                });
+            }
         }
 
         return currentRoot;
@@ -400,7 +438,7 @@ public class MigrationTransformer
                 {
                     // Build the leading trivia, including TODO comment if present
                     var leadingTrivia = containingStatement.GetLeadingTrivia();
-                    if (!string.IsNullOrEmpty(assertion.TodoComment))
+                    if (assertion.TodoComment is { Length: > 0 } todoComment)
                     {
                         // Extract the indentation from existing trivia
                         var indentationTrivia = leadingTrivia
@@ -412,7 +450,7 @@ public class MigrationTransformer
                         {
                             todoTrivia.Add(indentationTrivia);
                         }
-                        todoTrivia.Add(SyntaxFactory.Comment(assertion.TodoComment));
+                        todoTrivia.Add(SyntaxFactory.Comment(todoComment));
                         todoTrivia.Add(SyntaxFactory.EndOfLine("\n"));
 
                         // Combine TODO comment with existing leading trivia
@@ -485,14 +523,15 @@ public class MigrationTransformer
                 }
 
                 // Wrap return type in Task<T> if needed (non-void, non-Task return type)
-                if (change.WrapReturnTypeInTask && !string.IsNullOrEmpty(change.OriginalReturnType))
+                if (change.WrapReturnTypeInTask &&
+                    change.OriginalReturnType is { Length: > 0 } originalReturnType)
                 {
                     // Build Task<OriginalReturnType>
                     var taskGenericType = SyntaxFactory.GenericName(
                         SyntaxFactory.Identifier("Task"),
                         SyntaxFactory.TypeArgumentList(
                             SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.ParseTypeName(change.OriginalReturnType))))
+                                SyntaxFactory.ParseTypeName(originalReturnType))))
                         .WithTrailingTrivia(SyntaxFactory.Space);
                     newMethod = newMethod.WithReturnType(taskGenericType);
                 }
@@ -635,10 +674,10 @@ public class MigrationTransformer
                             var additionalAttr = SyntaxFactory.Attribute(
                                 SyntaxFactory.IdentifierName(additional.Name));
 
-                            if (!string.IsNullOrEmpty(additional.Arguments))
+                            if (additional.Arguments is { Length: > 0 } additionalArguments)
                             {
                                 additionalAttr = additionalAttr.WithArgumentList(
-                                    SyntaxFactory.ParseAttributeArgumentList(additional.Arguments));
+                                    SyntaxFactory.ParseAttributeArgumentList(additionalArguments));
                             }
 
                             // Use only indentation for additional attributes (no blank lines)
@@ -1091,10 +1130,10 @@ public class MigrationTransformer
                     .WithAttributeLists(SyntaxFactory.List(newAttributeLists));
 
                 // Change return type if specified
-                if (!string.IsNullOrEmpty(addition.NewReturnType))
+                if (addition.NewReturnType is { Length: > 0 } newReturnType)
                 {
                     newMethod = newMethod.WithReturnType(
-                        SyntaxFactory.ParseTypeName(addition.NewReturnType)
+                        SyntaxFactory.ParseTypeName(newReturnType)
                             .WithTrailingTrivia(SyntaxFactory.Space));
                 }
 

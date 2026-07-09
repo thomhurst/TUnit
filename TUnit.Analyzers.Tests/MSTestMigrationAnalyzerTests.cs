@@ -352,6 +352,48 @@ public class MSTestMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task MSTest_TestContext_Output_And_Directory_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                {|#0:public class MyClass|}
+                {
+                    public TestContext TestContext { get; set; }
+
+                    [TestMethod]
+                    public void MyMethod()
+                    {
+                        var testDirectory = TestContext.TestDir;
+                        var deploymentDirectory = TestContext.DeploymentDirectory;
+                        TestContext.WriteLine("standard output");
+                        TestContext.AddResultFile("artifact.txt");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    public TestContext TestContext { get; set; }
+
+                    [Test]
+                    public void MyMethod()
+                    {
+                        var testDirectory = System.AppContext.BaseDirectory;
+                        var deploymentDirectory = System.AppContext.BaseDirectory;
+                        Console.WriteLine("standard output");
+                        TUnit.Core.TestContext.Current!.Output.AttachArtifact("artifact.txt");
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
     public async Task MSTest_Nested_Class_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(
