@@ -71,7 +71,7 @@ public class ConversionPlan
     public List<InvocationReplacement> InvocationReplacements { get; } = new();
 
     /// <summary>
-    /// Expressions to replace (e.g., TestContext.CurrentContext.TestDirectory → System.AppContext.BaseDirectory)
+    /// Expressions to replace (e.g., TestContext.CurrentContext.TestDirectory → TestContext.TestDirectory)
     /// </summary>
     public List<ExpressionReplacement> ExpressionReplacements { get; } = new();
 
@@ -483,12 +483,12 @@ public class InvocationReplacement : ConversionTarget
 }
 
 /// <summary>
-/// Represents an expression to replace (e.g., TestContext.CurrentContext.TestDirectory → System.AppContext.BaseDirectory)
+/// Represents an expression to replace (e.g., TestContext.CurrentContext.TestDirectory → TestContext.TestDirectory)
 /// </summary>
 public class ExpressionReplacement : ConversionTarget
 {
     /// <summary>
-    /// The new expression code (e.g., "System.AppContext.BaseDirectory")
+    /// The new expression code (e.g., "TestContext.TestDirectory")
     /// </summary>
     public required string ReplacementCode { get; init; }
 }

@@ -382,8 +382,8 @@ public class MSTestMigrationAnalyzerTests
                     [Test]
                     public void MyMethod()
                     {
-                        var testDirectory = System.AppContext.BaseDirectory;
-                        var deploymentDirectory = System.AppContext.BaseDirectory;
+                        var testDirectory = TUnit.Core.TestContext.TestDirectory;
+                        var deploymentDirectory = TUnit.Core.TestContext.TestDirectory;
                         Console.WriteLine("standard output");
                         TUnit.Core.TestContext.Current!.Output.AttachArtifact("artifact.txt");
                     }

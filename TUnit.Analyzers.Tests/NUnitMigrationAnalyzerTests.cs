@@ -280,8 +280,8 @@ public class NUnitMigrationAnalyzerTests
                     [Test]
                     public void MyMethod()
                     {
-                        var testDirectory = System.AppContext.BaseDirectory;
-                        var workDirectory = System.AppContext.BaseDirectory;
+                        var testDirectory = TestContext.TestDirectory;
+                        var workDirectory = TestContext.WorkingDirectory;
                         Console.WriteLine("standard output");
                         Console.Out.WriteLine("out writer");
                         TestContext.Current!.Output.AttachArtifact("artifact.txt");

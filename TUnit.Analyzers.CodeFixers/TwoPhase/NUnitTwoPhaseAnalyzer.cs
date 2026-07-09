@@ -2089,11 +2089,18 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
             currentRoot = AddExpressionReplacement(
                 currentRoot,
                 originalExpression,
-                "System.AppContext.BaseDirectory",
+                GetNUnitTestContextDirectoryReplacement(originalExpression),
                 "NUnitTestContextDirectoryAnalysis");
         }
 
         return currentRoot;
+    }
+
+    private static string GetNUnitTestContextDirectoryReplacement(MemberAccessExpressionSyntax memberAccess)
+    {
+        return memberAccess.Name.Identifier.Text == "WorkDirectory"
+            ? "TestContext.WorkingDirectory"
+            : "TestContext.TestDirectory";
     }
 
     private bool IsNUnitTestContextDirectoryProperty(MemberAccessExpressionSyntax memberAccess)

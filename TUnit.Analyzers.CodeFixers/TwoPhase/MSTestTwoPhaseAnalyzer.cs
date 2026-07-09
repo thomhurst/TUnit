@@ -932,7 +932,7 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
             currentRoot = AddExpressionReplacement(
                 currentRoot,
                 originalExpression,
-                "System.AppContext.BaseDirectory",
+                "TUnit.Core.TestContext.TestDirectory",
                 "MSTestTestContextDirectoryAnalysis");
         }
 
