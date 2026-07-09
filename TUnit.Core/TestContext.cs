@@ -342,12 +342,6 @@ public partial class TestContext : Context,
     internal bool RunOnTestDiscovery { get; set; }
 
     /// <summary>
-    /// Indicates whether this test is reusing the discovery-time instance instead of creating a new instance.
-    /// When true, property resolution and initialization should be skipped since the instance is already prepared.
-    /// </summary>
-    internal bool IsDiscoveryInstanceReused { get; set; }
-
-    /// <summary>
     /// Gets a synchronization object that can be used for thread-safe operations within this test context.
     /// </summary>
     public object Lock { get; } = new();
