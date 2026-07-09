@@ -580,7 +580,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             testClassInstance = null;
         }
 
-        if (testClassInstance != null)
+        if (testClassInstance != null && targetType.IsInstanceOfType(testClassInstance))
         {
             return testClassInstance;
         }

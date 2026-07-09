@@ -218,6 +218,11 @@ internal static class ReflectionAttributeExtractor
         var targetType = methodDataSource.ClassProvidingDataSource ?? testClass;
         var memberName = methodDataSource.MethodNameProvidingDataSource;
 
+        if (!targetType.IsAssignableFrom(testClass))
+        {
+            return false;
+        }
+
         // GetMember returns all matching members (it never throws AmbiguousMatchException for
         // overloads, unlike GetMethod). Conservatively treat the data source as instance-targeting
         // if ANY matching member is an instance member, so the engine pre-creates a properly
