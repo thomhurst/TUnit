@@ -24,7 +24,7 @@
       "rollForward": true
     },
     "gitversion.tool": {
-      "version": "6.8.1",
+      "version": "6.8.2",
       "commands": [
         "dotnet-gitversion"
       ],
