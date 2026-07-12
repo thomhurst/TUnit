@@ -7,7 +7,6 @@
     <TargetFramework>net48</TargetFramework>
     <LangVersion>preview</LangVersion>
     <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
-    <NoWarn>$(NoWarn);CS0592;CS0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

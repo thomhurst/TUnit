@@ -8,14 +8,13 @@
 <!--#if (IsNetFramework) -->
     <LangVersion>preview</LangVersion>
     <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
-    <NoWarn>$(NoWarn);CS0592;CS0436</NoWarn>
 <!--#endif -->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.5*" />
 <!--#if (IsNetFramework) -->
-    <PackageReference Include="Polyfill" Version="10.8.*" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="10.11.2" PrivateAssets="all" />
 <!--#endif -->
   </ItemGroup>
 

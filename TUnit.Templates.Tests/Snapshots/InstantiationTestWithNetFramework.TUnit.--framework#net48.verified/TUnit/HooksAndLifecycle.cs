@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-[assembly: ExcludeFromCodeCoverage]
+[assembly: TUnit.Polyfills.ExcludeFromCodeCoverage]
 
 namespace TUnit;
 

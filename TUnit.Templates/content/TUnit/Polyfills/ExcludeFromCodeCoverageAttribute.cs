@@ -1,4 +1,4 @@
-namespace System.Diagnostics.CodeAnalysis;
+namespace TestProject.Polyfills;
 
 [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event, Inherited = false, AllowMultiple = false)]
 internal sealed class ExcludeFromCodeCoverageAttribute : Attribute

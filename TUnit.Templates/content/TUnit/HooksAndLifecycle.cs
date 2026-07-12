@@ -1,6 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
+#if (IsNetFramework)
+[assembly: TestProject.Polyfills.ExcludeFromCodeCoverage]
+#else
 [assembly: ExcludeFromCodeCoverage]
+#endif
 
 namespace TestProject;
 
