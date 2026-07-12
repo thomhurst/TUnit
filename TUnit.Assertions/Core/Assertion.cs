@@ -114,6 +114,11 @@ public abstract class Assertion<TValue> : IAssertion
     /// </summary>
     public virtual async Task<TValue?> AssertAsync()
     {
+        if (!await ExecutePendingPreWorkAsync())
+        {
+            return default;
+        }
+
         // If part of an And/Or chain, delegate to the wrapper
         if (_wrappedExecution != null)
         {
@@ -129,12 +134,9 @@ public abstract class Assertion<TValue> : IAssertion
     /// </summary>
     internal async Task<TValue?> ExecuteCoreAsync()
     {
-        // Execute any pending cross-type assertions first (e.g., string assertions before WhenParsedInto<int>)
-        if (Context.PendingPreWork != null)
+        if (!await ExecutePendingPreWorkAsync())
         {
-            var preWork = Context.PendingPreWork;
-            Context.PendingPreWork = null; // Clear BEFORE execution to prevent re-entry
-            await preWork();
+            return default;
         }
 
         // If this is an And/OrAssertion (composite), delegate to AssertAsync which has custom logic
@@ -153,6 +155,23 @@ public abstract class Assertion<TValue> : IAssertion
         }
 
         return contextResult.Value;
+    }
+
+    private async Task<bool> ExecutePendingPreWorkAsync()
+    {
+        if (Context.PendingPreWork is not { } preWork)
+        {
+            return true;
+        }
+
+        Context.PendingPreWork = null; // Clear before execution to prevent re-entry.
+        var currentScope = AssertionScope.GetCurrentAssertionScope();
+        var exceptionCountBefore = currentScope?.ExceptionCount ?? 0;
+        await preWork();
+
+        return !Context.SkipAssertionOnPreWorkFailure
+               || currentScope is null
+               || currentScope.ExceptionCount <= exceptionCountBefore;
     }
 
     // Create EvaluationMetadata in a separate scope to avoid creating additional

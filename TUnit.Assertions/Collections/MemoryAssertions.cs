@@ -1,6 +1,7 @@
 #if NET5_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Abstractions;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
@@ -235,6 +236,7 @@ public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryAssertionBase
 public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
+    private TItem? _singleItem;
 
     public MemoryHasSingleItemAssertion(
         AssertionContext<TMemory> context,
@@ -259,10 +261,24 @@ public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<
         }
 
         var adapter = _adapterFactory(metadata.Value);
-        return Task.FromResult(CollectionChecks.CheckHasSingleItem(adapter));
+        return Task.FromResult(CollectionChecks.CheckHasSingleItem(adapter, out _singleItem));
     }
 
     protected override string GetExpectation() => "to have a single item";
+
+    /// <summary>
+    /// Drills into the single item, allowing assertions to be chained directly against it.
+    /// </summary>
+    public SingleItemSource<TItem> Item
+    {
+        get
+        {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TMemory>>();
+            Context.ExpressionBuilder.Append(".Item");
+            Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
+            return SingleItemSource<TItem>.Create(Context, _ => _singleItem);
+        }
+    }
 }
 
 /// <summary>
