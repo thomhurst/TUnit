@@ -271,6 +271,11 @@ public partial class TestContext : Context,
     }
 
     /// <summary>
+    /// Gets the directory containing the test assembly, or <c>null</c> if it cannot be determined.
+    /// </summary>
+    public static string? TestDirectory => OutputDirectory;
+
+    /// <summary>
     /// Gets or sets the current working directory for the test process.
     /// </summary>
     public static string WorkingDirectory

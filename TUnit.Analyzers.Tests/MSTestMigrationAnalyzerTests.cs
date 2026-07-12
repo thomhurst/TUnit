@@ -352,6 +352,51 @@ public class MSTestMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task MSTest_TestContext_Output_And_Directory_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+                public class MyClass
+                {
+                    public TestContext TestContext { get; set; }
+
+                    {|#0:[TestMethod]|}
+                    public void MyMethod()
+                    {
+                        var testDirectory = TestContext.TestDir;
+                        var deploymentDirectory = TestContext.DeploymentDirectory;
+                        TestContext.WriteLine("standard output");
+                        TestContext.WriteLine($"Directory: {TestContext.TestDir}");
+                        TestContext.AddResultFile("artifact.txt");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    public TestContext TestContext { get; set; }
+
+                    [Test]
+                    public void MyMethod()
+                    {
+                        var testDirectory = TUnit.Core.TestContext.TestDirectory;
+                        // TODO: TUnit migration - MSTest DeploymentDirectory can differ from TUnit TestDirectory. Verify the migrated path.
+                        var deploymentDirectory = TUnit.Core.TestContext.TestDirectory;
+                        Console.WriteLine("standard output");
+                        Console.WriteLine($"Directory: {TUnit.Core.TestContext.TestDirectory}");
+                        TUnit.Core.TestContext.Current!.Output.AttachArtifact("artifact.txt");
+                    }
+                }
+                """,
+            ConfigureMSTestTest
+        );
+    }
+
+    [Test]
     public async Task MSTest_Nested_Class_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(

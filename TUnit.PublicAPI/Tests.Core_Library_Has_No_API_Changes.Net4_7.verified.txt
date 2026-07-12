@@ -1354,6 +1354,7 @@ namespace
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
+        public static string? TestDirectory { get; }
         public static string WorkingDirectory { get; set; }
         public override string GetErrorOutput() { }
         public override string GetStandardOutput() { }

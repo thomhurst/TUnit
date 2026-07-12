@@ -878,6 +878,111 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
         return false;
     }
 
+    protected override CompilationUnitSyntax AnalyzeSpecialInvocations(CompilationUnitSyntax root)
+    {
+        var currentRoot = AnalyzeMSTestTestContextInvocations(root);
+        return AnalyzeMSTestTestContextDirectoryProperties(currentRoot);
+    }
+
+    private CompilationUnitSyntax AnalyzeMSTestTestContextInvocations(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+        var testContextCalls = OriginalRoot.DescendantNodes()
+            .OfType<InvocationExpressionSyntax>()
+            .Select(call => (Call: call, ReplacementCode: GetMSTestTestContextInvocationReplacement(call)))
+            .Where(x => x.ReplacementCode != null);
+
+        foreach (var (originalCall, replacementCode) in testContextCalls)
+        {
+            currentRoot = AddInvocationReplacement(
+                currentRoot,
+                originalCall,
+                replacementCode!,
+                "MSTestTestContextInvocationAnalysis");
+        }
+
+        return currentRoot;
+    }
+
+    private string? GetMSTestTestContextInvocationReplacement(InvocationExpressionSyntax invocation)
+    {
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess ||
+            !IsMSTestTestContextExpression(memberAccess.Expression))
+        {
+            return null;
+        }
+
+        return memberAccess.Name.Identifier.Text switch
+        {
+            "WriteLine" => $"Console.WriteLine{invocation.ArgumentList}",
+            "AddResultFile" => BuildAttachArtifactCall(invocation.ArgumentList.Arguments),
+            _ => null
+        };
+    }
+
+    private CompilationUnitSyntax AnalyzeMSTestTestContextDirectoryProperties(CompilationUnitSyntax root)
+    {
+        var currentRoot = root;
+        var directoryProperties = OriginalRoot.DescendantNodes()
+            .OfType<MemberAccessExpressionSyntax>()
+            .Where(IsMSTestTestContextDirectoryProperty);
+
+        foreach (var originalExpression in directoryProperties)
+        {
+            currentRoot = AddExpressionReplacement(
+                currentRoot,
+                originalExpression,
+                "TUnit.Core.TestContext.TestDirectory",
+                "MSTestTestContextDirectoryAnalysis",
+                originalExpression.Name.Identifier.Text == "DeploymentDirectory"
+                    ? "// TODO: TUnit migration - MSTest DeploymentDirectory can differ from TUnit TestDirectory. Verify the migrated path."
+                    : null);
+        }
+
+        return currentRoot;
+    }
+
+    private bool IsMSTestTestContextDirectoryProperty(MemberAccessExpressionSyntax memberAccess)
+    {
+        if (memberAccess.Name.Identifier.Text is not ("TestDir" or "DeploymentDirectory"))
+        {
+            return false;
+        }
+
+        return IsMSTestTestContextExpression(memberAccess.Expression);
+    }
+
+    private bool IsMSTestTestContextExpression(ExpressionSyntax expression)
+    {
+        try
+        {
+            var type = SemanticModel.GetTypeInfo(expression).Type;
+            if (IsMSTestTestContextType(type))
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // Fall back to syntax below.
+        }
+
+        return expression.ToString() == "TestContext";
+    }
+
+    private static bool IsMSTestTestContextType(ITypeSymbol? type)
+    {
+        return type?.ToDisplayString() == "Microsoft.VisualStudio.TestTools.UnitTesting.TestContext";
+    }
+
+    private static string? BuildAttachArtifactCall(SeparatedSyntaxList<ArgumentSyntax> args)
+    {
+        if (args.Count < 1)
+            return null;
+
+        return $"TUnit.Core.TestContext.Current!.Output.AttachArtifact{SyntaxFactory.ArgumentList(args)}";
+    }
+
     protected override void AnalyzeUsings()
     {
         Plan.UsingPrefixesToRemove.Add("Microsoft.VisualStudio.TestTools");

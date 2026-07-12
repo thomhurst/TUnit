@@ -215,6 +215,91 @@ public class NUnitMigrationAnalyzerTests
     }
 
     [Test]
+    public async Task NUnit_Assert_That_Boolean_Overload_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyMethod()
+                    {
+                        var condition = true;
+                        System.Func<bool> deferredCondition = () => true;
+                        Assert.That(condition);
+                        Assert.That(condition, "Condition should be true");
+                        Assert.That(deferredCondition);
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+                using System.Threading.Tasks;
+
+                public class MyClass
+                {
+                    [Test]
+                    public async Task MyMethod()
+                    {
+                        var condition = true;
+                        System.Func<bool> deferredCondition = () => true;
+                        await Assert.That(condition).IsTrue();
+                        await Assert.That(condition).IsTrue().Because("Condition should be true");
+                        await Assert.That(deferredCondition).IsTrue();
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
+    public async Task NUnit_TestContext_Shortcuts_Converted()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+                using NUnit.Framework;
+
+                {|#0:public class MyClass|}
+                {
+                    [Test]
+                    public void MyMethod()
+                    {
+                        var testDirectory = TestContext.CurrentContext.TestDirectory;
+                        var workDirectory = TestContext.CurrentContext.WorkDirectory;
+                        TestContext.WriteLine("standard output");
+                        TestContext.WriteLine($"Directory: {TestContext.CurrentContext.TestDirectory}");
+                        TestContext.Out.WriteLine("out writer");
+                        TestContext.AddTestAttachment("artifact.txt");
+                        TestContext.CurrentContext.AddTestAttachment("described.txt", "description");
+                    }
+                }
+                """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
+            """
+
+                public class MyClass
+                {
+                    [Test]
+                    public void MyMethod()
+                    {
+                        var testDirectory = TestContext.TestDirectory;
+                        var workDirectory = TestContext.WorkingDirectory;
+                        Console.WriteLine("standard output");
+                        Console.WriteLine($"Directory: {TestContext.TestDirectory}");
+                        Console.Out.WriteLine("out writer");
+                        TestContext.Current!.Output.AttachArtifact("artifact.txt");
+                        TestContext.Current!.Output.AttachArtifact("described.txt", description: "description");
+                    }
+                }
+                """,
+            ConfigureNUnitTest
+        );
+    }
+
+    [Test]
     public async Task NUnit_Classic_Assertions_Converted()
     {
         await CodeFixer.VerifyCodeFixAsync(
