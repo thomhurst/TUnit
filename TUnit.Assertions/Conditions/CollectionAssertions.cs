@@ -508,6 +508,7 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
     {
         get
         {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TCollection>>();
             Context.ExpressionBuilder.Append(".Item");
             Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
             return new SingleItemSource<TItem>(Context.Map<TItem>(_ => _singleItem));
@@ -580,6 +581,7 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
     {
         get
         {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TCollection>>();
             Context.ExpressionBuilder.Append(".Item");
             Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
             return new SingleItemSource<TItem>(Context.Map<TItem>(_ => _singleItem));

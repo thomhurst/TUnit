@@ -134,7 +134,16 @@ public abstract class Assertion<TValue> : IAssertion
         {
             var preWork = Context.PendingPreWork;
             Context.PendingPreWork = null; // Clear BEFORE execution to prevent re-entry
+            var currentScope = AssertionScope.GetCurrentAssertionScope();
+            var exceptionCountBefore = currentScope?.ExceptionCount ?? 0;
             await preWork();
+
+            // Cross-type drill-ins must not evaluate when their parent assertion failed.
+            // Outside Assert.Multiple the failure throws; inside it the scope count is our signal.
+            if (currentScope?.ExceptionCount > exceptionCountBefore)
+            {
+                return default;
+            }
         }
 
         // If this is an And/OrAssertion (composite), delegate to AssertAsync which has custom logic

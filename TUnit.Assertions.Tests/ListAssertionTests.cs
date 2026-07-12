@@ -253,6 +253,36 @@ public class ListAssertionTests
     }
 
     [Test]
+    public async Task Test_List_HasSingleItem_Item_Rejects_Preceding_Or_Chain()
+    {
+        var action = async () => await Assert.That(Array.Empty<int>())
+            .IsEmpty().Or.HasSingleItem().Item.IsEqualTo(0);
+
+        await Assert.That(action).Throws<MixedAndOrAssertionsException>();
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_Item_Is_Not_Evaluated_After_Failure_In_Assert_Multiple()
+    {
+        var itemAssertionEvaluated = false;
+
+        var action = async () =>
+        {
+            using (Assert.Multiple())
+            {
+                await Assert.That(Array.Empty<int>()).HasSingleItem().Item.Satisfies(_ =>
+                {
+                    itemAssertionEvaluated = true;
+                    return true;
+                });
+            }
+        };
+
+        await Assert.That(action).ThrowsException();
+        await Assert.That(itemAssertionEvaluated).IsFalse();
+    }
+
+    [Test]
     public async Task Test_List_HasSingleItem_WithPredicate()
     {
         IList<int> list = new List<int> { 1, 2, 3, 4, 5 };

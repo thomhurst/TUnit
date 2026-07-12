@@ -273,6 +273,7 @@ public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<
     {
         get
         {
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TMemory>>();
             Context.ExpressionBuilder.Append(".Item");
             Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
             return new SingleItemSource<TItem>(Context.Map<TItem>(_ => _singleItem));
