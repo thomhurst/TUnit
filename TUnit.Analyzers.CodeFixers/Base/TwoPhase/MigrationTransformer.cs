@@ -242,8 +242,18 @@ public class MigrationTransformer
 
                 if (invocation == null) continue;
 
-                // Parse the replacement code
                 var newInvocation = SyntaxFactory.ParseExpression(replacement.ReplacementCode);
+                if (newInvocation is InvocationExpressionSyntax replacementInvocation &&
+                    replacementInvocation.ArgumentList.Arguments.Count == invocation.ArgumentList.Arguments.Count)
+                {
+                    var currentArguments = invocation.ArgumentList.Arguments;
+                    var refreshedArguments = replacementInvocation.ArgumentList.Arguments
+                        .Select((argument, index) => argument.WithExpression(currentArguments[index].Expression));
+
+                    newInvocation = replacementInvocation.WithArgumentList(
+                        replacementInvocation.ArgumentList.WithArguments(
+                            SyntaxFactory.SeparatedList(refreshedArguments)));
+                }
 
                 currentRoot = currentRoot.ReplaceNode(invocation, newInvocation
                     .WithLeadingTrivia(invocation.GetLeadingTrivia())

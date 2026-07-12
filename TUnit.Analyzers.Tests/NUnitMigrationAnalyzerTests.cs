@@ -270,6 +270,7 @@ public class NUnitMigrationAnalyzerTests
                         var testDirectory = TestContext.CurrentContext.TestDirectory;
                         var workDirectory = TestContext.CurrentContext.WorkDirectory;
                         TestContext.WriteLine("standard output");
+                        TestContext.WriteLine($"Directory: {TestContext.CurrentContext.TestDirectory}");
                         TestContext.Out.WriteLine("out writer");
                         TestContext.AddTestAttachment("artifact.txt");
                         TestContext.CurrentContext.AddTestAttachment("described.txt", "description");
@@ -287,6 +288,7 @@ public class NUnitMigrationAnalyzerTests
                         var testDirectory = TestContext.TestDirectory;
                         var workDirectory = TestContext.WorkingDirectory;
                         Console.WriteLine("standard output");
+                        Console.WriteLine($"Directory: {TestContext.TestDirectory}");
                         Console.Out.WriteLine("out writer");
                         TestContext.Current!.Output.AttachArtifact("artifact.txt");
                         TestContext.Current!.Output.AttachArtifact("described.txt", description: "description");

@@ -368,6 +368,7 @@ public class MSTestMigrationAnalyzerTests
                         var testDirectory = TestContext.TestDir;
                         var deploymentDirectory = TestContext.DeploymentDirectory;
                         TestContext.WriteLine("standard output");
+                        TestContext.WriteLine($"Directory: {TestContext.TestDir}");
                         TestContext.AddResultFile("artifact.txt");
                     }
                 }
@@ -386,6 +387,7 @@ public class MSTestMigrationAnalyzerTests
                         // TODO: TUnit migration - MSTest DeploymentDirectory can differ from TUnit TestDirectory. Verify the migrated path.
                         var deploymentDirectory = TUnit.Core.TestContext.TestDirectory;
                         Console.WriteLine("standard output");
+                        Console.WriteLine($"Directory: {TUnit.Core.TestContext.TestDirectory}");
                         TUnit.Core.TestContext.Current!.Output.AttachArtifact("artifact.txt");
                     }
                 }
