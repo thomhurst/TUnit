@@ -56,6 +56,14 @@ public class MemoryAssertionTests
     }
 
     [Test]
+    public async Task Test_Memory_HasSingleItem_Item_Allows_Chaining()
+    {
+        Memory<int> memory = new[] { 42 };
+
+        await Assert.That(memory).HasSingleItem().Item.IsEqualTo(42);
+    }
+
+    [Test]
     public async Task Test_Memory_All()
     {
         Memory<int> memory = new[] { 2, 4, 6, 8 };

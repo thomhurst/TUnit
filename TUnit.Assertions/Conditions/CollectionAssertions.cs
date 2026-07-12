@@ -502,6 +502,19 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
     protected override string GetExpectation() => "to have exactly one item";
 
     /// <summary>
+    /// Drills into the single item, allowing assertions to be chained directly against it.
+    /// </summary>
+    public SingleItemSource<TItem> Item
+    {
+        get
+        {
+            Context.ExpressionBuilder.Append(".Item");
+            Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
+            return new SingleItemSource<TItem>(Context.Map<TItem>(_ => _singleItem));
+        }
+    }
+
+    /// <summary>
     /// Enables await syntax that returns the single item.
     /// This allows both chaining (.And) and item capture (await).
     /// </summary>
@@ -559,6 +572,19 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
     }
 
     protected override string GetExpectation() => $"to have exactly one item matching {_predicateDescription}";
+
+    /// <summary>
+    /// Drills into the single matching item, allowing assertions to be chained directly against it.
+    /// </summary>
+    public SingleItemSource<TItem> Item
+    {
+        get
+        {
+            Context.ExpressionBuilder.Append(".Item");
+            Context.SetPendingLink(InternalWrappedExecution ?? this, CombinerType.And);
+            return new SingleItemSource<TItem>(Context.Map<TItem>(_ => _singleItem));
+        }
+    }
 
     /// <summary>
     /// Enables await syntax that returns the matching item.

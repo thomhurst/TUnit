@@ -239,6 +239,14 @@ public async Task Collection_Has_Single_Item()
 }
 ```
 
+Use `.Item` to continue assertions directly against the single item:
+
+```csharp
+await Assert.That(users)
+    .HasSingleItem()
+    .Item.Member(user => user.Name, name => name.IsEqualTo("Alice"));
+```
+
 ## Ordering Assertions
 
 ### IsInOrder

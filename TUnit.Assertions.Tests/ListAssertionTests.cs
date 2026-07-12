@@ -204,11 +204,68 @@ public class ListAssertionTests
     }
 
     [Test]
+    public async Task Test_List_HasSingleItem_Item_Allows_Chaining()
+    {
+        IList<int> list = new List<int> { 42 };
+
+        await Assert.That(list).HasSingleItem().Item.IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_Item_Preserves_Preceding_Chain()
+    {
+        IList<int> list = new List<int> { 42 };
+
+        await Assert.That(list).IsNotEmpty().And.HasSingleItem().Item.IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_Item_Does_Not_Reenumerate()
+    {
+        var enumerationCount = 0;
+
+        IEnumerable<int> GetItems()
+        {
+            enumerationCount++;
+            yield return 42;
+        }
+
+        await Assert.That(GetItems()).HasSingleItem().Item.IsEqualTo(42);
+        await Assert.That(enumerationCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_Item_Preserves_Collection_Shape()
+    {
+        IList<List<int>> list = [new List<int> { 1, 2, 3 }];
+
+        await Assert.That(list).HasSingleItem().Item.Count().IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_Item_Fails_Before_Item_Assertion()
+    {
+        IList<int> list = [];
+
+        var action = async () => await Assert.That(list).HasSingleItem().Item.IsEqualTo(0);
+
+        await Assert.That(action).ThrowsException();
+    }
+
+    [Test]
     public async Task Test_List_HasSingleItem_WithPredicate()
     {
         IList<int> list = new List<int> { 1, 2, 3, 4, 5 };
         var item = await Assert.That(list).HasSingleItem(x => x == 3);
         await Assert.That(item).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task Test_List_HasSingleItem_WithPredicate_Item_Allows_Chaining()
+    {
+        IList<int> list = new List<int> { 1, 2, 3, 4, 5 };
+
+        await Assert.That(list).HasSingleItem(x => x == 3).Item.IsEqualTo(3);
     }
 
     [Test]
