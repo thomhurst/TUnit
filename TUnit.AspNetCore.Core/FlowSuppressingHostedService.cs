@@ -48,10 +48,13 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        Task task;
         lock (_stopGate)
         {
-            return _stopTask ??= InvokeOnce(inner.StopAsync, cancellationToken);
+            task = _stopTask ??= InvokeOnce(inner.StopAsync, cancellationToken);
         }
+
+        return WaitWithCancellation(task, cancellationToken);
     }
 
     public Task StartingAsync(CancellationToken cancellationToken) =>
@@ -76,10 +79,13 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             return Task.CompletedTask;
         }
 
+        Task task;
         lock (_stopGate)
         {
-            return _stoppingTask ??= InvokeOnce(lifecycle.StoppingAsync, cancellationToken);
+            task = _stoppingTask ??= InvokeOnce(lifecycle.StoppingAsync, cancellationToken);
         }
+
+        return WaitWithCancellation(task, cancellationToken);
     }
 
     public Task StoppedAsync(CancellationToken cancellationToken)
@@ -89,10 +95,13 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             return Task.CompletedTask;
         }
 
+        Task task;
         lock (_stopGate)
         {
-            return _stoppedTask ??= InvokeOnce(lifecycle.StoppedAsync, cancellationToken);
+            task = _stoppedTask ??= InvokeOnce(lifecycle.StoppedAsync, cancellationToken);
         }
+
+        return WaitWithCancellation(task, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -136,6 +145,9 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             return Task.FromException(ex);
         }
     }
+
+    private static Task WaitWithCancellation(Task task, CancellationToken cancellationToken) =>
+        cancellationToken.CanBeCanceled ? task.WaitAsync(cancellationToken) : task;
 
     // Dispatch onto a thread-pool worker with a clean captured ExecutionContext by
     // combining SuppressFlow + Task.Run. Unlike wrapping `using (SuppressFlow()) return op(ct);`

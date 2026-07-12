@@ -61,6 +61,26 @@ public class HostedServiceStopOnceTests
     }
 
     [Test]
+    public async Task Duplicate_Stop_Caller_Observes_Its_Own_Cancellation_Token()
+    {
+        var inner = new BlockingStopHostedService();
+        var wrapper = new FlowSuppressingHostedService(inner);
+
+        var first = wrapper.StopAsync(CancellationToken.None);
+        await inner.Entered;
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var second = wrapper.StopAsync(cancellationTokenSource.Token);
+        cancellationTokenSource.Cancel();
+
+        await Assert.That(async () => await second).Throws<OperationCanceledException>();
+        await Assert.That(inner.StopCalls).IsEqualTo(1);
+
+        inner.Release();
+        await first;
+    }
+
+    [Test]
     public async Task Synchronously_Throwing_Stop_Is_Cached_Not_Reinvoked()
     {
         var inner = new SyncThrowingStopHostedService();
@@ -121,6 +141,27 @@ internal sealed class SyncThrowingStopHostedService : IHostedService
         Interlocked.Increment(ref _stopCalls);
         throw new InvalidOperationException("stop failed synchronously");
     }
+}
+
+internal sealed class BlockingStopHostedService : IHostedService
+{
+    private readonly TaskCompletionSource _entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private int _stopCalls;
+
+    public Task Entered => _entered.Task;
+    public int StopCalls => _stopCalls;
+
+    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref _stopCalls);
+        _entered.SetResult();
+        await _release.Task;
+    }
+
+    public void Release() => _release.SetResult();
 }
 
 internal sealed class CountingLifecycleHostedService : IHostedService, IHostedLifecycleService
