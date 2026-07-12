@@ -15,6 +15,40 @@
       "type": "project"
     },
     "sourceName": "TestProject",
-    "preferNameDirectory": true
+    "preferNameDirectory": true,
+    "symbols": {
+      "framework": {
+        "type": "parameter",
+        "description": "The target framework for the project.",
+        "datatype": "choice",
+        "choices": [
+          { "choice": "net10.0", "description": "Target .NET 10.0" },
+          { "choice": "net9.0", "description": "Target .NET 9.0" },
+          { "choice": "net8.0", "description": "Target .NET 8.0" },
+          { "choice": "net481", "description": "Target .NET Framework 4.8.1" },
+          { "choice": "net48", "description": "Target .NET Framework 4.8" },
+          { "choice": "net472", "description": "Target .NET Framework 4.7.2" },
+          { "choice": "net462", "description": "Target .NET Framework 4.6.2" }
+        ],
+        "defaultValue": "net10.0",
+        "replaces": "net10.0"
+      },
+      "IsNetFramework": {
+        "type": "computed",
+        "value": "(framework == \"net462\" || framework == \"net472\" || framework == \"net48\" || framework == \"net481\")"
+      }
+    },
+    "sources": [
+      {
+        "modifiers": [
+          {
+            "condition": "(!IsNetFramework)",
+            "exclude": [
+              "Polyfills/**"
+            ]
+          }
+        ]
+      }
+    ]
   }
   

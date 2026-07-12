@@ -1,10 +1,16 @@
+#if (!IsNetFramework)
 using System.Diagnostics.CodeAnalysis;
+#endif
 
+#if (IsNetFramework)
+[assembly: TestProject.Polyfills.ExcludeFromCodeCoverage]
+#else
 [assembly: ExcludeFromCodeCoverage]
+#endif
 
 namespace TestProject;
 
-public class GlobalHooks
+public static class GlobalHooks
 {
     [Before(TestSession)]
     public static Task BeforeTestSession(TestSessionContext context)

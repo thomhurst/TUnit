@@ -11,6 +11,12 @@ public class BasicTemplateTests : TemplateTestBase
     }
 
     [Test]
+    public async Task InstantiationTestWithNetFramework()
+    {
+        await Engine.Execute(OptionsWithFramework("net48")).ConfigureAwait(false);
+    }
+
+    [Test]
     public async Task InstantiationTestWithFSharp()
     {
         TemplateShortName = "TUnit.FSharp";

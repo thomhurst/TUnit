@@ -5,10 +5,17 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+<!--#if (IsNetFramework) -->
+    <LangVersion>preview</LangVersion>
+    <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+<!--#endif -->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.5*" />
+<!--#if (IsNetFramework) -->
+    <PackageReference Include="Polyfill" Version="10.11.2" PrivateAssets="all" />
+<!--#endif -->
   </ItemGroup>
 
 </Project>
