@@ -169,9 +169,9 @@ public abstract class Assertion<TValue> : IAssertion
         var exceptionCountBefore = currentScope?.ExceptionCount ?? 0;
         await preWork();
 
-        // Cross-type drill-ins must not evaluate when their parent assertion failed.
-        // Outside Assert.Multiple the failure throws; inside it the scope count is our signal.
-        return currentScope is null || currentScope.ExceptionCount <= exceptionCountBefore;
+        return !Context.SkipAssertionOnPreWorkFailure
+               || currentScope is null
+               || currentScope.ExceptionCount <= exceptionCountBefore;
     }
 
     // Create EvaluationMetadata in a separate scope to avoid creating additional

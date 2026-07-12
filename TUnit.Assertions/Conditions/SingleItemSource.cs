@@ -21,6 +21,7 @@ public sealed class SingleItemSource<TItem> : ValueAssertion<TItem>
     {
         var itemContext = context.Map(mapper);
         itemContext.PreservePendingPreWorkOnMap = true;
+        itemContext.SkipAssertionOnPreWorkFailure = true;
         return new SingleItemSource<TItem>(itemContext);
     }
 }

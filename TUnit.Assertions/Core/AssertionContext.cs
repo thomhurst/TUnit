@@ -75,6 +75,7 @@ public sealed class AssertionContext<TValue>
                 ? preWork
                 : async () => { await preWork(); await existing(); };
             newContext.PreservePendingPreWorkOnMap = true;
+            newContext.SkipAssertionOnPreWorkFailure = SkipAssertionOnPreWorkFailure;
         }
 
         return newContext;
@@ -174,6 +175,12 @@ public sealed class AssertionContext<TValue>
     /// Keeps pending pre-work attached while drill-in operations map through intermediate types.
     /// </summary>
     internal bool PreservePendingPreWorkOnMap { get; set; }
+
+    /// <summary>
+    /// Skips the mapped assertion when pending pre-work fails inside <see cref="Assert.Multiple"/>.
+    /// Used when the mapped value is only valid after the pre-work succeeds.
+    /// </summary>
+    internal bool SkipAssertionOnPreWorkFailure { get; set; }
 
     /// <summary>
     /// Sets the pending link state for the next assertion to consume.

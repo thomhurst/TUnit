@@ -161,8 +161,9 @@ public class ParseAssertionTests
             }
         }).ThrowsException();
 
-        // Should have recorded the length assertion failure
+        // Both the pre-work failure and mapped assertion failure must be recorded.
         await Assert.That(exception.Message).Contains("length");
+        await Assert.That(exception.Message).Contains("456");
     }
 
     [Test]
