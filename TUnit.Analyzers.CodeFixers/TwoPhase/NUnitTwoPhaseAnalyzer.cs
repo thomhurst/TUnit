@@ -1979,7 +1979,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
 
         var argumentList = attr.ArgumentList;
         if (argumentList is null || argumentList.Arguments.Count < 2)
+        {
             return null;
+        }
 
         // Determine the type from the first argument literal or the parameter type
         var firstArg = argumentList.Arguments[0].Expression.ToString();
@@ -2057,7 +2059,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     private string? GetNUnitTestContextInvocationReplacement(InvocationExpressionSyntax invocation)
     {
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
+        {
             return null;
+        }
 
         var methodName = memberAccess.Name.Identifier.Text;
         var arguments = invocation.ArgumentList.ToString();
@@ -2114,7 +2118,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     private bool IsNUnitTestContextDirectoryProperty(MemberAccessExpressionSyntax memberAccess)
     {
         if (memberAccess.Name.Identifier.Text is not ("TestDirectory" or "WorkDirectory"))
+        {
             return false;
+        }
 
         return IsNUnitTestContextExpression(memberAccess.Expression);
     }
@@ -2124,7 +2130,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         try
         {
             if (IsNUnitTestContextType(SemanticModel.GetTypeInfo(expression).Type))
+            {
                 return true;
+            }
 
             if (SemanticModel.GetSymbolInfo(expression).Symbol is INamedTypeSymbol namedType &&
                 IsNUnitTestContextType(namedType))
