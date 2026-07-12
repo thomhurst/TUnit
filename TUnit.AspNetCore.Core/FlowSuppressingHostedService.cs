@@ -122,6 +122,7 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
     {
         TaskCompletionSource? completionSource = null;
         Task task;
+        var ownsInvocation = false;
 
         lock (_stopGate)
         {
@@ -129,6 +130,7 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             {
                 completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
                 cachedTask = completionSource.Task;
+                ownsInvocation = true;
             }
 
             task = cachedTask;
@@ -139,7 +141,7 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             _ = ExecuteAndCompleteAsync(completionSource, operation, cancellationToken);
         }
 
-        return WaitWithCancellation(task, cancellationToken);
+        return ownsInvocation ? task : WaitWithCancellation(task, cancellationToken);
     }
 
     private static async Task ExecuteAndCompleteAsync(

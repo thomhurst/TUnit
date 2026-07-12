@@ -81,6 +81,29 @@ public class HostedServiceStopOnceTests
     }
 
     [Test]
+    public async Task Owning_Stop_Caller_Awaits_Inner_After_Token_Cancellation()
+    {
+        var inner = new BlockingStopHostedService();
+        var wrapper = new FlowSuppressingHostedService(inner);
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var stop = wrapper.StopAsync(cancellationTokenSource.Token);
+        await inner.Entered;
+
+        try
+        {
+            cancellationTokenSource.Cancel();
+            await Assert.That(stop.IsCompleted).IsFalse();
+        }
+        finally
+        {
+            inner.Release();
+        }
+
+        await stop;
+    }
+
+    [Test]
     public async Task Duplicate_Stop_Caller_Does_Not_Wait_For_Synchronous_Startup()
     {
         using var inner = new SynchronouslyBlockingStopHostedService();
