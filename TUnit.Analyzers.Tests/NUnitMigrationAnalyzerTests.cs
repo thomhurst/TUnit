@@ -227,8 +227,10 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod()
                     {
                         var condition = true;
+                        System.Func<bool> deferredCondition = () => true;
                         Assert.That(condition);
                         Assert.That(condition, "Condition should be true");
+                        Assert.That(deferredCondition);
                     }
                 }
                 """,
@@ -242,8 +244,10 @@ public class NUnitMigrationAnalyzerTests
                     public async Task MyMethod()
                     {
                         var condition = true;
+                        System.Func<bool> deferredCondition = () => true;
                         await Assert.That(condition).IsTrue();
                         await Assert.That(condition).IsTrue().Because("Condition should be true");
+                        await Assert.That(deferredCondition).IsTrue();
                     }
                 }
                 """,
