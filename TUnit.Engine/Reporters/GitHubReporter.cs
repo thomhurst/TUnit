@@ -149,9 +149,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 case InProgressTestNodeStateProperty:
                     inProgress.Add(kvp);
                     break;
-#pragma warning disable CS0618
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
                 case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
                     cancelled.Add(kvp);
                     break;
             }
@@ -502,12 +502,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
         if (stateProperty is FailedTestNodeStateProperty
             or ErrorTestNodeStateProperty
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
         {
             return $"<pre>{GetError(stateProperty)}</pre>";
         }
@@ -536,9 +536,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             ErrorTestNodeStateProperty errorTestNodeStateProperty =>
                 GetTruncatedExceptionMessage(TUnitFailedException.Unwrap(errorTestNodeStateProperty.Exception)) ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
             CancelledTestNodeStateProperty => "Test was cancelled",
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
             _ => null
         };
     }
@@ -566,9 +566,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     {
         return stateProperty switch
         {
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
             CancelledTestNodeStateProperty => "Cancelled",
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
             ErrorTestNodeStateProperty => "Failed",
             FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",

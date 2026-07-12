@@ -618,9 +618,9 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             ErrorTestNodeStateProperty error => ("error", MapException(error.Exception), null),
             TimeoutTestNodeStateProperty timeout => ("timedOut", MapException(timeout.Exception), null),
             SkippedTestNodeStateProperty skipped => ("skipped", null, skipped.Explanation),
-#pragma warning disable CS0618
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's HTML cancellation reporting
             CancelledTestNodeStateProperty => ("cancelled", null, null),
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
             InProgressTestNodeStateProperty => ("inProgress", null, null),
             _ => ("unknown", null, null)
         };
