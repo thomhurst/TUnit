@@ -262,6 +262,15 @@ public class ListAssertionTests
     }
 
     [Test]
+    public async Task Test_List_HasSingleItem_Item_Or_Cannot_Bypass_Parent_Assertion()
+    {
+        var action = async () => await Assert.That(Array.Empty<int>())
+            .HasSingleItem().Item.IsEqualTo(1).Or.IsEqualTo(0);
+
+        await Assert.That(action).ThrowsException();
+    }
+
+    [Test]
     public async Task Test_List_HasSingleItem_Item_Is_Not_Evaluated_After_Failure_In_Assert_Multiple()
     {
         var itemAssertionEvaluated = false;
