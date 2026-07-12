@@ -4,7 +4,7 @@
 
 namespace TUnit;
 
-public class GlobalHooks
+public static class GlobalHooks
 {
     [Before(TestSession)]
     public static Task BeforeTestSession(TestSessionContext context)
