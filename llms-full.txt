@@ -2596,22 +2596,6 @@ public async Task Not_Equal()
 }
 ```
 
-### EqualTo (Alias)
-
-`EqualTo()` is an alias for `IsEqualTo()` for more natural chaining:
-
-```csharp
-[Test]
-public async Task Using_EqualTo_Alias()
-{
-    var numbers = new[] { 1, 2, 3 };
-
-    await Assert.That(numbers)
-        .Count().IsEqualTo(3)
-        .And.Contains(2);
-}
-```
-
 ## Reference Equality
 
 ### IsSameReferenceAs
