@@ -1,4 +1,6 @@
+#if (!IsNetFramework)
 using System.Diagnostics.CodeAnalysis;
+#endif
 
 #if (IsNetFramework)
 [assembly: TestProject.Polyfills.ExcludeFromCodeCoverage]

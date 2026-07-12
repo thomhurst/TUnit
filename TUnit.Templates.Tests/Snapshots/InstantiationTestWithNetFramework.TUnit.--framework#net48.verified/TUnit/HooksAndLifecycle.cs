@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
+﻿
 [assembly: TUnit.Polyfills.ExcludeFromCodeCoverage]
 
 namespace TUnit;
