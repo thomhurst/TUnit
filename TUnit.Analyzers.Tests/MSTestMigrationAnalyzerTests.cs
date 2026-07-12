@@ -358,11 +358,11 @@ public class MSTestMigrationAnalyzerTests
             """
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-                {|#0:public class MyClass|}
+                public class MyClass
                 {
                     public TestContext TestContext { get; set; }
 
-                    [TestMethod]
+                    {|#0:[TestMethod]|}
                     public void MyMethod()
                     {
                         var testDirectory = TestContext.TestDir;
@@ -383,6 +383,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod()
                     {
                         var testDirectory = TUnit.Core.TestContext.TestDirectory;
+                        // TODO: TUnit migration - MSTest DeploymentDirectory can differ from TUnit TestDirectory. Verify the migrated path.
                         var deploymentDirectory = TUnit.Core.TestContext.TestDirectory;
                         Console.WriteLine("standard output");
                         TUnit.Core.TestContext.Current!.Output.AttachArtifact("artifact.txt");

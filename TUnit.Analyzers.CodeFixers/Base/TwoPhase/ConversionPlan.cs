@@ -491,6 +491,11 @@ public class ExpressionReplacement : ConversionTarget
     /// The new expression code (e.g., "TestContext.TestDirectory")
     /// </summary>
     public required string ReplacementCode { get; init; }
+
+    /// <summary>
+    /// Optional TODO comment to add before the containing statement.
+    /// </summary>
+    public string? TodoComment { get; init; }
 }
 
 /// <summary>

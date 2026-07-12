@@ -933,7 +933,10 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
                 currentRoot,
                 originalExpression,
                 "TUnit.Core.TestContext.TestDirectory",
-                "MSTestTestContextDirectoryAnalysis");
+                "MSTestTestContextDirectoryAnalysis",
+                originalExpression.Name.Identifier.Text == "DeploymentDirectory"
+                    ? "// TODO: TUnit migration - MSTest DeploymentDirectory can differ from TUnit TestDirectory. Verify the migrated path."
+                    : null);
         }
 
         return currentRoot;

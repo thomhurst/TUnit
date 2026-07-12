@@ -530,14 +530,16 @@ public abstract class MigrationAnalyzer
         CompilationUnitSyntax root,
         ExpressionSyntax originalExpression,
         string replacementCode,
-        string phase)
+        string phase,
+        string? todoComment = null)
     {
         try
         {
             var replacement = new ExpressionReplacement
             {
                 ReplacementCode = replacementCode,
-                OriginalText = originalExpression.ToString()
+                OriginalText = originalExpression.ToString(),
+                TodoComment = todoComment
             };
 
             Plan.ExpressionReplacements.Add(replacement);

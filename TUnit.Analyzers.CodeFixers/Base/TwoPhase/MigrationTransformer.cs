@@ -100,11 +100,22 @@ public class MigrationTransformer
 
                 if (expression == null) continue;
 
-                var newExpression = SyntaxFactory.ParseExpression(replacement.ReplacementCode);
-
-                currentRoot = currentRoot.ReplaceNode(expression, newExpression
+                var newExpression = SyntaxFactory.ParseExpression(replacement.ReplacementCode)
                     .WithLeadingTrivia(expression.GetLeadingTrivia())
-                    .WithTrailingTrivia(expression.GetTrailingTrivia()));
+                    .WithTrailingTrivia(expression.GetTrailingTrivia());
+
+                if (replacement.TodoComment is { Length: > 0 } todoComment
+                    && expression.FirstAncestorOrSelf<StatementSyntax>() is { } statement)
+                {
+                    var newStatement = statement.ReplaceNode(expression, newExpression)
+                        .WithLeadingTrivia(PrependTodoComment(statement.GetLeadingTrivia(), todoComment));
+
+                    currentRoot = currentRoot.ReplaceNode(statement, newStatement);
+                }
+                else
+                {
+                    currentRoot = currentRoot.ReplaceNode(expression, newExpression);
+                }
             }
             catch (Exception ex)
             {
@@ -440,21 +451,7 @@ public class MigrationTransformer
                     var leadingTrivia = containingStatement.GetLeadingTrivia();
                     if (assertion.TodoComment is { Length: > 0 } todoComment)
                     {
-                        // Extract the indentation from existing trivia
-                        var indentationTrivia = leadingTrivia
-                            .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
-                            .LastOrDefault();
-
-                        var todoTrivia = new List<SyntaxTrivia>();
-                        if (indentationTrivia != default)
-                        {
-                            todoTrivia.Add(indentationTrivia);
-                        }
-                        todoTrivia.Add(SyntaxFactory.Comment(todoComment));
-                        todoTrivia.Add(SyntaxFactory.EndOfLine("\n"));
-
-                        // Combine TODO comment with existing leading trivia
-                        leadingTrivia = SyntaxFactory.TriviaList(todoTrivia.Concat(leadingTrivia));
+                        leadingTrivia = PrependTodoComment(leadingTrivia, todoComment);
                     }
 
                     // Replace the entire statement with the new expression statement
@@ -485,6 +482,23 @@ public class MigrationTransformer
         }
 
         return currentRoot;
+    }
+
+    private static SyntaxTriviaList PrependTodoComment(SyntaxTriviaList leadingTrivia, string todoComment)
+    {
+        var indentationTrivia = leadingTrivia
+            .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+            .LastOrDefault();
+
+        var todoTrivia = new List<SyntaxTrivia>();
+        if (indentationTrivia != default)
+        {
+            todoTrivia.Add(indentationTrivia);
+        }
+
+        todoTrivia.Add(SyntaxFactory.Comment(todoComment));
+        todoTrivia.Add(SyntaxFactory.EndOfLine("\n"));
+        return SyntaxFactory.TriviaList(todoTrivia.Concat(leadingTrivia));
     }
 
     private CompilationUnitSyntax TransformMethodSignatures(CompilationUnitSyntax root)
