@@ -23,14 +23,31 @@ namespace TUnit.AspNetCore;
 /// Without this, wrapped services that own unmanaged resources leak silently because
 /// the container only sees the non-disposable wrapper.
 /// </para>
+/// <para>
+/// The stop-phase methods are additionally guarded to run the inner service's stop
+/// exactly once. Minimal-hosting SUTs park their own <c>app.Run()</c> in
+/// <c>WaitForShutdownAsync</c>, which calls <c>Host.StopAsync</c> when
+/// <c>ApplicationStopping</c> fires — concurrently with the <c>Host.StopAsync</c> that
+/// <c>WebApplicationFactory.DisposeAsync</c> already has in flight (the trigger of that
+/// very <c>ApplicationStopping</c>). <c>Host.StopAsync</c> has no concurrency guard, so
+/// every hosted service's <c>StopAsync</c> runs twice in parallel, breaking services
+/// with non-thread-safe shutdown (e.g. Rebus' bus dispose throws
+/// <see cref="ObjectDisposedException"/>). See https://github.com/thomhurst/TUnit/issues/6339.
+/// All concurrent and repeated callers observe the single underlying stop task.
+/// </para>
 /// </remarks>
 internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHostedLifecycleService, IAsyncDisposable, IDisposable
 {
+    private readonly object _stopGate = new();
+    private Task? _stopTask;
+    private Task? _stoppingTask;
+    private Task? _stoppedTask;
+
     public Task StartAsync(CancellationToken cancellationToken) =>
         RunOnCleanContext(inner.StartAsync, cancellationToken);
 
     public Task StopAsync(CancellationToken cancellationToken) =>
-        inner.StopAsync(cancellationToken);
+        InvokeOnce(ref _stopTask, inner.StopAsync, cancellationToken);
 
     public Task StartingAsync(CancellationToken cancellationToken) =>
         inner is IHostedLifecycleService lifecycle
@@ -42,18 +59,30 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             ? RunOnCleanContext(lifecycle.StartedAsync, cancellationToken)
             : Task.CompletedTask;
 
-    // Stop lifecycle is intentionally not wrapped: stop methods typically signal
-    // cancellation and await shutdown rather than spawning new long-running background
-    // work, so context capture during Stop is not the span-leak vector that Start is.
-    public Task StoppingAsync(CancellationToken cancellationToken) =>
-        inner is IHostedLifecycleService lifecycle
-            ? lifecycle.StoppingAsync(cancellationToken)
-            : Task.CompletedTask;
+    // Stop lifecycle is not flow-suppressed: stop methods typically signal cancellation
+    // and await shutdown rather than spawning new long-running background work, so
+    // context capture during Stop is not the span-leak vector that Start is. They are
+    // once-guarded, though — concurrent Host.StopAsync calls invoke these hooks twice
+    // (see the class remarks).
+    public Task StoppingAsync(CancellationToken cancellationToken)
+    {
+        if (inner is not IHostedLifecycleService lifecycle)
+        {
+            return Task.CompletedTask;
+        }
 
-    public Task StoppedAsync(CancellationToken cancellationToken) =>
-        inner is IHostedLifecycleService lifecycle
-            ? lifecycle.StoppedAsync(cancellationToken)
-            : Task.CompletedTask;
+        return InvokeOnce(ref _stoppingTask, lifecycle.StoppingAsync, cancellationToken);
+    }
+
+    public Task StoppedAsync(CancellationToken cancellationToken)
+    {
+        if (inner is not IHostedLifecycleService lifecycle)
+        {
+            return Task.CompletedTask;
+        }
+
+        return InvokeOnce(ref _stoppedTask, lifecycle.StoppedAsync, cancellationToken);
+    }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
@@ -82,6 +111,61 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             disposable.Dispose();
         }
     }
+
+    // Publish a placeholder before invoking the operation outside the lock. Duplicate callers
+    // can immediately wait with their own cancellation token, even when the operation blocks
+    // synchronously before returning its task.
+    private Task InvokeOnce(
+        ref Task? cachedTask,
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken)
+    {
+        TaskCompletionSource? completionSource = null;
+        Task task;
+        var ownsInvocation = false;
+
+        lock (_stopGate)
+        {
+            if (cachedTask is null)
+            {
+                completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                cachedTask = completionSource.Task;
+                ownsInvocation = true;
+            }
+
+            task = cachedTask;
+        }
+
+        if (completionSource is not null)
+        {
+            _ = ExecuteAndCompleteAsync(completionSource, operation, cancellationToken);
+        }
+
+        return ownsInvocation ? task : WaitWithCancellation(task, cancellationToken);
+    }
+
+    private static async Task ExecuteAndCompleteAsync(
+        TaskCompletionSource completionSource,
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await operation(cancellationToken).ConfigureAwait(false);
+            completionSource.SetResult();
+        }
+        catch (OperationCanceledException exception)
+        {
+            completionSource.SetCanceled(exception.CancellationToken);
+        }
+        catch (Exception exception)
+        {
+            completionSource.SetException(exception);
+        }
+    }
+
+    private static Task WaitWithCancellation(Task task, CancellationToken cancellationToken) =>
+        cancellationToken.CanBeCanceled ? task.WaitAsync(cancellationToken) : task;
 
     // Dispatch onto a thread-pool worker with a clean captured ExecutionContext by
     // combining SuppressFlow + Task.Run. Unlike wrapping `using (SuppressFlow()) return op(ct);`
