@@ -81,6 +81,33 @@ public class HostedServiceStopOnceTests
     }
 
     [Test]
+    public async Task Duplicate_Stop_Caller_Does_Not_Wait_For_Synchronous_Startup()
+    {
+        using var inner = new SynchronouslyBlockingStopHostedService();
+        var wrapper = new FlowSuppressingHostedService(inner);
+
+        var first = Task.Run(() => wrapper.StopAsync(CancellationToken.None));
+        inner.WaitUntilEntered();
+
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        try
+        {
+            var second = Task.Run(() => wrapper.StopAsync(cancellationTokenSource.Token));
+            await Assert.That(async () => await second.WaitAsync(TimeSpan.FromSeconds(1)))
+                .Throws<OperationCanceledException>();
+        }
+        finally
+        {
+            inner.Release();
+        }
+
+        await first;
+        await Assert.That(inner.StopCalls).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task Synchronously_Throwing_Stop_Is_Cached_Not_Reinvoked()
     {
         var inner = new SyncThrowingStopHostedService();
@@ -162,6 +189,40 @@ internal sealed class BlockingStopHostedService : IHostedService
     }
 
     public void Release() => _release.SetResult();
+}
+
+internal sealed class SynchronouslyBlockingStopHostedService : IHostedService, IDisposable
+{
+    private readonly ManualResetEventSlim _entered = new();
+    private readonly ManualResetEventSlim _release = new();
+    private int _stopCalls;
+
+    public int StopCalls => _stopCalls;
+
+    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref _stopCalls);
+        _entered.Set();
+        _release.Wait();
+        return Task.CompletedTask;
+    }
+
+    public void WaitUntilEntered()
+    {
+        if (!_entered.Wait(TimeSpan.FromSeconds(5)))
+        {
+            throw new TimeoutException("StopAsync was not entered within five seconds.");
+        }
+    }
+    public void Release() => _release.Set();
+
+    public void Dispose()
+    {
+        _entered.Dispose();
+        _release.Dispose();
+    }
 }
 
 internal sealed class CountingLifecycleHostedService : IHostedService, IHostedLifecycleService

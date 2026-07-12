@@ -46,16 +46,8 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
     public Task StartAsync(CancellationToken cancellationToken) =>
         RunOnCleanContext(inner.StartAsync, cancellationToken);
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        Task task;
-        lock (_stopGate)
-        {
-            task = _stopTask ??= InvokeOnce(inner.StopAsync, cancellationToken);
-        }
-
-        return WaitWithCancellation(task, cancellationToken);
-    }
+    public Task StopAsync(CancellationToken cancellationToken) =>
+        InvokeOnce(ref _stopTask, inner.StopAsync, cancellationToken);
 
     public Task StartingAsync(CancellationToken cancellationToken) =>
         inner is IHostedLifecycleService lifecycle
@@ -79,13 +71,7 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             return Task.CompletedTask;
         }
 
-        Task task;
-        lock (_stopGate)
-        {
-            task = _stoppingTask ??= InvokeOnce(lifecycle.StoppingAsync, cancellationToken);
-        }
-
-        return WaitWithCancellation(task, cancellationToken);
+        return InvokeOnce(ref _stoppingTask, lifecycle.StoppingAsync, cancellationToken);
     }
 
     public Task StoppedAsync(CancellationToken cancellationToken)
@@ -95,13 +81,7 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             return Task.CompletedTask;
         }
 
-        Task task;
-        lock (_stopGate)
-        {
-            task = _stoppedTask ??= InvokeOnce(lifecycle.StoppedAsync, cancellationToken);
-        }
-
-        return WaitWithCancellation(task, cancellationToken);
+        return InvokeOnce(ref _stoppedTask, lifecycle.StoppedAsync, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -132,17 +112,53 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
         }
     }
 
-    // Captures a synchronous throw as a faulted task so it is cached in the once-guard —
-    // otherwise a second caller would re-invoke the inner stop method.
-    private static Task InvokeOnce(Func<CancellationToken, Task> op, CancellationToken ct)
+    // Publish a placeholder before invoking the operation outside the lock. Duplicate callers
+    // can immediately wait with their own cancellation token, even when the operation blocks
+    // synchronously before returning its task.
+    private Task InvokeOnce(
+        ref Task? cachedTask,
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken)
+    {
+        TaskCompletionSource? completionSource = null;
+        Task task;
+
+        lock (_stopGate)
+        {
+            if (cachedTask is null)
+            {
+                completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                cachedTask = completionSource.Task;
+            }
+
+            task = cachedTask;
+        }
+
+        if (completionSource is not null)
+        {
+            _ = ExecuteAndCompleteAsync(completionSource, operation, cancellationToken);
+        }
+
+        return WaitWithCancellation(task, cancellationToken);
+    }
+
+    private static async Task ExecuteAndCompleteAsync(
+        TaskCompletionSource completionSource,
+        Func<CancellationToken, Task> operation,
+        CancellationToken cancellationToken)
     {
         try
         {
-            return op(ct);
+            await operation(cancellationToken).ConfigureAwait(false);
+            completionSource.SetResult();
         }
-        catch (Exception ex)
+        catch (OperationCanceledException exception)
         {
-            return Task.FromException(ex);
+            completionSource.SetCanceled(exception.CancellationToken);
+        }
+        catch (Exception exception)
+        {
+            completionSource.SetException(exception);
         }
     }
 
