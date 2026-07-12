@@ -23,14 +23,36 @@ namespace TUnit.AspNetCore;
 /// Without this, wrapped services that own unmanaged resources leak silently because
 /// the container only sees the non-disposable wrapper.
 /// </para>
+/// <para>
+/// The stop-phase methods are additionally guarded to run the inner service's stop
+/// exactly once. Minimal-hosting SUTs park their own <c>app.Run()</c> in
+/// <c>WaitForShutdownAsync</c>, which calls <c>Host.StopAsync</c> when
+/// <c>ApplicationStopping</c> fires — concurrently with the <c>Host.StopAsync</c> that
+/// <c>WebApplicationFactory.DisposeAsync</c> already has in flight (the trigger of that
+/// very <c>ApplicationStopping</c>). <c>Host.StopAsync</c> has no concurrency guard, so
+/// every hosted service's <c>StopAsync</c> runs twice in parallel, breaking services
+/// with non-thread-safe shutdown (e.g. Rebus' bus dispose throws
+/// <see cref="ObjectDisposedException"/>). See https://github.com/thomhurst/TUnit/issues/6339.
+/// All concurrent and repeated callers observe the single underlying stop task.
+/// </para>
 /// </remarks>
 internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHostedLifecycleService, IAsyncDisposable, IDisposable
 {
+    private readonly object _stopGate = new();
+    private Task? _stopTask;
+    private Task? _stoppingTask;
+    private Task? _stoppedTask;
+
     public Task StartAsync(CancellationToken cancellationToken) =>
         RunOnCleanContext(inner.StartAsync, cancellationToken);
 
-    public Task StopAsync(CancellationToken cancellationToken) =>
-        inner.StopAsync(cancellationToken);
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        lock (_stopGate)
+        {
+            return _stopTask ??= InvokeOnce(inner.StopAsync, cancellationToken);
+        }
+    }
 
     public Task StartingAsync(CancellationToken cancellationToken) =>
         inner is IHostedLifecycleService lifecycle
@@ -42,18 +64,36 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
             ? RunOnCleanContext(lifecycle.StartedAsync, cancellationToken)
             : Task.CompletedTask;
 
-    // Stop lifecycle is intentionally not wrapped: stop methods typically signal
-    // cancellation and await shutdown rather than spawning new long-running background
-    // work, so context capture during Stop is not the span-leak vector that Start is.
-    public Task StoppingAsync(CancellationToken cancellationToken) =>
-        inner is IHostedLifecycleService lifecycle
-            ? lifecycle.StoppingAsync(cancellationToken)
-            : Task.CompletedTask;
+    // Stop lifecycle is not flow-suppressed: stop methods typically signal cancellation
+    // and await shutdown rather than spawning new long-running background work, so
+    // context capture during Stop is not the span-leak vector that Start is. They are
+    // once-guarded, though — concurrent Host.StopAsync calls invoke these hooks twice
+    // (see the class remarks).
+    public Task StoppingAsync(CancellationToken cancellationToken)
+    {
+        if (inner is not IHostedLifecycleService lifecycle)
+        {
+            return Task.CompletedTask;
+        }
 
-    public Task StoppedAsync(CancellationToken cancellationToken) =>
-        inner is IHostedLifecycleService lifecycle
-            ? lifecycle.StoppedAsync(cancellationToken)
-            : Task.CompletedTask;
+        lock (_stopGate)
+        {
+            return _stoppingTask ??= InvokeOnce(lifecycle.StoppingAsync, cancellationToken);
+        }
+    }
+
+    public Task StoppedAsync(CancellationToken cancellationToken)
+    {
+        if (inner is not IHostedLifecycleService lifecycle)
+        {
+            return Task.CompletedTask;
+        }
+
+        lock (_stopGate)
+        {
+            return _stoppedTask ??= InvokeOnce(lifecycle.StoppedAsync, cancellationToken);
+        }
+    }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
@@ -80,6 +120,20 @@ internal sealed class FlowSuppressingHostedService(IHostedService inner) : IHost
         if (inner is IDisposable disposable)
         {
             disposable.Dispose();
+        }
+    }
+
+    // Captures a synchronous throw as a faulted task so it is cached in the once-guard —
+    // otherwise a second caller would re-invoke the inner stop method.
+    private static Task InvokeOnce(Func<CancellationToken, Task> op, CancellationToken ct)
+    {
+        try
+        {
+            return op(ct);
+        }
+        catch (Exception ex)
+        {
+            return Task.FromException(ex);
         }
     }
 
