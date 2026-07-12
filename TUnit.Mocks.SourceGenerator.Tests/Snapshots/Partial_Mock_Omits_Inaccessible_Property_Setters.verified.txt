@@ -140,13 +140,10 @@ namespace ExternalLib
 
         extension(global::TUnit.Mocks.Mock<global::ExternalLib.ExternalResponse> mock)
         {
-            [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
             public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
 
-            [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
             public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
 
-            [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
             public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
             {
                 get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);

@@ -1492,6 +1492,10 @@ internal static class MockMembersBuilder
 
         // Property polyfills via C# 14 extension block so users write mock.Invocations rather
         // than mock.Invocations().
+        // No [OverloadResolutionPriority] here: older-but-supported compilers (VS 17.14 /
+        // Roslyn 4.14) reject the attribute on non-indexer extension properties with CS9262
+        // (#6370), and it ranks nothing anyway — the skip-emission above already guarantees no
+        // same-name member ever coexists in this containing type.
         if (emitInvocations || emitBehavior || emitDefaultValueProvider)
         {
             if (!first) writer.AppendLine();
@@ -1500,21 +1504,18 @@ internal static class MockMembersBuilder
                 bool firstProp = true;
                 if (emitInvocations)
                 {
-                    writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);");
                     firstProp = false;
                 }
                 if (emitBehavior)
                 {
                     if (!firstProp) writer.AppendLine();
-                    writer.AppendLine(PriorityMinusOneAttribute);
                     writer.AppendLine("public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);");
                     firstProp = false;
                 }
                 if (emitDefaultValueProvider)
                 {
                     if (!firstProp) writer.AppendLine();
-                    writer.AppendLine(PriorityMinusOneAttribute);
                     using (writer.Block("public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider"))
                     {
                         writer.AppendLine("get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);");
