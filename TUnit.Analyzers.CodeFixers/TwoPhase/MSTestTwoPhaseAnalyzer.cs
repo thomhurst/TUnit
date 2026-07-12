@@ -945,7 +945,9 @@ public class MSTestTwoPhaseAnalyzer : MigrationAnalyzer
     private bool IsMSTestTestContextDirectoryProperty(MemberAccessExpressionSyntax memberAccess)
     {
         if (memberAccess.Name.Identifier.Text is not ("TestDir" or "DeploymentDirectory"))
+        {
             return false;
+        }
 
         return IsMSTestTestContextExpression(memberAccess.Expression);
     }

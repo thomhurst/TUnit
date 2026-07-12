@@ -235,10 +235,14 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         MemberAccessExpressionSyntax memberAccess)
     {
         if (args.Count == 1)
+        {
             return ConvertBooleanAssertThat(node, args[0], null);
+        }
 
         if (args.Count >= 2 && IsMessageArgument(args[1]) && IsBooleanExpression(args[0].Expression))
+        {
             return ConvertBooleanAssertThat(node, args[0], GetMessageArgument(args[1]));
+        }
 
         var actualValue = args[0].Expression.ToString();
         var constraintArg = args[1].Expression;
@@ -2140,7 +2144,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     private static string? BuildAttachArtifactCall(SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 1)
+        {
             return null;
+        }
 
         if (args.Count < 2)
         {

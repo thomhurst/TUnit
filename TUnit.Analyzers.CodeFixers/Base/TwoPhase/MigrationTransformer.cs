@@ -98,7 +98,10 @@ public class MigrationTransformer
                     .OfType<ExpressionSyntax>()
                     .FirstOrDefault(i => i.HasAnnotation(replacement.Annotation));
 
-                if (expression == null) continue;
+                if (expression == null)
+                {
+                    continue;
+                }
 
                 var newExpression = SyntaxFactory.ParseExpression(replacement.ReplacementCode)
                     .WithLeadingTrivia(expression.GetLeadingTrivia())
