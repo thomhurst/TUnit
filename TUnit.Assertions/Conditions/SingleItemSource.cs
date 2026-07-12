@@ -14,4 +14,13 @@ public sealed class SingleItemSource<TItem> : ValueAssertion<TItem>
         : base(context)
     {
     }
+
+    internal static SingleItemSource<TItem> Create<TValue>(
+        AssertionContext<TValue> context,
+        Func<TValue?, TItem?> mapper)
+    {
+        var itemContext = context.Map(mapper);
+        itemContext.PreservePendingPreWorkOnMap = true;
+        return new SingleItemSource<TItem>(itemContext);
+    }
 }

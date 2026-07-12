@@ -67,6 +67,16 @@ public sealed class AssertionContext<TValue>
             newContext.PendingPreWork = async () => await pendingAssertion.ExecuteCoreAsync();
         }
 
+        if (PreservePendingPreWorkOnMap && PendingPreWork is { } preWork)
+        {
+            PendingPreWork = null;
+            var existing = newContext.PendingPreWork;
+            newContext.PendingPreWork = existing is null
+                ? preWork
+                : async () => { await preWork(); await existing(); };
+            newContext.PreservePendingPreWorkOnMap = true;
+        }
+
         return newContext;
     }
 
@@ -159,6 +169,11 @@ public sealed class AssertionContext<TValue>
     /// Used for cross-type assertion chaining (e.g., string assertions before WhenParsedInto&lt;int&gt;).
     /// </summary>
     internal Func<Task>? PendingPreWork { get; set; }
+
+    /// <summary>
+    /// Keeps pending pre-work attached while drill-in operations map through intermediate types.
+    /// </summary>
+    internal bool PreservePendingPreWorkOnMap { get; set; }
 
     /// <summary>
     /// Sets the pending link state for the next assertion to consume.

@@ -271,6 +271,17 @@ public class ListAssertionTests
     }
 
     [Test]
+    public async Task Test_List_HasSingleItem_Item_Preserves_Parent_Through_Mappings()
+    {
+        await Assert.That(new[] { "value" }).HasSingleItem().Item.Length().IsEqualTo(5);
+
+        var action = async () => await Assert.That(Array.Empty<string>())
+            .HasSingleItem().Item.Length().IsEqualTo(0);
+
+        await Assert.That(action).ThrowsException();
+    }
+
+    [Test]
     public async Task Test_List_HasSingleItem_Item_Is_Not_Evaluated_After_Failure_In_Assert_Multiple()
     {
         var itemAssertionEvaluated = false;
