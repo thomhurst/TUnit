@@ -319,7 +319,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
     private bool IsMessageArgument(ArgumentSyntax arg)
     {
         if (arg.NameColon?.Name.Identifier.Text is "message")
+        {
             return true;
+        }
 
         if (arg.Expression is LiteralExpressionSyntax literal &&
             literal.IsKind(SyntaxKind.StringLiteralExpression))
@@ -328,7 +330,9 @@ public class NUnitTwoPhaseAnalyzer : MigrationAnalyzer
         }
 
         if (arg.Expression is InterpolatedStringExpressionSyntax)
+        {
             return true;
+        }
 
         try
         {
