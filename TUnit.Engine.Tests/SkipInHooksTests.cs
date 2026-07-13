@@ -11,7 +11,7 @@ public class SkipInHooksTests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/*/SkipInBeforeClassHookTests/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
@@ -25,7 +25,7 @@ public class SkipInHooksTests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/*/SkipInBeforeTestHookTests/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),

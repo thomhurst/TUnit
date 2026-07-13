@@ -230,9 +230,9 @@ internal static class JUnitXmlWriter
                 WriteTimeoutError(writer, timeout);
                 break;
 
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's JUnit cancellation reporting
             case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
                 WriteCancellationError(writer);
                 break;
 
@@ -396,9 +396,9 @@ internal static class JUnitXmlWriter
                     break;
                 case ErrorTestNodeStateProperty:
                 case TimeoutTestNodeStateProperty:
-#pragma warning disable CS0618 // CancelledTestNodeStateProperty is obsolete
+#pragma warning disable CS0618, MTP0001 // Retained for TUnit's JUnit cancellation reporting
                 case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618
+#pragma warning restore CS0618, MTP0001
                 case InProgressTestNodeStateProperty:
                     summary.Errors++;
                     break;

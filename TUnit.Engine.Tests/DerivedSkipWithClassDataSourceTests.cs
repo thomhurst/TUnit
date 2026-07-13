@@ -17,7 +17,7 @@ public class DerivedSkipWithClassDataSourceTests(TestMode testMode) : InvokableT
         await RunTestsWithFilter(
             "/*/*/DerivedSkipWithFailingClassDataSourceTests/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
@@ -31,7 +31,7 @@ public class DerivedSkipWithClassDataSourceTests(TestMode testMode) : InvokableT
         await RunTestsWithFilter(
             "/*/*/DerivedSkipWithSucceedingClassDataSourceTests/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
