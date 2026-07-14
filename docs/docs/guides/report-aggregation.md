@@ -75,7 +75,78 @@ GitHub gives every workflow step its **own** summary file, uploaded when the ste
 
 In defer mode each process persists its sidecar and keeps the merged HTML fresh, but writes **no** per-step summary at all — the final `tunit-report merge --github-summary` step emits the single block.
 
-For matrix jobs on different machines, upload each job's sidecars (or `TestResults` directories) as artifacts, download them all in a final job, and point `tunit-report merge` at the download directory — it scans recursively.
+## Across Jobs, Matrix Runners and Separate Runs
+
+Different jobs run on different machines, so there is no shared directory to merge through. Instead, ship the sidecars as artifacts:
+
+1. Each test job persists sidecars and uploads them as an artifact.
+2. A final job downloads all of them onto one runner.
+3. `tunit-report merge` runs against the downloaded tree (it scans recursively).
+
+```yaml
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      # defer = persist sidecars, write no per-job summary blocks;
+      # the merge job below emits the single combined block instead.
+      TUNIT_AGGREGATE_REPORTS: defer
+      TUNIT_AGGREGATE_DIR: ${{ github.workspace }}/test-reports
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: dotnet test MySolution.sln
+      - name: Upload report sidecars
+        if: always()   # failing tests are exactly what you want in the merged report
+        uses: actions/upload-artifact@v4
+        with:
+          # v4 artifact names are immutable and must be unique per job
+          name: test-reports-${{ matrix.os }}
+          path: test-reports/*.tunit-report.json
+
+  merge-reports:
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all report sidecars
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-reports-*
+          merge-multiple: true
+          path: test-reports
+      - name: Merge reports
+        run: |
+          dotnet tool install --global TUnit.Reporting.Tool
+          tunit-report merge --directory test-reports --output merged-report.html --github-summary
+      - name: Upload merged report
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-test-report
+          path: merged-report.html
+```
+
+Details worth knowing:
+
+- **Suites disambiguate themselves.** Rows in the merged output are labelled by assembly name, then — only where names collide — progressively by runtime, OS and machine. A three-OS matrix of one assembly renders as three distinct rows automatically.
+- **Duplicates are harmless.** `tunit-report` dedupes sidecars by content, so accidentally uploading both a `TestResults` copy and an aggregate-dir copy of the same suite won't double-count.
+- **Gate the pipeline if you want to.** Add `--fail-on-failures` to make the merge job itself fail when any merged test failed.
+- **`TUNIT_AGGREGATE_DIR` in the workspace keeps the upload path simple.** You can skip the env vars entirely and upload `**/TestResults/*.tunit-report.json` instead — sidecars are written next to every HTML report by default — but each job will then also write its own summary block (cooperative mode is the default on GitHub Actions).
+- The `--github-summary` block lands on the merge job's summary page — one block for the whole run.
+
+### Merging Reports from Separate Workflow Runs
+
+`tunit-report` only needs a directory of sidecars — which run produced them doesn't matter. To combine results across workflow runs (say, comparing against last night's scheduled run), download the other run's artifacts into the same directory before merging:
+
+```bash
+gh run download <other-run-id> --pattern 'test-reports-*' --dir test-reports
+tunit-report merge --directory test-reports --output combined.html
+```
+
+The same works inside a workflow with `actions/download-artifact@v4` by passing `run-id` and a `github-token`.
 
 ### Tool Reference
 
