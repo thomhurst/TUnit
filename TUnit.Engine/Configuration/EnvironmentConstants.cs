@@ -12,6 +12,17 @@ internal static class EnvironmentConstants
     // TUnit-specific: how long (in days) the auto-uploaded HTML report artifact is kept
     public const string ArtifactRetentionDays = "TUNIT_ARTIFACT_RETENTION_DAYS";
 
+    // TUnit-specific: cross-process report aggregation (issue #4522).
+    // ON by default wherever a shared directory is resolvable (GitHub Actions, or explicit
+    // TUNIT_AGGREGATE_DIR). Values: off/false/0/no/disabled/none = disable;
+    // defer = persist sidecars + merged HTML only (final summary via `tunit-report merge`);
+    // anything else (or unset) = cooperative merge.
+    public const string AggregateReports = "TUNIT_AGGREGATE_REPORTS";
+    // Shared directory for sidecars/merged outputs; auto-derived on GitHub Actions when unset.
+    public const string AggregateDirectory = "TUNIT_AGGREGATE_DIR";
+    // Opts out of the machine-readable JSON sidecar written next to the HTML report.
+    public const string DisableJsonReport = "TUNIT_DISABLE_JSON_REPORT";
+
     // TUnit-specific: Execution
     public const string ExecutionMode = "TUNIT_EXECUTION_MODE";
     public const string MaxParallelTests = "TUNIT_MAX_PARALLEL_TESTS";
@@ -43,6 +54,11 @@ internal static class EnvironmentConstants
     // Repository/organization maximum artifact retention (set by GitHub on the runner).
     // Used to clamp TUNIT_ARTIFACT_RETENTION_DAYS so the API does not reject the request.
     public const string GitHubRetentionDays = "GITHUB_RETENTION_DAYS";
+
+    // GitHub Actions context (for report aggregation scoping)
+    public const string RunnerTemp = "RUNNER_TEMP";
+    public const string GitHubRunAttempt = "GITHUB_RUN_ATTEMPT";
+    public const string GitHubJob = "GITHUB_JOB";
 
     // GitHub Actions context (for CI metadata in reports)
     public const string GitHubSha = "GITHUB_SHA";

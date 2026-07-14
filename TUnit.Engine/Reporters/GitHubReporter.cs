@@ -13,6 +13,7 @@ using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Reporters.Aggregation;
 
 namespace TUnit.Engine.Reporters;
 
@@ -103,11 +104,20 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return Task.CompletedTask;
     }
 
-    public Task AfterRunAsync(int exitCode, CancellationToken cancellation)
+    public async Task AfterRunAsync(int exitCode, CancellationToken cancellation)
     {
         if (_latestUpdates.IsEmpty)
         {
-            return Task.CompletedTask;
+            return;
+        }
+
+        // Cross-process aggregation: sibling processes of one step share the summary file,
+        // so instead of appending one block per suite, rewrite a single merged block from
+        // the sidecars persisted by every suite that has finished so far.
+        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+        if (aggregator is not null && await TryWriteAggregatedSummaryAsync(aggregator, cancellation))
+        {
+            return;
         }
 
         var targetFramework = Assembly.GetExecutingAssembly()
@@ -336,7 +346,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("---");
-            return WriteFile(stringBuilder.ToString());
+            await WriteFile(stringBuilder.ToString());
+            return;
         }
 
         // Cap per group to keep the GitHub step summary within the 1 MB file-size limit
@@ -447,7 +458,53 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         stringBuilder.AppendLine();
         stringBuilder.AppendLine("---");
 
-        return WriteFile(stringBuilder.ToString());
+        await WriteFile(stringBuilder.ToString());
+    }
+
+    /// <summary>
+    /// Writes (or rewrites) the single aggregated summary block. Returns false when this
+    /// process should fall back to the classic per-suite append — e.g. no sidecars exist
+    /// because the HTML reporter (which persists them) is disabled.
+    /// </summary>
+    private async Task<bool> TryWriteAggregatedSummaryAsync(ReportAggregator aggregator, CancellationToken cancellationToken)
+    {
+        if (aggregator.Mode == AggregationMode.Defer)
+        {
+            // Sidecars + merged HTML only; a final `tunit-report merge --github-summary`
+            // step emits the one summary block. Suppress the per-suite block entirely.
+            return true;
+        }
+
+        try
+        {
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (aggregationLock is null)
+            {
+                return true; // A sibling holds the lock and will write a fresher merge.
+            }
+
+            var suites = aggregator.ReadAllSidecars();
+            if (suites.Count == 0)
+            {
+                return false;
+            }
+
+            var serverUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl)
+                ?? EnvironmentConstants.GitHubDefaultServerUrl;
+
+            var content = AggregatedSummaryWriter.Render(
+                suites,
+                collapsible: _reporterStyle == GitHubReporterStyle.Collapsible,
+                serverUrl: serverUrl,
+                mergedReportHint: $"📄 Combined HTML report: `{aggregator.MergedReportPath}` — upload it as an artifact to keep it after the job.");
+
+            return GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Aggregated summary generation failed: {ex.Message}");
+            return true; // Don't double-report by appending a per-suite block on top.
+        }
     }
 
     private async Task WriteFile(string contents)

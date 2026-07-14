@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Single lowest-supported TFM + roll-forward: one tool payload runs on any newer runtime.
+         TargetFrameworks (plural) because Directory.Build.props pre-sets the multi-target default
+         before this file is evaluated; plural wins, so override the same property. -->
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <RollForward>LatestMajor</RollForward>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tunit-report</ToolCommandName>
+    <PackageId>TUnit.Reporting.Tool</PackageId>
+    <Description>Merges TUnit test report sidecars from multiple test projects, target frameworks or CI jobs into a single HTML report and GitHub Actions step summary.</Description>
+    <PackageTags>testing;tunit;report;aggregation;dotnet-tool</PackageTags>
+  </PropertyGroup>
+
+  <!-- The merge pipeline is compiled from the engine's own sources rather than referencing
+       TUnit.Engine: the tool must stay a tiny, dependency-free executable (TUnit.Engine drags
+       in Microsoft.Testing.Platform), and the shared source guarantees the tool reads exactly
+       what the engine writes. Tool-only shims for the few engine-external constants these
+       files use live in Shims.cs. -->
+  <ItemGroup>
+    <Compile Include="..\TUnit.Core\SpanData.cs" Link="Linked\SpanData.cs" />
+    <Compile Include="..\TUnit.Core\Enums\TimelineMode.cs" Link="Linked\TimelineMode.cs" />
+    <Compile Include="..\TUnit.Engine\Configuration\EnvironmentConstants.cs" Link="Linked\EnvironmentConstants.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\SourceControlContext.cs" Link="Linked\SourceControlContext.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportDataModel.cs" Link="Linked\HtmlReportDataModel.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportGenerator.cs" Link="Linked\HtmlReportGenerator.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataJson.cs" Link="Linked\ReportDataJson.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataMerger.cs" Link="Linked\ReportDataMerger.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\AggregatedSummaryWriter.cs" Link="Linked\AggregatedSummaryWriter.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\GitHubSummaryRegion.cs" Link="Linked\GitHubSummaryRegion.cs" />
+    <!-- LogicalName must match HtmlReportGenerator.TemplateResourceName exactly. -->
+    <EmbeddedResource Include="..\TUnit.Engine\Reporters\Html\TestReport.template.html">
+      <LogicalName>TUnit.Engine.Reporters.Html.TestReport.template.html</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

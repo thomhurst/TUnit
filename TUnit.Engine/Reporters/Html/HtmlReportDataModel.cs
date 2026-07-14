@@ -56,6 +56,16 @@ internal sealed class ReportData
 
     [JsonIgnore]
     public SourceLinkTemplates? SourceLinks { get; init; }
+
+    /// <summary>
+    /// Link to this suite's uploaded HTML report artifact, when the in-process GitHub
+    /// upload succeeded. Not part of the HTML renderer JSON — persisted only in the
+    /// aggregation sidecar (see <c>ReportDataJson</c>) so the merged step summary can
+    /// link each suite's individual report. Mutable because the upload happens after
+    /// the report data is built.
+    /// </summary>
+    [JsonIgnore]
+    public string? ArtifactUrl { get; set; }
 }
 
 internal sealed class ReportSummary

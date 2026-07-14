@@ -19,6 +19,7 @@ using TUnit.Engine.Extensions;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Reporters;
+using TUnit.Engine.Reporters.Aggregation;
 
 #pragma warning disable TPEXP
 
@@ -156,12 +157,82 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
 
             // GitHub Actions integration (artifact upload + step summary)
-            await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
+            reportData.ArtifactUrl = await TryGitHubIntegrationAsync(outputPath, testSessionContext.CancellationToken);
+
+            // Machine-readable sidecar + cross-process aggregation. Written after the
+            // GitHub integration so the sidecar carries this suite's artifact URL.
+            await TryWriteSidecarAndAggregateAsync(reportData, outputPath, testSessionContext.CancellationToken);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Warning: HTML report generation failed: {ex.Message}");
         }
+    }
+
+    private async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
+    {
+        if (!IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport)))
+        {
+            try
+            {
+                var sidecarPath = GetSidecarPath(htmlOutputPath);
+                File.WriteAllText(sidecarPath, ReportDataJson.Serialize(reportData), Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to write JSON report sidecar: {ex.Message}");
+            }
+        }
+
+        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
+        if (aggregator is null)
+        {
+            return;
+        }
+
+        try
+        {
+            aggregator.WriteSidecar(reportData, suiteSalt: htmlOutputPath);
+
+            // Every finishing process regenerates the merged report from all sidecars
+            // present so far; the last one to finish leaves the complete aggregate.
+            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
+            if (aggregationLock is null)
+            {
+                return;
+            }
+
+            var suites = aggregator.ReadAllSidecars();
+            if (suites.Count > 0)
+            {
+                aggregator.WriteMergedHtml(suites);
+                Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Report aggregation failed: {ex.Message}");
+        }
+    }
+
+    // Same truthy vocabulary as the TUNIT_DISABLE_* checks in IsEnabledAsync.
+    private static bool IsTruthyEnv(string? value)
+        => value is not null &&
+           (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("1", StringComparison.Ordinal) ||
+            value.Equals("yes", StringComparison.OrdinalIgnoreCase));
+
+    // Default HTML report is "{name}-{os}-{tfm}-report.html"; the sidecar drops the
+    // "-report" stem so the default pair reads "{name}-{os}-{tfm}.tunit-report.json".
+    internal static string GetSidecarPath(string htmlOutputPath)
+    {
+        const string reportSuffix = "-report.html";
+        if (htmlOutputPath.EndsWith(reportSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return htmlOutputPath.Substring(0, htmlOutputPath.Length - reportSuffix.Length) + ReportDataJson.SidecarExtension;
+        }
+
+        return Path.ChangeExtension(htmlOutputPath, null) + ReportDataJson.SidecarExtension;
     }
 
     internal async Task PublishArtifactAsync(string outputPath, SessionUid sessionUid, CancellationToken cancellationToken)
@@ -762,11 +833,12 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
                exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
+    /// <returns>The uploaded artifact's URL, when the in-process upload succeeded.</returns>
+    private async Task<string?> TryGitHubIntegrationAsync(string filePath, CancellationToken cancellationToken)
     {
         if (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubActions) is not "true")
         {
-            return;
+            return null;
         }
 
         var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
@@ -800,18 +872,26 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
         }
 
+        string? artifactUrl = null;
+        if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+        {
+            var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
+            artifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
+        }
+
         if (_githubReporter is not null)
         {
             if (!hasRuntimeToken)
             {
                 _githubReporter.ShowArtifactUploadTip = true;
             }
-            else if (artifactId is not null && !string.IsNullOrEmpty(repo) && !string.IsNullOrEmpty(runId))
+            else if (artifactUrl is not null)
             {
-                var serverUrl = (Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl) ?? EnvironmentConstants.GitHubDefaultServerUrl).TrimEnd('/');
-                _githubReporter.ArtifactUrl = $"{serverUrl}/{repo}/actions/runs/{runId}/artifacts/{artifactId}";
+                _githubReporter.ArtifactUrl = artifactUrl;
             }
         }
+
+        return artifactUrl;
     }
 
     private static int? ParseRetentionDays()

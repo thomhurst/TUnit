@@ -145,6 +145,10 @@ export DISABLE_GITHUB_REPORTER=true
   run: dotnet test
 ```
 
+### Multiple Test Projects
+
+Running several test projects in one pipeline produces one summary section per project. To merge them into a single aggregated block (and a single combined HTML report), see [Aggregated Reports](/docs/guides/report-aggregation).
+
 ### File Size Limitations
 
 The GitHub reporter respects GitHub's file size limits:

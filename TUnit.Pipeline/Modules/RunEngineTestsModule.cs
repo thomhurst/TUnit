@@ -46,6 +46,11 @@ public class RunEngineTestsModule : Module<CommandResult>
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true",
+                // Engine tests spawn hundreds of short-lived child TUnit processes (many
+                // designed to fail). With aggregation on by default in CI, every child
+                // would re-merge the job's shared report on exit — pure overhead here,
+                // and the failures would pollute the job's aggregated summary.
+                ["TUNIT_AGGREGATE_REPORTS"] = "off",
             },
             LogSettings = new CommandLoggingOptions
             {

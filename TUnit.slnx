@@ -29,6 +29,7 @@
     <Project Path="TUnit.Mocks.Http/TUnit.Mocks.Http.csproj" />
     <Project Path="TUnit.Mocks.Logging/TUnit.Mocks.Logging.csproj" />
     <Project Path="TUnit.Playwright/TUnit.Playwright.csproj" />
+    <Project Path="TUnit.Reporting.Tool/TUnit.Reporting.Tool.csproj" />
   </Folder>
 
   <!-- Roslyn analyzers and code fixers -->
