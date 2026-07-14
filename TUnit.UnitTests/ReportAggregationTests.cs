@@ -303,6 +303,32 @@ public class GitHubSummaryRegionTests
     }
 
     [Test]
+    public async Task ReplaceOrAppend_Swaps_Stale_Block_For_Overflow_Notice_When_Over_Limit()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"tunit-summary-{Guid.NewGuid():N}.md");
+        try
+        {
+            File.WriteAllText(path, "## Other tool\nkeep me\n");
+            await Assert.That(GitHubSummaryRegion.ReplaceOrAppend(path, "SMALL-V1", maxFileSizeInBytes: 4096)).IsTrue();
+
+            // A later aggregate that no longer fits must not leave the earlier block
+            // standing — it would misreport which suites ran.
+            var oversized = new string('x', 8192);
+            await Assert.That(GitHubSummaryRegion.ReplaceOrAppend(path, oversized, maxFileSizeInBytes: 4096)).IsFalse();
+
+            var result = File.ReadAllText(path);
+            await Assert.That(result).Contains("## Other tool");
+            await Assert.That(result).DoesNotContain("SMALL-V1");
+            await Assert.That(result).Contains(GitHubSummaryRegion.OverflowNotice);
+            await Assert.That(result).DoesNotContain(oversized);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Test]
     public async Task Splice_After_Torn_Block_Replaces_Only_The_Complete_Block()
     {
         // Torn fragment, then foreign content, then a complete block from a later writer.

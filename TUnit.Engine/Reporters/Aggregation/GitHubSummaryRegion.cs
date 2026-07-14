@@ -47,13 +47,27 @@ internal static class GitHubSummaryRegion
 
         if (Encoding.UTF8.GetByteCount(updated) > maxFileSizeInBytes)
         {
-            Console.WriteLine("Skipping GitHub step summary update: the aggregated summary would exceed the 1MB file size limit.");
+            // Don't leave a previously-written (now stale) block standing — it would
+            // silently misreport which suites ran. Swap the region for a short notice,
+            // which also frees whatever space the old block occupied.
+            updated = Splice(existing, OverflowNotice);
+            if (Encoding.UTF8.GetByteCount(updated) > maxFileSizeInBytes)
+            {
+                Console.WriteLine("Skipping GitHub step summary update: the file is already at GitHub's 1MB size limit.");
+                return false;
+            }
+
+            Console.WriteLine("The aggregated summary would exceed GitHub's 1MB step summary limit; wrote an overflow notice instead.");
+            AtomicFile.WriteAllText(summaryFilePath, updated);
             return false;
         }
 
         AtomicFile.WriteAllText(summaryFilePath, updated);
         return true;
     }
+
+    internal const string OverflowNotice =
+        "> ⚠️ The TUnit aggregated summary was omitted because it would exceed GitHub's 1 MiB step-summary limit. See the merged HTML report for full results.";
 
     /// <summary>
     /// Splices <paramref name="content"/> into <paramref name="existing"/> as a marked block.
