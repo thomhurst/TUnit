@@ -829,7 +829,8 @@ internal static class HtmlReportGenerator
         return sb.Length == 0 ? null : sb.ToString();
     }
 
-    private static long? TryParseUnixMs(string? iso)
+    // Internal (not private): ReportDataMerger reuses this for its wall-clock bounds scan.
+    internal static long? TryParseUnixMs(string? iso)
     {
         if (string.IsNullOrEmpty(iso)) return null;
         return DateTimeOffset.TryParse(

@@ -111,11 +111,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return;
         }
 
-        // Cross-process aggregation: sibling processes of one step share the summary file,
-        // so instead of appending one block per suite, rewrite a single merged block from
-        // the sidecars persisted by every suite that has finished so far.
-        var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable);
-        if (aggregator is not null && await TryWriteAggregatedSummaryAsync(aggregator, cancellation))
+        // Cross-process aggregation replaces per-suite blocks with one merged block; the
+        // whole merge (sidecar write, lock, merged HTML, summary region) runs inside
+        // HtmlReporter's session-finish, which sets this flag and calls back into
+        // WriteAggregatedSummary below. When the flag is unset (aggregation off, or the
+        // HTML reporter — which produces the sidecars — is disabled), append classically.
+        if (SuppressPerSuiteSummary)
         {
             return;
         }
@@ -350,8 +351,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return;
         }
 
-        // Cap per group to keep the GitHub step summary within the 1 MB file-size limit
-        const int maxTestsPerGroup = 50;
+        // Cap per group to keep the GitHub step summary within the 1 MB file-size limit;
+        // shared with the aggregated summary so both views truncate identically.
+        const int maxTestsPerGroup = AggregatedSummaryWriter.MaxTestsPerGroup;
         if (failureMessages.Count > 0)
         {
             stringBuilder.AppendLine();
@@ -462,49 +464,34 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     }
 
     /// <summary>
-    /// Writes (or rewrites) the single aggregated summary block. Returns false when this
-    /// process should fall back to the classic per-suite append — e.g. no sidecars exist
-    /// because the HTML reporter (which persists them) is disabled.
+    /// Set by HtmlReporter once this suite's sidecar is persisted to the shared
+    /// aggregation directory (its session-finish runs before this reporter's
+    /// AfterRunAsync), so the merged block owns the summary instead of per-suite appends.
     /// </summary>
-    private async Task<bool> TryWriteAggregatedSummaryAsync(ReportAggregator aggregator, CancellationToken cancellationToken)
+    internal bool SuppressPerSuiteSummary { get; set; }
+
+    /// <summary>
+    /// Renders the aggregated block and rewrites the marked summary region. Called by
+    /// HtmlReporter inside the aggregation lock, so the whole merge is one lock cycle.
+    /// No-ops when this reporter is disabled (not GitHub Actions / no summary file).
+    /// </summary>
+    internal void WriteAggregatedSummary(IReadOnlyList<Html.ReportData> suites, string mergedReportPath)
     {
-        if (aggregator.Mode == AggregationMode.Defer)
+        if (_outputSummaryFilePath is null)
         {
-            // Sidecars + merged HTML only; a final `tunit-report merge --github-summary`
-            // step emits the one summary block. Suppress the per-suite block entirely.
-            return true;
+            return;
         }
 
-        try
-        {
-            using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
-            if (aggregationLock is null)
-            {
-                return true; // A sibling holds the lock and will write a fresher merge.
-            }
+        var serverUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl)
+            ?? EnvironmentConstants.GitHubDefaultServerUrl;
 
-            var suites = aggregator.ReadAllSidecars();
-            if (suites.Count == 0)
-            {
-                return false;
-            }
+        var content = AggregatedSummaryWriter.Render(
+            suites,
+            collapsible: _reporterStyle == GitHubReporterStyle.Collapsible,
+            serverUrl: serverUrl,
+            mergedReportHint: $"📄 Combined HTML report: `{mergedReportPath}` — upload it as an artifact to keep it after the job.");
 
-            var serverUrl = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubServerUrl)
-                ?? EnvironmentConstants.GitHubDefaultServerUrl;
-
-            var content = AggregatedSummaryWriter.Render(
-                suites,
-                collapsible: _reporterStyle == GitHubReporterStyle.Collapsible,
-                serverUrl: serverUrl,
-                mergedReportHint: $"📄 Combined HTML report: `{aggregator.MergedReportPath}` — upload it as an artifact to keep it after the job.");
-
-            return GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Warning: Aggregated summary generation failed: {ex.Message}");
-            return true; // Don't double-report by appending a per-suite block on top.
-        }
+        GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
     }
 
     private async Task WriteFile(string contents)
@@ -675,15 +662,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         _reporterStyle = style;
     }
 
-    private static string FormatDuration(TimeSpan? duration) => duration switch
-    {
-        null => "-",
-        { TotalMilliseconds: < 1 } => "< 1ms",
-        { TotalSeconds: < 1 } d => $"{d.TotalMilliseconds:F0}ms",
-        { TotalMinutes: < 1 } d => $"{d.TotalSeconds:F1}s",
-        { TotalHours: < 1 } d => $"{d.Minutes}m {d.Seconds}s",
-        var d => $"{(int)d.Value.TotalHours}h {d.Value.Minutes}m"
-    };
+    // Delegates so the per-suite and aggregated summaries can never render durations differently.
+    private static string FormatDuration(TimeSpan? duration)
+        => duration is null ? "-" : AggregatedSummaryWriter.FormatDuration(duration.Value.TotalMilliseconds);
 
     private static string GetExceptionTypeName(IProperty? stateProperty) => stateProperty switch
     {

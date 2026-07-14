@@ -38,7 +38,6 @@ internal sealed class ReportAggregator
 {
     private const string SidecarSearchPattern = "*" + ReportDataJson.SidecarExtension;
     private const string LockFileName = ".tunit-aggregate.lock";
-    private const string MergedReportFileName = "merged-report.html";
 
     // Lock contention is expected (N processes finishing together, each holding the lock
     // for a full merge), so wait far longer than the file-write retry defaults.
@@ -47,7 +46,7 @@ internal sealed class ReportAggregator
 
     internal AggregationMode Mode { get; }
     internal string Directory { get; }
-    internal string MergedReportPath => Path.Combine(Directory, MergedReportFileName);
+    internal string MergedReportPath => Path.Combine(Directory, ReportDataJson.MergedReportFileName);
 
     private ReportAggregator(AggregationMode mode, string directory)
     {
@@ -121,29 +120,19 @@ internal sealed class ReportAggregator
     }
 
     /// <summary>
-    /// Persists this process's report data into the shared directory. The file name is
-    /// stable per suite (assembly + report path hash), so a re-run within the same scope
-    /// overwrites rather than duplicates. Written via temp-file + rename so concurrent
-    /// readers never observe a torn sidecar.
+    /// Persists this process's already-serialized report data into the shared directory.
+    /// The file name is stable per suite (assembly + report path hash), so a re-run within
+    /// the same scope overwrites rather than duplicates. Takes bytes rather than
+    /// <see cref="ReportData"/> so callers writing the sidecar to more than one location
+    /// serialize only once.
     /// </summary>
-    internal string WriteSidecar(ReportData data, string suiteSalt)
+    internal string WriteSidecar(byte[] sidecarUtf8Json, string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
 
-        var fileName = $"{PathValidator.SanitizeFileName(data.AssemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
+        var fileName = $"{PathValidator.SanitizeFileName(assemblyName)}-{ShortHash(suiteSalt)}{ReportDataJson.SidecarExtension}";
         var path = Path.Combine(Directory, fileName);
-        var tempPath = path + "." + Guid.NewGuid().ToString("N").Substring(0, 8) + ".tmp";
-
-        File.WriteAllText(tempPath, ReportDataJson.Serialize(data), Encoding.UTF8);
-#if NET
-        File.Move(tempPath, path, overwrite: true);
-#else
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-        }
-        File.Move(tempPath, path);
-#endif
+        AtomicFile.WriteAllBytes(path, sidecarUtf8Json);
         return path;
     }
 
@@ -163,7 +152,7 @@ internal sealed class ReportAggregator
         {
             try
             {
-                if (ReportDataJson.TryDeserialize(File.ReadAllText(file, Encoding.UTF8)) is { } data)
+                if (ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)File.ReadAllBytes(file)) is { } data)
                 {
                     results.Add(data);
                 }
@@ -225,18 +214,13 @@ internal sealed class ReportAggregator
 
         var merged = ReportDataMerger.Merge(suites);
         var html = HtmlReportGenerator.GenerateHtml(merged);
-        File.WriteAllText(MergedReportPath, html, Encoding.UTF8);
+        AtomicFile.WriteAllText(MergedReportPath, html);
     }
 
     private static string ShortHash(string value)
     {
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
-        var sb = new StringBuilder(8);
-        for (var i = 0; i < 4; i++)
-        {
-            sb.Append(hash[i].ToString("x2"));
-        }
-        return sb.ToString();
+        return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
     }
 }

@@ -43,11 +43,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     public async Task<bool> IsEnabledAsync()
     {
-        var disableValue = Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter);
-        if (disableValue is not null &&
-            (disableValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
-             disableValue.Equals("1", StringComparison.Ordinal) ||
-             disableValue.Equals("yes", StringComparison.OrdinalIgnoreCase)))
+        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableHtmlReporter)))
         {
             return false;
         }
@@ -171,12 +167,14 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
     private async Task TryWriteSidecarAndAggregateAsync(ReportData reportData, string htmlOutputPath, CancellationToken cancellationToken)
     {
+        // Serialized once; the same bytes back both the local sidecar and the shared copy.
+        var sidecarBytes = ReportDataJson.SerializeToBytes(reportData);
+
         if (!IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableJsonReport)))
         {
             try
             {
-                var sidecarPath = GetSidecarPath(htmlOutputPath);
-                File.WriteAllText(sidecarPath, ReportDataJson.Serialize(reportData), Encoding.UTF8);
+                AtomicFile.WriteAllBytes(GetSidecarPath(htmlOutputPath), sidecarBytes);
             }
             catch (Exception ex)
             {
@@ -192,9 +190,18 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
 
         try
         {
-            aggregator.WriteSidecar(reportData, suiteSalt: htmlOutputPath);
+            aggregator.WriteSidecar(sidecarBytes, reportData.AssemblyName, suiteSalt: htmlOutputPath);
 
-            // Every finishing process regenerates the merged report from all sidecars
+            // Aggregation is committed for this suite: whatever happens below, the classic
+            // per-suite block must not be appended on top of the aggregated one. (If we
+            // fail past this point, a sibling that merges after us still renders this
+            // suite's results from the sidecar just written.)
+            if (_githubReporter is not null)
+            {
+                _githubReporter.SuppressPerSuiteSummary = true;
+            }
+
+            // Every finishing process regenerates the merged outputs from all sidecars
             // present so far; the last one to finish leaves the complete aggregate.
             using var aggregationLock = await aggregator.AcquireLockAsync(cancellationToken);
             if (aggregationLock is null)
@@ -203,10 +210,19 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             }
 
             var suites = aggregator.ReadAllSidecars();
-            if (suites.Count > 0)
+            if (suites.Count == 0)
             {
-                aggregator.WriteMergedHtml(suites);
-                Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+                return;
+            }
+
+            aggregator.WriteMergedHtml(suites);
+            Console.WriteLine($"Merged HTML test report ({suites.Count} {(suites.Count == 1 ? "suite" : "suites")} so far) written to: {aggregator.MergedReportPath}");
+
+            // The step summary is rewritten in the same lock cycle: one env parse, one
+            // lock acquisition and one sidecar scan per process for both merged outputs.
+            if (aggregator.Mode == AggregationMode.Cooperative)
+            {
+                _githubReporter?.WriteAggregatedSummary(suites, aggregator.MergedReportPath);
             }
         }
         catch (Exception ex)
@@ -215,7 +231,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
         }
     }
 
-    // Same truthy vocabulary as the TUNIT_DISABLE_* checks in IsEnabledAsync.
+    // The truthy vocabulary shared by the TUNIT_DISABLE_* switches.
     private static bool IsTruthyEnv(string? value)
         => value is not null &&
            (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||

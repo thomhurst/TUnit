@@ -19,15 +19,18 @@
   <!-- The merge pipeline is compiled from the engine's own sources rather than referencing
        TUnit.Engine: the tool must stay a tiny, dependency-free executable (TUnit.Engine drags
        in Microsoft.Testing.Platform), and the shared source guarantees the tool reads exactly
-       what the engine writes. Tool-only shims for the few engine-external constants these
-       files use live in Shims.cs. -->
+       what the engine writes. The two *.Constants.cs partials exist specifically so this
+       project can link the real constant values instead of maintaining drift-prone copies. -->
   <ItemGroup>
     <Compile Include="..\TUnit.Core\SpanData.cs" Link="Linked\SpanData.cs" />
     <Compile Include="..\TUnit.Core\Enums\TimelineMode.cs" Link="Linked\TimelineMode.cs" />
+    <Compile Include="..\TUnit.Core\TUnitActivitySource.ReportConstants.cs" Link="Linked\TUnitActivitySource.ReportConstants.cs" />
+    <Compile Include="..\TUnit.Core\Attributes\TestMetadata\ClassTimelineAttribute.Constants.cs" Link="Linked\ClassTimelineAttribute.Constants.cs" />
     <Compile Include="..\TUnit.Engine\Configuration\EnvironmentConstants.cs" Link="Linked\EnvironmentConstants.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\SourceControlContext.cs" Link="Linked\SourceControlContext.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportDataModel.cs" Link="Linked\HtmlReportDataModel.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Html\HtmlReportGenerator.cs" Link="Linked\HtmlReportGenerator.cs" />
+    <Compile Include="..\TUnit.Engine\Reporters\Aggregation\AtomicFile.cs" Link="Linked\AtomicFile.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataJson.cs" Link="Linked\ReportDataJson.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\ReportDataMerger.cs" Link="Linked\ReportDataMerger.cs" />
     <Compile Include="..\TUnit.Engine\Reporters\Aggregation\AggregatedSummaryWriter.cs" Link="Linked\AggregatedSummaryWriter.cs" />

@@ -29,7 +29,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly)]
-public sealed class ClassTimelineAttribute(TimelineMode mode) : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute
+public sealed partial class ClassTimelineAttribute(TimelineMode mode) : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute
 {
     /// <summary>The timeline rendering mode to apply.</summary>
     public TimelineMode Mode { get; } = mode;
@@ -47,9 +47,4 @@ public sealed class ClassTimelineAttribute(TimelineMode mode) : TUnitAttribute, 
         return default;
     }
 
-    /// <summary>
-    /// Custom-property key used to round-trip the chosen <see cref="TimelineMode"/> into
-    /// <c>TestDetails.CustomProperties</c> so the HTML reporter can read it back per class.
-    /// </summary>
-    internal const string ClassTimelinePropertyKey = "tunit.report.timeline";
 }

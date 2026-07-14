@@ -22,13 +22,20 @@ internal static class GitHubSummaryRegion
     internal const string EndMarker = "<!-- tunit:aggregated-summary:end -->";
 
     /// <summary>
+    /// GitHub truncates step summaries above 1 MiB. Lives here (rather than only in
+    /// EngineDefaults, which isn't source-linked into the tool) so the engine and
+    /// <c>tunit-report</c> enforce the same cap.
+    /// </summary>
+    internal const long MaxFileSizeInBytes = 1024 * 1024;
+
+    /// <summary>
     /// Replaces the marked region in <paramref name="summaryFilePath"/> with
     /// <paramref name="content"/>, appending a new marked region when none exists.
     /// Returns false when the file is missing or would exceed
     /// <paramref name="maxFileSizeInBytes"/>. Callers hold the aggregation lock, which
     /// serialises all TUnit writers.
     /// </summary>
-    internal static bool ReplaceOrAppend(string summaryFilePath, string content, long maxFileSizeInBytes)
+    internal static bool ReplaceOrAppend(string summaryFilePath, string content, long maxFileSizeInBytes = MaxFileSizeInBytes)
     {
         if (!File.Exists(summaryFilePath))
         {
@@ -44,7 +51,7 @@ internal static class GitHubSummaryRegion
             return false;
         }
 
-        WriteAtomically(summaryFilePath, updated);
+        AtomicFile.WriteAllText(summaryFilePath, updated);
         return true;
     }
 
@@ -79,31 +86,5 @@ internal static class GitHubSummaryRegion
         }
 
         return existing.Substring(0, start) + block + existing.Substring(afterEnd);
-    }
-
-    // Rewriting in place risks a truncated file if this process dies mid-write — which
-    // would lose other tools' sections, not just ours. Stage to a sibling temp file and
-    // swap; File.Replace is atomic on the same volume. Fall back to an in-place write on
-    // filesystems that reject Replace (e.g. some network mounts).
-    private static void WriteAtomically(string path, string content)
-    {
-        var tempPath = path + "." + Guid.NewGuid().ToString("N").Substring(0, 8) + ".tmp";
-        File.WriteAllText(tempPath, content, Encoding.UTF8);
-        try
-        {
-            File.Replace(tempPath, path, destinationBackupFileName: null, ignoreMetadataErrors: true);
-        }
-        catch (Exception ex) when (ex is IOException or PlatformNotSupportedException or UnauthorizedAccessException)
-        {
-            File.WriteAllText(path, content, Encoding.UTF8);
-            try
-            {
-                File.Delete(tempPath);
-            }
-            catch (IOException)
-            {
-                // Best effort; a stray .tmp in the summary directory is harmless.
-            }
-        }
     }
 }

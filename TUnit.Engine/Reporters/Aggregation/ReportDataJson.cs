@@ -26,15 +26,25 @@ internal static class ReportDataJson
     /// <summary>File extension shared by every sidecar so aggregators can discover them.</summary>
     internal const string SidecarExtension = ".tunit-report.json";
 
-    internal static string Serialize(ReportData data)
+    /// <summary>Merged HTML report filename, shared by the engine and the tool's default output.</summary>
+    internal const string MergedReportFileName = "merged-report.html";
+
+    /// <summary>
+    /// Serializes straight to UTF-8 bytes — callers write the same payload to more than one
+    /// file, so producing bytes once avoids a UTF-8 → string → UTF-8 round trip per copy.
+    /// </summary>
+    internal static byte[] SerializeToBytes(ReportData data)
     {
         using var ms = new MemoryStream();
         using (var w = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = false }))
         {
             Write(w, data);
         }
-        return Encoding.UTF8.GetString(ms.GetBuffer(), 0, checked((int)ms.Length));
+        return ms.ToArray();
     }
+
+    internal static string Serialize(ReportData data)
+        => Encoding.UTF8.GetString(SerializeToBytes(data));
 
     private static void Write(Utf8JsonWriter w, ReportData data)
     {
@@ -265,49 +275,64 @@ internal static class ReportDataJson
         try
         {
             using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            if (root.ValueKind != JsonValueKind.Object) return null;
-            if (!root.TryGetProperty("schemaVersion", out var version)
-                || version.ValueKind != JsonValueKind.Number
-                || version.GetInt32() > SchemaVersion)
-            {
-                return null;
-            }
-
-            return new ReportData
-            {
-                AssemblyName = GetString(root, "assemblyName") ?? "Unknown",
-                MachineName = GetString(root, "machineName") ?? "",
-                Timestamp = GetString(root, "timestamp") ?? "",
-                TUnitVersion = GetString(root, "tunitVersion") ?? "",
-                OperatingSystem = GetString(root, "operatingSystem") ?? "",
-                RuntimeVersion = GetString(root, "runtimeVersion") ?? "",
-                Filter = GetString(root, "filter"),
-                TotalDurationMs = GetDouble(root, "totalDurationMs"),
-                ArtifactUrl = GetString(root, "artifactUrl"),
-                CommitSha = GetString(root, "commitSha"),
-                Branch = GetString(root, "branch"),
-                PullRequestNumber = GetString(root, "pullRequestNumber"),
-                RepositorySlug = GetString(root, "repositorySlug"),
-                SourceLinks = root.TryGetProperty("sourceLinks", out var sourceLinks)
-                              && sourceLinks.ValueKind == JsonValueKind.Object
-                              && GetString(sourceLinks, "lineUrl") is { } lineUrl
-                              && GetString(sourceLinks, "rangeUrl") is { } rangeUrl
-                    ? new SourceLinkTemplates(lineUrl, rangeUrl, GetString(sourceLinks, "rawUrl"))
-                    : null,
-                Summary = root.TryGetProperty("summary", out var summary) ? ReadSummary(summary) : new ReportSummary(),
-                Groups = root.TryGetProperty("groups", out var groups) && groups.ValueKind == JsonValueKind.Array
-                    ? ReadGroups(groups)
-                    : [],
-                Spans = root.TryGetProperty("spans", out var spans) && spans.ValueKind == JsonValueKind.Array
-                    ? ReadSpans(spans)
-                    : null,
-            };
+            return Read(doc);
         }
         catch (JsonException)
         {
             return null;
         }
+    }
+
+    /// <inheritdoc cref="TryDeserialize(string)"/>
+    internal static ReportData? TryDeserialize(ReadOnlyMemory<byte> utf8Json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(utf8Json);
+            return Read(doc);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    private static ReportData? Read(JsonDocument doc)
+    {
+        var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object) return null;
+        if (!root.TryGetProperty("schemaVersion", out var version)
+            || version.ValueKind != JsonValueKind.Number
+            || version.GetInt32() > SchemaVersion)
+        {
+            return null;
+        }
+
+        return new ReportData
+        {
+            AssemblyName = GetString(root, "assemblyName") ?? "Unknown",
+            MachineName = GetString(root, "machineName") ?? "",
+            Timestamp = GetString(root, "timestamp") ?? "",
+            TUnitVersion = GetString(root, "tunitVersion") ?? "",
+            OperatingSystem = GetString(root, "operatingSystem") ?? "",
+            RuntimeVersion = GetString(root, "runtimeVersion") ?? "",
+            Filter = GetString(root, "filter"),
+            TotalDurationMs = GetDouble(root, "totalDurationMs"),
+            ArtifactUrl = GetString(root, "artifactUrl"),
+            CommitSha = GetString(root, "commitSha"),
+            Branch = GetString(root, "branch"),
+            PullRequestNumber = GetString(root, "pullRequestNumber"),
+            RepositorySlug = GetString(root, "repositorySlug"),
+            SourceLinks = root.TryGetProperty("sourceLinks", out var sourceLinks)
+                          && sourceLinks.ValueKind == JsonValueKind.Object
+                          && GetString(sourceLinks, "lineUrl") is { } lineUrl
+                          && GetString(sourceLinks, "rangeUrl") is { } rangeUrl
+                ? new SourceLinkTemplates(lineUrl, rangeUrl, GetString(sourceLinks, "rawUrl"))
+                : null,
+            Summary = root.TryGetProperty("summary", out var summary) ? ReadSummary(summary) : new ReportSummary(),
+            Groups = ReadArray(root, "groups", ReadGroup) ?? [],
+            Spans = ReadArray(root, "spans", ReadSpan),
+        };
     }
 
     private static ReportSummary ReadSummary(JsonElement e) => new()
@@ -321,85 +346,69 @@ internal static class ReportDataJson
         Flaky = GetInt(e, "flaky"),
     };
 
-    private static ReportTestGroup[] ReadGroups(JsonElement array)
+    // Every array in the schema materializes the same way; the mapper is the only
+    // per-type piece. AOT-safe — plain generic instantiation, no reflection.
+    private static T[]? ReadArray<T>(JsonElement parent, string name, Func<JsonElement, T> map)
     {
-        var groups = new ReportTestGroup[array.GetArrayLength()];
-        var i = 0;
-        foreach (var g in array.EnumerateArray())
-        {
-            groups[i++] = new ReportTestGroup
-            {
-                ClassName = GetString(g, "className") ?? "UnknownClass",
-                Namespace = GetString(g, "namespace") ?? "",
-                Summary = g.TryGetProperty("summary", out var summary) ? ReadSummary(summary) : new ReportSummary(),
-                Tests = g.TryGetProperty("tests", out var tests) && tests.ValueKind == JsonValueKind.Array
-                    ? ReadTests(tests)
-                    : [],
-            };
-        }
-        return groups;
-    }
-
-    private static ReportTestResult[] ReadTests(JsonElement array)
-    {
-        var tests = new ReportTestResult[array.GetArrayLength()];
-        var i = 0;
-        foreach (var t in array.EnumerateArray())
-        {
-            tests[i++] = new ReportTestResult
-            {
-                Id = GetString(t, "id") ?? "",
-                DisplayName = GetString(t, "displayName") ?? "",
-                MethodName = GetString(t, "methodName") ?? "",
-                ClassName = GetString(t, "className") ?? "UnknownClass",
-                Status = GetString(t, "status") ?? "unknown",
-                DurationMs = GetDouble(t, "durationMs"),
-                StartTime = GetString(t, "startTime"),
-                EndTime = GetString(t, "endTime"),
-                Exception = t.TryGetProperty("exception", out var ex) && ex.ValueKind == JsonValueKind.Object
-                    ? ReadException(ex)
-                    : null,
-                Output = GetString(t, "output"),
-                ErrorOutput = GetString(t, "errorOutput"),
-                Categories = ReadStringArray(t, "categories"),
-                CustomProperties = ReadKeyValues(t, "customProperties"),
-                FilePath = GetString(t, "filePath"),
-                LineNumber = GetNullableInt(t, "lineNumber"),
-                EndLineNumber = GetNullableInt(t, "endLineNumber"),
-                SourceRelativePath = GetString(t, "sourceRelativePath"),
-                SkipReason = GetString(t, "skipReason"),
-                RetryAttempt = GetInt(t, "retryAttempt"),
-                Attempts = ReadAttempts(t),
-                TraceId = GetString(t, "traceId"),
-                SpanId = GetString(t, "spanId"),
-                AdditionalTraceIds = ReadStringArray(t, "additionalTraceIds"),
-            };
-        }
-        return tests;
-    }
-
-    private static ReportAttempt[]? ReadAttempts(JsonElement test)
-    {
-        if (!test.TryGetProperty("attempts", out var array) || array.ValueKind != JsonValueKind.Array)
+        if (!parent.TryGetProperty(name, out var array) || array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
-        var attempts = new ReportAttempt[array.GetArrayLength()];
+        var result = new T[array.GetArrayLength()];
         var i = 0;
-        foreach (var a in array.EnumerateArray())
+        foreach (var item in array.EnumerateArray())
         {
-            attempts[i++] = new ReportAttempt
-            {
-                Status = GetString(a, "status") ?? "unknown",
-                DurationMs = GetDouble(a, "durationMs"),
-                ExceptionType = GetString(a, "exceptionType"),
-                ExceptionMessage = GetString(a, "exceptionMessage"),
-                StackTrace = GetString(a, "stackTrace"),
-            };
+            result[i++] = map(item);
         }
-        return attempts;
+        return result;
     }
+
+    private static ReportTestGroup ReadGroup(JsonElement g) => new()
+    {
+        ClassName = GetString(g, "className") ?? "UnknownClass",
+        Namespace = GetString(g, "namespace") ?? "",
+        Summary = g.TryGetProperty("summary", out var summary) ? ReadSummary(summary) : new ReportSummary(),
+        Tests = ReadArray(g, "tests", ReadTest) ?? [],
+    };
+
+    private static ReportTestResult ReadTest(JsonElement t) => new()
+    {
+        Id = GetString(t, "id") ?? "",
+        DisplayName = GetString(t, "displayName") ?? "",
+        MethodName = GetString(t, "methodName") ?? "",
+        ClassName = GetString(t, "className") ?? "UnknownClass",
+        Status = GetString(t, "status") ?? "unknown",
+        DurationMs = GetDouble(t, "durationMs"),
+        StartTime = GetString(t, "startTime"),
+        EndTime = GetString(t, "endTime"),
+        Exception = t.TryGetProperty("exception", out var ex) && ex.ValueKind == JsonValueKind.Object
+            ? ReadException(ex)
+            : null,
+        Output = GetString(t, "output"),
+        ErrorOutput = GetString(t, "errorOutput"),
+        Categories = ReadArray(t, "categories", ReadString),
+        CustomProperties = ReadArray(t, "customProperties", ReadKeyValue),
+        FilePath = GetString(t, "filePath"),
+        LineNumber = GetNullableInt(t, "lineNumber"),
+        EndLineNumber = GetNullableInt(t, "endLineNumber"),
+        SourceRelativePath = GetString(t, "sourceRelativePath"),
+        SkipReason = GetString(t, "skipReason"),
+        RetryAttempt = GetInt(t, "retryAttempt"),
+        Attempts = ReadArray(t, "attempts", ReadAttempt),
+        TraceId = GetString(t, "traceId"),
+        SpanId = GetString(t, "spanId"),
+        AdditionalTraceIds = ReadArray(t, "additionalTraceIds", ReadString),
+    };
+
+    private static ReportAttempt ReadAttempt(JsonElement a) => new()
+    {
+        Status = GetString(a, "status") ?? "unknown",
+        DurationMs = GetDouble(a, "durationMs"),
+        ExceptionType = GetString(a, "exceptionType"),
+        ExceptionMessage = GetString(a, "exceptionMessage"),
+        StackTrace = GetString(a, "stackTrace"),
+    };
 
     private static ReportExceptionData ReadException(JsonElement e) => new()
     {
@@ -411,109 +420,45 @@ internal static class ReportDataJson
             : null,
     };
 
-    private static SpanData[] ReadSpans(JsonElement array)
+    private static SpanData ReadSpan(JsonElement s) => new()
     {
-        var spans = new SpanData[array.GetArrayLength()];
-        var i = 0;
-        foreach (var s in array.EnumerateArray())
-        {
-            spans[i++] = new SpanData
-            {
-                TraceId = GetString(s, "traceId") ?? "",
-                SpanId = GetString(s, "spanId") ?? "",
-                ParentSpanId = GetString(s, "parentSpanId"),
-                Name = GetString(s, "name") ?? "",
-                SpanType = GetString(s, "spanType"),
-                Source = GetString(s, "source") ?? "",
-                Kind = GetString(s, "kind") ?? "",
-                StartTimeMs = GetDouble(s, "startTimeMs"),
-                DurationMs = GetDouble(s, "durationMs"),
-                Status = GetString(s, "status") ?? "Unset",
-                StatusMessage = GetString(s, "statusMessage"),
-                Tags = ReadKeyValues(s, "tags"),
-                Events = ReadEvents(s),
-                Links = ReadLinks(s),
-            };
-        }
-        return spans;
-    }
+        TraceId = GetString(s, "traceId") ?? "",
+        SpanId = GetString(s, "spanId") ?? "",
+        ParentSpanId = GetString(s, "parentSpanId"),
+        Name = GetString(s, "name") ?? "",
+        SpanType = GetString(s, "spanType"),
+        Source = GetString(s, "source") ?? "",
+        Kind = GetString(s, "kind") ?? "",
+        StartTimeMs = GetDouble(s, "startTimeMs"),
+        DurationMs = GetDouble(s, "durationMs"),
+        Status = GetString(s, "status") ?? "Unset",
+        StatusMessage = GetString(s, "statusMessage"),
+        Tags = ReadArray(s, "tags", ReadKeyValue),
+        Events = ReadArray(s, "events", ReadEvent),
+        Links = ReadArray(s, "links", ReadLink),
+    };
 
-    private static SpanEvent[]? ReadEvents(JsonElement span)
+    private static SpanEvent ReadEvent(JsonElement e) => new()
     {
-        if (!span.TryGetProperty("events", out var array) || array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
+        Name = GetString(e, "name") ?? "",
+        TimestampMs = GetDouble(e, "timestampMs"),
+        Tags = ReadArray(e, "tags", ReadKeyValue),
+    };
 
-        var events = new SpanEvent[array.GetArrayLength()];
-        var i = 0;
-        foreach (var e in array.EnumerateArray())
-        {
-            events[i++] = new SpanEvent
-            {
-                Name = GetString(e, "name") ?? "",
-                TimestampMs = GetDouble(e, "timestampMs"),
-                Tags = ReadKeyValues(e, "tags"),
-            };
-        }
-        return events;
-    }
-
-    private static SpanLink[]? ReadLinks(JsonElement span)
+    private static SpanLink ReadLink(JsonElement l) => new()
     {
-        if (!span.TryGetProperty("links", out var array) || array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
+        TraceId = GetString(l, "traceId") ?? "",
+        SpanId = GetString(l, "spanId") ?? "",
+    };
 
-        var links = new SpanLink[array.GetArrayLength()];
-        var i = 0;
-        foreach (var l in array.EnumerateArray())
-        {
-            links[i++] = new SpanLink
-            {
-                TraceId = GetString(l, "traceId") ?? "",
-                SpanId = GetString(l, "spanId") ?? "",
-            };
-        }
-        return links;
-    }
-
-    private static ReportKeyValue[]? ReadKeyValues(JsonElement parent, string name)
+    private static ReportKeyValue ReadKeyValue(JsonElement kv) => new()
     {
-        if (!parent.TryGetProperty(name, out var array) || array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
+        Key = GetString(kv, "key") ?? "",
+        Value = GetString(kv, "value") ?? "",
+    };
 
-        var values = new ReportKeyValue[array.GetArrayLength()];
-        var i = 0;
-        foreach (var kv in array.EnumerateArray())
-        {
-            values[i++] = new ReportKeyValue
-            {
-                Key = GetString(kv, "key") ?? "",
-                Value = GetString(kv, "value") ?? "",
-            };
-        }
-        return values;
-    }
-
-    private static string[]? ReadStringArray(JsonElement parent, string name)
-    {
-        if (!parent.TryGetProperty(name, out var array) || array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        var values = new string[array.GetArrayLength()];
-        var i = 0;
-        foreach (var v in array.EnumerateArray())
-        {
-            values[i++] = v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
-        }
-        return values;
-    }
+    private static string ReadString(JsonElement v)
+        => v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
 
     private static string? GetString(JsonElement e, string name)
         => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;

@@ -52,13 +52,7 @@ internal static class ReportDataMerger
         {
             var suite = ordered[suiteIndex];
 
-            summary.Total += suite.Summary.Total;
-            summary.Passed += suite.Summary.Passed;
-            summary.Failed += suite.Summary.Failed;
-            summary.Skipped += suite.Summary.Skipped;
-            summary.Cancelled += suite.Summary.Cancelled;
-            summary.TimedOut += suite.Summary.TimedOut;
-            summary.Flaky += suite.Summary.Flaky;
+            summary.Add(suite.Summary);
 
             foreach (var group in suite.Groups)
             {
@@ -81,7 +75,6 @@ internal static class ReportDataMerger
             }
         }
 
-        var first = ordered[0];
         return new ReportData
         {
             AssemblyName = $"{ordered.Length} Test Suites",
@@ -152,35 +145,39 @@ internal static class ReportDataMerger
         var result = new ReportTestResult[tests.Length];
         for (var i = 0; i < tests.Length; i++)
         {
-            var t = tests[i];
-            result[i] = new ReportTestResult
+            result[i] = tests[i] with
             {
-                Id = $"s{suiteIndex}::{t.Id}",
-                DisplayName = t.DisplayName,
-                MethodName = t.MethodName,
+                Id = $"s{suiteIndex}::{tests[i].Id}",
                 ClassName = className,
-                Status = t.Status,
-                DurationMs = t.DurationMs,
-                StartTime = t.StartTime,
-                EndTime = t.EndTime,
-                Exception = t.Exception,
-                Output = t.Output,
-                ErrorOutput = t.ErrorOutput,
-                Categories = t.Categories,
-                CustomProperties = t.CustomProperties,
-                FilePath = t.FilePath,
-                LineNumber = t.LineNumber,
-                EndLineNumber = t.EndLineNumber,
-                SourceRelativePath = t.SourceRelativePath,
-                SkipReason = t.SkipReason,
-                RetryAttempt = t.RetryAttempt,
-                Attempts = t.Attempts,
-                TraceId = t.TraceId,
-                SpanId = t.SpanId,
-                AdditionalTraceIds = t.AdditionalTraceIds,
             };
         }
         return result;
+    }
+
+    /// <summary>
+    /// A suite's wall-clock bounds in unix ms, from its tests' absolute start timestamps;
+    /// <see langword="null"/> when no test carries one. Computed once per suite so callers
+    /// rendering both per-suite and whole-run durations parse each timestamp only once.
+    /// </summary>
+    internal static (long StartMs, long EndMs)? ComputeWallClockBounds(ReportData suite)
+    {
+        var earliest = long.MaxValue;
+        var latest = long.MinValue;
+        foreach (var group in suite.Groups)
+        {
+            foreach (var test in group.Tests)
+            {
+                if (HtmlReportGenerator.TryParseUnixMs(test.StartTime) is not { } startMs)
+                {
+                    continue;
+                }
+
+                var endMs = startMs + (long)Math.Round(test.DurationMs);
+                if (startMs < earliest) earliest = startMs;
+                if (endMs > latest) latest = endMs;
+            }
+        }
+        return earliest == long.MaxValue ? null : (earliest, latest);
     }
 
     /// <summary>
@@ -193,41 +190,25 @@ internal static class ReportDataMerger
     {
         var earliest = long.MaxValue;
         var latest = long.MinValue;
+        double maxSuiteDuration = 0;
         foreach (var suite in suites)
         {
-            foreach (var group in suite.Groups)
+            if (suite.TotalDurationMs > maxSuiteDuration)
             {
-                foreach (var test in group.Tests)
-                {
-                    if (!TryParseIso(test.StartTime, out var start))
-                    {
-                        continue;
-                    }
-
-                    var startMs = start.ToUnixTimeMilliseconds();
-                    var endMs = startMs + (long)Math.Round(test.DurationMs);
-                    if (startMs < earliest) earliest = startMs;
-                    if (endMs > latest) latest = endMs;
-                }
+                maxSuiteDuration = suite.TotalDurationMs;
             }
+
+            if (ComputeWallClockBounds(suite) is not { } bounds)
+            {
+                continue;
+            }
+
+            if (bounds.StartMs < earliest) earliest = bounds.StartMs;
+            if (bounds.EndMs > latest) latest = bounds.EndMs;
         }
 
-        if (earliest != long.MaxValue)
-        {
-            return latest - earliest;
-        }
-
-        double max = 0;
-        foreach (var suite in suites)
-        {
-            if (suite.TotalDurationMs > max) max = suite.TotalDurationMs;
-        }
-        return max;
+        return earliest == long.MaxValue ? maxSuiteDuration : latest - earliest;
     }
-
-    private static bool TryParseIso(string? value, out DateTimeOffset parsed)
-        => DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture,
-            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out parsed);
 
     // ReportData.Timestamp is a display string; parse with its exact write format
     // (HtmlReporter uses "dd MMM yyyy, HH:mm:ss 'UTC'") to pick the earliest suite.
@@ -249,27 +230,7 @@ internal static class ReportDataMerger
         return best;
     }
 
-    private static string JoinDistinct(IReadOnlyList<ReportData> suites, Func<ReportData, string> selector)
-    {
-        var distinct = new List<string>();
-        foreach (var suite in suites)
-        {
-            var value = selector(suite);
-            if (!string.IsNullOrEmpty(value) && !distinct.Contains(value))
-            {
-                distinct.Add(value);
-            }
-        }
-
-        return distinct.Count switch
-        {
-            0 => "",
-            <= 3 => string.Join(", ", distinct),
-            _ => $"{distinct[0]}, {distinct[1]} +{distinct.Count - 2} more",
-        };
-    }
-
-    private static string? JoinDistinctOrNull(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
+    private static List<string> DistinctNonEmpty(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
     {
         var distinct = new List<string>();
         foreach (var suite in suites)
@@ -280,6 +241,23 @@ internal static class ReportDataMerger
                 distinct.Add(value!);
             }
         }
+        return distinct;
+    }
+
+    private static string JoinDistinct(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
+    {
+        var distinct = DistinctNonEmpty(suites, selector);
+        return distinct.Count switch
+        {
+            0 => "",
+            <= 3 => string.Join(", ", distinct),
+            _ => $"{distinct[0]}, {distinct[1]} +{distinct.Count - 2} more",
+        };
+    }
+
+    private static string? JoinDistinctOrNull(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
+    {
+        var distinct = DistinctNonEmpty(suites, selector);
         return distinct.Count == 0 ? null : string.Join("; ", distinct);
     }
 

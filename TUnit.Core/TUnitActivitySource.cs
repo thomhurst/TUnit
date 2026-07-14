@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace TUnit.Core;
 
-public static class TUnitActivitySource
+public static partial class TUnitActivitySource
 {
     private static readonly string Version =
         typeof(TUnitActivitySource).Assembly.GetName().Version?.ToString() ?? "0.0.0";
@@ -28,12 +28,8 @@ public static class TUnitActivitySource
     internal static readonly ActivitySource Source = new(SourceName, Version);
     internal static readonly ActivitySource LifecycleSource = new(LifecycleSourceName, Version);
 
-    // Span names used across the engine and HTML report.
-    internal const string SpanTestSession = "test session";
-    internal const string SpanTestAssembly = "test assembly";
-    internal const string SpanTestSuite = "test suite";
-    internal const string SpanTestCase = "test case";
-    internal const string SpanTestBody = "test body";
+    // Span names live in TUnitActivitySource.ReportConstants.cs — a constants-only partial
+    // that TUnit.Reporting.Tool source-links (see that file's header before moving members).
 
     // Tag and baggage keys used across init/dispose spans, HTML report, and cross-boundary correlation.
 
@@ -45,7 +41,6 @@ public static class TUnitActivitySource
     public const string TagTestId = "tunit.test.id";
     internal const string TagSessionId = "tunit.session.id";
     internal const string TagTestFilter = "tunit.filter";
-    internal const string TagTestClass = "tunit.test.class";
     internal const string TagTestMethod = "tunit.test.method";
     internal const string TagTestNodeUid = "tunit.test.node_uid";
     internal const string TagTestCategories = "tunit.test.categories";
@@ -57,7 +52,6 @@ public static class TUnitActivitySource
     internal const string TagTestCaseResultStatus = "test.case.result.status";
     internal const string TagTestRetryAttempt = "tunit.test.retry_attempt";
     internal const string TagTestSkipReason = "tunit.test.skip_reason";
-    internal const string TagTraceScope = "tunit.trace.scope";
 
     /// <summary>
     /// Returns a human-readable type name suitable for span labels.

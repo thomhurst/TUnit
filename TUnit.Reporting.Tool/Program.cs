@@ -7,8 +7,6 @@ namespace TUnit.Reporting.Tool;
 
 internal static class Program
 {
-    private const long GitHubSummaryMaxFileSizeBytes = 1L * 1024L * 1024L; // GitHub's step summary cap
-
     private const string Usage =
         """
         tunit-report — merge TUnit test reports from multiple test projects into one.
@@ -125,7 +123,7 @@ internal static class Program
         }
 
         var merged = ReportDataMerger.Merge(suites);
-        output ??= Path.Combine(directory, "merged-report.html");
+        output ??= Path.Combine(directory, ReportDataJson.MergedReportFileName);
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output))!);
         File.WriteAllText(output, HtmlReportGenerator.GenerateHtml(merged), Encoding.UTF8);
 
@@ -147,17 +145,19 @@ internal static class Program
         var skipped = 0;
         // The same suite's sidecar can appear twice in one tree (the copy next to the HTML
         // report plus the copy in a TUNIT_AGGREGATE_DIR inside the scanned directory).
-        // Both are byte-identical output of the same writer, so dedupe on content.
-        var seenContent = new HashSet<string>(StringComparer.Ordinal);
+        // Both are byte-identical output of the same writer, so dedupe on a content hash —
+        // digests, not whole file bodies, are what stays alive across the scan.
+        var seenDigests = new HashSet<string>(StringComparer.Ordinal);
+        using var sha = System.Security.Cryptography.SHA256.Create();
         foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, SearchOption.AllDirectories))
         {
-            var json = File.ReadAllText(file, Encoding.UTF8);
-            if (!seenContent.Add(json))
+            var bytes = File.ReadAllBytes(file);
+            if (!seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes))))
             {
                 continue;
             }
 
-            if (ReportDataJson.TryDeserialize(json) is { } data)
+            if (ReportDataJson.TryDeserialize(bytes) is { } data)
             {
                 suites.Add(data);
             }
@@ -184,7 +184,7 @@ internal static class Program
             return;
         }
 
-        if (GitHubSummaryRegion.ReplaceOrAppend(summaryPath!, content, GitHubSummaryMaxFileSizeBytes))
+        if (GitHubSummaryRegion.ReplaceOrAppend(summaryPath!, content))
         {
             Console.WriteLine("Merged summary written to the GitHub step summary.");
         }
