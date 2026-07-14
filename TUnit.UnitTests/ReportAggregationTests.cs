@@ -169,27 +169,33 @@ public class ReportDataMergerTests
     }
 
     [Test]
-    public async Task Merge_Retags_Class_Spans_When_Class_Names_Are_Disambiguated()
+    public async Task Merge_Renames_Suite_Spans_When_Class_Names_Are_Disambiguated()
     {
-        var net8 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 8.0.0", tagSpanWithClass: true);
-        var net9 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 9.0.0", tagSpanWithClass: true);
+        var net8 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 8.0.0", withSuiteSpan: true);
+        var net9 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 9.0.0", withSuiteSpan: true);
 
         var merged = ReportDataMerger.Merge([net8, net9]);
 
-        // Per-class timelines join spans on this tag; after a rename it must point at the
-        // disambiguated group name, or the timeline silently disappears from the report.
+        // Per-class timelines join suite spans on their (collector-rewritten) Name;
+        // after a rename it must match the disambiguated group name, or the class
+        // timeline silently disappears from the merged report.
         var mergedClassNames = merged.Groups.Select(g => g.ClassName).ToHashSet();
-        var classTags = merged.Spans!
-            .SelectMany(s => s.Tags ?? [])
-            .Where(t => t.Key == "tunit.test.class")
-            .Select(t => t.Value)
-            .ToArray();
+        var suiteSpans = merged.Spans!.Where(s => s.SpanType == "test suite").ToArray();
 
-        await Assert.That(classTags).IsNotEmpty();
-        foreach (var tag in classTags)
+        await Assert.That(suiteSpans).IsNotEmpty();
+        foreach (var span in suiteSpans)
         {
-            await Assert.That(mergedClassNames).Contains(tag);
+            await Assert.That(mergedClassNames).Contains(span.Name);
+            await Assert.That(span.Tags!.Single(t => t.Key == "test.suite.name").Value).IsEqualTo(span.Name);
         }
+
+        // Unique class names must pass through untouched.
+        var untouched = ReportDataMerger.Merge([
+            TestReportData.Build("A.Tests", className: "ATests", withSuiteSpan: true),
+            TestReportData.Build("B.Tests", className: "BTests", withSuiteSpan: true),
+        ]);
+        var untouchedNames = untouched.Spans!.Where(s => s.SpanType == "test suite").Select(s => s.Name).ToArray();
+        await Assert.That(untouchedNames).IsEquivalentTo(new[] { "ATests", "BTests" });
     }
 
     [Test]
@@ -441,7 +447,7 @@ internal static class TestReportData
         string runtimeVersion = ".NET 10.0.0",
         string className = "CalculatorTests",
         string commitSha = "abc123",
-        bool tagSpanWithClass = false)
+        bool withSuiteSpan = false)
         => new()
         {
             AssemblyName = assemblyName,
@@ -523,28 +529,52 @@ internal static class TestReportData
                     ],
                 },
             ],
-            Spans =
-            [
-                new SpanData
-                {
-                    TraceId = "trace-1",
-                    SpanId = "span-1",
-                    ParentSpanId = null,
-                    Name = "SELECT",
-                    SpanType = "db",
-                    Source = "Npgsql",
-                    Kind = "Client",
-                    StartTimeMs = 1_752_487_201_000,
-                    DurationMs = 5,
-                    Status = "Ok",
-                    Tags = tagSpanWithClass
-                        ? [new ReportKeyValue { Key = "db.system", Value = "postgresql" }, new ReportKeyValue { Key = "tunit.test.class", Value = className }]
-                        : [new ReportKeyValue { Key = "db.system", Value = "postgresql" }],
-                    Events = [new SpanEvent { Name = "query", TimestampMs = 1_752_487_201_001 }],
-                    Links = [new SpanLink { TraceId = "trace-2", SpanId = "linked-span" }],
-                },
-            ],
+            Spans = BuildSpans(className, withSuiteSpan),
         };
+
+    private static SpanData[] BuildSpans(string className, bool withSuiteSpan)
+    {
+        var dbSpan = new SpanData
+        {
+            TraceId = "trace-1",
+            SpanId = "span-1",
+            ParentSpanId = null,
+            Name = "SELECT",
+            SpanType = "db",
+            Source = "Npgsql",
+            Kind = "Client",
+            StartTimeMs = 1_752_487_201_000,
+            DurationMs = 5,
+            Status = "Ok",
+            Tags = [new ReportKeyValue { Key = "db.system", Value = "postgresql" }],
+            Events = [new SpanEvent { Name = "query", TimestampMs = 1_752_487_201_001 }],
+            Links = [new SpanLink { TraceId = "trace-2", SpanId = "linked-span" }],
+        };
+
+        if (!withSuiteSpan)
+        {
+            return [dbSpan];
+        }
+
+        // Mirrors a collected suite span: the collector rewrites Name from the
+        // test.suite.name tag (the simple class name), and there is no tunit.test.class tag.
+        var suiteSpan = new SpanData
+        {
+            TraceId = "trace-1",
+            SpanId = "span-suite",
+            ParentSpanId = null,
+            Name = className,
+            SpanType = "test suite",
+            Source = "TUnit.Lifecycle",
+            Kind = "Internal",
+            StartTimeMs = 1_752_487_200_000,
+            DurationMs = 500,
+            Status = "Ok",
+            Tags = [new ReportKeyValue { Key = "test.suite.name", Value = className }],
+        };
+
+        return [dbSpan, suiteSpan];
+    }
 
     internal static ReportData BuildWithSingleTest(string assemblyName, string? start, double durationMs, double totalDurationMs = 0)
         => new()

@@ -124,25 +124,34 @@ internal static class ReportDataMerger
     }
 
 #if NET
+    // The report's class-timeline join resolves a suite span's class as
+    // `FindTagValue(TagTestClass) ?? Name`. Suite spans carry no TagTestClass; the
+    // collector rewrites their Name from the TagTestSuiteName tag (the simple class
+    // name), so the effective join key is Name — that's what must follow a rename.
     private static SpanData RetagClassSpan(SpanData span, Dictionary<string, string> renamedClasses)
     {
-        if (span.Tags is not { Length: > 0 } tags)
+        if (!string.Equals(span.SpanType, TUnitActivitySource.SpanTestSuite, StringComparison.Ordinal)
+            || !renamedClasses.TryGetValue(span.Name, out var renamed))
         {
             return span;
         }
 
-        for (var i = 0; i < tags.Length; i++)
+        var tags = span.Tags;
+        if (tags is { Length: > 0 })
         {
-            if (string.Equals(tags[i].Key, TUnitActivitySource.TagTestClass, StringComparison.Ordinal)
-                && renamedClasses.TryGetValue(tags[i].Value, out var renamed))
+            for (var i = 0; i < tags.Length; i++)
             {
-                var newTags = (ReportKeyValue[])tags.Clone();
-                newTags[i] = new ReportKeyValue { Key = tags[i].Key, Value = renamed };
-                return span with { Tags = newTags };
+                if (string.Equals(tags[i].Key, TUnitActivitySource.TagTestSuiteName, StringComparison.Ordinal)
+                    && string.Equals(tags[i].Value, span.Name, StringComparison.Ordinal))
+                {
+                    tags = (ReportKeyValue[])tags.Clone();
+                    tags[i] = new ReportKeyValue { Key = tags[i].Key, Value = renamed };
+                    break;
+                }
             }
         }
 
-        return span;
+        return span with { Name = renamed, Tags = tags };
     }
 #endif
 

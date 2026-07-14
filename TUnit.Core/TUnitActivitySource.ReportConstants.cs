@@ -16,6 +16,7 @@ public static partial class TUnitActivitySource
     internal const string SpanTestBody = "test body";
 
     internal const string TagTestClass = "tunit.test.class";
+    internal const string TagTestSuiteName = "test.suite.name";
     internal const string TagTraceScope = "tunit.trace.scope";
 }
 

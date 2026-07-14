@@ -47,7 +47,6 @@ public static partial class TUnitActivitySource
     internal const string TagTestCount = "tunit.test.count";
     internal const string TagClassNamespace = "tunit.class.namespace";
     internal const string TagTestCaseName = "test.case.name";
-    internal const string TagTestSuiteName = "test.suite.name";
     internal const string TagAssemblyName = "tunit.assembly.name";
     internal const string TagTestCaseResultStatus = "test.case.result.status";
     internal const string TagTestRetryAttempt = "tunit.test.retry_attempt";

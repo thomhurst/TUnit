@@ -148,11 +148,19 @@ internal sealed class ReportAggregator
             return results;
         }
 
+        // When TUNIT_AGGREGATE_DIR is pointed at a directory that also receives the local
+        // sidecar (e.g. a project's TestResults), the same suite exists twice under two
+        // names — byte-identical output of one writer, so dedupe on a content hash, same
+        // as the tunit-report tool does.
+        var seenDigests = new HashSet<string>(StringComparer.Ordinal);
+        using var sha = SHA256.Create();
         foreach (var file in System.IO.Directory.GetFiles(Directory, SidecarSearchPattern))
         {
             try
             {
-                if (ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)File.ReadAllBytes(file)) is { } data)
+                var bytes = File.ReadAllBytes(file);
+                if (seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes)))
+                    && ReportDataJson.TryDeserialize((ReadOnlyMemory<byte>)bytes) is { } data)
                 {
                     results.Add(data);
                 }
