@@ -149,7 +149,11 @@ internal static class Program
         // digests, not whole file bodies, are what stays alive across the scan.
         var seenDigests = new HashSet<string>(StringComparer.Ordinal);
         using var sha = System.Security.Cryptography.SHA256.Create();
-        foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, SearchOption.AllDirectories))
+        // IgnoreInaccessible: an unreadable or concurrently deleted subdirectory must not
+        // abort the walk — SearchOption.AllDirectories would throw mid-enumeration, before
+        // the per-file guard below ever ran.
+        var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
+        foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
         {
             byte[] bytes;
             try
