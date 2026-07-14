@@ -277,7 +277,7 @@ internal static class ReportDataJson
             using var doc = JsonDocument.Parse(json);
             return Read(doc);
         }
-        catch (JsonException)
+        catch (Exception ex) when (IsMalformedSidecar(ex))
         {
             return null;
         }
@@ -291,11 +291,19 @@ internal static class ReportDataJson
             using var doc = JsonDocument.Parse(utf8Json);
             return Read(doc);
         }
-        catch (JsonException)
+        catch (Exception ex) when (IsMalformedSidecar(ex))
         {
             return null;
         }
     }
+
+    // JsonException covers syntax errors, but shape errors surface differently:
+    // TryGetProperty on a non-object nested value (e.g. "groups":[1]) throws
+    // InvalidOperationException, and out-of-range numbers (e.g. 1e9999) throw
+    // FormatException. All three mean "not a usable sidecar" — never let one corrupt
+    // or foreign file abort a merge.
+    private static bool IsMalformedSidecar(Exception ex)
+        => ex is JsonException or InvalidOperationException or FormatException;
 
     private static ReportData? Read(JsonDocument doc)
     {
@@ -467,7 +475,14 @@ internal static class ReportDataJson
         => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
     private static double GetDouble(JsonElement e, string name)
-        => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetDouble() : 0;
+        => e.TryGetProperty(name, out var v)
+           && v.ValueKind == JsonValueKind.Number
+           && v.TryGetDouble(out var d)
+           // Out-of-range literals like 1e9999 parse to ±Infinity rather than failing;
+           // a non-finite duration would poison downstream duration math and formatting.
+           && !double.IsNaN(d) && !double.IsInfinity(d)
+            ? d
+            : 0;
 
     private static int GetInt(JsonElement e, string name)
         => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i) ? i : 0;

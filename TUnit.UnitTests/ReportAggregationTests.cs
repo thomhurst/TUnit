@@ -77,10 +77,20 @@ public class ReportDataJsonTests
     [Arguments("""{"schemaVersion": 999, "assemblyName": "x"}""")] // newer than we understand
     [Arguments("""{"schemaVersion": 999999999999, "assemblyName": "x"}""")] // not int-representable — must not throw
     [Arguments("""{"schemaVersion": 1.5, "assemblyName": "x"}""")] // not an integer — must not throw
+    [Arguments("""{"schemaVersion": 1, "groups": [1]}""")] // wrong nested shape — must not throw
+    [Arguments("""{"schemaVersion": 1, "groups": [{"tests": [{"attempts": [7]}]}]}""")] // deeper wrong shape
     [Arguments("[]")] // not an object
     public async Task TryDeserialize_Rejects_Invalid_Or_Incompatible_Input(string json)
     {
         await Assert.That(ReportDataJson.TryDeserialize(json)).IsNull();
+    }
+
+    [Test]
+    public async Task TryDeserialize_Treats_OutOfRange_Numbers_As_Defaults()
+    {
+        var restored = ReportDataJson.TryDeserialize("""{"schemaVersion": 1, "assemblyName": "A", "totalDurationMs": 1e9999}""");
+        await Assert.That(restored).IsNotNull();
+        await Assert.That(restored!.TotalDurationMs).IsEqualTo(0d);
     }
 
     [Test]
@@ -156,6 +166,48 @@ public class ReportDataMergerTests
 
         await Assert.That(merged.Groups.Select(g => g.ClassName)).Contains("ATests");
         await Assert.That(merged.Groups.Select(g => g.ClassName)).Contains("BTests");
+    }
+
+    [Test]
+    public async Task Merge_Retags_Class_Spans_When_Class_Names_Are_Disambiguated()
+    {
+        var net8 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 8.0.0", tagSpanWithClass: true);
+        var net9 = TestReportData.Build("Same.Tests", runtimeVersion: ".NET 9.0.0", tagSpanWithClass: true);
+
+        var merged = ReportDataMerger.Merge([net8, net9]);
+
+        // Per-class timelines join spans on this tag; after a rename it must point at the
+        // disambiguated group name, or the timeline silently disappears from the report.
+        var mergedClassNames = merged.Groups.Select(g => g.ClassName).ToHashSet();
+        var classTags = merged.Spans!
+            .SelectMany(s => s.Tags ?? [])
+            .Where(t => t.Key == "tunit.test.class")
+            .Select(t => t.Value)
+            .ToArray();
+
+        await Assert.That(classTags).IsNotEmpty();
+        foreach (var tag in classTags)
+        {
+            await Assert.That(mergedClassNames).Contains(tag);
+        }
+    }
+
+    [Test]
+    public async Task Merge_Keeps_SourceControl_Metadata_Only_When_Suites_Agree()
+    {
+        var sameCommit = ReportDataMerger.Merge([TestReportData.Build("A.Tests"), TestReportData.Build("B.Tests")]);
+        await Assert.That(sameCommit.CommitSha).IsEqualTo("abc123");
+        await Assert.That(sameCommit.SourceLinks).IsNotNull();
+
+        // Different commits (e.g. merging sidecars from separate runs): a single top-level
+        // template would link every test to the first suite's revision — omit instead.
+        var mixed = ReportDataMerger.Merge([
+            TestReportData.Build("A.Tests"),
+            TestReportData.Build("B.Tests", commitSha: "def456"),
+        ]);
+        await Assert.That(mixed.CommitSha).IsNull();
+        await Assert.That(mixed.SourceLinks).IsNull();
+        await Assert.That(mixed.RepositorySlug).IsEqualTo("acme/repo"); // still unanimous
     }
 
     [Test]
@@ -387,7 +439,9 @@ internal static class TestReportData
     internal static ReportData Build(
         string assemblyName,
         string runtimeVersion = ".NET 10.0.0",
-        string className = "CalculatorTests")
+        string className = "CalculatorTests",
+        string commitSha = "abc123",
+        bool tagSpanWithClass = false)
         => new()
         {
             AssemblyName = assemblyName,
@@ -399,14 +453,14 @@ internal static class TestReportData
             Filter = "/*/*/CalculatorTests/*",
             TotalDurationMs = 1234.5,
             ArtifactUrl = "https://github.com/acme/repo/actions/runs/1/artifacts/2",
-            CommitSha = "abc123",
+            CommitSha = commitSha,
             Branch = "main",
             PullRequestNumber = "17",
             RepositorySlug = "acme/repo",
             SourceLinks = new SourceLinkTemplates(
-                "https://github.com/acme/repo/blob/abc123/{path}#L{line}",
-                "https://github.com/acme/repo/blob/abc123/{path}#L{start}-L{end}",
-                "https://raw.githubusercontent.com/acme/repo/abc123/{path}"),
+                $"https://github.com/acme/repo/blob/{commitSha}/{{path}}#L{{line}}",
+                $"https://github.com/acme/repo/blob/{commitSha}/{{path}}#L{{start}}-L{{end}}",
+                $"https://raw.githubusercontent.com/acme/repo/{commitSha}/{{path}}"),
             Summary = new ReportSummary { Total = 3, Passed = 2, Failed = 1, Flaky = 1 },
             Groups =
             [
@@ -483,7 +537,9 @@ internal static class TestReportData
                     StartTimeMs = 1_752_487_201_000,
                     DurationMs = 5,
                     Status = "Ok",
-                    Tags = [new ReportKeyValue { Key = "db.system", Value = "postgresql" }],
+                    Tags = tagSpanWithClass
+                        ? [new ReportKeyValue { Key = "db.system", Value = "postgresql" }, new ReportKeyValue { Key = "tunit.test.class", Value = className }]
+                        : [new ReportKeyValue { Key = "db.system", Value = "postgresql" }],
                     Events = [new SpanEvent { Name = "query", TimestampMs = 1_752_487_201_001 }],
                     Links = [new SpanLink { TraceId = "trace-2", SpanId = "linked-span" }],
                 },

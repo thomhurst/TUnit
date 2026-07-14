@@ -54,11 +54,20 @@ internal static class ReportDataMerger
 
             summary.Add(suite.Summary);
 
+            // Original → disambiguated class names for this suite, so the suite's spans
+            // can be re-tagged to match: the report's per-class timelines are joined on
+            // the span's class tag, and a renamed group would otherwise lose its timeline.
+            Dictionary<string, string>? renamedClasses = null;
+
             foreach (var group in suite.Groups)
             {
-                var className = classNameCounts[group.ClassName] > 1
-                    ? $"{group.ClassName} [{labels[suiteIndex]}]"
-                    : group.ClassName;
+                var className = group.ClassName;
+                if (classNameCounts[className] > 1)
+                {
+                    var renamed = $"{className} [{labels[suiteIndex]}]";
+                    (renamedClasses ??= new Dictionary<string, string>(StringComparer.Ordinal))[className] = renamed;
+                    className = renamed;
+                }
 
                 groups.Add(new ReportTestGroup
                 {
@@ -71,7 +80,21 @@ internal static class ReportDataMerger
 
             if (suite.Spans is { Length: > 0 } suiteSpans)
             {
-                spans.AddRange(suiteSpans);
+#if NET
+                // Timelines only render on modern TFMs (span collection is #if NET), so
+                // the retag is pointless elsewhere — spans pass through untouched there.
+                if (renamedClasses is not null)
+                {
+                    foreach (var span in suiteSpans)
+                    {
+                        spans.Add(RetagClassSpan(span, renamedClasses));
+                    }
+                }
+                else
+#endif
+                {
+                    spans.AddRange(suiteSpans);
+                }
             }
         }
 
@@ -88,13 +111,40 @@ internal static class ReportDataMerger
             Summary = summary,
             Groups = groups.ToArray(),
             Spans = spans.Count > 0 ? spans.ToArray() : null,
-            CommitSha = FirstNonEmpty(ordered, static s => s.CommitSha),
-            Branch = FirstNonEmpty(ordered, static s => s.Branch),
-            PullRequestNumber = FirstNonEmpty(ordered, static s => s.PullRequestNumber),
-            RepositorySlug = FirstNonEmpty(ordered, static s => s.RepositorySlug),
-            SourceLinks = ordered.Select(static s => s.SourceLinks).FirstOrDefault(static l => l is not null),
+            // Source-control metadata (and the link templates built from it) applies to the
+            // whole merged report, so it is only kept when every suite that has it agrees —
+            // merging sidecars from different commits/runs must not label every test with
+            // the first suite's commit or link to the wrong revision.
+            CommitSha = SingleDistinctOrNull(ordered, static s => s.CommitSha),
+            Branch = SingleDistinctOrNull(ordered, static s => s.Branch),
+            PullRequestNumber = SingleDistinctOrNull(ordered, static s => s.PullRequestNumber),
+            RepositorySlug = SingleDistinctOrNull(ordered, static s => s.RepositorySlug),
+            SourceLinks = SingleDistinctSourceLinksOrNull(ordered),
         };
     }
+
+#if NET
+    private static SpanData RetagClassSpan(SpanData span, Dictionary<string, string> renamedClasses)
+    {
+        if (span.Tags is not { Length: > 0 } tags)
+        {
+            return span;
+        }
+
+        for (var i = 0; i < tags.Length; i++)
+        {
+            if (string.Equals(tags[i].Key, TUnitActivitySource.TagTestClass, StringComparison.Ordinal)
+                && renamedClasses.TryGetValue(tags[i].Value, out var renamed))
+            {
+                var newTags = (ReportKeyValue[])tags.Clone();
+                newTags[i] = new ReportKeyValue { Key = tags[i].Key, Value = renamed };
+                return span with { Tags = newTags };
+            }
+        }
+
+        return span;
+    }
+#endif
 
     /// <summary>
     /// Display labels for suites, unique across the set: assembly name alone when unique,
@@ -261,16 +311,32 @@ internal static class ReportDataMerger
         return distinct.Count == 0 ? null : string.Join("; ", distinct);
     }
 
-    private static string? FirstNonEmpty(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
+    /// <summary>The single value shared by every suite that has one; null when they disagree.</summary>
+    private static string? SingleDistinctOrNull(IReadOnlyList<ReportData> suites, Func<ReportData, string?> selector)
     {
+        var distinct = DistinctNonEmpty(suites, selector);
+        return distinct.Count == 1 ? distinct[0] : null;
+    }
+
+    private static SourceLinkTemplates? SingleDistinctSourceLinksOrNull(IReadOnlyList<ReportData> suites)
+    {
+        SourceLinkTemplates? found = null;
         foreach (var suite in suites)
         {
-            var value = selector(suite);
-            if (!string.IsNullOrEmpty(value))
+            if (suite.SourceLinks is not { } links)
             {
-                return value;
+                continue;
+            }
+
+            if (found is null)
+            {
+                found = links;
+            }
+            else if (found != links) // record value equality
+            {
+                return null;
             }
         }
-        return null;
+        return found;
     }
 }

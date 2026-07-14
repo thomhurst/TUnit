@@ -2,7 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace TUnit.Core;
 
-internal sealed class SpanData
+// A record so report merging can rewrite single properties via `with` without a
+// hand-maintained copy that silently drops newly added members.
+internal sealed record SpanData
 {
     [JsonPropertyName("traceId")]
     public required string TraceId { get; init; }
