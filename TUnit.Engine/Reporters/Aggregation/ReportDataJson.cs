@@ -301,9 +301,12 @@ internal static class ReportDataJson
     {
         var root = doc.RootElement;
         if (root.ValueKind != JsonValueKind.Object) return null;
+        // TryGetInt32 (not GetInt32): a corrupt/foreign file with e.g. 999999999999 or 1.5
+        // must be rejected as incompatible, not escape as a FormatException.
         if (!root.TryGetProperty("schemaVersion", out var version)
             || version.ValueKind != JsonValueKind.Number
-            || version.GetInt32() > SchemaVersion)
+            || !version.TryGetInt32(out var schemaVersion)
+            || schemaVersion > SchemaVersion)
         {
             return null;
         }
@@ -467,8 +470,8 @@ internal static class ReportDataJson
         => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetDouble() : 0;
 
     private static int GetInt(JsonElement e, string name)
-        => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetInt32() : 0;
+        => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i) ? i : 0;
 
     private static int? GetNullableInt(JsonElement e, string name)
-        => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetInt32() : null;
+        => e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i) ? i : null;
 }

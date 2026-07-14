@@ -151,7 +151,19 @@ internal static class Program
         using var sha = System.Security.Cryptography.SHA256.Create();
         foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, SearchOption.AllDirectories))
         {
-            var bytes = File.ReadAllBytes(file);
+            byte[] bytes;
+            try
+            {
+                bytes = File.ReadAllBytes(file);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Locked, deleted mid-enumeration, or unreadable — count it with the other
+                // skipped sidecars rather than failing the whole merge over one bad file.
+                skipped++;
+                continue;
+            }
+
             if (!seenDigests.Add(Convert.ToBase64String(sha.ComputeHash(bytes))))
             {
                 continue;

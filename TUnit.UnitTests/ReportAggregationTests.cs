@@ -75,6 +75,8 @@ public class ReportDataJsonTests
     [Arguments("not json at all")]
     [Arguments("{}")] // no schemaVersion
     [Arguments("""{"schemaVersion": 999, "assemblyName": "x"}""")] // newer than we understand
+    [Arguments("""{"schemaVersion": 999999999999, "assemblyName": "x"}""")] // not int-representable — must not throw
+    [Arguments("""{"schemaVersion": 1.5, "assemblyName": "x"}""")] // not an integer — must not throw
     [Arguments("[]")] // not an object
     public async Task TryDeserialize_Rejects_Invalid_Or_Incompatible_Input(string json)
     {
