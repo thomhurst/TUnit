@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.6*" />
 <!--#if (IsNetFramework) -->
-    <PackageReference Include="Polyfill" Version="11.0.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="11.0.1" PrivateAssets="all" />
 <!--#endif -->
   </ItemGroup>
 
