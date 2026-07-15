@@ -8,8 +8,8 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"blue",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.bd3cf430.css">
-<script src="/assets/js/runtime~main.074c4f8b.js" defer="defer"></script>
-<script src="/assets/js/main.9016a969.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.9fbbe26d.js" defer="defer"></script>
+<script src="/assets/js/main.30c868ab.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -23,6 +23,8 @@
 <p>For example: <code>TestResults/MyTests-linux-net10.0-report.html</code></p>
 <p>The OS and runtime version are included automatically so that matrix builds (multiple platforms/TFMs) produce distinct files instead of overwriting each other.</p>
 <p>Open it in any modern browser. The report is fully self-contained (single HTML file) and works offline.</p>
+<p>A machine-readable JSON sidecar (<code>{AssemblyName}-{os}-{tfm}.tunit-report.json</code>) is written alongside the HTML report. It powers <a class="" href="/docs/guides/report-aggregation">report aggregation</a> — merging reports from multiple test projects into one — and can be disabled with <code>TUNIT_DISABLE_JSON_REPORT=true</code>.</p>
+<p>Running many test projects and want <strong>one combined report instead of one per project</strong>? See <a class="" href="/docs/guides/report-aggregation">Aggregated Reports</a>.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="features">Features<a href="#features" class="hash-link" aria-label="Direct link to Features" title="Direct link to Features" translate="no">​</a></h2>
 <ul>
 <li class=""><strong>Summary Dashboard</strong> — Total, passed, failed, skipped, and cancelled counts with a visual pass-rate donut chart</li>

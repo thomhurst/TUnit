@@ -85,6 +85,7 @@ This file contains links to documentation sections following the llmstxt.org sta
 - [HTML Test Report](https://tunit.dev/docs/guides/html-report.md): TUnit automatically generates a rich HTML test report after every test run. No configuration is needed — the report is always on by default.
 - [Performance Best Practices](https://tunit.dev/docs/guides/performance.md): This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.
 - [Philosophy](https://tunit.dev/docs/guides/philosophy.md): TUnit does some things differently from other .NET testing frameworks. This page explains the thinking behind those choices.
+- [Aggregated Reports (Multiple Test Projects)](https://tunit.dev/docs/guides/report-aggregation.md): When you run several test projects with a single command — `dotnet test` on a solution, or one `dotnet run` per microservice test suite — each proj...
 - [Intro](https://tunit.dev/docs/intro.md): **TUnit** is another testing framework for C# / .NET.
 - [Migrating from MSTest](https://tunit.dev/docs/migration/mstest.md): :::from-mstest Performance Boost
 - [Migrating from NUnit](https://tunit.dev/docs/migration/nunit.md): :::from-nunit Performance Boost
