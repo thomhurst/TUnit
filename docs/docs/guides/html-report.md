@@ -20,6 +20,10 @@ The OS and runtime version are included automatically so that matrix builds (mul
 
 Open it in any modern browser. The report is fully self-contained (single HTML file) and works offline.
 
+A machine-readable JSON sidecar (`{AssemblyName}-{os}-{tfm}.tunit-report.json`) is written alongside the HTML report. It powers [report aggregation](/docs/guides/report-aggregation) — merging reports from multiple test projects into one — and can be disabled with `TUNIT_DISABLE_JSON_REPORT=true`.
+
+Running many test projects and want **one combined report instead of one per project**? See [Aggregated Reports](/docs/guides/report-aggregation).
+
 ## Features
 
 - **Summary Dashboard** — Total, passed, failed, skipped, and cancelled counts with a visual pass-rate donut chart

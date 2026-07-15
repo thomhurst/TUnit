@@ -59,7 +59,11 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         Properties = properties,
                         IncludeSource = project == Sourcy.DotNet.Projects.TUnit_Templates ? false : true,
                         Configuration = "Release",
-                        NoBuild = true,
+                        // The reporting tool is a standalone dotnet tool no test module
+                        // references, so nothing upstream has restored or built it — let
+                        // pack build it (the strong-name race in the header comment doesn't
+                        // apply: it isn't strong-named and nothing else consumes its bits).
+                        NoBuild = project != Sourcy.DotNet.Projects.TUnit_Reporting_Tool,
                     }, new CommandExecutionOptions
                     {
                         LogSettings = new CommandLoggingOptions

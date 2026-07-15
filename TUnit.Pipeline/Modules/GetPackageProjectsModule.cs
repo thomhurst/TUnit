@@ -30,7 +30,8 @@ public class GetPackageProjectsModule : Module<List<File>>
             Sourcy.DotNet.Projects.TUnit_Mocks,
             Sourcy.DotNet.Projects.TUnit_Mocks_Assertions,
             Sourcy.DotNet.Projects.TUnit_Mocks_Http,
-            Sourcy.DotNet.Projects.TUnit_Mocks_Logging
+            Sourcy.DotNet.Projects.TUnit_Mocks_Logging,
+            Sourcy.DotNet.Projects.TUnit_Reporting_Tool
         ];
     }
 }

@@ -56,6 +56,16 @@ internal sealed class ReportData
 
     [JsonIgnore]
     public SourceLinkTemplates? SourceLinks { get; init; }
+
+    /// <summary>
+    /// Link to this suite's uploaded HTML report artifact, when the in-process GitHub
+    /// upload succeeded. Not part of the HTML renderer JSON — persisted only in the
+    /// aggregation sidecar (see <c>ReportDataJson</c>) so the merged step summary can
+    /// link each suite's individual report. Mutable because the upload happens after
+    /// the report data is built.
+    /// </summary>
+    [JsonIgnore]
+    public string? ArtifactUrl { get; set; }
 }
 
 internal sealed class ReportSummary
@@ -86,6 +96,22 @@ internal sealed class ReportSummary
 
     [JsonIgnore]
     public int TotalFailed => Failed + TimedOut;
+
+    /// <summary>Everything that should mark a suite/run as not-green, cancellations included.</summary>
+    [JsonIgnore]
+    public int TotalUnsuccessful => Failed + TimedOut + Cancelled;
+
+    /// <summary>Accumulates another summary into this one (used when merging suites).</summary>
+    public void Add(ReportSummary other)
+    {
+        Total += other.Total;
+        Passed += other.Passed;
+        Failed += other.Failed;
+        Skipped += other.Skipped;
+        Cancelled += other.Cancelled;
+        TimedOut += other.TimedOut;
+        Flaky += other.Flaky;
+    }
 }
 
 internal sealed class ReportTestGroup
@@ -103,7 +129,9 @@ internal sealed class ReportTestGroup
     public required ReportTestResult[] Tests { get; init; }
 }
 
-internal sealed class ReportTestResult
+// A record so consumers (e.g. ReportDataMerger) can rewrite single properties via `with`
+// without a hand-maintained copy that silently drops newly added members.
+internal sealed record ReportTestResult
 {
     [JsonPropertyName("id")]
     public required string Id { get; init; }
