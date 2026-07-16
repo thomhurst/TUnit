@@ -353,13 +353,8 @@ public class SetupTeardownTests
     public void JsonOperationTest()
     {
         // Simulate JSON serialization
-        var data = new
-        {
-            Id = 123,
-            Name = "Test Data",
-            Values = Enumerable.Range(0, 50).ToArray()
-        };
-        var json = System.Text.Json.JsonSerializer.Serialize(data);
+        var data = new JsonPayload(123, "Test Data", Enumerable.Range(0, 50).ToArray());
+        var json = System.Text.Json.JsonSerializer.Serialize(data, BenchmarkJsonContext.Default.JsonPayload);
         _logBuilder.AppendLine($"JSON length: {json.Length}");
     }
 
@@ -368,13 +363,15 @@ public class SetupTeardownTests
     {
         // Simulate async JSON operations
         await Task.Delay(10);
-        var data = new
-        {
-            Id = 123,
-            Name = "Test Data",
-            Values = Enumerable.Range(0, 50).ToArray()
-        };
-        var json = System.Text.Json.JsonSerializer.Serialize(data);
+        var data = new JsonPayload(123, "Test Data", Enumerable.Range(0, 50).ToArray());
+        var json = System.Text.Json.JsonSerializer.Serialize(data, BenchmarkJsonContext.Default.JsonPayload);
         _logBuilder.AppendLine($"Async JSON length: {json.Length}");
     }
 }
+
+// Concrete DTO + source-generated serializer context so JSON tests work under Native AOT,
+// where reflection-based System.Text.Json serialization is disabled.
+public sealed record JsonPayload(int Id, string Name, int[] Values);
+
+[System.Text.Json.Serialization.JsonSerializable(typeof(JsonPayload))]
+internal partial class BenchmarkJsonContext : System.Text.Json.Serialization.JsonSerializerContext;
