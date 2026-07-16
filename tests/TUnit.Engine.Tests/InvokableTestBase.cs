@@ -47,7 +47,7 @@ public abstract class InvokableTestBase(TestMode testMode)
     private async Task RunWithoutAot(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
-        var testProject = Sourcy.DotNet.Projects.tests__TUnit_TestProject;
+        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var projectName = Path.GetFileNameWithoutExtension(testProject.Name);
         var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable));
 

@@ -1,5 +1,4 @@
 ﻿using ModularPipelines.Context;
-using ModularPipelines.Git.Extensions;
 using ModularPipelines.Modules;
 using File = ModularPipelines.FileSystem.File;
 
@@ -7,34 +6,32 @@ namespace TUnit.Pipeline.Modules;
 
 public class GetPackageProjectsModule : Module<List<File>>
 {
-    protected override Task<List<File>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<List<File>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var sourceDirectory = Path.Combine(context.Git().RootDirectory.Path, "src");
+        await Task.CompletedTask;
 
-        File SourceProject(string name) => new(Path.Combine(sourceDirectory, name, $"{name}.csproj"));
-
-        return Task.FromResult<List<File>?>(
+        return
         [
-            SourceProject("TUnit.Assertions"),
-            SourceProject("TUnit.Assertions.Should"),
-            SourceProject("TUnit.Assertions.FSharp"),
-            SourceProject("TUnit.Core"),
-            SourceProject("TUnit.Engine"),
-            SourceProject("TUnit"),
-            SourceProject("TUnit.Playwright"),
-            SourceProject("TUnit.Templates"),
-            SourceProject("TUnit.Logging.Microsoft"),
-            SourceProject("TUnit.AspNetCore"),
-            SourceProject("TUnit.AspNetCore.Core"),
-            SourceProject("TUnit.Aspire"),
-            SourceProject("TUnit.Aspire.Core"),
-            SourceProject("TUnit.OpenTelemetry"),
-            SourceProject("TUnit.FsCheck"),
-            SourceProject("TUnit.Mocks"),
-            SourceProject("TUnit.Mocks.Assertions"),
-            SourceProject("TUnit.Mocks.Http"),
-            SourceProject("TUnit.Mocks.Logging"),
-            SourceProject("TUnit.Reporting.Tool")
-        ]);
+            Sourcy.DotNet.Projects.TUnit_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Assertions_Should,
+            Sourcy.DotNet.Projects.TUnit_Assertions_FSharp,
+            Sourcy.DotNet.Projects.TUnit_Core,
+            Sourcy.DotNet.Projects.TUnit_Engine,
+            Sourcy.DotNet.Projects.TUnit,
+            Sourcy.DotNet.Projects.TUnit_Playwright,
+            Sourcy.DotNet.Projects.TUnit_Templates,
+            Sourcy.DotNet.Projects.TUnit_Logging_Microsoft,
+            Sourcy.DotNet.Projects.TUnit_AspNetCore,
+            Sourcy.DotNet.Projects.TUnit_AspNetCore_Core,
+            Sourcy.DotNet.Projects.TUnit_Aspire,
+            Sourcy.DotNet.Projects.TUnit_Aspire_Core,
+            Sourcy.DotNet.Projects.TUnit_OpenTelemetry,
+            Sourcy.DotNet.Projects.TUnit_FsCheck,
+            Sourcy.DotNet.Projects.TUnit_Mocks,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Assertions,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Http,
+            Sourcy.DotNet.Projects.TUnit_Mocks_Logging,
+            Sourcy.DotNet.Projects.TUnit_Reporting_Tool
+        ];
     }
 }

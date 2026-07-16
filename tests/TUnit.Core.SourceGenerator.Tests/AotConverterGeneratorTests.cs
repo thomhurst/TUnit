@@ -10,7 +10,7 @@ public class AotConverterGeneratorTests : TestsBase
         Path.GetTempFileName(),
         new RunTestOptions
         {
-            AdditionalFiles = Sourcy.DotNet.Projects.tests__TUnit_TestProject.Directory!.EnumerateFiles("*.cs", SearchOption.AllDirectories).Select(x => x.FullName).ToArray()
+            AdditionalFiles = Sourcy.DotNet.Projects.TUnit_TestProject.Directory!.EnumerateFiles("*.cs", SearchOption.AllDirectories).Select(x => x.FullName).ToArray()
         },
         async generatedFiles =>
         {

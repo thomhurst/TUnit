@@ -38,7 +38,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
             File.Delete(markerFile);
         }
 
-        var testProject = Sourcy.DotNet.Projects.tests__TUnit_TestProject;
+        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
 

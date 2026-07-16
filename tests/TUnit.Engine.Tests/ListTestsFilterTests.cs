@@ -50,7 +50,7 @@ public class ListTestsFilterTests
 
     private static async Task<BufferedCommandResult> RunListTestsAsync(bool reflection, string? filter)
     {
-        var testProject = Sourcy.DotNet.Projects.tests__TUnit_TestProject;
+        var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
         var projectName = Path.GetFileNameWithoutExtension(testProject.Name);
         var binDir = new DirectoryInfo(Path.Combine(testProject.DirectoryName!, "bin", "Release", NetVersion));
 

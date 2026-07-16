@@ -106,7 +106,7 @@ public sealed class VerifySettingsTask
         string dir;
         try
         {
-            dir = Sourcy.DotNet.Projects.tests__TUnit_Core_SourceGenerator_Tests.DirectoryName!;
+            dir = Sourcy.DotNet.Projects.TUnit_Core_SourceGenerator_Tests.DirectoryName!;
         }
         catch
         {

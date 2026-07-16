@@ -11,7 +11,7 @@ internal static class TestProjectBuilds
 {
     private static readonly ConcurrentDictionary<string, Task> _builds = new();
 
-    public static string WorkingDirectory { get; } = Sourcy.DotNet.Projects.tests__TUnit_TestProject.DirectoryName!;
+    public static string WorkingDirectory { get; } = Sourcy.DotNet.Projects.TUnit_TestProject.DirectoryName!;
 
     public static Task EnsureBuiltAsync(string framework, CancellationToken cancellationToken)
         => _builds.GetOrAdd(framework, tfm => BuildAsync(tfm, cancellationToken));
