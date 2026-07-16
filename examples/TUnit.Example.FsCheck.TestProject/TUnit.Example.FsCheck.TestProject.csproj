@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.FsCheck\TUnit.FsCheck.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

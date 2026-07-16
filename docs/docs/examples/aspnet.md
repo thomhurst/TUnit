@@ -458,7 +458,7 @@ public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicati
 - `IModelCacheKeyFactory` ensures EF Core caches a separate model per schema
 - Cleanup uses `DROP SCHEMA ... CASCADE` to remove all tables at once
 
-See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## HTTP Exchange Capture
 

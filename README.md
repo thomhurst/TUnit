@@ -331,6 +331,18 @@ TUnit runs F# and VB.NET test projects too, and `TUnit.Assertions.FSharp` provid
 
 The syntax will feel familiar. For example, xUnit's `[Fact]` becomes `[Test]`, and `[Theory]` + `[InlineData]` becomes `[Test]` + `[Arguments]`. See the migration guides for full details: [xUnit](https://tunit.dev/docs/migration/xunit) · [NUnit](https://tunit.dev/docs/migration/nunit) · [MSTest](https://tunit.dev/docs/migration/mstest).
 
+## Repository layout
+
+- `src/` — product libraries, analyzers, source generators, integrations, templates, and tools shipped as packages
+- `tests/` — unit, integration, snapshot, fixture, and cross-language test projects
+- `benchmarks/` — BenchmarkDotNet and profiling workloads
+- `examples/` — sample applications and test projects
+- `tools/` — repository automation and development utilities
+- `eng/` — shared MSBuild imports, signing key, and engineering assets
+- `scripts/` — local build, test, and profiling entry points
+
+Solutions and repository-wide SDK, package, and build configuration remain at root.
+
 ## Community
 
 - [Documentation](https://tunit.dev) — guides, tutorials, and API reference

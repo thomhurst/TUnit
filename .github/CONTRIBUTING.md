@@ -146,14 +146,14 @@ When contributing code to TUnit, please keep these important requirements in min
 
 TUnit supports both source-generated and reflection-based test discovery. **All changes that affect test discovery or execution must work identically in both modes:**
 
-- Source Generator path: `TUnit.Core.SourceGenerator`
-- Reflection path: `TUnit.Engine`
+- Source Generator path: `src/TUnit.Core.SourceGenerator`
+- Reflection path: `src/TUnit.Engine`
 
 #### Snapshot Testing
 
 If your changes affect the source generator output or public APIs:
 
-1. Run the relevant tests: `dotnet test TUnit.Core.SourceGenerator.Tests` or `dotnet test TUnit.PublicAPI`
+1. Run the relevant tests: `dotnet test tests/TUnit.Core.SourceGenerator.Tests` or `dotnet test tests/TUnit.PublicAPI`
 2. Review any `.received.txt` files generated
 3. If the changes are intentional, rename them to `.verified.txt`
 4. Commit the `.verified.txt` files with your changes

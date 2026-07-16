@@ -416,8 +416,8 @@ requirements/
 **/SourceGeneratedViewer/
 
 # TUnit test output files
-TUnit.TestProject/TestDiscovery*.txt
-TUnit.TestProject/TestSession*.txt
+tests/TUnit.TestProject/TestDiscovery*.txt
+tests/TUnit.TestProject/TestSession*.txt
 
 .mcp.json
 requirements

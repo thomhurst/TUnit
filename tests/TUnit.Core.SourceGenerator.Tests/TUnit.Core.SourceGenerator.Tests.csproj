@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Multi-target to verify generator output across consumer TFMs (snapshot tests). -->
+    <TargetFrameworks>net472;net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup>
+    <!-- Source generator projects (netstandard2.0) bring in older Microsoft.Bcl.AsyncInterfaces -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
+    <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Sourcy.DotNet">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Sourcy.Git">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy netstandard2.0 TUnit.Core.dll to a ref subfolder so it doesn't override the runtime version.
+         This can be used by source generator tests for compilation references against netstandard2.0 target. -->
+    <None Include="..\..\src\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="ref\TUnit.Core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+</Project>

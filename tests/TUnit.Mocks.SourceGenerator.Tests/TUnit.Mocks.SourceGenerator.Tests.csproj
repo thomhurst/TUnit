@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure the netstandard2.0 TFM of TUnit.Mocks is built before this project -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
+                      ReferenceOutputAssembly="false"
+                      Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy netstandard2.0 TUnit.Mocks.dll to a ref subfolder so it can be used as compilation reference -->
+    <None Include="..\..\src\TUnit.Mocks\bin\$(Configuration)\netstandard2.0\TUnit.Mocks.dll"
+          Link="ref\TUnit.Mocks.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

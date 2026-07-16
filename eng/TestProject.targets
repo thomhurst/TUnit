@@ -1,0 +1,19 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)TestLibrary.targets" />
+
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Engine\TUnit.Engine.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions\TUnit.Assertions.targets" />
+
+    <ItemGroup>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\TUnit.Engine\TUnit.Engine.csproj" />
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions\TUnit.Assertions.csproj" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+</Project>

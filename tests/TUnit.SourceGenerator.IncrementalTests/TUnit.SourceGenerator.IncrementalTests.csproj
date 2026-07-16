@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- Source generator projects (netstandard2.0) bring in older Microsoft.Bcl.AsyncInterfaces -->
+        <NoWarn>$(NoWarn);MSB3277</NoWarn>
+        <RootNamespace>TUnit.Assertions.SourceGenerator.IncrementalTests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="xunit" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.7.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
+        <ProjectReference Include="..\..\src\TUnit.Assertions\TUnit.Assertions.csproj" />
+        <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
+        <ProjectReference Include="..\..\src\TUnit.Core.SourceGenerator.Roslyn47\TUnit.Core.SourceGenerator.Roslyn47.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\eng\Library.props" />
+
+    <PropertyGroup>
+        <Description>Bridge package integrating TUnit.Mocks with TUnit.Assertions. Enables await Assert.That(mock.Verify.Method()).WasCalled(Times.Once).</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Mocks\TUnit.Mocks.csproj" />
+        <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+        <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <Import Project="..\..\eng\Library.targets" />
+
+</Project>

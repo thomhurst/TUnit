@@ -2,6 +2,20 @@
 
 ---
 
+## Repository Layout
+
+| Directory | Contents |
+|-----------|----------|
+| `src/` | Product libraries, analyzers, source generators, integrations, templates, and packaged tools |
+| `tests/` | Unit, integration, snapshot, fixture, and test-application projects |
+| `benchmarks/` | Performance benchmarks and profiling workloads |
+| `examples/` | Sample applications and test projects |
+| `tools/` | CI pipeline and developer utilities |
+| `eng/` | Shared MSBuild imports, signing key, and engineering assets |
+| `scripts/` | Local test and profiling scripts |
+
+Project names below are relative to their category directory. Production projects live under `src/`, test projects under `tests/`, and benchmark projects under `benchmarks/` unless noted.
+
 ## Core Projects
 
 | Project | Purpose |
@@ -23,7 +37,7 @@
 | `TUnit.PropertyTesting` | Property-based testing |
 | `TUnit.FsCheck` | F#-based property testing integration |
 | `TUnit.Playwright` | Browser testing integration |
-| `TUnit.Pipeline` | CI/CD pipeline orchestration |
+| `tools/TUnit.Pipeline` | CI/CD pipeline orchestration |
 | `TUnit.Templates` | `dotnet new` project templates |
 
 ## Test Projects

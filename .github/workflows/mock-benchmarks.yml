@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Benchmark
         run: dotnet run -c Release -f net10.0 -- --filter "*${{ matrix.benchmark }}*" --exporters json github
-        working-directory: "TUnit.Mocks.Benchmarks"
+        working-directory: "benchmarks/TUnit.Mocks.Benchmarks"
 
       - name: Upload Results
         uses: actions/upload-artifact@v7

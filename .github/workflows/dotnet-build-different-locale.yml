@@ -53,4 +53,4 @@ jobs:
 
       - name: Build
         run: dotnet build -c Release
-        working-directory: TUnit.TestProject
+        working-directory: tests/TUnit.TestProject

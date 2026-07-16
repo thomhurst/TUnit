@@ -1,0 +1,13 @@
+
+namespace TUnit.Core.SourceGenerator.Tests;
+
+internal class StringArgumentTests : TestsBase
+{
+    [Test]
+    public Task Test() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.TestProject",
+            "StringArgumentTests.cs"),
+        async generatedFiles =>
+        {
+            });
+}
