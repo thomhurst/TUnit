@@ -16,7 +16,7 @@ const FeatureList: FeatureItem[] = [
     icon: '🔧',
     description: (
       <>
-        Multiple ways to write, inject data, and control tests. Support for data-driven testing, matrix tests, and custom data sources.
+        Data-driven arguments, matrix tests, and custom data sources — plus injectable, shared fixtures with dependency injection and reference-counted disposal.
       </>
     ),
     codeExample: `[Test]
@@ -32,7 +32,7 @@ public async Task TestAdd(int a, int b, int expected)
     icon: '✨',
     description: (
       <>
-        Clean attribute-based syntax that's easy to read and write. Fluent assertions make tests expressive and self-documenting.
+        Clean, attribute-based tests with fluent async assertions that read like sentences — and pinpoint the exact difference when they fail, instead of dumping object graphs at you.
       </>
     ),
     codeExample: `[Test]
@@ -49,7 +49,7 @@ public async Task TestAsync()
     icon: '⚡',
     description: (
       <>
-        Source generated tests with Native AOT support. Built on Microsoft Testing Platform to reduce overhead and improve efficiency.
+        Source-generated tests with Native AOT support, built on the Microsoft Testing Platform. Work shifts from run time to build time, so every run after starts faster.
       </>
     ),
     codeExample: `// AOT Compatible
