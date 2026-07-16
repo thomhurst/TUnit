@@ -119,7 +119,7 @@ await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK)
     .Because("the health endpoint should always be up");
 
 await Assert.That(order.Items)
-    .HasCount(3)
+    .Count().IsEqualTo(3)
     .And.Contains(item => item.Sku == "ABC-123");
 ```
 
