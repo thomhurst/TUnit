@@ -10940,7 +10940,7 @@ This makes TUnit.Mocks compatible with **Native AOT** and **IL trimming**, while
 
 ### Source Code
 
-All benchmark source code is available in the [`TUnit.Mocks.Benchmarks`](https://github.com/thomhurst/TUnit/tree/main/TUnit.Mocks.Benchmarks) directory.
+All benchmark source code is available in the [TUnit repository](https://github.com/thomhurst/TUnit), under `benchmarks/TUnit.Mocks.Benchmarks`.
 
 ---
 
@@ -12299,7 +12299,7 @@ public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicati
 - `IModelCacheKeyFactory` ensures EF Core caches a separate model per schema
 - Cleanup uses `DROP SCHEMA ... CASCADE` to remove all tables at once
 
-See the full working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## HTTP Exchange Capture
 
@@ -13197,7 +13197,7 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 
 For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions and provides complete isolation using `GetIsolatedName("schema")`.
 
-See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## Comparison with Other Frameworks
 
