@@ -43,8 +43,10 @@ public async Task MyTest()
               <div className={styles.badge}>Modern .NET Testing</div>
             </div>
             <p className={styles.heroSubtitle}>
-              A modern testing framework for .NET built with performance in mind.
-              Leveraging source generation and AOT compilation for efficient test execution.
+              A modern .NET testing framework where tests are discovered at compile time, not
+              reflected at runtime. Source-generated and Native AOT ready, parallel by default,
+              batteries included — assertions, mocking, and first-class ASP.NET Core, Aspire,
+              and Playwright integrations.
             </p>
             <div className={styles.heroStats}>
               <div className={styles.stat}>
@@ -168,33 +170,33 @@ function WhyTUnit() {
   const features = [
     {
       icon: '⚡',
-      title: 'Performance Focused',
-      description: 'Source generated code eliminates reflection overhead. Built on the modern Microsoft Testing Platform.',
+      title: 'Compile-Time Discovery',
+      description: 'Tests are wired up by a source generator at build time, not found via reflection at runtime — faster startup, better IDE integration, and full Native AOT / trimming support.',
     },
     {
       icon: '🎯',
-      title: 'Compile-Time Validation',
-      description: 'Source generators provide early error detection and full IntelliSense support.',
+      title: 'Compile-Time Safety',
+      description: 'A suite of Roslyn analyzers ships in the box, so invalid hook signatures, broken data sources, and misused assertions fail your build — not your CI run.',
+    },
+    {
+      icon: '🔀',
+      title: 'Parallel by Default',
+      description: 'Tests run concurrently out of the box; [DependsOn], [NotInParallel], and [ParallelLimiter<T>] give you precise ordering and throttling when you need it.',
+    },
+    {
+      icon: '🧩',
+      title: 'Batteries Included',
+      description: 'Rich async assertions, shared fixtures with dependency injection, and lifecycle hooks at every scope — plus a source-generated mocking library.',
+    },
+    {
+      icon: '🔌',
+      title: 'First-Class Integrations',
+      description: 'Purpose-built support for ASP.NET Core, Aspire, and Playwright, so integration and end-to-end tests feel native to the framework.',
     },
     {
       icon: '🚀',
-      title: 'AOT Compatible',
-      description: 'Native AOT support enables faster startup times and reduced memory usage.',
-    },
-    {
-      icon: '🔧',
-      title: 'Extensible',
-      description: 'Rich extension points and customization options to fit your testing needs.',
-    },
-    {
-      icon: '📊',
-      title: 'Data Driven',
-      description: 'Powerful data source attributes for parameterized and matrix testing.',
-    },
-    {
-      icon: '🎨',
-      title: 'Modern API',
-      description: 'Fluent assertions, async-first design, and intuitive test organization.',
+      title: 'AOT & Trimming Ready',
+      description: 'Native AOT support enables dramatically faster startup and reduced memory usage, with no runtime reflection to trim away.',
     },
   ];
 
