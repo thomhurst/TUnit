@@ -56,7 +56,7 @@ at Assert.That(actualEmployee).IsEqualTo(expectedEmployee)
 
 ## Performance
 
-Source generation shifts work from run time to build time: builds are a fraction of a second slower, and every test run after that starts faster — dramatically so under Native AOT. The same test suites, run on every framework:
+Source generation shifts work from run time to build time: you pay a little up front at build, and every test run after that starts faster — dramatically so under Native AOT. The same test suites, run on every framework:
 
 <!-- benchmarks:start -->
 | Scenario | TUnit (AOT) | TUnit | xUnit v3 | NUnit | MSTest |
