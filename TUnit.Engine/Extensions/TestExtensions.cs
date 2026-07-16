@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
 using TUnit.Engine.Capabilities;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Reporters;
 #pragma warning disable TPEXP
 
@@ -61,7 +62,7 @@ internal static class TestExtensions
                 typeName: testContext.GetClassTypeName(),
                 methodName: testDetails.MethodName,
                 parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters),
-                returnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
+                returnTypeFullName: MetadataTypeNameFormatter.GetMetadataFullName(testDetails.ReturnType),
                 methodArity: testDetails.MethodMetadata.GenericTypeCount
             );
 
@@ -354,7 +355,7 @@ internal static class TestExtensions
         var array = new string[parameters.Length];
         for (var i = 0; i < parameters.Length; i++)
         {
-            array[i] = parameters[i].Type.FullName!;
+            array[i] = MetadataTypeNameFormatter.GetMetadataFullName(parameters[i].Type);
         }
         return array;
     }
