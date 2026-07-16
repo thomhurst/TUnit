@@ -1,51 +1,51 @@
 {
-  "timestamp": "2026-07-12T00:38:25.258Z",
+  "timestamp": "2026-07-16T16:49:09.140Z",
   "category": "MassiveParallelTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.301",
-    "host": ".NET 10.0.9 (10.0.9, 10.0.926.27113), X64 RyuJIT x86-64-v4"
+    "sdk": ".NET SDK 10.0.302",
+    "host": ".NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.58.0",
-      "Mean": "467.8 ms",
-      "Error": "8.86 ms",
-      "StdDev": "7.40 ms",
-      "Median": "467.2 ms"
+      "Version": "1.60.0",
+      "Mean": "530.9 ms",
+      "Error": "10.60 ms",
+      "StdDev": "20.42 ms",
+      "Median": "525.1 ms"
     },
     {
       "Method": "NUnit",
       "Version": "4.6.1",
-      "Mean": "1,107.5 ms",
-      "Error": "21.93 ms",
-      "StdDev": "26.10 ms",
-      "Median": "1,109.8 ms"
+      "Mean": "1,122.5 ms",
+      "Error": "19.75 ms",
+      "StdDev": "21.95 ms",
+      "Median": "1,114.3 ms"
     },
     {
       "Method": "MSTest",
-      "Version": "4.3.0",
-      "Mean": "2,993.9 ms",
-      "Error": "26.97 ms",
-      "StdDev": "23.91 ms",
-      "Median": "2,985.5 ms"
+      "Version": "4.3.2",
+      "Mean": "3,029.7 ms",
+      "Error": "34.65 ms",
+      "StdDev": "30.72 ms",
+      "Median": "3,024.8 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "3.2.2",
-      "Mean": "2,945.7 ms",
-      "Error": "15.70 ms",
-      "StdDev": "13.92 ms",
-      "Median": "2,945.5 ms"
+      "Mean": "2,975.1 ms",
+      "Error": "47.04 ms",
+      "StdDev": "44.00 ms",
+      "Median": "2,971.1 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.58.0",
-      "Mean": "217.6 ms",
-      "Error": "0.54 ms",
-      "StdDev": "0.42 ms",
-      "Median": "217.7 ms"
+      "Version": "1.60.0",
+      "Mean": "217.5 ms",
+      "Error": "1.28 ms",
+      "StdDev": "1.20 ms",
+      "Median": "217.1 ms"
     }
   ]
 }
