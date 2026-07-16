@@ -144,15 +144,17 @@ public class PostgresContainer : IAsyncInitializer, IAsyncDisposable
     public ValueTask DisposeAsync() { /* stop container */ }
 }
 
-[ClassDataSource<PostgresContainer>(Shared = SharedType.PerTestSession)]
-public class OrderRepositoryTests(PostgresContainer postgres)
+public class OrderRepositoryTests
 {
+    [ClassDataSource<PostgresContainer>(Shared = SharedType.PerTestSession)]
+    public required PostgresContainer Postgres { get; init; }
+
     [Test]
-    public async Task Saves_Order() { /* postgres is initialized and shared across the whole run */ }
+    public async Task Saves_Order() { /* Postgres is initialized and shared across the whole run */ }
 }
 ```
 
-Property injection works too, and disposal is reference-counted — shared fixtures are torn down exactly when the last test using them finishes.
+Property injection keeps base test classes clean — subclasses inherit the fixture without re-threading constructor parameters. Prefer a constructor param? That works too. Disposal is reference-counted, so shared fixtures are torn down exactly when the last test using them finishes.
 
 ### Parallelism you control
 
