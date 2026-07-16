@@ -160,6 +160,10 @@ jobs:
         run: |
           node .github/scripts/process-benchmarks.js
 
+      - name: Update README Benchmark Section
+        run: |
+          node .github/scripts/update-readme-benchmarks.js
+
       - name: Upload Individual Runtime Benchmarks
         uses: actions/upload-artifact@v7
         if: always()
@@ -266,7 +270,7 @@ jobs:
       - name: Check for Changes
         id: check_changes
         run: |
-          git add docs/docs/benchmarks/ docs/static/benchmarks/
+          git add docs/docs/benchmarks/ docs/static/benchmarks/ README.md
           if git diff --quiet --staged; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No benchmark changes detected"
