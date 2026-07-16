@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <TUnitMockImplicitUsings>disable</TUnitMockImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="BenchmarkDotNet.Annotations" />
+    <PackageReference Include="Imposter" />
+    <PackageReference Include="Mockolate" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="FakeItEasy" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
+
+</Project>

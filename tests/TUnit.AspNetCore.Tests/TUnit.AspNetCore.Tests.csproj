@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\eng\TestProject.props" />
+
+    <PropertyGroup>
+        <!-- ASP.NET Core testing only supports .NET 8.0+ -->
+        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <!-- Strong-named to access internals of TUnit.AspNetCore.Core via InternalsVisibleTo -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\TUnit.AspNetCore\TUnit.AspNetCore.csproj" />
+        <ProjectReference Include="..\TUnit.AspNetCore.Tests.WebApp\TUnit.AspNetCore.Tests.WebApp.csproj" />
+        <ProjectReference Include="..\TUnit.AspNetCore.Tests.MinimalApi\TUnit.AspNetCore.Tests.MinimalApi.csproj" />
+        <ProjectReference Include="..\..\src\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <!-- Version attr is required by CPM (Directory.Packages.props); VersionOverride selects the TFM-compatible version -->
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.10" VersionOverride="8.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.10" VersionOverride="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+    </ItemGroup>
+
+    <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

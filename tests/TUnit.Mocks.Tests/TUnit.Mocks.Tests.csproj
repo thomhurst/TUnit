@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" />
+    <PackageReference Include="Azure.Storage.Blobs" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
+
+    <!-- Wire source generator for mock generation in test code -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <!-- Wire analyzer for compile-time diagnostics -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

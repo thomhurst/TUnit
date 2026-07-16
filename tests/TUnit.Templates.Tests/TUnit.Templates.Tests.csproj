@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <Import Project="..\..\eng\TestProject.props" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.Templates\TUnit.Templates.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Exclude snapshot files from compilation -->
+    <Compile Remove="Snapshots\**" />
+    <None Include="Snapshots\**" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+</Project>

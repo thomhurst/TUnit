@@ -22,7 +22,7 @@ See `.claude/docs/mandatory-rules.md` for full details.
 
 **NEVER run `TUnit.TestProject` without filters.** Many tests are designed to fail.
 ```bash
-cd TUnit.TestProject
+cd tests/TUnit.TestProject
 dotnet test --treenode-filter "/*/*/SpecificClass/*"
 ```
 See `.claude/docs/workflows.md` for filter syntax and details.
@@ -31,7 +31,7 @@ See `.claude/docs/workflows.md` for filter syntax and details.
 
 ```bash
 # Review changes, then accept if intentional:
-# (Run from test project directory, e.g., TUnit.Core.SourceGenerator.Tests)
+# (Run from test project directory, e.g., tests/TUnit.Core.SourceGenerator.Tests)
 
 # Linux/macOS:
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done

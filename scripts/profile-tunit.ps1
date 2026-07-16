@@ -19,16 +19,16 @@
       dotnet tool install -g dotnet-dump  (optional, for -Dump)
 
 .EXAMPLE
-    # Profile with the default profiling project (TUnit.Profile)
+    # Profile with the default profiling project (benchmarks/TUnit.Profile)
     .\scripts\profile-tunit.ps1
 
 .EXAMPLE
     # Profile specific tests in TUnit.TestProject
-    .\scripts\profile-tunit.ps1 -Project TUnit.TestProject -Filter "/*/*/BasicTests/*"
+    .\scripts\profile-tunit.ps1 -Project tests/TUnit.TestProject -Filter "/*/*/BasicTests/*"
 
 .EXAMPLE
     # Profile a different project with a memory dump
-    .\scripts\profile-tunit.ps1 -Project TUnit.PerformanceBenchmarks -Dump
+    .\scripts\profile-tunit.ps1 -Project benchmarks/TUnit.PerformanceBenchmarks -Dump
 
 .EXAMPLE
     # Use GC-verbose tracing on net9.0
@@ -41,7 +41,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Project = "TUnit.Profile",
+    [string]$Project = "benchmarks/TUnit.Profile",
     [string]$Framework = "net10.0",
     [string]$Configuration = "Release",
     [string]$Filter = "",
@@ -72,13 +72,14 @@ if (-not (Test-Path $ProjectDir)) {
     return
 }
 
+$ProjectName = Split-Path -Leaf $ProjectDir
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 if (-not $OutputDir) {
-    $OutputDir = Join-Path $RepoRoot ".profile" "$Project-$Timestamp"
+    $OutputDir = Join-Path $RepoRoot ".profile" "$ProjectName-$Timestamp"
 }
 New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
-$ExePath = Join-Path $ProjectDir "bin" $Configuration $Framework "$Project.exe"
+$ExePath = Join-Path $ProjectDir "bin" $Configuration $Framework "$ProjectName.exe"
 
 Write-Host ""
 Write-Host "===================================================================" -ForegroundColor Cyan

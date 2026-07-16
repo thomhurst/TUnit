@@ -1,0 +1,18 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Core\TUnit.Core.props" />
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+        <IsPackable>false</IsPackable>
+
+        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+
+        <IsTestProject>false</IsTestProject>
+
+        <ImportTUnitGlobalUsings>true</ImportTUnitGlobalUsings>
+    </PropertyGroup>
+</Project>

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup>
+    <!-- ASP.NET Core only supports .NET 8.0+ -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TUnit.AspNetCore.Analyzers\TUnit.AspNetCore.Analyzers.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.AspNetCore.Analyzers.CodeFixers\TUnit.AspNetCore.Analyzers.CodeFixers.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Engine\TUnit.Engine.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Core\TUnit.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Copy netstandard2.0 build of TUnit.Core into the test bin so Net90 ref assemblies don't
+       trigger CS1705 against the test process's net10.0 build. -->
+  <ItemGroup>
+    <None Include="..\..\src\TUnit.Core\bin\$(Configuration)\netstandard2.0\TUnit.Core.dll"
+          Link="TUnit.Core.netstandard2.0.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <Compile Include="..\SharedTestHelpers\AnalyzerTestCompatibility.cs"
+             Link="Shared\AnalyzerTestCompatibility.cs" />
+    <Compile Include="..\SharedTestHelpers\RulesDecouplingVerifier.cs"
+             Link="Shared\RulesDecouplingVerifier.cs" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\TestProject.targets" />
+</Project>

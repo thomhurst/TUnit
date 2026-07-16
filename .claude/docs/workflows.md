@@ -20,8 +20,8 @@ dotnet build TUnit.slnx --no-restore -graphBuild:True
 dotnet test
 
 # Snapshot tests
-dotnet test TUnit.Core.SourceGenerator.Tests
-dotnet test TUnit.PublicAPI
+dotnet test tests/TUnit.Core.SourceGenerator.Tests
+dotnet test tests/TUnit.PublicAPI
 
 # Run specific test
 dotnet test --treenode-filter "/*/*/ClassName/*"
@@ -41,15 +41,15 @@ Run benchmarks when changing hot paths (test discovery, execution, data generati
 
 ```bash
 # Core performance benchmarks (BenchmarkDotNet)
-cd TUnit.Performance.Tests
+cd benchmarks/TUnit.Performance.Tests
 dotnet run -c Release
 
 # Source generator benchmarks
-cd TUnit.SourceGenerator.Benchmarks
+cd benchmarks/TUnit.SourceGenerator.Benchmarks
 dotnet run -c Release
 
 # Large-scale performance validation
-cd TUnit.PerformanceBenchmarks
+cd benchmarks/TUnit.PerformanceBenchmarks
 dotnet run -c Release
 ```
 

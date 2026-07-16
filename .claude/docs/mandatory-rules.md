@@ -35,8 +35,8 @@ TUnit supports two execution modes that MUST produce identical behavior:
 ## Rule 2: Snapshot Testing
 
 Run snapshot tests when changing:
-- Source generator output → `dotnet test TUnit.Core.SourceGenerator.Tests`
-- Public APIs → `dotnet test TUnit.PublicAPI`
+- Source generator output → `dotnet test tests/TUnit.Core.SourceGenerator.Tests`
+- Public APIs → `dotnet test tests/TUnit.PublicAPI`
 
 See `CLAUDE.md` for the quick fix workflow.
 
@@ -95,6 +95,6 @@ public void InvokeTest(MethodInfo method) { }
 ### Verification
 
 ```bash
-cd TUnit.TestProject
+cd tests/TUnit.TestProject
 dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 ```

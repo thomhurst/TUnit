@@ -1,0 +1,80 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\eng\Library.props" />
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TUnit.Engine" />
+        <InternalsVisibleTo Include="TUnit.UnitTests" />
+        <InternalsVisibleTo Include="TUnit.AspNetCore.Core" />
+        <InternalsVisibleTo Include="TUnit.Logging.Microsoft" />
+        <InternalsVisibleTo Include="TUnit.Aspire" />
+        <InternalsVisibleTo Include="TUnit.Aspire.Tests" />
+        <InternalsVisibleTo Include="TUnit.OpenTelemetry" />
+        <InternalsVisibleTo Include="TUnit.OpenTelemetry.Tests" />
+        <InternalsVisibleTo Include="TUnit.Engine.Tests" />
+        <InternalsVisibleTo Include="TUnit.Playwright" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Core.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Core.props">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
+
+        <TfmSpecificPackageFile Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Core.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.Roslyn414\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Analyzers.CodeFixers.dll"
+            Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn44\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.4/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn47\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.7/cs" Visible="false" />
+
+        <None
+            Include="$(MSBuildProjectDirectory)\..\TUnit.Core.SourceGenerator.Roslyn414\bin\$(Configuration)\netstandard2.0\TUnit.Core.SourceGenerator.dll"
+            Pack="true" PackagePath="analyzers/dotnet/roslyn4.14/cs" Visible="false" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.CSharp" />
+        <PackageReference Include="System.Text.Json" />
+        <PackageReference Include="System.Collections.Immutable" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="IClassDataSourceAttribute.cs" />
+      <Compile Remove="Interfaces\INestedClassDataSourceInitializer.cs" />
+    </ItemGroup>
+
+  <Import Project="..\..\eng\Library.targets" />
+
+</Project>

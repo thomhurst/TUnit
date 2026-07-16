@@ -204,7 +204,7 @@ public class InMemoryPostgreSqlDatabase : IAsyncInitializer, IAsyncDisposable
 
 For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This avoids fighting EF Core's table naming conventions and provides complete isolation using `GetIsolatedName("schema")`.
 
-See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `TUnit.Example.Asp.Net.TestProject/EfCore/`.
+See the full pattern with `IModelCacheKeyFactory`, `EnsureCreatedAsync()`, and schema cleanup in the [ASP.NET Core Integration Testing](aspnet.md#per-test-schema-isolation-with-ef-core) guide, or the working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
 
 ## Comparison with Other Frameworks
 

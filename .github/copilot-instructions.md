@@ -29,14 +29,14 @@
 2. **SNAPSHOT TESTS ARE NON-NEGOTIABLE**
    - After ANY change to source generator output:
      ```bash
-     dotnet test TUnit.Core.SourceGenerator.Tests
+     dotnet test tests/TUnit.Core.SourceGenerator.Tests
      # Review .received.txt files, then:
      for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done  # Linux/macOS
      for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"  # Windows
      ```
    - After ANY public API change (TUnit.Core, TUnit.Engine, TUnit.Assertions):
      ```bash
-     dotnet test TUnit.PublicAPI
+     dotnet test tests/TUnit.PublicAPI
      # Review and accept snapshots as above
      ```
    - Commit ALL `.verified.txt` files. These are the source of truth.
@@ -67,17 +67,17 @@
 
 ```bash
 # ❌ WRONG - Will show many "failures" (this is expected behavior)
-cd TUnit.TestProject && dotnet run
-cd TUnit.TestProject && dotnet test
+cd tests/TUnit.TestProject && dotnet run
+cd tests/TUnit.TestProject && dotnet test
 
 # ✅ CORRECT - Always use targeted filters when testing TUnit.TestProject
-cd TUnit.TestProject && dotnet test --treenode-filter "/*/*/SpecificClass/*"
-cd TUnit.TestProject && dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
+cd tests/TUnit.TestProject && dotnet test --treenode-filter "/*/*/SpecificClass/*"
+cd tests/TUnit.TestProject && dotnet test --treenode-filter "/*/*/*/*[Category!=Performance]"
 
 # ✅ CORRECT - Test other test projects normally (they don't have intentional failures)
-dotnet test TUnit.Engine.Tests
-dotnet test TUnit.Assertions.Tests
-dotnet test TUnit.Core.SourceGenerator.Tests
+dotnet test tests/TUnit.Engine.Tests
+dotnet test tests/TUnit.Assertions.Tests
+dotnet test tests/TUnit.Core.SourceGenerator.Tests
 ```
 
 **Why TUnit.TestProject is special:**
@@ -98,11 +98,11 @@ dotnet test TUnit.Core.SourceGenerator.Tests
 dotnet test
 
 # Test source generator + accept snapshots
-dotnet test TUnit.Core.SourceGenerator.Tests
+dotnet test tests/TUnit.Core.SourceGenerator.Tests
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
 # Test public API + accept snapshots
-dotnet test TUnit.PublicAPI
+dotnet test tests/TUnit.PublicAPI
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
 # Run specific test by tree node filter
@@ -270,13 +270,13 @@ TUnit has two execution paths that **MUST** behave identically:
    dotnet test
 
    # If source generator changed, accept snapshots
-   cd TUnit.Core.SourceGenerator.Tests
+   cd tests/TUnit.Core.SourceGenerator.Tests
    dotnet test
    # Review .received.txt files
    for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
    # If public API changed, accept snapshots
-   cd TUnit.PublicAPI
+   cd tests/TUnit.PublicAPI
    dotnet test
    # Review .received.txt files
    for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
@@ -285,13 +285,13 @@ TUnit has two execution paths that **MUST** behave identically:
 4. **Performance Check**
    ```bash
    # Run benchmarks (if touching hot paths)
-   cd TUnit.Performance.Tests
+   cd benchmarks/TUnit.Performance.Tests
    dotnet run -c Release --framework net9.0
    ```
 
 5. **AOT Verification** (if touching reflection)
    ```bash
-   cd TUnit.TestProject
+   cd tests/TUnit.TestProject
    dotnet publish -c Release -p:PublishAot=true --use-current-runtime
    ```
 
@@ -647,7 +647,7 @@ public Task GeneratesCorrectCode_ForSimpleTest()
 **Accepting Snapshots:**
 ```bash
 # After verifying .received.txt files are correct:
-cd TUnit.Core.SourceGenerator.Tests
+cd tests/TUnit.Core.SourceGenerator.Tests
 for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
 # Commit the .verified.txt files
@@ -785,7 +785,7 @@ public async Task BeforeAllTestsHook_ExecutesOnce(ExecutionMode mode)
 ### Adding Analyzer Rules
 
 ```csharp
-// TUnit.Analyzers/Rules/TestMethodMustBePublic.cs
+// src/TUnit.Analyzers/Rules/TestMethodMustBePublic.cs
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TestMethodMustBePublicAnalyzer : DiagnosticAnalyzer
@@ -826,7 +826,7 @@ public class TestMethodMustBePublicAnalyzer : DiagnosticAnalyzer
 ### Adding Assertions
 
 ```csharp
-// TUnit.Assertions/Extensions/NumericAssertions.cs
+// src/TUnit.Assertions/Extensions/NumericAssertions.cs
 
 public static class NumericAssertions
 {
@@ -863,7 +863,7 @@ await Assert.That(value).IsPositive();
 **Solution**:
 ```bash
 # 1. Review the .received.txt files to see what changed
-cd TUnit.Core.SourceGenerator.Tests  # or TUnit.PublicAPI
+cd tests/TUnit.Core.SourceGenerator.Tests  # or tests/TUnit.PublicAPI
 ls *.received.txt
 
 # 2. If changes are intentional (you modified the generator or public API):
@@ -955,7 +955,7 @@ public void InvokeTestMethod(MethodInfo method) { }
 **Diagnostic**:
 ```bash
 # Run performance benchmarks
-cd TUnit.Performance.Tests
+cd benchmarks/TUnit.Performance.Tests
 dotnet run -c Release --framework net9.0
 
 # Profile with dotnet-trace

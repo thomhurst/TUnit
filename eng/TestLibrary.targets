@@ -1,0 +1,27 @@
+<Project>
+    <Import
+        Project="$(MSBuildThisFileDirectory)Polyfill.targets" />
+
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Core\TUnit.Core.targets" />
+
+    <ItemGroup>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)..\src\TUnit.Core\TUnit.Core.csproj" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)..\src\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)..\src\TUnit.Analyzers\TUnit.Analyzers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <ProjectReference
+            Include="$(MSBuildThisFileDirectory)..\src\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj"
+            OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(ImportTUnitGlobalUsings)' == 'true'">
+        <Using Include="TUnit.Core.HookType" Static="True" />
+        <Using Include="TUnit.Core" />
+    </ItemGroup>
+</Project>

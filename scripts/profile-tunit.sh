@@ -22,11 +22,11 @@
 #   ./scripts/profile-tunit.sh [options]
 #
 # Examples:
-#   # Profile with the default profiling project (TUnit.Profile)
+#   # Profile with the default profiling project (benchmarks/TUnit.Profile)
 #   ./scripts/profile-tunit.sh
 #
 #   # Profile specific tests in TUnit.TestProject
-#   ./scripts/profile-tunit.sh --project TUnit.TestProject --filter "/*/*/BasicTests/*"
+#   ./scripts/profile-tunit.sh --project tests/TUnit.TestProject --filter "/*/*/BasicTests/*"
 #
 #   # Profile with a memory dump and top 50 hot functions
 #   ./scripts/profile-tunit.sh --dump --top 50
@@ -39,7 +39,7 @@ set -euo pipefail
 # ── Defaults ──────────────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROJECT="TUnit.Profile"
+PROJECT="benchmarks/TUnit.Profile"
 FRAMEWORK="net10.0"
 CONFIGURATION="Release"
 FILTER=""
@@ -110,17 +110,18 @@ if [[ ! -d "$PROJECT_DIR" ]]; then
     exit 1
 fi
 
+PROJECT_NAME="${PROJECT##*/}"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 if [[ -z "$OUTPUT_DIR" ]]; then
-    OUTPUT_DIR="$REPO_ROOT/.profile/${PROJECT}-${TIMESTAMP}"
+    OUTPUT_DIR="$REPO_ROOT/.profile/${PROJECT_NAME}-${TIMESTAMP}"
 fi
 mkdir -p "$OUTPUT_DIR"
 
 # Resolve the built executable path
 if [[ "$(uname -o 2>/dev/null || true)" == "Msys" || "$(uname -s)" == MINGW* || "$(uname -s)" == CYGWIN* ]]; then
-    EXE_NAME="${PROJECT}.exe"
+    EXE_NAME="${PROJECT_NAME}.exe"
 else
-    EXE_NAME="$PROJECT"
+    EXE_NAME="$PROJECT_NAME"
 fi
 EXE_PATH="$PROJECT_DIR/bin/$CONFIGURATION/$FRAMEWORK/$EXE_NAME"
 

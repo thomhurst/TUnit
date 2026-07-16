@@ -66,7 +66,7 @@ This makes TUnit.Mocks compatible with **Native AOT** and **IL trimming**, while
 
 ### Source Code
 
-All benchmark source code is available in the [`TUnit.Mocks.Benchmarks`](https://github.com/thomhurst/TUnit/tree/main/TUnit.Mocks.Benchmarks) directory.
+All benchmark source code is available in the [TUnit repository](https://github.com/thomhurst/TUnit), under `benchmarks/TUnit.Mocks.Benchmarks`.
 
 ---
 

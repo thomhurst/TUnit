@@ -58,7 +58,7 @@ See `mandatory-rules.md` for annotation patterns.
 
 **Diagnose**:
 ```bash
-cd TUnit.Performance.Tests
+cd benchmarks/TUnit.Performance.Tests
 dotnet run -c Release
 ```
 

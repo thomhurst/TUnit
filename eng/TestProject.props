@@ -1,0 +1,71 @@
+<Project>
+    <Import Project="$(MSBuildThisFileDirectory)TestLibrary.props" />
+
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Engine\TUnit.Engine.props" />
+    <Import Project="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions\TUnit.Assertions.props" />
+
+    <Import
+        Project="$(MSBuildThisFileDirectory)..\src\TUnit.Assertions.FSharp\TUnit.Assertions.FSharp.props"
+        Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
+
+    <PropertyGroup>
+        <!-- Test projects multi-target net8.0;net9.0;net10.0 (the repo default also set in
+             Directory.Build.props). We re-assert it here gated ONLY on TargetFrameworks being
+             empty (NOT on TargetFramework=='') so it survives Visual Studio's design-time
+             evaluation: CPS probes each candidate TFM by passing TargetFramework=netX as a
+             global property, which makes a TargetFramework=='' guard evaluate false and leaves
+             TargetFrameworks empty. CPS then can't resolve TargetPath for the cross-targeting
+             outer build and faults the project load (InvalidProjectDataException). Keeping this
+             unconditional-when-empty mirrors Library.props, which never hit the bug.
+             Projects needing a different set (e.g. TUnit.PublicAPI with net472) assign
+             <TargetFrameworks> before this import; the guard below then leaves them untouched. -->
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0;net9.0;net10.0</TargetFrameworks>
+
+        <OutputType>Exe</OutputType>
+
+        <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+        <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput>
+
+        <IsTestProject>true</IsTestProject>
+
+        <UseTestingPlatformProtocol>true</UseTestingPlatformProtocol>
+        <IsTestingPlatformEnabled>true</IsTestingPlatformEnabled>
+
+    </PropertyGroup>
+
+    <!-- Default off: emitting generator output to disk costs significant I/O per build. -->
+    <PropertyGroup>
+        <EmitCompilerGeneratedFiles Condition="'$(EmitCompilerGeneratedFiles)' == ''">false</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <!-- Compile Remove must stay unconditional: a stale folder from a previous opt-in build
+         would otherwise be picked up by the implicit C# glob and produce CS0111 / CS0579
+         duplicate-member errors alongside the in-memory generator output. -->
+    <ItemGroup>
+        <Compile Remove="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">
+        <None Include="SourceGeneratedViewer\**" />
+    </ItemGroup>
+
+    <!-- Clean SourceGeneratedViewer\ only when generator output is being emitted.
+         Stale files are excluded from compilation unconditionally above, so normal
+         local builds should not fail because an ignored viewer tree is locked. -->
+    <Target Name="CleanSourceGeneratedViewer" BeforeTargets="BeforeBuild"
+            Condition="'$(ContinuousIntegrationBuild)' != 'true' AND '$(EmitCompilerGeneratedFiles)' == 'true' AND Exists('$(ProjectDir)SourceGeneratedViewer')">
+        <ItemGroup>
+            <FilesToDelete Include="$(ProjectDir)SourceGeneratedViewer\**\*" />
+        </ItemGroup>
+        <Delete Files="@(FilesToDelete)" ContinueOnError="true" />
+    </Target>
+
+    <!-- Enable VSCode test discovery integration -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
+    </ItemGroup>
+
+</Project>
