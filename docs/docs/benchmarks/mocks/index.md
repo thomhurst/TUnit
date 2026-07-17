@@ -7,7 +7,7 @@ sidebar_position: 4
 # Mock Library Benchmarks
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-07-16** from the latest CI run.
+These benchmarks were automatically generated on **2026-07-17** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.302
 :::
@@ -66,7 +66,7 @@ This makes TUnit.Mocks compatible with **Native AOT** and **IL trimming**, while
 
 ### Source Code
 
-All benchmark source code is available in the [TUnit repository](https://github.com/thomhurst/TUnit), under `benchmarks/TUnit.Mocks.Benchmarks`.
+All benchmark source code is available in the [`TUnit.Mocks.Benchmarks`](https://github.com/thomhurst/TUnit/tree/main/benchmarks/TUnit.Mocks.Benchmarks) directory.
 
 ---
 
@@ -76,4 +76,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-07-16T03:22:07.543Z*
+*Last generated: 2026-07-17T03:20:48.806Z*
