@@ -4907,8 +4907,6 @@ import AssertionsLibrary from '@site/src/components/AssertionsLibrary';
 
 Browse the full list of assertions available in TUnit. Use the search box to filter by name or category. Click any assertion to see its signature and usage details.
 
-<AssertionsLibrary />
-
 ---
 
 ## Member Assertions
@@ -6864,7 +6862,7 @@ public async Task IP_Not_IPv6()
 }
 ```
 
-## Lazy\<T\> Assertions
+## Lazy\ Assertions
 
 ### IsValueCreated / IsNotValueCreated
 
@@ -30611,7 +30609,7 @@ public class UserRoleTests
 }
 ```
 
-## With Func\<T\> for Reference Types
+## With Func\ for Reference Types
 
 When returning reference types, combine with `Func<T>` to ensure fresh instances:
 
