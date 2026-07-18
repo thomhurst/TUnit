@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-17T03:20:48.806Z",
+  "timestamp": "2026-07-18T03:20:37.479Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
@@ -10,16 +10,16 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "2.119 μs",
-      "Error": "0.0188 μs",
-      "StdDev": "0.0167 μs",
+      "Mean": "1.974 μs",
+      "Error": "0.0329 μs",
+      "StdDev": "0.0308 μs",
       "Gen0": "0.3777",
       "Gen1": "0.0038",
       "Allocated": "6.23 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "3.022 μs",
+      "Mean": "2.916 μs",
       "Error": "0.0375 μs",
       "StdDev": "0.0332 μs",
       "Gen0": "0.9613",
@@ -28,36 +28,36 @@
     },
     {
       "Method": "Mockolate",
-      "Mean": "1.865 μs",
-      "Error": "0.0201 μs",
-      "StdDev": "0.0188 μs",
+      "Mean": "1.841 μs",
+      "Error": "0.0257 μs",
+      "StdDev": "0.0241 μs",
       "Gen0": "0.4501",
       "Gen1": "0.0076",
       "Allocated": "7.36 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "411.688 μs",
-      "Error": "2.8362 μs",
-      "StdDev": "2.6530 μs",
+      "Mean": "415.950 μs",
+      "Error": "1.7887 μs",
+      "StdDev": "1.5857 μs",
       "Gen0": "1.9531",
       "Gen1": "0.9766",
       "Allocated": "36.16 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "18.220 μs",
-      "Error": "0.1458 μs",
-      "StdDev": "0.1293 μs",
+      "Mean": "17.697 μs",
+      "Error": "0.2103 μs",
+      "StdDev": "0.1967 μs",
       "Gen0": "1.6174",
       "Gen1": "0.0305",
       "Allocated": "26.72 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "19.560 μs",
-      "Error": "0.2402 μs",
-      "StdDev": "0.2247 μs",
+      "Mean": "19.178 μs",
+      "Error": "0.1046 μs",
+      "StdDev": "0.0927 μs",
       "Gen0": "1.5564",
       "Gen1": "0.0305",
       "Allocated": "25.52 KB"
