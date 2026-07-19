@@ -14,7 +14,7 @@ internal static class GitHubArtifactUploader
     private const int BaseRetryMs = 3000;
     private const double RetryMultiplier = 1.5;
 
-    private static readonly HashSet<int> RetryableStatusCodes = [429, 500, 502, 503, 504];
+    private static readonly HashSet<int> RetryableStatusCodes = [408, 429, 500, 502, 503, 504];
     private static readonly HttpClient SharedHttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
     internal static async Task<string?> UploadAsync(
@@ -280,7 +280,7 @@ internal static class GitHubArtifactUploader
             {
                 return await action();
             }
-            catch (HttpRequestException ex) when (IsRetryable(ex))
+            catch (ArtifactUploadException ex) when (IsRetryable(ex.StatusCode))
             {
                 if (attempt == MaxRetries - 1)
                 {
@@ -312,29 +312,30 @@ internal static class GitHubArtifactUploader
 
         // Include response body in the exception message rather than logging per-attempt,
         // so only the final failure is surfaced by RetryAsync.
-#if NET
-        throw new HttpRequestException($"{step} returned {(int)response.StatusCode}: {body}", null, response.StatusCode);
-#else
-        throw new HttpRequestException($"{step} returned {(int)response.StatusCode}: {body}");
-#endif
+        var statusCode = (int)response.StatusCode;
+        var hint = statusCode is 404
+            // GitHub Enterprise Server / other non-github.com hosts don't implement the
+            // Actions Results artifact API, so retrying can only burn wall-clock time.
+            ? " (the artifact API is unavailable on this host — this is expected on GitHub Enterprise Server)"
+            : "";
+
+        throw new ArtifactUploadException($"{step} returned {statusCode}{hint}: {body}", statusCode);
     }
 
-    private static bool IsRetryable(HttpRequestException ex)
-    {
-#if NET
-        var statusCode = (int?)ex.StatusCode;
-        return statusCode is not null && RetryableStatusCodes.Contains(statusCode.Value);
-#else
-        // On netstandard2.0, HttpRequestException doesn't have StatusCode.
-        // Use message heuristic to avoid retrying non-retryable errors like 401/403.
-        var msg = ex.Message;
-        if (msg.Contains("401") || msg.Contains("403") ||
-            msg.Contains("Unauthorized") || msg.Contains("Forbidden"))
-        {
-            return false;
-        }
+    /// <summary>
+    /// Only transient failures are worth retrying. Anything else — an unavailable artifact API (404),
+    /// a bad token (401/403), a malformed request (400) — fails identically on every attempt, so
+    /// retrying just adds the full backoff schedule to the run time before the same error surfaces.
+    /// </summary>
+    internal static bool IsRetryable(int? statusCode) =>
+        statusCode is not null && RetryableStatusCodes.Contains(statusCode.Value);
 
-        return true;
-#endif
+    /// <summary>
+    /// Carries the HTTP status code across all target frameworks —
+    /// <see cref="HttpRequestException"/> only exposes <c>StatusCode</c> on .NET 5+.
+    /// </summary>
+    private sealed class ArtifactUploadException(string message, int statusCode) : Exception(message)
+    {
+        public int StatusCode { get; } = statusCode;
     }
 }
