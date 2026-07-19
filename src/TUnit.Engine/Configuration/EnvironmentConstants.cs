@@ -12,6 +12,9 @@ internal static class EnvironmentConstants
     // TUnit-specific: how long (in days) the auto-uploaded HTML report artifact is kept
     public const string ArtifactRetentionDays = "TUNIT_ARTIFACT_RETENTION_DAYS";
 
+    // TUnit-specific: keep generating the html report, but skip the automatic GitHub Actions artifact-upload.
+    public const string DisableArtifactUpload = "TUNIT_DISABLE_ARTIFACT_UPLOAD";
+
     // TUnit-specific: cross-process report aggregation (issue #4522).
     // ON by default wherever a shared directory is resolvable (GitHub Actions, or explicit
     // TUNIT_AGGREGATE_DIR). Values: off/false/0/no/disabled/none = disable;

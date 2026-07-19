@@ -857,6 +857,11 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataP
             return null;
         }
 
+        if (IsTruthyEnv(Environment.GetEnvironmentVariable(EnvironmentConstants.DisableArtifactUpload)))
+        {
+            return null;
+        }
+
         var repo = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRepository);
         var runId = Environment.GetEnvironmentVariable(EnvironmentConstants.GitHubRunId);
 
