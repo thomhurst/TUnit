@@ -114,6 +114,27 @@ The value must be a positive integer. If it exceeds your repository/organization
 TUnit clamps it to that maximum. This applies only to the automatic upload (Option A); the
 manual `upload-artifact` step (Option B) has its own [`retention-days`](https://github.com/actions/upload-artifact#retention-period) input.
 
+### Disabling the Automatic Artifact Upload
+
+To keep generating the html report file but skip the automatic artifact upload, set the
+`TUNIT_DISABLE_ARTIFACT_UPLOAD` environment variable:
+
+```yaml
+- name: Run Tests
+  run: dotnet run --project MyTests
+  env:
+    TUNIT_DISABLE_ARTIFACT_UPLOAD: true
+```
+This is useful if you:
+
+* Run a GitHub-actions compatible CI system that cant handle `upload-artifact/v7`
+  like [forgejo](https://forgejo.org/), [gitea](https://about.gitea.com/)
+  or anything other based on [GHES](https://docs.github.com/en/enterprise-server@latest/admin/overview/about-github-enterprise-server)
+* Upload the report to another endpoint anyway
+
+
+The report file and the `GITHUB_STEP_SUMMARY` are still generated.
+
 ### Viewing the Report
 
 After the workflow run completes:
