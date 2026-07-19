@@ -47,6 +47,37 @@ public class GitHubArtifactUploaderTests
     }
 
     [Test]
+    [Arguments(408)]
+    [Arguments(429)]
+    [Arguments(500)]
+    [Arguments(502)]
+    [Arguments(503)]
+    [Arguments(504)]
+    public void IsRetryable_Is_True_For_Transient_Status_Codes(int statusCode)
+    {
+        GitHubArtifactUploader.IsRetryable(statusCode).ShouldBeTrue();
+    }
+
+    [Test]
+    [Arguments(400)]
+    [Arguments(401)]
+    [Arguments(403)]
+    // 404 is what GitHub Enterprise Server returns — the artifact API doesn't exist there
+    [Arguments(404)]
+    [Arguments(422)]
+    [Arguments(501)]
+    public void IsRetryable_Is_False_For_Non_Retryable_Status_Codes(int statusCode)
+    {
+        GitHubArtifactUploader.IsRetryable(statusCode).ShouldBeFalse();
+    }
+
+    [Test]
+    public void IsRetryable_Is_False_When_No_Status_Code()
+    {
+        GitHubArtifactUploader.IsRetryable(null).ShouldBeFalse();
+    }
+
+    [Test]
     public void ComputeExpiresAt_Ignores_NonPositive_Repository_Maximum()
     {
         var result = GitHubArtifactUploader.ComputeExpiresAt(10, maxRetentionDays: 0, FixedUtcNow);
