@@ -18805,8 +18805,7 @@ To keep generating the html report file but skip the automatic artifact upload, 
 This is useful if you:
 
 * Run a GitHub-actions compatible CI system that cant handle `upload-artifact/v7`
-  like [forgejo](https://forgejo.org/), [gitea](https://about.gitea.com/)
-  or anything other based on [GHES](https://docs.github.com/en/enterprise-server@latest/admin/overview/about-github-enterprise-server)
+  such as a [GHES](https://docs.github.com/en/enterprise-server@latest/admin/overview/about-github-enterprise-server)
 * Upload the report to another endpoint anyway
 
 The report file and the `GITHUB_STEP_SUMMARY` are still generated.
