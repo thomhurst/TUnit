@@ -40,7 +40,7 @@ jobs:
           docker-images: false
           swap-storage: false
 
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
