@@ -233,7 +233,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(EngineDefaults.DiscoveryTimeout);
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, metadataFilter: null, cts.Token).ConfigureAwait(false);
+        var tests = await _testBuilderPipeline.BuildTestsAsync(testSessionId, buildingContext, metadataFilter: null, cts.Token).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
@@ -382,34 +382,12 @@ internal sealed class TestDiscoveryService : IDataProducer
 
 
 
-    private async Task InvokePostResolutionEventsInParallelAsync(List<AbstractExecutableTest> allTests)
+    private Task InvokePostResolutionEventsInParallelAsync(List<AbstractExecutableTest> allTests)
     {
-        if (allTests.Count < Building.ParallelThresholds.MinItemsForParallel)
-        {
-            foreach (var test in allTests)
-            {
-                await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
-            }
-            return;
-        }
-
-#if NET8_0_OR_GREATER
-        await Parallel.ForEachAsync(
+        return Utilities.ParallelMap.ForEachParallelAsync(
             allTests,
-            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            async (test, _) =>
-            {
-                await _testBuilderPipeline.InvokePostResolutionEventsAsync(test).ConfigureAwait(false);
-            }
-        ).ConfigureAwait(false);
-#else
-        var tasks = new Task[allTests.Count];
-        for (var i = 0; i < allTests.Count; i++)
-        {
-            tasks[i] = _testBuilderPipeline.InvokePostResolutionEventsAsync(allTests[i]).AsTask();
-        }
-        await Task.WhenAll(tasks).ConfigureAwait(false);
-#endif
+            test => _testBuilderPipeline.InvokePostResolutionEventsAsync(test),
+            Environment.ProcessorCount);
     }
 
     public IEnumerable<TestContext> GetCachedTestContexts()

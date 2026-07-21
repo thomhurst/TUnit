@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using EnumerableAsyncProcessor.Extensions;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Helpers;
@@ -12,19 +10,6 @@ using TUnit.Engine.Services;
 using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Building;
-
-/// <summary>
-/// Threshold below which sequential processing is used instead of parallel.
-/// For small test sets, the overhead of task scheduling exceeds parallelization benefits.
-/// </summary>
-internal static class ParallelThresholds
-{
-    /// <summary>
-    /// Minimum number of items before parallel processing is used.
-    /// Below this threshold, sequential processing avoids task scheduling overhead.
-    /// </summary>
-    public const int MinItemsForParallel = 8;
-}
 
 internal sealed class TestBuilderPipeline
 {
@@ -67,17 +52,6 @@ internal sealed class TestBuilderPipeline
         return testBuilderContext;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId)
-    {
-        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
-
-        // For this method (non-streaming), we're not in execution mode so no filter optimization
-        var buildingContext = new TestBuildingContext(IsForExecution: false, Filter: null);
-        return await BuildTestsFromMetadataAsync(collectedMetadata, buildingContext).ConfigureAwait(false);
-    }
-
     /// <summary>
     /// Collects all test metadata without building tests.
     /// This is a lightweight operation used for dependency analysis.
@@ -97,22 +71,18 @@ internal sealed class TestBuilderPipeline
     }
 
     /// <summary>
-    /// Streaming version that yields tests as they're built without buffering
+    /// Collects metadata for the session and builds all tests, optionally pre-filtering metadata.
     /// </summary>
     /// <param name="testSessionId">The test session identifier</param>
     /// <param name="buildingContext">Context for test building</param>
     /// <param name="metadataFilter">Optional predicate to filter which metadata should be built (null means build all)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(
         string testSessionId,
         TestBuildingContext buildingContext,
         Func<TestMetadata, bool>? metadataFilter = null,
         CancellationToken cancellationToken = default)
     {
-        // Get metadata streaming if supported
-        // Fall back to non-streaming collection
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
         // Apply metadata filter if provided (for dependency-aware filtering optimization)
@@ -121,9 +91,7 @@ internal sealed class TestBuilderPipeline
             collectedMetadata = collectedMetadata.Where(metadataFilter);
         }
 
-        return await collectedMetadata
-            .SelectManyAsync(metadata => BuildTestsFromSingleMetadataAsync(metadata, buildingContext, cancellationToken), cancellationToken: cancellationToken)
-            .ProcessInParallel(cancellationToken: cancellationToken);
+        return await BuildTestsFromMetadataAsync(collectedMetadata, buildingContext, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -137,62 +105,55 @@ internal sealed class TestBuilderPipeline
         TestBuildingContext buildingContext,
         CancellationToken cancellationToken = default)
     {
-        // Materialize to check count - for small sets, sequential processing is faster
-        var metadataList = testMetadata as IList<TestMetadata> ?? testMetadata.ToList();
+        var metadataList = testMetadata as IReadOnlyList<TestMetadata> ?? testMetadata.ToList();
 
-        IEnumerable<IEnumerable<AbstractExecutableTest>> testGroups;
+        var testGroups = await ParallelMap.SelectParallelAsync(
+            metadataList,
+            metadata => BuildTestsForMetadataAsync(metadata, buildingContext, cancellationToken),
+            Environment.ProcessorCount,
+            cancellationToken).ConfigureAwait(false);
 
-        if (metadataList.Count < ParallelThresholds.MinItemsForParallel)
+        var totalCount = 0;
+        foreach (var group in testGroups)
         {
-            // Sequential processing for small sets - avoids task scheduling overhead
-            var results = new List<IEnumerable<AbstractExecutableTest>>(metadataList.Count);
-            foreach (var metadata in metadataList)
+            totalCount += group.Count;
+        }
+
+        var allTests = new List<AbstractExecutableTest>(totalCount);
+        foreach (var group in testGroups)
+        {
+            allTests.AddRange(group);
+        }
+
+        return allTests;
+    }
+
+    /// <summary>
+    /// Builds all tests for a single metadata item. Exceptions surface as a single failed
+    /// placeholder test rather than propagating, so one bad data source cannot abort discovery.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    private async Task<IReadOnlyList<AbstractExecutableTest>> BuildTestsForMetadataAsync(
+        TestMetadata metadata,
+        TestBuildingContext buildingContext,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Dynamic test metadata bypasses normal test building
+            if (metadata is IDynamicTestMetadata)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                try
-                {
-                    if (metadata is IDynamicTestMetadata)
-                    {
-                        results.Add(await GenerateDynamicTests(metadata).ConfigureAwait(false));
-                    }
-                    else
-                    {
-                        results.Add(await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext, cancellationToken).ConfigureAwait(false));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
-                    results.Add([failedTest]);
-                }
+                return await GenerateDynamicTests(metadata).ConfigureAwait(false);
             }
-            testGroups = results;
+
+            var tests = await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext, cancellationToken).ConfigureAwait(false);
+
+            return tests as IReadOnlyList<AbstractExecutableTest> ?? tests.ToList();
         }
-        else
+        catch (Exception ex)
         {
-            // Parallel processing for larger sets
-            testGroups = await metadataList.SelectAsync(async metadata =>
-                {
-                    try
-                    {
-                        // Check if this is a dynamic test metadata that should bypass normal test building
-                        if (metadata is IDynamicTestMetadata)
-                        {
-                            return await GenerateDynamicTests(metadata).ConfigureAwait(false);
-                        }
-
-                        return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext, cancellationToken).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        var failedTest = CreateFailedTestForDataGenerationError(metadata, ex);
-                        return (IEnumerable<AbstractExecutableTest>)[failedTest];
-                    }
-                }, cancellationToken: cancellationToken)
-                .ProcessInParallel(Environment.ProcessorCount);
+            return [CreateFailedTestForDataGenerationError(metadata, ex)];
         }
-
-        return testGroups.SelectMany(x => x);
     }
 
     private async Task<AbstractExecutableTest[]> GenerateDynamicTests(TestMetadata metadata)
@@ -208,8 +169,9 @@ internal sealed class TestBuilderPipeline
         var attributesByType = attributes.ToAttributeDictionary();
         Func<Task<object>> instanceFactory = () => Task.FromResult(metadata.InstanceFactory(Type.EmptyTypes, []));
 
-        return await Enumerable.Range(0, repeatCount + 1)
-            .SelectAsync(async repeatIndex =>
+        return await ParallelMap.ForParallelAsync(
+            repeatCount + 1,
+            async repeatIndex =>
         {
             // Create a simple TestData for ID generation
             // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
@@ -285,219 +247,14 @@ internal sealed class TestBuilderPipeline
             };
 
             return metadata.CreateExecutableTestFactory(executableTestContext, metadata);
-        })
-            .ProcessInParallel(Environment.ProcessorCount);
-    }
-
-    /// <summary>
-    /// Build tests from a single metadata item, yielding them as they're created
-    /// </summary>
-#if NET8_0_OR_GREATER
-    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
-#endif
-    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        TestMetadata resolvedMetadata;
-        Exception? resolutionError = null;
-
-        try
-        {
-            resolvedMetadata = metadata;
-        }
-        catch (Exception ex)
-        {
-            resolutionError = ex;
-            resolvedMetadata = metadata; // Use original for error reporting
-        }
-
-        if (resolutionError != null)
-        {
-            yield return CreateFailedTestForGenericResolutionError(metadata, resolutionError);
-            yield break;
-        }
-
-        List<AbstractExecutableTest>? testsToYield = null;
-        Exception? buildError = null;
-
-        try
-        {
-            // Check if this is a dynamic test metadata that should bypass normal test building
-            if (resolvedMetadata is IDynamicTestMetadata)
-            {
-                testsToYield =
-                [
-                ];
-
-                // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
-                var repeatCount = resolvedMetadata.RepeatCount ?? 0;
-
-                // Get attributes for test details
-                var attributes = resolvedMetadata.GetOrCreateAttributes();
-
-                // Hoist loop-invariant state so repeat iterations share one attribute dictionary and factory delegate
-                var attributesByType = attributes.ToAttributeDictionary();
-                Func<Task<object>> instanceFactory = () => Task.FromResult(resolvedMetadata.InstanceFactory(Type.EmptyTypes, []));
-
-                // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
-                // We'll create multiple test instances based on RepeatCount
-                // Use DynamicTestIndex from the metadata to ensure unique test IDs for multiple dynamic tests
-                var dynamicTestIndex = ((IDynamicTestMetadata)resolvedMetadata).DynamicTestIndex;
-                for (var repeatIndex = 0; repeatIndex < repeatCount + 1; repeatIndex++)
-                {
-                    // Create a simple TestData for ID generation
-                    var testData = new TestBuilder.TestData
-                    {
-                        TestClassInstanceFactory = instanceFactory,
-                        ClassDataSourceAttributeIndex = 0,
-                        ClassDataLoopIndex = 0,
-                        ClassData = [],
-                        MethodDataSourceAttributeIndex = 0,
-                        MethodDataLoopIndex = dynamicTestIndex,
-                        MethodData = [],
-                        RepeatIndex = repeatIndex,
-                        InheritanceDepth = resolvedMetadata.InheritanceDepth,
-                        ResolvedClassGenericArguments = Type.EmptyTypes,
-                        ResolvedMethodGenericArguments = Type.EmptyTypes
-                    };
-
-                    var testId = TestIdentifierService.GenerateTestId(resolvedMetadata, testData);
-                    var dynamicMetadata = (IDynamicTestMetadata)resolvedMetadata;
-                    var baseDisplayName = dynamicMetadata.DisplayName ?? resolvedMetadata.TestName;
-                    var displayName = repeatCount > 0
-                        ? $"{baseDisplayName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
-                        : baseDisplayName;
-
-                    // Create TestDetails for dynamic tests
-                    var testDetails = new TestDetails(attributes)
-                    {
-                        TestId = testId,
-                        TestName = resolvedMetadata.TestName,
-                        ClassType = resolvedMetadata.TestClassType,
-                        MethodName = resolvedMetadata.TestMethodName,
-                        ClassInstance = PlaceholderInstance.Instance,
-                        TestMethodArguments = [],
-                        TestClassArguments = [],
-                        TestFilePath = resolvedMetadata.FilePath ?? "Unknown",
-                        TestLineNumber = resolvedMetadata.LineNumber,
-                        TestStartColumnNumber = resolvedMetadata.StartColumnNumber,
-                        TestEndLineNumber = resolvedMetadata.EndLineNumber,
-                        TestEndColumnNumber = resolvedMetadata.EndColumnNumber,
-                        ReturnType = typeof(Task),
-                        MethodMetadata = resolvedMetadata.MethodMetadata,
-                        AttributesByType = attributesByType
-                    };
-
-                    var context = _contextProvider.CreateTestContext(
-                        resolvedMetadata.TestClassType,
-                        CreateTestBuilderContext(resolvedMetadata),
-                        testDetails,
-                        CancellationToken.None);
-
-                    // Set custom display name for dynamic tests if specified
-                    if (dynamicMetadata.DisplayName != null)
-                    {
-                        context.Metadata.DisplayName = dynamicMetadata.DisplayName;
-                    }
-
-                    // Invoke discovery event receivers to properly handle all attribute behaviors
-                    await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
-
-                    var executableTestContext = new ExecutableTestCreationContext
-                    {
-                        TestId = testId,
-                        DisplayName = displayName,
-                        Arguments = [],
-                        ClassArguments = [],
-                        Context = context,
-                        TestClassInstanceFactory = testData.TestClassInstanceFactory
-                    };
-
-                    var executableTest = resolvedMetadata.CreateExecutableTestFactory(executableTestContext, resolvedMetadata);
-                    testsToYield.Add(executableTest);
-                }
-            }
-            else
-            {
-                // Normal test metadata goes through the standard test builder
-                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata, buildingContext, cancellationToken).ConfigureAwait(false);
-                testsToYield = new List<AbstractExecutableTest>(testsFromMetadata);
-            }
-        }
-        catch (Exception ex)
-        {
-            buildError = ex;
-        }
-
-        if (buildError != null)
-        {
-            yield return CreateFailedTestForDataGenerationError(resolvedMetadata, buildError);
-        }
-        else if (testsToYield != null)
-        {
-            foreach (var test in testsToYield)
-            {
-                yield return test;
-            }
-        }
+        },
+            Environment.ProcessorCount).ConfigureAwait(false);
     }
 
     private AbstractExecutableTest CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata);
         var displayName = $"{metadata.TestClassType.Name}.{metadata.TestName}";
-
-        var testDetails = new TestDetails([])
-        {
-            TestId = testId,
-            TestName = metadata.TestName,
-            ClassType = metadata.TestClassType,
-            MethodName = metadata.TestMethodName,
-            ClassInstance = null!,
-            TestMethodArguments = [],
-            TestClassArguments = [],
-            TestFilePath = metadata.FilePath ?? "Unknown",
-            TestLineNumber = metadata.LineNumber,
-            TestStartColumnNumber = metadata.StartColumnNumber,
-            TestEndLineNumber = metadata.EndLineNumber,
-            TestEndColumnNumber = metadata.EndColumnNumber,
-            ReturnType = typeof(Task),
-            MethodMetadata = metadata.MethodMetadata,
-            AttributesByType = AttributeDictionaryHelper.Empty
-        };
-
-        var context = _contextProvider.CreateTestContext(
-            metadata.TestClassType,
-            CreateTestBuilderContext(metadata),
-            testDetails,
-            CancellationToken.None);
-
-        var now = DateTimeOffset.UtcNow;
-
-        return new FailedExecutableTest(exception)
-        {
-            TestId = testId,
-            Metadata = metadata,
-            Arguments = [],
-            ClassArguments = [],
-            Context = context,
-            State = TestState.Failed,
-            Result = new TestResult
-            {
-                State = TestState.Failed,
-                Start = now,
-                End = now,
-                Duration = TimeSpan.Zero,
-                Exception = exception,
-                ComputerName = EnvironmentHelper.MachineName,
-                TestContext = context
-            }
-        };
-    }
-
-    private AbstractExecutableTest CreateFailedTestForGenericResolutionError(TestMetadata metadata, Exception exception)
-    {
-        var testId = TestIdentifierService.GenerateFailedTestId(metadata);
-        var displayName = $"{metadata.TestName} [GENERIC RESOLUTION ERROR]";
 
         var testDetails = new TestDetails([])
         {
