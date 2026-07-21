@@ -384,7 +384,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     private async Task InvokePostResolutionEventsInParallelAsync(List<AbstractExecutableTest> allTests)
     {
-        if (allTests.Count < Building.ParallelThresholds.MinItemsForParallel)
+        if (allTests.Count < Utilities.ParallelMap.SequentialThreshold)
         {
             foreach (var test in allTests)
             {

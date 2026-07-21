@@ -1,5 +1,4 @@
-﻿using EnumerableAsyncProcessor.Extensions;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using ModularPipelines.Attributes;
 using ModularPipelines.Configuration;
 using ModularPipelines.Context;
@@ -66,22 +65,27 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
                 $"Refusing to publish to NuGet: found a package stamped with the dummy local version '{DummyLocalVersion}'.");
         }
 
-        return await nupkgs.SelectAsync(file =>
-                context.DotNet().Nuget.Push(new DotNetNugetPushOptions
+        var results = new CommandResult[nupkgs.Length];
+
+        for (var i = 0; i < nupkgs.Length; i++)
+        {
+            results[i] = await context.DotNet().Nuget.Push(new DotNetNugetPushOptions
+            {
+                Path = nupkgs[i].Path,
+                Source = "https://api.nuget.org/v3/index.json",
+                ApiKey = options.Value.ApiKey,
+            }, new CommandExecutionOptions
+            {
+                LogSettings = new CommandLoggingOptions
                 {
-                    Path = file.Path,
-                    Source = "https://api.nuget.org/v3/index.json",
-                    ApiKey = options.Value.ApiKey,
-                }, new CommandExecutionOptions
-                {
-                    LogSettings = new CommandLoggingOptions
-                    {
-                        ShowCommandArguments = true,
-                        ShowStandardError = true,
-                        ShowExecutionTime = true,
-                        ShowExitCode = true
-                    }
-                }, cancellationToken), cancellationToken: cancellationToken)
-            .ProcessOneAtATime();
+                    ShowCommandArguments = true,
+                    ShowStandardError = true,
+                    ShowExecutionTime = true,
+                    ShowExitCode = true
+                }
+            }, cancellationToken);
+        }
+
+        return results;
     }
 }
