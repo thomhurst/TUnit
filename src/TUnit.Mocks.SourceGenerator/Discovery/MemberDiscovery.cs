@@ -731,7 +731,7 @@ internal static class MemberDiscovery
                     Constraints = tp.GetGenericConstraints(),
                     HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
                     HasValueTypeConstraint = tp.HasValueTypeConstraint,
-                    HasAnnotatedNullableUsage = tp.IsUnconstrainedWithNullableUsage(method)
+                    HasAnnotatedNullableUsage = tp.NeedsDefaultConstraintForNullableUsage(method)
                 }).ToImmutableArray()
             ),
             ExplicitInterfaceName = explicitInterfaceName,
