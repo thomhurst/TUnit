@@ -14,6 +14,78 @@ internal static class ParallelMap
     /// </summary>
     public const int SequentialThreshold = 8;
 
+    /// <summary>
+    /// Void counterpart of <see cref="SelectParallelAsync{TSource,TResult}"/> — same worker
+    /// model without the results array. Takes a ValueTask action so synchronously-completing
+    /// callees don't allocate a Task per item.
+    /// </summary>
+    public static async Task ForEachParallelAsync<TSource>(
+        IReadOnlyList<TSource> source,
+        Func<TSource, ValueTask> action,
+        int maxDegreeOfParallelism,
+        CancellationToken cancellationToken = default)
+    {
+        var count = source.Count;
+
+        if (count == 0)
+        {
+            return;
+        }
+
+        var workerCount = Math.Min(maxDegreeOfParallelism, count);
+
+        if (workerCount <= 1 || count < SequentialThreshold)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await action(source[i]).ConfigureAwait(false);
+            }
+
+            return;
+        }
+
+        var cursor = -1;
+
+        Func<Task> worker = WorkerAsync;
+        var workers = new Task[workerCount];
+        for (var w = 0; w < workerCount; w++)
+        {
+            workers[w] = Task.Run(worker, CancellationToken.None);
+        }
+
+        await Task.WhenAll(workers).ConfigureAwait(false);
+
+        return;
+
+        async Task WorkerAsync()
+        {
+            while (true)
+            {
+                var index = Interlocked.Increment(ref cursor);
+
+                if (index >= count)
+                {
+                    return;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    await action(source[index]).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Park the cursor so sibling workers stop pulling new items;
+                    // Task.WhenAll surfaces this fault once in-flight items finish.
+                    Volatile.Write(ref cursor, count);
+                    throw;
+                }
+            }
+        }
+    }
+
     public static Task<TResult[]> SelectParallelAsync<TSource, TResult>(
         IReadOnlyList<TSource> source,
         Func<TSource, Task<TResult>> selector,

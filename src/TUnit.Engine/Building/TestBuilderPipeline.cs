@@ -52,17 +52,6 @@ internal sealed class TestBuilderPipeline
         return testBuilderContext;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId)
-    {
-        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
-
-        // For this method (non-streaming), we're not in execution mode so no filter optimization
-        var buildingContext = new TestBuildingContext(IsForExecution: false, Filter: null);
-        return await BuildTestsFromMetadataAsync(collectedMetadata, buildingContext).ConfigureAwait(false);
-    }
-
     /// <summary>
     /// Collects all test metadata without building tests.
     /// This is a lightweight operation used for dependency analysis.
@@ -88,7 +77,7 @@ internal sealed class TestBuilderPipeline
     /// <param name="buildingContext">Context for test building</param>
     /// <param name="metadataFilter">Optional predicate to filter which metadata should be built (null means build all)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(
         string testSessionId,
         TestBuildingContext buildingContext,
         Func<TestMetadata, bool>? metadataFilter = null,
