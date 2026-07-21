@@ -54,9 +54,13 @@ internal static class MethodSymbolExtensions
         return string.Join(", ", constraints);
     }
 
-    public static bool IsUnconstrainedWithNullableUsage(this ITypeParameterSymbol typeParam, IMethodSymbol method)
+    public static bool NeedsDefaultConstraintForNullableUsage(this ITypeParameterSymbol typeParam, IMethodSymbol method)
     {
-        if (!typeParam.IsUnconstrained())
+        // On overrides and explicit interface implementations, T? is parsed as Nullable<T>
+        // unless T is known to be a reference/value type or a 'where T : default' clause is
+        // present. Interface-only constraints (e.g. Kiota's 'where T : IParsable') leave T
+        // unknown, so they need 'default' too — not just fully unconstrained parameters (#6456).
+        if (typeParam.IsReferenceType || typeParam.IsValueType)
         {
             return false;
         }
