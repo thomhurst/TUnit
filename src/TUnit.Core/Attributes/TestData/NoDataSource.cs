@@ -14,7 +14,7 @@ public sealed class NoDataSource : IDataSourceAttribute
     private static readonly Task<object?[]?> _emptyRowTask = Task.FromResult<object?[]?>([]);
 
     /// <summary>
-    /// Gets the singleton instance.
+    /// Gets the singleton instance, shared process-wide across all tests.
     /// </summary>
     public static readonly NoDataSource Instance = new();
 
@@ -23,10 +23,12 @@ public sealed class NoDataSource : IDataSourceAttribute
     }
 
     /// <inheritdoc />
-    public bool SkipIfEmpty { get; set; }
+    /// <remarks>Always <c>false</c>. The setter is a no-op — this type is a shared singleton, so writes must not leak across tests.</remarks>
+    public bool SkipIfEmpty { get => false; set { } }
 
     /// <inheritdoc />
-    public bool DeferEnumeration { get; set; }
+    /// <remarks>Always <c>false</c>. The setter is a no-op — this type is a shared singleton, so writes must not leak across tests.</remarks>
+    public bool DeferEnumeration { get => false; set { } }
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
