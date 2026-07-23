@@ -493,6 +493,73 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Unmanaged_Constrained_Type_Parameter()
+    {
+        // #6471: 'unmanaged' also sets HasValueTypeConstraint, so the generator emitted
+        // 'where T : struct, unmanaged' which is invalid C# (CS0449)
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface ISnapshotSource<T> where T : unmanaged
+            {
+                void Fill(ref T snapshot);
+            }
+
+            public interface IConstrainedSource<T> where T : unmanaged, IDisposable
+            {
+                T Get();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ISnapshotSource<int>>();
+                    var mock2 = Mock.Of<IConstrainedSource<System.Threading.CancellationTokenRegistration>>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public void Interface_With_Unmanaged_Constrained_Type_Parameter_Compiles()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            public interface ISnapshotSource<T> where T : unmanaged
+            {
+                void Fill(ref T snapshot);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ISnapshotSource<int>>();
+                }
+            }
+            """;
+
+        var errors = GetGeneratedCompilationErrors(source);
+
+        // CS0449: invalid 'struct, unmanaged' combination; CS8377: cascade when T no
+        // longer satisfies the interface's 'unmanaged' constraint (#6471)
+        foreach (var id in (string[])["CS0449", "CS8377"])
+        {
+            var match = errors.FirstOrDefault(e => string.Equals(e.Id, id, StringComparison.Ordinal));
+            if (match is not null)
+            {
+                throw new InvalidOperationException($"Generated code produced {id}: {match}");
+            }
+        }
+    }
+
+    [Test]
     public Task Interface_With_Overloaded_Methods()
     {
         var source = """
