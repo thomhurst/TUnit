@@ -4928,10 +4928,10 @@ dns-packet@^5.2.2:
   dependencies:
     "@leichtgewicht/ip-codec" "^2.0.1"
 
-docusaurus-plugin-llms@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/docusaurus-plugin-llms/-/docusaurus-plugin-llms-0.5.0.tgz#3b0fa774eddcff57cbca8da23115961f0877d834"
-  integrity sha512-t97YeryEsP62yw8UeRqyMkv5L2RJaGXz3Aw86OMZt2UtMEwNUjYB+Kp7ryzcw/JvX/Dcs2FmhAF6oG1/moExFQ==
+docusaurus-plugin-llms@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/docusaurus-plugin-llms/-/docusaurus-plugin-llms-0.5.1.tgz#166c7600d19e0eb0c430b2304fa4d23eb370cdd8"
+  integrity sha512-4kNSK+TU67Y+pV45MJhvkW2ISNDh3SYet8PcPvwShV3VL/Ydwpvms0pTgvmOx1GEdLtJMYjD4PNkdmO3kAvLyw==
   dependencies:
     gray-matter "4.0.3"
     minimatch "9.0.3"
