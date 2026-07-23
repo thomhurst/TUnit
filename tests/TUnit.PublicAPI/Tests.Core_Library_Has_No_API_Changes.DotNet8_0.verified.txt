@@ -1405,7 +1405,6 @@ namespace
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public new .Activity? Activity { get; }
         public .ClassHookContext ClassContext { get; }
-        public .IDataSourceAttribute ClassDataSource { get; }
         public . Dependencies { get; }
         public . Events { get; }
         public . Execution { get; }
@@ -1413,7 +1412,6 @@ namespace
         public . Isolation { get; }
         public object Lock { get; }
         public . Metadata { get; }
-        public .IDataSourceAttribute MethodDataSource { get; }
         public . Output { get; }
         public . Parallelism { get; }
         public . StateBag { get; }
@@ -2730,9 +2728,11 @@ namespace .Interfaces
     }
     public interface ITestMetadata
     {
+        .IDataSourceAttribute ClassDataSource { get; }
         string DefinitionId { get; }
         string DisplayName { get; set; }
         ? DisplayNameFormatter { get; set; }
+        .IDataSourceAttribute MethodDataSource { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }
     }

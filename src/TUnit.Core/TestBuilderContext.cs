@@ -93,7 +93,7 @@ public record TestBuilderContext
             Events = testContext.InternalEvents,
             TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
             DataSourceAttribute = dataSourceAttribute,
-            ClassDataSourceAttribute = testContext.ClassDataSource,
+            ClassDataSourceAttribute = testContext.Metadata.ClassDataSource,
             StateBag = testContext.StateBag.Items,
             ClassConstructor = testContext.ClassConstructor,
         };

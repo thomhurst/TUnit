@@ -107,8 +107,8 @@ public class MyTestClass
 
 The context exposes the data source attribute instances that generated the current test's arguments:
 
-- `ClassDataSource` — the attribute that generated the test class's constructor arguments
-- `MethodDataSource` — the attribute that generated the test method's arguments
+- `Metadata.ClassDataSource` — the attribute that generated the test class's constructor arguments
+- `Metadata.MethodDataSource` — the attribute that generated the test method's arguments
 
 Both are never null: for tests without a data source they return a no-op `NoDataSource` singleton, so you can pattern-match without null checks.
 
@@ -119,7 +119,7 @@ public class MyFixture : IAsyncInitializer
 {
     public Task InitializeAsync()
     {
-        if (TestContext.Current?.MethodDataSource is ClassDataSourceAttribute<MyFixture> attribute)
+        if (TestContext.Current?.Metadata.MethodDataSource is ClassDataSourceAttribute<MyFixture> attribute)
         {
             var sharedType = attribute.Shared; // e.g. SharedType.Keyed
             var key = attribute.Key;           // e.g. "MyKey"

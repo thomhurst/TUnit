@@ -5,9 +5,9 @@ namespace TUnit.Core;
 /// so non-parameterized tests flow through the same building pipeline as data-driven tests.
 /// </summary>
 /// <remarks>
-/// <see cref="TestContext.ClassDataSource"/> and <see cref="TestContext.MethodDataSource"/> return
-/// <see cref="Instance"/> when the test has no class or method data source respectively, so callers
-/// can pattern-match with <c>is NoDataSource</c> instead of null-checking.
+/// <see cref="Interfaces.ITestMetadata.ClassDataSource"/> and <see cref="Interfaces.ITestMetadata.MethodDataSource"/>
+/// (via <c>TestContext.Current.Metadata</c>) return <see cref="Instance"/> when the test has no class or
+/// method data source respectively, so callers can pattern-match with <c>is NoDataSource</c> instead of null-checking.
 /// </remarks>
 public sealed class NoDataSource : IDataSourceAttribute
 {
