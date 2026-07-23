@@ -205,6 +205,12 @@ internal class TestExecutor
             }
 #endif
 
+            // The session/assembly/class RestoreExecutionContext calls above replay AsyncLocals
+            // captured while the FIRST test in that scope ran its hooks — including that test's
+            // TestContext.Current. Re-point Current at this test before initializing objects so
+            // IAsyncInitializer implementations observe the correct test context.
+            TestContext.Current = executableTest.Context;
+
             // Initialize test objects (IAsyncInitializer) AFTER BeforeClass hooks
             // and after the test case activity starts. Per-test objects are traced
             // under the test case; shared objects under session/assembly/class.

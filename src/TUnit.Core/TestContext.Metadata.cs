@@ -74,6 +74,21 @@ public partial class TestContext
         _cachedDisplayName = null;
     }
 
+    /// <summary>
+    /// Gets the data source attribute instance that generated this test's class (constructor) arguments,
+    /// e.g. a <c>[ClassDataSource&lt;T&gt;]</c> applied to the test class. Never null — returns
+    /// <see cref="NoDataSource.Instance"/> when the test class has no constructor data source.
+    /// </summary>
+    public IDataSourceAttribute ClassDataSource => _testBuilderContext.ClassDataSourceAttribute ?? NoDataSource.Instance;
+
+    /// <summary>
+    /// Gets the data source attribute instance that generated this test's method arguments,
+    /// e.g. an <c>[Arguments]</c>, <c>[MethodDataSource]</c> or <c>[ClassDataSource&lt;T&gt;]</c> applied
+    /// to the test method. Never null — returns <see cref="NoDataSource.Instance"/> when the test
+    /// method has no data source.
+    /// </summary>
+    public IDataSourceAttribute MethodDataSource => _testBuilderContext.DataSourceAttribute ?? NoDataSource.Instance;
+
     string ITestMetadata.DefinitionId => _testBuilderContext.DefinitionId;
     TestDetails ITestMetadata.TestDetails
     {

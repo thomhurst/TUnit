@@ -1052,6 +1052,14 @@ namespace
         [.("ReflectionAnalysis", "IL2067", Justification="Factory is only called from generated code that always passes concrete types")]
         public static .MethodMetadata Create(string name,  type,  returnType, .ClassMetadata classMetadata, int genericTypeCount = 0, .ParameterMetadata[]? parameters = null) { }
     }
+    public sealed class NoDataSource : .IDataSourceAttribute
+    {
+        public static readonly .NoDataSource Instance;
+        public bool DeferEnumeration { get; set; }
+        public bool SkipIfEmpty { get; set; }
+        [.(typeof(.NoDataSource.<GetDataRowsAsync>d__11))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     [(.Assembly | .Class | .Method, AllowMultiple=false, Inherited=true)]
     public class NotDiscoverableAttribute : .TUnitAttribute, ., .
     {
@@ -1362,6 +1370,7 @@ namespace
     public class TestBuilderContext : <.TestBuilderContext>
     {
         public TestBuilderContext() { }
+        public .IDataSourceAttribute? ClassDataSourceAttribute { get; set; }
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
         public string DefinitionId { get; }
         public .TestContextEvents Events { get; set; }
@@ -1396,6 +1405,7 @@ namespace
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public new .Activity? Activity { get; }
         public .ClassHookContext ClassContext { get; }
+        public .IDataSourceAttribute ClassDataSource { get; }
         public . Dependencies { get; }
         public . Events { get; }
         public . Execution { get; }
@@ -1403,6 +1413,7 @@ namespace
         public . Isolation { get; }
         public object Lock { get; }
         public . Metadata { get; }
+        public .IDataSourceAttribute MethodDataSource { get; }
         public . Output { get; }
         public . Parallelism { get; }
         public . StateBag { get; }
