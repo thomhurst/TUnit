@@ -28,7 +28,7 @@
     "@docusaurus/module-type-aliases": "3.10.2",
     "@docusaurus/tsconfig": "3.10.2",
     "@docusaurus/types": "3.10.2",
-    "docusaurus-plugin-llms": "^0.5.0",
+    "docusaurus-plugin-llms": "^0.5.1",
     "typescript": "~7.0.2"
   },
   "browserslist": {
