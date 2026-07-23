@@ -50,7 +50,7 @@ file sealed class IConstrainedMockImpl : global::IConstrained, global::TUnit.Moc
         return _engine.HandleCallWithReturn<T>(1, "GetNew", global::System.Array.Empty<object?>(), default!, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public T GetUnmanaged<T>() where T : struct, unmanaged
+    public T GetUnmanaged<T>() where T : unmanaged
     {
         return _engine.HandleCallWithReturn<T>(2, "GetUnmanaged", global::System.Array.Empty<object?>(), default, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
@@ -133,7 +133,7 @@ public static class IConstrained_MockMemberExtensions
         return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "GetNew", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
     }
 
-    public static global::TUnit.Mocks.MockMethodCall<T> GetUnmanaged<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : struct, unmanaged
+    public static global::TUnit.Mocks.MockMethodCall<T> GetUnmanaged<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock) where T : unmanaged
     {
         var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
         return new global::TUnit.Mocks.MockMethodCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "GetUnmanaged", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);

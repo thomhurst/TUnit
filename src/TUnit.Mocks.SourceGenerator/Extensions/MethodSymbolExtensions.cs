@@ -36,7 +36,9 @@ internal static class MethodSymbolExtensions
 
         if (typeParam.HasReferenceTypeConstraint)
             constraints.Add("class");
-        if (typeParam.HasValueTypeConstraint)
+        // Roslyn reports HasValueTypeConstraint for 'unmanaged' too, but C# forbids
+        // combining 'struct' with 'unmanaged' (CS0449) — emit only 'unmanaged' (#6471)
+        if (typeParam.HasValueTypeConstraint && !typeParam.HasUnmanagedTypeConstraint)
             constraints.Add("struct");
         if (typeParam.HasUnmanagedTypeConstraint)
             constraints.Add("unmanaged");
