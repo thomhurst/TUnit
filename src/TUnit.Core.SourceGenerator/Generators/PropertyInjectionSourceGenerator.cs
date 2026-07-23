@@ -1260,6 +1260,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             {
                 constraints.Add("class");
             }
+            else if (tp.HasUnmanagedTypeConstraint)
+            {
+                // Checked before HasValueTypeConstraint: 'unmanaged' also sets that flag,
+                // so the 'struct' branch would silently downgrade the constraint (#6471)
+                constraints.Add("unmanaged");
+            }
             else if (tp.HasValueTypeConstraint)
             {
                 constraints.Add("struct");
@@ -1267,10 +1273,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             else if (tp.HasNotNullConstraint)
             {
                 constraints.Add("notnull");
-            }
-            else if (tp.HasUnmanagedTypeConstraint)
-            {
-                constraints.Add("unmanaged");
             }
 
             // Type constraints (base class and interfaces)

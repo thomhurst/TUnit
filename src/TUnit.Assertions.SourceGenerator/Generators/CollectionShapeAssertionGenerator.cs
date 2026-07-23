@@ -266,19 +266,20 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
             cs.Add("class");
         }
 
-        if (tp.HasValueTypeConstraint)
+        // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+        if (tp.HasValueTypeConstraint && !tp.HasUnmanagedTypeConstraint)
         {
             cs.Add("struct");
-        }
-
-        if (tp.HasNotNullConstraint)
-        {
-            cs.Add("notnull");
         }
 
         if (tp.HasUnmanagedTypeConstraint)
         {
             cs.Add("unmanaged");
+        }
+
+        if (tp.HasNotNullConstraint)
+        {
+            cs.Add("notnull");
         }
 
         foreach (var c in tp.ConstraintTypes)

@@ -1808,7 +1808,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         {
             var constraints = new List<string>();
             if (tp.HasReferenceTypeConstraint) constraints.Add("class");
-            if (tp.HasValueTypeConstraint) constraints.Add("struct");
+            // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+            if (tp.HasValueTypeConstraint && !tp.HasUnmanagedTypeConstraint) constraints.Add("struct");
+            if (tp.HasUnmanagedTypeConstraint) constraints.Add("unmanaged");
             if (tp.HasNotNullConstraint) constraints.Add("notnull");
             foreach (var ct in tp.ConstraintTypes)
             {
