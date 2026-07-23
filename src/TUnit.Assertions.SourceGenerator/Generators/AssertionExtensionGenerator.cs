@@ -300,9 +300,14 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                 {
                     constraints.Add("class");
                 }
-                if (typeParameter.HasValueTypeConstraint)
+                // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+                if (typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint)
                 {
                     constraints.Add("struct");
+                }
+                if (typeParameter.HasUnmanagedTypeConstraint)
+                {
+                    constraints.Add("unmanaged");
                 }
                 if (typeParameter.HasNotNullConstraint)
                 {
@@ -335,9 +340,14 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             {
                 constraints.Add("class");
             }
-            if (typeParamSymbol.HasValueTypeConstraint)
+            // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+            if (typeParamSymbol.HasValueTypeConstraint && !typeParamSymbol.HasUnmanagedTypeConstraint)
             {
                 constraints.Add("struct");
+            }
+            if (typeParamSymbol.HasUnmanagedTypeConstraint)
+            {
+                constraints.Add("unmanaged");
             }
             if (typeParamSymbol.HasNotNullConstraint)
             {

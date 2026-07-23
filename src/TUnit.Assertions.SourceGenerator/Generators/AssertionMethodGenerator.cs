@@ -1023,9 +1023,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             {
                 typeConstraints.Add("class");
             }
-            if (typeParameter.HasValueTypeConstraint)
+            // 'unmanaged' also sets HasValueTypeConstraint; 'struct, unmanaged' is CS0449 (#6471)
+            if (typeParameter.HasValueTypeConstraint && !typeParameter.HasUnmanagedTypeConstraint)
             {
                 typeConstraints.Add("struct");
+            }
+            if (typeParameter.HasUnmanagedTypeConstraint)
+            {
+                typeConstraints.Add("unmanaged");
             }
             if (typeParameter.HasNotNullConstraint)
             {

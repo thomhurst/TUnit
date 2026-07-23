@@ -177,6 +177,27 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
         });
 
     [Test]
+    public Task MethodWithUnmanagedConstraint() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "MethodWithUnmanagedConstraint.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            await Assert.That(mainFile).IsNotNull();
+
+            // 'unmanaged' preserved as-is: not combined with 'struct' (CS0449) and
+            // not silently downgraded to 'struct' (#6471)
+            await Assert.That(mainFile).Contains("Int_IsBlittableDefault_T_Assertion<T>");
+            await Assert.That(mainFile).Contains("where T : unmanaged");
+            await Assert.That(mainFile).DoesNotContain("struct, unmanaged");
+            await Assert.That(mainFile).DoesNotContain("where T : struct");
+        });
+
+    [Test]
     public Task MethodWithNotNullConstraint() => RunTest(
         Path.Combine(Git.TestsDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
