@@ -55,7 +55,15 @@ public record TestBuilderContext
         set => _events = value;
     }
 
+    /// <summary>
+    /// Gets or sets the data source attribute that generated the test's method arguments, if any.
+    /// </summary>
     public IDataSourceAttribute? DataSourceAttribute { get; set; }
+
+    /// <summary>
+    /// Gets or sets the data source attribute that generated the test's class (constructor) arguments, if any.
+    /// </summary>
+    public IDataSourceAttribute? ClassDataSourceAttribute { get; set; }
 
     /// <summary>
     /// Gets the test method information, if available during source generation.
@@ -85,6 +93,7 @@ public record TestBuilderContext
             Events = testContext.InternalEvents,
             TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
             DataSourceAttribute = dataSourceAttribute,
+            ClassDataSourceAttribute = testContext.Metadata.ClassDataSource,
             StateBag = testContext.StateBag.Items,
             ClassConstructor = testContext.ClassConstructor,
         };

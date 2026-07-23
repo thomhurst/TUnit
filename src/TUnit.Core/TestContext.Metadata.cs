@@ -75,6 +75,10 @@ public partial class TestContext
     }
 
     string ITestMetadata.DefinitionId => _testBuilderContext.DefinitionId;
+
+    IDataSourceAttribute ITestMetadata.ClassDataSource => _testBuilderContext.ClassDataSourceAttribute ?? NoDataSource.Instance;
+
+    IDataSourceAttribute ITestMetadata.MethodDataSource => _testBuilderContext.DataSourceAttribute ?? NoDataSource.Instance;
     TestDetails ITestMetadata.TestDetails
     {
         get => TestDetails;

@@ -1014,6 +1014,14 @@ namespace
     {
         public static .MethodMetadata Create(string name,  type,  returnType, .ClassMetadata classMetadata, int genericTypeCount = 0, .ParameterMetadata[]? parameters = null) { }
     }
+    public sealed class NoDataSource : .IDataSourceAttribute
+    {
+        public static readonly .NoDataSource Instance;
+        public bool DeferEnumeration { get; set; }
+        public bool SkipIfEmpty { get; set; }
+        [.(typeof(.NoDataSource.<GetDataRowsAsync>d__9))]
+        public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     [(.Assembly | .Class | .Method, AllowMultiple=false, Inherited=true)]
     public class NotDiscoverableAttribute : .TUnitAttribute, ., .
     {
@@ -1307,6 +1315,7 @@ namespace
     public class TestBuilderContext : <.TestBuilderContext>
     {
         public TestBuilderContext() { }
+        public .IDataSourceAttribute? ClassDataSourceAttribute { get; set; }
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
         public string DefinitionId { get; }
         public .TestContextEvents Events { get; set; }
@@ -2650,9 +2659,11 @@ namespace .Interfaces
     }
     public interface ITestMetadata
     {
+        .IDataSourceAttribute ClassDataSource { get; }
         string DefinitionId { get; }
         string DisplayName { get; set; }
         ? DisplayNameFormatter { get; set; }
+        .IDataSourceAttribute MethodDataSource { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }
     }

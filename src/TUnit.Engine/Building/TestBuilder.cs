@@ -283,6 +283,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     {
                                         TestMetadata = metadata.MethodMetadata,
                                         DataSourceAttribute = methodDataSource,
+                                        ClassDataSourceAttribute = classDataSource,
                                         InitializedAttributes = testBuilderContext.InitializedAttributes,
                                         ClassConstructor = testBuilderContext.ClassConstructor
                                     };
@@ -418,6 +419,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         StateBag = contextAccessor.Current.StateBag,
                                         ClassConstructor = testBuilderContext.ClassConstructor,
                                         DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,
+                                        ClassDataSourceAttribute = classDataSource,
                                         InitializedAttributes = attributes
                                     };
 
@@ -481,6 +483,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         TestMetadata = metadata.MethodMetadata,
                                         ClassConstructor = testBuilderContext.ClassConstructor,
                                         DataSourceAttribute = methodDataSource,
+                                        ClassDataSourceAttribute = classDataSource,
                                         InitializedAttributes = attributes
                                     };
 
@@ -541,11 +544,15 @@ internal sealed class TestBuilder : ITestBuilder
                             ResolvedMethodGenericArguments = Type.EmptyTypes
                         };
 
+                        // The class data source yielded no rows, so no method data source was ever
+                        // enumerated — only ClassDataSourceAttribute is populated. The class attribute
+                        // is already present in the initialized attributes (it is declared on the class),
+                        // so nothing is lost by leaving the method slot empty.
                         var testSpecificContext = new TestBuilderContext
                         {
                             TestMetadata = metadata.MethodMetadata,
                             ClassConstructor = testBuilderContext.ClassConstructor,
-                            DataSourceAttribute = classDataSource,
+                            ClassDataSourceAttribute = classDataSource,
                             InitializedAttributes = attributes
                         };
 
@@ -1956,7 +1963,8 @@ internal sealed class TestBuilder : ITestBuilder
                 TestMetadata = metadata.MethodMetadata,
                 StateBag = contextAccessor.Current.StateBag,
                 ClassConstructor = contextAccessor.Current.ClassConstructor,
-                DataSourceAttribute = contextAccessor.Current.DataSourceAttribute,
+                DataSourceAttribute = methodDataSource ?? contextAccessor.Current.DataSourceAttribute,
+                ClassDataSourceAttribute = classDataSource ?? contextAccessor.Current.ClassDataSourceAttribute,
                 InitializedAttributes = attributes
             };
 

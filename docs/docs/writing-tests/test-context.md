@@ -103,6 +103,46 @@ public class MyTestClass
 }
 ```
 
+## Data Source Attributes
+
+The context exposes the data source attribute instances that generated the current test's arguments:
+
+- `Metadata.ClassDataSource` — the attribute that generated the test class's constructor arguments
+- `Metadata.MethodDataSource` — the attribute that generated the test method's arguments
+
+Both are never null: for tests without a data source they return a no-op `NoDataSource` singleton, so you can pattern-match without null checks.
+
+This is useful when a fixture needs to know how it was shared. For example, a fixture can read its own `Shared` scope and `Key` during `InitializeAsync`:
+
+```csharp
+public class MyFixture : IAsyncInitializer
+{
+    public Task InitializeAsync()
+    {
+        if (TestContext.Current?.Metadata.MethodDataSource is ClassDataSourceAttribute<MyFixture> attribute)
+        {
+            var sharedType = attribute.Shared; // e.g. SharedType.Keyed
+            var key = attribute.Key;           // e.g. "MyKey"
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+public class MyTests
+{
+    [Test]
+    [ClassDataSource<MyFixture>(Shared = SharedType.Keyed, Key = "MyKey")]
+    public void MyTest(MyFixture fixture)
+    {
+    }
+}
+```
+
+Note that shared fixtures (`PerTestSession`, `PerClass`, `Keyed`, etc.) are initialized once, by the first test that uses them — inside `InitializeAsync`, `TestContext.Current` refers to that first test.
+
+If you only need the sharing key, implementing `IKeyedDataSource` on the fixture is a simpler alternative: TUnit sets its `Key` property before `InitializeAsync` is called.
+
 ## Dependency Injection
 
 **Note**: `TestContext` does NOT provide direct access to dependency injection services. The internal service provider in `TestContext` is exclusively for TUnit framework services and is not meant for user-provided dependencies.
