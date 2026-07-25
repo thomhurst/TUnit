@@ -26815,78 +26815,54 @@ TUnit provides multiple mechanisms for hooking into the test lifecycle:
 
 ## Complete Lifecycle Diagram
 
+Discovery runs first, then every test executes inside nested scopes:
+
+```mermaid
+flowchart LR
+    Discovery["Discovery"] --> Session["Test Session"] --> Assembly["Assembly"] --> Class["Class"] --> Test["Test"]
+```
+
+`[Before]` hooks run outermost first (session → assembly → class → test), and `[After]` hooks
+unwind in the opposite order:
+
 ```mermaid
 flowchart TB
-    subgraph Discovery["1. Discovery Phase"]
-        direction TB
-        D1["[Before(TestDiscovery)]"]
-        D2["Scan assemblies for [Test] methods"]
-        D3["Create data sources & resolve property values"]
-        D3a["IAsyncDiscoveryInitializer.InitializeAsync()"]
-        D4["[After(TestDiscovery)]"]
-        D5["ITestRegisteredEventReceiver.OnTestRegistered()"]
-        D1 --> D2 --> D3 --> D3a --> D4 --> D5
-    end
+    D1["[Before(TestDiscovery)]"]
+    D2["Scan assemblies · create data sources · IAsyncDiscoveryInitializer"]
+    D3["[After(TestDiscovery)] · ITestRegisteredEventReceiver"]
+    S1["[Before(TestSession)] · IFirstTestInTestSessionEventReceiver"]
+    A1["[BeforeEvery(Assembly)] / [Before(Assembly)] · IFirstTestInAssemblyEventReceiver"]
+    C1["[BeforeEvery(Class)] / [Before(Class)] · IFirstTestInClassEventReceiver"]
+    T["Per-test flow — see Phase 2"]
+    C2["ILastTestInClassEventReceiver · [After(Class)] / [AfterEvery(Class)]"]
+    A2["ILastTestInAssemblyEventReceiver · [After(Assembly)] / [AfterEvery(Assembly)]"]
+    S2["ILastTestInTestSessionEventReceiver · [After(TestSession)]"]
 
-    subgraph Session["2. Test Session Execution"]
-        direction TB
-        S1["[Before(TestSession)]"]
-        S1a["IFirstTestInTestSessionEventReceiver"]
+    D1 --> D2 --> D3 --> S1 --> A1 --> C1 --> T --> C2 --> A2 --> S2
 
-        subgraph Assembly["Per Assembly"]
-            direction TB
-            A1["[BeforeEvery(Assembly)] / [Before(Assembly)]"]
-            A1a["IFirstTestInAssemblyEventReceiver"]
+    style T fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
+```
 
-            subgraph Class["Per Class"]
-                direction TB
-                C1["[BeforeEvery(Class)] / [Before(Class)]"]
-                C1a["IFirstTestInClassEventReceiver"]
+Everything inside a single test — construction, initialization, hooks, body and disposal:
 
-                subgraph Test["Per Test Execution"]
-                    direction TB
-                    T0["Create test class instance (constructor)"]
-                    T0a["Set injected property values on instance"]
-                    T0b["IAsyncInitializer.InitializeAsync()"]
-                    T1["[BeforeEvery(Test)]"]
-                    T1a["ITestStartEventReceiver (Early)"]
-                    T2["[Before(Test)]"]
-                    T2a["ITestStartEventReceiver (Late)"]
-                    T3["Test Body"]
-                    T3a["ITestEndEventReceiver (Early)"]
-                    T4["[After(Test)]"]
-                    T4a["ITestEndEventReceiver (Late)"]
-                    T5["[AfterEvery(Test)]"]
-                    T6["IDisposable / IAsyncDisposable"]
-                    T7["Cleanup tracked objects"]
+```mermaid
+flowchart TB
+    T0["Create test class instance (constructor)"]
+    T0a["Set injected property values on instance"]
+    T0b["IAsyncInitializer.InitializeAsync()"]
+    T1["[BeforeEvery(Test)] · ITestStartEventReceiver (Early)"]
+    T2["[Before(Test)] · ITestStartEventReceiver (Late)"]
+    T3["Test Body"]
+    T4["ITestEndEventReceiver (Early) · [After(Test)]"]
+    T5["ITestEndEventReceiver (Late) · [AfterEvery(Test)]"]
+    T6["IDisposable / IAsyncDisposable"]
+    T7["Cleanup tracked objects"]
 
-                    T0 --> T0a --> T0b --> T1
-                    T1 --> T1a --> T2 --> T2a --> T3
-                    T3 --> T3a --> T4 --> T4a --> T5 --> T6 --> T7
-                end
+    T0 --> T0a --> T0b --> T1 --> T2 --> T3 --> T4 --> T5 --> T6 --> T7
 
-                C2a["ILastTestInClassEventReceiver"]
-                C2["[After(Class)] / [AfterEvery(Class)]"]
-                C1 --> C1a --> Test --> C2a --> C2
-            end
-
-            A2a["ILastTestInAssemblyEventReceiver"]
-            A2["[After(Assembly)] / [AfterEvery(Assembly)]"]
-            A1 --> A1a --> Class --> A2a --> A2
-        end
-
-        S2a["ILastTestInTestSessionEventReceiver"]
-        S2["[After(TestSession)]"]
-        S1 --> S1a --> Assembly --> S2a --> S2
-    end
-
-    Discovery --> Session
-
-    style D2 fill:#e1f5fe
-    style D3a fill:#fff3e0
-    style T0b fill:#fff3e0
-    style T3 fill:#c8e6c9
-    style T6 fill:#ffcdd2
+    style T0b fill:#fff3e0,stroke:#ef6c00,color:#e65100
+    style T3 fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
+    style T6 fill:#ffcdd2,stroke:#c62828,color:#b71c1c
 ```
 
 ## Phase 1: Test Discovery
@@ -26942,16 +26918,14 @@ Use `IAsyncDiscoveryInitializer` when your data source needs async initializatio
 sequenceDiagram
     participant Engine as TUnit Engine
     participant Instance as Test Instance
-    participant Init as Initializers
     participant Hooks as Hook Attributes
     participant Events as Event Receivers
-    participant Dispose as Disposal
 
     Note over Engine: After BeforeClass hooks...
 
-    Engine->>Instance: Create test class instance (constructor)
-    Engine->>Instance: Set cached property values on instance
-    Engine->>Init: IAsyncInitializer.InitializeAsync() for all tracked objects
+    Engine->>Instance: Create instance (constructor)
+    Engine->>Instance: Set cached property values
+    Engine->>Instance: IAsyncInitializer.InitializeAsync()
 
     Engine->>Hooks: [BeforeEvery(Test)]
     Engine->>Events: ITestStartEventReceiver (Early)
@@ -26965,8 +26939,8 @@ sequenceDiagram
     Engine->>Events: ITestEndEventReceiver (Late)
     Engine->>Hooks: [AfterEvery(Test)]
 
-    Engine->>Dispose: IAsyncDisposable.DisposeAsync() / IDisposable.Dispose()
-    Engine->>Engine: Cleanup tracked objects (decrement ref counts, dispose if 0)
+    Engine->>Instance: DisposeAsync() / Dispose()
+    Engine->>Engine: Cleanup tracked objects (dispose at ref count 0)
 ```
 
 ### Complete Test Execution Order
@@ -27050,19 +27024,23 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph AfterTest["After Each Test"]
+        direction TB
         A1["[After(Test)]"]
         A2["[AfterEvery(Test)]"]
-        A3["Test Instance: IAsyncDisposable / IDisposable"]
+        A3["Test Instance:<br/>IAsyncDisposable / IDisposable"]
+        A1 --> A2 --> A3
     end
 
     subgraph AfterScope["After Scope Ends"]
+        direction TB
         B1["Tracked objects with ref count = 0"]
-        B2["SharedType.PerClass objects after last test in class"]
-        B3["SharedType.PerAssembly objects after last test in assembly"]
-        B4["SharedType.PerTestSession objects after session"]
+        B2["SharedType.PerClass<br/>after last test in class"]
+        B3["SharedType.PerAssembly<br/>after last test in assembly"]
+        B4["SharedType.PerTestSession<br/>after session"]
+        B1 ~~~ B2 ~~~ B3 ~~~ B4
     end
 
-    A1 --> A2 --> A3 --> B1
+    AfterTest --> AfterScope
 ```
 
 ### Disposal by Sharing Type
@@ -27128,17 +27106,21 @@ For `ITestStartEventReceiver` and `ITestEndEventReceiver`:
 ```mermaid
 flowchart LR
     subgraph TestStart["Test Start"]
+        direction TB
         A1["[BeforeEvery(Test)]"]
         A2["ITestStartEventReceiver (Early)"]
         A3["[Before(Test)]"]
         A4["ITestStartEventReceiver (Late)"]
+        A1 --> A2 --> A3 --> A4
     end
 
     subgraph TestEnd["Test End"]
+        direction TB
         B1["ITestEndEventReceiver (Early)"]
         B2["[After(Test)]"]
         B3["ITestEndEventReceiver (Late)"]
         B4["[AfterEvery(Test)]"]
+        B1 --> B2 --> B3 --> B4
     end
 
     TestStart --> TestEnd

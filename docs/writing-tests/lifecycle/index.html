@@ -7,9 +7,9 @@
 
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"blue",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
-<script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.bd3cf430.css">
-<script src="/assets/js/runtime~main.430f9191.js" defer="defer"></script>
-<script src="/assets/js/main.715f6563.js" defer="defer"></script>
+<script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.96503ebe.css">
+<script src="/assets/js/runtime~main.f8b17320.js" defer="defer"></script>
+<script src="/assets/js/main.d3ca9dc0.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -24,6 +24,12 @@
 <li class=""><strong>Disposal Interfaces</strong> (<code>IDisposable</code>, <code>IAsyncDisposable</code>) - Resource cleanup</li>
 </ol>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="complete-lifecycle-diagram">Complete Lifecycle Diagram<a href="#complete-lifecycle-diagram" class="hash-link" aria-label="Direct link to Complete Lifecycle Diagram" title="Direct link to Complete Lifecycle Diagram" translate="no">​</a></h2>
+<p>Discovery runs first, then every test executes inside nested scopes:</p>
+<!-- -->
+<p><code>[Before]</code> hooks run outermost first (session → assembly → class → test), and <code>[After]</code> hooks
+unwind in the opposite order:</p>
+<!-- -->
+<p>Everything inside a single test — construction, initialization, hooks, body and disposal:</p>
 <!-- -->
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="phase-1-test-discovery">Phase 1: Test Discovery<a href="#phase-1-test-discovery" class="hash-link" aria-label="Direct link to Phase 1: Test Discovery" title="Direct link to Phase 1: Test Discovery" translate="no">​</a></h2>
 <p>Before any tests execute, TUnit discovers all tests and prepares data sources.</p>
