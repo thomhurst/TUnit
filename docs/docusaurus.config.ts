@@ -92,6 +92,15 @@ const config: Config = {
   themes: ['@docusaurus/theme-mermaid'],
 
   themeConfig: {
+    mermaid: {
+      options: {
+        // Default is 200px, which wraps most labels onto 4-5 lines and turns
+        // flowcharts into unreadably narrow, very tall diagrams.
+        flowchart: {
+          wrappingWidth: 400,
+        },
+      },
+    },
     // Replace with your project's social card
     algolia: {
       // The application ID provided by Algolia
