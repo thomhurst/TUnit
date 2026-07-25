@@ -1,26 +1,28 @@
-/* Enhanced styling for Mermaid benchmark charts */
+/* Enhanced styling for Mermaid benchmark charts.
+   Scoped to xychart only - flowcharts and sequence diagrams must keep the
+   colours Mermaid picks for the active theme, otherwise labels lose contrast. */
 
 /* Enhance chart readability - light mode */
-.markdown .docusaurus-mermaid-container svg text {
+.markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] text {
   fill: var(--ifm-font-color-base) !important;
   font-family: var(--ifm-font-family-base);
 }
 
 /* Grid lines for better readability */
-.markdown .docusaurus-mermaid-container svg line {
+.markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] line {
   stroke: var(--ifm-color-emphasis-300);
   stroke-opacity: 0.5;
 }
 
 /* Dark mode adjustments */
-[data-theme='dark'] .markdown .docusaurus-mermaid-container svg text {
+[data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] text {
   fill: var(--ifm-font-color-base) !important;
 }
 
-[data-theme='dark'] .markdown .docusaurus-mermaid-container svg .main > rect {
+[data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] .main > rect {
   fill: var(--ifm-background-color) !important;
 }
 
-[data-theme='dark'] .markdown .docusaurus-mermaid-container svg line {
+[data-theme='dark'] .markdown .docusaurus-mermaid-container svg[aria-roledescription='xychart'] line {
   stroke: var(--ifm-color-emphasis-500);
 }
