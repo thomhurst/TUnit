@@ -48,13 +48,10 @@ internal static class InterfaceImplementability
                 continue;
             }
 
-            // Accessors are checked through their associated property/event, which carries the
-            // accessibility that actually gates implementation.
-            if (member is IMethodSymbol { AssociatedSymbol: not null })
-            {
-                continue;
-            }
-
+            // Accessors are checked too, not skipped: C# allows a per-accessor modifier on an
+            // interface property (`string Value { get; internal set; }`), so a property that is
+            // itself reachable can still declare a slot no outside implementer can provide —
+            // MemberDiscovery drops that accessor and the impl then fails to satisfy the interface.
             if (!MemberDiscovery.IsMemberAccessible(member, compilation.Assembly))
             {
                 return false;

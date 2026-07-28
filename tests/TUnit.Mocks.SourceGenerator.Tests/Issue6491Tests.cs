@@ -34,6 +34,13 @@ public class Issue6491Tests : SnapshotTestBase
                 IInternalMemberInterface GetConverter();
             }
 
+            // A reachable property can still carry an unreachable accessor slot: C# allows a
+            // per-accessor modifier on an interface property.
+            public interface IHalfHiddenInterface
+            {
+                string Value { get; internal set; }
+            }
+
             // protected / protected internal members are reachable from any assembly through
             // explicit interface implementation, so these stay mockable.
             public interface IProtectedMemberInterface
@@ -96,6 +103,28 @@ public class Issue6491Tests : SnapshotTestBase
         await Assert.That(generated.Any(g => g.Contains("IInternalMemberInterfaceMockImpl"))).IsFalse();
         // ...while sibling interfaces that *are* implementable still get their auto-mock factory.
         await Assert.That(generated.Any(g => g.Contains("IPublicConverterMockImpl"))).IsTrue();
+    }
+
+    [Test]
+    public async Task Interface_With_An_Inaccessible_Accessor_Gets_No_Generated_Mock()
+    {
+        // MemberDiscovery drops the unreachable setter, so emitting the impl would leave that slot
+        // unimplemented (CS0535) even though the property itself is public.
+        var source = """
+            using TUnit.Mocks;
+
+            public class Test
+            {
+                public void Run()
+                {
+                    var halfHidden = Mock.Of<ExternalLib.IHalfHiddenInterface>();
+                }
+            }
+            """;
+
+        var generated = RunGenerator(source, [CreateExternalAssemblyReference(ExternalLibrary)]);
+
+        await Assert.That(generated.Any(g => g.Contains("IHalfHiddenInterfaceMockImpl"))).IsFalse();
     }
 
     [Test]

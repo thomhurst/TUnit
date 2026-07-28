@@ -189,6 +189,104 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
     }
 
     [Test]
+    public async Task Cross_Assembly_Internal_Setter_On_A_Public_Property_Reports_TM007()
+    {
+        // C# allows a per-accessor modifier on an interface property, so a reachable property can
+        // still declare an unreachable slot. Reported against the property, which is what the
+        // compiler error would name.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.IHalfHidden>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IHalfHidden
+                {
+                    string Value { get; internal set; }
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM007_CannotMockInterfaceWithInaccessibleMember)
+                .WithLocation(0)
+                .WithArguments("IHalfHidden", "Value")
+        );
+    }
+
+    [Test]
+    public async Task GenerateMock_Attribute_For_An_Unmockable_Interface_Reports_TM007()
+    {
+        // The attribute produces no invocation, so without its own action the request would be
+        // dropped by the generator with nothing said.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            """
+            [assembly: {|#0:TUnit.Mocks.GenerateMock(typeof(ExternalLib.IHidden))|}]
+
+            namespace TUnit.Mocks
+            {
+                [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
+                public sealed class GenerateMockAttribute : System.Attribute
+                {
+                    public GenerateMockAttribute(System.Type type) { }
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IHidden
+                {
+                    internal void Secret();
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM007_CannotMockInterfaceWithInaccessibleMember)
+                .WithLocation(0)
+                .WithArguments("IHidden", "Secret")
+        );
+    }
+
+    [Test]
+    public async Task Unrelated_Static_Mock_Method_Does_Not_Report()
+    {
+        // Another library's own `IFoo.Mock()` binds to a method that is not the generated entry
+        // point, so it must not be treated as a TUnit mock request.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public static class OtherLibraryExtensions
+            {
+                public static object Mock(this ExternalLib.IHidden hidden) => hidden;
+            }
+
+            public class TestClass
+            {
+                public void Test(ExternalLib.IHidden hidden)
+                {
+                    hidden.Mock();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IHidden
+                {
+                    internal void Secret();
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
     public async Task Cross_Assembly_Protected_Member_Does_Not_Report()
     {
         // A protected interface member is implementable from any assembly via explicit interface

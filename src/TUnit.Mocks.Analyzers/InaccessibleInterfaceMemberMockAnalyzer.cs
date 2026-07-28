@@ -26,6 +26,7 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
 
         context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeGenerateMockAttribute, SyntaxKind.Attribute);
     }
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
@@ -35,7 +36,51 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        foreach (var target in ResolveMockTargets(context, invocation))
+        ReportUnmockableTargets(context, ResolveMockTargets(context, invocation), invocation.GetLocation());
+    }
+
+    /// <summary>
+    /// <c>[assembly: GenerateMock(typeof(T))]</c> is a third entry point. The generator drops an
+    /// unimplementable T there too, and the attribute produces no invocation to hang the
+    /// invocation-based diagnostic off, so it would otherwise fail silently — no mock, no message.
+    /// </summary>
+    private static void AnalyzeGenerateMockAttribute(SyntaxNodeAnalysisContext context)
+    {
+        if (context.Node is not AttributeSyntax attribute)
+        {
+            return;
+        }
+
+        if (context.SemanticModel.GetSymbolInfo(attribute, context.CancellationToken).Symbol is not IMethodSymbol attributeConstructor
+            || attributeConstructor.ContainingType is not { Name: "GenerateMockAttribute" } attributeType
+            || !IsTUnitMocksNamespace(attributeType.ContainingNamespace))
+        {
+            return;
+        }
+
+        var typeOfArgument = attribute.ArgumentList?.Arguments
+            .Select(a => a.Expression)
+            .OfType<TypeOfExpressionSyntax>()
+            .FirstOrDefault();
+
+        if (typeOfArgument is null)
+        {
+            return;
+        }
+
+        var target = context.SemanticModel.GetTypeInfo(typeOfArgument.Type, context.CancellationToken).Type as INamedTypeSymbol;
+
+        if (target is null)
+        {
+            return;
+        }
+
+        ReportUnmockableTargets(context, new[] { target }, attribute.GetLocation());
+    }
+
+    private static void ReportUnmockableTargets(SyntaxNodeAnalysisContext context, IEnumerable<INamedTypeSymbol> targets, Location location)
+    {
+        foreach (var target in targets)
         {
             if (target.TypeKind != TypeKind.Interface)
             {
@@ -52,9 +97,9 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(
                 Diagnostic.Create(
                     Rules.TM007_CannotMockInterfaceWithInaccessibleMember,
-                    invocation.GetLocation(),
+                    location,
                     target.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                    inaccessibleMember.Name
+                    DescribeMember(inaccessibleMember)
                 )
             );
         }
@@ -71,9 +116,19 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
     {
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
-        if (symbolInfo.Symbol is IMethodSymbol methodSymbol && IsMockEntryPointMethod(methodSymbol))
+        if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
         {
-            return methodSymbol.TypeArguments.OfType<INamedTypeSymbol>();
+            if (IsMockEntryPointMethod(methodSymbol))
+            {
+                return methodSymbol.TypeArguments.OfType<INamedTypeSymbol>();
+            }
+
+            // Bound to something that isn't ours — e.g. another library's own `IFoo.Mock()`
+            // extension, or a static Mock() the user declared. Not a TUnit mock request.
+            if (!IsGeneratedStaticEntryPoint(methodSymbol))
+            {
+                return Enumerable.Empty<INamedTypeSymbol>();
+            }
         }
 
         return ResolveStaticEntryPointTarget(context, invocation) is { } target
@@ -81,9 +136,32 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
             : Enumerable.Empty<INamedTypeSymbol>();
     }
 
+    /// <summary>
+    /// Matches the <c>Mock()</c> the generator emits: a static member of a C# 14
+    /// <c>extension(T)</c> block inside a <c>*_MockStaticExtension</c> class in namespace
+    /// <c>TUnit.Mocks</c>. Roslyn reports the member's immediate containing type as the
+    /// synthesised, unnamed extension type, so the check walks out to the declaring class.
+    /// </summary>
+    private static bool IsGeneratedStaticEntryPoint(IMethodSymbol method)
+    {
+        if (method is not { Name: "Mock", IsStatic: true } || !IsTUnitMocksNamespace(method.ContainingNamespace))
+        {
+            return false;
+        }
+
+        for (var containing = method.ContainingType; containing is not null; containing = containing.ContainingType)
+        {
+            if (containing.Name.EndsWith("_MockStaticExtension", System.StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static INamedTypeSymbol? ResolveStaticEntryPointTarget(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
     {
-
         if (invocation is not
             {
                 ArgumentList.Arguments.Count: 0,
@@ -99,6 +177,9 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
         return context.SemanticModel.GetSymbolInfo(memberAccess.Expression, context.CancellationToken).Symbol
             as INamedTypeSymbol;
     }
+
+    private static bool IsTUnitMocksNamespace(INamespaceSymbol? ns)
+        => ns is { Name: "Mocks", ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true } };
 
     private static bool IsMockEntryPointMethod(IMethodSymbol method)
     {
@@ -132,12 +213,9 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            // Accessors carry their property's/event's accessibility — report the member itself.
-            if (member is IMethodSymbol { AssociatedSymbol: not null })
-            {
-                continue;
-            }
-
+            // Accessors are checked too, not skipped: C# allows a per-accessor modifier on an
+            // interface property (`string Value { get; internal set; }`), so a public property can
+            // still carry a slot no outside implementer can provide.
             if (!IsImplementableFrom(member, compilation.Assembly))
             {
                 return member;
@@ -146,6 +224,13 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
 
         return null;
     }
+
+    /// <summary>
+    /// Names the member for the diagnostic message. An accessor reports as its property or event,
+    /// which is what the user wrote and what the compiler error would point at.
+    /// </summary>
+    private static string DescribeMember(ISymbol member)
+        => member is IMethodSymbol { AssociatedSymbol: { } associated } ? associated.Name : member.Name;
 
     /// <summary>
     /// True when a type declared in <paramref name="compilationAssembly"/> could provide this
