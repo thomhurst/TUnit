@@ -303,7 +303,8 @@ public abstract class SnapshotTestBase
                 $"Snapshot mismatch for '{testName}'.\n" +
                 $"Received: {receivedPath}\n" +
                 $"Verified: {verifiedPath}\n" +
-                $"Update the .verified.txt file if this change is intentional.");
+                $"Update the .verified.txt file if this change is intentional.\n" +
+                $"{DescribeDifference(verified, generatedOutput)}");
         }
 
         // Clean up any leftover .received.txt on success
@@ -316,5 +317,72 @@ public abstract class SnapshotTestBase
     private static string NormalizeNewlines(string text)
     {
         return text.Replace("\r\n", "\n").Replace("\r", "\n");
+    }
+
+    /// <summary>
+    /// Renders the first divergence between the two snapshots inline in the failure message.
+    /// The <c>.received.txt</c> file is only useful to someone with the working tree in front of
+    /// them; a mismatch that reproduces on CI (or on one OS only) is otherwise undiagnosable from
+    /// the log alone.
+    /// </summary>
+    private static string DescribeDifference(string verified, string received)
+    {
+        const int ContextLines = 3;
+        const int MaxReportedLines = 40;
+
+        var verifiedLines = verified.Split('\n');
+        var receivedLines = received.Split('\n');
+
+        var firstDifference = 0;
+        while (firstDifference < verifiedLines.Length
+               && firstDifference < receivedLines.Length
+               && string.Equals(verifiedLines[firstDifference], receivedLines[firstDifference], StringComparison.Ordinal))
+        {
+            firstDifference++;
+        }
+
+        var report = new StringBuilder();
+        report.Append("Verified has ").Append(verifiedLines.Length)
+            .Append(" line(s), received has ").Append(receivedLines.Length)
+            .Append(" line(s); first difference at line ").Append(firstDifference + 1).Append('.')
+            .Append('\n');
+
+        var contextStart = Math.Max(0, firstDifference - ContextLines);
+        for (var i = contextStart; i < firstDifference; i++)
+        {
+            report.Append("  ").Append(verifiedLines[i]).Append('\n');
+        }
+
+        var reported = 0;
+        for (var i = firstDifference; i < Math.Max(verifiedLines.Length, receivedLines.Length) && reported < MaxReportedLines; i++)
+        {
+            var verifiedLine = i < verifiedLines.Length ? verifiedLines[i] : null;
+            var receivedLine = i < receivedLines.Length ? receivedLines[i] : null;
+
+            if (string.Equals(verifiedLine, receivedLine, StringComparison.Ordinal))
+            {
+                report.Append("  ").Append(verifiedLine).Append('\n');
+                continue;
+            }
+
+            if (verifiedLine is not null)
+            {
+                report.Append("- ").Append(verifiedLine).Append('\n');
+            }
+
+            if (receivedLine is not null)
+            {
+                report.Append("+ ").Append(receivedLine).Append('\n');
+            }
+
+            reported++;
+        }
+
+        if (reported == MaxReportedLines)
+        {
+            report.Append("  ... (truncated)\n");
+        }
+
+        return report.ToString();
     }
 }
