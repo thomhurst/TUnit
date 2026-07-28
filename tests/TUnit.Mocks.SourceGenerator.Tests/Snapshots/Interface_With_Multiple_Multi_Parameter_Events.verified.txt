@@ -20,28 +20,31 @@ public sealed class IDualEventsMock : global::TUnit.Mocks.Mock<global::IDualEven
 #pragma warning disable
 #nullable enable
 
-[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-public readonly struct IDualEvents_MockEvents
+namespace TUnit.Mocks.Generated
 {
-    internal readonly global::TUnit.Mocks.MockEngine<global::IDualEvents> Engine;
-
-    internal IDualEvents_MockEvents(global::TUnit.Mocks.MockEngine<global::IDualEvents> engine) => Engine = engine;
-}
-
-public static class IDualEvents_MockEventsExtensions
-{
-    extension(global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct IDualEvents_MockEvents
     {
-        public IDualEvents_MockEvents Events => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock));
+        internal readonly global::TUnit.Mocks.MockEngine<global::IDualEvents> Engine;
+
+        internal IDualEvents_MockEvents(global::TUnit.Mocks.MockEngine<global::IDualEvents> engine) => Engine = engine;
     }
 
-    extension(IDualEvents_MockEvents events)
+    public static class IDualEvents_MockEventsExtensions
     {
-        public global::TUnit.Mocks.EventSubscriptionAccessor First
-            => new(events.Engine, "First");
+        extension(global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+        {
+            public IDualEvents_MockEvents Events => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock));
+        }
 
-        public global::TUnit.Mocks.EventSubscriptionAccessor Second
-            => new(events.Engine, "Second");
+        extension(IDualEvents_MockEvents events)
+        {
+            public global::TUnit.Mocks.EventSubscriptionAccessor First
+                => new(events.Engine, "First");
+
+            public global::TUnit.Mocks.EventSubscriptionAccessor Second
+                => new(events.Engine, "Second");
+        }
     }
 }
 
@@ -162,60 +165,63 @@ internal static class IDualEventsMockFactory
 #pragma warning disable
 #nullable enable
 
-public static class IDualEvents_MockMemberExtensions
+namespace TUnit.Mocks.Generated
 {
-    public static void RaiseFirst(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, object sender, string value)
+    public static class IDualEvents_MockMemberExtensions
     {
-        ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("First", (object?)new object?[] { sender, value });
-    }
-
-    public static void RaiseSecond(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, object sender, int value)
-    {
-        ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("Second", (object?)new object?[] { sender, value });
-    }
-
-    #if NET9_0_OR_GREATER
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void Reset(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-        => global::TUnit.Mocks.Mock.Reset(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-        => global::TUnit.Mocks.Mock.VerifyAll(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetState(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, string? stateName)
-        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void InState(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::IDualEvents>> configure)
-        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
-
-    extension(global::TUnit.Mocks.Mock<global::IDualEvents> mock)
-    {
-        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
-
-        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
-
-        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        public static void RaiseFirst(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, object sender, string value)
         {
-            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
-            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("First", (object?)new object?[] { sender, value });
         }
+
+        public static void RaiseSecond(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, object sender, int value)
+        {
+            ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("Second", (object?)new object?[] { sender, value });
+        }
+
+        #if NET9_0_OR_GREATER
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void Reset(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+            => global::TUnit.Mocks.Mock.Reset(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyAll(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+            => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+            => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+            => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+            => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetState(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, string? stateName)
+            => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void InState(this global::TUnit.Mocks.Mock<global::IDualEvents> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::IDualEvents>> configure)
+            => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+        extension(global::TUnit.Mocks.Mock<global::IDualEvents> mock)
+        {
+            public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+            public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+            public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+            {
+                get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+                set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+        }
+        #endif
     }
-    #endif
 }
 
 

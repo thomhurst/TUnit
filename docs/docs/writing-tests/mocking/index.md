@@ -27,6 +27,10 @@ dotnet add package TUnit.Mocks.Logging
 TUnit.Mocks requires **C# 14** or later (`LangVersion` set to `14` or `preview`). If your project targets an older version, you will see error **TM004** at compile time.
 :::
 
+:::note Generated namespaces
+The setup, verification and event surface is generated into `TUnit.Mocks.Generated`, which TUnit.Mocks adds as a global using. It does not matter which namespace the mocked type itself lives in. If you set `<TUnitMockImplicitUsings>disable</TUnitMockImplicitUsings>`, add `using TUnit.Mocks.Generated;` yourself or the setup methods will not be found.
+:::
+
 ## Your First Mock
 
 ```csharp

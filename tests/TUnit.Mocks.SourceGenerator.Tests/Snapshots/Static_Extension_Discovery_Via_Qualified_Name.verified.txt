@@ -83,7 +83,7 @@ namespace MyNamespace
 #pragma warning disable
 #nullable enable
 
-namespace MyNamespace
+namespace TUnit.Mocks.Generated
 {
     public static class MyNamespace_ITestInterface_MockMemberExtensions
     {

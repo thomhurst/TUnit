@@ -23,25 +23,28 @@ public sealed class INotifierMock : global::TUnit.Mocks.Mock<global::INotifier>,
 #pragma warning disable
 #nullable enable
 
-[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-public readonly struct INotifier_MockEvents
+namespace TUnit.Mocks.Generated
 {
-    internal readonly global::TUnit.Mocks.MockEngine<global::INotifier> Engine;
-
-    internal INotifier_MockEvents(global::TUnit.Mocks.MockEngine<global::INotifier> engine) => Engine = engine;
-}
-
-public static class INotifier_MockEventsExtensions
-{
-    extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public readonly struct INotifier_MockEvents
     {
-        public INotifier_MockEvents Events => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock));
+        internal readonly global::TUnit.Mocks.MockEngine<global::INotifier> Engine;
+
+        internal INotifier_MockEvents(global::TUnit.Mocks.MockEngine<global::INotifier> engine) => Engine = engine;
     }
 
-    extension(INotifier_MockEvents events)
+    public static class INotifier_MockEventsExtensions
     {
-        public global::TUnit.Mocks.EventSubscriptionAccessor ItemAdded
-            => new(events.Engine, "ItemAdded");
+        extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
+        {
+            public INotifier_MockEvents Events => new(global::TUnit.Mocks.MockRegistry.GetEngine(mock));
+        }
+
+        extension(INotifier_MockEvents events)
+        {
+            public global::TUnit.Mocks.EventSubscriptionAccessor ItemAdded
+                => new(events.Engine, "ItemAdded");
+        }
     }
 }
 
@@ -134,151 +137,154 @@ internal static class INotifierMockFactory
 #pragma warning disable
 #nullable enable
 
-public static class INotifier_MockMemberExtensions
+namespace TUnit.Mocks.Generated
 {
-    public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::TUnit.Mocks.Arguments.Arg<string> message)
+    public static class INotifier_MockMemberExtensions
     {
-        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { message.Matcher };
-        return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Notify", matchers);
-    }
-
-    public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::System.Func<string, bool> message)
-    {
-        global::TUnit.Mocks.Arguments.Arg<string> __fa_message = message;
-        var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
-        return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Notify", matchers);
-    }
-
-    public static void RaiseItemAdded(this global::TUnit.Mocks.Mock<global::INotifier> mock, string e)
-    {
-        ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("ItemAdded", (object?)e);
-    }
-
-    #if NET9_0_OR_GREATER
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void Reset(this global::TUnit.Mocks.Mock<global::INotifier> mock)
-        => global::TUnit.Mocks.Mock.Reset(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::INotifier> mock)
-        => global::TUnit.Mocks.Mock.VerifyAll(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::INotifier> mock)
-        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::INotifier> mock)
-        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::INotifier> mock)
-        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetState(this global::TUnit.Mocks.Mock<global::INotifier> mock, string? stateName)
-        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void InState(this global::TUnit.Mocks.Mock<global::INotifier> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::INotifier>> configure)
-        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
-
-    extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
-    {
-        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
-
-        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
-
-        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::TUnit.Mocks.Arguments.Arg<string> message)
         {
-            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
-            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { message.Matcher };
+            return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Notify", matchers);
         }
+
+        public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::System.Func<string, bool> message)
+        {
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_message = message;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
+            return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Notify", matchers);
+        }
+
+        public static void RaiseItemAdded(this global::TUnit.Mocks.Mock<global::INotifier> mock, string e)
+        {
+            ((global::TUnit.Mocks.IRaisable)global::TUnit.Mocks.MockRegistry.GetEngine(mock).Raisable!).RaiseEvent("ItemAdded", (object?)e);
+        }
+
+        #if NET9_0_OR_GREATER
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void Reset(this global::TUnit.Mocks.Mock<global::INotifier> mock)
+            => global::TUnit.Mocks.Mock.Reset(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyAll(this global::TUnit.Mocks.Mock<global::INotifier> mock)
+            => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::INotifier> mock)
+            => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::INotifier> mock)
+            => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::INotifier> mock)
+            => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetState(this global::TUnit.Mocks.Mock<global::INotifier> mock, string? stateName)
+            => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void InState(this global::TUnit.Mocks.Mock<global::INotifier> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::INotifier>> configure)
+            => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+        extension(global::TUnit.Mocks.Mock<global::INotifier> mock)
+        {
+            public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+            public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+            public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+            {
+                get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+                set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+        }
+        #endif
     }
-    #endif
-}
 
-[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-public sealed class INotifier_Notify_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
-{
-    private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
-    private readonly int _memberId;
-    private readonly string _memberName;
-    private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
-    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
-
-    internal INotifier_Notify_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed class INotifier_Notify_M0_MockCall : global::TUnit.Mocks.Verification.ICallVerification
     {
-        _engine = engine;
-        _memberId = memberId;
-        _memberName = memberName;
-        _matchers = matchers;
-        _ = EnsureSetup();
+        private readonly global::TUnit.Mocks.IMockEngineAccess _engine;
+        private readonly int _memberId;
+        private readonly string _memberName;
+        private readonly global::TUnit.Mocks.Arguments.IArgumentMatcher[] _matchers;
+        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder? _builder;
+
+        internal INotifier_Notify_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+        {
+            _engine = engine;
+            _memberId = memberId;
+            _memberName = memberName;
+            _matchers = matchers;
+            _ = EnsureSetup();
+        }
+
+        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
+        {
+            var existing = global::System.Threading.Volatile.Read(ref _builder);
+            if (existing is not null) return existing;
+            return EnsureSetupSlow();
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
+        {
+            var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
+            var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
+            var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
+            if (prev is not null) return prev;
+            // AddSetup runs only on the CAS winner. Setup is sequential in practice,
+            // so a concurrent loser observing the builder before registration is benign.
+            _engine.AddSetup(setup);
+            return fresh;
+        }
+
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall Returns() { EnsureSetup().Returns(); return this; }
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
+        /// <inheritdoc />
+        public INotifier_Notify_M0_MockCall Then() { EnsureSetup().Then(); return this; }
+
+        /// <summary>Execute a typed callback using the actual method parameters.</summary>
+        public INotifier_Notify_M0_MockCall Callback(global::System.Action<string> callback)
+        {
+            EnsureSetup().Callback(callback);
+            return this;
+        }
+
+        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+        public INotifier_Notify_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
+        {
+            EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
+            return this;
+        }
+
+        /// <summary>Auto-raise the ItemAdded event when this method is called.</summary>
+        public INotifier_Notify_M0_MockCall RaisesItemAdded(string e) { EnsureSetup().Raises("ItemAdded", (object?)e); return this; }
+
+        // ICallVerification
+        /// <inheritdoc />
+        public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
+        /// <inheritdoc />
+        public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
+        /// <inheritdoc />
+        public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
+        /// <inheritdoc />
+        public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
+        /// <inheritdoc />
+        public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
+        /// <inheritdoc />
+        public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
     }
-
-    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetup()
-    {
-        var existing = global::System.Threading.Volatile.Read(ref _builder);
-        if (existing is not null) return existing;
-        return EnsureSetupSlow();
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-    private global::TUnit.Mocks.Setup.VoidMethodSetupBuilder EnsureSetupSlow()
-    {
-        var setup = new global::TUnit.Mocks.Setup.MethodSetup(_memberId, _matchers, _memberName);
-        var fresh = new global::TUnit.Mocks.Setup.VoidMethodSetupBuilder(setup);
-        var prev = global::System.Threading.Interlocked.CompareExchange(ref _builder, fresh, null);
-        if (prev is not null) return prev;
-        // AddSetup runs only on the CAS winner. Setup is sequential in practice,
-        // so a concurrent loser observing the builder before registration is benign.
-        _engine.AddSetup(setup);
-        return fresh;
-    }
-
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall Returns() { EnsureSetup().Returns(); return this; }
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall Throws<TException>() where TException : global::System.Exception, new() { EnsureSetup().Throws<TException>(); return this; }
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall Throws(global::System.Exception exception) { EnsureSetup().Throws(exception); return this; }
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall Callback(global::System.Action callback) { EnsureSetup().Callback(callback); return this; }
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return this; }
-    /// <inheritdoc />
-    public INotifier_Notify_M0_MockCall Then() { EnsureSetup().Then(); return this; }
-
-    /// <summary>Execute a typed callback using the actual method parameters.</summary>
-    public INotifier_Notify_M0_MockCall Callback(global::System.Action<string> callback)
-    {
-        EnsureSetup().Callback(callback);
-        return this;
-    }
-
-    /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-    public INotifier_Notify_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
-    {
-        EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
-        return this;
-    }
-
-    /// <summary>Auto-raise the ItemAdded event when this method is called.</summary>
-    public INotifier_Notify_M0_MockCall RaisesItemAdded(string e) { EnsureSetup().Raises("ItemAdded", (object?)e); return this; }
-
-    // ICallVerification
-    /// <inheritdoc />
-    public void WasCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled();
-    /// <inheritdoc />
-    public void WasCalled(global::TUnit.Mocks.Times times) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times);
-    /// <inheritdoc />
-    public void WasCalled(global::TUnit.Mocks.Times times, string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(times, message);
-    /// <inheritdoc />
-    public void WasCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasCalled(message);
-    /// <inheritdoc />
-    public void WasNeverCalled() => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled();
-    /// <inheritdoc />
-    public void WasNeverCalled(string? message) => _engine.CreateVerification(_memberId, _memberName, _matchers).WasNeverCalled(message);
 }
 
 
