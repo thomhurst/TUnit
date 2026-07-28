@@ -80,11 +80,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
                 : null;
         }
 
-        // Generated per-type entry point: `T.Mock()`. The generated static extension class always
-        // lives in namespace TUnit.Mocks; its members bind through a compiler-synthesised nested
-        // extension type, so match on the namespace rather than the immediate containing type.
-        if (methodSymbol is not { Name: "Mock", IsStatic: true }
-            || !IsTUnitMocksNamespace(methodSymbol.ContainingNamespace)
+        // Generated per-type entry point: `T.Mock()`.
+        if (!IsGeneratedStaticEntryPoint(methodSymbol)
             || invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
         {
             return null;
@@ -92,6 +89,32 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
 
         return context.SemanticModel.GetSymbolInfo(memberAccess.Expression, context.CancellationToken).Symbol
             as INamedTypeSymbol;
+    }
+
+    /// <summary>
+    /// Matches the <c>Mock()</c> the generator emits: a static member of a C# 14
+    /// <c>extension(T)</c> block inside a <c>*_MockStaticExtension</c> class in namespace
+    /// <c>TUnit.Mocks</c>. Roslyn reports the member's immediate containing type as the
+    /// synthesised, unnamed extension type, so the check walks out to the declaring class —
+    /// matching on the namespace alone would claim any static <c>Mock()</c> a consumer happens to
+    /// declare there.
+    /// </summary>
+    private static bool IsGeneratedStaticEntryPoint(IMethodSymbol method)
+    {
+        if (method is not { Name: "Mock", IsStatic: true } || !IsTUnitMocksNamespace(method.ContainingNamespace))
+        {
+            return false;
+        }
+
+        for (var containing = method.ContainingType; containing is not null; containing = containing.ContainingType)
+        {
+            if (containing.Name.EndsWith("_MockStaticExtension", System.StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool IsTUnitMocksNamespace(INamespaceSymbol? ns)

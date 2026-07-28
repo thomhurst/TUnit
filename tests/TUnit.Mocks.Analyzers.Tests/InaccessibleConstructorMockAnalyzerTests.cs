@@ -48,13 +48,15 @@ public class InaccessibleConstructorMockAnalyzerTests
     }
 
     [Test]
-    public async Task Generated_Static_Mock_Entry_Point_Reports_TM006()
+    public async Task Unrelated_Static_Mock_Method_Does_Not_Report()
     {
-        // The generator emits `Mock()` as a C# 14 static extension member on the target type,
-        // inside namespace TUnit.Mocks. The Roslyn version behind the analyzer test harness
-        // predates extension blocks, so this stands in the equivalent binding shape the analyzer
-        // actually matches on: `T.Mock()` resolving to a static method named Mock whose containing
-        // namespace is TUnit.Mocks.
+        // The generated entry point is a static member of an `extension(T)` block inside a
+        // *_MockStaticExtension class. A static Mock() that merely happens to sit in namespace
+        // TUnit.Mocks is not ours and must not draw a compilation-blocking diagnostic.
+        //
+        // The positive case can't be expressed here: the Roslyn behind this harness predates C# 14
+        // extension blocks. It is covered by a real-SDK build in TUnit.Mocks.Tests, where
+        // `T.Mock()` on a constructor-less class reports TM006 and no longer produces CS1729.
         await Verifier.VerifyAnalyzerAsync(
             MockStub + """
 
@@ -72,13 +74,10 @@ public class InaccessibleConstructorMockAnalyzerTests
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.RuntimeProperties.Mock()|};
+                    TUnit.Mocks.RuntimeProperties.Mock();
                 }
             }
-            """,
-            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
-                .WithLocation(0)
-                .WithArguments("RuntimeProperties")
+            """
         );
     }
 
