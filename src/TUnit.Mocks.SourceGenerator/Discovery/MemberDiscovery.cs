@@ -550,9 +550,12 @@ internal static class MemberDiscovery
 
     /// <summary>
     /// Full accessibility check for members where the containing assembly isn't pre-computed
-    /// (used by DiscoverConstructors and IsAccessorAccessible).
+    /// (used by DiscoverConstructors, IsAccessorAccessible and
+    /// <see cref="InterfaceImplementability"/>). This is the single definition of "the generated
+    /// impl can use this member" — anything it rejects is absent from the emitted mock, so callers
+    /// deciding whether a type is mockable at all must ask exactly this question.
     /// </summary>
-    private static bool IsMemberAccessible(ISymbol member, IAssemblySymbol? compilationAssembly)
+    internal static bool IsMemberAccessible(ISymbol member, IAssemblySymbol? compilationAssembly)
     {
         if (compilationAssembly is null) return true;
 

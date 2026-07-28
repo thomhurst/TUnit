@@ -6,13 +6,12 @@ using Verifier = TUnit.Mocks.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TU
 namespace TUnit.Mocks.Analyzers.Tests;
 
 // Regression: https://github.com/thomhurst/TUnit/issues/6491
-// An interface with a non-public abstract member cannot be implemented by any type the generator
-// could emit, so the generator now skips it. TM007 is what turns that into an actionable error.
+// An interface with an abstract member the consuming assembly cannot reach has no possible
+// implementer, so the generator skips it. TM007 is what turns that into an actionable error.
 //
-// The report's case is an `internal` member in a referenced assembly; these tests use `protected`
-// members, which are unimplementable by a class in any assembly and so exercise the same
-// accessibility check within a single compilation. The cross-assembly `internal` case is covered
-// end-to-end by Issue6491Tests in TUnit.Mocks.SourceGenerator.Tests.
+// Only `internal` and `private protected` are assembly-scoped, so every reporting case needs a
+// genuinely separate compilation. `protected` / `protected internal` members are implementable from
+// any assembly through explicit interface implementation and must NOT report.
 public class InaccessibleInterfaceMemberMockAnalyzerTests
 {
     private const string MockStub = """
@@ -21,29 +20,33 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
             public static class Mock
             {
                 public static object Of<T>() => default!;
-                public static object Of<T>(int behavior) => default!;
+                public static object Of<T1, T2>() => default!;
             }
         }
         """;
 
     [Test]
-    public async Task Interface_With_Inaccessible_Property_Reports_TM007()
+    public async Task Cross_Assembly_Internal_Property_Reports_TM007()
     {
-        await Verifier.VerifyAnalyzerAsync(
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface ISessionConverter
-            {
-                protected string MissingProperties { get; set; }
-
-                string Describe();
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.Mock.Of<ISessionConverter>()|};
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.ISessionConverter>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface ISessionConverter
+                {
+                    internal string MissingProperties { get; set; }
+
+                    string Describe();
                 }
             }
             """,
@@ -54,21 +57,25 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
     }
 
     [Test]
-    public async Task Interface_With_Inaccessible_Method_Reports_TM007()
+    public async Task Cross_Assembly_Internal_Method_Reports_TM007()
     {
-        await Verifier.VerifyAnalyzerAsync(
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface IHidden
-            {
-                protected void Secret();
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.Mock.Of<IHidden>()|};
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.IHidden>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IHidden
+                {
+                    internal void Secret();
                 }
             }
             """,
@@ -81,24 +88,28 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
     [Test]
     public async Task Inaccessible_Member_Inherited_From_Base_Interface_Reports_TM007()
     {
-        await Verifier.VerifyAnalyzerAsync(
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface IBaseWithHiddenMember
-            {
-                protected string Hidden { get; }
-            }
-
-            public interface IDocumentStore : IBaseWithHiddenMember
-            {
-                string Identifier { get; }
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    {|#0:TUnit.Mocks.Mock.Of<IDocumentStore>()|};
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.IDocumentStore>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IBaseWithHiddenMember
+                {
+                    internal string Hidden { get; }
+                }
+
+                public interface IDocumentStore : IBaseWithHiddenMember
+                {
+                    string Identifier { get; }
                 }
             }
             """,
@@ -109,23 +120,63 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
     }
 
     [Test]
-    public async Task Static_Mock_Entry_Point_Reports_TM007()
+    public async Task Additional_Interface_Of_A_Multi_Type_Mock_Reports_TM007()
     {
-        // The generator emits no `Mock()` member for an unmockable interface, so this form is
-        // matched syntactically — `T.Mock()` with T resolving to the interface.
-        await Verifier.VerifyAnalyzerAsync(
+        // The impl lists every additional interface in its base-type list, so T2 being
+        // unimplementable takes the whole combo down — the diagnostic has to cover it.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface IHidden
-            {
-                protected void Secret();
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    {|#0:IHidden.Mock()|};
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.IFine, ExternalLib.IHidden>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IFine
+                {
+                    string Describe();
+                }
+
+                public interface IHidden
+                {
+                    internal void Secret();
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM007_CannotMockInterfaceWithInaccessibleMember)
+                .WithLocation(0)
+                .WithArguments("IHidden", "Secret")
+        );
+    }
+
+    [Test]
+    public async Task Static_Mock_Entry_Point_Reports_TM007()
+    {
+        // The generator emits no `Mock()` member for an unmockable interface, so this form is
+        // matched syntactically — `T.Mock()` with T resolving to the interface.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:ExternalLib.IHidden.Mock()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IHidden
+                {
+                    internal void Secret();
                 }
             }
             """,
@@ -133,28 +184,36 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
                 .WithLocation(0)
                 .WithArguments("IHidden", "Secret"),
             // No mock is generated for this interface, so `Mock` is genuinely undefined here.
-            DiagnosticResult.CompilerError("CS0117").WithSpan(18, 17, 18, 21).WithArguments("IHidden", "Mock")
+            DiagnosticResult.CompilerError("CS0117").WithSpan(13, 29, 13, 33)
         );
     }
 
     [Test]
-    public async Task Interface_With_Only_Public_Members_Does_Not_Report()
+    public async Task Cross_Assembly_Protected_Member_Does_Not_Report()
     {
-        await Verifier.VerifyAnalyzerAsync(
+        // A protected interface member is implementable from any assembly via explicit interface
+        // implementation, so mocking must keep working. Guards the accessibility check against
+        // Compilation.IsSymbolAccessibleWithin(member, assembly), which reports protected members
+        // as inaccessible and would silently drop these interfaces from generation.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface IGreeter
-            {
-                string Greet(string name);
-                string Name { get; set; }
-                event System.Action Tick;
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    TUnit.Mocks.Mock.Of<IGreeter>();
+                    TUnit.Mocks.Mock.Of<ExternalLib.IProtectedMember>();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IProtectedMember
+                {
+                    protected string Hidden { get; set; }
+
+                    string Describe();
                 }
             }
             """
@@ -162,24 +221,56 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
     }
 
     [Test]
-    public async Task Non_Public_Member_With_Default_Implementation_Does_Not_Report()
+    public async Task Cross_Assembly_Protected_Internal_Member_Does_Not_Report()
     {
-        // A member with a body is not the implementer's problem, so it never blocks mocking.
-        await Verifier.VerifyAnalyzerAsync(
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
             MockStub + """
-
-            public interface IWithDefault
-            {
-                protected string Helper() => "default";
-
-                string Describe();
-            }
 
             public class TestClass
             {
                 public void Test()
                 {
-                    TUnit.Mocks.Mock.Of<IWithDefault>();
+                    TUnit.Mocks.Mock.Of<ExternalLib.IProtectedInternalMember>();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IProtectedInternalMember
+                {
+                    protected internal string Hidden { get; set; }
+
+                    string Describe();
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Cross_Assembly_Internal_Member_With_Default_Implementation_Does_Not_Report()
+    {
+        // A member with a body is not the implementer's problem, so it never blocks mocking.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<ExternalLib.IWithDefault>();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public interface IWithDefault
+                {
+                    internal string Helper() => "default";
+
+                    string Describe();
                 }
             }
             """
@@ -205,6 +296,30 @@ public class InaccessibleInterfaceMemberMockAnalyzerTests
                 public void Test()
                 {
                     TUnit.Mocks.Mock.Of<IInternalMember>();
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Interface_With_Only_Public_Members_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public interface IGreeter
+            {
+                string Greet(string name);
+                string Name { get; set; }
+                event System.Action Tick;
+            }
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<IGreeter>();
                 }
             }
             """

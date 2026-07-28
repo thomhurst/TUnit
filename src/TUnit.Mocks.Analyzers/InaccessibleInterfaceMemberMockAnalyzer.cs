@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -34,44 +35,54 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (ResolveMockTarget(context, invocation) is not { TypeKind: TypeKind.Interface } interfaceType)
+        foreach (var target in ResolveMockTargets(context, invocation))
         {
-            return;
+            if (target.TypeKind != TypeKind.Interface)
+            {
+                continue;
+            }
+
+            var inaccessibleMember = FindInaccessibleAbstractMember(target, context.Compilation);
+
+            if (inaccessibleMember is null)
+            {
+                continue;
+            }
+
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    Rules.TM007_CannotMockInterfaceWithInaccessibleMember,
+                    invocation.GetLocation(),
+                    target.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                    inaccessibleMember.Name
+                )
+            );
         }
-
-        var inaccessibleMember = FindInaccessibleAbstractMember(interfaceType, context.Compilation);
-
-        if (inaccessibleMember is null)
-        {
-            return;
-        }
-
-        context.ReportDiagnostic(
-            Diagnostic.Create(
-                Rules.TM007_CannotMockInterfaceWithInaccessibleMember,
-                invocation.GetLocation(),
-                interfaceType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                inaccessibleMember.Name
-            )
-        );
     }
 
     /// <summary>
-    /// Resolves the mocked type from either entry point: the generic <c>Mock.Of&lt;T&gt;()</c>
-    /// form, or <c>T.Mock()</c>. The latter is matched syntactically as well as semantically —
-    /// when the generator declines to emit the mock there is no <c>Mock()</c> member to bind to,
-    /// which is exactly the case this diagnostic needs to explain.
+    /// Resolves the mocked type(s) from either entry point: the generic <c>Mock.Of&lt;T&gt;()</c>
+    /// form — including the multi-interface <c>Mock.Of&lt;T1, T2&gt;()</c> shape, where any type
+    /// argument makes the whole combo unmockable — or <c>T.Mock()</c>. The latter is matched
+    /// syntactically as well as semantically: when the generator declines to emit the mock there
+    /// is no <c>Mock()</c> member to bind to, which is exactly the case this diagnostic explains.
     /// </summary>
-    private static INamedTypeSymbol? ResolveMockTarget(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static IEnumerable<INamedTypeSymbol> ResolveMockTargets(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
     {
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
         if (symbolInfo.Symbol is IMethodSymbol methodSymbol && IsMockEntryPointMethod(methodSymbol))
         {
-            return methodSymbol.TypeArguments.Length == 1
-                ? methodSymbol.TypeArguments[0] as INamedTypeSymbol
-                : null;
+            return methodSymbol.TypeArguments.OfType<INamedTypeSymbol>();
         }
+
+        return ResolveStaticEntryPointTarget(context, invocation) is { } target
+            ? new[] { target }
+            : Enumerable.Empty<INamedTypeSymbol>();
+    }
+
+    private static INamedTypeSymbol? ResolveStaticEntryPointTarget(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    {
 
         if (invocation is not
             {
@@ -99,7 +110,10 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// Returns the first abstract member of the interface (or one of its base interfaces) that an
     /// implementer declared in this compilation could not access, or null when all of them are
-    /// reachable. Mirrors <c>InterfaceImplementability</c> in the generator.
+    /// reachable. Mirrors <c>InterfaceImplementability</c> in the generator, which delegates to
+    /// <c>MemberDiscovery.IsMemberAccessible</c> — keep the two in step. The analyzer and the
+    /// generator ship as separate assemblies with no shared project, so this is a deliberate
+    /// second copy of a deliberately small rule.
     /// </summary>
     private static ISymbol? FindInaccessibleAbstractMember(INamedTypeSymbol interfaceType, Compilation compilation)
     {
@@ -124,12 +138,35 @@ public class InaccessibleInterfaceMemberMockAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            if (!compilation.IsSymbolAccessibleWithin(member, compilation.Assembly))
+            if (!IsImplementableFrom(member, compilation.Assembly))
             {
                 return member;
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// True when a type declared in <paramref name="compilationAssembly"/> could provide this
+    /// interface member. Only <c>internal</c> and <c>private protected</c> are assembly-scoped;
+    /// <c>protected</c> and <c>protected internal</c> members are reachable from any assembly
+    /// through explicit interface implementation, so they must not be treated as blockers.
+    /// <c>Compilation.IsSymbolAccessibleWithin</c> is deliberately not used here: given an
+    /// assembly as the "within" context it reports <c>protected</c> as inaccessible, which is the
+    /// wrong question for an implementer.
+    /// </summary>
+    private static bool IsImplementableFrom(ISymbol member, IAssemblySymbol compilationAssembly)
+    {
+        if (member.DeclaredAccessibility is not (Accessibility.Internal or Accessibility.ProtectedAndInternal))
+        {
+            return true;
+        }
+
+        var declaringAssembly = member.ContainingAssembly;
+
+        return declaringAssembly is null
+            || SymbolEqualityComparer.Default.Equals(declaringAssembly, compilationAssembly)
+            || declaringAssembly.GivesAccessTo(compilationAssembly);
     }
 }

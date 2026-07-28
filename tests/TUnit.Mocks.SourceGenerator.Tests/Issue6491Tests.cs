@@ -33,6 +33,17 @@ public class Issue6491Tests : SnapshotTestBase
 
                 IInternalMemberInterface GetConverter();
             }
+
+            // protected / protected internal members are reachable from any assembly through
+            // explicit interface implementation, so these stay mockable.
+            public interface IProtectedMemberInterface
+            {
+                protected string Hidden { get; set; }
+
+                protected internal string AlsoHidden { get; }
+
+                string Describe();
+            }
         }
         """;
 
@@ -85,5 +96,29 @@ public class Issue6491Tests : SnapshotTestBase
         await Assert.That(generated.Any(g => g.Contains("IInternalMemberInterfaceMockImpl"))).IsFalse();
         // ...while sibling interfaces that *are* implementable still get their auto-mock factory.
         await Assert.That(generated.Any(g => g.Contains("IPublicConverterMockImpl"))).IsTrue();
+    }
+
+    [Test]
+    public async Task Interface_With_Protected_Members_Is_Still_Mockable()
+    {
+        // A protected (or protected internal) interface member is implementable from any assembly
+        // through explicit interface implementation, so it must not be mistaken for an
+        // assembly-gated one. Compilation.IsSymbolAccessibleWithin(member, assembly) reports these
+        // as inaccessible, which would silently drop the interface from generation.
+        var source = """
+            using TUnit.Mocks;
+
+            public class Test
+            {
+                public void Run()
+                {
+                    var protectedMembers = Mock.Of<ExternalLib.IProtectedMemberInterface>();
+                }
+            }
+            """;
+
+        var generated = RunGenerator(source, [CreateExternalAssemblyReference(ExternalLibrary)]);
+
+        await Assert.That(generated.Any(g => g.Contains("IProtectedMemberInterfaceMockImpl"))).IsTrue();
     }
 }

@@ -34,4 +34,34 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
 
         await test.RunAsync(CancellationToken.None);
     }
+
+    /// <summary>
+    /// Runs the analyzer against <paramref name="source"/> with <paramref name="librarySource"/>
+    /// compiled as a separate referenced assembly. Needed whenever the behaviour under test turns
+    /// on cross-assembly accessibility (<c>internal</c> members, InternalsVisibleTo), which a
+    /// single-compilation test can never exercise.
+    /// </summary>
+    public static async Task VerifyAnalyzerWithLibraryAsync(
+        [StringSyntax("c#-test")] string source,
+        [StringSyntax("c#-test")] string librarySource,
+        params DiagnosticResult[] expected)
+    {
+        const string libraryProjectName = "ExternalLib";
+
+        var test = new Test
+        {
+            TestCode = source,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
+        };
+
+        test.TestState.AdditionalProjects.Add(
+            libraryProjectName,
+            new ProjectState(libraryProjectName, LanguageNames.CSharp, "/lib/", "cs"));
+        test.TestState.AdditionalProjects[libraryProjectName].Sources.Add(("Library.cs", librarySource));
+        test.TestState.AdditionalProjectReferences.Add(libraryProjectName);
+
+        test.ExpectedDiagnostics.AddRange(expected);
+
+        await test.RunAsync(CancellationToken.None);
+    }
 }

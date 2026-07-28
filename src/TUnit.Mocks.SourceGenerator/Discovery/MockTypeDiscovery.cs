@@ -139,6 +139,11 @@ internal static class MockTypeDiscovery
                 return ImmutableArray<MockTypeModel>.Empty;
             if (additionalType.TypeKind != TypeKind.Interface)
                 return ImmutableArray<MockTypeModel>.Empty;
+            // The impl lists every additional interface in its base-type list, so one the
+            // compilation can't implement takes the whole combo down with it (CS0535) — the same
+            // reason BuildSingleTypeModel drops the primary. TM007 reports it at the call site.
+            if (!InterfaceImplementability.CanBeImplemented(additionalType, compilation))
+                return ImmutableArray<MockTypeModel>.Empty;
             additionalTypes.Add(additionalType);
         }
 

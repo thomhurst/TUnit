@@ -15,9 +15,18 @@ internal static class InterfaceImplementability
 {
     /// <summary>
     /// True when every abstract member the interface (and its base interfaces) requires an
-    /// implementer to provide is accessible from <paramref name="compilation"/>'s assembly.
-    /// Members with a default implementation are not the implementer's problem and are ignored.
+    /// implementer to provide is one the generated impl could declare. Members with a default
+    /// implementation are not the implementer's problem and are ignored.
     /// </summary>
+    /// <remarks>
+    /// Delegates to <see cref="MemberDiscovery.IsMemberAccessible"/>, the same rule that decides
+    /// which members reach the model: a required member that discovery drops is exactly a member
+    /// the impl will fail to implement. In particular <c>protected</c> and
+    /// <c>protected internal</c> interface members stay implementable — a class in any assembly
+    /// can satisfy them through explicit interface implementation — so only <c>internal</c> and
+    /// <c>private protected</c> members from another assembly (without InternalsVisibleTo), or a
+    /// member whose signature mentions an inaccessible type, make an interface unmockable.
+    /// </remarks>
     internal static bool CanBeImplemented(INamedTypeSymbol interfaceType, Compilation compilation)
     {
         if (interfaceType.TypeKind != TypeKind.Interface)
@@ -46,7 +55,7 @@ internal static class InterfaceImplementability
                 continue;
             }
 
-            if (!compilation.IsSymbolAccessibleWithin(member, compilation.Assembly))
+            if (!MemberDiscovery.IsMemberAccessible(member, compilation.Assembly))
             {
                 return false;
             }
