@@ -75,7 +75,11 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
 
         if (IsMockEntryPointMethod(methodSymbol))
         {
-            return methodSymbol.TypeArguments.Length == 1
+            // The multi-type overloads — Of<T1, T2>() through Of<T1, T2, T3, T4>() — return
+            // Mock<T1>: T1 is the type the impl subclasses, T2..T4 are interfaces layered on it,
+            // and MockTypeDiscovery reuses T1's constructors for the multi-type model. So the
+            // first type argument is the constructor-bearing target for every overload.
+            return methodSymbol.TypeArguments.Length >= 1
                 ? methodSymbol.TypeArguments[0] as INamedTypeSymbol
                 : null;
         }

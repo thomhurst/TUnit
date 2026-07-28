@@ -17,6 +17,7 @@ public class InaccessibleConstructorMockAnalyzerTests
             {
                 public static object Of<T>() => default!;
                 public static object Of<T>(int behavior) => default!;
+                public static object Of<T1, T2>() => default!;
                 public static object Wrap<T>(T instance) => default!;
             }
         }
@@ -38,6 +39,37 @@ public class InaccessibleConstructorMockAnalyzerTests
                 public void Test()
                 {
                     {|#0:TUnit.Mocks.Mock.Of<RuntimeProperties>()|};
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
+                .WithLocation(0)
+                .WithArguments("RuntimeProperties")
+        );
+    }
+
+    // Of<T1, T2>() returns Mock<T1>: T1 is the type the impl subclasses, and MockTypeDiscovery
+    // reuses T1's constructors for the multi-type model. Without this the generator silently
+    // skips generation and the call fails at runtime with "No mock factory registered" rather
+    // than at the call site.
+    [Test]
+    public async Task Multi_Type_Of_With_Inaccessible_Primary_Constructor_Reports_TM006()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public class RuntimeProperties
+            {
+                private RuntimeProperties(string name) { }
+            }
+
+            public interface ISomeInterface;
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<RuntimeProperties, ISomeInterface>()|};
                 }
             }
             """,
