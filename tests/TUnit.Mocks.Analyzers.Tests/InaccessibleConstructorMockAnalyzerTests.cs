@@ -108,6 +108,68 @@ public class InaccessibleConstructorMockAnalyzerTests
     }
 
     [Test]
+    public async Task Cross_Assembly_Internal_Constructor_Reports_TM006()
+    {
+        // The shape from the report: Azure's QueueRuntimeProperties exposes only an internal
+        // constructor, which is unreachable from a test assembly.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.QueueRuntimeProperties>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class QueueRuntimeProperties
+                {
+                    internal QueueRuntimeProperties(string name) { }
+
+                    public virtual string Name { get; } = "";
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
+                .WithLocation(0)
+                .WithArguments("QueueRuntimeProperties")
+        );
+    }
+
+    [Test]
+    public async Task Cross_Assembly_Public_Constructor_Does_Not_Report()
+    {
+        // Guards the parameter-type accessibility check against false positives.
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<ExternalLib.OpenService>();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public sealed class Options { }
+
+                public class OpenService
+                {
+                    public OpenService(Options options) { }
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
     public async Task Public_Constructor_Does_Not_Report()
     {
         await Verifier.VerifyAnalyzerAsync(

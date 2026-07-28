@@ -105,8 +105,12 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Mirrors the generator's constructor discovery: a generated subclass can chain to any
-    /// constructor that is not private, and not internal-without-access from another assembly.
+    /// Mirrors the generator's constructor discovery — <c>MemberDiscovery.DiscoverConstructors</c>
+    /// → <c>IsMemberAccessible</c> → <c>AreMemberSignatureTypesAccessible</c>. A generated subclass
+    /// can chain to a constructor only when the constructor itself is reachable AND every one of
+    /// its parameter types is: the generator drops a constructor whose signature mentions an
+    /// inaccessible type, and a target left with none is exactly the case this rule reports.
+    /// Keep the two in step; they live in separate assemblies with no shared project.
     /// Protected (and protected internal) constructors are reachable precisely because the
     /// generated impl derives from the target.
     /// </summary>
@@ -117,18 +121,64 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
 
     private static bool IsChainable(IMethodSymbol ctor, IAssemblySymbol compilationAssembly)
     {
+        // DiscoverConstructors rejects private constructors outright, same-assembly or not —
+        // a subclass can never chain to one.
         if (ctor.DeclaredAccessibility == Accessibility.Private)
         {
             return false;
         }
 
-        var declaringAssembly = ctor.ContainingAssembly;
+        return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilationAssembly)
+               && ctor.Parameters.All(p => IsTypeAccessible(p.Type, compilationAssembly));
+    }
+
+    /// <summary>
+    /// Whether a symbol with this accessibility, declared in <paramref name="declaringAssembly"/>,
+    /// is reachable from <paramref name="compilationAssembly"/>. Anything in the same assembly is;
+    /// across assemblies only <c>internal</c> and <c>private protected</c> are gated (and then only
+    /// without InternalsVisibleTo).
+    /// </summary>
+    private static bool IsAssemblyReachable(Accessibility accessibility, IAssemblySymbol? declaringAssembly, IAssemblySymbol compilationAssembly)
+    {
         if (declaringAssembly is null || SymbolEqualityComparer.Default.Equals(declaringAssembly, compilationAssembly))
         {
             return true;
         }
 
-        return ctor.DeclaredAccessibility is not (Accessibility.Internal or Accessibility.ProtectedAndInternal)
+        if (accessibility == Accessibility.Private)
+        {
+            return false;
+        }
+
+        return accessibility is not (Accessibility.Internal or Accessibility.ProtectedAndInternal)
                || declaringAssembly.GivesAccessTo(compilationAssembly);
+    }
+
+    private static bool IsTypeAccessible(ITypeSymbol type, IAssemblySymbol compilationAssembly)
+    {
+        // Type parameters are always accessible.
+        if (type is ITypeParameterSymbol)
+        {
+            return true;
+        }
+
+        // Pointer types can't appear in a generated override signature, even same-assembly.
+        if (type is IPointerTypeSymbol or IFunctionPointerTypeSymbol)
+        {
+            return false;
+        }
+
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return IsTypeAccessible(arrayType.ElementType, compilationAssembly);
+        }
+
+        if (!IsAssemblyReachable(type.DeclaredAccessibility, type.ContainingAssembly, compilationAssembly))
+        {
+            return false;
+        }
+
+        return type is not INamedTypeSymbol namedType
+               || namedType.TypeArguments.All(arg => IsTypeAccessible(arg, compilationAssembly));
     }
 }
