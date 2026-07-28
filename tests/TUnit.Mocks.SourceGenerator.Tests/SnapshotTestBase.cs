@@ -16,44 +16,35 @@ public abstract class SnapshotTestBase
 
     /// <summary>
     /// Returns the shared, lazily-loaded set of metadata references used by the test compilations
-    /// (current AppDomain assemblies plus the <c>ref/TUnit.Mocks.dll</c> if present). Derived
-    /// test classes should reuse this instead of re-discovering references per test invocation.
+    /// (current AppDomain assemblies, with exactly one TUnit.Mocks reference). Derived test classes
+    /// should reuse this instead of re-discovering references per test invocation.
     /// </summary>
     protected static IEnumerable<MetadataReference> GetCachedReferences() => _references.Value;
 
     private static List<PortableExecutableReference> LoadReferences()
     {
-        var refs = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
-            .Select(a => MetadataReference.CreateFromFile(a.Location))
-            .ToList();
+        // TUnit.Mocks must appear exactly once. Two references to it — the loaded assembly plus a
+        // second copy on disk — leave `Mock`/`GenerateMockAttribute` bound to an error type unless
+        // the two are byte-identical, and neither Roslyn nor the generator reports that: the
+        // generator simply finds no mock targets and emits only its post-init namespace stub, so
+        // every affected test fails as a bare snapshot mismatch. That is what a `ref/` copy of the
+        // netstandard2.0 build used to risk, and it broke the [assembly: GenerateMock] tests on
+        // the windows and macos CI jobs while ubuntu stayed green.
+        var mocksAssembly = typeof(global::TUnit.Mocks.Mock).Assembly;
 
-        // Add TUnit.Mocks.dll from the ref subfolder (netstandard2.0 build)
-        var refDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ref");
-        var mockDll = Path.Combine(refDir, "TUnit.Mocks.dll");
-        if (File.Exists(mockDll))
-        {
-            refs.Add(MetadataReference.CreateFromFile(mockDll));
-        }
-        else
-        {
-            // The ref copy comes from a <None Include> whose glob is expanded at evaluation time,
-            // so a clean build that evaluates this project before TUnit.Mocks/netstandard2.0 has
-            // produced output silently ships without it. Fall back to the assembly this project
-            // actually references. GetAssemblies() above can't be relied on for it either: it only
-            // returns assemblies the runtime has already faulted in, which makes the reference set
-            // depend on which test happened to run first.
-            refs.Add(MetadataReference.CreateFromFile(typeof(global::TUnit.Mocks.Mock).Assembly.Location));
-        }
-
-        // Without a TUnit.Mocks reference, Mock.Of<T>() and [assembly: GenerateMock] bind to
-        // nothing, the generator emits no mock, and every test fails as a confusing "expected
-        // output to contain ..." or snapshot mismatch. Fail on the actual cause instead.
-        if (!refs.Any(r => Path.GetFileName(r.FilePath ?? "").Equals("TUnit.Mocks.dll", StringComparison.OrdinalIgnoreCase)))
+        if (string.IsNullOrWhiteSpace(mocksAssembly.Location))
         {
             throw new InvalidOperationException(
                 "No TUnit.Mocks reference available to the test compilations — the generator would silently produce nothing.");
         }
+
+        var refs = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
+            .Where(a => a != mocksAssembly)
+            .Select(a => MetadataReference.CreateFromFile(a.Location))
+            .ToList();
+
+        refs.Add(MetadataReference.CreateFromFile(mocksAssembly.Location));
 
         return refs;
     }
@@ -303,7 +294,8 @@ public abstract class SnapshotTestBase
                 $"Snapshot mismatch for '{testName}'.\n" +
                 $"Received: {receivedPath}\n" +
                 $"Verified: {verifiedPath}\n" +
-                $"Update the .verified.txt file if this change is intentional.");
+                $"Update the .verified.txt file if this change is intentional.\n" +
+                $"{DescribeDifference(verified, generatedOutput)}");
         }
 
         // Clean up any leftover .received.txt on success
@@ -316,5 +308,72 @@ public abstract class SnapshotTestBase
     private static string NormalizeNewlines(string text)
     {
         return text.Replace("\r\n", "\n").Replace("\r", "\n");
+    }
+
+    /// <summary>
+    /// Renders the first divergence between the two snapshots inline in the failure message.
+    /// The <c>.received.txt</c> file is only useful to someone with the working tree in front of
+    /// them; a mismatch that reproduces on CI (or on one OS only) is otherwise undiagnosable from
+    /// the log alone.
+    /// </summary>
+    private static string DescribeDifference(string verified, string received)
+    {
+        const int ContextLines = 3;
+        const int MaxReportedLines = 40;
+
+        var verifiedLines = verified.Split('\n');
+        var receivedLines = received.Split('\n');
+
+        var firstDifference = 0;
+        while (firstDifference < verifiedLines.Length
+               && firstDifference < receivedLines.Length
+               && string.Equals(verifiedLines[firstDifference], receivedLines[firstDifference], StringComparison.Ordinal))
+        {
+            firstDifference++;
+        }
+
+        var report = new StringBuilder();
+        report.Append("Verified has ").Append(verifiedLines.Length)
+            .Append(" line(s), received has ").Append(receivedLines.Length)
+            .Append(" line(s); first difference at line ").Append(firstDifference + 1).Append('.')
+            .Append('\n');
+
+        var contextStart = Math.Max(0, firstDifference - ContextLines);
+        for (var i = contextStart; i < firstDifference; i++)
+        {
+            report.Append("  ").Append(verifiedLines[i]).Append('\n');
+        }
+
+        var reported = 0;
+        for (var i = firstDifference; i < Math.Max(verifiedLines.Length, receivedLines.Length) && reported < MaxReportedLines; i++)
+        {
+            var verifiedLine = i < verifiedLines.Length ? verifiedLines[i] : null;
+            var receivedLine = i < receivedLines.Length ? receivedLines[i] : null;
+
+            if (string.Equals(verifiedLine, receivedLine, StringComparison.Ordinal))
+            {
+                report.Append("  ").Append(verifiedLine).Append('\n');
+                continue;
+            }
+
+            if (verifiedLine is not null)
+            {
+                report.Append("- ").Append(verifiedLine).Append('\n');
+            }
+
+            if (receivedLine is not null)
+            {
+                report.Append("+ ").Append(receivedLine).Append('\n');
+            }
+
+            reported++;
+        }
+
+        if (reported == MaxReportedLines)
+        {
+            report.Append("  ... (truncated)\n");
+        }
+
+        return report.ToString();
     }
 }
