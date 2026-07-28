@@ -57,12 +57,27 @@ public class MockGenerator : IIncrementalGenerator
                 foreach (var m in mockOfTypes) set.Add(m);
                 foreach (var m in attributeTypes) set.Add(m);
                 foreach (var m in extensionInvocations) set.Add(m);
-                return set;
+
+                // Flag types that would emit the same generated names before anything is written:
+                // duplicate hint names abort the generator and take every mock in the compilation
+                // with them. See issue #6505.
+                return GeneratedNameCollisionDetector.Annotate(set);
             });
 
         // Step 3: Generate source for each unique type
         context.RegisterSourceOutput(distinctTypes, (spc, model) =>
         {
+            if (model.CollidesWith is not null)
+            {
+                spc.ReportDiagnostic(Diagnostic.Create(
+                    Diagnostics.TM008_GeneratedNameCollision,
+                    Location.None,
+                    model.FullyQualifiedName,
+                    MockImplBuilder.GetCompositeSafeName(model),
+                    model.CollidesWith));
+                return;
+            }
+
             if (model.IsSecondaryMemberSurface)
             {
                 // Pair model: the shared setup/verify surface for one additional interface of a

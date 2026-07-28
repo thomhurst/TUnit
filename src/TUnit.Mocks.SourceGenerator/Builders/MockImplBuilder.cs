@@ -1725,40 +1725,7 @@ internal static class MockImplBuilder
         => name.StartsWith("global::") ? name.Substring("global::".Length) : name;
 
     private static string SanitizeIdentifier(string name)
-    {
-        name = name.Replace("global::", "");
-
-        var sb = new System.Text.StringBuilder(name.Length);
-        var lastWasUnderscore = false;
-
-        foreach (var c in name)
-        {
-            if (c == ' ')
-                continue;
-
-            if (char.IsLetterOrDigit(c) || c == '_')
-            {
-                if (c == '_')
-                {
-                    if (lastWasUnderscore)
-                        continue;
-                    lastWasUnderscore = true;
-                }
-                else
-                {
-                    lastWasUnderscore = false;
-                }
-                sb.Append(c);
-            }
-            else if (!lastWasUnderscore)
-            {
-                sb.Append('_');
-                lastWasUnderscore = true;
-            }
-        }
-
-        return sb.ToString();
-    }
+        => IdentifierEscaping.SanitizeIdentifier(name);
 
     /// <summary>
     /// Root namespace for fallback-mode mock emission, used when the original namespace

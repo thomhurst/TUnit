@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace TUnit.Mocks.SourceGenerator;
@@ -26,4 +27,52 @@ internal static class IdentifierEscaping
     // interface implementation matching against the source-declared member name.
     internal static string EscapeIdentifier(string name) =>
         SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
+
+    /// <summary>
+    /// Turns a type name (fully qualified, or a bare name with generic arguments) into a single
+    /// C# identifier, used for generated type names and <c>AddSource</c> hint names.
+    /// <para>
+    /// The mapping must be injective: a hint-name clash makes Roslyn drop the generated sources
+    /// for <em>both</em> types with no diagnostic, so the user only ever sees the downstream
+    /// CS1061/CS0117 from the missing surface. Every literal <c>_</c> is therefore doubled before
+    /// separators become <c>_</c>, so a single underscore in the result always came from a
+    /// separator. Without that, <c>A_B.IFoo</c> and <c>A.B.IFoo</c> both produced
+    /// <c>A_B_IFoo</c> — see issue #6505.
+    /// </para>
+    /// </summary>
+    internal static string SanitizeIdentifier(string name)
+    {
+        name = name.Replace("global::", "");
+
+        var sb = new StringBuilder(name.Length);
+        var lastWasSeparator = false;
+
+        foreach (var c in name)
+        {
+            if (c == ' ')
+            {
+                continue;
+            }
+
+            if (c == '_')
+            {
+                sb.Append("__");
+                lastWasSeparator = false;
+            }
+            else if (char.IsLetterOrDigit(c))
+            {
+                sb.Append(c);
+                lastWasSeparator = false;
+            }
+            else if (!lastWasSeparator)
+            {
+                // Runs of separators still collapse to one '_' ("IFoo<T>" -> "IFoo_T_"); only the
+                // separator/underscore distinction has to survive.
+                sb.Append('_');
+                lastWasSeparator = true;
+            }
+        }
+
+        return sb.ToString();
+    }
 }

@@ -64,6 +64,15 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     public string Visibility => IsPublic ? "public" : "internal";
 
     /// <summary>
+    /// Set by <see cref="Discovery.GeneratedNameCollisionDetector"/> when another mocked type in
+    /// the same compilation sanitizes to the same generated name (see issue #6505). Generation is
+    /// skipped and TM008 is reported, because emitting both would give Roslyn duplicate hint names
+    /// — which silently discards every mock in the compilation. Holds the other type's fully
+    /// qualified name (comma separated when more than one collides).
+    /// </summary>
+    public string? CollidesWith { get; init; }
+
+    /// <summary>
     /// True for a class target that exposes no constructor the generated impl could chain to.
     /// The impl derives from the target, so with every constructor private (or cross-assembly
     /// internal) it cannot be subclassed at all — emitting the impl would produce a bare CS1729
@@ -98,6 +107,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             && Constructors.Equals(other.Constructors)
             && HasStaticAbstractMembers == other.HasStaticAbstractMembers
             && IsSecondaryMemberSurface == other.IsSecondaryMemberSurface
+            && CollidesWith == other.CollidesWith
             && SecondaryMemberIdMaps.Equals(other.SecondaryMemberIdMaps);
     }
 
@@ -120,6 +130,7 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
             hash = hash * 31 + AdditionalInterfaceNames.GetHashCode();
             hash = hash * 31 + HasStaticAbstractMembers.GetHashCode();
             hash = hash * 31 + IsSecondaryMemberSurface.GetHashCode();
+            hash = hash * 31 + (CollidesWith?.GetHashCode() ?? 0);
             hash = hash * 31 + SecondaryMemberIdMaps.GetHashCode();
             return hash;
         }
