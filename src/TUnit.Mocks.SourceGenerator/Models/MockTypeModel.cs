@@ -63,6 +63,18 @@ internal sealed record MockTypeModel : IEquatable<MockTypeModel>
     /// <summary>The C# visibility keyword to emit on generated wrapper/extension types.</summary>
     public string Visibility => IsPublic ? "public" : "internal";
 
+    /// <summary>
+    /// True for a class target that exposes no constructor the generated impl could chain to.
+    /// The impl derives from the target, so with every constructor private (or cross-assembly
+    /// internal) it cannot be subclassed at all — emitting the impl would produce a bare CS1729
+    /// on generated code. Generation is skipped and TM006 is reported at the call site instead.
+    /// <see cref="Constructors"/> is populated with exactly the accessible constructors, and only
+    /// for class targets, so an empty array on a class model means "none accessible".
+    /// See issue #6493.
+    /// </summary>
+    public bool LacksAccessibleConstructor
+        => IsPartialMock && !IsInterface && !IsDelegateType && Constructors.Length == 0;
+
     public bool Equals(MockTypeModel? other)
     {
         if (other is null) return false;
