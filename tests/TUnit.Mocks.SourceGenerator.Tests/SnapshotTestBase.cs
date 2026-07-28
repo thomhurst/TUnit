@@ -90,6 +90,41 @@ public abstract class SnapshotTestBase
             .ToArray();
     }
 
+    /// <summary>
+    /// Runs the MockGenerator and returns its diagnostics alongside the generated files. Unlike
+    /// <see cref="RunGenerator"/> this does not throw on generator errors — use it when the
+    /// diagnostic is what the test is about.
+    /// </summary>
+    protected static (string[] Sources, IReadOnlyList<Diagnostic> Diagnostics) RunGeneratorForDiagnostics(
+        string source,
+        IEnumerable<MetadataReference>? additionalReferences = null)
+    {
+        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
+        var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
+
+        IEnumerable<MetadataReference> refs = additionalReferences is null
+            ? _references.Value
+            : _references.Value.Concat(additionalReferences);
+
+        var compilation = CSharpCompilation.Create(
+            "TestAssembly",
+            [syntaxTree],
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        ).WithReferences(refs);
+
+        var generator = new MockGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
+
+        var runResult = driver.RunGenerators(compilation).GetRunResult();
+
+        var sources = runResult.GeneratedTrees
+            .OrderBy(t => GetGeneratedTreeSortKey(t.FilePath), StringComparer.Ordinal)
+            .Select(t => t.GetText().ToString())
+            .ToArray();
+
+        return (sources, runResult.Diagnostics);
+    }
+
     private static string GetGeneratedTreeSortKey(string filePath)
     {
         var normalizedPath = filePath.Replace('\\', '/');

@@ -10,6 +10,8 @@
     <PackageId>TUnit.Mocks.SourceGenerator</PackageId>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <IsPackable>false</IsPackable>
+    <!-- Matches TUnit.Mocks.Analyzers: TM diagnostics are not release-tracked. -->
+    <NoWarn>RS2008</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
