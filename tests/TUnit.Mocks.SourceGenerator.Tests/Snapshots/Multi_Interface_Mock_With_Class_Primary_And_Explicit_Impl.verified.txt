@@ -64,28 +64,31 @@ file static class DataContext_IInfraPartialMockFactory
 #pragma warning disable
 #nullable enable
 
-public static class DataContext_IInfra_MockMemberExtensions
+namespace TUnit.Mocks.Generated
 {
-    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    internal static int __Id(global::TUnit.Mocks.MockEngine<global::DataContext> engine, int localId)
+    public static class DataContext_IInfra_MockMemberExtensions
     {
-        if (!engine.TryGetSecondaryMemberId(typeof(global::IInfra), localId, out var memberId))
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        internal static int __Id(global::TUnit.Mocks.MockEngine<global::DataContext> engine, int localId)
         {
-            throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof(global::IInfra))
-                ? "Member #" + localId + " of 'IInfra' has no setup mapping on this mock instance — it is not part of this combo's configurable surface."
-                : "This mock was not created with 'IInfra' as a secondary interface. Create it with Mock.Of<DataContext, IInfra>() to configure its members.");
-        }
-        return memberId;
-    }
-
-    extension(global::TUnit.Mocks.Mock<global::DataContext> mock)
-    {
-        public global::TUnit.Mocks.PropertyMockCall<string> Instance
-        {
-            get
+            if (!engine.TryGetSecondaryMemberId(typeof(global::IInfra), localId, out var memberId))
             {
-                var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
-                return new(__engine, __Id(__engine, 0), 0, "Instance", true, false);
+                throw new global::System.InvalidOperationException(engine.HasSecondaryInterface(typeof(global::IInfra))
+                    ? "Member #" + localId + " of 'IInfra' has no setup mapping on this mock instance — it is not part of this combo's configurable surface."
+                    : "This mock was not created with 'IInfra' as a secondary interface. Create it with Mock.Of<DataContext, IInfra>() to configure its members.");
+            }
+            return memberId;
+        }
+
+        extension(global::TUnit.Mocks.Mock<global::DataContext> mock)
+        {
+            public global::TUnit.Mocks.PropertyMockCall<string> Instance
+            {
+                get
+                {
+                    var __engine = global::TUnit.Mocks.MockRegistry.GetEngine(mock);
+                    return new(__engine, __Id(__engine, 0), 0, "Instance", true, false);
+                }
             }
         }
     }
@@ -152,56 +155,59 @@ file static class DataContextPartialMockFactory
 #pragma warning disable
 #nullable enable
 
-public static class DataContext_MockMemberExtensions
+namespace TUnit.Mocks.Generated
 {
-    public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+    public static class DataContext_MockMemberExtensions
     {
-        var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
-        return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetName", matchers);
-    }
-
-    #if NET9_0_OR_GREATER
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void Reset(this global::TUnit.Mocks.Mock<global::DataContext> mock)
-        => global::TUnit.Mocks.Mock.Reset(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyAll(this global::TUnit.Mocks.Mock<global::DataContext> mock)
-        => global::TUnit.Mocks.Mock.VerifyAll(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::DataContext> mock)
-        => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::DataContext> mock)
-        => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::DataContext> mock)
-        => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void SetState(this global::TUnit.Mocks.Mock<global::DataContext> mock, string? stateName)
-        => global::TUnit.Mocks.Mock.SetState(mock, stateName);
-
-    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-    public static void InState(this global::TUnit.Mocks.Mock<global::DataContext> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::DataContext>> configure)
-        => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
-
-    extension(global::TUnit.Mocks.Mock<global::DataContext> mock)
-    {
-        public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
-
-        public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
-
-        public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+        public static global::TUnit.Mocks.MockMethodCall<string> GetName(this global::TUnit.Mocks.Mock<global::DataContext> mock)
         {
-            get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
-            set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();
+            return new global::TUnit.Mocks.MockMethodCall<string>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetName", matchers);
         }
+
+        #if NET9_0_OR_GREATER
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void Reset(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+            => global::TUnit.Mocks.Mock.Reset(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyAll(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+            => global::TUnit.Mocks.Mock.VerifyAll(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+            => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+            => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::DataContext> mock)
+            => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void SetState(this global::TUnit.Mocks.Mock<global::DataContext> mock, string? stateName)
+            => global::TUnit.Mocks.Mock.SetState(mock, stateName);
+
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public static void InState(this global::TUnit.Mocks.Mock<global::DataContext> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::DataContext>> configure)
+            => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
+
+        extension(global::TUnit.Mocks.Mock<global::DataContext> mock)
+        {
+            public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
+
+            public global::TUnit.Mocks.MockBehavior Behavior => global::TUnit.Mocks.Mock.Behavior(mock);
+
+            public global::TUnit.Mocks.IDefaultValueProvider? DefaultValueProvider
+            {
+                get => global::TUnit.Mocks.Mock.GetDefaultValueProvider(mock);
+                set => global::TUnit.Mocks.Mock.SetDefaultValueProvider(mock, value);
+            }
+        }
+        #endif
     }
-    #endif
 }
 
 

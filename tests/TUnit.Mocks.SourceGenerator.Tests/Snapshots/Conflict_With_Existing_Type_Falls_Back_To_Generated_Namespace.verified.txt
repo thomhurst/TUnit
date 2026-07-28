@@ -83,7 +83,7 @@ namespace TUnit.Mocks.Generated.MyApp
 #pragma warning disable
 #nullable enable
 
-namespace TUnit.Mocks.Generated.MyApp
+namespace TUnit.Mocks.Generated
 {
     public static class MyApp_IGreeter_MockMemberExtensions
     {

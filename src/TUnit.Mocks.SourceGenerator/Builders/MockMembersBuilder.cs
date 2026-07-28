@@ -80,7 +80,10 @@ internal static class MockMembersBuilder
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
 
-        using (writer.OptionalNamespaceBlock(mockNamespace))
+        // The setup/verify surface goes in the globally-imported namespace rather than beside the
+        // mocked type — an extension member is invisible unless its namespace is imported, which
+        // silently hid every setup for types from a namespace the test hadn't `using`'d (#6494).
+        using (writer.OptionalNamespaceBlock(MockImplBuilder.MemberSurfaceNamespace))
         {
             // Extension methods class
             using (writer.Block($"{model.Visibility} static class {safeName}_MockMemberExtensions"))
@@ -166,17 +169,47 @@ internal static class MockMembersBuilder
             // Generate unified sealed classes for qualifying methods
             var instanceEventArray = new EquatableArray<MockEventModel>(
                 instanceEvents.ToImmutableArray());
-            foreach (var method in model.Methods)
+            foreach (var method in WrappedMethods(model, hasEvents))
             {
-                if (method.ExplicitInterfaceName is not null && !method.IsStaticAbstract) continue;
-                if (!ShouldGenerateTypedWrapper(method, model, hasEvents)) continue;
                 writer.AppendLine();
-                EmitNonSpanRefStructSetterDelegates(writer, model, method);
                 GenerateUnifiedSealedClass(writer, method, safeName, instanceEventArray, model.Visibility, model);
             }
         }
 
+        // The out/ref setter delegates stay beside the mocked type: the generated impl references
+        // them through GetGlobalMockNamespacePrefix, and they are named from the type's short name.
+        EmitOutRefSetterDelegateNamespace(writer, model, hasEvents, mockNamespace);
+
         return writer.ToString();
+    }
+
+    /// <summary>Methods that get a typed call wrapper — the shared filter for both emission passes.</summary>
+    private static IEnumerable<MockMemberModel> WrappedMethods(MockTypeModel model, bool hasEvents)
+        => model.Methods.Where(m =>
+            (m.ExplicitInterfaceName is null || m.IsStaticAbstract)
+            && ShouldGenerateTypedWrapper(m, model, hasEvents));
+
+    private static void EmitOutRefSetterDelegateNamespace(CodeWriter writer, MockTypeModel model, bool hasEvents, string mockNamespace)
+    {
+        var methodsNeedingDelegates = WrappedMethods(model, hasEvents)
+            .Where(m => MockImplBuilder.SupportsClosedRefStructSetter(model, m)
+                     && m.Parameters.Any(p => p.Direction is ParameterDirection.Out or ParameterDirection.Ref
+                                           && p.IsNonSpanRefStruct))
+            .ToList();
+
+        if (methodsNeedingDelegates.Count == 0)
+        {
+            return;
+        }
+
+        writer.AppendLine();
+        using (writer.OptionalNamespaceBlock(mockNamespace))
+        {
+            foreach (var method in methodsNeedingDelegates)
+            {
+                EmitNonSpanRefStructSetterDelegates(writer, model, method);
+            }
+        }
     }
 
     /// <summary>

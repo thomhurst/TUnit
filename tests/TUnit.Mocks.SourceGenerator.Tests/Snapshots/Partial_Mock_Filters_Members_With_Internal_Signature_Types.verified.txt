@@ -59,7 +59,7 @@ namespace ExternalLib
 #pragma warning disable
 #nullable enable
 
-namespace ExternalLib
+namespace TUnit.Mocks.Generated
 {
     public static class ExternalLib_ServiceClient_MockMemberExtensions
     {

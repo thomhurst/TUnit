@@ -635,6 +635,43 @@ public class MockGeneratorTests : SnapshotTestBase
         return VerifyGeneratorOutput(source);
     }
 
+    // A non-span ref struct out/ref parameter is the one construct that emits a namespace-scoped
+    // delegate, and that delegate stays beside the mocked type while the setup surface moved to
+    // TUnit.Mocks.Generated (#6494) — the impl references it through GetGlobalMockNamespacePrefix.
+    // No other snapshot exercises the delegate emission path.
+    [Test]
+    public Task Interface_With_NonSpan_RefStruct_Out_Ref_Parameters()
+    {
+        var source = """
+            using System;
+            using TUnit.Mocks;
+
+            namespace Sandbox
+            {
+                public ref struct Cursor
+                {
+                    public int Position;
+                }
+
+                public interface ICursorParser
+                {
+                    bool TryRead(string input, out Cursor cursor);
+                    void Advance(ref Cursor cursor);
+                }
+
+                public class TestUsage
+                {
+                    void M()
+                    {
+                        var mock = Mock.Of<ICursorParser>();
+                    }
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
     [Test]
     public Task Interface_With_Mixed_Members()
     {

@@ -87,7 +87,7 @@ namespace Sandbox
 #pragma warning disable
 #nullable enable
 
-namespace Sandbox
+namespace TUnit.Mocks.Generated
 {
     public static class Sandbox_IFoo_T__MockMemberExtensions
     {

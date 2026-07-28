@@ -1767,6 +1767,17 @@ internal static class MockImplBuilder
     /// </summary>
     internal const string FallbackNamespaceRoot = "TUnit.Mocks.Generated";
 
+    /// <summary>
+    /// Namespace for the user-facing setup/verify surface (the <c>_MockMemberExtensions</c> and
+    /// <c>_MockEventsExtensions</c> classes and the call wrappers they return). Extension members
+    /// are only found when their containing namespace is imported, and this one is a global using
+    /// (see TUnit.Mocks.targets) — emitting them beside the mocked type instead would silently hide
+    /// every setup unless the caller also imported that library's namespace. See issue #6494.
+    /// Generated type names here are derived from the fully qualified type name, so two mocked
+    /// types sharing a short name across namespaces stay distinct.
+    /// </summary>
+    internal const string MemberSurfaceNamespace = FallbackNamespaceRoot;
+
     internal static bool IsGlobalNamespace(string ns)
         => string.IsNullOrEmpty(ns) || ns == "<global namespace>";
 
