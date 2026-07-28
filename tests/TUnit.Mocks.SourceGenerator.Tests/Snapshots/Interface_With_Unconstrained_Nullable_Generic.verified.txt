@@ -228,6 +228,11 @@ public sealed class IFoo_DoSomethingAsync_M0_MockCall<T> : global::TUnit.Mocks.V
     public IFoo_DoSomethingAsync_M0_MockCall<T> ReturnsAsync(global::System.Threading.Tasks.Task<T?> task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IFoo_DoSomethingAsync_M0_MockCall<T> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #if NET9_0_OR_GREATER
+    /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IFoo_DoSomethingAsync_M0_MockCall<T> Returns(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #endif
 
     // ICallVerification
     /// <inheritdoc />

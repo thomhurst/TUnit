@@ -299,6 +299,11 @@ public sealed class IAsyncService_GetValueAsync_M0_MockCall : global::TUnit.Mock
     public IAsyncService_GetValueAsync_M0_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<string> task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IAsyncService_GetValueAsync_M0_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<string>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #if NET9_0_OR_GREATER
+    /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_GetValueAsync_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<string>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #endif
 
     /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
     public IAsyncService_GetValueAsync_M0_MockCall Returns(global::System.Func<string, string> factory)
@@ -313,6 +318,16 @@ public sealed class IAsyncService_GetValueAsync_M0_MockCall : global::TUnit.Mock
         EnsureSetup().ReturnsRaw(args => (object?)factory((string)args[0]!));
         return this;
     }
+
+    #if NET9_0_OR_GREATER
+    /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_GetValueAsync_M0_MockCall Returns(global::System.Func<string, global::System.Threading.Tasks.Task<string>> factory)
+    {
+        EnsureSetup().ReturnsRaw(args => (object?)factory((string)args[0]!));
+        return this;
+    }
+    #endif
 
     /// <summary>Execute a typed callback using the actual method parameters.</summary>
     public IAsyncService_GetValueAsync_M0_MockCall Callback(global::System.Action<string> callback)
@@ -398,6 +413,11 @@ public sealed class IAsyncService_DoWorkAsync_M1_MockCall : global::TUnit.Mocks.
     public IAsyncService_DoWorkAsync_M1_MockCall ReturnsAsync(global::System.Threading.Tasks.Task task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IAsyncService_DoWorkAsync_M1_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #if NET9_0_OR_GREATER
+    /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_DoWorkAsync_M1_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #endif
 
     // ICallVerification
     /// <inheritdoc />
@@ -474,6 +494,11 @@ public sealed class IAsyncService_ComputeAsync_M2_MockCall : global::TUnit.Mocks
     public IAsyncService_ComputeAsync_M2_MockCall ReturnsAsync(global::System.Threading.Tasks.ValueTask<int> task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built ValueTask from a factory, invoked on each call.</summary>
     public IAsyncService_ComputeAsync_M2_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.ValueTask<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #if NET9_0_OR_GREATER
+    /// <summary>Return a ValueTask from a factory, invoked on each call. The ValueTask is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_ComputeAsync_M2_MockCall Returns(global::System.Func<global::System.Threading.Tasks.ValueTask<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #endif
 
     /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
     public IAsyncService_ComputeAsync_M2_MockCall Returns(global::System.Func<int, int> factory)
@@ -488,6 +513,16 @@ public sealed class IAsyncService_ComputeAsync_M2_MockCall : global::TUnit.Mocks
         EnsureSetup().ReturnsRaw(args => (object?)factory((int)args[0]!));
         return this;
     }
+
+    #if NET9_0_OR_GREATER
+    /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_ComputeAsync_M2_MockCall Returns(global::System.Func<int, global::System.Threading.Tasks.ValueTask<int>> factory)
+    {
+        EnsureSetup().ReturnsRaw(args => (object?)factory((int)args[0]!));
+        return this;
+    }
+    #endif
 
     /// <summary>Execute a typed callback using the actual method parameters.</summary>
     public IAsyncService_ComputeAsync_M2_MockCall Callback(global::System.Action<int> callback)
@@ -575,6 +610,11 @@ public sealed class IAsyncService_InitializeAsync_M3_MockCall : global::TUnit.Mo
     public IAsyncService_InitializeAsync_M3_MockCall ReturnsAsync(global::System.Threading.Tasks.ValueTask task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built ValueTask from a factory, invoked on each call.</summary>
     public IAsyncService_InitializeAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.ValueTask> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #if NET9_0_OR_GREATER
+    /// <summary>Return a ValueTask from a factory, invoked on each call. The ValueTask is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+    public IAsyncService_InitializeAsync_M3_MockCall Returns(global::System.Func<global::System.Threading.Tasks.ValueTask> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    #endif
 
     /// <summary>Execute a typed callback using the actual method parameters.</summary>
     public IAsyncService_InitializeAsync_M3_MockCall Callback(global::System.Action<global::System.Threading.CancellationToken> callback)
