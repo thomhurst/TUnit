@@ -318,6 +318,11 @@ namespace TUnit.Mocks.Generated
         public IService_GetAsync_M3_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<string> task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
         public IService_GetAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<string>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        #if NET9_0_OR_GREATER
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public IService_GetAsync_M3_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<string>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        #endif
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
         public IService_GetAsync_M3_MockCall Returns(global::System.Func<int, string> factory)
@@ -332,6 +337,16 @@ namespace TUnit.Mocks.Generated
             EnsureSetup().ReturnsRaw(args => (object?)factory((int)args[0]!));
             return this;
         }
+
+        #if NET9_0_OR_GREATER
+        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+        [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
+        public IService_GetAsync_M3_MockCall Returns(global::System.Func<int, global::System.Threading.Tasks.Task<string>> factory)
+        {
+            EnsureSetup().ReturnsRaw(args => (object?)factory((int)args[0]!));
+            return this;
+        }
+        #endif
 
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public IService_GetAsync_M3_MockCall Callback(global::System.Action<int> callback)
