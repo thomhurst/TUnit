@@ -613,6 +613,8 @@ public sealed class IFoo_GetAsync_M3_MockCall : global::TUnit.Mocks.Verification
     public IFoo_GetAsync_M3_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<string?> task) { EnsureSetup().ReturnsRaw(task); return this; }
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IFoo_GetAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<string?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+    /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    public IFoo_GetAsync_M3_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<string?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
     /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
     public IFoo_GetAsync_M3_MockCall Returns(global::System.Func<string?, string?> factory)
@@ -623,6 +625,13 @@ public sealed class IFoo_GetAsync_M3_MockCall : global::TUnit.Mocks.Verification
 
     /// <summary>Configure a typed computed async return value using the actual method parameters.</summary>
     public IFoo_GetAsync_M3_MockCall ReturnsAsync(global::System.Func<string?, global::System.Threading.Tasks.Task<string?>> factory)
+    {
+        EnsureSetup().ReturnsRaw(args => (object?)factory((string?)args[0]));
+        return this;
+    }
+
+    /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+    public IFoo_GetAsync_M3_MockCall Returns(global::System.Func<string?, global::System.Threading.Tasks.Task<string?>> factory)
     {
         EnsureSetup().ReturnsRaw(args => (object?)factory((string?)args[0]));
         return this;
