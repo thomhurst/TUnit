@@ -75,6 +75,14 @@ public class MockGenerator : IIncrementalGenerator
                 // Delegate mock: generate members and delegate factory (no impl class)
                 GenerateDelegateMock(spc, model);
             }
+            else if (model.LacksAccessibleConstructor)
+            {
+                // Unsubclassable class (every constructor private / cross-assembly internal).
+                // Emit only the static Mock() entry point so the call site still binds and the
+                // TM006 analyzer diagnostic is the single error the user sees, instead of a
+                // CS1729 pointing into generated code. See issue #6493.
+                GenerateUnconstructableClassStub(spc, model);
+            }
             else if (model.IsWrapMock)
             {
                 // Wrap mock: generate wrap impl, wrap factory, plus members
@@ -130,6 +138,15 @@ public class MockGenerator : IIncrementalGenerator
             {
                 spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
             }
+        }
+    }
+
+    private static void GenerateUnconstructableClassStub(SourceProductionContext spc, MockTypeModel model)
+    {
+        var extensionSource = MockStaticExtensionBuilder.BuildForPartialMock(model);
+        if (!string.IsNullOrEmpty(extensionSource))
+        {
+            spc.AddSource($"{GetSafeFileName(model)}_MockStaticExtension.g.cs", extensionSource);
         }
     }
 

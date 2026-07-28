@@ -38,8 +38,8 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     /// <summary>
     /// Runs the analyzer against <paramref name="source"/> with <paramref name="librarySource"/>
     /// compiled as a separate referenced assembly. Needed whenever the behaviour under test turns
-    /// on cross-assembly accessibility (<c>internal</c> members, InternalsVisibleTo), which a
-    /// single-compilation test can never exercise.
+    /// on cross-assembly accessibility (<c>internal</c> members or types, InternalsVisibleTo),
+    /// which a single-compilation test can never exercise.
     /// </summary>
     public static async Task VerifyAnalyzerWithLibraryAsync(
         [StringSyntax("c#-test")] string source,

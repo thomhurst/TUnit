@@ -55,6 +55,16 @@ public static class Rules
         description: "Non-nullable value types can never be null, so Arg.IsNull<T>() will always return false and Arg.IsNotNull<T>() will always return true. Use the nullable form (e.g. int?) to match nullable value type parameters."
     );
 
+    public static readonly DiagnosticDescriptor TM006_CannotMockTypeWithoutAccessibleConstructor = new(
+        id: "TM006",
+        title: "Cannot mock type without an accessible constructor",
+        messageFormat: "Cannot mock '{0}' because it has no accessible constructor. Use a factory method or model-builder the library provides instead.",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "TUnit.Mocks generates a subclass to intercept calls, and every constructor of a subclass must chain to a base constructor. When all of the target's constructors are private (or internal in another assembly), no subclass can be declared, so the type cannot be mocked. Many libraries expose a factory for such types (e.g. Azure's ServiceBusModelFactory) — use that to build the value instead."
+    );
+
     public static readonly DiagnosticDescriptor TM007_CannotMockInterfaceWithInaccessibleMember = new(
         id: "TM007",
         title: "Cannot mock interface with an inaccessible member",
