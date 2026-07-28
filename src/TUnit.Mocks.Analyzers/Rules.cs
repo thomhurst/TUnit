@@ -54,4 +54,14 @@ public static class Rules
         isEnabledByDefault: true,
         description: "Non-nullable value types can never be null, so Arg.IsNull<T>() will always return false and Arg.IsNotNull<T>() will always return true. Use the nullable form (e.g. int?) to match nullable value type parameters."
     );
+
+    public static readonly DiagnosticDescriptor TM007_CannotMockInterfaceWithInaccessibleMember = new(
+        id: "TM007",
+        title: "Cannot mock interface with an inaccessible member",
+        messageFormat: "Cannot mock '{0}' because its member '{1}' is not accessible here and cannot be implemented.",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Since C# 8 an interface may declare non-public abstract members. No type outside the declaring assembly can implement those members, so the interface cannot be mocked — a generated implementation would fail with CS0535. Mock a different abstraction, or wrap the interface in one you own."
+    );
 }

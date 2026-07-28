@@ -945,6 +945,12 @@ internal static class MemberDiscovery
         if (IsInterfaceWithStaticAbstractMembers(effectiveReturnType))
             return null;
 
+        // Interfaces with abstract members this compilation can't access are never generated
+        // (CollectTransitiveInterfaceTypes skips them), so referencing their factory would be a
+        // CS0400 on a type that was deliberately left out. See issue #6491.
+        if (!InterfaceImplementability.CanBeImplemented(namedType.OriginalDefinition, compilation))
+            return null;
+
         var baseName = namedType.OriginalDefinition.GetGeneratedMockBaseName();
         var factoryNamespace = namedType.OriginalDefinition.GetGeneratedMockNamespace(compilation);
         var globalPrefix = Builders.MockImplBuilder.ToGlobalPrefix(factoryNamespace);

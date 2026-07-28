@@ -411,6 +411,15 @@ internal static class MockTypeDiscovery
 
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
+        // An interface with abstract members this compilation can't access (e.g. `internal`
+        // members declared in another assembly) cannot be implemented by any type we could emit,
+        // so generating a mock for it is guaranteed CS0535. Drop it — for a directly requested
+        // mock the TM007 analyzer reports the reason at the call site, and members returning it
+        // fall back to a plain default (GetAutoMockFactoryMethod applies the same rule).
+        // See issue #6491.
+        if (!InterfaceImplementability.CanBeImplemented(namedType, compilation))
+            return null;
+
         var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly, compilation);
 
         // Discover constructors for partial mocks of classes
