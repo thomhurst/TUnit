@@ -19,6 +19,15 @@ public interface ISlowService
     Task DoWorkAsync();
 }
 
+// A reference-typed async result: null and throw-expression lambda bodies convert to both T and
+// Task<T>, so the two Returns factory overloads must not become an ambiguity (CS0121).
+public interface IReferenceResultService
+{
+    Task<string?> GetNameAsync();
+
+    Task<string?> GetNameAsync(int id);
+}
+
 public class Issue6495Tests
 {
     private const int NeverInTestTimeMs = 30_000;
@@ -113,6 +122,55 @@ public class Issue6495Tests
         mock.GetValueAsync().Returns(() => 42);
 
         await Assert.That(await mock.Object.GetValueAsync()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Null_Returning_Lambda_Still_Binds_To_The_Synchronous_Factory()
+    {
+        // `() => null` converts to both Func<string?> and Func<Task<string?>>. The async overload
+        // is deprioritised, so this keeps its pre-existing meaning: null is the *value*, and the
+        // member still returns a completed task.
+        var mock = IReferenceResultService.Mock();
+        mock.GetNameAsync().Returns(() => null);
+
+        var call = mock.Object.GetNameAsync();
+
+        await Assert.That(call.IsCompleted).IsTrue();
+        await Assert.That(await call).IsNull();
+    }
+
+    [Test]
+    public async Task Throwing_Lambda_Still_Binds_To_The_Synchronous_Factory()
+    {
+        var mock = IReferenceResultService.Mock();
+        mock.GetNameAsync().Returns(() => throw new InvalidOperationException("boom"));
+
+        await Assert.That(async () => await mock.Object.GetNameAsync())
+            .Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Null_Returning_Typed_Lambda_Still_Binds_To_The_Synchronous_Factory()
+    {
+        var mock = IReferenceResultService.Mock();
+        mock.GetNameAsync(Arg.Any<int>()).Returns(id => null);
+
+        await Assert.That(await mock.Object.GetNameAsync(1)).IsNull();
+    }
+
+    [Test]
+    public async Task Async_Lambda_Still_Binds_On_A_Reference_Typed_Result()
+    {
+        var mock = IReferenceResultService.Mock();
+        mock.GetNameAsync().Returns(async () =>
+        {
+            await Task.Delay(NeverInTestTimeMs);
+            return "late";
+        });
+
+        var call = mock.Object.GetNameAsync();
+
+        await Assert.That(call.IsCompleted).IsFalse();
     }
 
     [Test]

@@ -203,6 +203,7 @@ public sealed class IDialogReference_GetReturnValueAsync_M0_MockCall<T> : global
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IDialogReference_GetReturnValueAsync_M0_MockCall<T> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
     /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public IDialogReference_GetReturnValueAsync_M0_MockCall<T> Returns(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
     // ICallVerification
@@ -590,6 +591,7 @@ public sealed class IDialogService_UpdateDialogAsync_M0_MockCall<TData> : global
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IDialogService_UpdateDialogAsync_M0_MockCall<TData> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<global::IDialogReference?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
     /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public IDialogService_UpdateDialogAsync_M0_MockCall<TData> Returns(global::System.Func<global::System.Threading.Tasks.Task<global::IDialogReference?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
     /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
@@ -607,6 +609,7 @@ public sealed class IDialogService_UpdateDialogAsync_M0_MockCall<TData> : global
     }
 
     /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public IDialogService_UpdateDialogAsync_M0_MockCall<TData> Returns(global::System.Func<string, global::DialogParameters<TData>, global::System.Threading.Tasks.Task<global::IDialogReference?>> factory)
     {
         EnsureSetup().ReturnsRaw(args => (object?)factory((string)args[0]!, (global::DialogParameters<TData>)args[1]!));
@@ -706,6 +709,7 @@ public sealed class IDialogService_ShowDialogAsync_M1_MockCall<TDialog> : global
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public IDialogService_ShowDialogAsync_M1_MockCall<TDialog> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<global::IDialogReference>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
     /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public IDialogService_ShowDialogAsync_M1_MockCall<TDialog> Returns(global::System.Func<global::System.Threading.Tasks.Task<global::IDialogReference>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
     /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
@@ -723,6 +727,7 @@ public sealed class IDialogService_ShowDialogAsync_M1_MockCall<TDialog> : global
     }
 
     /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public IDialogService_ShowDialogAsync_M1_MockCall<TDialog> Returns(global::System.Func<object, global::DialogParameters, global::System.Threading.Tasks.Task<global::IDialogReference>> factory)
     {
         EnsureSetup().ReturnsRaw(args => (object?)factory((object)args[0]!, (global::DialogParameters)args[1]!));

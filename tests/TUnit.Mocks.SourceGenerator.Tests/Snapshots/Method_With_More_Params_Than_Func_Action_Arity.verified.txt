@@ -205,6 +205,7 @@ public sealed class ILongMethodSignatures_SomeMethod_M0_MockCall : global::TUnit
     /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
     public ILongMethodSignatures_SomeMethod_M0_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
     /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
     public ILongMethodSignatures_SomeMethod_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
     // ICallVerification

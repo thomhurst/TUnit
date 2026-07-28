@@ -720,9 +720,11 @@ internal static class MockMembersBuilder
         }
 
         // Returns alias, so an `async (a, b) => ...` lambda binds here rather than failing against
-        // the synchronous typed overload with CS4010. See issue #6495.
+        // the synchronous typed overload with CS4010. Deprioritised for the same reason as the
+        // parameterless alias — see EmitReturnsAsyncOverloads. See issue #6495.
         writer.AppendLine();
         writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
+        writer.AppendLine(PriorityMinusOneAttribute);
         using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
         {
             writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
@@ -1791,7 +1793,14 @@ internal static class MockMembersBuilder
         // Same factory, spelled Returns — so an `async () => ...` lambda binds without the caller
         // having to know about ReturnsAsync (the synchronous Func<T> overload rejects it with
         // CS4010). The returned task is handed back as-is, so it stays pending. See issue #6495.
+        //
+        // Deprioritised against the synchronous Returns(Func<T>) sibling: when T is a reference
+        // type, a lambda whose body pins nothing — Returns(() => null), Returns(() => throw ...) —
+        // converts equally well to Func<T> and Func<Task<T>>, which would be CS0121. The priority
+        // breaks that tie back to the pre-existing synchronous meaning. A genuine async lambda is
+        // unaffected: it is not convertible to Func<T> at all, so it is the only candidate.
         writer.AppendLine($"/// <summary>Return a {taskLabel} from a factory, invoked on each call. The {taskLabel} is returned as-is, so an async factory stays pending until it completes.</summary>");
+        writer.AppendLine(PriorityMinusOneAttribute);
         writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
     }
 
