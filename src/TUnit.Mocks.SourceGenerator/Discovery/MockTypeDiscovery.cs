@@ -139,6 +139,11 @@ internal static class MockTypeDiscovery
                 return ImmutableArray<MockTypeModel>.Empty;
             if (additionalType.TypeKind != TypeKind.Interface)
                 return ImmutableArray<MockTypeModel>.Empty;
+            // The impl lists every additional interface in its base-type list, so one the
+            // compilation can't implement takes the whole combo down with it (CS0535) — the same
+            // reason BuildSingleTypeModel drops the primary. TM007 reports it at the call site.
+            if (!InterfaceImplementability.CanBeImplemented(additionalType, compilation))
+                return ImmutableArray<MockTypeModel>.Empty;
             additionalTypes.Add(additionalType);
         }
 
@@ -411,6 +416,15 @@ internal static class MockTypeDiscovery
 
     private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
     {
+        // An interface with abstract members this compilation can't access (e.g. `internal`
+        // members declared in another assembly) cannot be implemented by any type we could emit,
+        // so generating a mock for it is guaranteed CS0535. Drop it — for a directly requested
+        // mock the TM007 analyzer reports the reason at the call site, and members returning it
+        // fall back to a plain default (GetAutoMockFactoryMethod applies the same rule).
+        // See issue #6491.
+        if (!InterfaceImplementability.CanBeImplemented(namedType, compilation))
+            return null;
+
         var (methods, properties, events) = MemberDiscovery.DiscoverMembers(namedType, compilationAssembly, compilation);
 
         // Discover constructors for partial mocks of classes

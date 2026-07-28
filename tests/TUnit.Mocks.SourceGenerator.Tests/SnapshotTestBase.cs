@@ -35,6 +35,25 @@ public abstract class SnapshotTestBase
         {
             refs.Add(MetadataReference.CreateFromFile(mockDll));
         }
+        else
+        {
+            // The ref copy comes from a <None Include> whose glob is expanded at evaluation time,
+            // so a clean build that evaluates this project before TUnit.Mocks/netstandard2.0 has
+            // produced output silently ships without it. Fall back to the assembly this project
+            // actually references. GetAssemblies() above can't be relied on for it either: it only
+            // returns assemblies the runtime has already faulted in, which makes the reference set
+            // depend on which test happened to run first.
+            refs.Add(MetadataReference.CreateFromFile(typeof(global::TUnit.Mocks.Mock).Assembly.Location));
+        }
+
+        // Without a TUnit.Mocks reference, Mock.Of<T>() and [assembly: GenerateMock] bind to
+        // nothing, the generator emits no mock, and every test fails as a confusing "expected
+        // output to contain ..." or snapshot mismatch. Fail on the actual cause instead.
+        if (!refs.Any(r => Path.GetFileName(r.FilePath ?? "").Equals("TUnit.Mocks.dll", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                "No TUnit.Mocks reference available to the test compilations — the generator would silently produce nothing.");
+        }
 
         return refs;
     }
