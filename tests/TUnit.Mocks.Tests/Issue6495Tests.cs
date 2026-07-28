@@ -32,6 +32,11 @@ public class Issue6495Tests
 {
     private const int NeverInTestTimeMs = 30_000;
 
+#if NET9_0_OR_GREATER
+    // The async-factory Returns overload carries [OverloadResolutionPriority], which only reaches
+    // a consumer's compilation on net9.0+ — so the overload, and these tests, are net9.0+ only.
+    // net8.0 consumers keep ReturnsAsync, covered by ReturnsAsync_Factory_Is_Unchanged below.
+
     [Test]
     public async Task Returns_Async_Lambda_Stays_Pending_So_A_Timeout_Can_Win()
     {
@@ -115,6 +120,8 @@ public class Issue6495Tests
         await Assert.That(call.IsCompleted).IsFalse();
     }
 
+#endif
+
     [Test]
     public async Task Synchronous_Returns_Factory_Still_Works()
     {
@@ -158,6 +165,7 @@ public class Issue6495Tests
         await Assert.That(await mock.Object.GetNameAsync(1)).IsNull();
     }
 
+#if NET9_0_OR_GREATER
     [Test]
     public async Task Async_Lambda_Still_Binds_On_A_Reference_Typed_Result()
     {
@@ -172,6 +180,8 @@ public class Issue6495Tests
 
         await Assert.That(call.IsCompleted).IsFalse();
     }
+
+#endif
 
     [Test]
     public async Task ReturnsAsync_Factory_Is_Unchanged()
