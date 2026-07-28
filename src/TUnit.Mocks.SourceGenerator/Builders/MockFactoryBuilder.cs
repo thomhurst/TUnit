@@ -273,16 +273,21 @@ internal static class MockFactoryBuilder
                         var innerKeyword = innerFirst ? "if" : "else if";
                         innerFirst = false;
 
-                        // Build type-check conditions for each parameter
-                        // Reference types accept null via (arg is null or Type); value types use (arg is Type)
+                        // Build type-check conditions for each parameter.
+                        // Anything that can hold null (reference types, and Nullable<T>) accepts
+                        // null via (arg is null or Type); non-nullable value types use (arg is Type).
                         var typeChecks = new List<string>();
                         var castArgs = new List<string>();
                         for (int i = 0; i < ctor.Parameters.Length; i++)
                         {
                             var p = ctor.Parameters[i];
-                            typeChecks.Add(p.IsValueType
-                                ? $"constructorArgs[{i}] is {p.FullyQualifiedType}"
-                                : $"(constructorArgs[{i}] is null or {p.FullyQualifiedType})");
+                            var patternType = StripNullableAnnotation(p.FullyQualifiedType);
+                            // A trailing '?' on a value type means Nullable<T>, which boxes to
+                            // either null or a boxed T — so match the underlying type and null.
+                            var acceptsNull = !p.IsValueType || patternType.Length != p.FullyQualifiedType.Length;
+                            typeChecks.Add(acceptsNull
+                                ? $"(constructorArgs[{i}] is null or {patternType})"
+                                : $"constructorArgs[{i}] is {patternType}");
                             castArgs.Add($"({p.FullyQualifiedType})constructorArgs[{i}]");
                         }
                         var condition = string.Join(" && ", typeChecks);
@@ -307,4 +312,15 @@ internal static class MockFactoryBuilder
             writer.AppendLine($"throw new global::System.ArgumentException($\"No matching constructor found for type '{model.FullyQualifiedName}' with {{constructorArgs.Length}} argument(s).\");");
         }
     }
+
+    /// <summary>
+    /// Removes a single trailing <c>?</c> from a fully qualified type name. A nullable type is
+    /// never legal as the type of an <c>is</c> pattern (CS8116) — neither the annotated reference
+    /// form (<c>Uri?</c>) nor <c>Nullable&lt;T&gt;</c> (<c>int?</c>) — so constructor dispatch must
+    /// test against the underlying type. See issue #6492.
+    /// </summary>
+    private static string StripNullableAnnotation(string fullyQualifiedType)
+        => fullyQualifiedType.EndsWith("?", StringComparison.Ordinal)
+            ? fullyQualifiedType.Substring(0, fullyQualifiedType.Length - 1)
+            : fullyQualifiedType;
 }
