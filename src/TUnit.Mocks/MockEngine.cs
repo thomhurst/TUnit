@@ -139,8 +139,16 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
                     return autoMockFactory(Behavior);
                 }
 
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var mock);
-                return mock;
+                if (MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var mock))
+                {
+                    return mock;
+                }
+
+                // No source-generated factory — the type is either internal to another assembly
+                // (unnameable at compile time, #6514) or was simply never mocked. Fall back to a
+                // runtime-emitted stub where the platform allows it.
+                RuntimeStubs.RuntimeStubGenerator.TryCreateStub(typeof(TReturn), out var stub);
+                return stub;
             });
 
             if (autoMock is not null)
