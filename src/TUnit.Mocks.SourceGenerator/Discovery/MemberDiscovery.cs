@@ -915,6 +915,8 @@ internal static class MemberDiscovery
             DeclaringInterfaceName = declaringInterfaceName,
             NullableAnnotation = indexer.Type.NullableAnnotation.ToString(),
             SmartDefault = indexer.Type.GetSmartDefault(indexer.Type.IsNullableAnnotated()),
+            IsAbstractMember = indexer.IsAbstract,
+            IsVirtualMember = indexer.IsVirtual || indexer.IsOverride,
             OverrideAccessModifier = overrideAccessModifier,
             GetterAccessModifier = GetAccessorAccessModifier(indexer.GetMethod, overrideAccessModifier, compilationAssembly),
             SetterAccessModifier = GetAccessorAccessModifier(indexer.SetMethod, overrideAccessModifier, compilationAssembly),

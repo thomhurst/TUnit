@@ -2382,6 +2382,45 @@ public class MockGeneratorTests : SnapshotTestBase
         AssertNoGeneratedError(source, "CS0535");
     }
 
+    [Test]
+    public Task Abstract_Class_With_Abstract_Indexer()
+    {
+        // Regression #6516: an abstract indexer took the virtual-member path and emitted a
+        // `base[...]` fallback — CS0205, there is no base implementation. Abstract indexers must
+        // dispatch through the engine only, like abstract methods/properties (DbDataReader shape).
+        var source = """
+            using TUnit.Mocks;
+
+            public abstract class Repository
+            {
+                public abstract object this[int index] { get; }
+                public abstract object this[string key] { get; }
+                public abstract string this[int a, int b] { get; set; }
+                public virtual string this[bool flag] { get => "base"; set { } }
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Repository.Mock();
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        // Virtual indexer keeps its base fallback; abstract ones must not reference base at all.
+        AssertContains(output, "return base[flag];");
+        AssertDoesNotContain(output, "return base[index];");
+        AssertDoesNotContain(output, "return base[key];");
+        AssertDoesNotContain(output, "base[a, b]");
+
+        AssertNoGeneratedError(source, "CS0205");
+
+        return VerifyGeneratorOutput(source);
+    }
+
     private static void AssertNoGeneratedError(string source, string errorId)
     {
         foreach (var diagnostic in GetGeneratedCompilationErrors(source))
