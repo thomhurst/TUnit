@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Experimental (#6514 Tier 2). MSBuild task assembly loaded by `dotnet msbuild` only;
+         single-targeted at the SDK's own runtime. Not packed yet. -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <!-- Task dependencies (Mono.Cecil) must sit next to the task assembly so MSBuild's
+         assembly-dependency resolution can find them. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

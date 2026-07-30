@@ -27,6 +27,7 @@
     <Project Path="src/TUnit.Mocks/TUnit.Mocks.csproj" />
     <Project Path="src/TUnit.Mocks.Assertions/TUnit.Mocks.Assertions.csproj" />
     <Project Path="src/TUnit.Mocks.Http/TUnit.Mocks.Http.csproj" />
+    <Project Path="src/TUnit.Mocks.InternalsAccess.Tasks/TUnit.Mocks.InternalsAccess.Tasks.csproj" />
     <Project Path="src/TUnit.Mocks.Logging/TUnit.Mocks.Logging.csproj" />
     <Project Path="src/TUnit.Playwright/TUnit.Playwright.csproj" />
     <Project Path="src/TUnit.Reporting.Tool/TUnit.Reporting.Tool.csproj" />
@@ -77,6 +78,8 @@
     <Project Path="tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Analyzers.Tests/TUnit.Mocks.Analyzers.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Http.Tests/TUnit.Mocks.Http.Tests.csproj" />
+    <Project Path="tests/TUnit.Mocks.InternalsAccess.TargetLib/TUnit.Mocks.InternalsAccess.TargetLib.csproj" />
+    <Project Path="tests/TUnit.Mocks.InternalsAccess.Tests/TUnit.Mocks.InternalsAccess.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Logging.Tests/TUnit.Mocks.Logging.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.SourceGenerator.Tests/TUnit.Mocks.SourceGenerator.Tests.csproj" />
     <Project Path="tests/TUnit.Mocks.Tests/TUnit.Mocks.Tests.csproj" />
