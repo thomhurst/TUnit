@@ -238,3 +238,57 @@ mock.Invocations.Count; // 0 (history cleared)
 ```
 
 The `SetupAllProperties()` flag is preserved across resets.
+
+## Internals Access (experimental)
+
+Some SDKs route behavior through types that are `internal` to their own assembly — the classic
+example is `Microsoft.Azure.Functions.Worker`, whose `IInvocationFeatures.Get<T>()` is called
+inside the SDK with `T = IFunctionBindingsFeature`, a type your test assembly cannot even name.
+Runtime-proxy libraries can auto-substitute such types (when the SDK grants `InternalsVisibleTo`
+to Castle's proxy assembly), but they can never let you *configure* one.
+
+TUnit.Mocks can, behind an experimental opt-in:
+
+```xml
+<PropertyGroup>
+  <TUnitMocksExperimentalInternalsAccess>true</TUnitMocksExperimentalInternalsAccess>
+</PropertyGroup>
+
+<ItemGroup>
+  <!-- Simple assembly name of any direct or transitive reference. -->
+  <TUnitMocksInternalsAccess Include="Microsoft.Azure.Functions.Worker.Core" />
+</ItemGroup>
+```
+
+Internal types of the listed assemblies then behave like public ones in your test project —
+nameable, source-generator mocked, with fully typed setups, matchers, and verification. No
+`InternalsVisibleTo` is required from the target assembly:
+
+```csharp
+var bindings = IFunctionBindingsFeature.Mock();          // internal to the SDK
+bindings.InvocationResult.Returns(myResult);
+
+features.Get<IFunctionBindingsFeature>().Returns(bindings.Object);
+features.Get<IFunctionBindingsFeature>().WasCalled(Times.Once);
+```
+
+### How it works
+
+At build time, each listed reference is swapped — for the compiler only — with a copy whose
+internals are rewritten to public, preserving the assembly identity. The original assembly still
+ships and loads; an `IgnoresAccessChecksTo` attribute (honored by the .NET runtime) makes the
+compiled IL valid against it at execution time. This is the established "publicizer" pattern
+used by several long-lived OSS tools, wired into the TUnit.Mocks package.
+
+### Caveats
+
+- **Experimental.** `IgnoresAccessChecksToAttribute` is honored by the runtime but is not a
+  documented public contract.
+- Not supported on .NET Framework test targets (the runtime there does not honor the attribute);
+  a build warning is emitted and the pipeline stays inert.
+- Works under trimmed publishes; Native AOT is not yet verified.
+- If another package already injects an `IgnoresAccessChecksToAttribute` definition into your
+  compilation (e.g. IgnoresAccessChecksToGenerator), suppress TUnit's copy with
+  `<TUnitMocksInternalsAccessEmitAttributeDefinition>false</TUnitMocksInternalsAccessEmitAttributeDefinition>`.
+- Internal APIs are internal for a reason: they can change in any release of the target package.
+  Prefer public seams when they exist.

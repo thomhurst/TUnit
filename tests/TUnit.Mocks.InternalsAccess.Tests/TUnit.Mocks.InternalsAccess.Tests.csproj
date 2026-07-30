@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\eng\TestProject.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <!-- Experimental #6514 Tier 2: compile-time internals access. -->
+    <TUnitMocksExperimentalInternalsAccess>true</TUnitMocksExperimentalInternalsAccess>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TUnitMocksInternalsAccess Include="TUnit.Mocks.InternalsAccess.TargetLib" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Mocks.InternalsAccess.TargetLib\TUnit.Mocks.InternalsAccess.TargetLib.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks\TUnit.Mocks.csproj" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Assertions\TUnit.Mocks.Assertions.csproj" />
+
+    <ProjectReference Include="..\..\src\TUnit.Mocks.SourceGenerator\TUnit.Mocks.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+    <!-- Referenced output so the task class itself is unit-testable; this also guarantees the
+         task assembly exists before this project compiles (the targets pipeline loads it). -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.Tasks.csproj" />
+
+    <!-- The task excludes MSBuild runtime assets (the MSBuild host provides them); the unit
+         tests run the task in-process, so they need them for real. -->
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.8.3" />
+  </ItemGroup>
+
+  <!-- The internals-access pipeline itself is imported by TUnit.Mocks.targets. -->
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
+  <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
+  <Import Project="..\..\eng\TestProject.targets" />
+
+</Project>

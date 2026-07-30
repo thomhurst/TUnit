@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Experimental (#6514 Tier 2). MSBuild task assembly: net8.0 for `dotnet msbuild` and
+         MSBuild-on-.NET IDEs, net472 for Visual Studio's .NET Framework MSBuild. Ships inside
+         the TUnit.Mocks package under tasks/<tfm>/ (see TUnit.Mocks.csproj); never a package of
+         its own. -->
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <!-- Task dependencies (Mono.Cecil) must sit next to the task assembly so MSBuild's
+         assembly-dependency resolution can find them. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" />
+    <!-- Compile-time only: the MSBuild host provides these assemblies at runtime. Pinned to a
+         version that ships both net472 and net8.0 assets. -->
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.8.3" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

@@ -5,4 +5,8 @@
         <Using Include="TUnit.Mocks.Arguments.Arg" Static="true" />
         <Using Include="TUnit.Mocks.Generated" />
     </ItemGroup>
+
+    <!-- Experimental compile-time internals access (#6514); inert unless
+         $(TUnitMocksExperimentalInternalsAccess) is set to true. -->
+    <Import Project="$(MSBuildThisFileDirectory)TUnit.Mocks.InternalsAccess.targets" />
 </Project>
