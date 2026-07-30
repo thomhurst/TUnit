@@ -68,6 +68,33 @@ public interface IConstantNumericAsyncService
     Task<ulong> GetUnsignedAsync();
 }
 
+// Enum results (#6518 Codex round 6): `async () => 0` on a Task<MyEnum> member compiles via
+// C#'s implicit constant-zero-to-enum conversion, but the generic alias infers int and the
+// numeric tables have no enum destinations. The helper replays it value-guarded — integral
+// sources, exactly zero, enum destinations only.
+public interface IEnumAsyncService
+{
+    Task<AsyncColor> GetColorAsync();
+
+    ValueTask<AsyncColor> GetColorValueAsync();
+
+    Task<AsyncColor?> GetColorOrNullAsync();
+}
+
+public enum AsyncColor
+{
+    None = 0,
+    Red = 1,
+}
+
+// Defaultable T? (#6518 Codex round 6): on an unconstrained type parameter the trailing '?' is
+// the defaultable annotation, not Nullable<T> — Task<T?> with T = int is Task<int>, so a null
+// factory result must surface as the informative InvalidCastException, not silently become 0.
+public interface IDefaultableGenericAsyncService
+{
+    Task<T?> FindAsync<T>(int id);
+}
+
 // dynamic result (#6518 Codex round 2): `dynamic` is illegal as a pattern type (CS8208) and as
 // a typeof operand (CS1962), so the conversion helper must spell it `object` — merely mocking
 // this interface failing to COMPILE is the regression.
@@ -378,6 +405,106 @@ public class Issue6515Tests
 
         await Assert.That(async () => await mock.Object.GetUnsignedAsync())
             .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Zero_On_Enum_Member_Converts()
+    {
+        // `async () => 0` compiles against the declared delegate only via the implicit
+        // constant-zero-to-enum conversion; the alias infers int and the helper must replay it.
+        var mock = IEnumAsyncService.Mock();
+        mock.GetColorAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 0;
+        });
+
+        await Assert.That(await mock.Object.GetColorAsync()).IsEqualTo(AsyncColor.None);
+    }
+
+    [Test]
+    public async Task Zero_On_ValueTask_Enum_Member_Converts()
+    {
+        var mock = IEnumAsyncService.Mock();
+        mock.GetColorValueAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 0;
+        });
+
+        await Assert.That(await mock.Object.GetColorValueAsync()).IsEqualTo(AsyncColor.None);
+    }
+
+    [Test]
+    public async Task Zero_On_Nullable_Enum_Member_Converts()
+    {
+        var mock = IEnumAsyncService.Mock();
+        mock.GetColorOrNullAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 0;
+        });
+
+        await Assert.That(await mock.Object.GetColorOrNullAsync()).IsEqualTo(AsyncColor.None);
+    }
+
+    [Test]
+    public async Task Non_Zero_Int_On_Enum_Member_Surfaces_An_Informative_InvalidCast()
+    {
+        // C# only converts the CONSTANT ZERO to an enum implicitly — a non-zero int would not
+        // compile against the declared delegate either, so the helper must not silently cast.
+        var mock = IEnumAsyncService.Mock();
+        mock.GetColorAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 1;
+        });
+
+        await Assert.That(async () => await mock.Object.GetColorAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Null_On_Defaultable_Generic_Value_Instantiation_Throws()
+    {
+        // Task<T?> with unconstrained T = int is Task<int> — '?' is the defaultable annotation,
+        // not Nullable<int>. A null factory result silently becoming 0 is the regression.
+        var mock = IDefaultableGenericAsyncService.Mock();
+        mock.FindAsync<int>(Arg.Any<int>()).Returns(async _ =>
+        {
+            await Task.Yield();
+            return (int?)null;
+        });
+
+        await Assert.That(async () => await mock.Object.FindAsync<int>(1))
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Value_On_Defaultable_Generic_Value_Instantiation_Round_Trips()
+    {
+        var mock = IDefaultableGenericAsyncService.Mock();
+        mock.FindAsync<int>(Arg.Any<int>()).Returns(async _ =>
+        {
+            await Task.Yield();
+            return 5;
+        });
+
+        await Assert.That(await mock.Object.FindAsync<int>(1)).IsEqualTo(5);
+    }
+
+    [Test]
+    public async Task Null_On_Defaultable_Generic_Reference_Instantiation_Round_Trips()
+    {
+        // For T = string the same runtime guard must NOT fire — null is a valid T? value.
+        var mock = IDefaultableGenericAsyncService.Mock();
+        mock.FindAsync<string>(Arg.Any<int>()).Returns(async _ =>
+        {
+            await Task.Yield();
+            return (string?)null;
+        });
+
+        await Assert.That(await mock.Object.FindAsync<string>(1)).IsNull();
     }
 
     [Test]

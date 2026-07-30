@@ -467,6 +467,44 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Enum_And_Defaultable_Generic_Async_Results()
+    {
+        // #6518 review round 6: the conversion helper must replay C#'s implicit
+        // constant-zero-to-enum conversion (value-guarded, enum destinations only), and a
+        // trailing '?' on an UNCONSTRAINED type parameter (Task<T?>, T = int is Task<int>) must
+        // keep the runtime value-type null guard — while a struct-constrained T? (genuine
+        // Nullable<T>) still skips it.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public enum Color
+            {
+                None = 0,
+                Red = 1,
+            }
+
+            public interface IEnumAndGenericService
+            {
+                Task<Color> GetColorAsync();
+                ValueTask<Color> GetColorValueAsync();
+                Task<T?> FindAsync<T>(int id);
+                Task<T?> FindStructAsync<T>(int id) where T : struct;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IEnumAndGenericService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Dynamic_Async_Result()
     {
         // #6518 review: `dynamic` is illegal as a pattern type (CS8208) and as a typeof operand

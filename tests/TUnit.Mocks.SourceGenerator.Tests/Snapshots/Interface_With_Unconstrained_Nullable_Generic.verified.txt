@@ -242,7 +242,9 @@ namespace TUnit.Mocks.Generated
             switch (value)
             {
                 case T exact: return exact;
+                case null when typeof(T).IsValueType && global::System.Nullable.GetUnderlyingType(typeof(T)) is null: throw new global::System.InvalidCastException("The async factory (result type '" + typeof(TAsyncFactoryResult) + "') produced a null result, but the member's declared result type '" + typeof(T) + "' is a non-nullable value type. Return a non-null value of the declared type from the factory.");
                 case null: return default(T?)!;
+                case global::System.IConvertible zero when typeof(T).IsEnum && zero is not global::System.Enum && zero.GetTypeCode() >= global::System.TypeCode.Char && zero.GetTypeCode() <= global::System.TypeCode.UInt64 && zero.ToDecimal(null) == 0m: return (T)global::System.Enum.ToObject(typeof(T), 0);
                 default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(T) + "'. Cast the factory result to the declared type in the lambda.");
             }
         }

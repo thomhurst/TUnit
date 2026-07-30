@@ -512,7 +512,7 @@ internal static class MockMembersBuilder
             var aliasTypeParam = GetAsyncAliasTypeParamName(model, method);
             if (isAsync && fullReturnType is not null)
             {
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask, aliasTypeParam);
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask, aliasTypeParam, GetDefaultableTypeParameterNames(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -646,7 +646,7 @@ internal static class MockMembersBuilder
                 var taskType = isValueTask
                     ? "global::System.Threading.Tasks.ValueTask"
                     : "global::System.Threading.Tasks.Task";
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method));
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method), GetDefaultableTypeParameterNames(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -1834,7 +1834,7 @@ internal static class MockMembersBuilder
         return string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
     }
 
-    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask, string aliasTypeParam)
+    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask, string aliasTypeParam, HashSet<string> defaultableTypeParameters)
     {
         var taskLabel = isValueTask ? "ValueTask" : "Task";
         writer.AppendLine();
@@ -1933,14 +1933,21 @@ internal static class MockMembersBuilder
                 using (writer.Block())
                 {
                     writer.AppendLine($"case {patternType} exact: return exact;");
-                    if (!resultType.EndsWith("?") && patternType is not ("object" or "string"))
+                    // On an unconstrained (or class-constrained) type parameter, a trailing '?'
+                    // is the "defaultable" annotation, NOT Nullable<T>: Task<T?> with T = int is
+                    // Task<int>, so the runtime value-type guard must still run — typeof(T)
+                    // judges each instantiation (T = int throws on null; T = int? / T = string
+                    // accept it). Only a struct-constrained T? (genuine Nullable<T>) or a
+                    // concrete annotated type may skip the guard at generation time.
+                    var nullableAnnotationIsDefaultable = defaultableTypeParameters.Contains(resultType.TrimEnd('?'));
+                    if ((!resultType.EndsWith("?") || nullableAnnotationIsDefaultable) && patternType is not ("object" or "string"))
                     {
                         // A null result silently becoming default(T) (zero) would corrupt data
                         // for non-nullable value-type members (Task<int> member, alias inferring
                         // Task<int?>, factory yielding null). The check is a runtime one because
                         // a generic result type's nullability depends on the instantiation;
-                        // outer-nullable results (trailing '?') skip it at generation time, and
-                        // object/string are known reference types.
+                        // genuinely nullable results (trailing '?' on a non-defaultable type)
+                        // skip it at generation time, and object/string are known reference types.
                         writer.AppendLine($"case null when typeof({patternType}).IsValueType && global::System.Nullable.GetUnderlyingType(typeof({patternType})) is null: throw new global::System.InvalidCastException(\"The async factory (result type '\" + typeof({aliasTypeParam}) + \"') produced a null result, but the member's declared result type '\" + typeof({patternType}) + \"' is a non-nullable value type. Return a non-null value of the declared type from the factory.\");");
                     }
                     writer.AppendLine($"case null: return default({resultType})!;");
@@ -1964,6 +1971,18 @@ internal static class MockMembersBuilder
                     foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
                     {
                         writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
+                    }
+                    if (MightBeEnumResultType(patternType))
+                    {
+                        // C# also implicitly converts the constant 0 of any integer type to any
+                        // enum type (`async () => 0` on a Task<MyEnum> member compiles against
+                        // the declared delegate, but the alias infers int). Constant-ness is
+                        // erased at runtime, so replay it value-guarded: integral sources only
+                        // (an enum source is excluded — enum → enum is never implicit), exactly
+                        // zero, enum destinations only. Enum-ness is a runtime check because a
+                        // generic result type's enum-ness depends on the instantiation; non-zero
+                        // values still take the informative InvalidCastException below.
+                        writer.AppendLine($"case global::System.IConvertible zero when typeof({patternType}).IsEnum && zero is not global::System.Enum && zero.GetTypeCode() >= global::System.TypeCode.Char && zero.GetTypeCode() <= global::System.TypeCode.UInt64 && zero.ToDecimal(null) == 0m: return ({patternType})global::System.Enum.ToObject(typeof({patternType}), 0);");
                     }
                     writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced a result of type '\" + value.GetType() + \"', which is not convertible to the member's declared result type '\" + typeof({patternType}) + \"'. Cast the factory result to the declared type in the lambda.\");");
                 }
@@ -2053,6 +2072,51 @@ internal static class MockMembersBuilder
             "ulong" or "UInt64" => [("int", "number >= 0"), ("long", "number >= 0")],
             _ => [],
         };
+    }
+
+    /// <summary>
+    /// Whether the declared async result type could be an enum at runtime — a named type that
+    /// is not a known primitive/special type, or a type parameter (whose enum-ness depends on
+    /// the instantiation). Gates emission of the constant-zero-to-enum conversion case, which
+    /// is itself runtime-guarded by <c>typeof(T).IsEnum</c>.
+    /// </summary>
+    private static bool MightBeEnumResultType(string type)
+    {
+        return NormalizeNumericTypeName(type) switch
+        {
+            "object" or "string" or "dynamic" or "bool" or "Boolean" or "char" or "Char"
+                or "sbyte" or "SByte" or "byte" or "Byte" or "short" or "Int16" or "ushort" or "UInt16"
+                or "int" or "Int32" or "uint" or "UInt32" or "long" or "Int64" or "ulong" or "UInt64"
+                or "float" or "Single" or "double" or "Double" or "decimal" or "Decimal" => false,
+            _ => true,
+        };
+    }
+
+    /// <summary>
+    /// Type parameters (containing type's and the method's own) for which a trailing '?' is the
+    /// "defaultable" annotation rather than <c>Nullable&lt;T&gt;</c> — everything except
+    /// struct-constrained parameters, whose <c>T?</c> genuinely erases to Nullable.
+    /// </summary>
+    private static HashSet<string> GetDefaultableTypeParameterNames(MockTypeModel model, MockMemberModel method)
+    {
+        var names = new HashSet<string>();
+        foreach (var tp in model.TypeParameters)
+        {
+            if (!tp.HasValueTypeConstraint)
+            {
+                names.Add(tp.Name);
+            }
+        }
+
+        foreach (var tp in method.TypeParameters)
+        {
+            if (!tp.HasValueTypeConstraint)
+            {
+                names.Add(tp.Name);
+            }
+        }
+
+        return names;
     }
 
     private static string NormalizeNumericTypeName(string type)
