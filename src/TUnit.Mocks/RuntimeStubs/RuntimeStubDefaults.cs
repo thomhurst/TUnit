@@ -47,7 +47,10 @@ internal static class RuntimeStubDefaults
 
             if (definition == typeof(ValueTask<>))
             {
-                return Activator.CreateInstance(type, GetDefault(typeArgs[0]));
+                // Explicit ctor selection: ValueTask<T> has both (T) and (Task<T>) constructors,
+                // and a null argument (reference-typed T with a null default) matches either, so
+                // Activator.CreateInstance(type, arg) would be ambiguous.
+                return type.GetConstructor([typeArgs[0]])!.Invoke([GetDefault(typeArgs[0])]);
             }
 
             if (definition == typeof(Nullable<>))

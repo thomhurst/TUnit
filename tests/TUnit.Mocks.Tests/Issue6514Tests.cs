@@ -45,6 +45,23 @@ public interface INeverMockedGenericFeature
     T Resolve<T>();
 }
 
+// Review findings on #6519: indexer state must be keyed by the index arguments, and
+// ValueTask<T> defaults must not trip the ambiguous (T)/(Task<T>) constructor pair when the
+// inner default is null.
+public sealed class StubDto
+{
+    public string? Name { get; set; }
+}
+
+public interface IIndexedFeature
+{
+    string this[int index] { get; set; }
+
+    string this[string first, int second] { get; set; }
+
+    ValueTask<StubDto> GetDtoAsync();
+}
+
 // Simulates the SDK-internal call site: code the test has no control over requesting types the
 // test assembly could not configure.
 public static class StubFeatureConsumer
@@ -162,6 +179,38 @@ public class Issue6514Tests
         // Same instantiation still returns the same cached instance.
         await Assert.That(stub.Resolve<INeverMockedNested>())
             .IsSameReferenceAs(stub.Resolve<INeverMockedNested>());
+    }
+
+    [Test]
+    public async Task Stub_Indexer_State_Is_Keyed_By_Index_Arguments()
+    {
+        var features = IStubFeatures.Mock();
+        var stub = features.Object.Get<IIndexedFeature>();
+
+        stub[1] = "one";
+        stub[2] = "two";
+
+        await Assert.That(stub[1]).IsEqualTo("one");
+        await Assert.That(stub[2]).IsEqualTo("two");
+        await Assert.That(stub[3]).IsEqualTo(string.Empty); // unset index keeps the default
+
+        stub["a", 1] = "multi";
+
+        await Assert.That(stub["a", 1]).IsEqualTo("multi");
+        await Assert.That(stub["a", 2]).IsEqualTo(string.Empty);
+        await Assert.That(stub["b", 1]).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Stub_ValueTask_Of_Reference_Type_Returns_Completed_Null()
+    {
+        var features = IStubFeatures.Mock();
+        var stub = features.Object.Get<IIndexedFeature>();
+
+        var task = stub.GetDtoAsync();
+
+        await Assert.That(task.IsCompleted).IsTrue();
+        await Assert.That(await task).IsNull();
     }
 
     [Test]

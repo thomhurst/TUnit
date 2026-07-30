@@ -53,6 +53,12 @@ internal static class RuntimeStubGenerator
     private static readonly MethodInfo SetPropertyValueMethod =
         typeof(RuntimeStub).GetMethod("SetPropertyValue", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
+    private static readonly MethodInfo GetIndexerValueMethod =
+        typeof(RuntimeStub).GetMethod("GetIndexerValue", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+    private static readonly MethodInfo SetIndexerValueMethod =
+        typeof(RuntimeStub).GetMethod("SetIndexerValue", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
     /// <summary>
     /// Tries to create a runtime stub implementing <paramref name="interfaceType"/>. Returns
     /// false — never throws — when stubs are disabled, dynamic code is unavailable (Native AOT),
@@ -133,17 +139,23 @@ internal static class RuntimeStubGenerator
             {
                 var propertySlot = slot++;
                 var isRefLike = property.PropertyType.IsByRefLike || property.PropertyType.IsPointer;
+                // Index arguments are boxed into the state key so distinct indices round-trip
+                // independently — unless an index parameter cannot be boxed (by-ref / ref struct
+                // / pointer), in which case the accessor degrades to slot-level state.
+                var indexParameters = property.GetIndexParameters();
+                var indexable = indexParameters.Length > 0 && indexParameters.All(static p =>
+                    !p.ParameterType.IsByRef && !p.ParameterType.IsByRefLike && !p.ParameterType.IsPointer);
 
                 if (property.GetMethod is { IsAbstract: true } getter)
                 {
                     handledAccessors.Add(getter);
-                    EmitAccessor(tb, iface, getter, propertySlot, isSetter: false, isRefLike);
+                    EmitAccessor(tb, iface, getter, propertySlot, isSetter: false, isRefLike, indexable);
                 }
 
                 if (property.SetMethod is { IsAbstract: true } setter)
                 {
                     handledAccessors.Add(setter);
-                    EmitAccessor(tb, iface, setter, propertySlot, isSetter: true, isRefLike);
+                    EmitAccessor(tb, iface, setter, propertySlot, isSetter: true, isRefLike, indexable);
                 }
             }
 
@@ -311,7 +323,7 @@ internal static class RuntimeStubGenerator
         EmitReturn(il, slot, returnType, GetReturnValueMethod);
     }
 
-    private static void EmitAccessor(TypeBuilder tb, Type iface, MethodInfo accessor, int slot, bool isSetter, bool isRefLike)
+    private static void EmitAccessor(TypeBuilder tb, Type iface, MethodInfo accessor, int slot, bool isSetter, bool isRefLike, bool indexable)
     {
         var mb = DefineExplicitImpl(tb, iface, accessor, slot, out var parameterTypes, out _, out _);
         var il = mb.GetILGenerator();
@@ -323,6 +335,11 @@ internal static class RuntimeStubGenerator
             {
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldc_I4, slot);
+                if (indexable)
+                {
+                    EmitLoadArgsArray(il, parameterTypes, count: parameterTypes.Length - 1);
+                }
+
                 il.Emit(OpCodes.Ldarg, parameterTypes.Length); // value is the last argument
                 var valueType = parameterTypes[^1];
                 if (valueType.IsValueType || valueType.IsGenericParameter)
@@ -330,14 +347,48 @@ internal static class RuntimeStubGenerator
                     il.Emit(OpCodes.Box, valueType);
                 }
 
-                il.Emit(OpCodes.Call, SetPropertyValueMethod);
+                il.Emit(OpCodes.Call, indexable ? SetIndexerValueMethod : SetPropertyValueMethod);
             }
 
             il.Emit(OpCodes.Ret);
             return;
         }
 
+        if (indexable && !isRefLike)
+        {
+            var returnType = Substitute(accessor.ReturnType, []);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldc_I4, slot);
+            EmitLoadArgsArray(il, parameterTypes, count: parameterTypes.Length);
+            il.Emit(OpCodes.Ldtoken, returnType);
+            il.Emit(OpCodes.Call, GetTypeFromHandleMethod);
+            il.Emit(OpCodes.Call, GetIndexerValueMethod);
+            il.Emit(OpCodes.Unbox_Any, returnType);
+            il.Emit(OpCodes.Ret);
+            return;
+        }
+
         EmitReturn(il, slot, Substitute(accessor.ReturnType, []), GetPropertyValueMethod);
+    }
+
+    /// <summary>Loads a new object?[] holding the first <paramref name="count"/> arguments
+    /// (boxing value types), leaving it on the evaluation stack.</summary>
+    private static void EmitLoadArgsArray(ILGenerator il, Type[] parameterTypes, int count)
+    {
+        il.Emit(OpCodes.Ldc_I4, count);
+        il.Emit(OpCodes.Newarr, typeof(object));
+        for (var i = 0; i < count; i++)
+        {
+            il.Emit(OpCodes.Dup);
+            il.Emit(OpCodes.Ldc_I4, i);
+            il.Emit(OpCodes.Ldarg, i + 1);
+            if (parameterTypes[i].IsValueType || parameterTypes[i].IsGenericParameter)
+            {
+                il.Emit(OpCodes.Box, parameterTypes[i]);
+            }
+
+            il.Emit(OpCodes.Stelem_Ref);
+        }
     }
 
     private static void EmitNoOp(TypeBuilder tb, Type iface, MethodInfo method, int slot)
