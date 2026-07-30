@@ -713,6 +713,9 @@ namespace TUnit.Mocks.Generated
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDialogService_ShowPanel_M1_MockCall<TData> Returns(global::System.Func<global::System.Threading.Tasks.Task<string?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        #else
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
@@ -733,6 +736,13 @@ namespace TUnit.Mocks.Generated
         /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDialogService_ShowPanel_M1_MockCall<TData> Returns(global::System.Func<TData?, global::System.Threading.Tasks.Task<string?>> factory)
+        {
+            EnsureSetup().ReturnsRaw(args => (object?)factory((TData?)args[0]));
+            return this;
+        }
+        #else
+        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<TData?, global::System.Threading.Tasks.Task<TAsyncFactoryResult>> factory)
         {
             EnsureSetup().ReturnsRaw(args => (object?)factory((TData?)args[0]));
             return this;

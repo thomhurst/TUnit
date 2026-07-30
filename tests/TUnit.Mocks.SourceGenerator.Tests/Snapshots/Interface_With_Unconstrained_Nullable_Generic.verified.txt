@@ -234,6 +234,9 @@ namespace TUnit.Mocks.Generated
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IFoo_DoSomethingAsync_M0_MockCall<T> Returns(global::System.Func<global::System.Threading.Tasks.Task<T?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        #else
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        public IFoo_DoSomethingAsync_M0_MockCall<T> Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
 
         // ICallVerification

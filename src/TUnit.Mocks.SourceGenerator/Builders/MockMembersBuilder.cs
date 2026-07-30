@@ -753,14 +753,26 @@ internal static class MockMembersBuilder
         }
 
         // Returns alias, so an `async (a, b) => ...` lambda binds here rather than failing against
-        // the synchronous typed overload with CS4010. Deprioritised — and therefore net9.0+ only —
-        // for the same reasons as the parameterless alias; see EmitReturnsAsyncOverloads.
-        // See issue #6495.
+        // the synchronous typed overload with CS4010. ORP-deprioritised on net9.0+, generic below
+        // that, for the same reasons as the parameterless alias; see EmitReturnsAsyncOverloads.
+        // See issues #6495 and #6515.
         writer.AppendLine();
         writer.AppendLine("#if NET9_0_OR_GREATER");
         writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
         writer.AppendLine(PriorityMinusOneAttribute);
         using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
+        {
+            writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
+            writer.AppendLine("return this;");
+        }
+        writer.AppendLine("#else");
+        var genericTaskKind = taskType.Substring(0, taskType.IndexOf('<'));
+        // TAsyncFactoryResult rather than TResult: the wrapper type carries the mocked method's own
+        // type parameters, and TResult is a common user choice — a same-name inner declaration
+        // would be a CS0693 shadowing warning in generated code.
+        var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<TAsyncFactoryResult>>";
+        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
+        using (writer.Block($"public {wrapperName} Returns<TAsyncFactoryResult>({genericFuncType} factory)"))
         {
             writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
             writer.AppendLine("return this;");
@@ -1830,23 +1842,42 @@ internal static class MockMembersBuilder
         // having to know about ReturnsAsync (the synchronous Func<T> overload rejects it with
         // CS4010). The returned task is handed back as-is, so it stays pending. See issue #6495.
         //
-        // Deprioritised against the synchronous Returns(Func<T>) sibling: when T is a reference
-        // type, a lambda whose body pins nothing — Returns(() => null), Returns(() => throw ...) —
-        // converts equally well to Func<T> and Func<Task<T>>, which would be CS0121. The priority
-        // breaks that tie back to the pre-existing synchronous meaning. A genuine async lambda is
-        // unaffected: it is not convertible to Func<T> at all, so it is the only candidate.
-        //
-        // That makes the alias inseparable from the attribute, which only reaches the consumer's
-        // compilation on net9.0+ — TUnit.Mocks polyfills it internally for its own build, so a
-        // net8.0 consumer would hit CS0246. Emitting the overload there without the priority would
-        // hand them the ambiguity instead, so the whole alias is net9.0+ (matching the framework
-        // polyfills below); net8.0 keeps ReturnsAsync, which already returns the task as-is.
-        writer.AppendLine("#if NET9_0_OR_GREATER");
-        writer.AppendLine($"/// <summary>Return a {taskLabel} from a factory, invoked on each call. The {taskLabel} is returned as-is, so an async factory stays pending until it completes.</summary>");
-        writer.AppendLine(PriorityMinusOneAttribute);
-        writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
-        writer.AppendLine("#endif");
+        // For Task<T>/ValueTask<T>, the alias must not collide with the synchronous
+        // Returns(Func<T>) sibling: when the result type is a reference type, a lambda whose body
+        // pins nothing — Returns(() => null), Returns(() => throw ...) — converts equally well to
+        // Func<T> and Func<Task<T>>, which would be CS0121. On net9.0+,
+        // [OverloadResolutionPriority(-1)] breaks that tie back to the pre-existing synchronous
+        // meaning; a genuine async lambda is unaffected, as it is not convertible to Func<T> at
+        // all. The attribute only reaches the consumer's compilation on net9.0+, so below that the
+        // alias is generic instead (#6515): a typeless lambda body (null / throw / default) cannot
+        // infer the result type parameter, which excludes the alias from the candidate set and
+        // resolves the same tie the same way — while an async lambda with an inferable body binds
+        // it, ValueTask included. The generic form trades the ORP alias's compile-time result-type
+        // check for inference (a wrong-typed factory surfaces when the setup is consumed), which
+        // is why the ORP alias remains the net9.0+ shape. Bare Task/ValueTask members have no
+        // synchronous Returns sibling to collide with, so their alias needs neither.
+        var aliasDoc = $"/// <summary>Return a {taskLabel} from a factory, invoked on each call. The {taskLabel} is returned as-is, so an async factory stays pending until it completes.</summary>";
+        if (IsGenericTaskType(taskType))
+        {
+            var taskKind = isValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
+            writer.AppendLine("#if NET9_0_OR_GREATER");
+            writer.AppendLine(aliasDoc);
+            writer.AppendLine(PriorityMinusOneAttribute);
+            writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
+            writer.AppendLine("#else");
+            writer.AppendLine(aliasDoc);
+            writer.AppendLine($"public {wrapperName} Returns<TAsyncFactoryResult>(global::System.Func<{taskKind}<TAsyncFactoryResult>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
+            writer.AppendLine("#endif");
+        }
+        else
+        {
+            writer.AppendLine(aliasDoc);
+            writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
+        }
     }
+
+    /// <summary>True for Task&lt;T&gt;/ValueTask&lt;T&gt; type strings, false for bare Task/ValueTask.</summary>
+    private static bool IsGenericTaskType(string taskType) => taskType.EndsWith(">");
 
     private static void EmitEnsureSetup(CodeWriter writer, string builderType, bool hasTypeArguments)
     {

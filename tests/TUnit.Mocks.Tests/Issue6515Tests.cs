@@ -1,0 +1,70 @@
+using TUnit.Mocks;
+
+namespace TUnit.Mocks.Tests;
+
+// Regression: https://github.com/thomhurst/TUnit/issues/6515
+// The async-factory Returns alias added for #6495 carried [OverloadResolutionPriority] and was
+// therefore gated to net9.0+ consumers, so on net8.0 (and net472) `.Returns(async () => ...)`
+// did not exist and a mocked async call could never be handed back still-pending. Below net9.0
+// the alias is now generic — Returns<TAsyncFactoryResult>(Func<Task<TAsyncFactoryResult>>) — so
+// typeless lambdas (null/throw) fail type inference and keep binding the synchronous factory,
+// while genuine async lambdas bind the alias. This file runs on every target framework the test
+// project builds for.
+
+#region Test types
+
+public interface ITimeoutClient
+{
+    Task<int> GetValueAsync(CancellationToken ct);
+}
+
+public class TimeoutConsumer
+{
+    public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+        var task = client.GetValueAsync(cts.Token);
+        var completed = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cts.Token));
+        if (completed != task)
+        {
+            throw new TimeoutException();
+        }
+        return await task;
+    }
+}
+
+#endregion
+
+public class Issue6515Tests
+{
+    [Test]
+    public async Task Timeout_Genuinely_Races_A_Pending_Mocked_Call_And_Wins()
+    {
+        var client = ITimeoutClient.Mock();
+        client.GetValueAsync(Arg.Any<CancellationToken>()).Returns(async _ =>
+        {
+            await Task.Delay(30_000);
+            return 42;
+        });
+
+        var consumer = new TimeoutConsumer();
+
+        await Assert.That(async () => await consumer.GetWithTimeoutAsync(client.Object, TimeSpan.FromMilliseconds(50)))
+            .Throws<TimeoutException>();
+    }
+
+    [Test]
+    public async Task Fast_Async_Factory_Completes_Before_The_Timeout()
+    {
+        var client = ITimeoutClient.Mock();
+        client.GetValueAsync(Arg.Any<CancellationToken>()).Returns(async _ =>
+        {
+            await Task.Yield();
+            return 42;
+        });
+
+        var consumer = new TimeoutConsumer();
+
+        await Assert.That(await consumer.GetWithTimeoutAsync(client.Object, TimeSpan.FromSeconds(30))).IsEqualTo(42);
+    }
+}

@@ -32,10 +32,9 @@ public class Issue6495Tests
 {
     private const int NeverInTestTimeMs = 30_000;
 
-#if NET9_0_OR_GREATER
-    // The async-factory Returns overload carries [OverloadResolutionPriority], which only reaches
-    // a consumer's compilation on net9.0+ — so the overload, and these tests, are net9.0+ only.
-    // net8.0 consumers keep ReturnsAsync, covered by ReturnsAsync_Factory_Is_Unchanged below.
+    // The async-factory Returns alias is emitted on every target framework (#6515): ORP-based on
+    // net9.0+ as before, generic (inference-gated) below that — so these tests run on all of
+    // them, net472 and net8.0 included.
 
     [Test]
     public async Task Returns_Async_Lambda_Stays_Pending_So_A_Timeout_Can_Win()
@@ -120,8 +119,6 @@ public class Issue6495Tests
         await Assert.That(call.IsCompleted).IsFalse();
     }
 
-#endif
-
     [Test]
     public async Task Synchronous_Returns_Factory_Still_Works()
     {
@@ -135,8 +132,9 @@ public class Issue6495Tests
     public async Task Null_Returning_Lambda_Still_Binds_To_The_Synchronous_Factory()
     {
         // `() => null` converts to both Func<string?> and Func<Task<string?>>. The async overload
-        // is deprioritised, so this keeps its pre-existing meaning: null is the *value*, and the
-        // member still returns a completed task.
+        // is deprioritised (net9.0+) or excluded by failed type inference (below), so this keeps
+        // its pre-existing meaning: null is the *value*, and the member still returns a completed
+        // task.
         var mock = IReferenceResultService.Mock();
         mock.GetNameAsync().Returns(() => null);
 
@@ -165,7 +163,6 @@ public class Issue6495Tests
         await Assert.That(await mock.Object.GetNameAsync(1)).IsNull();
     }
 
-#if NET9_0_OR_GREATER
     [Test]
     public async Task Async_Lambda_Still_Binds_On_A_Reference_Typed_Result()
     {
@@ -180,8 +177,6 @@ public class Issue6495Tests
 
         await Assert.That(call.IsCompleted).IsFalse();
     }
-
-#endif
 
     [Test]
     public async Task ReturnsAsync_Factory_Is_Unchanged()
