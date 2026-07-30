@@ -62,6 +62,26 @@ public interface IIndexedFeature
     ValueTask<StubDto> GetDtoAsync();
 }
 
+// Review finding on #6519 (round 4): the typed cache-miss handlers (1–8 args) must route
+// through the same runtime-stub fallback as the object-array handler. IServiceProvider has no
+// source-generated auto-mock factory (System.* interfaces are excluded), so only the runtime
+// stub can serve it.
+public interface ITypedPathFeatures
+{
+    IServiceProvider Resolve(int id);
+}
+
+// Distinct never-before-stubbed interfaces for the concurrent first-emission test — each
+// first-touch runs EmitStubType, which must be serialized over the shared ModuleBuilder.
+public interface IConcurrentStub0 { string Name { get; } }
+public interface IConcurrentStub1 { string Name { get; } }
+public interface IConcurrentStub2 { string Name { get; } }
+public interface IConcurrentStub3 { string Name { get; } }
+public interface IConcurrentStub4 { string Name { get; } }
+public interface IConcurrentStub5 { string Name { get; } }
+public interface IConcurrentStub6 { string Name { get; } }
+public interface IConcurrentStub7 { string Name { get; } }
+
 // Simulates the SDK-internal call site: code the test has no control over requesting types the
 // test assembly could not configure.
 public static class StubFeatureConsumer
@@ -263,6 +283,55 @@ public class Issue6514Tests
 
         await Assert.That(() => features.Object.Get<INeverMockedFeature>())
             .Throws<TUnit.Mocks.Exceptions.MockStrictBehaviorException>();
+    }
+
+    [Test]
+    public async Task Typed_Handler_Cache_Miss_Falls_Back_To_Runtime_Stub()
+    {
+        var mock = ITypedPathFeatures.Mock();
+
+        var provider = mock.Object.Resolve(42);
+
+        await Assert.That(provider).IsNotNull();
+        // Stubs are functional: members return defaults instead of throwing.
+        await Assert.That(provider.GetService(typeof(string))).IsNull();
+        // Same member + return type resolves to the same cached stub, argument values included.
+        await Assert.That(mock.Object.Resolve(43)).IsSameReferenceAs(provider);
+    }
+
+    [Test]
+    public async Task Concurrent_First_Time_Stub_Emission_Is_Thread_Safe()
+    {
+        // GetOrAdd only de-duplicates the factory per key: distinct interfaces first-touched in
+        // parallel reach EmitStubType concurrently, and the shared ModuleBuilder must be guarded.
+        var features = IStubFeatures.Mock();
+        using var start = new ManualResetEventSlim(false);
+
+        Task<object?> First(Func<object?> resolve) => Task.Run(() =>
+        {
+            start.Wait();
+            return resolve();
+        });
+
+        var tasks = new[]
+        {
+            First(() => features.Object.Get<IConcurrentStub0>()),
+            First(() => features.Object.Get<IConcurrentStub1>()),
+            First(() => features.Object.Get<IConcurrentStub2>()),
+            First(() => features.Object.Get<IConcurrentStub3>()),
+            First(() => features.Object.Get<IConcurrentStub4>()),
+            First(() => features.Object.Get<IConcurrentStub5>()),
+            First(() => features.Object.Get<IConcurrentStub6>()),
+            First(() => features.Object.Get<IConcurrentStub7>()),
+        };
+
+        start.Set();
+        var results = await Task.WhenAll(tasks);
+
+        foreach (var result in results)
+        {
+            await Assert.That(result).IsNotNull();
+        }
     }
 
     // Bare NotInParallel: this test flips a global setting, so nothing may run alongside it.

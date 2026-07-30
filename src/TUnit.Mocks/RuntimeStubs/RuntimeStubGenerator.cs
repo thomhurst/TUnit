@@ -38,6 +38,7 @@ internal static class RuntimeStubGenerator
         "d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7";
 
     private static readonly ConcurrentDictionary<Type, Type?> _stubTypes = new();
+    private static readonly object _emitLock = new();
     private static ModuleBuilder? _module;
     private static int _typeCounter;
 
@@ -117,76 +118,84 @@ internal static class RuntimeStubGenerator
             }
         }
 
-        var module = EnsureModule();
-        var tb = module.DefineType(
-            $"TUnit.Mocks.RuntimeStubs.Stub{Interlocked.Increment(ref _typeCounter)}_{Sanitize(interfaceType.Name)}",
-            TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class,
-            typeof(RuntimeStub));
-
-        foreach (var iface in interfaces)
+        // ConcurrentDictionary.GetOrAdd only de-duplicates the factory per KEY — factories for
+        // different interfaces run concurrently, and ModuleBuilder.DefineType/TypeBuilder.CreateType
+        // on the shared module are not thread-safe on coreclr (dotnet/runtime#64094). Serialize
+        // emission, as Castle's ModuleScope does for this same assembly identity; cache hits in
+        // TryCreateStub stay lock-free.
+        lock (_emitLock)
         {
-            tb.AddInterfaceImplementation(iface);
+            var module = EnsureModule();
+            var tb = module.DefineType(
+                $"TUnit.Mocks.RuntimeStubs.Stub{Interlocked.Increment(ref _typeCounter)}_{Sanitize(interfaceType.Name)}",
+                TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class,
+                typeof(RuntimeStub));
+
+            foreach (var iface in interfaces)
+            {
+                tb.AddInterfaceImplementation(iface);
+            }
+
+            EmitConstructor(tb);
+
+            var slot = 0;
+            foreach (var iface in interfaces)
+            {
+                var handledAccessors = new HashSet<MethodInfo>();
+
+                foreach (var property in iface.GetProperties())
+                {
+                    var propertySlot = slot++;
+                    var isRefLike = property.PropertyType.IsByRefLike || property.PropertyType.IsPointer;
+                    // Index arguments are boxed into the state key so distinct indices round-trip
+                    // independently — unless an index parameter cannot be boxed (by-ref / ref struct
+                    // / pointer), in which case the accessor degrades to slot-level state.
+                    var indexParameters = property.GetIndexParameters();
+                    var indexable = indexParameters.Length > 0 && indexParameters.All(static p =>
+                        !p.ParameterType.IsByRef && !p.ParameterType.IsByRefLike && !p.ParameterType.IsPointer);
+
+                    if (property.GetMethod is { IsAbstract: true } getter)
+                    {
+                        handledAccessors.Add(getter);
+                        EmitAccessor(tb, iface, getter, propertySlot, isSetter: false, isRefLike, indexable);
+                    }
+
+                    if (property.SetMethod is { IsAbstract: true } setter)
+                    {
+                        handledAccessors.Add(setter);
+                        EmitAccessor(tb, iface, setter, propertySlot, isSetter: true, isRefLike, indexable);
+                    }
+                }
+
+                foreach (var evt in iface.GetEvents())
+                {
+                    if (evt.AddMethod is { IsAbstract: true } add)
+                    {
+                        handledAccessors.Add(add);
+                        EmitNoOp(tb, iface, add, slot++);
+                    }
+
+                    if (evt.RemoveMethod is { IsAbstract: true } remove)
+                    {
+                        handledAccessors.Add(remove);
+                        EmitNoOp(tb, iface, remove, slot++);
+                    }
+                }
+
+                foreach (var method in iface.GetMethods())
+                {
+                    // Default interface methods keep their bodies; accessors were handled above.
+                    if (!method.IsAbstract || handledAccessors.Contains(method))
+                    {
+                        continue;
+                    }
+
+                    EmitMethod(tb, iface, method, slot++);
+                }
+            }
+
+            return tb.CreateType();
         }
-
-        EmitConstructor(tb);
-
-        var slot = 0;
-        foreach (var iface in interfaces)
-        {
-            var handledAccessors = new HashSet<MethodInfo>();
-
-            foreach (var property in iface.GetProperties())
-            {
-                var propertySlot = slot++;
-                var isRefLike = property.PropertyType.IsByRefLike || property.PropertyType.IsPointer;
-                // Index arguments are boxed into the state key so distinct indices round-trip
-                // independently — unless an index parameter cannot be boxed (by-ref / ref struct
-                // / pointer), in which case the accessor degrades to slot-level state.
-                var indexParameters = property.GetIndexParameters();
-                var indexable = indexParameters.Length > 0 && indexParameters.All(static p =>
-                    !p.ParameterType.IsByRef && !p.ParameterType.IsByRefLike && !p.ParameterType.IsPointer);
-
-                if (property.GetMethod is { IsAbstract: true } getter)
-                {
-                    handledAccessors.Add(getter);
-                    EmitAccessor(tb, iface, getter, propertySlot, isSetter: false, isRefLike, indexable);
-                }
-
-                if (property.SetMethod is { IsAbstract: true } setter)
-                {
-                    handledAccessors.Add(setter);
-                    EmitAccessor(tb, iface, setter, propertySlot, isSetter: true, isRefLike, indexable);
-                }
-            }
-
-            foreach (var evt in iface.GetEvents())
-            {
-                if (evt.AddMethod is { IsAbstract: true } add)
-                {
-                    handledAccessors.Add(add);
-                    EmitNoOp(tb, iface, add, slot++);
-                }
-
-                if (evt.RemoveMethod is { IsAbstract: true } remove)
-                {
-                    handledAccessors.Add(remove);
-                    EmitNoOp(tb, iface, remove, slot++);
-                }
-            }
-
-            foreach (var method in iface.GetMethods())
-            {
-                // Default interface methods keep their bodies; accessors were handled above.
-                if (!method.IsAbstract || handledAccessors.Contains(method))
-                {
-                    continue;
-                }
-
-                EmitMethod(tb, iface, method, slot++);
-            }
-        }
-
-        return tb.CreateType();
     }
 
     private static Type[] CollectInterfaces(Type interfaceType)
