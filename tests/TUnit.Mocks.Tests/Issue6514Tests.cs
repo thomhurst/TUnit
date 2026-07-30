@@ -38,6 +38,13 @@ public interface INeverMockedNested
     int Value { get; }
 }
 
+// A stubbed interface that itself declares a generic method — every instantiation shares one
+// member slot, so cached defaults must be keyed by the closed return type too.
+public interface INeverMockedGenericFeature
+{
+    T Resolve<T>();
+}
+
 // Simulates the SDK-internal call site: code the test has no control over requesting types the
 // test assembly could not configure.
 public static class StubFeatureConsumer
@@ -137,6 +144,24 @@ public class Issue6514Tests
         wrapper.Tag.Returns("configured");
 
         await Assert.That(instance.Tag).IsEqualTo("configured");
+    }
+
+    [Test]
+    public async Task Stub_Generic_Method_Keeps_Instantiations_Separate()
+    {
+        // Review finding on #6519: the per-slot return cache conflated generic instantiations —
+        // after Resolve<int>() cached a boxed 0, Resolve<INeverMockedNested>() retrieved it and
+        // the emitted unbox/cast threw InvalidCastException.
+        var features = IStubFeatures.Mock();
+        var stub = features.Object.Get<INeverMockedGenericFeature>();
+
+        await Assert.That(stub.Resolve<int>()).IsEqualTo(0);
+        await Assert.That(stub.Resolve<INeverMockedNested>()).IsNotNull();
+        await Assert.That(stub.Resolve<string>()).IsEqualTo(string.Empty);
+
+        // Same instantiation still returns the same cached instance.
+        await Assert.That(stub.Resolve<INeverMockedNested>())
+            .IsSameReferenceAs(stub.Resolve<INeverMockedNested>());
     }
 
     [Test]

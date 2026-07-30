@@ -12,14 +12,18 @@ namespace TUnit.Mocks.RuntimeStubs;
 public abstract class RuntimeStub
 {
     private readonly ConcurrentDictionary<int, object?> _propertyValues = new();
-    private readonly ConcurrentDictionary<int, object?> _returnCache = new();
+
+    // Keyed by (slot, closed return type): a generic member like T Get<T>() shares one slot
+    // across every instantiation, so the type must disambiguate or Get<string>() would hand
+    // back Get<int>()'s cached boxed value and fail the emitted unbox/cast.
+    private readonly ConcurrentDictionary<(int Slot, Type ReturnType), object?> _returnCache = new();
 
     /// <summary>
-    /// Default return value for a method slot. Cached per slot so repeated calls hand back the
-    /// same instance (matching auto-mock identity semantics).
+    /// Default return value for a method slot. Cached per slot and closed return type so
+    /// repeated calls hand back the same instance (matching auto-mock identity semantics).
     /// </summary>
     protected object? GetReturnValue(int slot, Type returnType)
-        => _returnCache.GetOrAdd(slot, static (_, t) => RuntimeStubDefaults.GetDefault(t), returnType);
+        => _returnCache.GetOrAdd((slot, returnType), static key => RuntimeStubDefaults.GetDefault(key.ReturnType));
 
     /// <summary>
     /// Property getter: an explicitly set value wins; otherwise the cached default for the slot.
@@ -31,7 +35,7 @@ public abstract class RuntimeStub
             return value;
         }
 
-        return _returnCache.GetOrAdd(slot, static (_, t) => RuntimeStubDefaults.GetDefault(t), propertyType);
+        return _returnCache.GetOrAdd((slot, propertyType), static key => RuntimeStubDefaults.GetDefault(key.ReturnType));
     }
 
     /// <summary>Property setter: remembers the value so a later get round-trips it.</summary>
