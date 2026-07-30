@@ -243,6 +243,69 @@ public class PublicizeAssemblyReferencesTaskTests
     }
 
     [Test]
+    public async Task Different_Identity_Same_Name_Reference_Is_Left_In_Place()
+    {
+        var dir = NewScratchDirectory();
+        var otherVersionDir = NewScratchDirectory();
+        var otherVersionPath = Path.Combine(otherVersionDir, TargetLibName + ".dll");
+        CreateDifferentVersionCopy(TargetLibPath, otherVersionPath);
+
+        // A same-file-name reference with a DIFFERENT identity is a legal pair only when extern
+        // aliases keep the two apart — superseding it would rebind its alias to the publicized
+        // copy's identity and drop its unique API from the compilation.
+        var winner = new TaskItem(TargetLibPath);
+        var otherVersion = new TaskItem(otherVersionPath);
+        otherVersion.SetMetadata("Aliases", "oldsdk");
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [winner, otherVersion];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(1);
+        await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA004");
+
+        // Only the winner is superseded; the different-identity reference stays untouched.
+        var supersededPaths = task.SupersededReferences.Select(s => s.ItemSpec).ToList();
+        await Assert.That(supersededPaths).Contains(TargetLibPath);
+        await Assert.That(supersededPaths).DoesNotContain(otherVersionPath);
+        // Its alias must NOT be merged onto the publicized item — it belongs to a different
+        // assembly identity that remains in the compiler's reference list.
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Aliases")).IsEqualTo("");
+    }
+
+    [Test]
+    public async Task Requested_Name_Matches_Assembly_Identity_When_Compile_Asset_Is_Renamed()
+    {
+        var dir = NewScratchDirectory();
+        var renamedDir = NewScratchDirectory();
+        var renamed = Path.Combine(renamedDir, "VendorAlias.dll");
+        File.Copy(TargetLibPath, renamed);
+
+        // The documented contract is the simple ASSEMBLY name — a compile asset renamed
+        // relative to the identity it contains must still resolve, not fail with TUMIA001.
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(renamed)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Errors.Count).IsEqualTo(0);
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(renamed);
+
+        var source = await File.ReadAllTextAsync(task.GeneratedSourceFile);
+        await Assert.That(source).Contains($"IgnoresAccessChecksTo(\"{TargetLibName}\")");
+    }
+
+    private static void CreateDifferentVersionCopy(string source, string destination)
+    {
+        using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
+        module.Assembly.Name.Version = new Version(99, 0, 0, 0);
+        module.Write(destination);
+    }
+
+    [Test]
     public async Task Task_Version_Change_Invalidates_Publicized_Copy()
     {
         var dir = NewScratchDirectory();

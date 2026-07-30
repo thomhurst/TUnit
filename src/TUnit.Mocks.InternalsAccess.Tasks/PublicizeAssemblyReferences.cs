@@ -89,8 +89,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 
         foreach (var name in requestedNames)
         {
-            var matches = ReferencePaths.Where(r =>
-                string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
+            var matches = FindReferenceMatches(name);
 
             if (matches.Count == 0)
             {
@@ -102,15 +101,27 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 continue;
             }
 
+            // Only matches sharing the winner's assembly identity are safe to collapse onto the
+            // publicized copy. A same-file-name reference with a DIFFERENT identity (version or
+            // public key — a legal pair only when extern aliases keep them apart) must stay in
+            // the compiler's reference list untouched, or its alias would rebind to the wrong
+            // assembly and its unique API would vanish from the compilation.
+            var (supersededMatches, retainedMatches) = PartitionByIdentity(matches);
+
             if (matches.Select(m => m.ItemSpec).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
             {
+                var retainedNote = retainedMatches.Count > 0
+                    ? " References whose assembly identity differs from the first match are left " +
+                      $"in place: {string.Join(", ", retainedMatches.Select(m => m.ItemSpec))}."
+                    : "";
                 Log.LogWarning(
                     subcategory: null, warningCode: "TUMIA004", helpKeyword: null,
                     file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
                     message: $"TUnitMocksInternalsAccess: multiple resolved references match '{name}': " +
                              $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Using the first " +
-                             "(extern aliases and EmbedInteropTypes from all matches are preserved); " +
-                             "if that is the wrong one, resolve the version conflict in the project.");
+                             "(extern aliases and EmbedInteropTypes from same-identity duplicates are " +
+                             $"preserved).{retainedNote} If the first is the wrong one, resolve the " +
+                             "version conflict in the project.");
             }
 
             var reference = matches[0];
@@ -161,9 +172,9 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             // Csc reads compiler-significant options from item metadata, and an extern-aliased
             // reference must stay extern-aliased after the swap.
             reference.CopyMetadataTo(item);
-            if (matches.Count > 1)
+            if (supersededMatches.Count > 1)
             {
-                MergeCompilerMetadataFromDuplicates(item, matches);
+                MergeCompilerMetadataFromDuplicates(item, supersededMatches);
             }
             // "Original" is what the targets file Removes — the reference item as the compiler
             // knew it (the ref assembly when one existed), not the implementation path.
@@ -173,10 +184,10 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             item.SetMetadata("CopyLocal", "false");
             outputs.Add(item);
             publicizedNames.Add(assemblyName);
-            // All same-simple-name matches leave the compiler's reference list, not just the
+            // Every SAME-IDENTITY match leaves the compiler's reference list, not just the
             // winner — a leftover duplicate would share the publicized copy's assembly identity
-            // and fail the compile with CS1703.
-            superseded.AddRange(matches.Select(ITaskItem (m) => new TaskItem(m.ItemSpec)));
+            // and fail the compile with CS1703. Different-identity matches stay.
+            superseded.AddRange(supersededMatches.Select(ITaskItem (m) => new TaskItem(m.ItemSpec)));
         }
 
         if (!Log.HasLoggedErrors)
@@ -204,7 +215,77 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     }
 
     /// <summary>
-    /// Every same-simple-name match is removed from the compiler's reference list, so
+    /// Resolves the requested simple name against the compiler's references: by file name first
+    /// (the common case), then by each reference's REAL assembly identity — a compile asset can
+    /// be renamed relative to the assembly it contains (e.g. VendorAlias.dll holding identity
+    /// Vendor.Core), and the documented contract is the simple ASSEMBLY name, not the file name.
+    /// </summary>
+    private List<ITaskItem> FindReferenceMatches(string name)
+    {
+        var byFileName = ReferencePaths.Where(r =>
+            string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (byFileName.Count > 0)
+        {
+            return byFileName;
+        }
+
+        return ReferencePaths.Where(r =>
+            string.Equals(TryGetAssemblyIdentity(r.ItemSpec)?.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    /// <summary>
+    /// Splits the matches into those safe to collapse onto the publicized copy (the winner plus
+    /// duplicates with the winner's exact assembly identity) and those that must remain in the
+    /// compiler's reference list (a different version or public key — or an unreadable file,
+    /// which is never assumed to be a duplicate).
+    /// </summary>
+    private (List<ITaskItem> Superseded, List<ITaskItem> Retained) PartitionByIdentity(List<ITaskItem> matches)
+    {
+        var supersededMatches = new List<ITaskItem> { matches[0] };
+        var retained = new List<ITaskItem>();
+
+        if (matches.Count > 1)
+        {
+            var winnerIdentity = TryGetAssemblyIdentity(matches[0].ItemSpec);
+
+            foreach (var match in matches.Skip(1))
+            {
+                var identity = winnerIdentity is null ? null : TryGetAssemblyIdentity(match.ItemSpec);
+                if (identity is not null && HasSameIdentity(winnerIdentity!, identity))
+                {
+                    supersededMatches.Add(match);
+                }
+                else
+                {
+                    retained.Add(match);
+                }
+            }
+        }
+
+        return (supersededMatches, retained);
+    }
+
+    private static bool HasSameIdentity(System.Reflection.AssemblyName left, System.Reflection.AssemblyName right)
+        => string.Equals(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)
+           && Equals(left.Version, right.Version)
+           && (left.GetPublicKeyToken() ?? []).SequenceEqual(right.GetPublicKeyToken() ?? []);
+
+    private static System.Reflection.AssemblyName? TryGetAssemblyIdentity(string path)
+    {
+        try
+        {
+            return System.Reflection.AssemblyName.GetAssemblyName(path);
+        }
+        catch (Exception)
+        {
+            // Native or otherwise unreadable dll.
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Every superseded (same-identity) match is removed from the compiler's reference list, so
     /// compiler-significant metadata carried only by a non-selected match — an extern alias, an
     /// EmbedInteropTypes flag — must survive on the single replacement item: aliases are
     /// unioned, and interop embedding is kept if any match asked for it.
@@ -326,12 +407,8 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             return byFileName;
         }
 
-        System.Reflection.AssemblyName identity;
-        try
-        {
-            identity = System.Reflection.AssemblyName.GetAssemblyName(referencePath);
-        }
-        catch (Exception)
+        var identity = TryGetAssemblyIdentity(referencePath);
+        if (identity is null)
         {
             return null;
         }
@@ -339,12 +416,8 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         string? nameOnlyMatch = null;
         foreach (var candidate in candidates)
         {
-            System.Reflection.AssemblyName candidateIdentity;
-            try
-            {
-                candidateIdentity = System.Reflection.AssemblyName.GetAssemblyName(candidate);
-            }
-            catch (Exception)
+            var candidateIdentity = TryGetAssemblyIdentity(candidate);
+            if (candidateIdentity is null)
             {
                 // Native or otherwise unreadable dll among the copy-local assets.
                 continue;

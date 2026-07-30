@@ -72,12 +72,14 @@ for TUnit.Mocks:
   alone; explicit interface implementations stay private as IL requires.
 - Dev loop: MSBuild nodes hold the task assembly's file lock across builds — run
   `dotnet build-server shutdown` after changing this project.
-- Diagnostics: `TUMIA001` unresolved assembly name (error), `TUMIA002` .NET Framework inert
-  (warning), `TUMIA003` ref-assembly-only source (warning), `TUMIA004` ambiguous simple-name
-  match — first wins and all matches are removed from the compiler's references so the duplicate
-  cannot collide with the publicized copy; extern aliases are unioned and `EmbedInteropTypes`
-  kept if any match set it, so compiler-significant metadata carried only by a non-selected
-  match survives the swap (warning), `TUMIA005` publicize failure, e.g. unreadable/locked
+- Diagnostics: `TUMIA001` unresolved assembly name (error; the requested name is matched by
+  file name first, then by the reference's real assembly identity, so renamed compile assets
+  resolve), `TUMIA002` .NET Framework inert (warning), `TUMIA003` ref-assembly-only source
+  (warning), `TUMIA004` ambiguous simple-name match — first wins and same-identity duplicates
+  are removed from the compiler's references so they cannot collide with the publicized copy;
+  their extern aliases are unioned and `EmbedInteropTypes` kept if any set it. Matches with a
+  DIFFERENT assembly identity (version/public key — a legal pair only under extern aliases) are
+  left in place untouched (warning), `TUMIA005` publicize failure, e.g. unreadable/locked
   assembly (error).
 - Incrementality is content-based (source path + SHA-256) and versioned: upgrading TUnit.Mocks
   re-publicizes even when the referenced assembly is unchanged, so rewrite-rule fixes are never
