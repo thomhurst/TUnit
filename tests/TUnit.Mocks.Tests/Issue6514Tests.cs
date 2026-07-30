@@ -363,6 +363,25 @@ public class Issue6514Tests
         }
     }
 
+    // Review finding on #6519: the auto-mock cache re-key to (memberName, Type) removed the
+    // public TryGetAutoMock(string, out IMock?) CLR signature — a binary break for assemblies
+    // compiled against the previous shape. The legacy overload must keep resolving entries by
+    // the old memberName + "|" + returnType.FullName key format.
+    [Test]
+    public async Task Legacy_String_TryGetAutoMock_Overload_Resolves_Cached_Auto_Mocks()
+    {
+        var features = IStubFeatures.Mock();
+        var stub = features.Object.Get<INeverMockedFeature>();
+
+        var engine = ((IMockEngineAccess<IStubFeatures>)features).Engine;
+        var legacyKey = "Get|" + typeof(INeverMockedFeature).FullName;
+
+        await Assert.That(engine.TryGetAutoMock(legacyKey, out var cached)).IsTrue();
+        await Assert.That(cached!.ObjectInstance).IsSameReferenceAs(stub!);
+
+        await Assert.That(engine.TryGetAutoMock("Get|No.Such.Type", out _)).IsFalse();
+    }
+
     // Bare NotInParallel: this test flips a global setting, so nothing may run alongside it.
     [Test]
     [NotInParallel]

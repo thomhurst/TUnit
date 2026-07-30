@@ -680,6 +680,36 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
+    /// Tries to get a cached auto-mock by the legacy string cache key
+    /// (<c>memberName + "|" + returnType.FullName</c>). Kept for binary compatibility with
+    /// assemblies compiled against the previous shape of this helper; new code uses the
+    /// <see cref="TryGetAutoMock(string, Type, out IMock?)"/> overload, which keys by Type
+    /// identity instead of a name string.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
+    {
+        if (Volatile.Read(ref _autoMockCache) is not { } cache)
+        {
+            mock = null;
+            return false;
+        }
+
+        foreach (var entry in cache)
+        {
+            if (entry.Value is not null &&
+                string.Equals(entry.Key.MemberName + "|" + entry.Key.ReturnType.FullName, cacheKey, StringComparison.Ordinal))
+            {
+                mock = entry.Value;
+                return true;
+            }
+        }
+
+        mock = null;
+        return false;
+    }
+
+    /// <summary>
     /// Clears all setups and call history.
     /// </summary>
     public void Reset()
