@@ -47,6 +47,22 @@ public interface INumericAsyncService
     ValueTask<double> GetRatioAsync();
 
     Task<long> AddAsync(int x);
+
+    Task<int> GetSmallAsync();
+
+    Task<decimal> GetPriceAsync();
+
+    Task<long?> GetCountOrNullAsync();
+}
+
+// dynamic result (#6518 Codex round 2): `dynamic` is illegal as a pattern type (CS8208) and as
+// a typeof operand (CS1962), so the conversion helper must spell it `object` — merely mocking
+// this interface failing to COMPILE is the regression.
+public interface IDynamicAsyncService
+{
+    Task<dynamic> GetAsync();
+
+    ValueTask<dynamic> GetValueAsync();
 }
 
 // User-named type parameter (#6518 review finding): the alias's own type parameter must be
@@ -309,6 +325,144 @@ public class Issue6515Tests
 
         // Boxed so the assertion targets the task reference itself, not its awaited result.
         await Assert.That((object?)mock.Object.GetAsync()).IsNull();
+    }
+
+    [Test]
+    public async Task Task_Of_Dynamic_Member_Converts_The_Factory_Result()
+    {
+        // `async () => "dyn"` infers Task<string>, which is invariant-incompatible with the
+        // declared Task<dynamic>, so the generic alias binds and the conversion helper runs.
+        var mock = IDynamicAsyncService.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "dyn";
+        });
+
+        string result = await mock.Object.GetAsync();
+
+        await Assert.That(result).IsEqualTo("dyn");
+    }
+
+    [Test]
+    public async Task ValueTask_Of_Dynamic_Member_Converts_The_Factory_Result()
+    {
+        var mock = IDynamicAsyncService.Mock();
+        mock.GetValueAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 7;
+        });
+
+        int result = await mock.Object.GetValueAsync();
+
+        await Assert.That(result).IsEqualTo(7);
+    }
+
+    [Test]
+    public async Task Task_Of_Dynamic_Member_Accepts_A_Null_Factory_Result()
+    {
+        // dynamic accepts null — the non-nullable value-type null guard must not fire here.
+        var mock = IDynamicAsyncService.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (string?)null;
+        });
+
+        object? result = await mock.Object.GetAsync();
+
+        await Assert.That(result).IsNull();
+    }
+
+    [Test]
+    public async Task Null_From_A_Factory_Inferring_Nullable_On_A_NonNullable_Value_Member_Throws()
+    {
+        // `async () => (long?)null` infers Task<long?> on the Task<long> member; the null must
+        // not silently become default(long) — zero would be corrupted data.
+        var mock = INumericAsyncService.Mock();
+        mock.GetCountAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (long?)null;
+        });
+
+        await Assert.That(async () => await mock.Object.GetCountAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Null_From_A_Factory_On_A_Nullable_Value_Member_Round_Trips()
+    {
+        // `async () => (int?)null` infers Task<int?> on the Task<long?> member — a different
+        // task type, so the conversion helper runs; null is valid for the nullable result.
+        var mock = INumericAsyncService.Mock();
+        mock.GetCountOrNullAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (int?)null;
+        });
+
+        await Assert.That(await mock.Object.GetCountOrNullAsync()).IsNull();
+    }
+
+    [Test]
+    public async Task Long_To_Int_Narrowing_Attempt_Throws_Instead_Of_Truncating()
+    {
+        // long → int is not an implicit C# conversion; the helper must not replay it.
+        var mock = INumericAsyncService.Mock();
+        mock.GetSmallAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 5L;
+        });
+
+        await Assert.That(async () => await mock.Object.GetSmallAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Double_To_Int_Rounding_Attempt_Throws_Instead_Of_Rounding()
+    {
+        // Convert.ChangeType would round 1.9 to 2; C# has no double → int implicit conversion.
+        var mock = INumericAsyncService.Mock();
+        mock.GetSmallAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 1.9;
+        });
+
+        await Assert.That(async () => await mock.Object.GetSmallAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Int_To_Decimal_Widening_Works()
+    {
+        // int → decimal IS an implicit numeric conversion and must keep working.
+        var mock = INumericAsyncService.Mock();
+        mock.GetPriceAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 42;
+        });
+
+        await Assert.That(await mock.Object.GetPriceAsync()).IsEqualTo(42m);
+    }
+
+    [Test]
+    public async Task Double_To_Decimal_Is_Not_Implicit_And_Throws()
+    {
+        // double → decimal is only an EXPLICIT conversion in C#.
+        var mock = INumericAsyncService.Mock();
+        mock.GetPriceAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 1.5;
+        });
+
+        await Assert.That(async () => await mock.Object.GetPriceAsync())
+            .Throws<InvalidCastException>();
     }
 
     [Test]

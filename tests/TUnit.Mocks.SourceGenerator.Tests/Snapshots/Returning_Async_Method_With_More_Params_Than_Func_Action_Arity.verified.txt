@@ -221,8 +221,13 @@ namespace TUnit.Mocks.Generated
             switch (value)
             {
                 case int exact: return exact;
+                case null when typeof(int).IsValueType && global::System.Nullable.GetUnderlyingType(typeof(int)) is null: throw new global::System.InvalidCastException("The async factory (result type '" + typeof(TAsyncFactoryResult) + "') produced a null result, but the member's declared result type '" + typeof(int) + "' is a non-nullable value type. Return a non-null value of the declared type from the factory.");
                 case null: return default(int)!;
-                case global::System.IConvertible convertible when convertible is not string && convertible is not bool: return (int)global::System.Convert.ChangeType(convertible, typeof(int), global::System.Globalization.CultureInfo.InvariantCulture);
+                case sbyte number: return number;
+                case byte number: return number;
+                case short number: return number;
+                case ushort number: return number;
+                case char number: return number;
                 default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(int) + "'. Cast the factory result to the declared type in the lambda.");
             }
         }

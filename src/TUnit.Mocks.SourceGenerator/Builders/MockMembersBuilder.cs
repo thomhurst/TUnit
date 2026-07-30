@@ -1886,10 +1886,12 @@ internal static class MockMembersBuilder
             //   converted to the declared task type: an exact-typed task passes through untouched
             //   (identity preserved), anything else is mirrored by an async wrapper that stays
             //   pending until the inner task completes. The wrapper honors reference/boxing
-            //   conversions and — for numeric-primitive result types — implicit numeric widening;
-            //   a genuinely wrong-typed factory surfaces as an informative InvalidCastException
-            //   when its task completes. (User-defined implicit conversions are not replayed at
-            //   runtime — cast the factory result to the declared type in the lambda.)
+            //   conversions and — for numeric-primitive result types — C#'s implicit numeric
+            //   widening table, and nothing more: narrowing/rounding (long → int, double → int),
+            //   a null result for a non-nullable value-type member, and any genuinely wrong-typed
+            //   factory all surface as an informative InvalidCastException when the task
+            //   completes. (User-defined implicit conversions are not replayed at runtime — cast
+            //   the factory result to the declared type in the lambda.)
             // - A null Task from the factory (valid for outer-nullable members) bypasses the
             //   conversion and flows to the raw-return check, which accepts null for those
             //   members.
@@ -1900,7 +1902,16 @@ internal static class MockMembersBuilder
             // with each other.
             var taskKind = isValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
             var resultType = GetTaskResultType(taskType);
+            // `dynamic` erases to object at runtime but is illegal as a pattern type (CS8208)
+            // and as a typeof operand (CS1962), so the helper's pattern/typeof spell it object —
+            // object → dynamic is an identity conversion, so `return exact;` still satisfies the
+            // declared result type. Constructed types containing dynamic (Task<dynamic>,
+            // List<dynamic>) are legal in both and need no mapping.
             var patternType = resultType.TrimEnd('?');
+            if (patternType == "dynamic")
+            {
+                patternType = "object";
+            }
             writer.AppendLine(aliasDoc);
             if (isValueTask)
             {
@@ -1922,12 +1933,26 @@ internal static class MockMembersBuilder
                 using (writer.Block())
                 {
                     writer.AppendLine($"case {patternType} exact: return exact;");
-                    writer.AppendLine($"case null: return default({resultType})!;");
-                    if (IsNumericPrimitive(patternType))
+                    if (!resultType.EndsWith("?") && patternType is not ("object" or "string"))
                     {
-                        // string/bool are IConvertible but have no numeric conversion in C# —
-                        // excluding them keeps ChangeType from silently parsing "123" to a number.
-                        writer.AppendLine($"case global::System.IConvertible convertible when convertible is not string && convertible is not bool: return ({patternType})global::System.Convert.ChangeType(convertible, typeof({patternType}), global::System.Globalization.CultureInfo.InvariantCulture);");
+                        // A null result silently becoming default(T) (zero) would corrupt data
+                        // for non-nullable value-type members (Task<int> member, alias inferring
+                        // Task<int?>, factory yielding null). The check is a runtime one because
+                        // a generic result type's nullability depends on the instantiation;
+                        // outer-nullable results (trailing '?') skip it at generation time, and
+                        // object/string are known reference types.
+                        writer.AppendLine($"case null when typeof({patternType}).IsValueType && global::System.Nullable.GetUnderlyingType(typeof({patternType})) is null: throw new global::System.InvalidCastException(\"The async factory (result type '\" + typeof({aliasTypeParam}) + \"') produced a null result, but the member's declared result type '\" + typeof({patternType}) + \"' is a non-nullable value type. Return a non-null value of the declared type from the factory.\");");
+                    }
+                    writer.AppendLine($"case null: return default({resultType})!;");
+                    // Only the implicit numeric widening conversions C# itself permits
+                    // (sbyte → long, int → double, ...) are replayed, each as a dedicated case
+                    // whose conversion the compiler verifies. Convert.ChangeType would also
+                    // accept narrowing/rounding conversions (long → int, double → int,
+                    // double → decimal) that C# rejects implicitly, silently corrupting the
+                    // value — those fall through to the informative InvalidCastException below.
+                    foreach (var source in GetImplicitNumericWideningSources(patternType))
+                    {
+                        writer.AppendLine($"case {source} number: return number;");
                     }
                     writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced a result of type '\" + value.GetType() + \"', which is not convertible to the member's declared result type '\" + typeof({patternType}) + \"'. Cast the factory result to the declared type in the lambda.\");");
                 }
@@ -1970,11 +1995,15 @@ internal static class MockMembersBuilder
     }
 
     /// <summary>
-    /// True when the type string is a numeric primitive with implicit widening conversions
-    /// (byte → long, int → double, ...) that the async conversion helper replays via
-    /// <c>Convert.ChangeType</c>, since a boxed value cannot be unboxed as a wider type.
+    /// The C# source types whose values convert to <paramref name="type"/> via an implicit
+    /// numeric widening conversion (C# spec §10.2.3) — the exact set the async conversion
+    /// helper replays for a boxed factory result, each as a compiler-verified cast case
+    /// (a boxed value cannot be unboxed as a wider type). Empty for non-numeric types and
+    /// for numeric types with no implicit sources (sbyte, byte, char). Note decimal:
+    /// integral → decimal is implicit, but float/double → decimal (and decimal → anything)
+    /// is not.
     /// </summary>
-    private static bool IsNumericPrimitive(string type)
+    private static string[] GetImplicitNumericWideningSources(string type)
     {
         var name = type.StartsWith("global::") ? type.Substring("global::".Length) : type;
         if (name.StartsWith("System."))
@@ -1982,10 +2011,19 @@ internal static class MockMembersBuilder
             name = name.Substring("System.".Length);
         }
 
-        return name is "sbyte" or "byte" or "short" or "ushort" or "int" or "uint" or "long" or "ulong"
-            or "char" or "float" or "double" or "decimal"
-            or "SByte" or "Byte" or "Int16" or "UInt16" or "Int32" or "UInt32" or "Int64" or "UInt64"
-            or "Char" or "Single" or "Double" or "Decimal";
+        return name switch
+        {
+            "short" or "Int16" => ["sbyte", "byte"],
+            "ushort" or "UInt16" => ["byte", "char"],
+            "int" or "Int32" => ["sbyte", "byte", "short", "ushort", "char"],
+            "uint" or "UInt32" => ["byte", "ushort", "char"],
+            "long" or "Int64" => ["sbyte", "byte", "short", "ushort", "int", "uint", "char"],
+            "ulong" or "UInt64" => ["byte", "ushort", "uint", "char"],
+            "float" or "Single" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char"],
+            "double" or "Double" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char", "float"],
+            "decimal" or "Decimal" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char"],
+            _ => [],
+        };
     }
 
     /// <summary>

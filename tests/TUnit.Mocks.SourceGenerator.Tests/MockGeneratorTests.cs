@@ -438,6 +438,34 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Dynamic_Async_Result()
+    {
+        // #6518 review: `dynamic` is illegal as a pattern type (CS8208) and as a typeof operand
+        // (CS1962), so the async conversion helper must spell it `object` — merely mocking this
+        // interface used to break the consumer's compilation.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IDynamicService
+            {
+                Task<dynamic> GetAsync();
+                ValueTask<dynamic> ComputeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IDynamicService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Generic_Methods()
     {
         var source = """

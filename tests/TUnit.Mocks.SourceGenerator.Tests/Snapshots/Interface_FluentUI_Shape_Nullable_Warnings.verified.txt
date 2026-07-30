@@ -772,6 +772,7 @@ namespace TUnit.Mocks.Generated
             switch (value)
             {
                 case global::IDialogReference exact: return exact;
+                case null when typeof(global::IDialogReference).IsValueType && global::System.Nullable.GetUnderlyingType(typeof(global::IDialogReference)) is null: throw new global::System.InvalidCastException("The async factory (result type '" + typeof(TAsyncFactoryResult) + "') produced a null result, but the member's declared result type '" + typeof(global::IDialogReference) + "' is a non-nullable value type. Return a non-null value of the declared type from the factory.");
                 case null: return default(global::IDialogReference)!;
                 default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(global::IDialogReference) + "'. Cast the factory result to the declared type in the lambda.");
             }
