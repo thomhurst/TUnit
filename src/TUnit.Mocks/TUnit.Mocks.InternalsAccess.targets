@@ -6,15 +6,22 @@
        Selected references are swapped (for the compiler only) with copies whose internals are
        public, and IgnoresAccessChecksTo is applied so CoreCLR skips accessibility checks at
        runtime. The original assemblies still ship and load; the rewritten copies never leave
-       the intermediate directory. -->
+       the intermediate directory. Fully inert unless the property is set. -->
 
-  <PropertyGroup>
-    <TUnitMocksInternalsAccessTasksAssembly Condition="'$(TUnitMocksInternalsAccessTasksAssembly)' == ''">$(MSBuildThisFileDirectory)bin\$(Configuration)\net10.0\TUnit.Mocks.InternalsAccess.Tasks.dll</TUnitMocksInternalsAccessTasksAssembly>
+  <PropertyGroup Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true'">
+    <_TUnitMocksInternalsAccessTasksTfm Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</_TUnitMocksInternalsAccessTasksTfm>
+    <_TUnitMocksInternalsAccessTasksTfm Condition="'$(_TUnitMocksInternalsAccessTasksTfm)' == ''">net472</_TUnitMocksInternalsAccessTasksTfm>
+
+    <!-- Packaged layout: this file sits in buildTransitive/<tfm>/ (or build/netstandard2.0/),
+         with the task under tasks/<tfm>/ at the package root. -->
+    <TUnitMocksInternalsAccessTasksAssembly Condition="'$(TUnitMocksInternalsAccessTasksAssembly)' == '' and Exists('$(MSBuildThisFileDirectory)..\..\tasks\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll')">$(MSBuildThisFileDirectory)..\..\tasks\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll</TUnitMocksInternalsAccessTasksAssembly>
+
+    <!-- Repo-local layout: this file sits in src/TUnit.Mocks/, the task project beside it.
+         Dev loop note: MSBuild nodes load the task assembly in-proc and hold the file lock
+         across builds — run `dotnet build-server shutdown` after changing the task project. -->
+    <TUnitMocksInternalsAccessTasksAssembly Condition="'$(TUnitMocksInternalsAccessTasksAssembly)' == ''">$(MSBuildThisFileDirectory)..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\$(_TUnitMocksInternalsAccessTasksTfm)\TUnit.Mocks.InternalsAccess.Tasks.dll</TUnitMocksInternalsAccessTasksAssembly>
   </PropertyGroup>
 
-  <!-- Dev loop note: MSBuild nodes load this assembly in-proc and hold the file lock across
-       builds. After changing the task project, run `dotnet build-server shutdown` before
-       rebuilding it. -->
   <UsingTask TaskName="TUnit.Mocks.InternalsAccess.Tasks.PublicizeAssemblyReferences"
              AssemblyFile="$(TUnitMocksInternalsAccessTasksAssembly)"
              Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true'" />
@@ -22,7 +29,8 @@
   <Target Name="_TUnitMocksInternalsAccessNetFxGuard"
           BeforeTargets="CoreCompile"
           Condition="'$(TUnitMocksExperimentalInternalsAccess)' == 'true' and '@(TUnitMocksInternalsAccess)' != '' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Warning Text="TUnit.Mocks internals access is inert on .NET Framework: the runtime does not honor IgnoresAccessChecksToAttribute. References were not publicized for this target." />
+    <Warning Code="TUMIA002"
+             Text="TUnit.Mocks internals access is inert on .NET Framework: the runtime does not honor IgnoresAccessChecksToAttribute. References were not publicized for this target." />
   </Target>
 
   <Target Name="TUnitMocksPublicizeReferences"

@@ -55,6 +55,33 @@ public class InternalsAccessTests
     }
 
     [Test]
+    public async Task Closed_Generic_Internal_Interface_Is_Mockable()
+    {
+        var repository = IInternalRepository<string>.Mock();
+        repository.Load(Any<int>()).Returns(id => $"row-{id}");
+
+        var features = IFeatureCollection.Mock();
+        features.Get<IInternalRepository<string>>().Returns(repository.Object);
+
+        await Assert.That(SdkRuntime.DescribeRepository(features.Object)).IsEqualTo("row-1");
+    }
+
+    [Test]
+    public async Task Internal_Class_Is_Partial_Mockable()
+    {
+        // Partial-mock shape: internal class, virtual members, internal constructor — all
+        // publicized for the compiler, honored by IgnoresAccessChecksTo at runtime.
+        var widget = InternalWidget.Mock();
+        widget.Name.Returns("mocked");
+
+        var features = IFeatureCollection.Mock();
+        features.Get<InternalWidget>().Returns(widget.Object);
+
+        // Weight() is unconfigured, so the virtual base implementation runs.
+        await Assert.That(SdkRuntime.DescribeWidget(features.Object)).IsEqualTo("mocked:100");
+    }
+
+    [Test]
     public async Task Manual_Implementation_Of_The_Internal_Interface_Loads_And_Runs()
     {
         // Proves IgnoresAccessChecksTo is honored at type-load time for hand-written

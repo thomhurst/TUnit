@@ -4,9 +4,12 @@
     <!-- Stands in for a third-party SDK. Deliberately grants NO InternalsVisibleTo — not to the
          test assembly and not to DynamicProxyGenAssembly2 — so the internals-access pipeline is
          the only way its internal types can be reached (the case runtime auto-stubs cannot
-         cover). -->
+         cover). Strong-named like real SDK assemblies: the publicized compile-time copy must
+         preserve the signed identity so the compiled IL binds to this original at runtime. -->
     <TargetFrameworks>net10.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
 </Project>

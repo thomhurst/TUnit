@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Mono.Cecil;
@@ -19,7 +23,10 @@ namespace TUnit.Mocks.InternalsAccess.Tasks;
 /// </summary>
 public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 {
-    /// <summary>All resolved compile-time references (@(ReferencePath)).</summary>
+    /// <summary>
+    /// The compiler's resolved references (@(ReferencePathWithRefAssemblies)) — each ItemSpec is
+    /// exactly the file the compiler would consume, reference assemblies included.
+    /// </summary>
     [Required]
     public ITaskItem[] ReferencePaths { get; set; } = [];
 
@@ -36,7 +43,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     public string GeneratedSourceFile { get; set; } = "";
 
     /// <summary>
-    /// Publicized references. ItemSpec = rewritten copy; %(Original) = the ReferencePath item it
+    /// Publicized references. ItemSpec = rewritten copy; %(Original) = the reference item it
     /// replaces, for the targets file to Remove.
     /// </summary>
     [Output]
@@ -57,16 +64,22 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 
             if (reference is null)
             {
-                Log.LogError($"TUnitMocksInternalsAccess: no resolved reference named '{name}' was found. " +
+                Log.LogError(
+                    subcategory: null, errorCode: "TUMIA001", helpKeyword: null,
+                    file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
+                    message: $"TUnitMocksInternalsAccess: no resolved reference named '{name}' was found. " +
                              "The value must be the simple assembly name of a direct or transitive reference.");
-                return false;
+                continue;
             }
 
-            // The compiler consumes the reference assembly when one exists (project references
-            // produce one under obj/ref; packages may ship ref/ assemblies) — that is the file
-            // that must be publicized.
-            var referenceAssembly = reference.GetMetadata("ReferenceAssembly");
-            var source = string.IsNullOrEmpty(referenceAssembly) ? reference.ItemSpec : referenceAssembly;
+            // Publicize the IMPLEMENTATION assembly, not the reference assembly the compiler
+            // would normally consume: Roslyn ref assemblies strip internal members when the
+            // assembly grants no InternalsVisibleTo (internal types survive as empty shells —
+            // e.g. an internal constructor would be gone). ReferencePathWithRefAssemblies items
+            // carry the implementation path as %(OriginalPath) when a ref assembly was
+            // substituted.
+            var originalPath = reference.GetMetadata("OriginalPath");
+            var source = string.IsNullOrEmpty(originalPath) ? reference.ItemSpec : originalPath;
             var destination = Path.Combine(OutputDirectory, Path.GetFileName(source));
 
             if (!File.Exists(destination) || File.GetLastWriteTimeUtc(destination) < File.GetLastWriteTimeUtc(source))
@@ -74,8 +87,14 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 Publicize(source, destination);
                 Log.LogMessage(MessageImportance.Normal, $"TUnitMocksInternalsAccess: publicized '{source}' -> '{destination}'.");
             }
+            else
+            {
+                Log.LogMessage(MessageImportance.Low, $"TUnitMocksInternalsAccess: '{destination}' is up to date.");
+            }
 
             var item = new TaskItem(destination);
+            // "Original" is what the targets file Removes — the reference item as the compiler
+            // knew it (the ref assembly when one existed), not the implementation path.
             item.SetMetadata("Original", reference.ItemSpec);
             // Compile-time only: never copy the rewritten assembly to the output directory.
             item.SetMetadata("Private", "false");
@@ -84,7 +103,11 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             publicizedNames.Add(name);
         }
 
-        WriteIgnoresAccessChecksToSource(publicizedNames);
+        if (!Log.HasLoggedErrors)
+        {
+            WriteIgnoresAccessChecksToSource(publicizedNames);
+        }
+
         PublicizedReferences = outputs.ToArray();
         return !Log.HasLoggedErrors;
     }

@@ -50,6 +50,43 @@
             <Pack>true</Pack>
             <PackagePath>$(BuildPath)</PackagePath>
         </None>
+
+        <TfmSpecificPackageFile Include="TUnit.Mocks.InternalsAccess.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildTransitivePath)</PackagePath>
+        </TfmSpecificPackageFile>
+
+        <None Include="TUnit.Mocks.InternalsAccess.targets">
+            <Pack>true</Pack>
+            <PackagePath>$(BuildPath)</PackagePath>
+        </None>
+    </ItemGroup>
+
+    <!-- Experimental internals-access publicizer task (#6514): shipped under tasks/<tfm>/ for
+         both MSBuild runtimes, resolved by TUnit.Mocks.InternalsAccess.targets. The project
+         reference is a build-order edge only (the task multi-targets MSBuild runtimes, not this
+         library's frameworks). NU5100 flags assemblies outside lib/, which is exactly right for
+         MSBuild task assemblies — they must never be referenced by consuming projects. -->
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);NU5100</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.Tasks.csproj"
+                          ReferenceOutputAssembly="false"
+                          SkipGetTargetFrameworkProperties="true"
+                          SetTargetFramework="TargetFramework=net472"
+                          Private="false" />
+        <ProjectReference Include="..\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.Tasks.csproj"
+                          ReferenceOutputAssembly="false"
+                          SkipGetTargetFrameworkProperties="true"
+                          SetTargetFramework="TargetFramework=net8.0"
+                          Private="false" />
+
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\net472\TUnit.Mocks.InternalsAccess.Tasks.dll" Pack="true" PackagePath="tasks/net472" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\net472\Mono.Cecil.dll" Pack="true" PackagePath="tasks/net472" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\net8.0\TUnit.Mocks.InternalsAccess.Tasks.dll" Pack="true" PackagePath="tasks/net8.0" Visible="false" />
+        <None Include="$(MSBuildProjectDirectory)\..\TUnit.Mocks.InternalsAccess.Tasks\bin\$(Configuration)\net8.0\Mono.Cecil.dll" Pack="true" PackagePath="tasks/net8.0" Visible="false" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

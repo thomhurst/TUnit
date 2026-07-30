@@ -22,14 +22,18 @@
     <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj"
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
-    <!-- Build-order only: the publicizer task assembly must exist before this project compiles. -->
-    <ProjectReference Include="..\..\src\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.Tasks.csproj"
-                      ReferenceOutputAssembly="false" />
+    <!-- Referenced output so the task class itself is unit-testable; this also guarantees the
+         task assembly exists before this project compiles (the targets pipeline loads it). -->
+    <ProjectReference Include="..\..\src\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.Tasks.csproj" />
+
+    <!-- The task excludes MSBuild runtime assets (the MSBuild host provides them); the unit
+         tests run the task in-process, so they need them for real. -->
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.8.3" />
   </ItemGroup>
 
+  <!-- The internals-access pipeline itself is imported by TUnit.Mocks.targets. -->
   <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.props" />
   <Import Project="..\..\src\TUnit.Mocks\TUnit.Mocks.targets" />
   <Import Project="..\..\eng\TestProject.targets" />
-  <Import Project="..\..\src\TUnit.Mocks.InternalsAccess.Tasks\TUnit.Mocks.InternalsAccess.targets" />
 
 </Project>

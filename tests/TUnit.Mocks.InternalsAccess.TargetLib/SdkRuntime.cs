@@ -20,10 +20,44 @@ internal interface IInternalBindingsFeature
 }
 
 /// <summary>
+/// An internal generic interface: closed instantiations must be mockable too.
+/// </summary>
+internal interface IInternalRepository<T>
+{
+    T Load(int id);
+}
+
+/// <summary>
+/// An internal class with virtual members and an internal constructor — the partial-mock shape.
+/// </summary>
+internal class InternalWidget
+{
+    internal InternalWidget()
+    {
+    }
+
+    public virtual string Name => "real-widget";
+
+    public virtual int Weight() => 100;
+}
+
+/// <summary>
 /// Simulates SDK-internal call sites the test has no control over.
 /// </summary>
 public static class SdkRuntime
 {
+    public static string DescribeRepository(IFeatureCollection features)
+    {
+        var repository = features.Get<IInternalRepository<string>>();
+        return repository is null ? "<missing>" : repository.Load(1);
+    }
+
+    public static string DescribeWidget(IFeatureCollection features)
+    {
+        var widget = features.Get<InternalWidget>();
+        return widget is null ? "<missing>" : $"{widget.Name}:{widget.Weight()}";
+    }
+
     public static string DescribeInvocation(IFeatureCollection features)
     {
         var bindings = features.Get<IInternalBindingsFeature>();
