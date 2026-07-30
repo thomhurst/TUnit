@@ -562,6 +562,87 @@ public class PublicizeAssemblyReferencesTaskTests
             .IsEqualTo(new Version(99, 0, 0, 0));
     }
 
+    [Test]
+    public async Task Colliding_File_Name_Does_Not_Hide_The_Identity_Match()
+    {
+        // One reference carries the requested FILE name but a different assembly identity, while
+        // a renamed reference holds the requested identity. The documented contract is the simple
+        // assembly name, so the identity match must win — a filename-first lookup would publicize
+        // the wrong assembly and leave the intended reference untouched.
+        var dir = NewScratchDirectory();
+
+        var decoyDir = NewScratchDirectory();
+        var decoy = Path.Combine(decoyDir, TargetLibName + ".dll");
+        CreateRenamedIdentityCopy(TargetLibPath, decoy, "Some.Unrelated.Assembly");
+
+        var aliasDir = NewScratchDirectory();
+        var alias = Path.Combine(aliasDir, "VendorAlias.dll");
+        File.Copy(TargetLibPath, alias);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(decoy), new TaskItem(alias)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(task.PublicizedReferences.Length).IsEqualTo(1);
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(alias);
+        await Assert.That(AssemblyName.GetAssemblyName(task.PublicizedReferences[0].ItemSpec).Name)
+            .IsEqualTo(TargetLibName);
+    }
+
+    [Test]
+    public async Task Runtime_Asset_With_Conflicting_Public_Key_Token_Is_Never_Selected()
+    {
+        // Same simple name and version but a different public key token is a DIFFERENT assembly;
+        // handing it back as the "implementation" would swap identities. The stripped ref
+        // assembly must be publicized instead, with the TUMIA003 warning.
+        var dir = NewScratchDirectory();
+
+        var refAsmDir = NewScratchDirectory();
+        var refAsm = Path.Combine(refAsmDir, TargetLibName + ".dll");
+        CreateReferenceAssemblyCopy(TargetLibPath, refAsm);
+
+        var unsignedDir = NewScratchDirectory();
+        var unsignedImpl = Path.Combine(unsignedDir, TargetLibName + ".dll");
+        CreateUnsignedCopy(TargetLibPath, unsignedImpl);
+
+        // Sanity: the scenario only exists if the tokens actually differ.
+        await Assert.That(AssemblyName.GetAssemblyName(TargetLibPath).GetPublicKeyToken()!.Length)
+            .IsNotEqualTo(0);
+        await Assert.That(AssemblyName.GetAssemblyName(unsignedImpl).GetPublicKeyToken() ?? [])
+            .IsEmpty();
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(refAsm)];
+        task.RuntimeAssemblies = [new TaskItem(unsignedImpl)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(1);
+        await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA003");
+
+        // Publicized from the ref assembly itself — it keeps ITS identity.
+        var publicizedToken = AssemblyName.GetAssemblyName(task.PublicizedReferences[0].ItemSpec).GetPublicKeyToken();
+        await Assert.That(publicizedToken).IsEquivalentTo(AssemblyName.GetAssemblyName(TargetLibPath).GetPublicKeyToken()!);
+    }
+
+    private static void CreateRenamedIdentityCopy(string source, string destination, string newAssemblyName)
+    {
+        using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
+        module.Assembly.Name.Name = newAssemblyName;
+        module.Write(destination);
+    }
+
+    private static void CreateUnsignedCopy(string source, string destination)
+    {
+        using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
+        module.Assembly.Name.PublicKey = [];
+        module.Assembly.Name.HasPublicKey = false;
+        module.Write(destination);
+    }
+
     private static void CreateReferenceAssemblyCopy(string source, string destination)
     {
         using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);

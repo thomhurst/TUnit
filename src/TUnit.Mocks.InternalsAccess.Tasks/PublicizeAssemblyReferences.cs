@@ -154,23 +154,29 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     }
 
     /// <summary>
-    /// Resolves the requested simple name against the compiler's references: by file name first
-    /// (the common case), then by each reference's REAL assembly identity — a compile asset can
-    /// be renamed relative to the assembly it contains (e.g. VendorAlias.dll holding identity
-    /// Vendor.Core), and the documented contract is the simple ASSEMBLY name, not the file name.
+    /// Resolves the requested simple name against the compiler's references. The documented
+    /// contract is the simple ASSEMBLY name, so a readable identity always decides: a renamed
+    /// asset (VendorAlias.dll holding identity Vendor.Core) matches, and a colliding file name
+    /// holding a DIFFERENT identity must not hide it. File-name matching survives in two places
+    /// only — references whose identity cannot be read ride along with the identity matches, and
+    /// when NO identity matches at all the file name is tried as a compatibility fallback (the
+    /// pre-existing behavior of requesting a renamed asset by its file name).
     /// </summary>
     private List<ITaskItem> FindReferenceMatches(string name)
     {
-        var byFileName = ReferencePaths.Where(r =>
-            string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
+        var byIdentity = ReferencePaths.Where(r =>
+            string.Equals(TryGetAssemblyIdentity(r.ItemSpec)?.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        if (byFileName.Count > 0)
+        if (byIdentity.Count > 0)
         {
-            return byFileName;
+            byIdentity.AddRange(ReferencePaths.Where(r =>
+                TryGetAssemblyIdentity(r.ItemSpec) is null &&
+                string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)));
+            return byIdentity;
         }
 
         return ReferencePaths.Where(r =>
-            string.Equals(TryGetAssemblyIdentity(r.ItemSpec)?.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
+            string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
     /// <summary>
@@ -298,17 +304,30 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
            && Equals(left.Version, right.Version)
            && (left.GetPublicKeyToken() ?? []).SequenceEqual(right.GetPublicKeyToken() ?? []);
 
-    private static System.Reflection.AssemblyName? TryGetAssemblyIdentity(string path)
+    // Identity-first matching reads every reference's identity per requested name; cache the
+    // reads so each file is opened once per task invocation.
+    private readonly Dictionary<string, System.Reflection.AssemblyName?> _identityCache = new(StringComparer.Ordinal);
+
+    private System.Reflection.AssemblyName? TryGetAssemblyIdentity(string path)
     {
+        if (_identityCache.TryGetValue(path, out var cached))
+        {
+            return cached;
+        }
+
+        System.Reflection.AssemblyName? identity;
         try
         {
-            return System.Reflection.AssemblyName.GetAssemblyName(path);
+            identity = System.Reflection.AssemblyName.GetAssemblyName(path);
         }
         catch (Exception)
         {
             // Native or otherwise unreadable dll.
-            return null;
+            identity = null;
         }
+
+        _identityCache[path] = identity;
+        return identity;
     }
 
     /// <summary>
@@ -411,11 +430,12 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 
     /// <summary>
     /// Finds the implementation assembly among the runtime/copy-local assets by the reference's
-    /// real assembly identity — a version-exact match wins over a name-only one. Identity, not
-    /// file name, decides: two same-file-name references with distinct identities (extern-alias
-    /// pairs) each search this list, and a filename-first shortcut would hand both the same
-    /// implementation. The requested-name filename match survives only as a fallback for a
-    /// reference whose own identity cannot be read.
+    /// real assembly identity — a full-identity match (name, public key token, version) wins,
+    /// with version drift alone tolerated as a fallback for imperfectly built packages. A
+    /// conflicting public key token is a DIFFERENT assembly that happens to share the simple
+    /// name (extern-alias pairs) and is never handed back — doing so would swap identities.
+    /// The requested-name filename match survives only as a fallback for a reference whose own
+    /// identity cannot be read.
     /// </summary>
     private string? FindRuntimeImplementation(string name, string referencePath)
     {
@@ -425,7 +445,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 string.Equals(Path.GetExtension(p), ".dll", StringComparison.OrdinalIgnoreCase) &&
                 File.Exists(p) &&
                 // Never hand back the reference assembly itself if it also appears as an asset.
-                !string.Equals(Path.GetFullPath(p), Path.GetFullPath(referencePath), StringComparison.OrdinalIgnoreCase))
+                !string.Equals(Path.GetFullPath(p), Path.GetFullPath(referencePath), PathComparison))
             .ToList();
 
         var identity = TryGetAssemblyIdentity(referencePath);
@@ -435,7 +455,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 string.Equals(Path.GetFileNameWithoutExtension(p), name, StringComparison.OrdinalIgnoreCase));
         }
 
-        string? nameOnlyMatch = null;
+        string? versionDriftMatch = null;
         foreach (var candidate in candidates)
         {
             var candidateIdentity = TryGetAssemblyIdentity(candidate);
@@ -450,16 +470,34 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 continue;
             }
 
+            if (!(candidateIdentity.GetPublicKeyToken() ?? []).SequenceEqual(identity.GetPublicKeyToken() ?? []))
+            {
+                continue;
+            }
+
             if (Equals(candidateIdentity.Version, identity.Version))
             {
                 return candidate;
             }
 
-            nameOnlyMatch ??= candidate;
+            versionDriftMatch ??= candidate;
         }
 
-        return nameOnlyMatch;
+        return versionDriftMatch;
     }
+
+    /// <summary>
+    /// Path comparisons fold case only where the filesystem does: on a case-sensitive host,
+    /// /deps/A/Foo.dll and /deps/a/Foo.dll are distinct files, and folding would misjudge the
+    /// implementation as the reference assembly itself.
+    /// </summary>
+    private static StringComparison PathComparison =>
+#if NET
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+#else
+        // The net472 MSBuild host only runs on Windows.
+        StringComparison.OrdinalIgnoreCase;
+#endif
 
     private static bool IsReferenceAssembly(string path)
     {
