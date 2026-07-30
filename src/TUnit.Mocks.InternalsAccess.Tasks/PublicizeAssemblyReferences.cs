@@ -281,17 +281,14 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             return reference.ItemSpec;
         }
 
-        var runtimeMatch = RuntimeAssemblies.FirstOrDefault(r =>
-            string.Equals(Path.GetExtension(r.ItemSpec), ".dll", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase) &&
-            File.Exists(r.ItemSpec));
+        var runtimeMatch = FindRuntimeImplementation(name, reference.ItemSpec);
 
         if (runtimeMatch is not null)
         {
             Log.LogMessage(MessageImportance.Normal,
                 $"TUnitMocksInternalsAccess: '{reference.ItemSpec}' is a reference assembly; " +
-                $"publicizing the implementation '{runtimeMatch.ItemSpec}' instead.");
-            return runtimeMatch.ItemSpec;
+                $"publicizing the implementation '{runtimeMatch}' instead.");
+            return runtimeMatch;
         }
 
         Log.LogWarning(
@@ -302,6 +299,71 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                      "already be stripped from it, in which case internals access will be incomplete for " +
                      $"'{name}'.");
         return reference.ItemSpec;
+    }
+
+    /// <summary>
+    /// Finds the implementation assembly among the runtime/copy-local assets: first by file name
+    /// (the common case), then by the reference's real assembly identity — a compile asset can
+    /// be renamed relative to the assembly it contains, in which case the implementation shows
+    /// up among the runtime assets under the real name, not the requested (file-derived) one.
+    /// A version-exact identity match wins over a name-only one.
+    /// </summary>
+    private string? FindRuntimeImplementation(string name, string referencePath)
+    {
+        var candidates = RuntimeAssemblies
+            .Select(r => r.ItemSpec)
+            .Where(p =>
+                string.Equals(Path.GetExtension(p), ".dll", StringComparison.OrdinalIgnoreCase) &&
+                File.Exists(p) &&
+                // Never hand back the reference assembly itself if it also appears as an asset.
+                !string.Equals(Path.GetFullPath(p), Path.GetFullPath(referencePath), StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var byFileName = candidates.FirstOrDefault(p =>
+            string.Equals(Path.GetFileNameWithoutExtension(p), name, StringComparison.OrdinalIgnoreCase));
+        if (byFileName is not null)
+        {
+            return byFileName;
+        }
+
+        System.Reflection.AssemblyName identity;
+        try
+        {
+            identity = System.Reflection.AssemblyName.GetAssemblyName(referencePath);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+
+        string? nameOnlyMatch = null;
+        foreach (var candidate in candidates)
+        {
+            System.Reflection.AssemblyName candidateIdentity;
+            try
+            {
+                candidateIdentity = System.Reflection.AssemblyName.GetAssemblyName(candidate);
+            }
+            catch (Exception)
+            {
+                // Native or otherwise unreadable dll among the copy-local assets.
+                continue;
+            }
+
+            if (!string.Equals(candidateIdentity.Name, identity.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (Equals(candidateIdentity.Version, identity.Version))
+            {
+                return candidate;
+            }
+
+            nameOnlyMatch ??= candidate;
+        }
+
+        return nameOnlyMatch;
     }
 
     private static bool IsReferenceAssembly(string path)

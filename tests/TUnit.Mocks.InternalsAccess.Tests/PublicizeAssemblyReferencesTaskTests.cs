@@ -386,6 +386,36 @@ public class PublicizeAssemblyReferencesTaskTests
         await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(refAsm);
     }
 
+    [Test]
+    public async Task Renamed_Reference_Assembly_Resolves_Implementation_By_Assembly_Identity()
+    {
+        // The compile asset's file name can differ from the assembly identity it contains; the
+        // implementation then sits among the runtime assets under the REAL name, so a
+        // file-name-only match would miss it and publicize the stripped ref assembly (TUMIA003).
+        var dir = NewScratchDirectory();
+        var refAsmDir = NewScratchDirectory();
+        var refAsm = Path.Combine(refAsmDir, "Renamed.Compile.Asset.dll");
+        CreateReferenceAssemblyCopy(TargetLibPath, refAsm);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, "Renamed.Compile.Asset");
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(refAsm)];
+        task.RuntimeAssemblies = [new TaskItem(TargetLibPath)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(0);
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(refAsm);
+
+        // The publicized bits must come from the implementation — the ref-assembly copy would
+        // still carry ReferenceAssemblyAttribute.
+        var publicized = task.PublicizedReferences[0].ItemSpec;
+        using var module = Mono.Cecil.ModuleDefinition.ReadModule(publicized);
+        var isRefAssembly = module.Assembly.CustomAttributes.Any(a =>
+            a.AttributeType.FullName == "System.Runtime.CompilerServices.ReferenceAssemblyAttribute");
+        await Assert.That(isRefAssembly).IsFalse();
+    }
+
     private static void CreateReferenceAssemblyCopy(string source, string destination)
     {
         using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
