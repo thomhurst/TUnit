@@ -62,6 +62,16 @@ public interface IIndexedFeature
     ValueTask<StubDto> GetDtoAsync();
 }
 
+// Review finding on #6519 (round 5, rebutted): assigning null to a writable stub property or
+// indexer must round-trip. ConcurrentDictionary rejects null KEYS, not values — the stub keys
+// by slot int / index tuple, so storing a null value is fine; this pins that behavior.
+public interface INullAssignableFeature
+{
+    string? Name { get; set; }
+
+    string? this[int index] { get; set; }
+}
+
 // Review finding on #6519 (round 4): the typed cache-miss handlers (1–8 args) must route
 // through the same runtime-stub fallback as the object-array handler. IServiceProvider has no
 // source-generated auto-mock factory (System.* interfaces are excluded), so only the runtime
@@ -254,6 +264,25 @@ public class Issue6514Tests
         await Assert.That(stub["a", 1]).IsEqualTo("multi");
         await Assert.That(stub["a", 2]).IsEqualTo(string.Empty);
         await Assert.That(stub["b", 1]).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Stub_Writable_Property_And_Indexer_Round_Trip_Null()
+    {
+        var features = IStubFeatures.Mock();
+        var stub = features.Object.Get<INullAssignableFeature>();
+
+        // Overwrite a real value with null so the setter genuinely stores null rather than
+        // leaving the slot untouched, then confirm the getter hands the null back instead of
+        // throwing or falling through to the "" default.
+        stub.Name = "set";
+        stub.Name = null;
+        await Assert.That(stub.Name).IsNull();
+
+        stub[1] = "set";
+        stub[1] = null;
+        await Assert.That(stub[1]).IsNull();
+        await Assert.That(stub[2]).IsEqualTo(string.Empty); // untouched index keeps the default
     }
 
     [Test]
