@@ -410,11 +410,12 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     }
 
     /// <summary>
-    /// Finds the implementation assembly among the runtime/copy-local assets: first by file name
-    /// (the common case), then by the reference's real assembly identity — a compile asset can
-    /// be renamed relative to the assembly it contains, in which case the implementation shows
-    /// up among the runtime assets under the real name, not the requested (file-derived) one.
-    /// A version-exact identity match wins over a name-only one.
+    /// Finds the implementation assembly among the runtime/copy-local assets by the reference's
+    /// real assembly identity — a version-exact match wins over a name-only one. Identity, not
+    /// file name, decides: two same-file-name references with distinct identities (extern-alias
+    /// pairs) each search this list, and a filename-first shortcut would hand both the same
+    /// implementation. The requested-name filename match survives only as a fallback for a
+    /// reference whose own identity cannot be read.
     /// </summary>
     private string? FindRuntimeImplementation(string name, string referencePath)
     {
@@ -427,17 +428,11 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 !string.Equals(Path.GetFullPath(p), Path.GetFullPath(referencePath), StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var byFileName = candidates.FirstOrDefault(p =>
-            string.Equals(Path.GetFileNameWithoutExtension(p), name, StringComparison.OrdinalIgnoreCase));
-        if (byFileName is not null)
-        {
-            return byFileName;
-        }
-
         var identity = TryGetAssemblyIdentity(referencePath);
         if (identity is null)
         {
-            return null;
+            return candidates.FirstOrDefault(p =>
+                string.Equals(Path.GetFileNameWithoutExtension(p), name, StringComparison.OrdinalIgnoreCase));
         }
 
         string? nameOnlyMatch = null;
@@ -476,11 +471,24 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     /// <summary>
     /// Stable per-source-path directory token — derived from the path (not content) so the same
     /// source keeps the same output location across builds and incrementality still works.
+    /// Case is folded only where paths are case-insensitive: on a case-sensitive host,
+    /// /deps/A/Foo.dll and /deps/a/Foo.dll are DIFFERENT sources and folding would collapse
+    /// their tokens (and, with equal file names, their destinations).
     /// </summary>
     private static string HashPathToken(string sourcePath)
     {
+        var fullPath = Path.GetFullPath(sourcePath);
+#if NET
+        if (OperatingSystem.IsWindows())
+        {
+            fullPath = fullPath.ToUpperInvariant();
+        }
+#else
+        // The net472 MSBuild host only runs on Windows.
+        fullPath = fullPath.ToUpperInvariant();
+#endif
         using var sha = SHA256.Create();
-        var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(sourcePath).ToUpperInvariant()));
+        var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(fullPath));
 #if NET
         return Convert.ToHexString(hash, 0, 4).ToLowerInvariant();
 #else

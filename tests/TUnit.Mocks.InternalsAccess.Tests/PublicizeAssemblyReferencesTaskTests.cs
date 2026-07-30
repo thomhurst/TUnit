@@ -524,6 +524,44 @@ public class PublicizeAssemblyReferencesTaskTests
         await Assert.That(isRefAssembly).IsFalse();
     }
 
+    [Test]
+    public async Task Same_File_Name_Identity_Pair_Resolves_Each_Implementation_By_Identity()
+    {
+        // Two metadata-only references sharing a file name but holding DISTINCT identities
+        // (extern-alias pair) both search the runtime assets — a filename-first shortcut would
+        // hand both groups the first implementation, so the second publicized copy would carry
+        // the first assembly's identity.
+        var dir = NewScratchDirectory();
+
+        var implOldDir = NewScratchDirectory();
+        var implOld = Path.Combine(implOldDir, TargetLibName + ".dll");
+        CreateDifferentVersionCopy(TargetLibPath, implOld);
+
+        var refNewDir = NewScratchDirectory();
+        var refNew = Path.Combine(refNewDir, TargetLibName + ".dll");
+        CreateReferenceAssemblyCopy(TargetLibPath, refNew);
+        var refOldDir = NewScratchDirectory();
+        var refOld = Path.Combine(refOldDir, TargetLibName + ".dll");
+        CreateReferenceAssemblyCopy(implOld, refOld);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(refNew), new TaskItem(refOld)];
+        task.RuntimeAssemblies = [new TaskItem(TargetLibPath), new TaskItem(implOld)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(task.PublicizedReferences.Length).IsEqualTo(2);
+
+        // Each copy must hold ITS reference's identity, resolved from the matching
+        // implementation — never the other identity's asset.
+        var originalVersion = AssemblyName.GetAssemblyName(TargetLibPath).Version;
+        await Assert.That(AssemblyName.GetAssemblyName(task.PublicizedReferences[0].ItemSpec).Version)
+            .IsEqualTo(originalVersion);
+        await Assert.That(AssemblyName.GetAssemblyName(task.PublicizedReferences[1].ItemSpec).Version)
+            .IsEqualTo(new Version(99, 0, 0, 0));
+    }
+
     private static void CreateReferenceAssemblyCopy(string source, string destination)
     {
         using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
