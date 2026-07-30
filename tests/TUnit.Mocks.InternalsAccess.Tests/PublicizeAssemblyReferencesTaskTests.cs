@@ -111,6 +111,161 @@ public class PublicizeAssemblyReferencesTaskTests
     }
 
     [Test]
+    public async Task Content_Change_Invalidates_Publicized_Copy_Despite_Older_Timestamp()
+    {
+        var dir = NewScratchDirectory();
+
+        // Use a private copy of the source so its content/timestamp can be manipulated.
+        var sourceDir = NewScratchDirectory();
+        var source = Path.Combine(sourceDir, TargetLibName + ".dll");
+        File.Copy(TargetLibPath, source);
+
+        var first = CreateTask(dir, TargetLibName);
+        first.ReferencePaths = [new TaskItem(source)];
+        await Assert.That(first.Execute()).IsTrue();
+
+        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var firstWrite = File.GetLastWriteTimeUtc(rewritten);
+
+        // Different content, timestamp pushed BEFORE the publicized copy — a timestamp-only
+        // check would treat the output as up to date.
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "TUnit.Mocks.dll"), source, overwrite: true);
+        File.SetLastWriteTimeUtc(source, firstWrite.AddMinutes(-5));
+
+        var second = CreateTask(dir, TargetLibName);
+        second.ReferencePaths = [new TaskItem(source)];
+        await Assert.That(second.Execute()).IsTrue();
+
+        await Assert.That(File.GetLastWriteTimeUtc(rewritten)).IsNotEqualTo(firstWrite);
+    }
+
+    [Test]
+    public async Task Replacement_Reference_Preserves_Compiler_Metadata()
+    {
+        var dir = NewScratchDirectory();
+        var reference = new TaskItem(TargetLibPath);
+        reference.SetMetadata("Aliases", "sdkalias");
+        reference.SetMetadata("EmbedInteropTypes", "false");
+
+        var task = CreateTask(dir, TargetLibName);
+        task.ReferencePaths = [reference];
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        var publicized = task.PublicizedReferences[0];
+        await Assert.That(publicized.GetMetadata("Aliases")).IsEqualTo("sdkalias");
+        await Assert.That(publicized.GetMetadata("EmbedInteropTypes")).IsEqualTo("false");
+        // The overrides still win over copied metadata.
+        await Assert.That(publicized.GetMetadata("Private")).IsEqualTo("false");
+        await Assert.That(publicized.GetMetadata("CopyLocal")).IsEqualTo("false");
+    }
+
+    [Test]
+    public async Task Attribute_Definition_Can_Be_Suppressed()
+    {
+        var dir = NewScratchDirectory();
+        var task = CreateTask(dir, TargetLibName);
+        task.EmitAttributeDefinition = false;
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        var source = await File.ReadAllTextAsync(task.GeneratedSourceFile);
+        await Assert.That(source).Contains($"IgnoresAccessChecksTo(\"{TargetLibName}\")");
+        await Assert.That(source).DoesNotContain("class IgnoresAccessChecksToAttribute");
+    }
+
+    [Test]
+    public async Task Ambiguous_Simple_Name_Warns_With_TUMIA004()
+    {
+        var dir = NewScratchDirectory();
+        var duplicateDir = NewScratchDirectory();
+        var duplicate = Path.Combine(duplicateDir, TargetLibName + ".dll");
+        File.Copy(TargetLibPath, duplicate);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(TargetLibPath), new TaskItem(duplicate)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(1);
+        await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA004");
+        // Deterministic: first match wins.
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(TargetLibPath);
+    }
+
+    [Test]
+    public async Task Unreadable_Assembly_Fails_With_TUMIA005_Not_An_Unhandled_Exception()
+    {
+        var dir = NewScratchDirectory();
+        var garbage = Path.Combine(dir, "Garbage.Assembly.dll");
+        await File.WriteAllTextAsync(garbage, "this is not a PE file");
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, "Garbage.Assembly");
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(garbage)];
+
+        await Assert.That(task.Execute()).IsFalse();
+        await Assert.That(engine.Errors.Count).IsEqualTo(1);
+        await Assert.That(engine.Errors[0].Code).IsEqualTo("TUMIA005");
+    }
+
+    [Test]
+    public async Task Reference_Assembly_Without_Implementation_Warns_With_TUMIA003()
+    {
+        var dir = NewScratchDirectory();
+        var refAsmDir = NewScratchDirectory();
+        var refAsm = Path.Combine(refAsmDir, TargetLibName + ".dll");
+        CreateReferenceAssemblyCopy(TargetLibPath, refAsm);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(refAsm)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(1);
+        await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA003");
+    }
+
+    [Test]
+    public async Task Reference_Assembly_Falls_Back_To_Runtime_Implementation()
+    {
+        var dir = NewScratchDirectory();
+        var refAsmDir = NewScratchDirectory();
+        var refAsm = Path.Combine(refAsmDir, TargetLibName + ".dll");
+        CreateReferenceAssemblyCopy(TargetLibPath, refAsm);
+
+        var engine = new StubBuildEngine();
+        var task = CreateTask(dir, TargetLibName);
+        task.BuildEngine = engine;
+        task.ReferencePaths = [new TaskItem(refAsm)];
+        task.RuntimeAssemblies = [new TaskItem(TargetLibPath)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(engine.Warnings.Count).IsEqualTo(0);
+
+        // The swap must still Remove the compiler's item (the ref assembly), while the
+        // publicized bits come from the implementation.
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(refAsm);
+    }
+
+    private static void CreateReferenceAssemblyCopy(string source, string destination)
+    {
+        using var module = Mono.Cecil.ModuleDefinition.ReadModule(source);
+        var attributeType = new Mono.Cecil.TypeReference(
+            "System.Runtime.CompilerServices", "ReferenceAssemblyAttribute",
+            module, module.TypeSystem.CoreLibrary);
+        var constructor = new Mono.Cecil.MethodReference(".ctor", module.TypeSystem.Void, attributeType)
+        {
+            HasThis = true,
+        };
+        module.Assembly.CustomAttributes.Add(new Mono.Cecil.CustomAttribute(constructor));
+        module.Write(destination);
+    }
+
+    [Test]
     public async Task Unresolved_Assembly_Name_Fails_With_TUMIA001()
     {
         var dir = NewScratchDirectory();
@@ -126,6 +281,8 @@ public class PublicizeAssemblyReferencesTaskTests
     private sealed class StubBuildEngine : IBuildEngine
     {
         public List<BuildErrorEventArgs> Errors { get; } = [];
+
+        public List<BuildWarningEventArgs> Warnings { get; } = [];
 
         public bool ContinueOnError => false;
 
@@ -147,8 +304,6 @@ public class PublicizeAssemblyReferencesTaskTests
         {
         }
 
-        public void LogWarningEvent(BuildWarningEventArgs e)
-        {
-        }
+        public void LogWarningEvent(BuildWarningEventArgs e) => Warnings.Add(e);
     }
 }

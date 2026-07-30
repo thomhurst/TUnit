@@ -31,14 +31,23 @@ for TUnit.Mocks:
    types and members are public, preserving the assembly identity (name, version, public key).
    The **implementation** assembly is used as the source — Roslyn reference assemblies strip
    internal members (e.g. internal constructors) when no `InternalsVisibleTo` exists, so
-   publicizing a ref assembly would yield empty shells. Copies live under `obj/` only.
+   publicizing a ref assembly would yield empty shells. `%(OriginalPath)` supplies the
+   implementation when MSBuild substituted a ref assembly; when a package ships its compile
+   asset from `ref/<tfm>` directly (no `OriginalPath`), the implementation is located among the
+   runtime/copy-local assets instead (warning `TUMIA003` if none is found). Copies live under
+   `obj/` only, invalidated by content hash (not timestamps), so downgrades and equal-timestamp
+   replacements re-publicize.
 2. `TUnit.Mocks.InternalsAccess.targets` (imported by `TUnit.Mocks.targets`, fully inert without
    the opt-in) swaps the copies into `ReferencePathWithRefAssemblies` — the item group that feeds
-   the compiler and nothing else. `ReferencePath` is untouched, so copy-local output and
-   `deps.json` keep the original assembly and the runtime binds to it.
+   the compiler and nothing else. The replacement item carries the original reference's metadata
+   (`Aliases`, `EmbedInteropTypes`, ...) so extern-aliased references stay aliased.
+   `ReferencePath` is untouched, so copy-local output and `deps.json` keep the original assembly
+   and the runtime binds to it.
 3. The task emits `[assembly: IgnoresAccessChecksTo(...)]` (plus the attribute definition) into
    the compilation; the runtime honors it and skips accessibility checks, so generated mock
-   classes implementing internal interfaces load and run against the original assembly.
+   classes implementing internal interfaces load and run against the original assembly. If
+   another package already defines `IgnoresAccessChecksToAttribute` in the compilation, set
+   `<TUnitMocksInternalsAccessEmitAttributeDefinition>false</...>` to suppress TUnit's copy.
 4. The TUnit.Mocks source generator needs no changes: through the publicized reference the
    internal types simply look public — discovery, TM007 accessibility checks, and emission all
    behave as for any public type.
@@ -60,6 +69,22 @@ for TUnit.Mocks:
   alone; explicit interface implementations stay private as IL requires.
 - Dev loop: MSBuild nodes hold the task assembly's file lock across builds — run
   `dotnet build-server shutdown` after changing this project.
+- Diagnostics: `TUMIA001` unresolved assembly name (error), `TUMIA002` .NET Framework inert
+  (warning), `TUMIA003` ref-assembly-only source (warning), `TUMIA004` ambiguous simple-name
+  match — first wins (warning), `TUMIA005` publicize failure, e.g. unreadable/locked assembly
+  (error).
+
+## Why a custom task instead of depending on Krafs.Publicizer / IgnoresAccessChecksToGenerator
+
+Those packages are consumer-facing: each wires its own MSBuild entry points, props/targets, and
+item vocabulary into the referencing project. TUnit.Mocks needs the publicize step to ride
+inside its own package transparently (single opt-in property, transitive `buildTransitive`
+import, dual net472/net8.0 MSBuild hosts, `ReferencePathWithRefAssemblies`-only swap so
+`deps.json` stays clean) — none of which those packages expose as a library API; both would
+arrive as additional package references with their own configuration surface for users to
+manage. The rewrite itself (~60 lines of Cecil) is deliberately narrower than theirs: types and
+methods only, no fields, no `IgnoresAccessChecksTo`-free mode. If the scope ever grows toward
+theirs, vendoring or depending on one should be revisited.
 
 ## Validation
 

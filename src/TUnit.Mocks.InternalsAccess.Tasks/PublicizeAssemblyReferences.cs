@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Mono.Cecil;
@@ -34,6 +35,13 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     [Required]
     public ITaskItem[] AssembliesToPublicize { get; set; } = [];
 
+    /// <summary>
+    /// Runtime/copy-local assets (implementation assemblies), used to locate the implementation
+    /// when the compiler reference is itself a metadata-only reference assembly with no
+    /// %(OriginalPath) — e.g. a package whose compile asset comes straight from ref/&lt;tfm&gt;.
+    /// </summary>
+    public ITaskItem[] RuntimeAssemblies { get; set; } = [];
+
     /// <summary>Directory for the rewritten compile-time copies.</summary>
     [Required]
     public string OutputDirectory { get; set; } = "";
@@ -41,6 +49,13 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     /// <summary>Path of the generated IgnoresAccessChecksTo source file.</summary>
     [Required]
     public string GeneratedSourceFile { get; set; } = "";
+
+    /// <summary>
+    /// Whether the generated source also defines IgnoresAccessChecksToAttribute. Turn off when
+    /// another package (IgnoresAccessChecksToGenerator, Fody, ...) already injects the same type
+    /// into the compilation, which would otherwise be a duplicate-type compile error.
+    /// </summary>
+    public bool EmitAttributeDefinition { get; set; } = true;
 
     /// <summary>
     /// Publicized references. ItemSpec = rewritten copy; %(Original) = the reference item it
@@ -59,10 +74,10 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         foreach (var requested in AssembliesToPublicize)
         {
             var name = requested.ItemSpec;
-            var reference = ReferencePaths.FirstOrDefault(r =>
-                string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase));
+            var matches = ReferencePaths.Where(r =>
+                string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            if (reference is null)
+            if (matches.Count == 0)
             {
                 Log.LogError(
                     subcategory: null, errorCode: "TUMIA001", helpKeyword: null,
@@ -72,27 +87,57 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 continue;
             }
 
-            // Publicize the IMPLEMENTATION assembly, not the reference assembly the compiler
-            // would normally consume: Roslyn ref assemblies strip internal members when the
-            // assembly grants no InternalsVisibleTo (internal types survive as empty shells —
-            // e.g. an internal constructor would be gone). ReferencePathWithRefAssemblies items
-            // carry the implementation path as %(OriginalPath) when a ref assembly was
-            // substituted.
-            var originalPath = reference.GetMetadata("OriginalPath");
-            var source = string.IsNullOrEmpty(originalPath) ? reference.ItemSpec : originalPath;
-            var destination = Path.Combine(OutputDirectory, Path.GetFileName(source));
-
-            if (!File.Exists(destination) || File.GetLastWriteTimeUtc(destination) < File.GetLastWriteTimeUtc(source))
+            if (matches.Select(m => m.ItemSpec).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
             {
-                Publicize(source, destination);
-                Log.LogMessage(MessageImportance.Normal, $"TUnitMocksInternalsAccess: publicized '{source}' -> '{destination}'.");
+                Log.LogWarning(
+                    subcategory: null, warningCode: "TUMIA004", helpKeyword: null,
+                    file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
+                    message: $"TUnitMocksInternalsAccess: multiple resolved references match '{name}': " +
+                             $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Using the first; " +
+                             "if that is the wrong one, resolve the version conflict in the project.");
             }
-            else
+
+            var reference = matches[0];
+            string source;
+            string destination;
+
+            try
             {
-                Log.LogMessage(MessageImportance.Low, $"TUnitMocksInternalsAccess: '{destination}' is up to date.");
+                source = ResolveImplementationAssembly(name, reference);
+                destination = Path.Combine(OutputDirectory, Path.GetFileName(source));
+
+                // Content-based incrementality: the signature records the resolved source path
+                // and a hash of its bytes, so a replaced/downgraded assembly with an equal or
+                // older timestamp still invalidates the publicized copy.
+                var signaturePath = destination + ".sig";
+                var signature = source + "\n" + HashFile(source);
+
+                if (!File.Exists(destination) || !File.Exists(signaturePath) || File.ReadAllText(signaturePath) != signature)
+                {
+                    Publicize(source, destination);
+                    File.WriteAllText(signaturePath, signature);
+                    Log.LogMessage(MessageImportance.Normal, $"TUnitMocksInternalsAccess: publicized '{source}' -> '{destination}'.");
+                }
+                else
+                {
+                    Log.LogMessage(MessageImportance.Low, $"TUnitMocksInternalsAccess: '{destination}' is up to date.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.LogError(
+                    subcategory: null, errorCode: "TUMIA005", helpKeyword: null,
+                    file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
+                    message: $"TUnitMocksInternalsAccess: failed to publicize '{reference.ItemSpec}': {ex.Message}");
+                Log.LogMessage(MessageImportance.Low, ex.ToString());
+                continue;
             }
 
             var item = new TaskItem(destination);
+            // Preserve the original reference's metadata (Aliases, EmbedInteropTypes, ...) —
+            // Csc reads compiler-significant options from item metadata, and an extern-aliased
+            // reference must stay extern-aliased after the swap.
+            reference.CopyMetadataTo(item);
             // "Original" is what the targets file Removes — the reference item as the compiler
             // knew it (the ref assembly when one existed), not the implementation path.
             item.SetMetadata("Original", reference.ItemSpec);
@@ -110,6 +155,69 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 
         PublicizedReferences = outputs.ToArray();
         return !Log.HasLoggedErrors;
+    }
+
+    /// <summary>
+    /// Picks the implementation assembly to publicize. Roslyn reference assemblies strip
+    /// internal members when the assembly grants no InternalsVisibleTo (internal types survive
+    /// as empty shells — e.g. an internal constructor would be gone), so a ref assembly is
+    /// useless as a publicizer source. ReferencePathWithRefAssemblies items carry the
+    /// implementation path as %(OriginalPath) when a ref assembly was substituted; when a
+    /// package supplies its compile asset from ref/&lt;tfm&gt; directly there is no OriginalPath, so
+    /// fall back to the runtime/copy-local assets to find the implementation.
+    /// </summary>
+    private string ResolveImplementationAssembly(string name, ITaskItem reference)
+    {
+        var originalPath = reference.GetMetadata("OriginalPath");
+        if (!string.IsNullOrEmpty(originalPath))
+        {
+            return originalPath;
+        }
+
+        if (!IsReferenceAssembly(reference.ItemSpec))
+        {
+            return reference.ItemSpec;
+        }
+
+        var runtimeMatch = RuntimeAssemblies.FirstOrDefault(r =>
+            string.Equals(Path.GetExtension(r.ItemSpec), ".dll", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase) &&
+            File.Exists(r.ItemSpec));
+
+        if (runtimeMatch is not null)
+        {
+            Log.LogMessage(MessageImportance.Normal,
+                $"TUnitMocksInternalsAccess: '{reference.ItemSpec}' is a reference assembly; " +
+                $"publicizing the implementation '{runtimeMatch.ItemSpec}' instead.");
+            return runtimeMatch.ItemSpec;
+        }
+
+        Log.LogWarning(
+            subcategory: null, warningCode: "TUMIA003", helpKeyword: null,
+            file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
+            message: $"TUnitMocksInternalsAccess: '{reference.ItemSpec}' is a metadata-only reference assembly " +
+                     "and no implementation assembly was found among the runtime assets. Internal members may " +
+                     "already be stripped from it, in which case internals access will be incomplete for " +
+                     $"'{name}'.");
+        return reference.ItemSpec;
+    }
+
+    private static bool IsReferenceAssembly(string path)
+    {
+        using var module = ModuleDefinition.ReadModule(path);
+        return module.Assembly.HasCustomAttributes && module.Assembly.CustomAttributes.Any(a =>
+            a.AttributeType.FullName == "System.Runtime.CompilerServices.ReferenceAssemblyAttribute");
+    }
+
+    private static string HashFile(string path)
+    {
+        using var sha = SHA256.Create();
+        using var stream = File.OpenRead(path);
+#if NET
+        return Convert.ToHexString(sha.ComputeHash(stream));
+#else
+        return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "");
+#endif
     }
 
     private static void Publicize(string source, string destination)
@@ -160,17 +268,20 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             writer.WriteLine($"[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(\"{name}\")]");
         }
 
-        writer.WriteLine();
-        writer.WriteLine("namespace System.Runtime.CompilerServices");
-        writer.WriteLine("{");
-        writer.WriteLine("    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]");
-        writer.WriteLine("    internal sealed class IgnoresAccessChecksToAttribute : Attribute");
-        writer.WriteLine("    {");
-        writer.WriteLine("        public IgnoresAccessChecksToAttribute(string assemblyName) => AssemblyName = assemblyName;");
-        writer.WriteLine();
-        writer.WriteLine("        public string AssemblyName { get; }");
-        writer.WriteLine("    }");
-        writer.WriteLine("}");
+        if (EmitAttributeDefinition)
+        {
+            writer.WriteLine();
+            writer.WriteLine("namespace System.Runtime.CompilerServices");
+            writer.WriteLine("{");
+            writer.WriteLine("    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]");
+            writer.WriteLine("    internal sealed class IgnoresAccessChecksToAttribute : Attribute");
+            writer.WriteLine("    {");
+            writer.WriteLine("        public IgnoresAccessChecksToAttribute(string assemblyName) => AssemblyName = assemblyName;");
+            writer.WriteLine();
+            writer.WriteLine("        public string AssemblyName { get; }");
+            writer.WriteLine("    }");
+            writer.WriteLine("}");
+        }
 
         var content = writer.ToString();
         Directory.CreateDirectory(Path.GetDirectoryName(GeneratedSourceFile)!);

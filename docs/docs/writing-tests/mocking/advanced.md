@@ -287,5 +287,8 @@ used by several long-lived OSS tools, wired into the TUnit.Mocks package.
 - Not supported on .NET Framework test targets (the runtime there does not honor the attribute);
   a build warning is emitted and the pipeline stays inert.
 - Works under trimmed publishes; Native AOT is not yet verified.
+- If another package already injects an `IgnoresAccessChecksToAttribute` definition into your
+  compilation (e.g. IgnoresAccessChecksToGenerator), suppress TUnit's copy with
+  `<TUnitMocksInternalsAccessEmitAttributeDefinition>false</TUnitMocksInternalsAccessEmitAttributeDefinition>`.
 - Internal APIs are internal for a reason: they can change in any release of the target package.
   Prefer public seams when they exist.

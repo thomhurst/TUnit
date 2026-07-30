@@ -41,13 +41,18 @@
 
     <PropertyGroup>
       <_TUnitMocksIactSourceFile>$(IntermediateOutputPath)TUnitMocksIgnoresAccessChecksTo.g.cs</_TUnitMocksIactSourceFile>
+      <!-- Set false when another package already injects IgnoresAccessChecksToAttribute into
+           the compilation (would otherwise be a duplicate-type error). -->
+      <TUnitMocksInternalsAccessEmitAttributeDefinition Condition="'$(TUnitMocksInternalsAccessEmitAttributeDefinition)' == ''">true</TUnitMocksInternalsAccessEmitAttributeDefinition>
     </PropertyGroup>
 
     <PublicizeAssemblyReferences
         ReferencePaths="@(ReferencePathWithRefAssemblies)"
         AssembliesToPublicize="@(TUnitMocksInternalsAccess)"
+        RuntimeAssemblies="@(RuntimeCopyLocalItems);@(ReferenceCopyLocalPaths)"
         OutputDirectory="$(IntermediateOutputPath)tunit-mocks-internals\"
-        GeneratedSourceFile="$(_TUnitMocksIactSourceFile)">
+        GeneratedSourceFile="$(_TUnitMocksIactSourceFile)"
+        EmitAttributeDefinition="$(TUnitMocksInternalsAccessEmitAttributeDefinition)">
       <Output TaskParameter="PublicizedReferences" ItemName="_TUnitMocksPublicizedReference" />
     </PublicizeAssemblyReferences>
 
@@ -61,6 +66,7 @@
       <Compile Include="$(_TUnitMocksIactSourceFile)" />
       <FileWrites Include="$(_TUnitMocksIactSourceFile)" />
       <FileWrites Include="@(_TUnitMocksPublicizedReference)" />
+      <FileWrites Include="@(_TUnitMocksPublicizedReference->'%(Identity).sig')" />
     </ItemGroup>
   </Target>
 </Project>
