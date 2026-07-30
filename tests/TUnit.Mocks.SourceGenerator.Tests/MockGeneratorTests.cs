@@ -438,6 +438,262 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Small_Numeric_Async_Results()
+    {
+        // #6518 review: `async () => 1` on a Task<byte> member compiles via C#'s implicit
+        // constant expression conversion, but the alias infers int — the conversion helper must
+        // carry range-guarded int → byte/short/ulong cases, not only widening ones.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface ISmallNumericService
+            {
+                Task<byte> GetByteAsync();
+                ValueTask<short> GetShortAsync();
+                Task<ulong> GetUnsignedAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ISmallNumericService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Native_Integer_Async_Results()
+    {
+        // #6518 review: nint → long is an ordinary implicit numeric conversion (and native
+        // integers are valid destinations for int / non-negative int constants) — the
+        // conversion tables must include nint/nuint on both sides.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface INativeIntService
+            {
+                Task<long> GetLongAsync();
+                Task<nint> GetNativeAsync();
+                ValueTask<nuint> GetUnsignedNativeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<INativeIntService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Enum_And_Defaultable_Generic_Async_Results()
+    {
+        // #6518 review round 6: the conversion helper must replay C#'s implicit
+        // constant-zero-to-enum conversion (value-guarded, enum destinations only), and a
+        // trailing '?' on an UNCONSTRAINED type parameter (Task<T?>, T = int is Task<int>) must
+        // keep the runtime value-type null guard — while a struct-constrained T? (genuine
+        // Nullable<T>) still skips it.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public enum Color
+            {
+                None = 0,
+                Red = 1,
+            }
+
+            public interface IEnumAndGenericService
+            {
+                Task<Color> GetColorAsync();
+                ValueTask<Color> GetColorValueAsync();
+                Task<T?> FindAsync<T>(int id);
+                Task<T?> FindStructAsync<T>(int id) where T : struct;
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IEnumAndGenericService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Dynamic_Async_Result()
+    {
+        // #6518 review: `dynamic` is illegal as a pattern type (CS8208) and as a typeof operand
+        // (CS1962), so the async conversion helper must spell it `object` — merely mocking this
+        // interface used to break the consumer's compilation.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IDynamicService
+            {
+                Task<dynamic> GetAsync();
+                ValueTask<dynamic> ComputeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IDynamicService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Tuple_Async_Results()
+    {
+        // #6518 review: value-tuple results need C#'s element-wise implicit tuple conversions
+        // replayed (the generic alias infers the factory's tuple type, e.g. (string, string)
+        // for a Task<(object, object)> member), and tuple element names must never reach the
+        // helper's typeof/patterns — they are not permitted there.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface ITupleService
+            {
+                Task<(object, object)> GetPairAsync();
+                ValueTask<(int Id, string Name)> GetNamedAsync();
+                Task<(long, (object, object))> GetNestedAsync();
+                Task<(int, string)?> GetOptionalPairAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITupleService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_IConvertible_Async_Result()
+    {
+        // #6518 review: the zero-to-enum case's own pattern is `case IConvertible` — on a
+        // member declared Task<IConvertible> it would land right after `case IConvertible exact`
+        // and be unreachable, and CS8120 is an error. The case must not be emitted here.
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IConvertibleService
+            {
+                Task<IConvertible> GetAsync();
+                ValueTask<IConvertible> ComputeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConvertibleService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Type_Parameters_Named_Like_Numeric_Types()
+    {
+        // #6518 review: the conversion tables match type names textually, so a type parameter
+        // literally named Int32 was mistaken for System.Int32 and numeric widening cases were
+        // emitted into a helper returning the open parameter (CS0029). Type parameters must
+        // take only the exact/null/zero-to-enum cases, all runtime-guarded.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface INumericNamed<Int32>
+            {
+                Task<Int32> GetAsync();
+                Task<Int64> RoundtripAsync<Int64>(Int64 value);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<INumericNamed<string>>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public void Interface_With_IConvertible_And_Numeric_Named_Type_Parameters_Compiles()
+    {
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IConvertibleService
+            {
+                Task<IConvertible> GetAsync();
+            }
+
+            public interface INumericNamed<Int32>
+            {
+                Task<Int32> GetAsync();
+                Task<Int64> RoundtripAsync<Int64>(Int64 value);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConvertibleService>();
+                    var mock2 = Mock.Of<INumericNamed<string>>();
+                }
+            }
+            """;
+
+        var errors = GetGeneratedCompilationErrors(source);
+
+        // CS8120: unreachable switch case (IConvertible zero case after IConvertible exact);
+        // CS0029: numeric widening cases emitted into a helper returning an open type parameter
+        foreach (var id in (string[])["CS8120", "CS0029"])
+        {
+            var match = errors.FirstOrDefault(e => string.Equals(e.Id, id, StringComparison.Ordinal));
+            if (match is not null)
+            {
+                throw new InvalidOperationException($"Generated code produced {id}: {match}");
+            }
+        }
+    }
+
+    [Test]
     public Task Interface_With_Generic_Methods()
     {
         var source = """
@@ -2380,6 +2636,45 @@ public class MockGeneratorTests : SnapshotTestBase
 
         AssertNoGeneratedError(source, "CS0121");
         AssertNoGeneratedError(source, "CS0535");
+    }
+
+    [Test]
+    public void Outer_Nullable_Task_Member_Keeps_Null_Lambda_Unambiguous()
+    {
+        // Regression (#6518 review): `Task<string>?` ends in '?', so the generic-task check
+        // misread it as bare Task and emitted the ungated non-generic alias next to the
+        // synchronous factory — making the pre-existing `Returns(() => null)` setup CS0121.
+        var source = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IOuterNullableTask
+            {
+                Task<string?>? GetNameAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IOuterNullableTask>();
+                    mock.GetNameAsync().Returns(() => null);
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        // The alias must be the gated shape (ORP on net9.0+, generic below), never the
+        // ungated bare-task alias.
+        AssertContains(output, "Returns<TAsyncFactoryResult>");
+        AssertContains(output, "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+
+        AssertNoGeneratedError(source, "CS0121");
+        // Pre-existing on outer-nullable async members: the ReturnsAsync raw-return check used
+        // the annotated type in an `is` pattern.
+        AssertNoGeneratedError(source, "CS8116");
     }
 
     [Test]

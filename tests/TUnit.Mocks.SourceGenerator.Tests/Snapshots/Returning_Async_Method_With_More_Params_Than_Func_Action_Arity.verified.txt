@@ -209,6 +209,28 @@ namespace TUnit.Mocks.Generated
         public ILongReturningSignature_Sum_M0_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<int> task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
         public ILongReturningSignature_Sum_M0_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        public ILongReturningSignature_Sum_M0_MockCall Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => { var task = taskFactory(); return task is null ? null : (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(task); }); return this; }
+
+        private static global::System.Threading.Tasks.Task<int> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+            => task is global::System.Threading.Tasks.Task<int> exact ? exact : __TUnitMocksAwaitAndConvert(task);
+
+        private static async global::System.Threading.Tasks.Task<int> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+        {
+            object? value = await task.ConfigureAwait(false);
+            switch (value)
+            {
+                case int exact: return exact;
+                case null when typeof(int).IsValueType && global::System.Nullable.GetUnderlyingType(typeof(int)) is null: throw new global::System.InvalidCastException("The async factory (result type '" + typeof(TAsyncFactoryResult) + "') produced a null result, but the member's declared result type '" + typeof(int) + "' is a non-nullable value type. Return a non-null value of the declared type from the factory.");
+                case null: return default(int)!;
+                case sbyte number: return number;
+                case byte number: return number;
+                case short number: return number;
+                case ushort number: return number;
+                case char number: return number;
+                default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(int) + "'. Cast the factory result to the declared type in the lambda.");
+            }
+        }
         #if NET9_0_OR_GREATER
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
