@@ -200,6 +200,75 @@ public class PublicizeAssemblyReferencesTaskTests
     }
 
     [Test]
+    public async Task Duplicate_Requests_Produce_Single_Publicized_Reference()
+    {
+        var dir = NewScratchDirectory();
+        // Same simple name requested twice (case difference included) — e.g. duplicated items
+        // from a multi-imported props file. The compiler must see exactly one publicized copy.
+        var task = CreateTask(dir, TargetLibName, TargetLibName.ToUpperInvariant());
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        await Assert.That(task.PublicizedReferences.Length).IsEqualTo(1);
+        var source = await File.ReadAllTextAsync(task.GeneratedSourceFile);
+        var applications = source.Split([$"IgnoresAccessChecksTo(\"{TargetLibName}\")"], StringSplitOptions.None).Length - 1;
+        await Assert.That(applications).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Ambiguous_Matches_Union_Compiler_Metadata()
+    {
+        var dir = NewScratchDirectory();
+        var duplicateDir = NewScratchDirectory();
+        var duplicatePath = Path.Combine(duplicateDir, TargetLibName + ".dll");
+        File.Copy(TargetLibPath, duplicatePath);
+
+        // The alias and interop flag live ONLY on the non-selected match. Both matches leave
+        // the compiler's reference list, so the replacement item must carry them or an existing
+        // `extern alias sdkalias` in the consuming project stops resolving.
+        var winner = new TaskItem(TargetLibPath);
+        var duplicate = new TaskItem(duplicatePath);
+        duplicate.SetMetadata("Aliases", "sdkalias");
+        duplicate.SetMetadata("EmbedInteropTypes", "true");
+
+        var task = CreateTask(dir, TargetLibName);
+        task.ReferencePaths = [winner, duplicate];
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        var publicized = task.PublicizedReferences[0];
+        // The winner had no aliases (global visibility) — that must survive the union too.
+        await Assert.That(publicized.GetMetadata("Aliases")).IsEqualTo("global,sdkalias");
+        await Assert.That(publicized.GetMetadata("EmbedInteropTypes")).IsEqualTo("true");
+    }
+
+    [Test]
+    public async Task Task_Version_Change_Invalidates_Publicized_Copy()
+    {
+        var dir = NewScratchDirectory();
+
+        var first = CreateTask(dir, TargetLibName);
+        await Assert.That(first.Execute()).IsTrue();
+
+        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var signaturePath = rewritten + ".sig";
+
+        // Emulate a copy produced by an older TUnit.Mocks: same source path and hash, different
+        // task version on the first signature line.
+        var lines = (await File.ReadAllTextAsync(signaturePath)).Split('\n');
+        lines[0] = "0.0.0-previous-task-version";
+        await File.WriteAllTextAsync(signaturePath, string.Join("\n", lines));
+
+        var staleWrite = File.GetLastWriteTimeUtc(rewritten).AddMinutes(-5);
+        File.SetLastWriteTimeUtc(rewritten, staleWrite);
+
+        var second = CreateTask(dir, TargetLibName);
+        await Assert.That(second.Execute()).IsTrue();
+
+        await Assert.That(File.GetLastWriteTimeUtc(rewritten)).IsNotEqualTo(staleWrite);
+    }
+
+    [Test]
     public async Task Publicize_Promotes_Only_Assembly_Visible_Members()
     {
         var dir = NewScratchDirectory();

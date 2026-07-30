@@ -81,9 +81,14 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         var superseded = new List<ITaskItem>();
         var publicizedNames = new List<string>();
 
-        foreach (var requested in AssembliesToPublicize)
+        // The same simple name requested twice (duplicate items, multi-import) must not produce
+        // two publicized items — the targets would hand Csc the same rewritten assembly twice.
+        var requestedNames = AssembliesToPublicize
+            .Select(i => i.ItemSpec)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var name in requestedNames)
         {
-            var name = requested.ItemSpec;
             var matches = ReferencePaths.Where(r =>
                 string.Equals(Path.GetFileNameWithoutExtension(r.ItemSpec), name, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -103,7 +108,8 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                     subcategory: null, warningCode: "TUMIA004", helpKeyword: null,
                     file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
                     message: $"TUnitMocksInternalsAccess: multiple resolved references match '{name}': " +
-                             $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Using the first; " +
+                             $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Using the first " +
+                             "(extern aliases and EmbedInteropTypes from all matches are preserved); " +
                              "if that is the wrong one, resolve the version conflict in the project.");
             }
 
@@ -123,8 +129,11 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 // Content-based incrementality: the signature records the resolved source path
                 // and a hash of its bytes, so a replaced/downgraded assembly with an equal or
                 // older timestamp still invalidates the publicized copy.
+                // The task version is part of the signature: a TUnit.Mocks upgrade that changes
+                // the rewrite rules must invalidate copies produced by the previous task, or the
+                // compiler keeps seeing the stale publicized API until obj is cleaned.
                 var signaturePath = destination + ".sig";
-                var signature = source + "\n" + HashFile(source);
+                var signature = TaskVersion + "\n" + source + "\n" + HashFile(source);
 
                 if (!File.Exists(destination) || !File.Exists(signaturePath) || File.ReadAllText(signaturePath) != signature)
                 {
@@ -152,6 +161,10 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             // Csc reads compiler-significant options from item metadata, and an extern-aliased
             // reference must stay extern-aliased after the swap.
             reference.CopyMetadataTo(item);
+            if (matches.Count > 1)
+            {
+                MergeCompilerMetadataFromDuplicates(item, matches);
+            }
             // "Original" is what the targets file Removes — the reference item as the compiler
             // knew it (the ref assembly when one existed), not the implementation path.
             item.SetMetadata("Original", reference.ItemSpec);
@@ -174,6 +187,76 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         PublicizedReferences = outputs.ToArray();
         SupersededReferences = superseded.ToArray();
         return !Log.HasLoggedErrors;
+    }
+
+    /// <summary>
+    /// Version stamp for the incrementality signature — a new TUnit.Mocks release re-publicizes
+    /// even when the source assembly is unchanged.
+    /// </summary>
+    private static readonly string TaskVersion = GetTaskVersion();
+
+    private static string GetTaskVersion()
+    {
+        var assembly = typeof(PublicizeAssemblyReferences).Assembly;
+        var informational = (System.Reflection.AssemblyInformationalVersionAttribute?)Attribute.GetCustomAttribute(
+            assembly, typeof(System.Reflection.AssemblyInformationalVersionAttribute));
+        return informational?.InformationalVersion ?? assembly.GetName().Version?.ToString() ?? "0";
+    }
+
+    /// <summary>
+    /// Every same-simple-name match is removed from the compiler's reference list, so
+    /// compiler-significant metadata carried only by a non-selected match — an extern alias, an
+    /// EmbedInteropTypes flag — must survive on the single replacement item: aliases are
+    /// unioned, and interop embedding is kept if any match asked for it.
+    /// </summary>
+    private static void MergeCompilerMetadataFromDuplicates(TaskItem item, List<ITaskItem> matches)
+    {
+        var aliases = new List<string>();
+        var anyGlobal = false;
+
+        foreach (var match in matches)
+        {
+            var value = match.GetMetadata("Aliases");
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                // No aliases = visible through the global namespace.
+                anyGlobal = true;
+                continue;
+            }
+
+            foreach (var raw in value.Split(','))
+            {
+                var alias = raw.Trim();
+                if (alias.Length == 0)
+                {
+                    continue;
+                }
+
+                if (alias == "global")
+                {
+                    anyGlobal = true;
+                }
+                else if (!aliases.Contains(alias, StringComparer.Ordinal))
+                {
+                    aliases.Add(alias);
+                }
+            }
+        }
+
+        if (aliases.Count > 0)
+        {
+            if (anyGlobal)
+            {
+                aliases.Insert(0, "global");
+            }
+
+            item.SetMetadata("Aliases", string.Join(",", aliases));
+        }
+
+        if (matches.Any(m => string.Equals(m.GetMetadata("EmbedInteropTypes"), "true", StringComparison.OrdinalIgnoreCase)))
+        {
+            item.SetMetadata("EmbedInteropTypes", "true");
+        }
     }
 
     /// <summary>

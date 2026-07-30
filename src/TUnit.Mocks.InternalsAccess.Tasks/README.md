@@ -75,8 +75,13 @@ for TUnit.Mocks:
 - Diagnostics: `TUMIA001` unresolved assembly name (error), `TUMIA002` .NET Framework inert
   (warning), `TUMIA003` ref-assembly-only source (warning), `TUMIA004` ambiguous simple-name
   match — first wins and all matches are removed from the compiler's references so the duplicate
-  cannot collide with the publicized copy (warning), `TUMIA005` publicize failure, e.g.
-  unreadable/locked assembly (error).
+  cannot collide with the publicized copy; extern aliases are unioned and `EmbedInteropTypes`
+  kept if any match set it, so compiler-significant metadata carried only by a non-selected
+  match survives the swap (warning), `TUMIA005` publicize failure, e.g. unreadable/locked
+  assembly (error).
+- Incrementality is content-based (source path + SHA-256) and versioned: upgrading TUnit.Mocks
+  re-publicizes even when the referenced assembly is unchanged, so rewrite-rule fixes are never
+  masked by a stale `obj` copy.
 
 ## Why a custom task instead of depending on Krafs.Publicizer / IgnoresAccessChecksToGenerator
 
