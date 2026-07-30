@@ -509,9 +509,10 @@ internal static class MockMembersBuilder
             writer.AppendLine($"/// <inheritdoc />");
             writer.AppendLine($"public {wrapperTypeName} Then() {{ EnsureSetup().Then(); return this; }}");
 
+            var aliasTypeParam = GetAsyncAliasTypeParamName(model, method);
             if (isAsync && fullReturnType is not null)
             {
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask);
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask, aliasTypeParam);
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -521,14 +522,14 @@ internal static class MockMembersBuilder
                 if (hasRefStructParams)
                 {
                     writer.AppendLine("#if NET9_0_OR_GREATER");
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType, allNonOutParams);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType, aliasTypeParam, allNonOutParams);
                     writer.AppendLine("#else");
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType, aliasTypeParam);
                     writer.AppendLine("#endif");
                 }
                 else
                 {
-                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType);
+                    EmitTypedOverloads(writer, nonOutParams, returnType, wrapperTypeName, isAsync, fullReturnType, aliasTypeParam);
                 }
             }
 
@@ -645,7 +646,7 @@ internal static class MockMembersBuilder
                 var taskType = isValueTask
                     ? "global::System.Threading.Tasks.ValueTask"
                     : "global::System.Threading.Tasks.Task";
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask);
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -724,13 +725,13 @@ internal static class MockMembersBuilder
 
     private static void EmitTypedOverloads(CodeWriter writer, List<MockParameterModel> nonOutParams,
         string returnType, string wrapperName, bool isAsync, string? fullReturnType,
-        List<MockParameterModel>? allNonOutParams = null)
+        string aliasTypeParam, List<MockParameterModel>? allNonOutParams = null)
     {
         GenerateTypedReturnsOverload(writer, nonOutParams, returnType, wrapperName, allNonOutParams);
         if (isAsync && fullReturnType is not null)
         {
             writer.AppendLine();
-            GenerateTypedReturnsAsyncOverload(writer, nonOutParams, fullReturnType, wrapperName, allNonOutParams);
+            GenerateTypedReturnsAsyncOverload(writer, nonOutParams, fullReturnType, wrapperName, aliasTypeParam, allNonOutParams);
         }
         writer.AppendLine();
         GenerateTypedCallbackOverload(writer, nonOutParams, wrapperName, allNonOutParams);
@@ -739,7 +740,7 @@ internal static class MockMembersBuilder
     }
 
     private static void GenerateTypedReturnsAsyncOverload(CodeWriter writer, List<MockParameterModel> nonOutParams,
-        string taskType, string wrapperName, List<MockParameterModel>? allNonOutParams = null)
+        string taskType, string wrapperName, string aliasTypeParam, List<MockParameterModel>? allNonOutParams = null)
     {
         var typeList = string.Join(", ", nonOutParams.Select(p => p.FullyQualifiedType));
         var funcType = $"global::System.Func<{typeList}, {taskType}>";
@@ -758,17 +759,27 @@ internal static class MockMembersBuilder
         // net9.0+-only ORP(-1) non-generic alias for typeless async lambda bodies; see
         // EmitReturnsAsyncOverloads for the full rationale. The __TUnitMocksConvertAsyncResult
         // helpers are emitted there, and that always runs for the wrappers that reach here.
-        // TAsyncFactoryResult rather than TResult: the wrapper type carries the mocked method's
-        // own type parameters, and TResult is a common user choice — a same-name inner
-        // declaration would be a CS0693 shadowing warning in generated code.
-        // See issues #6495 and #6515.
+        // aliasTypeParam is uniquified against the mocked type's and method's own type
+        // parameters — a same-name inner declaration would shadow (CS0693) and break the
+        // conversion helper's result-type reference. See issues #6495 and #6515.
         var genericTaskKind = taskType.Substring(0, taskType.IndexOf('<'));
-        var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<TAsyncFactoryResult>>";
+        var isValueTaskKind = genericTaskKind.EndsWith("ValueTask");
+        var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<{aliasTypeParam}>>";
         writer.AppendLine();
         writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
-        using (writer.Block($"public {wrapperName} Returns<TAsyncFactoryResult>({genericFuncType} factory)"))
+        using (writer.Block($"public {wrapperName} Returns<{aliasTypeParam}>({genericFuncType} factory)"))
         {
-            writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(factory({castArgs})));");
+            if (isValueTaskKind)
+            {
+                writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)__TUnitMocksConvertAsyncResult<{aliasTypeParam}>(factory({castArgs})));");
+            }
+            else
+            {
+                // A null task from the factory is contractually valid for outer-nullable members;
+                // it must bypass the conversion helper (whose exact-type pattern cannot match null)
+                // and flow to the raw-return check, which accepts null for those members.
+                writer.AppendLine($"EnsureSetup().ReturnsRaw(args => {{ var task = factory({castArgs}); return task is null ? null : (object?)__TUnitMocksConvertAsyncResult<{aliasTypeParam}>(task); }});");
+            }
             writer.AppendLine("return this;");
         }
         writer.AppendLine("#if NET9_0_OR_GREATER");
@@ -1823,7 +1834,7 @@ internal static class MockMembersBuilder
         return string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
     }
 
-    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask)
+    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask, string aliasTypeParam)
     {
         var taskLabel = isValueTask ? "ValueTask" : "Task";
         writer.AppendLine();
@@ -1869,13 +1880,19 @@ internal static class MockMembersBuilder
             //   Task<object> the alias wins over Returns(object value) — which an ORP(-1)
             //   non-generic alias LOSES (priority pruning runs before betterness), silently
             //   boxing the natural-typed lambda as the value.
-            // - Inference may pick a SUBTYPE of the declared result (Task<object> member,
-            //   `async () => "value"` infers Task<string>) and Task<T>/ValueTask<T> are
-            //   invariant, so the factory task is converted to the declared task type: an
-            //   exact-typed task passes through untouched (identity preserved), anything else is
-            //   mirrored by an async wrapper that stays pending until the inner task completes.
-            //   A wrong-typed factory surfaces as an InvalidCastException when its task
-            //   completes.
+            // - Inference may pick a type OTHER than the declared result (Task<object> member,
+            //   `async () => "value"` infers Task<string>; Task<long> member, `async () => 1`
+            //   infers Task<int>) and Task<T>/ValueTask<T> are invariant, so the factory task is
+            //   converted to the declared task type: an exact-typed task passes through untouched
+            //   (identity preserved), anything else is mirrored by an async wrapper that stays
+            //   pending until the inner task completes. The wrapper honors reference/boxing
+            //   conversions and — for numeric-primitive result types — implicit numeric widening;
+            //   a genuinely wrong-typed factory surfaces as an informative InvalidCastException
+            //   when its task completes. (User-defined implicit conversions are not replayed at
+            //   runtime — cast the factory result to the declared type in the lambda.)
+            // - A null Task from the factory (valid for outer-nullable members) bypasses the
+            //   conversion and flows to the raw-return check, which accepts null for those
+            //   members.
             // The net9.0+-only ORP(-1) non-generic alias below covers the one shape the generic
             // alias cannot: an async lambda whose body pins no type (`async () => null`) — it has
             // no natural type, so no other overload applies and the deprioritised alias is the
@@ -1883,14 +1900,38 @@ internal static class MockMembersBuilder
             // with each other.
             var taskKind = isValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
             var resultType = GetTaskResultType(taskType);
+            var patternType = resultType.TrimEnd('?');
             writer.AppendLine(aliasDoc);
-            writer.AppendLine($"public {wrapperName} Returns<TAsyncFactoryResult>(global::System.Func<{taskKind}<TAsyncFactoryResult>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(taskFactory())); return this; }}");
+            if (isValueTask)
+            {
+                writer.AppendLine($"public {wrapperName} Returns<{aliasTypeParam}>(global::System.Func<{taskKind}<{aliasTypeParam}>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<{aliasTypeParam}>(taskFactory())); return this; }}");
+            }
+            else
+            {
+                writer.AppendLine($"public {wrapperName} Returns<{aliasTypeParam}>(global::System.Func<{taskKind}<{aliasTypeParam}>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => {{ var task = taskFactory(); return task is null ? null : (object?)__TUnitMocksConvertAsyncResult<{aliasTypeParam}>(task); }}); return this; }}");
+            }
             writer.AppendLine();
-            writer.AppendLine($"private static {taskKind}<{resultType}> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>({taskKind}<TAsyncFactoryResult> task)");
+            writer.AppendLine($"private static {taskKind}<{resultType}> __TUnitMocksConvertAsyncResult<{aliasTypeParam}>({taskKind}<{aliasTypeParam}> task)");
             writer.AppendLine($"    => task is {taskKind}<{resultType}> exact ? exact : __TUnitMocksAwaitAndConvert(task);");
             writer.AppendLine();
-            writer.AppendLine($"private static async {taskKind}<{resultType}> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>({taskKind}<TAsyncFactoryResult> task)");
-            writer.AppendLine($"    => ({resultType})(object?)(await task.ConfigureAwait(false))!;");
+            writer.AppendLine($"private static async {taskKind}<{resultType}> __TUnitMocksAwaitAndConvert<{aliasTypeParam}>({taskKind}<{aliasTypeParam}> task)");
+            using (writer.Block())
+            {
+                writer.AppendLine("object? value = await task.ConfigureAwait(false);");
+                writer.AppendLine("switch (value)");
+                using (writer.Block())
+                {
+                    writer.AppendLine($"case {patternType} exact: return exact;");
+                    writer.AppendLine($"case null: return default({resultType})!;");
+                    if (IsNumericPrimitive(patternType))
+                    {
+                        // string/bool are IConvertible but have no numeric conversion in C# —
+                        // excluding them keeps ChangeType from silently parsing "123" to a number.
+                        writer.AppendLine($"case global::System.IConvertible convertible when convertible is not string && convertible is not bool: return ({patternType})global::System.Convert.ChangeType(convertible, typeof({patternType}), global::System.Globalization.CultureInfo.InvariantCulture);");
+                    }
+                    writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced a result of type '\" + value.GetType() + \"', which is not convertible to the member's declared result type '\" + typeof({patternType}) + \"'. Cast the factory result to the declared type in the lambda.\");");
+                }
+            }
             writer.AppendLine("#if NET9_0_OR_GREATER");
             writer.AppendLine(aliasDoc);
             writer.AppendLine(PriorityMinusOneAttribute);
@@ -1911,6 +1952,41 @@ internal static class MockMembersBuilder
     /// to the synchronous factory and make <c>Returns(() =&gt; null)</c> ambiguous (CS0121).
     /// </summary>
     private static bool IsGenericTaskType(string taskType) => taskType.TrimEnd('?').EndsWith(">");
+
+    /// <summary>
+    /// The type parameter name for the generic async-factory Returns alias, uniquified against
+    /// the mocked type's and the method's own type parameters (both are in scope inside the
+    /// wrapper class): a same-name declaration would shadow (CS0693) and silently rebind the
+    /// conversion helper's result-type reference to the alias's parameter.
+    /// </summary>
+    private static string GetAsyncAliasTypeParamName(MockTypeModel model, MockMemberModel method)
+    {
+        var name = "TAsyncFactoryResult";
+        while (model.TypeParameters.Any(tp => tp.Name == name) || method.TypeParameters.Any(tp => tp.Name == name))
+        {
+            name += "_";
+        }
+        return name;
+    }
+
+    /// <summary>
+    /// True when the type string is a numeric primitive with implicit widening conversions
+    /// (byte → long, int → double, ...) that the async conversion helper replays via
+    /// <c>Convert.ChangeType</c>, since a boxed value cannot be unboxed as a wider type.
+    /// </summary>
+    private static bool IsNumericPrimitive(string type)
+    {
+        var name = type.StartsWith("global::") ? type.Substring("global::".Length) : type;
+        if (name.StartsWith("System."))
+        {
+            name = name.Substring("System.".Length);
+        }
+
+        return name is "sbyte" or "byte" or "short" or "ushort" or "int" or "uint" or "long" or "ulong"
+            or "char" or "float" or "double" or "decimal"
+            or "SByte" or "Byte" or "Int16" or "UInt16" or "Int32" or "UInt32" or "Int64" or "UInt64"
+            or "Char" or "Single" or "Double" or "Decimal";
+    }
 
     /// <summary>
     /// The declared result type inside a Task&lt;T&gt;/ValueTask&lt;T&gt; type string, ignoring an

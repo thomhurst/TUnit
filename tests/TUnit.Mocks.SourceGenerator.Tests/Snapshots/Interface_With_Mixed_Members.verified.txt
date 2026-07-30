@@ -319,13 +319,21 @@ namespace TUnit.Mocks.Generated
         /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
         public IService_GetAsync_M3_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<string>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
-        public IService_GetAsync_M3_MockCall Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(taskFactory())); return this; }
+        public IService_GetAsync_M3_MockCall Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => { var task = taskFactory(); return task is null ? null : (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(task); }); return this; }
 
         private static global::System.Threading.Tasks.Task<string> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
             => task is global::System.Threading.Tasks.Task<string> exact ? exact : __TUnitMocksAwaitAndConvert(task);
 
         private static async global::System.Threading.Tasks.Task<string> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
-            => (string)(object?)(await task.ConfigureAwait(false))!;
+        {
+            object? value = await task.ConfigureAwait(false);
+            switch (value)
+            {
+                case string exact: return exact;
+                case null: return default(string)!;
+                default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(string) + "'. Cast the factory result to the declared type in the lambda.");
+            }
+        }
         #if NET9_0_OR_GREATER
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
@@ -349,7 +357,7 @@ namespace TUnit.Mocks.Generated
         /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
         public IService_GetAsync_M3_MockCall Returns<TAsyncFactoryResult>(global::System.Func<int, global::System.Threading.Tasks.Task<TAsyncFactoryResult>> factory)
         {
-            EnsureSetup().ReturnsRaw(args => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(factory((int)args[0]!)));
+            EnsureSetup().ReturnsRaw(args => { var task = factory((int)args[0]!); return task is null ? null : (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(task); });
             return this;
         }
         #if NET9_0_OR_GREATER

@@ -37,6 +37,34 @@ public interface IPolymorphicResultService
     Task<object> GetByIdAsync(int id);
 }
 
+// Numeric widening (#6518 review finding): the generic alias infers the async lambda's own
+// numeric type (`async () => 1` infers int on a Task<long> member); the conversion helper must
+// replay the implicit widening rather than fail unboxing.
+public interface INumericAsyncService
+{
+    Task<long> GetCountAsync();
+
+    ValueTask<double> GetRatioAsync();
+
+    Task<long> AddAsync(int x);
+}
+
+// User-named type parameter (#6518 review finding): the alias's own type parameter must be
+// uniquified, or it shadows this one (CS0693) and rebinds the conversion helper's result type.
+public interface IUserNamedTypeParam
+{
+    Task<TAsyncFactoryResult> RoundtripAsync<TAsyncFactoryResult>(TAsyncFactoryResult value);
+}
+
+// Null-task pass-through (#6518 review finding): when the generic alias binds (the factory's
+// task type differs from the declared one, so the synchronous factory is inapplicable) and the
+// factory produces a null task at runtime, the null must reach the raw-return check instead of
+// faulting inside the conversion helper.
+public interface IOuterNullableObjectService
+{
+    Task<object?>? GetAsync();
+}
+
 public class TimeoutConsumer
 {
     public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
@@ -194,6 +222,94 @@ public class Issue6515Tests
         await Assert.That(await call).IsNull();
     }
 #endif
+
+    [Test]
+    public async Task Async_Lambda_With_Narrower_Numeric_Type_Widens_To_The_Declared_Result()
+    {
+        // `async () => 1` infers Task<int> on a Task<long> member; a boxed int cannot be
+        // unboxed as long, so the conversion helper must widen explicitly.
+        var mock = INumericAsyncService.Mock();
+        mock.GetCountAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 1;
+        });
+
+        await Assert.That(await mock.Object.GetCountAsync()).IsEqualTo(1L);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Numeric_Widening_On_ValueTask_Member()
+    {
+        var mock = INumericAsyncService.Mock();
+        mock.GetRatioAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 2;
+        });
+
+        await Assert.That(await mock.Object.GetRatioAsync()).IsEqualTo(2d);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Numeric_Widening_With_Typed_Parameters()
+    {
+        var mock = INumericAsyncService.Mock();
+        mock.AddAsync(Arg.Any<int>()).Returns(async x =>
+        {
+            await Task.Yield();
+            return x + 1;
+        });
+
+        await Assert.That(await mock.Object.AddAsync(2)).IsEqualTo(3L);
+    }
+
+    [Test]
+    public async Task Wrong_Typed_Async_Factory_Surfaces_An_Informative_InvalidCast()
+    {
+        // A string is IConvertible, but C# has no string-to-long conversion — the helper must
+        // not silently parse it, and the failure must name both types.
+        var mock = INumericAsyncService.Mock();
+        mock.GetCountAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "nope";
+        });
+
+        await Assert.That(async () => await mock.Object.GetCountAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Generic_Method_With_User_Named_TAsyncFactoryResult_Still_Converts()
+    {
+        // The interface's own type parameter is literally named TAsyncFactoryResult; the alias
+        // must not shadow it (this test failing to COMPILE is the regression).
+        var mock = IUserNamedTypeParam.Mock();
+        mock.RoundtripAsync<string>(Arg.Any<string>()).Returns(async v =>
+        {
+            await Task.Yield();
+            return v + "!";
+        });
+
+        await Assert.That(await mock.Object.RoundtripAsync("a")).IsEqualTo("a!");
+    }
+
+    [Test]
+    public async Task Null_Task_From_A_Generic_Alias_Factory_Passes_Through_On_Outer_Nullable_Member()
+    {
+        // Task<string?>? does not convert to the declared Task<object?>?, so the synchronous
+        // factory is inapplicable and the generic alias binds with the factory's own task type.
+        // Its null result must round-trip as the member's (contractually valid) null task.
+        Func<Task<string?>?> inner = () => null;
+
+        var mock = IOuterNullableObjectService.Mock();
+        // The '!' silences the annotation-level mismatch only; the runtime value is still null.
+        mock.GetAsync().Returns(() => inner()!);
+
+        // Boxed so the assertion targets the task reference itself, not its awaited result.
+        await Assert.That((object?)mock.Object.GetAsync()).IsNull();
+    }
 
     [Test]
     public async Task Exactly_Typed_Factory_Task_Is_Handed_Back_As_Is()
