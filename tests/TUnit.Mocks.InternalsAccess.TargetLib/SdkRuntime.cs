@@ -42,6 +42,28 @@ internal class InternalWidget
 }
 
 /// <summary>
+/// Overload-resolution guard for the publicizer: only assembly-visible members may be promoted.
+/// If the private Describe(string) overload became public, a consumer's Describe(null) would
+/// silently rebind from the object overload to it.
+/// </summary>
+public class PublicSurface
+{
+    public string Describe(object? value) => "object";
+
+    private string Describe(string? value) => "string";
+
+    internal string InternalHelper() => "internal";
+
+    protected virtual string ProtectedHook() => "protected";
+
+    public string UsePrivates() => Describe((string?)null) + Describe((object?)null) + ProtectedHook();
+
+    private sealed class PrivateNested;
+
+    internal sealed class InternalNested;
+}
+
+/// <summary>
 /// Simulates SDK-internal call sites the test has no control over.
 /// </summary>
 public static class SdkRuntime

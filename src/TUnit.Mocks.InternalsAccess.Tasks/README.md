@@ -65,14 +65,18 @@ for TUnit.Mocks:
   (it underpins several long-lived OSS packages; breakage risk is low but nonzero).
 - .NET Framework test targets are unsupported (warning `TUMIA002`, pipeline stays inert).
 - Verified under `PublishTrimmed` (full trim mode); Native AOT not yet verified.
-- Publicizer scope: types and methods (constructors and accessors included); fields are left
+- Publicizer scope: assembly-visible types and methods only — `internal`, `protected internal`,
+  and `private protected` become `public` (constructors and accessors included). `private` and
+  `protected` members are untouched: the feature promises internals access, and promoting a
+  private overload would silently change overload resolution in consuming code. Fields are left
   alone; explicit interface implementations stay private as IL requires.
 - Dev loop: MSBuild nodes hold the task assembly's file lock across builds — run
   `dotnet build-server shutdown` after changing this project.
 - Diagnostics: `TUMIA001` unresolved assembly name (error), `TUMIA002` .NET Framework inert
   (warning), `TUMIA003` ref-assembly-only source (warning), `TUMIA004` ambiguous simple-name
-  match — first wins (warning), `TUMIA005` publicize failure, e.g. unreadable/locked assembly
-  (error).
+  match — first wins and all matches are removed from the compiler's references so the duplicate
+  cannot collide with the publicized copy (warning), `TUMIA005` publicize failure, e.g.
+  unreadable/locked assembly (error).
 
 ## Why a custom task instead of depending on Krafs.Publicizer / IgnoresAccessChecksToGenerator
 

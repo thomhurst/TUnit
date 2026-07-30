@@ -192,6 +192,72 @@ public class PublicizeAssemblyReferencesTaskTests
         await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA004");
         // Deterministic: first match wins.
         await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(TargetLibPath);
+        // ALL matches are superseded — a leftover duplicate would carry the same assembly
+        // identity as the publicized copy and break the compile with CS1703.
+        var supersededPaths = task.SupersededReferences.Select(s => s.ItemSpec).ToList();
+        await Assert.That(supersededPaths).Contains(TargetLibPath);
+        await Assert.That(supersededPaths).Contains(duplicate);
+    }
+
+    [Test]
+    public async Task Publicize_Promotes_Only_Assembly_Visible_Members()
+    {
+        var dir = NewScratchDirectory();
+        var task = CreateTask(dir, TargetLibName);
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        var context = new AssemblyLoadContext("visibility-probe", isCollectible: true);
+        try
+        {
+            var assembly = context.LoadFromAssemblyPath(Path.Combine(dir, TargetLibName + ".dll"));
+            var surface = assembly.GetType("FakeSdk.PublicSurface", throwOnError: true)!;
+
+            // internal -> public.
+            var internalHelper = surface.GetMethod("InternalHelper", BindingFlags.Instance | BindingFlags.Public);
+            await Assert.That(internalHelper).IsNotNull();
+
+            // private overload stays private — promoting it would rebind Describe(null) in
+            // consuming code from the object overload to the string overload.
+            var describeString = surface.GetMethod(
+                "Describe", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                binder: null, [typeof(string)], modifiers: null)!;
+            await Assert.That(describeString.IsPrivate).IsTrue();
+
+            // protected stays protected — already accessible where it matters (derived mocks).
+            var protectedHook = surface.GetMethod("ProtectedHook", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            await Assert.That(protectedHook.IsFamily).IsTrue();
+
+            // Nested types: internal -> public, private stays private.
+            var internalNested = surface.GetNestedType("InternalNested", BindingFlags.Public);
+            await Assert.That(internalNested).IsNotNull();
+            var privateNested = surface.GetNestedType("PrivateNested", BindingFlags.NonPublic)!;
+            await Assert.That(privateNested.IsNestedPrivate).IsTrue();
+        }
+        finally
+        {
+            context.Unload();
+        }
+    }
+
+    [Test]
+    public async Task Generated_Source_Uses_Real_Assembly_Identity_When_File_Name_Differs()
+    {
+        var dir = NewScratchDirectory();
+        var renamedDir = NewScratchDirectory();
+        var renamed = Path.Combine(renamedDir, "Renamed.Lib.dll");
+        File.Copy(TargetLibPath, renamed);
+
+        var task = CreateTask(dir, "Renamed.Lib");
+        task.ReferencePaths = [new TaskItem(renamed)];
+
+        await Assert.That(task.Execute()).IsTrue();
+
+        // The runtime matches IgnoresAccessChecksTo against the assembly's real identity, not
+        // the file name the reference was requested by.
+        var source = await File.ReadAllTextAsync(task.GeneratedSourceFile);
+        await Assert.That(source).Contains($"IgnoresAccessChecksTo(\"{TargetLibName}\")");
+        await Assert.That(source).DoesNotContain("IgnoresAccessChecksTo(\"Renamed.Lib\")");
     }
 
     [Test]

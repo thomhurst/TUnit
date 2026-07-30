@@ -54,14 +54,16 @@
         GeneratedSourceFile="$(_TUnitMocksIactSourceFile)"
         EmitAttributeDefinition="$(TUnitMocksInternalsAccessEmitAttributeDefinition)">
       <Output TaskParameter="PublicizedReferences" ItemName="_TUnitMocksPublicizedReference" />
+      <Output TaskParameter="SupersededReferences" ItemName="_TUnitMocksSupersededReference" />
     </PublicizeAssemblyReferences>
 
     <ItemGroup>
       <!-- Swap ONLY the compiler's view (ReferencePathWithRefAssemblies feeds Csc and nothing
            else). ReferencePath stays untouched, so copy-local outputs and deps.json keep the
            original assembly and the runtime binds to it — where IgnoresAccessChecksTo takes
-           over. -->
-      <ReferencePathWithRefAssemblies Remove="@(_TUnitMocksPublicizedReference->'%(Original)')" />
+           over. Superseded = the selected reference plus any same-simple-name duplicates; a
+           leftover duplicate would carry the publicized copy's assembly identity (CS1703). -->
+      <ReferencePathWithRefAssemblies Remove="@(_TUnitMocksSupersededReference)" />
       <ReferencePathWithRefAssemblies Include="@(_TUnitMocksPublicizedReference)" />
       <Compile Include="$(_TUnitMocksIactSourceFile)" />
       <FileWrites Include="$(_TUnitMocksIactSourceFile)" />

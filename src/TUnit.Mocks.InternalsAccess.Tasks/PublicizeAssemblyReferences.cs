@@ -59,16 +59,26 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
 
     /// <summary>
     /// Publicized references. ItemSpec = rewritten copy; %(Original) = the reference item it
-    /// replaces, for the targets file to Remove.
+    /// replaces (the selected match).
     /// </summary>
     [Output]
     public ITaskItem[] PublicizedReferences { get; set; } = [];
+
+    /// <summary>
+    /// Every resolved reference superseded by a publicized copy — the selected match plus any
+    /// same-simple-name duplicates. The targets file Removes all of these so an ambiguous match
+    /// degrades to "first wins, cleanly" instead of the compiler seeing the same assembly
+    /// identity twice (CS1703).
+    /// </summary>
+    [Output]
+    public ITaskItem[] SupersededReferences { get; set; } = [];
 
     public override bool Execute()
     {
         Directory.CreateDirectory(OutputDirectory);
 
         var outputs = new List<ITaskItem>();
+        var superseded = new List<ITaskItem>();
         var publicizedNames = new List<string>();
 
         foreach (var requested in AssembliesToPublicize)
@@ -100,10 +110,14 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             var reference = matches[0];
             string source;
             string destination;
+            string assemblyName;
 
             try
             {
                 source = ResolveImplementationAssembly(name, reference);
+                // The runtime matches IgnoresAccessChecksTo against the real assembly identity,
+                // which can differ from the requested (file-derived) simple name.
+                assemblyName = System.Reflection.AssemblyName.GetAssemblyName(source).Name!;
                 destination = Path.Combine(OutputDirectory, Path.GetFileName(source));
 
                 // Content-based incrementality: the signature records the resolved source path
@@ -145,7 +159,11 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
             item.SetMetadata("Private", "false");
             item.SetMetadata("CopyLocal", "false");
             outputs.Add(item);
-            publicizedNames.Add(name);
+            publicizedNames.Add(assemblyName);
+            // All same-simple-name matches leave the compiler's reference list, not just the
+            // winner — a leftover duplicate would share the publicized copy's assembly identity
+            // and fail the compile with CS1703.
+            superseded.AddRange(matches.Select(ITaskItem (m) => new TaskItem(m.ItemSpec)));
         }
 
         if (!Log.HasLoggedErrors)
@@ -154,6 +172,7 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         }
 
         PublicizedReferences = outputs.ToArray();
+        SupersededReferences = superseded.ToArray();
         return !Log.HasLoggedErrors;
     }
 
@@ -231,20 +250,23 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 continue;
             }
 
-            type.Attributes = type.IsNested
-                ? (type.Attributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NestedPublic
-                : (type.Attributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.Public;
+            // Only assembly-level visibility is promoted. private/protected members stay as
+            // they are: the feature promises INTERNALS access, and promoting private members
+            // would inject them into overload resolution for consuming code (a formerly-private
+            // M(string) beside a public M(object) silently rebinding M(null)).
+            if (IsAssemblyVisibleType(type))
+            {
+                type.Attributes = type.IsNested
+                    ? (type.Attributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NestedPublic
+                    : (type.Attributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.Public;
+            }
 
             foreach (var method in type.Methods)
             {
-                // Explicit interface implementations stay private — IL requires it, and making
-                // them public would surface dotted names the compiler cannot bind anyway.
-                if (method.Overrides.Count > 0 && method.IsPrivate)
+                if (IsAssemblyVisibleMethod(method))
                 {
-                    continue;
+                    method.Attributes = (method.Attributes & ~MethodAttributes.MemberAccessMask) | MethodAttributes.Public;
                 }
-
-                method.Attributes = (method.Attributes & ~MethodAttributes.MemberAccessMask) | MethodAttributes.Public;
             }
         }
 
@@ -254,6 +276,15 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         module.Attributes &= ~ModuleAttributes.StrongNameSigned;
         module.Write(destination);
     }
+
+    /// <summary>internal, protected internal, or private protected — never plain private.</summary>
+    private static bool IsAssemblyVisibleType(TypeDefinition type)
+        => type.IsNested
+            ? type.IsNestedAssembly || type.IsNestedFamilyOrAssembly || type.IsNestedFamilyAndAssembly
+            : type.IsNotPublic;
+
+    private static bool IsAssemblyVisibleMethod(MethodDefinition method)
+        => method.IsAssembly || method.IsFamilyOrAssembly || method.IsFamilyAndAssembly;
 
     private void WriteIgnoresAccessChecksToSource(List<string> assemblyNames)
     {
