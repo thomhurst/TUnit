@@ -2382,6 +2382,45 @@ public class MockGeneratorTests : SnapshotTestBase
         AssertNoGeneratedError(source, "CS0535");
     }
 
+    [Test]
+    public void Outer_Nullable_Task_Member_Keeps_Null_Lambda_Unambiguous()
+    {
+        // Regression (#6518 review): `Task<string>?` ends in '?', so the generic-task check
+        // misread it as bare Task and emitted the ungated non-generic alias next to the
+        // synchronous factory — making the pre-existing `Returns(() => null)` setup CS0121.
+        var source = """
+            #nullable enable
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IOuterNullableTask
+            {
+                Task<string?>? GetNameAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IOuterNullableTask>();
+                    mock.GetNameAsync().Returns(() => null);
+                }
+            }
+            """;
+
+        var output = GetGeneratedOutput(source);
+
+        // The alias must be the gated shape (ORP on net9.0+, generic below), never the
+        // ungated bare-task alias.
+        AssertContains(output, "Returns<TAsyncFactoryResult>");
+        AssertContains(output, "[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+
+        AssertNoGeneratedError(source, "CS0121");
+        // Pre-existing on outer-nullable async members: the ReturnsAsync raw-return check used
+        // the annotated type in an `is` pattern.
+        AssertNoGeneratedError(source, "CS8116");
+    }
+
     private static void AssertNoGeneratedError(string source, string errorId)
     {
         foreach (var diagnostic in GetGeneratedCompilationErrors(source))

@@ -18,6 +18,13 @@ public interface ITimeoutClient
     Task<int> GetValueAsync(CancellationToken ct);
 }
 
+// Outer-nullable task member (#6518 review finding): the trailing '?' must not demote the alias
+// to the ungated bare-task shape, or Returns(() => null) becomes CS0121.
+public interface IOuterNullableTaskService
+{
+    Task<string?>? GetNameAsync();
+}
+
 public class TimeoutConsumer
 {
     public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
@@ -66,5 +73,32 @@ public class Issue6515Tests
         var consumer = new TimeoutConsumer();
 
         await Assert.That(await consumer.GetWithTimeoutAsync(client.Object, TimeSpan.FromSeconds(30))).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task Outer_Nullable_Task_Member_Null_Lambda_Still_Binds_The_Synchronous_Factory()
+    {
+        var mock = IOuterNullableTaskService.Mock();
+        mock.GetNameAsync().Returns(() => null);
+
+        var call = mock.Object.GetNameAsync();
+
+        await Assert.That(call!.IsCompleted).IsTrue();
+        await Assert.That(await call).IsNull();
+    }
+
+    [Test]
+    public async Task Outer_Nullable_Task_Member_Async_Lambda_Stays_Pending()
+    {
+        var mock = IOuterNullableTaskService.Mock();
+        mock.GetNameAsync().Returns(async () =>
+        {
+            await Task.Delay(30_000);
+            return "late";
+        });
+
+        var call = mock.Object.GetNameAsync();
+
+        await Assert.That(call!.IsCompleted).IsFalse();
     }
 }

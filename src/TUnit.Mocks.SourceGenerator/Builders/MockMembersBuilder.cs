@@ -1876,8 +1876,13 @@ internal static class MockMembersBuilder
         }
     }
 
-    /// <summary>True for Task&lt;T&gt;/ValueTask&lt;T&gt; type strings, false for bare Task/ValueTask.</summary>
-    private static bool IsGenericTaskType(string taskType) => taskType.EndsWith(">");
+    /// <summary>
+    /// True for Task&lt;T&gt;/ValueTask&lt;T&gt; type strings, false for bare Task/ValueTask.
+    /// An outer-nullable member type (<c>Task&lt;string&gt;?</c>) carries a trailing <c>?</c>,
+    /// so trim it before testing — misclassifying it as bare would emit the ungated alias next
+    /// to the synchronous factory and make <c>Returns(() =&gt; null)</c> ambiguous (CS0121).
+    /// </summary>
+    private static bool IsGenericTaskType(string taskType) => taskType.TrimEnd('?').EndsWith(">");
 
     private static void EmitEnsureSetup(CodeWriter writer, string builderType, bool hasTypeArguments)
     {
