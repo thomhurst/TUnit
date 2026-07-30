@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-29T03:20:13.661Z",
+  "timestamp": "2026-07-30T03:21:07.533Z",
   "category": "Callback",
   "description": "Callback registration and execution",
   "environment": {
@@ -10,110 +10,110 @@
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "663.4 ns",
-      "Error": "3.38 ns",
-      "StdDev": "3.00 ns",
+      "Mean": "639.9 ns",
+      "Error": "2.51 ns",
+      "StdDev": "2.22 ns",
       "Gen0": "0.1898",
       "Gen1": "0.0019",
       "Allocated": "3.11 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "477.5 ns",
-      "Error": "2.71 ns",
-      "StdDev": "2.40 ns",
-      "Gen0": "0.1621",
-      "Gen1": "0.0010",
+      "Mean": "447.1 ns",
+      "Error": "2.49 ns",
+      "StdDev": "2.33 ns",
+      "Gen0": "0.1626",
+      "Gen1": "0.0014",
       "Allocated": "2.66 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "348.5 ns",
-      "Error": "3.69 ns",
-      "StdDev": "3.45 ns",
+      "Mean": "336.6 ns",
+      "Error": "2.93 ns",
+      "StdDev": "2.45 ns",
       "Gen0": "0.1097",
       "Gen1": "0.0005",
       "Allocated": "1.8 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "136,794.3 ns",
-      "Error": "1,187.94 ns",
-      "StdDev": "1,111.20 ns",
-      "Gen0": "0.7324",
-      "Gen1": "0.4883",
-      "Allocated": "13.24 KB"
+      "Mean": "185,626.5 ns",
+      "Error": "744.65 ns",
+      "StdDev": "660.11 ns",
+      "Gen0": "0.4883",
+      "Gen1": "-",
+      "Allocated": "13.14 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "4,316.6 ns",
-      "Error": "25.42 ns",
-      "StdDev": "23.78 ns",
+      "Mean": "4,795.3 ns",
+      "Error": "43.05 ns",
+      "StdDev": "38.16 ns",
       "Gen0": "0.4807",
       "Gen1": "0.0076",
       "Allocated": "7.85 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "4,707.9 ns",
-      "Error": "57.40 ns",
-      "StdDev": "44.81 ns",
-      "Gen0": "0.4272",
-      "Gen1": "0.0305",
+      "Mean": "5,327.4 ns",
+      "Error": "12.60 ns",
+      "StdDev": "11.17 ns",
+      "Gen0": "0.4501",
+      "Gen1": "0.0153",
       "Allocated": "7.44 KB"
     },
     {
       "Method": "'TUnit.Mocks (with args)'",
-      "Mean": "807.5 ns",
-      "Error": "3.01 ns",
-      "StdDev": "2.51 ns",
+      "Mean": "771.3 ns",
+      "Error": "8.51 ns",
+      "StdDev": "7.96 ns",
       "Gen0": "0.1955",
       "Gen1": "0.0019",
       "Allocated": "3.2 KB"
     },
     {
       "Method": "'Imposter (with args)'",
-      "Mean": "545.7 ns",
-      "Error": "3.22 ns",
-      "StdDev": "3.01 ns",
+      "Mean": "523.4 ns",
+      "Error": "2.94 ns",
+      "StdDev": "2.46 ns",
       "Gen0": "0.1726",
       "Gen1": "0.0010",
       "Allocated": "2.82 KB"
     },
     {
       "Method": "'Mockolate (with args)'",
-      "Mean": "391.4 ns",
-      "Error": "2.08 ns",
-      "StdDev": "1.95 ns",
+      "Mean": "382.0 ns",
+      "Error": "1.49 ns",
+      "StdDev": "1.39 ns",
       "Gen0": "0.1125",
       "Gen1": "0.0005",
       "Allocated": "1.84 KB"
     },
     {
       "Method": "'Moq (with args)'",
-      "Mean": "144,797.6 ns",
-      "Error": "657.45 ns",
-      "StdDev": "582.81 ns",
+      "Mean": "194,053.9 ns",
+      "Error": "1,901.05 ns",
+      "StdDev": "1,778.25 ns",
       "Gen0": "0.4883",
       "Gen1": "-",
       "Allocated": "13.73 KB"
     },
     {
       "Method": "'NSubstitute (with args)'",
-      "Mean": "4,971.5 ns",
-      "Error": "27.01 ns",
-      "StdDev": "23.95 ns",
-      "Gen0": "0.5112",
-      "Gen1": "0.0076",
+      "Mean": "5,224.6 ns",
+      "Error": "56.60 ns",
+      "StdDev": "52.95 ns",
+      "Gen0": "0.4883",
+      "Gen1": "-",
       "Allocated": "8.41 KB"
     },
     {
       "Method": "'FakeItEasy (with args)'",
-      "Mean": "5,644.7 ns",
-      "Error": "43.08 ns",
-      "StdDev": "38.19 ns",
+      "Mean": "6,148.9 ns",
+      "Error": "75.07 ns",
+      "StdDev": "62.69 ns",
       "Gen0": "0.5493",
-      "Gen1": "0.0305",
+      "Gen1": "0.0610",
       "Allocated": "9.26 KB"
     }
   ]
