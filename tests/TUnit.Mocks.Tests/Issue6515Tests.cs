@@ -55,6 +55,19 @@ public interface INumericAsyncService
     Task<long?> GetCountOrNullAsync();
 }
 
+// Implicit constant expression conversions (#6518 Codex round 5): `async () => 1` on a
+// Task<byte> member compiles against the declared delegate (in-range int constant → byte), but
+// the generic alias infers int and the widening table has no int → byte entry. The helper
+// replays these as range-guarded exact-value narrowings — constant-ness is erased at runtime.
+public interface IConstantNumericAsyncService
+{
+    Task<byte> GetByteAsync();
+
+    ValueTask<short> GetShortAsync();
+
+    Task<ulong> GetUnsignedAsync();
+}
+
 // dynamic result (#6518 Codex round 2): `dynamic` is illegal as a pattern type (CS8208) and as
 // a typeof operand (CS1962), so the conversion helper must spell it `object` — merely mocking
 // this interface failing to COMPILE is the regression.
@@ -293,6 +306,77 @@ public class Issue6515Tests
         });
 
         await Assert.That(async () => await mock.Object.GetCountAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Async_Lambda_With_In_Range_Constant_Int_On_Byte_Member_Converts()
+    {
+        // `async () => 1` compiles against Func<Task<byte>> only because 1 is an in-range int
+        // constant; the alias infers int, so the helper must replay the constant conversion.
+        var mock = IConstantNumericAsyncService.Mock();
+        mock.GetByteAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 1;
+        });
+
+        await Assert.That(await mock.Object.GetByteAsync()).IsEqualTo((byte)1);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Constant_Conversion_On_ValueTask_Short_Member()
+    {
+        var mock = IConstantNumericAsyncService.Mock();
+        mock.GetShortAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return -5;
+        });
+
+        await Assert.That(await mock.Object.GetShortAsync()).IsEqualTo((short)-5);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Non_Negative_Int_On_Ulong_Member_Converts()
+    {
+        var mock = IConstantNumericAsyncService.Mock();
+        mock.GetUnsignedAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 7;
+        });
+
+        await Assert.That(await mock.Object.GetUnsignedAsync()).IsEqualTo(7UL);
+    }
+
+    [Test]
+    public async Task Out_Of_Range_Int_On_Byte_Member_Surfaces_An_Informative_InvalidCast()
+    {
+        // 300 is not representable as byte — C# would reject the constant conversion too, so
+        // the helper must not silently truncate; it takes the informative failure path.
+        var mock = IConstantNumericAsyncService.Mock();
+        mock.GetByteAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 300;
+        });
+
+        await Assert.That(async () => await mock.Object.GetByteAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Negative_Int_On_Ulong_Member_Surfaces_An_Informative_InvalidCast()
+    {
+        var mock = IConstantNumericAsyncService.Mock();
+        mock.GetUnsignedAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return -1;
+        });
+
+        await Assert.That(async () => await mock.Object.GetUnsignedAsync())
             .Throws<InvalidCastException>();
     }
 

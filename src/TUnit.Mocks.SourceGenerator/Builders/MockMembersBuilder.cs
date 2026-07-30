@@ -1954,6 +1954,17 @@ internal static class MockMembersBuilder
                     {
                         writer.AppendLine($"case {source} number: return number;");
                     }
+                    // C# also permits implicit *constant expression* conversions (an in-range
+                    // int constant to sbyte/byte/short/ushort/uint/ulong, a non-negative long
+                    // constant to ulong) — `async () => 1` on a Task<byte> member compiles
+                    // against the declared delegate, but the alias infers int. Constant-ness is
+                    // erased by the time the boxed result reaches the helper, so replay them as
+                    // range-guarded exact-value conversions; an out-of-range value still takes
+                    // the informative InvalidCastException below.
+                    foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
+                    {
+                        writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
+                    }
                     writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced a result of type '\" + value.GetType() + \"', which is not convertible to the member's declared result type '\" + typeof({patternType}) + \"'. Cast the factory result to the declared type in the lambda.\");");
                 }
             }
@@ -2005,11 +2016,7 @@ internal static class MockMembersBuilder
     /// </summary>
     private static string[] GetImplicitNumericWideningSources(string type)
     {
-        var name = type.StartsWith("global::") ? type.Substring("global::".Length) : type;
-        if (name.StartsWith("System."))
-        {
-            name = name.Substring("System.".Length);
-        }
+        var name = NormalizeNumericTypeName(type);
 
         return name switch
         {
@@ -2024,6 +2031,34 @@ internal static class MockMembersBuilder
             "decimal" or "Decimal" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char"],
             _ => [],
         };
+    }
+
+    /// <summary>
+    /// The (source, guard) pairs replaying C#'s implicit constant expression conversions
+    /// (spec §10.2.11): an in-range int constant converts to sbyte/byte/short/ushort/uint/ulong,
+    /// and a non-negative long constant to ulong. Constant-ness is erased at runtime — the boxed
+    /// factory result of <c>async () =&gt; 1</c> on a Task&lt;byte&gt; member is just an int — so
+    /// the guard checks the value's range instead: exact-value narrowing only, never rounding,
+    /// with out-of-range values falling through to the informative InvalidCastException.
+    /// </summary>
+    private static (string Source, string Guard)[] GetImplicitConstantConversionSources(string type)
+    {
+        return NormalizeNumericTypeName(type) switch
+        {
+            "sbyte" or "SByte" => [("int", "number >= global::System.SByte.MinValue && number <= global::System.SByte.MaxValue")],
+            "byte" or "Byte" => [("int", "number >= global::System.Byte.MinValue && number <= global::System.Byte.MaxValue")],
+            "short" or "Int16" => [("int", "number >= global::System.Int16.MinValue && number <= global::System.Int16.MaxValue")],
+            "ushort" or "UInt16" => [("int", "number >= global::System.UInt16.MinValue && number <= global::System.UInt16.MaxValue")],
+            "uint" or "UInt32" => [("int", "number >= 0")],
+            "ulong" or "UInt64" => [("int", "number >= 0"), ("long", "number >= 0")],
+            _ => [],
+        };
+    }
+
+    private static string NormalizeNumericTypeName(string type)
+    {
+        var name = type.StartsWith("global::") ? type.Substring("global::".Length) : type;
+        return name.StartsWith("System.") ? name.Substring("System.".Length) : name;
     }
 
     /// <summary>

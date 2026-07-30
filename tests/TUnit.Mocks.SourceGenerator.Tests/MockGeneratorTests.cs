@@ -438,6 +438,35 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Small_Numeric_Async_Results()
+    {
+        // #6518 review: `async () => 1` on a Task<byte> member compiles via C#'s implicit
+        // constant expression conversion, but the alias infers int — the conversion helper must
+        // carry range-guarded int → byte/short/ulong cases, not only widening ones.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface ISmallNumericService
+            {
+                Task<byte> GetByteAsync();
+                ValueTask<short> GetShortAsync();
+                Task<ulong> GetUnsignedAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ISmallNumericService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Dynamic_Async_Result()
     {
         // #6518 review: `dynamic` is illegal as a pattern type (CS8208) and as a typeof operand
