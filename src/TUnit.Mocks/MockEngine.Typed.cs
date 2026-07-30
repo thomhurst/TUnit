@@ -119,15 +119,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -277,15 +271,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -435,15 +423,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -593,15 +575,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -751,15 +727,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -909,15 +879,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1067,15 +1031,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)
@@ -1225,15 +1183,9 @@ public sealed partial class MockEngine<T> where T : class
         }
 #pragma warning restore IL3050, IL2026
 
-        if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
+        if (TryGetLooseAutoMockResult(memberName, autoMockFactory: null, out TReturn autoMockResult))
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
-            var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
-            {
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
-                return m;
-            });
-            if (autoMock is not null) return (TReturn)autoMock.ObjectInstance;
+            return autoMockResult;
         }
 
         if (Behavior == MockBehavior.Strict)

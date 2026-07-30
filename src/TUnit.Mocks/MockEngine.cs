@@ -55,7 +55,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
     private ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
     private ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
-    private ConcurrentDictionary<string, IMock?>? _autoMockCache;
+    // Keyed by member AND the actual Type identity (never a name string): two same-full-named
+    // types from different assemblies must not share a cached auto-mock/stub.
+    private ConcurrentDictionary<(string MemberName, Type ReturnType), IMock?>? _autoMockCache;
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -123,7 +125,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
         => LazyInitializer.EnsureInitialized(ref _onUnsubscribeCallbacks)!;
 
-    private ConcurrentDictionary<string, IMock?> AutoMockCache
+    private ConcurrentDictionary<(string MemberName, Type ReturnType), IMock?> AutoMockCache
         => LazyInitializer.EnsureInitialized(ref _autoMockCache)!;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,7 +133,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 if (autoMockFactory is not null)
@@ -139,8 +141,16 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
                     return autoMockFactory(Behavior);
                 }
 
-                MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var mock);
-                return mock;
+                if (MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var mock))
+                {
+                    return mock;
+                }
+
+                // No source-generated factory — the type is either internal to another assembly
+                // (unnameable at compile time, #6514) or was simply never mocked. Fall back to a
+                // runtime-emitted stub where the platform allows it.
+                RuntimeStubs.RuntimeStubGenerator.TryCreateStub(typeof(TReturn), out var stub);
+                return stub;
             });
 
             if (autoMock is not null)
@@ -656,7 +666,28 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Tries to get a cached auto-mock by its cache key. Used by Mock&lt;T&gt;.GetAutoMock.
+    /// Tries to get a cached auto-mock for a member and return type.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool TryGetAutoMock(string memberName, Type returnType, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
+    {
+        if (Volatile.Read(ref _autoMockCache) is not { } cache)
+        {
+            mock = null;
+            return false;
+        }
+
+        // A cached null records a definitive miss (stubs disabled/unavailable/failed) — not a
+        // usable mock, and NotNullWhen(true) promises non-null on true.
+        return cache.TryGetValue((memberName, returnType), out mock) && mock is not null;
+    }
+
+    /// <summary>
+    /// Tries to get a cached auto-mock by the legacy string cache key
+    /// (<c>memberName + "|" + returnType.FullName</c>). Kept for binary compatibility with
+    /// assemblies compiled against the previous shape of this helper; new code uses the
+    /// <see cref="TryGetAutoMock(string, Type, out IMock?)"/> overload, which keys by Type
+    /// identity instead of a name string.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
@@ -666,7 +697,19 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             mock = null;
             return false;
         }
-        return cache.TryGetValue(cacheKey, out mock);
+
+        foreach (var entry in cache)
+        {
+            if (entry.Value is not null &&
+                string.Equals(entry.Key.MemberName + "|" + entry.Key.ReturnType.FullName, cacheKey, StringComparison.Ordinal))
+            {
+                mock = entry.Value;
+                return true;
+            }
+        }
+
+        mock = null;
+        return false;
     }
 
     /// <summary>

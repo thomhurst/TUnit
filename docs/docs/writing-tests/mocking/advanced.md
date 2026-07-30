@@ -137,6 +137,47 @@ var value = serviceB.GetValue(); // 42
 
 Use `Mock.Get(obj)` to retrieve the `Mock<T>` wrapper for any mock object — auto-mocked return values, or any object created by `T.Mock()`. Auto-mocks are cached — calling the same method returns the same mock instance.
 
+### Runtime Auto-Stubs
+
+Source-generated auto-mocks cover every interface the generator can name at compile time. Some
+types it structurally cannot see — most commonly a generic method like `T Get<T>()` invoked
+*inside* a third-party SDK with a `T` that is `internal` to that SDK, so your test assembly
+cannot even write the type name:
+
+```csharp
+// Inside the Azure Functions Worker SDK — not your code:
+//   features.Get<IFunctionBindingsFeature>()   // IFunctionBindingsFeature is internal to the SDK
+
+var features = IInvocationFeatures.Mock();
+
+// The SDK's internal Get<T>() call receives a functional runtime stub instead of null.
+```
+
+In loose mode, when no source-generated mock exists for a requested interface, TUnit.Mocks emits
+a functional stub at runtime. Stubs are recursive and use the same defaults you'd expect from
+runtime-proxy libraries like NSubstitute: strings return `""`, tasks come back completed,
+collections are empty, value types are zeroed, and interface-returning members return further
+stubs (or a real configurable `Mock<T>` when a source-generated factory exists for that type).
+Properties round-trip values set on them, and member results are cached for stable identity.
+
+The stub assembly is named `DynamicProxyGenAssembly2` and carries Castle DynamicProxy's public
+key — the exact identity SDKs already grant `InternalsVisibleTo` for NSubstitute/Moq
+compatibility — so any internal interface reachable by those libraries is reachable by
+TUnit.Mocks stubs too.
+
+Notes and limits:
+
+- Runtime stubs are not configurable or verifiable — by definition you cannot name their types
+  in test code. Nameable interfaces still get real, configurable mocks.
+- Strict mode is unaffected: unconfigured calls still throw.
+- On Native AOT (where `Reflection.Emit` does not exist) the feature is inert and unconfigured
+  calls keep returning default values.
+- The `netstandard2.0` asset (used by .NET Framework test projects) does not include the
+  runtime emitter — unconfigured calls return default values there too. Runtime stubs require
+  the `net8.0`+ assets.
+- Opt out globally with `settings.Mocks.RuntimeAutoStubs = false;` in a
+  `[Before(HookType.TestDiscovery)]` hook.
+
 ## MockRepository
 
 Manage multiple mocks with shared behavior and batch operations:
