@@ -68,6 +68,18 @@ public interface IConstantNumericAsyncService
     Task<ulong> GetUnsignedAsync();
 }
 
+// Native integers (#6518 Codex round 7): nint → long (and nuint → ulong) are ordinary
+// implicit numeric conversions, as are the small integral types → nint and the non-negative
+// int constant → nuint — the conversion tables must include native integers on both sides.
+public interface INativeIntAsyncService
+{
+    Task<long> GetLongAsync();
+
+    Task<nint> GetNativeAsync();
+
+    ValueTask<nuint> GetUnsignedNativeAsync();
+}
+
 // Enum results (#6518 Codex round 6): `async () => 0` on a Task<MyEnum> member compiles via
 // C#'s implicit constant-zero-to-enum conversion, but the generic alias infers int and the
 // numeric tables have no enum destinations. The helper replays it value-guarded — integral
@@ -375,6 +387,64 @@ public class Issue6515Tests
         });
 
         await Assert.That(await mock.Object.GetUnsignedAsync()).IsEqualTo(7UL);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_Nint_On_Long_Member_Converts()
+    {
+        // nint → long is an ordinary implicit numeric conversion; the alias infers nint and
+        // the widening table must include the native-integer source.
+        var mock = INativeIntAsyncService.Mock();
+        mock.GetLongAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (nint)7;
+        });
+
+        await Assert.That(await mock.Object.GetLongAsync()).IsEqualTo(7L);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_Int_On_Nint_Member_Converts()
+    {
+        // int → nint is an ordinary implicit numeric conversion (native int is at least 32
+        // bits); the boxed int must convert via the native-integer destination entry.
+        var mock = INativeIntAsyncService.Mock();
+        mock.GetNativeAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 7;
+        });
+
+        await Assert.That(await mock.Object.GetNativeAsync()).IsEqualTo((nint)7);
+    }
+
+    [Test]
+    public async Task Async_Lambda_Non_Negative_Int_On_Nuint_Member_Converts()
+    {
+        // A non-negative int CONSTANT converts implicitly to nuint; replayed value-guarded.
+        var mock = INativeIntAsyncService.Mock();
+        mock.GetUnsignedNativeAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 7;
+        });
+
+        await Assert.That(await mock.Object.GetUnsignedNativeAsync()).IsEqualTo((nuint)7);
+    }
+
+    [Test]
+    public async Task Negative_Int_On_Nuint_Member_Surfaces_An_Informative_InvalidCast()
+    {
+        var mock = INativeIntAsyncService.Mock();
+        mock.GetUnsignedNativeAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return -1;
+        });
+
+        await Assert.That(async () => await mock.Object.GetUnsignedNativeAsync())
+            .Throws<InvalidCastException>();
     }
 
     [Test]

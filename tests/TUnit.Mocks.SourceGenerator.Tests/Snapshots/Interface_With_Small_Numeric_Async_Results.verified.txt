@@ -470,6 +470,7 @@ namespace TUnit.Mocks.Generated
                 case ushort number: return number;
                 case uint number: return number;
                 case char number: return number;
+                case nuint number: return number;
                 case int number when number >= 0: return (ulong)number;
                 case long number when number >= 0: return (ulong)number;
                 default: throw new global::System.InvalidCastException("The async factory produced a result of type '" + value.GetType() + "', which is not convertible to the member's declared result type '" + typeof(ulong) + "'. Cast the factory result to the declared type in the lambda.");

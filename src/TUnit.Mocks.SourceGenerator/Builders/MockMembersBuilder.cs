@@ -2043,11 +2043,16 @@ internal static class MockMembersBuilder
             "ushort" or "UInt16" => ["byte", "char"],
             "int" or "Int32" => ["sbyte", "byte", "short", "ushort", "char"],
             "uint" or "UInt32" => ["byte", "ushort", "char"],
-            "long" or "Int64" => ["sbyte", "byte", "short", "ushort", "int", "uint", "char"],
-            "ulong" or "UInt64" => ["byte", "ushort", "uint", "char"],
-            "float" or "Single" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char"],
-            "double" or "Double" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char", "float"],
-            "decimal" or "Decimal" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char"],
+            // Native integers participate on both sides: nint → long (and nuint → ulong) are
+            // implicit, as are the small integral types → nint/nuint. On the supported TFMs
+            // (net7+ NumericIntPtr) System.IntPtr IS nint to the compiler, so both spellings map.
+            "long" or "Int64" => ["sbyte", "byte", "short", "ushort", "int", "uint", "char", "nint"],
+            "ulong" or "UInt64" => ["byte", "ushort", "uint", "char", "nuint"],
+            "float" or "Single" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char", "nint", "nuint"],
+            "double" or "Double" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char", "float", "nint", "nuint"],
+            "decimal" or "Decimal" => ["sbyte", "byte", "short", "ushort", "int", "uint", "long", "ulong", "char", "nint", "nuint"],
+            "nint" or "IntPtr" => ["sbyte", "byte", "short", "ushort", "int", "char"],
+            "nuint" or "UIntPtr" => ["byte", "ushort", "uint", "char"],
             _ => [],
         };
     }
@@ -2070,6 +2075,9 @@ internal static class MockMembersBuilder
             "ushort" or "UInt16" => [("int", "number >= global::System.UInt16.MinValue && number <= global::System.UInt16.MaxValue")],
             "uint" or "UInt32" => [("int", "number >= 0")],
             "ulong" or "UInt64" => [("int", "number >= 0"), ("long", "number >= 0")],
+            // A non-negative int constant also converts to nuint (int → nint needs no entry:
+            // it is an ordinary implicit conversion, replayed by the widening table).
+            "nuint" or "UIntPtr" => [("int", "number >= 0")],
             _ => [],
         };
     }
@@ -2087,7 +2095,8 @@ internal static class MockMembersBuilder
             "object" or "string" or "dynamic" or "bool" or "Boolean" or "char" or "Char"
                 or "sbyte" or "SByte" or "byte" or "Byte" or "short" or "Int16" or "ushort" or "UInt16"
                 or "int" or "Int32" or "uint" or "UInt32" or "long" or "Int64" or "ulong" or "UInt64"
-                or "float" or "Single" or "double" or "Double" or "decimal" or "Decimal" => false,
+                or "float" or "Single" or "double" or "Double" or "decimal" or "Decimal"
+                or "nint" or "IntPtr" or "nuint" or "UIntPtr" => false,
             _ => true,
         };
     }

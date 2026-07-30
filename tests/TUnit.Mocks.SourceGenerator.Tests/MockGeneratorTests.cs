@@ -467,6 +467,35 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Native_Integer_Async_Results()
+    {
+        // #6518 review: nint → long is an ordinary implicit numeric conversion (and native
+        // integers are valid destinations for int / non-negative int constants) — the
+        // conversion tables must include nint/nuint on both sides.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface INativeIntService
+            {
+                Task<long> GetLongAsync();
+                Task<nint> GetNativeAsync();
+                ValueTask<nuint> GetUnsignedNativeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<INativeIntService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Enum_And_Defaultable_Generic_Async_Results()
     {
         // #6518 review round 6: the conversion helper must replay C#'s implicit
