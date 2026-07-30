@@ -153,6 +153,28 @@ public interface ITupleAsyncService
     Task<(int, string)?> GetOptionalPairAsync();
 }
 
+// IConvertible result (#6518 review round 9): the zero-to-enum case's own pattern is
+// `case IConvertible` — on a member declared Task<IConvertible> it would land right after
+// `case IConvertible exact` and be unreachable, and CS8120 is an error. Merely mocking this
+// interface failing to COMPILE is the regression.
+public interface IConvertibleAsyncService
+{
+    Task<IConvertible> GetAsync();
+
+    ValueTask<IConvertible> GetValueAsync();
+}
+
+// Type parameters named like BCL numeric types (#6518 review round 9): the conversion tables
+// match type names textually, so a parameter literally named Int32 was mistaken for
+// System.Int32 and numeric cases were emitted into a helper returning the open parameter
+// (CS0029). Merely mocking these shapes failing to COMPILE is the regression.
+public interface INumericNamedTypeParam<Int32>
+{
+    Task<Int32> GetAsync();
+
+    Task<Int64> RoundtripAsync<Int64>(Int64 value);
+}
+
 public class TimeoutConsumer
 {
     public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
@@ -907,5 +929,60 @@ public class Issue6515Tests
         });
 
         await Assert.That((await mock.Object.GetOptionalPairAsync()).HasValue).IsFalse();
+    }
+
+    [Test]
+    public async Task IConvertible_Member_Accepts_A_Factory_Inferring_A_Concrete_Type()
+    {
+        // Boxed int implements IConvertible, so the exact reference-conversion case handles it;
+        // the (dead-at-runtime) zero-to-enum case must not be emitted at all — it would be CS8120.
+        var mock = IConvertibleAsyncService.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return 42;
+        });
+
+        await Assert.That((int)await mock.Object.GetAsync()).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task IConvertible_ValueTask_Member_Accepts_A_Factory_Inferring_A_Concrete_Type()
+    {
+        var mock = IConvertibleAsyncService.Mock();
+        mock.GetValueAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "converted";
+        });
+
+        await Assert.That((string)await mock.Object.GetValueAsync()).IsEqualTo("converted");
+    }
+
+    [Test]
+    public async Task Type_Parameter_Named_Int32_Round_Trips_Its_Actual_Instantiation()
+    {
+        var mock = INumericNamedTypeParam<string>.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "not a number";
+        });
+
+        await Assert.That(await mock.Object.GetAsync()).IsEqualTo("not a number");
+    }
+
+    [Test]
+    public async Task Method_Type_Parameter_Named_Int64_Round_Trips_Its_Actual_Instantiation()
+    {
+        var mock = INumericNamedTypeParam<string>.Mock();
+        mock.RoundtripAsync(Arg.Any<Uri>()).Returns(async () =>
+        {
+            await Task.Yield();
+            return new Uri("https://example.test/");
+        });
+
+        await Assert.That((await mock.Object.RoundtripAsync(new Uri("https://tunit.dev/"))).Host)
+            .IsEqualTo("example.test");
     }
 }

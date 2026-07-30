@@ -593,6 +593,107 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_IConvertible_Async_Result()
+    {
+        // #6518 review: the zero-to-enum case's own pattern is `case IConvertible` — on a
+        // member declared Task<IConvertible> it would land right after `case IConvertible exact`
+        // and be unreachable, and CS8120 is an error. The case must not be emitted here.
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IConvertibleService
+            {
+                Task<IConvertible> GetAsync();
+                ValueTask<IConvertible> ComputeAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConvertibleService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public Task Interface_With_Type_Parameters_Named_Like_Numeric_Types()
+    {
+        // #6518 review: the conversion tables match type names textually, so a type parameter
+        // literally named Int32 was mistaken for System.Int32 and numeric widening cases were
+        // emitted into a helper returning the open parameter (CS0029). Type parameters must
+        // take only the exact/null/zero-to-enum cases, all runtime-guarded.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface INumericNamed<Int32>
+            {
+                Task<Int32> GetAsync();
+                Task<Int64> RoundtripAsync<Int64>(Int64 value);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<INumericNamed<string>>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
+    public void Interface_With_IConvertible_And_Numeric_Named_Type_Parameters_Compiles()
+    {
+        var source = """
+            using System;
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface IConvertibleService
+            {
+                Task<IConvertible> GetAsync();
+            }
+
+            public interface INumericNamed<Int32>
+            {
+                Task<Int32> GetAsync();
+                Task<Int64> RoundtripAsync<Int64>(Int64 value);
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<IConvertibleService>();
+                    var mock2 = Mock.Of<INumericNamed<string>>();
+                }
+            }
+            """;
+
+        var errors = GetGeneratedCompilationErrors(source);
+
+        // CS8120: unreachable switch case (IConvertible zero case after IConvertible exact);
+        // CS0029: numeric widening cases emitted into a helper returning an open type parameter
+        foreach (var id in (string[])["CS8120", "CS0029"])
+        {
+            var match = errors.FirstOrDefault(e => string.Equals(e.Id, id, StringComparison.Ordinal));
+            if (match is not null)
+            {
+                throw new InvalidOperationException($"Generated code produced {id}: {match}");
+            }
+        }
+    }
+
+    [Test]
     public Task Interface_With_Generic_Methods()
     {
         var source = """

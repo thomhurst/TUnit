@@ -512,7 +512,7 @@ internal static class MockMembersBuilder
             var aliasTypeParam = GetAsyncAliasTypeParamName(model, method);
             if (isAsync && fullReturnType is not null)
             {
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask, aliasTypeParam, GetDefaultableTypeParameterNames(model, method));
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, fullReturnType, isValueTask, aliasTypeParam, GetDefaultableTypeParameterNames(model, method), GetTypeParameterNames(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -646,7 +646,7 @@ internal static class MockMembersBuilder
                 var taskType = isValueTask
                     ? "global::System.Threading.Tasks.ValueTask"
                     : "global::System.Threading.Tasks.Task";
-                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method), GetDefaultableTypeParameterNames(model, method));
+                EmitReturnsAsyncOverloads(writer, wrapperTypeName, taskType, isValueTask, GetAsyncAliasTypeParamName(model, method), GetDefaultableTypeParameterNames(model, method), GetTypeParameterNames(model, method));
             }
 
             // Typed parameter overloads (only for methods with typed params within the arity limit).
@@ -1834,7 +1834,7 @@ internal static class MockMembersBuilder
         return string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
     }
 
-    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask, string aliasTypeParam, HashSet<string> defaultableTypeParameters)
+    private static void EmitReturnsAsyncOverloads(CodeWriter writer, string wrapperName, string taskType, bool isValueTask, string aliasTypeParam, HashSet<string> defaultableTypeParameters, HashSet<string> typeParameterNames)
     {
         var taskLabel = isValueTask ? "ValueTask" : "Task";
         writer.AppendLine();
@@ -1928,7 +1928,7 @@ internal static class MockMembersBuilder
                 writer.AppendLine("switch (value)");
                 using (writer.Block())
                 {
-                    EmitAsyncResultConversionCases(writer, resultType, defaultableTypeParameters, aliasTypeParam, "", pendingTupleItems);
+                    EmitAsyncResultConversionCases(writer, resultType, defaultableTypeParameters, typeParameterNames, aliasTypeParam, "", pendingTupleItems);
                 }
             }
             // Value-tuple results convert element-wise; each element gets its own converter so
@@ -1944,7 +1944,7 @@ internal static class MockMembersBuilder
                     writer.AppendLine("switch (value)");
                     using (writer.Block())
                     {
-                        EmitAsyncResultConversionCases(writer, itemType, defaultableTypeParameters, null, suffix, pendingTupleItems);
+                        EmitAsyncResultConversionCases(writer, itemType, defaultableTypeParameters, typeParameterNames, null, suffix, pendingTupleItems);
                     }
                 }
             }
@@ -1971,7 +1971,8 @@ internal static class MockMembersBuilder
     /// tuples recurse).
     /// </summary>
     private static void EmitAsyncResultConversionCases(CodeWriter writer, string declaredType,
-        HashSet<string> defaultableTypeParameters, string? aliasTypeParam, string helperSuffix,
+        HashSet<string> defaultableTypeParameters, HashSet<string> typeParameterNames,
+        string? aliasTypeParam, string helperSuffix,
         List<(string Suffix, string Type)> pendingTupleItems)
     {
         var bareType = StripTupleElementNames(declaredType);
@@ -2033,28 +2034,36 @@ internal static class MockMembersBuilder
 
         if (!isTuple)
         {
-            // Only the implicit numeric widening conversions C# itself permits
-            // (sbyte → long, int → double, ...) are replayed, each as a dedicated case
-            // whose conversion the compiler verifies. Convert.ChangeType would also
-            // accept narrowing/rounding conversions (long → int, double → int,
-            // double → decimal) that C# rejects implicitly, silently corrupting the
-            // value — those fall through to the informative InvalidCastException below.
-            foreach (var source in GetImplicitNumericWideningSources(patternType))
+            // A type parameter may be NAMED like a BCL numeric type (interface IFoo<Int32>),
+            // but C# grants no implicit numeric conversions on an open T, and emitting the
+            // numeric cases into a method returning T would not compile (CS0029). Type
+            // parameters take only the exact/null/zero-to-enum cases, all runtime-guarded.
+            var isTypeParameter = typeParameterNames.Contains(patternType);
+            if (!isTypeParameter)
             {
-                writer.AppendLine($"case {source} number: return number;");
+                // Only the implicit numeric widening conversions C# itself permits
+                // (sbyte → long, int → double, ...) are replayed, each as a dedicated case
+                // whose conversion the compiler verifies. Convert.ChangeType would also
+                // accept narrowing/rounding conversions (long → int, double → int,
+                // double → decimal) that C# rejects implicitly, silently corrupting the
+                // value — those fall through to the informative InvalidCastException below.
+                foreach (var source in GetImplicitNumericWideningSources(patternType))
+                {
+                    writer.AppendLine($"case {source} number: return number;");
+                }
+                // C# also permits implicit *constant expression* conversions (an in-range
+                // int constant to sbyte/byte/short/ushort/uint/ulong, a non-negative long
+                // constant to ulong) — `async () => 1` on a Task<byte> member compiles
+                // against the declared delegate, but the alias infers int. Constant-ness is
+                // erased by the time the boxed result reaches the helper, so replay them as
+                // range-guarded exact-value conversions; an out-of-range value still takes
+                // the informative InvalidCastException below.
+                foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
+                {
+                    writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
+                }
             }
-            // C# also permits implicit *constant expression* conversions (an in-range
-            // int constant to sbyte/byte/short/ushort/uint/ulong, a non-negative long
-            // constant to ulong) — `async () => 1` on a Task<byte> member compiles
-            // against the declared delegate, but the alias infers int. Constant-ness is
-            // erased by the time the boxed result reaches the helper, so replay them as
-            // range-guarded exact-value conversions; an out-of-range value still takes
-            // the informative InvalidCastException below.
-            foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
-            {
-                writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
-            }
-            if (MightBeEnumResultType(patternType))
+            if (isTypeParameter || MightBeEnumResultType(patternType))
             {
                 // C# also implicitly converts the constant 0 of any integer type to any
                 // enum type (`async () => 0` on a Task<MyEnum> member compiles against
@@ -2309,9 +2318,11 @@ internal static class MockMembersBuilder
 
     /// <summary>
     /// Whether the declared async result type could be an enum at runtime — a named type that
-    /// is not a known primitive/special type, or a type parameter (whose enum-ness depends on
-    /// the instantiation). Gates emission of the constant-zero-to-enum conversion case, which
-    /// is itself runtime-guarded by <c>typeof(T).IsEnum</c>.
+    /// is not a known primitive/special type. Gates emission of the constant-zero-to-enum
+    /// conversion case, which is itself runtime-guarded by <c>typeof(T).IsEnum</c>. IConvertible
+    /// is excluded because the zero case's own pattern is <c>case IConvertible</c> — emitted
+    /// after <c>case IConvertible exact</c> it would be unreachable, and CS8120 is an error.
+    /// (Type parameters bypass this check entirely at the call site.)
     /// </summary>
     private static bool MightBeEnumResultType(string type)
     {
@@ -2321,7 +2332,7 @@ internal static class MockMembersBuilder
                 or "sbyte" or "SByte" or "byte" or "Byte" or "short" or "Int16" or "ushort" or "UInt16"
                 or "int" or "Int32" or "uint" or "UInt32" or "long" or "Int64" or "ulong" or "UInt64"
                 or "float" or "Single" or "double" or "Double" or "decimal" or "Decimal"
-                or "nint" or "IntPtr" or "nuint" or "UIntPtr" => false,
+                or "nint" or "IntPtr" or "nuint" or "UIntPtr" or "IConvertible" => false,
             _ => true,
         };
     }
@@ -2348,6 +2359,28 @@ internal static class MockMembersBuilder
             {
                 names.Add(tp.Name);
             }
+        }
+
+        return names;
+    }
+
+    /// <summary>
+    /// Every in-scope type parameter name (containing type's and the method's own). A result
+    /// type matching one of these is an open type parameter regardless of what it is named —
+    /// a parameter called <c>Int32</c> must not be mistaken for <c>System.Int32</c> by the
+    /// name-based numeric conversion tables.
+    /// </summary>
+    private static HashSet<string> GetTypeParameterNames(MockTypeModel model, MockMemberModel method)
+    {
+        var names = new HashSet<string>();
+        foreach (var tp in model.TypeParameters)
+        {
+            names.Add(tp.Name);
+        }
+
+        foreach (var tp in method.TypeParameters)
+        {
+            names.Add(tp.Name);
         }
 
         return names;
