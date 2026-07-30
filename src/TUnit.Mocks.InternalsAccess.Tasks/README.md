@@ -75,10 +75,11 @@ for TUnit.Mocks:
 - Diagnostics: `TUMIA001` unresolved assembly name (error; the requested name is matched by
   file name first, then by the reference's real assembly identity, so renamed compile assets
   resolve), `TUMIA002` .NET Framework inert (warning), `TUMIA003` ref-assembly-only source
-  (warning), `TUMIA004` ambiguous simple-name match — first wins and same-identity duplicates
-  are removed from the compiler's references so they cannot collide with the publicized copy;
-  their extern aliases are unioned and `EmbedInteropTypes` kept if any set it. Matches with a
-  DIFFERENT assembly identity (version/public key — a legal pair only under extern aliases) are
+  (warning), `TUMIA004` ambiguous simple-name match — each distinct assembly identity
+  (version/public key — a legal pair only under extern aliases) gets its own publicized copy,
+  while same-identity duplicates collapse onto one copy with extern aliases unioned and
+  `EmbedInteropTypes` kept if any set it; all matched references are removed from the compiler's
+  list so nothing collides with the publicized copies. Matches whose identity cannot be read are
   left in place untouched (warning), `TUMIA005` publicize failure, e.g. unreadable/locked
   assembly (error).
 - Incrementality is content-based (source path + SHA-256) and versioned: upgrading TUnit.Mocks

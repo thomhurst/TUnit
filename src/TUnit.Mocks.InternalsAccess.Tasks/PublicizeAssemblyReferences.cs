@@ -101,93 +101,32 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
                 continue;
             }
 
-            // Only matches sharing the winner's assembly identity are safe to collapse onto the
-            // publicized copy. A same-file-name reference with a DIFFERENT identity (version or
-            // public key — a legal pair only when extern aliases keep them apart) must stay in
-            // the compiler's reference list untouched, or its alias would rebind to the wrong
-            // assembly and its unique API would vanish from the compilation.
-            var (supersededMatches, retainedMatches) = PartitionByIdentity(matches);
+            // EVERY distinct assembly identity behind the requested name is publicized — a
+            // same-file-name pair with different identities (version or public key, legal only
+            // under extern aliases) gets one publicized copy each, since the simple-name request
+            // has no way to single one out. Same-identity duplicates collapse onto one copy.
+            var (identityGroups, unreadableMatches) = GroupMatchesByIdentity(matches);
 
             if (matches.Select(m => m.ItemSpec).Distinct(StringComparer.OrdinalIgnoreCase).Count() > 1)
             {
-                var retainedNote = retainedMatches.Count > 0
-                    ? " References whose assembly identity differs from the first match are left " +
-                      $"in place: {string.Join(", ", retainedMatches.Select(m => m.ItemSpec))}."
+                var unreadableNote = unreadableMatches.Count > 0
+                    ? " References whose assembly identity cannot be read are left in place: " +
+                      $"{string.Join(", ", unreadableMatches.Select(m => m.ItemSpec))}."
                     : "";
                 Log.LogWarning(
                     subcategory: null, warningCode: "TUMIA004", helpKeyword: null,
                     file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
                     message: $"TUnitMocksInternalsAccess: multiple resolved references match '{name}': " +
-                             $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Using the first " +
-                             "(extern aliases and EmbedInteropTypes from same-identity duplicates are " +
-                             $"preserved).{retainedNote} If the first is the wrong one, resolve the " +
-                             "version conflict in the project.");
+                             $"{string.Join(", ", matches.Select(m => m.ItemSpec))}. Each distinct " +
+                             "assembly identity is publicized separately; same-identity duplicates " +
+                             "collapse onto one copy (extern aliases and EmbedInteropTypes " +
+                             $"preserved).{unreadableNote}");
             }
 
-            var reference = matches[0];
-            string source;
-            string destination;
-            string assemblyName;
-
-            try
+            foreach (var identityGroup in identityGroups)
             {
-                source = ResolveImplementationAssembly(name, reference);
-                // The runtime matches IgnoresAccessChecksTo against the real assembly identity,
-                // which can differ from the requested (file-derived) simple name.
-                assemblyName = System.Reflection.AssemblyName.GetAssemblyName(source).Name!;
-                destination = Path.Combine(OutputDirectory, Path.GetFileName(source));
-
-                // Content-based incrementality: the signature records the resolved source path
-                // and a hash of its bytes, so a replaced/downgraded assembly with an equal or
-                // older timestamp still invalidates the publicized copy.
-                // The task version is part of the signature: a TUnit.Mocks upgrade that changes
-                // the rewrite rules must invalidate copies produced by the previous task, or the
-                // compiler keeps seeing the stale publicized API until obj is cleaned.
-                var signaturePath = destination + ".sig";
-                var signature = TaskVersion + "\n" + source + "\n" + HashFile(source);
-
-                if (!File.Exists(destination) || !File.Exists(signaturePath) || File.ReadAllText(signaturePath) != signature)
-                {
-                    Publicize(source, destination);
-                    File.WriteAllText(signaturePath, signature);
-                    Log.LogMessage(MessageImportance.Normal, $"TUnitMocksInternalsAccess: publicized '{source}' -> '{destination}'.");
-                }
-                else
-                {
-                    Log.LogMessage(MessageImportance.Low, $"TUnitMocksInternalsAccess: '{destination}' is up to date.");
-                }
+                PublicizeGroup(name, identityGroup, outputs, superseded, publicizedNames);
             }
-            catch (Exception ex)
-            {
-                Log.LogError(
-                    subcategory: null, errorCode: "TUMIA005", helpKeyword: null,
-                    file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
-                    message: $"TUnitMocksInternalsAccess: failed to publicize '{reference.ItemSpec}': {ex.Message}");
-                Log.LogMessage(MessageImportance.Low, ex.ToString());
-                continue;
-            }
-
-            var item = new TaskItem(destination);
-            // Preserve the original reference's metadata (Aliases, EmbedInteropTypes, ...) —
-            // Csc reads compiler-significant options from item metadata, and an extern-aliased
-            // reference must stay extern-aliased after the swap.
-            reference.CopyMetadataTo(item);
-            if (supersededMatches.Count > 1)
-            {
-                MergeCompilerMetadataFromDuplicates(item, supersededMatches);
-            }
-            // "Original" is what the targets file Removes — the reference item as the compiler
-            // knew it (the ref assembly when one existed), not the implementation path.
-            item.SetMetadata("Original", reference.ItemSpec);
-            // Compile-time only: never copy the rewritten assembly to the output directory.
-            item.SetMetadata("Private", "false");
-            item.SetMetadata("CopyLocal", "false");
-            outputs.Add(item);
-            publicizedNames.Add(assemblyName);
-            // Every SAME-IDENTITY match leaves the compiler's reference list, not just the
-            // winner — a leftover duplicate would share the publicized copy's assembly identity
-            // and fail the compile with CS1703. Different-identity matches stay.
-            superseded.AddRange(supersededMatches.Select(ITaskItem (m) => new TaskItem(m.ItemSpec)));
         }
 
         if (!Log.HasLoggedErrors)
@@ -235,35 +174,123 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
     }
 
     /// <summary>
-    /// Splits the matches into those safe to collapse onto the publicized copy (the winner plus
-    /// duplicates with the winner's exact assembly identity) and those that must remain in the
-    /// compiler's reference list (a different version or public key — or an unreadable file,
-    /// which is never assumed to be a duplicate).
+    /// Publicizes one identity group: the group's first member is the source, every member is
+    /// superseded (a leftover same-identity duplicate would collide with the publicized copy —
+    /// CS1703), and compiler-significant metadata from all members survives on the replacement.
     /// </summary>
-    private (List<ITaskItem> Superseded, List<ITaskItem> Retained) PartitionByIdentity(List<ITaskItem> matches)
+    private void PublicizeGroup(
+        string name, List<ITaskItem> identityGroup,
+        List<ITaskItem> outputs, List<ITaskItem> superseded, List<string> publicizedNames)
     {
-        var supersededMatches = new List<ITaskItem> { matches[0] };
-        var retained = new List<ITaskItem>();
+        var reference = identityGroup[0];
+        string source;
+        string destination;
+        string assemblyName;
 
-        if (matches.Count > 1)
+        try
         {
-            var winnerIdentity = TryGetAssemblyIdentity(matches[0].ItemSpec);
+            source = ResolveImplementationAssembly(name, reference);
+            // The runtime matches IgnoresAccessChecksTo against the real assembly identity,
+            // which can differ from the requested (file-derived) simple name.
+            assemblyName = System.Reflection.AssemblyName.GetAssemblyName(source).Name!;
+            // Each source gets its own subdirectory keyed by its path: two implementation
+            // assemblies with the same file name in different directories (renamed assets, or
+            // two identities behind one simple name) must not overwrite each other's copy.
+            var destinationDirectory = Path.Combine(OutputDirectory, HashPathToken(source));
+            Directory.CreateDirectory(destinationDirectory);
+            destination = Path.Combine(destinationDirectory, Path.GetFileName(source));
 
-            foreach (var match in matches.Skip(1))
+            // Content-based incrementality: the signature records the resolved source path
+            // and a hash of its bytes, so a replaced/downgraded assembly with an equal or
+            // older timestamp still invalidates the publicized copy.
+            // The task version is part of the signature: a TUnit.Mocks upgrade that changes
+            // the rewrite rules must invalidate copies produced by the previous task, or the
+            // compiler keeps seeing the stale publicized API until obj is cleaned.
+            var signaturePath = destination + ".sig";
+            var signature = TaskVersion + "\n" + source + "\n" + HashFile(source);
+
+            if (!File.Exists(destination) || !File.Exists(signaturePath) || File.ReadAllText(signaturePath) != signature)
             {
-                var identity = winnerIdentity is null ? null : TryGetAssemblyIdentity(match.ItemSpec);
-                if (identity is not null && HasSameIdentity(winnerIdentity!, identity))
-                {
-                    supersededMatches.Add(match);
-                }
-                else
-                {
-                    retained.Add(match);
-                }
+                Publicize(source, destination);
+                File.WriteAllText(signaturePath, signature);
+                Log.LogMessage(MessageImportance.Normal, $"TUnitMocksInternalsAccess: publicized '{source}' -> '{destination}'.");
+            }
+            else
+            {
+                Log.LogMessage(MessageImportance.Low, $"TUnitMocksInternalsAccess: '{destination}' is up to date.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.LogError(
+                subcategory: null, errorCode: "TUMIA005", helpKeyword: null,
+                file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0,
+                message: $"TUnitMocksInternalsAccess: failed to publicize '{reference.ItemSpec}': {ex.Message}");
+            Log.LogMessage(MessageImportance.Low, ex.ToString());
+            return;
+        }
+
+        var item = new TaskItem(destination);
+        // Preserve the original reference's metadata (Aliases, EmbedInteropTypes, ...) —
+        // Csc reads compiler-significant options from item metadata, and an extern-aliased
+        // reference must stay extern-aliased after the swap.
+        reference.CopyMetadataTo(item);
+        if (identityGroup.Count > 1)
+        {
+            MergeCompilerMetadataFromDuplicates(item, identityGroup);
+        }
+        // "Original" is what the targets file Removes — the reference item as the compiler
+        // knew it (the ref assembly when one existed), not the implementation path.
+        item.SetMetadata("Original", reference.ItemSpec);
+        // Compile-time only: never copy the rewritten assembly to the output directory.
+        item.SetMetadata("Private", "false");
+        item.SetMetadata("CopyLocal", "false");
+        outputs.Add(item);
+        // Two identities behind one simple name produce one attribute application — the runtime
+        // matches IgnoresAccessChecksTo by simple name only.
+        if (!publicizedNames.Contains(assemblyName, StringComparer.OrdinalIgnoreCase))
+        {
+            publicizedNames.Add(assemblyName);
+        }
+
+        superseded.AddRange(identityGroup.Select(ITaskItem (m) => new TaskItem(m.ItemSpec)));
+    }
+
+    /// <summary>
+    /// Groups the matches by exact assembly identity (name, version, public key), preserving
+    /// order — each group is publicized once from its first member. A match whose identity
+    /// cannot be read is never assumed to duplicate anything: the first match still anchors a
+    /// group (so a single unreadable reference fails loudly in Publicize), later unreadable
+    /// matches are left in the compiler's reference list untouched.
+    /// </summary>
+    private (List<List<ITaskItem>> Groups, List<ITaskItem> Unreadable) GroupMatchesByIdentity(List<ITaskItem> matches)
+    {
+        var groups = new List<List<ITaskItem>> { new() { matches[0] } };
+        var groupIdentities = new List<System.Reflection.AssemblyName?> { TryGetAssemblyIdentity(matches[0].ItemSpec) };
+        var unreadable = new List<ITaskItem>();
+
+        foreach (var match in matches.Skip(1))
+        {
+            var identity = TryGetAssemblyIdentity(match.ItemSpec);
+            if (identity is null)
+            {
+                unreadable.Add(match);
+                continue;
+            }
+
+            var groupIndex = groupIdentities.FindIndex(g => g is not null && HasSameIdentity(g, identity));
+            if (groupIndex >= 0)
+            {
+                groups[groupIndex].Add(match);
+            }
+            else
+            {
+                groups.Add([match]);
+                groupIdentities.Add(identity);
             }
         }
 
-        return (supersededMatches, retained);
+        return (groups, unreadable);
     }
 
     private static bool HasSameIdentity(System.Reflection.AssemblyName left, System.Reflection.AssemblyName right)
@@ -444,6 +471,21 @@ public sealed class PublicizeAssemblyReferences : Microsoft.Build.Utilities.Task
         using var module = ModuleDefinition.ReadModule(path);
         return module.Assembly.HasCustomAttributes && module.Assembly.CustomAttributes.Any(a =>
             a.AttributeType.FullName == "System.Runtime.CompilerServices.ReferenceAssemblyAttribute");
+    }
+
+    /// <summary>
+    /// Stable per-source-path directory token — derived from the path (not content) so the same
+    /// source keeps the same output location across builds and incrementality still works.
+    /// </summary>
+    private static string HashPathToken(string sourcePath)
+    {
+        using var sha = SHA256.Create();
+        var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(sourcePath).ToUpperInvariant()));
+#if NET
+        return Convert.ToHexString(hash, 0, 4).ToLowerInvariant();
+#else
+        return BitConverter.ToString(hash, 0, 4).Replace("-", "").ToLowerInvariant();
+#endif
     }
 
     private static string HashFile(string path)

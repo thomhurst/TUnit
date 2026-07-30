@@ -44,7 +44,7 @@ public class PublicizeAssemblyReferencesTaskTests
 
         await Assert.That(task.Execute()).IsTrue();
 
-        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var rewritten = task.PublicizedReferences[0].ItemSpec;
         await Assert.That(File.Exists(rewritten)).IsTrue();
 
         var context = new AssemblyLoadContext("publicized-probe", isCollectible: true);
@@ -99,7 +99,7 @@ public class PublicizeAssemblyReferencesTaskTests
         var first = CreateTask(dir, TargetLibName);
         await Assert.That(first.Execute()).IsTrue();
 
-        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var rewritten = first.PublicizedReferences[0].ItemSpec;
         var firstWrite = File.GetLastWriteTimeUtc(rewritten);
         var firstSourceWrite = File.GetLastWriteTimeUtc(first.GeneratedSourceFile);
 
@@ -124,7 +124,7 @@ public class PublicizeAssemblyReferencesTaskTests
         first.ReferencePaths = [new TaskItem(source)];
         await Assert.That(first.Execute()).IsTrue();
 
-        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var rewritten = first.PublicizedReferences[0].ItemSpec;
         var firstWrite = File.GetLastWriteTimeUtc(rewritten);
 
         // Different content, timestamp pushed BEFORE the publicized copy — a timestamp-only
@@ -243,16 +243,16 @@ public class PublicizeAssemblyReferencesTaskTests
     }
 
     [Test]
-    public async Task Different_Identity_Same_Name_Reference_Is_Left_In_Place()
+    public async Task Different_Identity_Same_Name_References_Are_Each_Publicized()
     {
         var dir = NewScratchDirectory();
         var otherVersionDir = NewScratchDirectory();
         var otherVersionPath = Path.Combine(otherVersionDir, TargetLibName + ".dll");
         CreateDifferentVersionCopy(TargetLibPath, otherVersionPath);
 
-        // A same-file-name reference with a DIFFERENT identity is a legal pair only when extern
-        // aliases keep the two apart — superseding it would rebind its alias to the publicized
-        // copy's identity and drop its unique API from the compilation.
+        // A same-file-name pair with DIFFERENT identities is legal only under extern aliases,
+        // and the simple-name request cannot single one out — so each identity gets its own
+        // publicized copy, with per-identity metadata (the alias) preserved on its own item.
         var winner = new TaskItem(TargetLibPath);
         var otherVersion = new TaskItem(otherVersionPath);
         otherVersion.SetMetadata("Aliases", "oldsdk");
@@ -266,13 +266,58 @@ public class PublicizeAssemblyReferencesTaskTests
         await Assert.That(engine.Warnings.Count).IsEqualTo(1);
         await Assert.That(engine.Warnings[0].Code).IsEqualTo("TUMIA004");
 
-        // Only the winner is superseded; the different-identity reference stays untouched.
+        // Both identities are superseded — each is replaced by its own publicized copy.
         var supersededPaths = task.SupersededReferences.Select(s => s.ItemSpec).ToList();
         await Assert.That(supersededPaths).Contains(TargetLibPath);
-        await Assert.That(supersededPaths).DoesNotContain(otherVersionPath);
-        // Its alias must NOT be merged onto the publicized item — it belongs to a different
-        // assembly identity that remains in the compiler's reference list.
+        await Assert.That(supersededPaths).Contains(otherVersionPath);
+
+        await Assert.That(task.PublicizedReferences.Length).IsEqualTo(2);
+        await Assert.That(task.PublicizedReferences[0].GetMetadata("Original")).IsEqualTo(TargetLibPath);
+        await Assert.That(task.PublicizedReferences[1].GetMetadata("Original")).IsEqualTo(otherVersionPath);
+        // Aliases stay with their own identity — never merged across identities.
         await Assert.That(task.PublicizedReferences[0].GetMetadata("Aliases")).IsEqualTo("");
+        await Assert.That(task.PublicizedReferences[1].GetMetadata("Aliases")).IsEqualTo("oldsdk");
+
+        // Same file name from different directories — the copies must not overwrite each other,
+        // and each must keep its own identity.
+        var copyPaths = task.PublicizedReferences.Select(p => p.ItemSpec).ToList();
+        await Assert.That(copyPaths[0]).IsNotEqualTo(copyPaths[1]);
+        await Assert.That(AssemblyName.GetAssemblyName(copyPaths[0]).Version)
+            .IsEqualTo(AssemblyName.GetAssemblyName(TargetLibPath).Version);
+        await Assert.That(AssemblyName.GetAssemblyName(copyPaths[1]).Version).IsEqualTo(new Version(99, 0, 0, 0));
+
+        // One simple name -> one IgnoresAccessChecksTo application, even with two identities.
+        var source = await File.ReadAllTextAsync(task.GeneratedSourceFile);
+        var applications = source.Split([$"IgnoresAccessChecksTo(\"{TargetLibName}\")"], StringSplitOptions.None).Length - 1;
+        await Assert.That(applications).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Same_File_Name_Sources_From_Different_Directories_Get_Distinct_Outputs()
+    {
+        var dir = NewScratchDirectory();
+        var dirA = NewScratchDirectory();
+        var dirB = NewScratchDirectory();
+
+        // Two opted-in references whose compile assets share a file name but hold different
+        // assemblies (renamed assets) — their publicized copies must not collide.
+        var renamedTargetLib = Path.Combine(dirA, "Common.dll");
+        File.Copy(TargetLibPath, renamedTargetLib);
+        var renamedMocks = Path.Combine(dirB, "Common.dll");
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "TUnit.Mocks.dll"), renamedMocks);
+
+        var task = CreateTask(dir, TargetLibName, "TUnit.Mocks");
+        task.ReferencePaths = [new TaskItem(renamedTargetLib), new TaskItem(renamedMocks)];
+
+        await Assert.That(task.Execute()).IsTrue();
+        await Assert.That(task.PublicizedReferences.Length).IsEqualTo(2);
+
+        var copyPaths = task.PublicizedReferences.Select(p => p.ItemSpec).ToList();
+        await Assert.That(copyPaths[0]).IsNotEqualTo(copyPaths[1]);
+        // Each copy holds the assembly it was publicized from, not the other name's overwrite.
+        var identities = copyPaths.Select(p => AssemblyName.GetAssemblyName(p).Name).ToList();
+        await Assert.That(identities).Contains(TargetLibName);
+        await Assert.That(identities).Contains("TUnit.Mocks");
     }
 
     [Test]
@@ -313,7 +358,7 @@ public class PublicizeAssemblyReferencesTaskTests
         var first = CreateTask(dir, TargetLibName);
         await Assert.That(first.Execute()).IsTrue();
 
-        var rewritten = Path.Combine(dir, TargetLibName + ".dll");
+        var rewritten = first.PublicizedReferences[0].ItemSpec;
         var signaturePath = rewritten + ".sig";
 
         // Emulate a copy produced by an older TUnit.Mocks: same source path and hash, different
@@ -342,7 +387,7 @@ public class PublicizeAssemblyReferencesTaskTests
         var context = new AssemblyLoadContext("visibility-probe", isCollectible: true);
         try
         {
-            var assembly = context.LoadFromAssemblyPath(Path.Combine(dir, TargetLibName + ".dll"));
+            var assembly = context.LoadFromAssemblyPath(task.PublicizedReferences[0].ItemSpec);
             var surface = assembly.GetType("FakeSdk.PublicSurface", throwOnError: true)!;
 
             // internal -> public.
