@@ -182,6 +182,41 @@ public class Issue6514Tests
     }
 
     [Test]
+    public async Task Same_Full_Name_From_Different_Assemblies_Get_Distinct_Stubs()
+    {
+        // Review finding on #6519: the auto-mock cache keyed by memberName + FullName string
+        // conflated two types with identical full names from different assemblies — the second
+        // call retrieved the first type's stub and the cast to TReturn threw.
+        var typeA = EmitEmptyInterface("Issue6514.CollisionAssemblyA");
+        var typeB = EmitEmptyInterface("Issue6514.CollisionAssemblyB");
+
+        var features = IStubFeatures.Mock();
+        var get = typeof(IStubFeatures).GetMethod(nameof(IStubFeatures.Get))!;
+
+        var first = get.MakeGenericMethod(typeA).Invoke(features.Object, null);
+        var second = get.MakeGenericMethod(typeB).Invoke(features.Object, null);
+
+        await Assert.That(first).IsNotNull();
+        await Assert.That(second).IsNotNull();
+        await Assert.That(typeA.IsInstanceOfType(first!)).IsTrue();
+        await Assert.That(typeB.IsInstanceOfType(second!)).IsTrue();
+    }
+
+    private static Type EmitEmptyInterface(string assemblyName)
+    {
+        var assembly = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+            new System.Reflection.AssemblyName(assemblyName),
+            System.Reflection.Emit.AssemblyBuilderAccess.Run);
+        var module = assembly.DefineDynamicModule("collision");
+        var type = module.DefineType(
+            "Issue6514.Collision.ISameFullName",
+            System.Reflection.TypeAttributes.Public
+            | System.Reflection.TypeAttributes.Interface
+            | System.Reflection.TypeAttributes.Abstract);
+        return type.CreateType()!;
+    }
+
+    [Test]
     public async Task Stub_Indexer_State_Is_Keyed_By_Index_Arguments()
     {
         var features = IStubFeatures.Mock();

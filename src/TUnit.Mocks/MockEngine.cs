@@ -55,7 +55,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
     private ConcurrentDictionary<string, Action>? _onSubscribeCallbacks;
     private ConcurrentDictionary<string, Action>? _onUnsubscribeCallbacks;
-    private ConcurrentDictionary<string, IMock?>? _autoMockCache;
+    // Keyed by member AND the actual Type identity (never a name string): two same-full-named
+    // types from different assemblies must not share a cached auto-mock/stub.
+    private ConcurrentDictionary<(string MemberName, Type ReturnType), IMock?>? _autoMockCache;
 
     /// <summary>
     /// The current state name for state machine mocking. Null means no state (all setups match).
@@ -123,7 +125,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private ConcurrentDictionary<string, Action> OnUnsubscribeCallbacks
         => LazyInitializer.EnsureInitialized(ref _onUnsubscribeCallbacks)!;
 
-    private ConcurrentDictionary<string, IMock?> AutoMockCache
+    private ConcurrentDictionary<(string MemberName, Type ReturnType), IMock?> AutoMockCache
         => LazyInitializer.EnsureInitialized(ref _autoMockCache)!;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,7 +133,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 if (autoMockFactory is not null)
@@ -664,17 +666,17 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Tries to get a cached auto-mock by its cache key. Used by Mock&lt;T&gt;.GetAutoMock.
+    /// Tries to get a cached auto-mock for a member and return type.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public bool TryGetAutoMock(string cacheKey, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
+    public bool TryGetAutoMock(string memberName, Type returnType, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IMock? mock)
     {
         if (Volatile.Read(ref _autoMockCache) is not { } cache)
         {
             mock = null;
             return false;
         }
-        return cache.TryGetValue(cacheKey, out mock);
+        return cache.TryGetValue((memberName, returnType), out mock);
     }
 
     /// <summary>

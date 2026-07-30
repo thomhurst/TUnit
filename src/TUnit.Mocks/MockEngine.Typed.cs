@@ -121,7 +121,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -279,7 +279,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -437,7 +437,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -595,7 +595,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -753,7 +753,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -911,7 +911,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -1069,7 +1069,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
@@ -1227,7 +1227,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (Behavior == MockBehavior.Loose && typeof(TReturn).IsInterface)
         {
-            var cacheKey = memberName + "|" + typeof(TReturn).FullName;
+            var cacheKey = (memberName, typeof(TReturn));
             var autoMock = AutoMockCache.GetOrAdd(cacheKey, _ =>
             {
                 MockRegistry.TryCreateAutoMock(typeof(TReturn), Behavior, out var m);
