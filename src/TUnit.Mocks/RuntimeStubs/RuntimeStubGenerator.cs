@@ -315,14 +315,26 @@ internal static class RuntimeStubGenerator
 
         var parameters = target.GetParameters();
         parameterTypes = new Type[parameters.Length];
+        var parameterRequiredModifiers = new Type[parameters.Length][];
+        var parameterOptionalModifiers = new Type[parameters.Length][];
         for (var i = 0; i < parameters.Length; i++)
         {
             parameterTypes[i] = Substitute(parameters[i].ParameterType, genericMap);
+            parameterRequiredModifiers[i] = parameters[i].GetRequiredCustomModifiers();
+            parameterOptionalModifiers[i] = parameters[i].GetOptionalCustomModifiers();
         }
 
         returnType = Substitute(target.ReturnType, genericMap);
-        mb.SetReturnType(returnType);
-        mb.SetParameters(parameterTypes);
+        // Custom modifiers are part of the CLR signature the MethodImpl must match — an init
+        // setter's modreq(IsExternalInit) or an `in` parameter's modreq(InAttribute) dropped
+        // here would make CreateType reject the implementation.
+        mb.SetSignature(
+            returnType,
+            target.ReturnParameter.GetRequiredCustomModifiers(),
+            target.ReturnParameter.GetOptionalCustomModifiers(),
+            parameterTypes,
+            parameterRequiredModifiers,
+            parameterOptionalModifiers);
         tb.DefineMethodOverride(mb, target);
         return mb;
     }

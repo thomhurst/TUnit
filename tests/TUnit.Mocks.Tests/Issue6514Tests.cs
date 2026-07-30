@@ -101,6 +101,16 @@ public interface IByRefFeature
     ref int Counter();
 }
 
+// Custom modifiers are part of the CLR signature the emitted MethodImpl must match: an init
+// setter carries modreq(IsExternalInit), an `in` parameter modreq(InAttribute). Dropping either
+// during emission makes CreateType reject the stub type.
+public interface ICustomModifierFeature
+{
+    string Name { get; init; }
+
+    int Sum(in int left, in int right);
+}
+
 // Simulates the SDK-internal call site: code the test has no control over requesting types the
 // test assembly could not configure.
 public static class StubFeatureConsumer
@@ -292,6 +302,20 @@ public class Issue6514Tests
         stub[1] = null;
         await Assert.That(stub[1]).IsNull();
         await Assert.That(stub[2]).IsEqualTo(string.Empty); // untouched index keeps the default
+    }
+
+    [Test]
+    public async Task Stub_Supports_Init_Only_Properties_And_In_Parameters()
+    {
+        var features = IStubFeatures.Mock();
+
+        // Emission must preserve modreq(IsExternalInit) / modreq(InAttribute) — a dropped
+        // modifier fails CreateType, the miss is cached, and this returns null instead.
+        var stub = features.Object.Get<ICustomModifierFeature>();
+
+        await Assert.That(stub).IsNotNull();
+        await Assert.That(stub.Name).IsEqualTo(string.Empty);
+        await Assert.That(stub.Sum(1, 2)).IsEqualTo(0);
     }
 
     [Test]
