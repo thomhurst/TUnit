@@ -709,13 +709,18 @@ namespace TUnit.Mocks.Generated
         public IDialogService_ShowPanel_M1_MockCall<TData> ReturnsAsync(global::System.Threading.Tasks.Task<string?> task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
         public IDialogService_ShowPanel_M1_MockCall<TData> ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<string?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(taskFactory())); return this; }
+
+        private static global::System.Threading.Tasks.Task<string?> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+            => task is global::System.Threading.Tasks.Task<string?> exact ? exact : __TUnitMocksAwaitAndConvert(task);
+
+        private static async global::System.Threading.Tasks.Task<string?> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+            => (string?)(object?)(await task.ConfigureAwait(false))!;
         #if NET9_0_OR_GREATER
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDialogService_ShowPanel_M1_MockCall<TData> Returns(global::System.Func<global::System.Threading.Tasks.Task<string?>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
-        #else
-        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
-        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
@@ -732,17 +737,16 @@ namespace TUnit.Mocks.Generated
             return this;
         }
 
+        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<TData?, global::System.Threading.Tasks.Task<TAsyncFactoryResult>> factory)
+        {
+            EnsureSetup().ReturnsRaw(args => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(factory((TData?)args[0])));
+            return this;
+        }
         #if NET9_0_OR_GREATER
         /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public IDialogService_ShowPanel_M1_MockCall<TData> Returns(global::System.Func<TData?, global::System.Threading.Tasks.Task<string?>> factory)
-        {
-            EnsureSetup().ReturnsRaw(args => (object?)factory((TData?)args[0]));
-            return this;
-        }
-        #else
-        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
-        public IDialogService_ShowPanel_M1_MockCall<TData> Returns<TAsyncFactoryResult>(global::System.Func<TData?, global::System.Threading.Tasks.Task<TAsyncFactoryResult>> factory)
         {
             EnsureSetup().ReturnsRaw(args => (object?)factory((TData?)args[0]));
             return this;

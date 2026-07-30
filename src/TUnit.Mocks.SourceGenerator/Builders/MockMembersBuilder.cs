@@ -753,26 +753,28 @@ internal static class MockMembersBuilder
         }
 
         // Returns alias, so an `async (a, b) => ...` lambda binds here rather than failing against
-        // the synchronous typed overload with CS4010. ORP-deprioritised on net9.0+, generic below
-        // that, for the same reasons as the parameterless alias; see EmitReturnsAsyncOverloads.
+        // the synchronous typed overload with CS4010. Same two-alias shape as the parameterless
+        // variant — generic (primary, all TFMs, converted to the declared task type) plus a
+        // net9.0+-only ORP(-1) non-generic alias for typeless async lambda bodies; see
+        // EmitReturnsAsyncOverloads for the full rationale. The __TUnitMocksConvertAsyncResult
+        // helpers are emitted there, and that always runs for the wrappers that reach here.
+        // TAsyncFactoryResult rather than TResult: the wrapper type carries the mocked method's
+        // own type parameters, and TResult is a common user choice — a same-name inner
+        // declaration would be a CS0693 shadowing warning in generated code.
         // See issues #6495 and #6515.
+        var genericTaskKind = taskType.Substring(0, taskType.IndexOf('<'));
+        var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<TAsyncFactoryResult>>";
         writer.AppendLine();
+        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
+        using (writer.Block($"public {wrapperName} Returns<TAsyncFactoryResult>({genericFuncType} factory)"))
+        {
+            writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(factory({castArgs})));");
+            writer.AppendLine("return this;");
+        }
         writer.AppendLine("#if NET9_0_OR_GREATER");
         writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
         writer.AppendLine(PriorityMinusOneAttribute);
         using (writer.Block($"public {wrapperName} Returns({funcType} factory)"))
-        {
-            writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
-            writer.AppendLine("return this;");
-        }
-        writer.AppendLine("#else");
-        var genericTaskKind = taskType.Substring(0, taskType.IndexOf('<'));
-        // TAsyncFactoryResult rather than TResult: the wrapper type carries the mocked method's own
-        // type parameters, and TResult is a common user choice — a same-name inner declaration
-        // would be a CS0693 shadowing warning in generated code.
-        var genericFuncType = $"global::System.Func<{typeList}, {genericTaskKind}<TAsyncFactoryResult>>";
-        writer.AppendLine("/// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>");
-        using (writer.Block($"public {wrapperName} Returns<TAsyncFactoryResult>({genericFuncType} factory)"))
         {
             writer.AppendLine($"EnsureSetup().ReturnsRaw(args => (object?)factory({castArgs}));");
             writer.AppendLine("return this;");
@@ -1859,14 +1861,40 @@ internal static class MockMembersBuilder
         var aliasDoc = $"/// <summary>Return a {taskLabel} from a factory, invoked on each call. The {taskLabel} is returned as-is, so an async factory stays pending until it completes.</summary>";
         if (IsGenericTaskType(taskType))
         {
+            // The generic alias is the primary shape on EVERY target framework:
+            // - A typeless lambda body (null / throw / default) cannot infer the type parameter,
+            //   so the alias drops out and Returns(() => null) keeps binding the synchronous
+            //   factory — no CS0121, no ORP needed for that tie.
+            // - A lambda-to-delegate conversion beats lambda-to-object, so on members declared
+            //   Task<object> the alias wins over Returns(object value) — which an ORP(-1)
+            //   non-generic alias LOSES (priority pruning runs before betterness), silently
+            //   boxing the natural-typed lambda as the value.
+            // - Inference may pick a SUBTYPE of the declared result (Task<object> member,
+            //   `async () => "value"` infers Task<string>) and Task<T>/ValueTask<T> are
+            //   invariant, so the factory task is converted to the declared task type: an
+            //   exact-typed task passes through untouched (identity preserved), anything else is
+            //   mirrored by an async wrapper that stays pending until the inner task completes.
+            //   A wrong-typed factory surfaces as an InvalidCastException when its task
+            //   completes.
+            // The net9.0+-only ORP(-1) non-generic alias below covers the one shape the generic
+            // alias cannot: an async lambda whose body pins no type (`async () => null`) — it has
+            // no natural type, so no other overload applies and the deprioritised alias is the
+            // sole candidate. ORP pruning also guarantees the two aliases are never ambiguous
+            // with each other.
             var taskKind = isValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
+            var resultType = GetTaskResultType(taskType);
+            writer.AppendLine(aliasDoc);
+            writer.AppendLine($"public {wrapperName} Returns<TAsyncFactoryResult>(global::System.Func<{taskKind}<TAsyncFactoryResult>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(taskFactory())); return this; }}");
+            writer.AppendLine();
+            writer.AppendLine($"private static {taskKind}<{resultType}> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>({taskKind}<TAsyncFactoryResult> task)");
+            writer.AppendLine($"    => task is {taskKind}<{resultType}> exact ? exact : __TUnitMocksAwaitAndConvert(task);");
+            writer.AppendLine();
+            writer.AppendLine($"private static async {taskKind}<{resultType}> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>({taskKind}<TAsyncFactoryResult> task)");
+            writer.AppendLine($"    => ({resultType})(object?)(await task.ConfigureAwait(false))!;");
             writer.AppendLine("#if NET9_0_OR_GREATER");
             writer.AppendLine(aliasDoc);
             writer.AppendLine(PriorityMinusOneAttribute);
             writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
-            writer.AppendLine("#else");
-            writer.AppendLine(aliasDoc);
-            writer.AppendLine($"public {wrapperName} Returns<TAsyncFactoryResult>(global::System.Func<{taskKind}<TAsyncFactoryResult>> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
             writer.AppendLine("#endif");
         }
         else
@@ -1883,6 +1911,17 @@ internal static class MockMembersBuilder
     /// to the synchronous factory and make <c>Returns(() =&gt; null)</c> ambiguous (CS0121).
     /// </summary>
     private static bool IsGenericTaskType(string taskType) => taskType.TrimEnd('?').EndsWith(">");
+
+    /// <summary>
+    /// The declared result type inside a Task&lt;T&gt;/ValueTask&lt;T&gt; type string, ignoring an
+    /// outer nullable annotation. Only valid when <see cref="IsGenericTaskType"/> is true.
+    /// </summary>
+    private static string GetTaskResultType(string taskType)
+    {
+        var trimmed = taskType.TrimEnd('?');
+        var open = trimmed.IndexOf('<');
+        return trimmed.Substring(open + 1, trimmed.Length - open - 2);
+    }
 
     private static void EmitEnsureSetup(CodeWriter writer, string builderType, bool hasTypeArguments)
     {

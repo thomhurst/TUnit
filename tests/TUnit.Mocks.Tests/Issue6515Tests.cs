@@ -25,6 +25,18 @@ public interface IOuterNullableTaskService
     Task<string?>? GetNameAsync();
 }
 
+// Polymorphic results (#6518 review finding): below net9.0 the generic alias infers the async
+// lambda's own result type — a SUBTYPE of the declared result here — and Task<T>/ValueTask<T>
+// are invariant, so the stored task must be converted to the declared task type.
+public interface IPolymorphicResultService
+{
+    Task<object> GetAsync();
+
+    ValueTask<object> GetValueAsync();
+
+    Task<object> GetByIdAsync(int id);
+}
+
 public class TimeoutConsumer
 {
     public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
@@ -100,5 +112,101 @@ public class Issue6515Tests
         var call = mock.Object.GetNameAsync();
 
         await Assert.That(call!.IsCompleted).IsFalse();
+    }
+
+    [Test]
+    public async Task Outer_Nullable_Member_Configured_With_A_Null_Task_Returns_Null()
+    {
+        var mock = IOuterNullableTaskService.Mock();
+        mock.GetNameAsync().ReturnsAsync((Task<string?>?)null);
+
+        // Boxed so the assertion targets the task reference itself, not its awaited result.
+        await Assert.That((object?)mock.Object.GetNameAsync()).IsNull();
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_A_Subtype_Produces_The_Value()
+    {
+        // `async () => "value"` infers Task<string> for a Task<object> member below net9.0 —
+        // the setup must still serve the declared Task<object>.
+        var mock = IPolymorphicResultService.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "value";
+        });
+
+        await Assert.That(await mock.Object.GetAsync()).IsEqualTo("value");
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_A_Subtype_Stays_Pending()
+    {
+        var mock = IPolymorphicResultService.Mock();
+        mock.GetAsync().Returns(async () =>
+        {
+            await Task.Delay(30_000);
+            return "late";
+        });
+
+        await Assert.That(mock.Object.GetAsync().IsCompleted).IsFalse();
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_A_Subtype_On_ValueTask_Member()
+    {
+        var mock = IPolymorphicResultService.Mock();
+        mock.GetValueAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return "vt-value";
+        });
+
+        await Assert.That(await mock.Object.GetValueAsync()).IsEqualTo("vt-value");
+    }
+
+    [Test]
+    public async Task Async_Lambda_Returning_A_Subtype_With_Typed_Parameters()
+    {
+        var mock = IPolymorphicResultService.Mock();
+        mock.GetByIdAsync(Arg.Any<int>()).Returns(async id =>
+        {
+            await Task.Yield();
+            return $"id-{id}";
+        });
+
+        await Assert.That(await mock.Object.GetByIdAsync(7)).IsEqualTo("id-7");
+    }
+
+#if NET9_0_OR_GREATER
+    [Test]
+    public async Task Async_Lambda_With_Null_Body_Binds_The_NonGeneric_Alias()
+    {
+        // `async () => null` pins no type: it has no natural type, cannot infer the generic
+        // alias's type parameter, and is not convertible to Func<T> — the ORP(-1) non-generic
+        // alias is the sole applicable candidate. That alias only exists on net9.0+.
+        var mock = IOuterNullableTaskService.Mock();
+        mock.GetNameAsync().Returns(async () => null);
+
+        var call = mock.Object.GetNameAsync();
+
+        await Assert.That(call!.IsCompleted).IsTrue();
+        await Assert.That(await call).IsNull();
+    }
+#endif
+
+    [Test]
+    public async Task Exactly_Typed_Factory_Task_Is_Handed_Back_As_Is()
+    {
+        // The conversion path must not wrap a factory task that already has the declared type —
+        // reference identity is part of the "returned as-is" contract.
+        var exact = Task.FromResult(42);
+        Func<Task<int>> factory = () => exact;
+
+        var mock = ISlowService.Mock();
+        mock.GetValueAsync().Returns(factory);
+
+        // Boxed so the assertion targets the task reference itself, not its awaited result.
+        await Assert.That((object)mock.Object.GetValueAsync()).IsSameReferenceAs(exact);
     }
 }

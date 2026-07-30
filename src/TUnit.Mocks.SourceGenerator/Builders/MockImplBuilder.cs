@@ -1517,11 +1517,18 @@ internal static class MockImplBuilder
         // IMPORTANT: This check must appear synchronously (no await) after the engine
         // dispatch call. The [ThreadStatic] RawReturnContext requires same-thread consumption.
         // The pattern type must drop an outer nullable annotation (Task<string?>? → Task<string?>):
-        // nullable types are never legal in an `is` pattern (CS8116), and a null raw value falls
-        // through to the informative throw either way.
+        // nullable types are never legal in an `is` pattern (CS8116). For an outer-nullable
+        // member, a null raw value is a legitimate contract value — ReturnsAsync accepts a null
+        // task there — so it is returned rather than falling into the mismatch throw.
         var patternType = method.ReturnType.TrimEnd('?');
+        var isOuterNullable = patternType.Length != method.ReturnType.Length;
         writer.AppendLine($"if (global::TUnit.Mocks.Setup.RawReturnContext.TryConsume(out var __rawAsync))");
         writer.OpenBrace();
+        if (isOuterNullable)
+        {
+            writer.AppendLine("if (__rawAsync is null) return null;");
+        }
+
         writer.AppendLine($"if (__rawAsync is {patternType} __typedAsync) return __typedAsync;");
         writer.AppendLine($"throw new global::System.InvalidOperationException($\"ReturnsAsync: expected {method.ReturnType} but got {{__rawAsync?.GetType().Name ?? \"null\"}}\");");
         writer.CloseBrace();

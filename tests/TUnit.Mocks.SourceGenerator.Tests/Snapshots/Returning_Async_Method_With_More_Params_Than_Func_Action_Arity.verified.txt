@@ -209,13 +209,18 @@ namespace TUnit.Mocks.Generated
         public ILongReturningSignature_Sum_M0_MockCall ReturnsAsync(global::System.Threading.Tasks.Task<int> task) { EnsureSetup().ReturnsRaw(task); return this; }
         /// <summary>Return a pre-built Task from a factory, invoked on each call.</summary>
         public ILongReturningSignature_Sum_M0_MockCall ReturnsAsync(global::System.Func<global::System.Threading.Tasks.Task<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
+        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
+        public ILongReturningSignature_Sum_M0_MockCall Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)__TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(taskFactory())); return this; }
+
+        private static global::System.Threading.Tasks.Task<int> __TUnitMocksConvertAsyncResult<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+            => task is global::System.Threading.Tasks.Task<int> exact ? exact : __TUnitMocksAwaitAndConvert(task);
+
+        private static async global::System.Threading.Tasks.Task<int> __TUnitMocksAwaitAndConvert<TAsyncFactoryResult>(global::System.Threading.Tasks.Task<TAsyncFactoryResult> task)
+            => (int)(object?)(await task.ConfigureAwait(false))!;
         #if NET9_0_OR_GREATER
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public ILongReturningSignature_Sum_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task<int>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
-        #else
-        /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
-        public ILongReturningSignature_Sum_M0_MockCall Returns<TAsyncFactoryResult>(global::System.Func<global::System.Threading.Tasks.Task<TAsyncFactoryResult>> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
         #endif
 
         // ICallVerification
