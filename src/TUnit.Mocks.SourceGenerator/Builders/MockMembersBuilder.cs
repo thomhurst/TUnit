@@ -1886,8 +1886,9 @@ internal static class MockMembersBuilder
             //   converted to the declared task type: an exact-typed task passes through untouched
             //   (identity preserved), anything else is mirrored by an async wrapper that stays
             //   pending until the inner task completes. The wrapper honors reference/boxing
-            //   conversions and — for numeric-primitive result types — C#'s implicit numeric
-            //   widening table, and nothing more: narrowing/rounding (long → int, double → int),
+            //   conversions, C#'s implicit numeric widening table (numeric-primitive results),
+            //   and C#'s element-wise implicit tuple conversions (value-tuple results), and
+            //   nothing more: narrowing/rounding (long → int, double → int),
             //   a null result for a non-nullable value-type member, and any genuinely wrong-typed
             //   factory all surface as an informative InvalidCastException when the task
             //   completes. (User-defined implicit conversions are not replayed at runtime — cast
@@ -1902,16 +1903,10 @@ internal static class MockMembersBuilder
             // with each other.
             var taskKind = isValueTask ? "global::System.Threading.Tasks.ValueTask" : "global::System.Threading.Tasks.Task";
             var resultType = GetTaskResultType(taskType);
-            // `dynamic` erases to object at runtime but is illegal as a pattern type (CS8208)
-            // and as a typeof operand (CS1962), so the helper's pattern/typeof spell it object —
-            // object → dynamic is an identity conversion, so `return exact;` still satisfies the
-            // declared result type. Constructed types containing dynamic (Task<dynamic>,
-            // List<dynamic>) are legal in both and need no mapping.
-            var patternType = resultType.TrimEnd('?');
-            if (patternType == "dynamic")
-            {
-                patternType = "object";
-            }
+            // Tuple element names are not permitted in typeof (and add nothing to conversion
+            // identity), so the helper's pattern/typeof always use the bare form; for non-tuple
+            // result types this is the unchanged type string.
+            var bareResultType = StripTupleElementNames(resultType);
             writer.AppendLine(aliasDoc);
             if (isValueTask)
             {
@@ -1923,68 +1918,34 @@ internal static class MockMembersBuilder
             }
             writer.AppendLine();
             writer.AppendLine($"private static {taskKind}<{resultType}> __TUnitMocksConvertAsyncResult<{aliasTypeParam}>({taskKind}<{aliasTypeParam}> task)");
-            writer.AppendLine($"    => task is {taskKind}<{resultType}> exact ? exact : __TUnitMocksAwaitAndConvert(task);");
+            writer.AppendLine($"    => task is {taskKind}<{bareResultType}> exact ? exact : __TUnitMocksAwaitAndConvert(task);");
             writer.AppendLine();
             writer.AppendLine($"private static async {taskKind}<{resultType}> __TUnitMocksAwaitAndConvert<{aliasTypeParam}>({taskKind}<{aliasTypeParam}> task)");
+            var pendingTupleItems = new List<(string Suffix, string Type)>();
             using (writer.Block())
             {
                 writer.AppendLine("object? value = await task.ConfigureAwait(false);");
                 writer.AppendLine("switch (value)");
                 using (writer.Block())
                 {
-                    writer.AppendLine($"case {patternType} exact: return exact;");
-                    // On an unconstrained (or class-constrained) type parameter, a trailing '?'
-                    // is the "defaultable" annotation, NOT Nullable<T>: Task<T?> with T = int is
-                    // Task<int>, so the runtime value-type guard must still run — typeof(T)
-                    // judges each instantiation (T = int throws on null; T = int? / T = string
-                    // accept it). Only a struct-constrained T? (genuine Nullable<T>) or a
-                    // concrete annotated type may skip the guard at generation time.
-                    var nullableAnnotationIsDefaultable = defaultableTypeParameters.Contains(resultType.TrimEnd('?'));
-                    if ((!resultType.EndsWith("?") || nullableAnnotationIsDefaultable) && patternType is not ("object" or "string"))
+                    EmitAsyncResultConversionCases(writer, resultType, defaultableTypeParameters, aliasTypeParam, "", pendingTupleItems);
+                }
+            }
+            // Value-tuple results convert element-wise; each element gets its own converter so
+            // nested tuples recurse and every element replays the same conversion set as a
+            // whole result would. The list grows while iterating (nested tuples enqueue).
+            for (var itemIndex = 0; itemIndex < pendingTupleItems.Count; itemIndex++)
+            {
+                var (suffix, itemType) = pendingTupleItems[itemIndex];
+                writer.AppendLine();
+                writer.AppendLine($"private static {itemType} __TUnitMocksConvertAsyncTupleItem{suffix}(object? value)");
+                using (writer.Block())
+                {
+                    writer.AppendLine("switch (value)");
+                    using (writer.Block())
                     {
-                        // A null result silently becoming default(T) (zero) would corrupt data
-                        // for non-nullable value-type members (Task<int> member, alias inferring
-                        // Task<int?>, factory yielding null). The check is a runtime one because
-                        // a generic result type's nullability depends on the instantiation;
-                        // genuinely nullable results (trailing '?' on a non-defaultable type)
-                        // skip it at generation time, and object/string are known reference types.
-                        writer.AppendLine($"case null when typeof({patternType}).IsValueType && global::System.Nullable.GetUnderlyingType(typeof({patternType})) is null: throw new global::System.InvalidCastException(\"The async factory (result type '\" + typeof({aliasTypeParam}) + \"') produced a null result, but the member's declared result type '\" + typeof({patternType}) + \"' is a non-nullable value type. Return a non-null value of the declared type from the factory.\");");
+                        EmitAsyncResultConversionCases(writer, itemType, defaultableTypeParameters, null, suffix, pendingTupleItems);
                     }
-                    writer.AppendLine($"case null: return default({resultType})!;");
-                    // Only the implicit numeric widening conversions C# itself permits
-                    // (sbyte → long, int → double, ...) are replayed, each as a dedicated case
-                    // whose conversion the compiler verifies. Convert.ChangeType would also
-                    // accept narrowing/rounding conversions (long → int, double → int,
-                    // double → decimal) that C# rejects implicitly, silently corrupting the
-                    // value — those fall through to the informative InvalidCastException below.
-                    foreach (var source in GetImplicitNumericWideningSources(patternType))
-                    {
-                        writer.AppendLine($"case {source} number: return number;");
-                    }
-                    // C# also permits implicit *constant expression* conversions (an in-range
-                    // int constant to sbyte/byte/short/ushort/uint/ulong, a non-negative long
-                    // constant to ulong) — `async () => 1` on a Task<byte> member compiles
-                    // against the declared delegate, but the alias infers int. Constant-ness is
-                    // erased by the time the boxed result reaches the helper, so replay them as
-                    // range-guarded exact-value conversions; an out-of-range value still takes
-                    // the informative InvalidCastException below.
-                    foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
-                    {
-                        writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
-                    }
-                    if (MightBeEnumResultType(patternType))
-                    {
-                        // C# also implicitly converts the constant 0 of any integer type to any
-                        // enum type (`async () => 0` on a Task<MyEnum> member compiles against
-                        // the declared delegate, but the alias infers int). Constant-ness is
-                        // erased at runtime, so replay it value-guarded: integral sources only
-                        // (an enum source is excluded — enum → enum is never implicit), exactly
-                        // zero, enum destinations only. Enum-ness is a runtime check because a
-                        // generic result type's enum-ness depends on the instantiation; non-zero
-                        // values still take the informative InvalidCastException below.
-                        writer.AppendLine($"case global::System.IConvertible zero when typeof({patternType}).IsEnum && zero is not global::System.Enum && zero.GetTypeCode() >= global::System.TypeCode.Char && zero.GetTypeCode() <= global::System.TypeCode.UInt64 && zero.ToDecimal(null) == 0m: return ({patternType})global::System.Enum.ToObject(typeof({patternType}), 0);");
-                    }
-                    writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced a result of type '\" + value.GetType() + \"', which is not convertible to the member's declared result type '\" + typeof({patternType}) + \"'. Cast the factory result to the declared type in the lambda.\");");
                 }
             }
             writer.AppendLine("#if NET9_0_OR_GREATER");
@@ -1998,6 +1959,270 @@ internal static class MockMembersBuilder
             writer.AppendLine(aliasDoc);
             writer.AppendLine($"public {wrapperName} Returns(global::System.Func<{taskType}> taskFactory) {{ EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }}");
         }
+    }
+
+    /// <summary>
+    /// Emits the case set replaying C#'s implicit conversions for one boxed async factory
+    /// result — or, when <paramref name="aliasTypeParam"/> is null, one value-tuple element of
+    /// it: exact type, null (guarded for non-nullable value types), implicit numeric widening,
+    /// implicit constant conversions, constant zero-to-enum, and element-wise value-tuple
+    /// conversion. Everything else takes an informative InvalidCastException. Tuple elements
+    /// enqueue their own converter methods on <paramref name="pendingTupleItems"/> (nested
+    /// tuples recurse).
+    /// </summary>
+    private static void EmitAsyncResultConversionCases(CodeWriter writer, string declaredType,
+        HashSet<string> defaultableTypeParameters, string? aliasTypeParam, string helperSuffix,
+        List<(string Suffix, string Type)> pendingTupleItems)
+    {
+        var bareType = StripTupleElementNames(declaredType);
+        // `dynamic` erases to object at runtime but is illegal as a pattern type (CS8208)
+        // and as a typeof operand (CS1962), so the helper's pattern/typeof spell it object —
+        // object → dynamic is an identity conversion, so `return exact;` still satisfies the
+        // declared result type. Constructed types containing dynamic (Task<dynamic>,
+        // List<dynamic>) are legal in both and need no mapping.
+        var patternType = bareType.TrimEnd('?');
+        if (patternType == "dynamic")
+        {
+            patternType = "object";
+        }
+
+        var isTuple = TryGetTupleElementTypes(patternType, out var tupleElements);
+        var declaredDesc = aliasTypeParam is not null ? "the member's declared result type" : "the declared tuple element type";
+        var producedWhat = aliasTypeParam is not null ? "a result" : "a tuple element";
+
+        if (!isTuple)
+        {
+            writer.AppendLine($"case {patternType} exact: return exact;");
+        }
+
+        // On an unconstrained (or class-constrained) type parameter, a trailing '?'
+        // is the "defaultable" annotation, NOT Nullable<T>: Task<T?> with T = int is
+        // Task<int>, so the runtime value-type guard must still run — typeof(T)
+        // judges each instantiation (T = int throws on null; T = int? / T = string
+        // accept it). Only a struct-constrained T? (genuine Nullable<T>) or a
+        // concrete annotated type may skip the guard at generation time.
+        var nullableAnnotationIsDefaultable = defaultableTypeParameters.Contains(declaredType.TrimEnd('?'));
+        var isNonNullable = !declaredType.EndsWith("?") || nullableAnnotationIsDefaultable;
+        if (isTuple && isNonNullable)
+        {
+            // A value-tuple type is statically a non-nullable value type, so null always
+            // throws — no runtime type checks, and no typeof on a tuple type (tuple element
+            // names aside, the diagnostic only needs the type's spelling).
+            var origin = aliasTypeParam is not null
+                ? $"\"The async factory (result type '\" + typeof({aliasTypeParam}) + \"') produced a null result, but {declaredDesc} '{patternType}' is a non-nullable value type. Return a non-null value of the declared type from the factory.\""
+                : $"\"The async factory produced a null tuple element, but {declaredDesc} '{patternType}' is a non-nullable value type. Return a non-null value of the declared type from the factory.\"";
+            writer.AppendLine($"case null: throw new global::System.InvalidCastException({origin});");
+        }
+        else
+        {
+            if (isNonNullable && patternType is not ("object" or "string"))
+            {
+                // A null result silently becoming default(T) (zero) would corrupt data
+                // for non-nullable value-type members (Task<int> member, alias inferring
+                // Task<int?>, factory yielding null). The check is a runtime one because
+                // a generic result type's nullability depends on the instantiation;
+                // genuinely nullable results (trailing '?' on a non-defaultable type)
+                // skip it at generation time, and object/string are known reference types.
+                var origin = aliasTypeParam is not null
+                    ? $"\"The async factory (result type '\" + typeof({aliasTypeParam}) + \"') produced a null result, but {declaredDesc} '\" + typeof({patternType}) + \"' is a non-nullable value type. Return a non-null value of the declared type from the factory.\""
+                    : $"\"The async factory produced a null tuple element, but {declaredDesc} '\" + typeof({patternType}) + \"' is a non-nullable value type. Return a non-null value of the declared type from the factory.\"";
+                writer.AppendLine($"case null when typeof({patternType}).IsValueType && global::System.Nullable.GetUnderlyingType(typeof({patternType})) is null: throw new global::System.InvalidCastException({origin});");
+            }
+            writer.AppendLine($"case null: return default({bareType})!;");
+        }
+
+        if (!isTuple)
+        {
+            // Only the implicit numeric widening conversions C# itself permits
+            // (sbyte → long, int → double, ...) are replayed, each as a dedicated case
+            // whose conversion the compiler verifies. Convert.ChangeType would also
+            // accept narrowing/rounding conversions (long → int, double → int,
+            // double → decimal) that C# rejects implicitly, silently corrupting the
+            // value — those fall through to the informative InvalidCastException below.
+            foreach (var source in GetImplicitNumericWideningSources(patternType))
+            {
+                writer.AppendLine($"case {source} number: return number;");
+            }
+            // C# also permits implicit *constant expression* conversions (an in-range
+            // int constant to sbyte/byte/short/ushort/uint/ulong, a non-negative long
+            // constant to ulong) — `async () => 1` on a Task<byte> member compiles
+            // against the declared delegate, but the alias infers int. Constant-ness is
+            // erased by the time the boxed result reaches the helper, so replay them as
+            // range-guarded exact-value conversions; an out-of-range value still takes
+            // the informative InvalidCastException below.
+            foreach (var (source, guard) in GetImplicitConstantConversionSources(patternType))
+            {
+                writer.AppendLine($"case {source} number when {guard}: return ({patternType})number;");
+            }
+            if (MightBeEnumResultType(patternType))
+            {
+                // C# also implicitly converts the constant 0 of any integer type to any
+                // enum type (`async () => 0` on a Task<MyEnum> member compiles against
+                // the declared delegate, but the alias infers int). Constant-ness is
+                // erased at runtime, so replay it value-guarded: integral sources only
+                // (an enum source is excluded — enum → enum is never implicit), exactly
+                // zero, enum destinations only. Enum-ness is a runtime check because a
+                // generic result type's enum-ness depends on the instantiation; non-zero
+                // values still take the informative InvalidCastException below.
+                writer.AppendLine($"case global::System.IConvertible zero when typeof({patternType}).IsEnum && zero is not global::System.Enum && zero.GetTypeCode() >= global::System.TypeCode.Char && zero.GetTypeCode() <= global::System.TypeCode.UInt64 && zero.ToDecimal(null) == 0m: return ({patternType})global::System.Enum.ToObject(typeof({patternType}), 0);");
+            }
+        }
+        else
+        {
+            // C#'s implicit tuple conversions are element-wise, so they are replayed the same
+            // way: any value tuple of matching arity (a System.Tuple is a class and never
+            // implicitly converts, hence the IsValueType guard) has each element converted by
+            // its own helper — an inconvertible element throws its informative
+            // InvalidCastException from there. There is no exact-type fast case: this case
+            // also handles the exact tuple, element by element, keeping tuple type patterns
+            // (whose element-name/annotation rules differ) out of the generated code.
+            for (var i = 0; i < tupleElements.Length; i++)
+            {
+                pendingTupleItems.Add(($"{helperSuffix}_{i}", tupleElements[i]));
+            }
+            var converted = string.Join(", ", tupleElements.Select((_, i) => $"__TUnitMocksConvertAsyncTupleItem{helperSuffix}_{i}(tuple[{i}])"));
+            writer.AppendLine($"case global::System.Runtime.CompilerServices.ITuple tuple when tuple.GetType().IsValueType && tuple.Length == {tupleElements.Length}: return ({converted});");
+        }
+
+        var declaredSpelling = isTuple ? $"'{patternType}'" : $"'\" + typeof({patternType}) + \"'";
+        writer.AppendLine($"default: throw new global::System.InvalidCastException(\"The async factory produced {producedWhat} of type '\" + value.GetType() + \"', which is not convertible to {declaredDesc} {declaredSpelling}. Cast the factory result to the declared type in the lambda.\");");
+    }
+
+    /// <summary>
+    /// True when <paramref name="type"/> is value-tuple syntax <c>(T1, T2, ...)</c> — the
+    /// parenthesized form the display format produces for ValueTuple types. Outputs the element
+    /// types with any element names removed.
+    /// </summary>
+    private static bool TryGetTupleElementTypes(string type, out string[] elements)
+    {
+        elements = [];
+        if (type.Length < 2 || type[0] != '(' || type[type.Length - 1] != ')')
+        {
+            return false;
+        }
+
+        // The trailing ')' must close the LEADING '(' — otherwise this is not tuple syntax.
+        var depth = 0;
+        for (var i = 0; i < type.Length - 1; i++)
+        {
+            var c = type[i];
+            if (c is '<' or '(' or '[')
+            {
+                depth++;
+            }
+            else if (c is '>' or ')' or ']')
+            {
+                depth--;
+            }
+
+            if (depth == 0)
+            {
+                return false;
+            }
+        }
+
+        var parts = SplitTopLevelTypeArguments(type.Substring(1, type.Length - 2));
+        if (parts.Count < 2)
+        {
+            return false;
+        }
+
+        elements = parts.Select(StripTupleElementName).ToArray();
+        return true;
+    }
+
+    /// <summary>
+    /// Splits a comma-separated type list at the top level, respecting angle-bracket, paren,
+    /// and square-bracket nesting. Input is the INSIDE of a tuple/generic bracket pair.
+    /// </summary>
+    private static List<string> SplitTopLevelTypeArguments(string list)
+    {
+        var result = new List<string>();
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < list.Length; i++)
+        {
+            var c = list[i];
+            if (c is '<' or '(' or '[')
+            {
+                depth++;
+            }
+            else if (c is '>' or ')' or ']')
+            {
+                depth--;
+            }
+            else if (c == ',' && depth == 0)
+            {
+                result.Add(list.Substring(start, i - start).Trim());
+                start = i + 1;
+            }
+        }
+
+        result.Add(list.Substring(start).Trim());
+        return result;
+    }
+
+    /// <summary>
+    /// Drops a trailing tuple element NAME (<c>global::N.Type Count</c> → <c>global::N.Type</c>).
+    /// A type display string only ends in a space-separated plain identifier when an element
+    /// name follows the type (spaces inside generic arguments are followed by more type syntax).
+    /// </summary>
+    private static string StripTupleElementName(string element)
+    {
+        var lastSpace = element.LastIndexOf(' ');
+        if (lastSpace < 0)
+        {
+            return element;
+        }
+
+        var candidate = element.Substring(lastSpace + 1);
+        if (candidate.Length == 0 || char.IsDigit(candidate[0]))
+        {
+            return element;
+        }
+
+        foreach (var c in candidate)
+        {
+            if (!char.IsLetterOrDigit(c) && c != '_' && c != '@')
+            {
+                return element;
+            }
+        }
+
+        return element.Substring(0, lastSpace).TrimEnd();
+    }
+
+    /// <summary>
+    /// Rewrites a type display string with all tuple element names removed, recursing into
+    /// tuple elements and generic type arguments — element names are not permitted in
+    /// <c>typeof</c> (and add nothing to conversion identity), so generated helper code always
+    /// uses the bare form. Non-tuple types come back unchanged.
+    /// </summary>
+    private static string StripTupleElementNames(string type)
+    {
+        if (type.EndsWith("?"))
+        {
+            return StripTupleElementNames(type.Substring(0, type.Length - 1)) + "?";
+        }
+
+        if (type.EndsWith("[]"))
+        {
+            return StripTupleElementNames(type.Substring(0, type.Length - 2)) + "[]";
+        }
+
+        if (TryGetTupleElementTypes(type, out var elements))
+        {
+            return "(" + string.Join(", ", elements.Select(StripTupleElementNames)) + ")";
+        }
+
+        var open = type.IndexOf('<');
+        if (open >= 0 && type.EndsWith(">"))
+        {
+            var args = SplitTopLevelTypeArguments(type.Substring(open + 1, type.Length - open - 2));
+            return type.Substring(0, open) + "<" + string.Join(", ", args.Select(StripTupleElementNames)) + ">";
+        }
+
+        return type;
     }
 
     /// <summary>

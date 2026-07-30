@@ -562,6 +562,37 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public Task Interface_With_Tuple_Async_Results()
+    {
+        // #6518 review: value-tuple results need C#'s element-wise implicit tuple conversions
+        // replayed (the generic alias infers the factory's tuple type, e.g. (string, string)
+        // for a Task<(object, object)> member), and tuple element names must never reach the
+        // helper's typeof/patterns — they are not permitted there.
+        var source = """
+            using System.Threading.Tasks;
+            using TUnit.Mocks;
+
+            public interface ITupleService
+            {
+                Task<(object, object)> GetPairAsync();
+                ValueTask<(int Id, string Name)> GetNamedAsync();
+                Task<(long, (object, object))> GetNestedAsync();
+                Task<(int, string)?> GetOptionalPairAsync();
+            }
+
+            public class TestUsage
+            {
+                void M()
+                {
+                    var mock = Mock.Of<ITupleService>();
+                }
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
+    [Test]
     public Task Interface_With_Generic_Methods()
     {
         var source = """

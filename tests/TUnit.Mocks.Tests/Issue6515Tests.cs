@@ -133,6 +133,26 @@ public interface IOuterNullableObjectService
     Task<object?>? GetAsync();
 }
 
+// Value tuples (#6518 Codex round 8): `async () => ("a", "b")` on a Task<(object, object)>
+// member compiles against the declared delegate via C#'s element-wise implicit tuple
+// conversion, but the generic alias infers (string, string) — the conversion helper must
+// replay the conversion element by element (recursively for nested tuples). Element names
+// must never reach the helper's typeof/patterns — they are not permitted there.
+public interface ITupleAsyncService
+{
+    Task<(object, object)> GetPairAsync();
+
+    ValueTask<(int Id, string Name)> GetNamedAsync();
+
+    Task<(long, object)> GetWideningPairAsync();
+
+    Task<(int, string)> GetStrictPairAsync();
+
+    Task<(object, (object, object))> GetNestedAsync();
+
+    Task<(int, string)?> GetOptionalPairAsync();
+}
+
 public class TimeoutConsumer
 {
     public async Task<int> GetWithTimeoutAsync(ITimeoutClient client, TimeSpan timeout)
@@ -759,5 +779,133 @@ public class Issue6515Tests
 
         // Boxed so the assertion targets the task reference itself, not its awaited result.
         await Assert.That((object)mock.Object.GetValueAsync()).IsSameReferenceAs(exact);
+    }
+
+    [Test]
+    public async Task Tuple_Member_Converts_The_Factory_Elements()
+    {
+        // `async () => ("a", "b")` infers (string, string) on the (object, object) member; the
+        // helper must replay the element-wise implicit tuple conversion.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return ("a", "b");
+        });
+
+        var (first, second) = await mock.Object.GetPairAsync();
+
+        await Assert.That(first).IsEqualTo("a");
+        await Assert.That(second).IsEqualTo("b");
+    }
+
+    [Test]
+    public async Task Named_Tuple_Member_Is_Mockable_And_Round_Trips()
+    {
+        // Element names must not leak into the generated helper (typeof rejects them) — merely
+        // mocking this member is the compile-time half of the regression.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetNamedAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (1, "n");
+        });
+
+        var result = await mock.Object.GetNamedAsync();
+
+        await Assert.That(result.Id).IsEqualTo(1);
+        await Assert.That(result.Name).IsEqualTo("n");
+    }
+
+    [Test]
+    public async Task Tuple_Element_Numeric_Widening_Works()
+    {
+        // Element 0 infers int on a long element — the element converter must replay the
+        // implicit numeric widening just like a whole numeric result.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetWideningPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (1, "x");
+        });
+
+        var (count, tag) = await mock.Object.GetWideningPairAsync();
+
+        await Assert.That(count).IsEqualTo(1L);
+        await Assert.That(tag).IsEqualTo("x");
+    }
+
+    [Test]
+    public async Task Inconvertible_Tuple_Element_Throws_Instead_Of_Unboxing()
+    {
+        // (int, int) on the (int, string) member: element 1 has no implicit conversion.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetStrictPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (1, 2);
+        });
+
+        await Assert.That(async () => await mock.Object.GetStrictPairAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Null_Tuple_Element_On_A_NonNullable_Value_Element_Throws()
+    {
+        // ((int?)null, "x") infers (int?, string); the null element must not silently become
+        // default(int) on the (int, string) member.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetStrictPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return ((int?)null, "x");
+        });
+
+        await Assert.That(async () => await mock.Object.GetStrictPairAsync())
+            .Throws<InvalidCastException>();
+    }
+
+    [Test]
+    public async Task Nested_Tuple_Elements_Convert_Recursively()
+    {
+        var mock = ITupleAsyncService.Mock();
+        mock.GetNestedAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return ("a", ("b", "c"));
+        });
+
+        var (outer, inner) = await mock.Object.GetNestedAsync();
+
+        await Assert.That(outer).IsEqualTo("a");
+        await Assert.That(inner.Item1).IsEqualTo("b");
+        await Assert.That(inner.Item2).IsEqualTo("c");
+    }
+
+    [Test]
+    public async Task Nullable_Tuple_Member_Accepts_A_Converted_Pair_And_A_Null_Tuple()
+    {
+        // (int, string) infers the non-nullable tuple on the (int, string)? member — the
+        // ITuple case converts and the literal lifts to the nullable declared type. A null
+        // tuple factory infers (int, string)? and passes through as the exact task type.
+        var mock = ITupleAsyncService.Mock();
+        mock.GetOptionalPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return (1, "a");
+        });
+
+        var value = await mock.Object.GetOptionalPairAsync();
+        await Assert.That(value.HasValue).IsTrue();
+        await Assert.That(value!.Value.Item2).IsEqualTo("a");
+
+        mock.GetOptionalPairAsync().Returns(async () =>
+        {
+            await Task.Yield();
+            return ((int, string)?)null;
+        });
+
+        await Assert.That((await mock.Object.GetOptionalPairAsync()).HasValue).IsFalse();
     }
 }
