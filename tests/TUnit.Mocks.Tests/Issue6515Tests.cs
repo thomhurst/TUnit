@@ -651,6 +651,7 @@ public class Issue6515Tests
     }
 
     [Test]
+    [SkipIfNotDynamicCodeSupported("Consuming an awaited `dynamic` as a typed local makes the C# runtime binder build an expression tree, which NREs under Native AOT.")]
     public async Task Task_Of_Dynamic_Member_Converts_The_Factory_Result()
     {
         // `async () => "dyn"` infers Task<string>, which is invariant-incompatible with the
@@ -668,6 +669,7 @@ public class Issue6515Tests
     }
 
     [Test]
+    [SkipIfNotDynamicCodeSupported("Consuming an awaited `dynamic` as a typed local makes the C# runtime binder build an expression tree, which NREs under Native AOT.")]
     public async Task ValueTask_Of_Dynamic_Member_Converts_The_Factory_Result()
     {
         var mock = IDynamicAsyncService.Mock();
