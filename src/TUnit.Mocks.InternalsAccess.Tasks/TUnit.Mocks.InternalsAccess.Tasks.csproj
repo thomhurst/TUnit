@@ -17,7 +17,7 @@
     <PackageReference Include="Mono.Cecil" />
     <!-- Compile-time only: the MSBuild host provides these assemblies at runtime. Pinned to a
          version that ships both net472 and net8.0 assets. -->
-    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.8.3" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.14.28" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>

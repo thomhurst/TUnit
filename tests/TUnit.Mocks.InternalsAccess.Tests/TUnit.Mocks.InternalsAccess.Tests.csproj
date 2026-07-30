@@ -28,7 +28,7 @@
 
     <!-- The task excludes MSBuild runtime assets (the MSBuild host provides them); the unit
          tests run the task in-process, so they need them for real. -->
-    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.8.3" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="17.14.28" />
   </ItemGroup>
 
   <!-- The internals-access pipeline itself is imported by TUnit.Mocks.targets. -->
