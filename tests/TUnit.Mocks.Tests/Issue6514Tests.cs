@@ -92,6 +92,15 @@ public interface IConcurrentStub5 { string Name { get; } }
 public interface IConcurrentStub6 { string Name { get; } }
 public interface IConcurrentStub7 { string Name { get; } }
 
+public interface ISingleEmissionStub { string Name { get; } }
+
+// By-ref returns are an unsupported stub shape: TryCreateStub fails and the engine caches the
+// miss as null.
+public interface IByRefFeature
+{
+    ref int Counter();
+}
+
 // Simulates the SDK-internal call site: code the test has no control over requesting types the
 // test assembly could not configure.
 public static class StubFeatureConsumer
@@ -361,6 +370,67 @@ public class Issue6514Tests
         {
             await Assert.That(result).IsNotNull();
         }
+    }
+
+    [Test]
+    public async Task Concurrent_Same_Interface_First_Touch_Emits_A_Single_Stub_Type()
+    {
+        // GetOrAdd may run the value factory once per contender for the SAME key and keep only
+        // one result — with a plain Type? value, racing first-touches of one interface would
+        // each emit a permanent dynamic type. The Lazy cache must collapse them to exactly one.
+        using var start = new ManualResetEventSlim(false);
+
+        var tasks = Enumerable.Range(0, 8).Select(_ => Task.Run(() =>
+        {
+            // Distinct mocks so every engine's own auto-mock cache misses and all of them race
+            // into RuntimeStubGenerator for the same interface.
+            var features = IStubFeatures.Mock();
+            start.Wait();
+            return (object?)features.Object.Get<ISingleEmissionStub>();
+        })).ToArray();
+
+        start.Set();
+        var results = await Task.WhenAll(tasks);
+
+        foreach (var result in results)
+        {
+            await Assert.That(result).IsNotNull();
+        }
+
+        var emittedTypes = GetLoadedTypes(results[0]!.GetType().Assembly)
+            .Where(t => t.Name.Contains(nameof(ISingleEmissionStub)))
+            .ToList();
+        await Assert.That(emittedTypes.Count).IsEqualTo(1);
+
+        // Other tests may be mid-emission in the shared dynamic assembly while this enumerates
+        // it — their half-built TypeBuilders throw; every ISingleEmissionStub stub is fully
+        // created by this point, so the loaded subset is complete for the assertion.
+        static IEnumerable<Type> GetLoadedTypes(System.Reflection.Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (System.Reflection.ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t is not null)!;
+            }
+        }
+    }
+
+    // Review finding on #6519: a cached null records a definitive miss (stub disabled,
+    // unavailable, or failed) — TryGetAutoMock must not report it as a hit with a null mock,
+    // which would violate NotNullWhen(true) and hand callers a null to dereference.
+    [Test]
+    public async Task TryGetAutoMock_Returns_False_For_A_Cached_Miss()
+    {
+        var features = IStubFeatures.Mock();
+        await Assert.That(features.Object.Get<IByRefFeature>()).IsNull();
+
+        var engine = ((IMockEngineAccess<IStubFeatures>)features).Engine;
+
+        await Assert.That(engine.TryGetAutoMock("Get", typeof(IByRefFeature), out var mock)).IsFalse();
+        await Assert.That(mock).IsNull();
     }
 
     // Review finding on #6519: the auto-mock cache re-key to (memberName, Type) removed the

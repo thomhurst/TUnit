@@ -676,7 +676,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             mock = null;
             return false;
         }
-        return cache.TryGetValue((memberName, returnType), out mock);
+
+        // A cached null records a definitive miss (stubs disabled/unavailable/failed) — not a
+        // usable mock, and NotNullWhen(true) promises non-null on true.
+        return cache.TryGetValue((memberName, returnType), out mock) && mock is not null;
     }
 
     /// <summary>

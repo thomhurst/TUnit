@@ -37,7 +37,11 @@ internal static class RuntimeStubGenerator
         "c297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92" +
         "d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7";
 
-    private static readonly ConcurrentDictionary<Type, Type?> _stubTypes = new();
+    // Lazy values: GetOrAdd may invoke the factory once per contender for the SAME key and keep
+    // only one result — a plain Type? value would let racing first-touches of one interface each
+    // emit a permanent dynamic type before all but one are discarded. Lazy (ExecutionAndPublication)
+    // guarantees exactly one emission per interface; cache hits stay lock-free.
+    private static readonly ConcurrentDictionary<Type, Lazy<Type?>> _stubTypes = new();
     private static readonly object _emitLock = new();
     private static ModuleBuilder? _module;
     private static int _typeCounter;
@@ -81,7 +85,7 @@ internal static class RuntimeStubGenerator
             return false;
         }
 
-        var stubType = _stubTypes.GetOrAdd(interfaceType, static t =>
+        var stubType = _stubTypes.GetOrAdd(interfaceType, static t => new Lazy<Type?>(() =>
         {
             try
             {
@@ -94,7 +98,7 @@ internal static class RuntimeStubGenerator
                 // engine fall back to its existing default (null).
                 return null;
             }
-        });
+        })).Value;
 
         if (stubType is null)
         {

@@ -172,6 +172,9 @@ Notes and limits:
 - Strict mode is unaffected: unconfigured calls still throw.
 - On Native AOT (where `Reflection.Emit` does not exist) the feature is inert and unconfigured
   calls keep returning default values.
+- The `netstandard2.0` asset (used by .NET Framework test projects) does not include the
+  runtime emitter — unconfigured calls return default values there too. Runtime stubs require
+  the `net8.0`+ assets.
 - Opt out globally with `settings.Mocks.RuntimeAutoStubs = false;` in a
   `[Before(HookType.TestDiscovery)]` hook.
 
