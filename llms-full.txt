@@ -26860,7 +26860,7 @@ flowchart TB
 
     T0 --> T0a --> T0b --> T1 --> T2 --> T3 --> T4 --> T5 --> T6 --> T7
 
-    style T0b fill:#fff3e0,stroke:#ef6c00,color:#e65100
+    style T0b fill:#fff3e0,stroke:#ef6c00,color:#9a3412
     style T3 fill:#c8e6c9,stroke:#2e7d32,color:#1b5e20
     style T6 fill:#ffcdd2,stroke:#c62828,color:#b71c1c
 ```
