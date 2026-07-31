@@ -93,6 +93,12 @@ body {
   color: var(--text-body);
 }
 
+/* Mermaid assigns node text colours on a parent element. Keep labels inheriting
+   those colours instead of applying the global dark-mode paragraph colour. */
+[data-theme='dark'] .docusaurus-mermaid-container .nodeLabel p {
+  color: inherit;
+}
+
 /* Better code block contrast */
 [data-theme='dark'] code {
   background: rgba(20, 184, 166, 0.15) !important;
