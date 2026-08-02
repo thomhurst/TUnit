@@ -45,6 +45,10 @@ public class MyTestClass
 
 That will generate 100 test cases. 10 different values for value1, and 10 different values for value2. 10\*10 is 100.
 
+:::info
+Using `[Matrix]` without arguments on a `bool` or `enum` parameter will automatically expand all known values.
+:::
+
 ## Matrix Range
 
 You can also use the `[MatrixRange<T>]` for numerical types. It will generated a range between the minimum and maximum, with an optional step parameter to define how far to step between each value. By default, this is 1.
