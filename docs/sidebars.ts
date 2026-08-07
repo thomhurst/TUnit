@@ -159,6 +159,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'execution/test-filters',
+        'execution/parameters',
         'execution/timeouts',
         'execution/retrying',
         'execution/repeating',
