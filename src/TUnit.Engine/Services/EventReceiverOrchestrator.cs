@@ -79,6 +79,8 @@ internal sealed class EventReceiverOrchestrator
             _registry.RegisterReceivers(vlb.AsSpan());
         }
         vlb.Dispose();
+
+        context.EventObjectsRegistered = true;
     }
 
     // Precondition: ClassInstance has just been assigned; the initial RegisterReceivers call (with ClassInstance still null) already covered every other eligible object.

@@ -409,6 +409,16 @@ public partial class TestContext : Context,
     internal bool EventReceiversBuilt { get; set; }
 
     /// <summary>
+    /// Set once this context's eligible event objects have been pushed into the
+    /// EventReceiverOrchestrator registry (normally by the eager PrepareForExecution pass).
+    /// Lets the per-test fallback registration skip re-scanning the eligible-object set.
+    /// Deliberately not cleared by <see cref="InvalidateEventReceiverCaches"/>: retry
+    /// invalidation rebuilds the same object instances (only ClassInstance changes, and
+    /// that is registered separately), so re-registration would be a pure dedup no-op.
+    /// </summary>
+    internal bool EventObjectsRegistered { get; set; }
+
+    /// <summary>
     /// Invalidates all cached event receiver data. Called when class instance changes (e.g., on retry).
     /// </summary>
     internal void InvalidateEventReceiverCaches()
