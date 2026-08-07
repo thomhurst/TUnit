@@ -589,9 +589,21 @@ internal sealed class EventReceiverOrchestrator
     }
 
     /// <summary>
-    /// Initialize test counts for first/last event receivers
+    /// Prepares the orchestrator for execution: initializes test counts for first/last event
+    /// receivers and registers every test's eligible event receivers into the registry.
     /// </summary>
-    public void InitializeTestCounts(IReadOnlyList<AbstractExecutableTest> allTests)
+    /// <remarks>
+    /// Registration must be complete for ALL tests before ANY test executes: the first-in-
+    /// session/assembly/class events are one-shot (memoized per scope key) and enumerate the
+    /// registry at the moment the first gated test reaches them. Receivers registered lazily
+    /// per test (the pre-eager-pass design) missed those events whenever an earlier test with
+    /// a same-interface receiver had already triggered the memoized invocation (#6557).
+    /// Runs after the registration phase (argument/property resolution) and after deferred
+    /// placeholder expansion, so the eligible-object sets are complete — including injected
+    /// property values (#6554). Class instances don't exist yet; they are registered per test
+    /// via <see cref="RegisterClassInstanceReceiver"/>.
+    /// </remarks>
+    public void PrepareForExecution(IReadOnlyList<AbstractExecutableTest> allTests)
     {
         Interlocked.Exchange(ref _sessionTestCount, allTests.Count);
 
@@ -602,12 +614,15 @@ internal sealed class EventReceiverOrchestrator
 
         for (var i = 0; i < allTests.Count; i++)
         {
-            var classContext = allTests[i].Context.ClassContext;
+            var context = allTests[i].Context;
+            var classContext = context.ClassContext;
             var assemblyCounter = _assemblyTestCounts.GetOrAdd(classContext.AssemblyContext.Assembly, static _ => new Counter());
             assemblyCounter.Add(1);
 
             var classCounter = _classTestCounts.GetOrAdd(classContext.ClassType, static _ => new Counter());
             classCounter.Add(1);
+
+            RegisterReceivers(context);
         }
     }
 

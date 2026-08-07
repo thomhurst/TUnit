@@ -100,7 +100,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
-        _eventReceiverOrchestrator.InitializeTestCounts(testList);
+        _eventReceiverOrchestrator.PrepareForExecution(testList);
     }
 
     /// <summary>
