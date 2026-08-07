@@ -81,7 +81,11 @@ public async Task IntegrationTest()
 [Test]
 public async Task DatabaseTest()
 {
-    var connectionStrings = TestContext.Parameters["connection-string"];
+    if (!TestContext.Parameters.TryGetValue("connection-string", out var connectionStrings))
+    {
+        Assert.Skip("Requires --test-parameter connection-string=...");
+    }
+
     using var connection = new SqlConnection(connectionStrings.First());
     // ...
 }

@@ -84,7 +84,10 @@ If you're using `TUnit.AspNetCore`, the `WebApplicationTest` base class provides
 
 ```csharp
 // Run with: dotnet run --test-parameter environment=staging
-var environment = TestContext.Parameters["environment"].First();
+if (TestContext.Parameters.TryGetValue("environment", out var values))
+{
+    var environment = values.First(); // "staging"
+}
 ```
 
 See the [Test Parameters](../execution/parameters.md) guide for full details.
