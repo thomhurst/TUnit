@@ -63,9 +63,13 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             _contextRestorer.RestoreContext(test);
 
-            // Register event receivers early so that skip event receivers work
-            // even when the test is skipped before full initialization.
-            _eventReceiverOrchestrator.RegisterReceivers(test.Context);
+            // Fallback registration for tests that bypass the eager PrepareForExecution pass
+            // (e.g. dynamically queued tests added mid-session). Gated so normally scheduled
+            // tests don't pay a second eligible-object scan per test.
+            if (!test.Context.EventObjectsRegistered)
+            {
+                _eventReceiverOrchestrator.RegisterReceivers(test.Context);
+            }
 
             // Check if test was already marked as skipped during registration
             // (e.g., by a derived SkipAttribute evaluated in OnTestRegistered).

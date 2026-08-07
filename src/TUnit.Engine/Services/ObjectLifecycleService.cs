@@ -72,12 +72,29 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
         var events = testContext.InternalEvents;
         var testClassType = testContext.Metadata.TestDetails.ClassType;
 
-        // Resolve property values (creating shared objects) and cache them WITHOUT setting on placeholder instance
-        // This ensures shared objects are created once and tracked with the correct reference count
-        await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext, cancellationToken);
+        try
+        {
+            // Resolve property values (creating shared objects) and cache them WITHOUT setting on placeholder instance
+            // This ensures shared objects are created once and tracked with the correct reference count
+            await PropertyInjector.ResolveAndCachePropertiesAsync(testClassType, objectBag, methodMetadata, events, testContext, cancellationToken);
 
-        // Track the cached objects so they get the correct reference count
-        _objectTracker.TrackObjects(testContext);
+            // Track the cached objects so they get the correct reference count
+            _objectTracker.TrackObjects(testContext);
+        }
+        finally
+        {
+            // The per-context event receiver caches were already built and locked in before this
+            // point (GetTestRegisteredReceivers runs first so SkipAttribute can short-circuit
+            // expensive data sources). Injected property values can themselves be event receivers
+            // (e.g. ITestStartEventReceiver), so drop the stale caches to pick them up (#6554).
+            // Runs in finally because resolution is parallel (Task.WhenAll): when one property
+            // throws, sibling properties may still have resolved and cached receivers, and the
+            // failed test's ITestEndEventReceiver invocation must see them.
+            if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.Count > 0)
+            {
+                testContext.InvalidateEventReceiverCaches();
+            }
+        }
     }
 
     /// <summary>
