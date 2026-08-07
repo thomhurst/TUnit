@@ -78,6 +78,15 @@ internal sealed class ObjectLifecycleService : IObjectRegistry, IInitializationC
 
         // Track the cached objects so they get the correct reference count
         _objectTracker.TrackObjects(testContext);
+
+        // The per-context event receiver caches were already built and locked in before this
+        // point (GetTestRegisteredReceivers runs first so SkipAttribute can short-circuit
+        // expensive data sources). Injected property values can themselves be event receivers
+        // (e.g. ITestStartEventReceiver), so drop the stale caches to pick them up (#6554).
+        if (testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.Count > 0)
+        {
+            testContext.InvalidateEventReceiverCaches();
+        }
     }
 
     /// <summary>
