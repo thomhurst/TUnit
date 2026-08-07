@@ -50,7 +50,11 @@ public sealed class PartialInjectionFailureTests
     }
 }
 
-[EngineTest(ExpectedResult.Pass)]
+// Marked Failure (not Pass) despite passing itself: DependsOn pulls Fails_During_Registration
+// into any filtered run containing this test, which would poison the EngineTest=Pass bucket's
+// TRX outcome. Both classes are verified together by PartialInjectionFailure6554Tests in
+// TUnit.Engine.Tests.
+[EngineTest(ExpectedResult.Failure)]
 public sealed class PartialInjectionFailureObserverTests
 {
     [Test]
