@@ -4,12 +4,17 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.Conditions;
 
+internal interface ITypeErasedMemberAssertion
+{
+    Assertion<object?> TypeErasedAssertion { get; }
+}
+
 /// <summary>
 /// Result of a member assertion that allows returning to the parent object context.
 /// Enables chaining multiple member assertions on the same parent object.
 /// Implements IAssertion to allow use in Satisfies() lambdas that accept IAssertion.
 /// </summary>
-public class MemberAssertionResult<TObject> : IAssertion
+public class MemberAssertionResult<TObject> : IAssertion, ITypeErasedMemberAssertion
 {
     private readonly AssertionContext<TObject> _parentContext;
     private readonly Assertion<object?> _memberAssertion;
@@ -28,6 +33,8 @@ public class MemberAssertionResult<TObject> : IAssertion
     {
         await _memberAssertion.AssertAsync();
     }
+
+    Assertion<object?> ITypeErasedMemberAssertion.TypeErasedAssertion => _memberAssertion;
 
     /// <summary>
     /// Returns an And continuation that operates on the parent object's context,

@@ -828,6 +828,11 @@ public static partial class AssertionExtensions
             throw new InvalidOperationException("Member assertion cannot be null.");
         }
 
+        if (memberAssertion is ITypeErasedMemberAssertion typeErasedMemberAssertion)
+        {
+            return typeErasedMemberAssertion.TypeErasedAssertion;
+        }
+
         var type = memberAssertion.GetType();
 
         // Walk up the inheritance chain to find the Assertion<T> base class
