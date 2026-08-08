@@ -279,10 +279,10 @@ internal class TestExecutor
                 }
                 else
                 {
-                    // Fast path: no timeout — invoke directly, no CTS/TCS/WhenAny overhead
+                    // Fast path: no timeout — invoke directly, with no timeout-specific CTS/TCS/WhenAny overhead
                     await ExecuteTestAsync(
                         executableTest,
-                        executableTest.Context.Execution.CancellationToken).ConfigureAwait(false);
+                        executableTest.Context.TestCancellationToken).ConfigureAwait(false);
                 }
             }
             catch
@@ -314,7 +314,7 @@ internal class TestExecutor
                 }
             }
 
-            executableTest.SetResult(executableTest.Context.IsTestCancellationRequested
+            executableTest.SetResult(executableTest.Context.CompleteTestCancellation()
                 ? TestState.Cancelled
                 : TestState.Passed);
         }

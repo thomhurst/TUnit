@@ -180,11 +180,12 @@ public partial class TestContext
         }
     }
 
-    internal void CompleteTestCancellation()
+    internal bool CompleteTestCancellation()
     {
         lock (Lock)
         {
             _acceptingTestCancellation = false;
+            return _testCancellationRequested;
         }
     }
 

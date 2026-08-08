@@ -8,6 +8,8 @@ namespace TUnit.TestProject;
 [TestExecutor<CancellationObservingTestExecutor>]
 public class TestExecutionCancellationTests
 {
+    private const string StateRecordingRunId = "TUNIT_CANCELLATION_STATE_RUN_ID";
+
     [Test]
     [Timeout(5_000)]
     public async Task CancelStopsCooperativeTestBody(CancellationToken cancellationToken)
@@ -23,6 +25,21 @@ public class TestExecutionCancellationTests
     public void CancelMarksTestAsCancelledWhenBodyReturnsNormally()
     {
         TestContext.Current!.Execution.Cancel();
+    }
+
+    [After(Test)]
+    public void RecordFinalState(TestContext context)
+    {
+        if (Environment.GetEnvironmentVariable(StateRecordingRunId) is not { Length: > 0 } runId)
+        {
+            return;
+        }
+
+        var directory = Path.Combine(Path.GetTempPath(), nameof(TestExecutionCancellationTests), runId);
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(
+            Path.Combine(directory, $"{context.Metadata.TestDetails.MethodName}.txt"),
+            context.Execution.Result?.State.ToString() ?? "No result");
     }
 }
 
