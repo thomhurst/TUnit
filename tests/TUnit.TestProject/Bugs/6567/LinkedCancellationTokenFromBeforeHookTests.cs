@@ -10,25 +10,27 @@ public sealed class LinkedCancellationTokenFromBeforeHookTests
     [Before(Test)]
     public void BeforeTest(TestContext context)
     {
-        _cancellationTokenSource = new CancellationTokenSource(100);
+        _cancellationTokenSource = new CancellationTokenSource();
         context.Execution.AddLinkedCancellationToken(_cancellationTokenSource.Token);
     }
 
     [Test]
-    public Task LinkedCancellationReachesInjectedToken(CancellationToken cancellationToken)
+    public void LinkedCancellationReachesInjectedToken(CancellationToken cancellationToken)
     {
-        return ObserveCancellation(cancellationToken);
+        _cancellationTokenSource!.Cancel();
+
+        AssertCancellationObserved(cancellationToken);
     }
 
     [Test]
     [Timeout(5_000)]
-    public async Task AdditionalLinkPreservesInjectedAndCurrentTokens(CancellationToken cancellationToken)
+    public void AdditionalLinkPreservesInjectedAndCurrentTokens(CancellationToken cancellationToken)
     {
         TestContext.Current!.Execution.AddLinkedCancellationToken(CancellationToken.None);
+        _cancellationTokenSource!.Cancel();
 
-        await Task.WhenAll(
-            ObserveCancellation(cancellationToken),
-            ObserveCancellation(TestContext.Current.Execution.CancellationToken));
+        AssertCancellationObserved(cancellationToken);
+        AssertCancellationObserved(TestContext.Current.Execution.CancellationToken);
     }
 
     [After(Test)]
@@ -37,17 +39,11 @@ public sealed class LinkedCancellationTokenFromBeforeHookTests
         _cancellationTokenSource?.Dispose();
     }
 
-    private static async Task ObserveCancellation(CancellationToken cancellationToken)
+    private static void AssertCancellationObserved(CancellationToken cancellationToken)
     {
-        try
+        if (!cancellationToken.IsCancellationRequested)
         {
-            await Task.Delay(1_000, cancellationToken);
+            throw new InvalidOperationException("Token did not observe linked cancellation.");
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            return;
-        }
-
-        throw new InvalidOperationException("Token did not observe linked cancellation.");
     }
 }
