@@ -14,6 +14,8 @@ public partial class TestContext
     private CancellationToken _baseCancellationToken;
     private CancellationTokenSource? _testCancellationTokenSource;
     private List<CancellationTokenSource>? _retiredTestCancellationTokenSources;
+    private int _activeTestCancellationOperations;
+    private bool _disposeCancellationTokenSourcesPending;
     private bool _acceptingTestCancellation;
     private volatile bool _testCancellationRequested;
     private List<CancellationToken>? _externalCancellationTokens;
@@ -213,6 +215,7 @@ public partial class TestContext
             }
 
             _testCancellationRequested = true;
+            _activeTestCancellationOperations++;
             cancellationTokenSource = _testCancellationTokenSource;
         }
 
@@ -220,10 +223,17 @@ public partial class TestContext
         {
             cancellationTokenSource.Cancel();
         }
-        catch (ObjectDisposedException)
+        finally
         {
-            // Final cleanup can dispose the source after we release Lock but before Cancel runs.
-            // Treat that race as a late cancellation request, which is intentionally a no-op.
+            lock (Lock)
+            {
+                _activeTestCancellationOperations--;
+
+                if (_activeTestCancellationOperations == 0 && _disposeCancellationTokenSourcesPending)
+                {
+                    DisposeCancellationTokenSourcesUnderLock();
+                }
+            }
         }
     }
 
@@ -277,36 +287,49 @@ public partial class TestContext
     {
         lock (Lock)
         {
-            _linkedCancellationTokenSource?.Dispose();
-            _linkedCancellationTokenSource = null;
-
-            if (_retiredLinkedCancellationTokenSources is { } retiredLinkedCancellationTokenSources)
-            {
-                for (var i = retiredLinkedCancellationTokenSources.Count - 1; i >= 0; i--)
-                {
-                    retiredLinkedCancellationTokenSources[i].Dispose();
-                }
-
-                _retiredLinkedCancellationTokenSources = null;
-            }
-
-            _externalCancellationTokens = null;
-            CancellationToken = _baseCancellationToken;
-
-            _testCancellationTokenSource?.Dispose();
-            _testCancellationTokenSource = null;
-
-            if (_retiredTestCancellationTokenSources is { } retiredTestCancellationTokenSources)
-            {
-                for (var i = retiredTestCancellationTokenSources.Count - 1; i >= 0; i--)
-                {
-                    retiredTestCancellationTokenSources[i].Dispose();
-                }
-
-                _retiredTestCancellationTokenSources = null;
-            }
-
             _acceptingTestCancellation = false;
+
+            if (_activeTestCancellationOperations > 0)
+            {
+                _disposeCancellationTokenSourcesPending = true;
+                return;
+            }
+
+            DisposeCancellationTokenSourcesUnderLock();
         }
+    }
+
+    private void DisposeCancellationTokenSourcesUnderLock()
+    {
+        _linkedCancellationTokenSource?.Dispose();
+        _linkedCancellationTokenSource = null;
+
+        if (_retiredLinkedCancellationTokenSources is { } retiredLinkedCancellationTokenSources)
+        {
+            for (var i = retiredLinkedCancellationTokenSources.Count - 1; i >= 0; i--)
+            {
+                retiredLinkedCancellationTokenSources[i].Dispose();
+            }
+
+            _retiredLinkedCancellationTokenSources = null;
+        }
+
+        _externalCancellationTokens = null;
+        CancellationToken = _baseCancellationToken;
+
+        _testCancellationTokenSource?.Dispose();
+        _testCancellationTokenSource = null;
+
+        if (_retiredTestCancellationTokenSources is { } retiredTestCancellationTokenSources)
+        {
+            for (var i = retiredTestCancellationTokenSources.Count - 1; i >= 0; i--)
+            {
+                retiredTestCancellationTokenSources[i].Dispose();
+            }
+
+            _retiredTestCancellationTokenSources = null;
+        }
+
+        _disposeCancellationTokenSourcesPending = false;
     }
 }
