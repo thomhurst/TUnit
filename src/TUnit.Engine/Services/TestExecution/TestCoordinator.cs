@@ -336,10 +336,11 @@ internal sealed class TestCoordinator : ITestCoordinator
                     throw new ArgumentOutOfRangeException();
             }
 
-            // Dispose the per-test timeout source now that the body and every teardown phase — After(Test)
+            // Dispose the per-test cancellation sources now that the body and every teardown phase — After(Test)
             // hooks, instance/OnDispose, object cleanup, After(Class)/After(Assembly) and Last receivers —
-            // have all run. Keeping it alive this long means a token copy captured mid-body stayed backed
+            // have all run. Keeping them alive this long means a token copy captured mid-body stayed backed
             // by a live source throughout teardown instead of throwing ObjectDisposedException (#6339).
+            test.Context.DisposeLinkedCancellationTokenSources();
             test.Context.TimeoutCancellationSource?.Dispose();
             test.Context.TimeoutCancellationSource = null;
 
