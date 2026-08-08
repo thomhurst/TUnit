@@ -72,6 +72,11 @@ internal static class RetryHelper
                         };
                     (testContext.RetryAttempts ??= []).Add(attemptResult);
 
+                    if (testContext.FailureSignal is not null)
+                    {
+                        testContext.ResetFailureSignal();
+                    }
+
                     // Clear the previous result before retrying
                     testContext.Execution.Result = null;
                     testContext.TestStart = null;

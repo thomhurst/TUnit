@@ -32,6 +32,7 @@ public partial class TestContext
     internal IHookExecutor? CustomHookExecutor { get; set; }
     internal bool ReportResult { get; set; } = true;
     internal bool IsNotDiscoverable { get; set; }
+    internal TestFailureSignal? FailureSignal { get; private set; }
 
     // Explicit interface implementations for ITestExecution
     TestPhase ITestExecution.Phase => Phase;
@@ -84,6 +85,7 @@ public partial class TestContext
 
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
     void ITestExecution.AddLinkedCancellationToken(CancellationToken cancellationToken) => AddLinkedCancellationToken(cancellationToken);
+    ITestFailureSignal ITestExecution.CreateFailureSignal() => CreateFailureSignal();
 
     // Internal implementation methods
     internal void OverrideResult(TestState state, string reason)
@@ -138,6 +140,27 @@ public partial class TestContext
 
             InternalExecutableTest.State = state;
         }
+    }
+
+    internal ITestFailureSignal CreateFailureSignal()
+    {
+        lock (Lock)
+        {
+            if (TestStart is not null)
+            {
+                throw new InvalidOperationException(
+                    "A failure signal must be created before the test body starts. " +
+                    "Create it in a Before(Test) hook or ITestStartEventReceiver.OnTestStart.");
+            }
+
+            return FailureSignal ??= new TestFailureSignal(CancellationToken);
+        }
+    }
+
+    internal void ResetFailureSignal()
+    {
+        FailureSignal?.Dispose();
+        FailureSignal = null;
     }
 
     internal void AddLinkedCancellationToken(CancellationToken cancellationToken)

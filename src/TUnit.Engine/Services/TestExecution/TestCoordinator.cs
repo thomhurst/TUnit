@@ -343,6 +343,11 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.TimeoutCancellationSource?.Dispose();
             test.Context.TimeoutCancellationSource = null;
 
+            if (test.Context.FailureSignal is not null)
+            {
+                test.Context.ResetFailureSignal();
+            }
+
             test.Context.RemoveFromRegistry();
         }
     }
