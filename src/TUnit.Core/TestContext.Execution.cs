@@ -215,7 +215,15 @@ public partial class TestContext
             cancellationTokenSource = _testCancellationTokenSource;
         }
 
-        cancellationTokenSource.Cancel();
+        try
+        {
+            cancellationTokenSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Final cleanup can dispose the source after we release Lock but before Cancel runs.
+            // Treat that race as a late cancellation request, which is intentionally a no-op.
+        }
     }
 
     internal void SetCancellationToken(CancellationToken cancellationToken)

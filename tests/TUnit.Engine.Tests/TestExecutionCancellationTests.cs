@@ -25,8 +25,8 @@ public class TestExecutionCancellationTests(TestMode testMode) : InvokableTestBa
             "/*/*/LateTestExecutionCancellationTests/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(1),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

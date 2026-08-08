@@ -46,20 +46,20 @@ public sealed class CancellationObservingTestExecutor : ITestExecutor
 }
 
 [EngineTest(ExpectedResult.Pass)]
-[CancelAtTestEnd]
 public class LateTestExecutionCancellationTests
 {
-    [Test]
-    public void LateCancellationDoesNotChangeCompletedTest()
-    {
-    }
-}
+    private static ITestExecution? _completedExecution;
 
-public sealed class CancelAtTestEndAttribute : Attribute, ITestEndEventReceiver
-{
-    public ValueTask OnTestEnd(TestContext context)
+    [Test]
+    public void CaptureExecution()
     {
-        context.Execution.Cancel();
-        return default;
+        _completedExecution = TestContext.Current!.Execution;
+    }
+
+    [Test]
+    [DependsOn(nameof(CaptureExecution))]
+    public void CancelAfterPreviousTestIsDisposed()
+    {
+        _completedExecution!.Cancel();
     }
 }
