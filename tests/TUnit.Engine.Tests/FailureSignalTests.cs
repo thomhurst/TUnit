@@ -64,4 +64,17 @@ public class FailureSignalTests(TestMode testMode) : InvokableTestBase(testMode)
                 }
             ]);
     }
+
+    [Test]
+    public async Task ReportsAfterTheTestBodyCompletesAreIgnoredWithCustomTestExecutors()
+    {
+        await RunTestsWithFilter(
+            "/*/*/FailureSignalCustomExecutorLateReportTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
 }

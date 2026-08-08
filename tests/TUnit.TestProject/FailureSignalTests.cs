@@ -157,3 +157,36 @@ public sealed class FailureSignalTestExecutor : ITestExecutor
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[TestExecutor<LateReportingFailureSignalTestExecutor>]
+public class FailureSignalCustomExecutorLateReportTests : ITestStartEventReceiver
+{
+    internal const string FailureSignalKey = nameof(FailureSignalKey);
+
+    public ValueTask OnTestStart(TestContext context)
+    {
+        context.StateBag[FailureSignalKey] = context.Execution.CreateFailureSignal();
+        return default;
+    }
+
+    [Test]
+    public void ReportAfterTestBodyCompletesIsIgnored()
+    {
+    }
+}
+
+public sealed class LateReportingFailureSignalTestExecutor : ITestExecutor
+{
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
+    {
+        await action();
+
+        var signal = (ITestFailureSignal)context.StateBag[FailureSignalCustomExecutorLateReportTests.FailureSignalKey]!;
+
+        if (signal.TryReport("Late report from custom executor"))
+        {
+            throw new InvalidOperationException("A failure signal accepted a report after the test body completed");
+        }
+    }
+}

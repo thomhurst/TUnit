@@ -499,7 +499,7 @@ internal class TestExecutor
             var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
             testBodyTask = TimeoutHelper.ExecuteWithTimeoutAsync(
-                ct => ExecuteTestAsync(executableTest, ct).AsTask(),
+                ct => ExecuteTestWithFailureSignalCoreAsync(executableTest, ct, failureSignal).AsTask(),
                 testTimeout.Value,
                 testBodyTimeoutCts,
                 failureSignal.CancellationToken,
@@ -507,7 +507,10 @@ internal class TestExecutor
         }
         else
         {
-            testBodyTask = ExecuteTestAsync(executableTest, failureSignal.CancellationToken).AsTask();
+            testBodyTask = ExecuteTestWithFailureSignalCoreAsync(
+                executableTest,
+                failureSignal.CancellationToken,
+                failureSignal).AsTask();
         }
 
         var completedTask = await Task.WhenAny(testBodyTask, failureSignal.FailureTask).ConfigureAwait(false);
@@ -572,6 +575,59 @@ internal class TestExecutor
         }
 
         ExceptionDispatchInfo.Capture(reportedException).Throw();
+    }
+
+    // Keep this separate from ExecuteTestAsync so tests that do not opt in retain the direct hot path.
+    private static async ValueTask ExecuteTestWithFailureSignalCoreAsync(
+        AbstractExecutableTest executableTest,
+        CancellationToken cancellationToken,
+        TestFailureSignal failureSignal)
+    {
+        if (executableTest.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+            !string.IsNullOrEmpty(executableTest.Context.SkipReason))
+        {
+            failureSignal.Complete();
+            return;
+        }
+
+        executableTest.Context.TestStart = DateTimeOffset.UtcNow;
+        executableTest.Context.CancellationToken = cancellationToken;
+
+        if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
+        {
+            try
+            {
+                await testExecutor.ExecuteTest(
+                    executableTest.Context,
+                    () => InvokeTestAndCompleteFailureSignalAsync(executableTest, failureSignal)).ConfigureAwait(false);
+            }
+            finally
+            {
+                // Also close the signal when an executor does not invoke the supplied action.
+                failureSignal.Complete();
+            }
+
+            return;
+        }
+
+        await InvokeTestAndCompleteFailureSignalAsync(executableTest, failureSignal).ConfigureAwait(false);
+    }
+
+    private static async ValueTask InvokeTestAndCompleteFailureSignalAsync(
+        AbstractExecutableTest executableTest,
+        TestFailureSignal failureSignal)
+    {
+        try
+        {
+            await executableTest.InvokeTestAsync(
+                executableTest.Context.Metadata.TestDetails.ClassInstance,
+                executableTest.Context.Execution.CancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Close before the invocation task completes, leaving no window for a post-body report.
+            failureSignal.Complete();
+        }
     }
 
     internal async Task<List<Exception>?> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
