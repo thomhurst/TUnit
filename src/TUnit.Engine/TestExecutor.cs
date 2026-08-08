@@ -458,7 +458,9 @@ internal class TestExecutor
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
             await testExecutor.ExecuteTest(executableTest.Context,
-                () => new ValueTask(executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken))).ConfigureAwait(false);
+                () => new ValueTask(executableTest.InvokeTestAsync(
+                    executableTest.Context.Metadata.TestDetails.ClassInstance,
+                    executableTest.Context.Execution.CancellationToken))).ConfigureAwait(false);
         }
         else
         {
