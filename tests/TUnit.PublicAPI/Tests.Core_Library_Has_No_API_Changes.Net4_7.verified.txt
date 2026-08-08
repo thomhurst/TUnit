@@ -2629,6 +2629,7 @@ namespace .Interfaces
         ? TestEnd { get; }
         ? TestStart { get; }
         void AddLinkedCancellationToken(.CancellationToken cancellationToken);
+        void Cancel();
         void OverrideResult(.TestState state, string reason);
     }
     public interface ITestExecutor

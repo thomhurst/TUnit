@@ -131,6 +131,16 @@ public interface ITestExecution
     bool IsNotDiscoverable { get; set; }
 
     /// <summary>
+    /// Requests cooperative cancellation of the current test execution.
+    /// </summary>
+    /// <remarks>
+    /// Cancellation is scoped to this test and does not cancel other tests or the test session.
+    /// The test body should observe <see cref="CancellationToken"/> and stop promptly. Calls made
+    /// after the test execution has completed are ignored.
+    /// </remarks>
+    void Cancel();
+
+    /// <summary>
     /// Links an external cancellation token to this test's execution token.
     /// Useful for coordinating cancellation across multiple operations or tests.
     /// </summary>

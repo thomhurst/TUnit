@@ -113,7 +113,7 @@ internal class TestExecutor
     /// </summary>
     public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, TimeSpan? testTimeout = null)
     {
-        executableTest.Context.SetCancellationToken(cancellationToken);
+        executableTest.Context.InitializeTestCancellation(cancellationToken);
 
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
@@ -264,7 +264,8 @@ internal class TestExecutor
                     // retry attempt's source (if any) is released here before the new one replaces it.
                     var context = executableTest.Context;
                     context.TimeoutCancellationSource?.Dispose();
-                    var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    var testCancellationToken = context.TestCancellationToken;
+                    var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(testCancellationToken);
                     context.TimeoutCancellationSource = testBodyTimeoutCts;
 
                     var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
@@ -273,13 +274,15 @@ internal class TestExecutor
                         ct => ExecuteTestAsync(executableTest, ct).AsTask(),
                         testTimeout.Value,
                         testBodyTimeoutCts,
-                        cancellationToken,
+                        testCancellationToken,
                         timeoutMessage).ConfigureAwait(false);
                 }
                 else
                 {
                     // Fast path: no timeout — invoke directly, no CTS/TCS/WhenAny overhead
-                    await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                    await ExecuteTestAsync(
+                        executableTest,
+                        executableTest.Context.Execution.CancellationToken).ConfigureAwait(false);
                 }
             }
             catch
@@ -307,11 +310,13 @@ internal class TestExecutor
                 // disposed later by TestCoordinator, so token copies captured mid-body stay valid — #6339.)
                 if (testTimeout.HasValue)
                 {
-                    executableTest.Context.SetCancellationToken(cancellationToken);
+                    executableTest.Context.RestoreTestCancellationToken();
                 }
             }
 
-            executableTest.SetResult(TestState.Passed);
+            executableTest.SetResult(executableTest.Context.IsTestCancellationRequested
+                ? TestState.Cancelled
+                : TestState.Passed);
         }
         catch (SkipTestException ex)
         {
@@ -321,6 +326,10 @@ internal class TestExecutor
             executableTest.Context.SkipReason ??= ex.Reason;
             capturedException = ex;
         }
+        catch (OperationCanceledException) when (executableTest.Context.IsTestCancellationRequested)
+        {
+            executableTest.SetResult(TestState.Cancelled);
+        }
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
@@ -328,6 +337,8 @@ internal class TestExecutor
         }
         finally
         {
+            executableTest.Context.CompleteTestCancellation();
+
             // After hooks must use CancellationToken.None to ensure cleanup runs even when cancelled
             // This matches the pattern used for After Class/Assembly hooks in TestCoordinator
 
