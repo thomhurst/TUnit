@@ -11,8 +11,13 @@ namespace TUnit.Core;
 public partial class TestContext
 {
     // Internal backing fields and properties
-    internal CancellationToken CancellationToken { get; set; }
-    internal CancellationTokenSource? LinkedCancellationTokens { get; set; }
+    private CancellationToken _baseCancellationToken;
+    private List<CancellationToken>? _externalCancellationTokens;
+    private CancellationTokenSource? _linkedCancellationTokenSource;
+    // Token copies can escape into user code and remain in use through teardown (#6339).
+    // Keep replaced sources alive until the complete test lifecycle has finished.
+    private List<CancellationTokenSource>? _retiredLinkedCancellationTokenSources;
+    internal CancellationToken CancellationToken { get; private set; }
 
     // Linked source backing the per-test timeout token. Owned for the whole test lifecycle — the body
     // plus every teardown phase (After(Test) hooks, instance/OnDispose, object cleanup, After(Class)/
@@ -144,19 +149,76 @@ public partial class TestContext
     {
         lock (Lock)
         {
-            if (LinkedCancellationTokens == null)
+            (_externalCancellationTokens ??= []).Add(cancellationToken);
+            RebuildLinkedCancellationTokenSource();
+        }
+    }
+
+    internal void SetCancellationToken(CancellationToken cancellationToken)
+    {
+        lock (Lock)
+        {
+            if (_baseCancellationToken == cancellationToken)
             {
-                LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
-            }
-            else
-            {
-                var existingToken = LinkedCancellationTokens.Token;
-                var oldCts = LinkedCancellationTokens;
-                LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
-                oldCts.Dispose();
+                return;
             }
 
-            CancellationToken = LinkedCancellationTokens.Token;
+            _baseCancellationToken = cancellationToken;
+            RebuildLinkedCancellationTokenSource();
+        }
+    }
+
+    private void RebuildLinkedCancellationTokenSource()
+    {
+        if (_externalCancellationTokens is not { Count: > 0 } externalCancellationTokens)
+        {
+            CancellationToken = _baseCancellationToken;
+            return;
+        }
+
+        CancellationTokenSource linkedCancellationTokenSource;
+        if (externalCancellationTokens.Count == 1)
+        {
+            linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                _baseCancellationToken,
+                externalCancellationTokens[0]);
+        }
+        else
+        {
+            var cancellationTokens = new CancellationToken[externalCancellationTokens.Count + 1];
+            cancellationTokens[0] = _baseCancellationToken;
+            externalCancellationTokens.CopyTo(cancellationTokens, 1);
+            linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokens);
+        }
+
+        if (_linkedCancellationTokenSource is { } previousLinkedCancellationTokenSource)
+        {
+            (_retiredLinkedCancellationTokenSources ??= []).Add(previousLinkedCancellationTokenSource);
+        }
+
+        _linkedCancellationTokenSource = linkedCancellationTokenSource;
+        CancellationToken = linkedCancellationTokenSource.Token;
+    }
+
+    internal void DisposeLinkedCancellationTokenSources()
+    {
+        lock (Lock)
+        {
+            _linkedCancellationTokenSource?.Dispose();
+            _linkedCancellationTokenSource = null;
+
+            if (_retiredLinkedCancellationTokenSources is { } retiredLinkedCancellationTokenSources)
+            {
+                for (var i = retiredLinkedCancellationTokenSources.Count - 1; i >= 0; i--)
+                {
+                    retiredLinkedCancellationTokenSources[i].Dispose();
+                }
+
+                _retiredLinkedCancellationTokenSources = null;
+            }
+
+            _externalCancellationTokens = null;
+            CancellationToken = _baseCancellationToken;
         }
     }
 }

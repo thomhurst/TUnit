@@ -40,6 +40,7 @@ public partial class TestContext : Context,
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
         _testBuilderContext = testBuilderContext;
+        _baseCancellationToken = cancellationToken;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
