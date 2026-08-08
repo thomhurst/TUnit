@@ -80,3 +80,47 @@ public class LateTestExecutionCancellationTests
         _completedExecution!.Cancel();
     }
 }
+
+[EngineTest(ExpectedResult.Failure)]
+[CancelDuringRetry]
+public class RetryBackoffCancellationTests
+{
+    private const string StateRecordingRunId = "TUNIT_CANCELLATION_STATE_RUN_ID";
+    private static ITestExecution? _execution;
+
+    [Test]
+    public void CancelBetweenRetryAttempts()
+    {
+        _execution = TestContext.Current!.Execution;
+        throw new InvalidOperationException("Trigger retry.");
+    }
+
+    [After(Class)]
+    public static void RecordFinalState()
+    {
+        if (Environment.GetEnvironmentVariable(StateRecordingRunId) is not { Length: > 0 } runId)
+        {
+            return;
+        }
+
+        var directory = Path.Combine(Path.GetTempPath(), nameof(RetryBackoffCancellationTests), runId);
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(
+            Path.Combine(directory, "FinalState.txt"),
+            _execution?.Result?.State.ToString() ?? "No result");
+    }
+}
+
+public sealed class CancelDuringRetryAttribute : RetryAttribute
+{
+    public CancelDuringRetryAttribute() : base(1)
+    {
+        BackoffMs = 5_000;
+    }
+
+    public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
+    {
+        context.Execution.Cancel();
+        return Task.FromResult(true);
+    }
+}

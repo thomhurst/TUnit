@@ -201,6 +201,17 @@ public partial class TestContext
         }
     }
 
+    internal void OpenTestCancellationForRetry()
+    {
+        lock (Lock)
+        {
+            if (_testCancellationTokenSource is not null)
+            {
+                _acceptingTestCancellation = true;
+            }
+        }
+    }
+
     internal void RestoreTestCancellationToken()
     {
         lock (Lock)

@@ -73,6 +73,28 @@ public class TestContextCancellationTests
         }
     }
 
+    [Test]
+    public async Task RetryWindowAcceptsCancellationBetweenAttempts()
+    {
+        var context = CreateContext();
+        context.InitializeTestCancellation(CancellationToken.None);
+        context.CompleteTestCancellation();
+
+        try
+        {
+            context.OpenTestCancellationForRetry();
+            context.Cancel();
+
+            await Assert.That(context.IsTestCancellationRequested).IsTrue();
+            await Assert.That(context.TestCancellationToken.IsCancellationRequested).IsTrue();
+        }
+        finally
+        {
+            context.DisposeLinkedCancellationTokenSources();
+            context.RemoveFromRegistry();
+        }
+    }
+
     private static TestContext CreateContext()
     {
         var currentContext = TestContext.Current!;
