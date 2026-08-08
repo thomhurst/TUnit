@@ -167,17 +167,27 @@ public partial class TestContext
     {
         lock (Lock)
         {
+            // Cancel() targets the whole execution, so retries inherit an accepted request.
+            var preserveCancellationRequest = CurrentRetryAttempt > 0 && _testCancellationRequested;
+
             if (_testCancellationTokenSource is { } previousTestCancellationTokenSource)
             {
                 (_retiredTestCancellationTokenSources ??= []).Add(previousTestCancellationTokenSource);
             }
 
-            _testCancellationTokenSource = cancellationToken.CanBeCanceled
+            var testCancellationTokenSource = cancellationToken.CanBeCanceled
                 ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)
                 : new CancellationTokenSource();
+
+            if (preserveCancellationRequest)
+            {
+                testCancellationTokenSource.Cancel();
+            }
+
+            _testCancellationTokenSource = testCancellationTokenSource;
             _acceptingTestCancellation = true;
-            _testCancellationRequested = false;
-            _baseCancellationToken = _testCancellationTokenSource.Token;
+            _testCancellationRequested = preserveCancellationRequest;
+            _baseCancellationToken = testCancellationTokenSource.Token;
             RebuildLinkedCancellationTokenSource();
         }
     }
