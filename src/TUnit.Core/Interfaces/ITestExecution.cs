@@ -131,6 +131,19 @@ public interface ITestExecution
     bool IsNotDiscoverable { get; set; }
 
     /// <summary>
+    /// Creates a signal that can safely report failures from callbacks or other detached work
+    /// to this test execution.
+    /// </summary>
+    /// <remarks>
+    /// The signal must be created before the test body starts, such as from a Before(Test) hook
+    /// or <see cref="ITestStartEventReceiver.OnTestStart"/>. The first report wins. Reports made
+    /// after the test body completes are ignored. Calling this method more than once returns the
+    /// same signal for the current test attempt.
+    /// </remarks>
+    /// <returns>A failure signal scoped to the current test attempt.</returns>
+    ITestFailureSignal CreateFailureSignal();
+
+    /// <summary>
     /// Links an external cancellation token to this test's execution token.
     /// Useful for coordinating cancellation across multiple operations or tests.
     /// </summary>

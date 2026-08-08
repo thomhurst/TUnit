@@ -2629,11 +2629,19 @@ namespace .Interfaces
         ? TestEnd { get; }
         ? TestStart { get; }
         void AddLinkedCancellationToken(.CancellationToken cancellationToken);
+        . CreateFailureSignal();
         void OverrideResult(.TestState state, string reason);
     }
     public interface ITestExecutor
     {
         . ExecuteTest(.TestContext context, <.> action);
+    }
+    public interface ITestFailureSignal
+    {
+        void Report( exception);
+        void Report(string reason);
+        bool TryReport( exception);
+        bool TryReport(string reason);
     }
     public interface ITestFinder
     {

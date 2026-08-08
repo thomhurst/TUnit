@@ -6,6 +6,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
+using TUnit.Engine.Constants;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 #if NET
@@ -249,9 +250,18 @@ internal class TestExecutor
                     TUnitActivitySource.SpanTestBody);
             }
 #endif
+            var failureSignal = executableTest.Context.FailureSignal;
+
             try
             {
-                if (testTimeout.HasValue)
+                if (failureSignal is not null)
+                {
+                    await ExecuteTestWithFailureSignalAsync(
+                        executableTest,
+                        testTimeout,
+                        failureSignal).ConfigureAwait(false);
+                }
+                else if (testTimeout.HasValue)
                 {
                     // Own the linked timeout source across the whole test lifecycle rather than letting
                     // TimeoutHelper dispose it on return. The body can hand Context.CancellationToken to
@@ -304,7 +314,7 @@ internal class TestExecutor
                 // receivers, After(Test)/AfterEvery(Test) hooks, and any retry back-off observe a live
                 // token via the context property. (The source itself is kept alive on the context and
                 // disposed later by TestCoordinator, so token copies captured mid-body stay valid — #6339.)
-                if (testTimeout.HasValue)
+                if (testTimeout.HasValue || failureSignal is not null)
                 {
                     executableTest.Context.CancellationToken = cancellationToken;
                 }
@@ -327,6 +337,10 @@ internal class TestExecutor
         }
         finally
         {
+            // Stop accepting reports before teardown begins. The signal's cancellation source stays
+            // alive until all teardown has completed so token copies captured by the body remain valid.
+            executableTest.Context.FailureSignal?.Complete();
+
             // After hooks must use CancellationToken.None to ensure cleanup runs even when cancelled
             // This matches the pattern used for After Class/Assembly hooks in TestCoordinator
 
@@ -465,6 +479,154 @@ internal class TestExecutor
         else
         {
             await executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private static async ValueTask ExecuteTestWithFailureSignalAsync(
+        AbstractExecutableTest executableTest,
+        TimeSpan? testTimeout,
+        TestFailureSignal failureSignal)
+    {
+        Task testBodyTask;
+
+        if (testTimeout.HasValue)
+        {
+            var context = executableTest.Context;
+            context.TimeoutCancellationSource?.Dispose();
+            var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(failureSignal.CancellationToken);
+            context.TimeoutCancellationSource = testBodyTimeoutCts;
+
+            var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
+
+            testBodyTask = TimeoutHelper.ExecuteWithTimeoutAsync(
+                ct => ExecuteTestWithFailureSignalCoreAsync(executableTest, ct, failureSignal).AsTask(),
+                testTimeout.Value,
+                testBodyTimeoutCts,
+                failureSignal.CancellationToken,
+                timeoutMessage);
+        }
+        else
+        {
+            testBodyTask = ExecuteTestWithFailureSignalCoreAsync(
+                executableTest,
+                failureSignal.CancellationToken,
+                failureSignal).AsTask();
+        }
+
+        var completedTask = await Task.WhenAny(testBodyTask, failureSignal.FailureTask).ConfigureAwait(false);
+
+        if (completedTask == failureSignal.FailureTask)
+        {
+            Exception? gracePeriodException = null;
+
+            try
+            {
+                await testBodyTask.WaitAsync(EngineDefaults.TimeoutGracePeriod, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (System.TimeoutException)
+            {
+                // The body ignored cancellation. Continue with the reported failure after the grace period.
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when the body cooperatively observes the signal's cancellation token.
+            }
+            catch (Exception ex)
+            {
+                gracePeriodException = ex;
+            }
+
+            var signalException = failureSignal.Complete()!;
+
+            if (gracePeriodException is not null)
+            {
+                throw new AggregateException(gracePeriodException, signalException);
+            }
+
+            ExceptionDispatchInfo.Capture(signalException).Throw();
+        }
+
+        Exception? testBodyException = null;
+
+        try
+        {
+            await testBodyTask.ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            testBodyException = ex;
+        }
+
+        var reportedException = failureSignal.Complete();
+
+        if (reportedException is null)
+        {
+            if (testBodyException is not null)
+            {
+                ExceptionDispatchInfo.Capture(testBodyException).Throw();
+            }
+
+            return;
+        }
+
+        if (testBodyException is not null and not OperationCanceledException)
+        {
+            throw new AggregateException(testBodyException, reportedException);
+        }
+
+        ExceptionDispatchInfo.Capture(reportedException).Throw();
+    }
+
+    // Keep this separate from ExecuteTestAsync so tests that do not opt in retain the direct hot path.
+    private static async ValueTask ExecuteTestWithFailureSignalCoreAsync(
+        AbstractExecutableTest executableTest,
+        CancellationToken cancellationToken,
+        TestFailureSignal failureSignal)
+    {
+        if (executableTest.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+            !string.IsNullOrEmpty(executableTest.Context.SkipReason))
+        {
+            failureSignal.Complete();
+            return;
+        }
+
+        executableTest.Context.TestStart = DateTimeOffset.UtcNow;
+        executableTest.Context.CancellationToken = cancellationToken;
+
+        if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
+        {
+            try
+            {
+                await testExecutor.ExecuteTest(
+                    executableTest.Context,
+                    () => InvokeTestAndCompleteFailureSignalAsync(executableTest, failureSignal)).ConfigureAwait(false);
+            }
+            finally
+            {
+                // Also close the signal when an executor does not invoke the supplied action.
+                failureSignal.Complete();
+            }
+
+            return;
+        }
+
+        await InvokeTestAndCompleteFailureSignalAsync(executableTest, failureSignal).ConfigureAwait(false);
+    }
+
+    private static async ValueTask InvokeTestAndCompleteFailureSignalAsync(
+        AbstractExecutableTest executableTest,
+        TestFailureSignal failureSignal)
+    {
+        try
+        {
+            await executableTest.InvokeTestAsync(
+                executableTest.Context.Metadata.TestDetails.ClassInstance,
+                executableTest.Context.Execution.CancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // Close before the invocation task completes, leaving no window for a post-body report.
+            failureSignal.Complete();
         }
     }
 

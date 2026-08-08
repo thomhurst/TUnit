@@ -51,6 +51,7 @@ const sidebars: SidebarsConfig = {
           collapsed: true,
           items: [
             'writing-tests/test-context',
+            'writing-tests/failure-signals',
             'writing-tests/artifacts',
           ],
         },
