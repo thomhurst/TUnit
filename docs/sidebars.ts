@@ -160,6 +160,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'execution/test-filters',
         'execution/parameters',
+        'execution/cancellation',
         'execution/timeouts',
         'execution/retrying',
         'execution/repeating',

@@ -12,6 +12,10 @@ public partial class TestContext
 {
     // Internal backing fields and properties
     private CancellationToken _baseCancellationToken;
+    private CancellationTokenSource? _testCancellationTokenSource;
+    private List<CancellationTokenSource>? _retiredTestCancellationTokenSources;
+    private bool _acceptingTestCancellation;
+    private volatile bool _testCancellationRequested;
     private List<CancellationToken>? _externalCancellationTokens;
     private CancellationTokenSource? _linkedCancellationTokenSource;
     // Token copies can escape into user code and remain in use through teardown (#6339).
@@ -37,6 +41,8 @@ public partial class TestContext
     internal IHookExecutor? CustomHookExecutor { get; set; }
     internal bool ReportResult { get; set; } = true;
     internal bool IsNotDiscoverable { get; set; }
+    internal bool IsTestCancellationRequested => _testCancellationRequested;
+    internal CancellationToken TestCancellationToken => _testCancellationTokenSource?.Token ?? CancellationToken;
 
     // Explicit interface implementations for ITestExecution
     TestPhase ITestExecution.Phase => Phase;
@@ -88,6 +94,7 @@ public partial class TestContext
     }
 
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
+    void ITestExecution.Cancel() => Cancel();
     void ITestExecution.AddLinkedCancellationToken(CancellationToken cancellationToken) => AddLinkedCancellationToken(cancellationToken);
 
     // Internal implementation methods
@@ -152,6 +159,63 @@ public partial class TestContext
             (_externalCancellationTokens ??= []).Add(cancellationToken);
             RebuildLinkedCancellationTokenSource();
         }
+    }
+
+    internal void InitializeTestCancellation(CancellationToken cancellationToken)
+    {
+        lock (Lock)
+        {
+            if (_testCancellationTokenSource is { } previousTestCancellationTokenSource)
+            {
+                (_retiredTestCancellationTokenSources ??= []).Add(previousTestCancellationTokenSource);
+            }
+
+            _testCancellationTokenSource = cancellationToken.CanBeCanceled
+                ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)
+                : new CancellationTokenSource();
+            _acceptingTestCancellation = true;
+            _testCancellationRequested = false;
+            _baseCancellationToken = _testCancellationTokenSource.Token;
+            RebuildLinkedCancellationTokenSource();
+        }
+    }
+
+    internal void CompleteTestCancellation()
+    {
+        lock (Lock)
+        {
+            _acceptingTestCancellation = false;
+        }
+    }
+
+    internal void RestoreTestCancellationToken()
+    {
+        lock (Lock)
+        {
+            if (_testCancellationTokenSource is not null)
+            {
+                _baseCancellationToken = _testCancellationTokenSource.Token;
+                RebuildLinkedCancellationTokenSource();
+            }
+        }
+    }
+
+    internal void Cancel()
+    {
+        CancellationTokenSource cancellationTokenSource;
+
+        lock (Lock)
+        {
+            if (!_acceptingTestCancellation || _testCancellationTokenSource is null)
+            {
+                return;
+            }
+
+            _testCancellationRequested = true;
+            cancellationTokenSource = _testCancellationTokenSource;
+        }
+
+        cancellationTokenSource.Cancel();
     }
 
     internal void SetCancellationToken(CancellationToken cancellationToken)
@@ -219,6 +283,21 @@ public partial class TestContext
 
             _externalCancellationTokens = null;
             CancellationToken = _baseCancellationToken;
+
+            _testCancellationTokenSource?.Dispose();
+            _testCancellationTokenSource = null;
+
+            if (_retiredTestCancellationTokenSources is { } retiredTestCancellationTokenSources)
+            {
+                for (var i = retiredTestCancellationTokenSources.Count - 1; i >= 0; i--)
+                {
+                    retiredTestCancellationTokenSources[i].Dispose();
+                }
+
+                _retiredTestCancellationTokenSources = null;
+            }
+
+            _acceptingTestCancellation = false;
         }
     }
 }
