@@ -113,6 +113,7 @@ internal class TestExecutor
     /// </summary>
     public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, TimeSpan? testTimeout = null)
     {
+        executableTest.Context.SetCancellationToken(cancellationToken);
 
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
@@ -306,7 +307,7 @@ internal class TestExecutor
                 // disposed later by TestCoordinator, so token copies captured mid-body stay valid — #6339.)
                 if (testTimeout.HasValue)
                 {
-                    executableTest.Context.CancellationToken = cancellationToken;
+                    executableTest.Context.SetCancellationToken(cancellationToken);
                 }
             }
 
@@ -453,7 +454,7 @@ internal class TestExecutor
         executableTest.Context.TestStart = DateTimeOffset.UtcNow;
 
         // Set the cancellation token on the context so source-generated tests can access it
-        executableTest.Context.CancellationToken = cancellationToken;
+        executableTest.Context.SetCancellationToken(cancellationToken);
 
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
@@ -464,7 +465,9 @@ internal class TestExecutor
         }
         else
         {
-            await executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+            await executableTest.InvokeTestAsync(
+                executableTest.Context.Metadata.TestDetails.ClassInstance,
+                executableTest.Context.Execution.CancellationToken).ConfigureAwait(false);
         }
     }
 
