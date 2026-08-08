@@ -75,6 +75,8 @@ public async Task MyTest()
 }
 ```
 
+Custom executors also compose with [failure signals](../writing-tests/failure-signals.md). Await the supplied `action` and use `context.Execution.AddLinkedCancellationToken(...)` when the executor needs to contribute cancellation; TUnit passes the latest linked token to the test body.
+
 ### STA Thread Example
 
 A common use case for `ITestExecutor` is running tests on an STA thread (required by some COM / UI components on Windows):

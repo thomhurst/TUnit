@@ -40,4 +40,28 @@ public class FailureSignalTests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task FailureSignalsComposeWithCustomTestExecutors()
+    {
+        await RunTestsWithFilter(
+            "/*/*/FailureSignalCustomExecutorTests/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(0),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result =>
+                {
+                    var messages = string.Join(
+                        Environment.NewLine,
+                        result.Results.Select(x => x.Output?.ErrorInfo?.Message));
+
+                    messages.ShouldContain("Failure reported through custom executor");
+                    messages.ShouldContain("Failure reported before executor cleanup");
+                    messages.ShouldContain("Custom executor cleanup failed");
+                    messages.ShouldNotContain("The custom test executor did not complete after signal cancellation");
+                }
+            ]);
+    }
 }
