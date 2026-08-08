@@ -27,7 +27,25 @@ internal static class RetryHelper
                     throw;
                 }
 
-                if (await ShouldRetry(testContext, ex, attempt))
+                testContext.OpenTestCancellationForRetry();
+
+                bool shouldRetry;
+                try
+                {
+                    shouldRetry = await ShouldRetry(testContext, ex, attempt);
+                }
+                catch
+                {
+                    if (testContext.CompleteTestCancellation())
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
+                    throw;
+                }
+
+                if (shouldRetry)
                 {
 #if NET
                     // Stop the failed attempt's activity before retrying
@@ -41,9 +59,6 @@ internal static class RetryHelper
                         testContext.Activity = null;
                     }
 #endif
-
-                    // Apply backoff delay before retrying
-                    await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
 
                     // Record this failed attempt before it's cleared, so reporters (e.g. the HTML
                     // report's retry/flaky UI) can show the full attempt history. The engine only
@@ -77,7 +92,30 @@ internal static class RetryHelper
                     testContext.TestStart = null;
                     testContext.Execution.TestEnd = null;
                     testContext.Timings.Clear();
+
+                    try
+                    {
+                        await ApplyBackoffDelay(testContext, attempt).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (testContext.IsTestCancellationRequested)
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
+                    if (testContext.IsTestCancellationRequested)
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
                     continue;
+                }
+
+                if (testContext.CompleteTestCancellation())
+                {
+                    SetCancelledResult(testContext);
+                    return;
                 }
 
                 throw;
@@ -119,5 +157,11 @@ internal static class RetryHelper
         }
 
         return Task.CompletedTask;
+    }
+
+    private static void SetCancelledResult(TestContext testContext)
+    {
+        testContext.Execution.Result = null;
+        testContext.InternalExecutableTest.SetResult(TestState.Cancelled);
     }
 }

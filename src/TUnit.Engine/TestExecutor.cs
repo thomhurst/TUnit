@@ -113,7 +113,7 @@ internal class TestExecutor
     /// </summary>
     public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, TestInitializer testInitializer, CancellationToken cancellationToken, TimeSpan? testTimeout = null)
     {
-        executableTest.Context.SetCancellationToken(cancellationToken);
+        executableTest.Context.InitializeTestCancellation(cancellationToken);
 
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
@@ -264,7 +264,8 @@ internal class TestExecutor
                     // retry attempt's source (if any) is released here before the new one replaces it.
                     var context = executableTest.Context;
                     context.TimeoutCancellationSource?.Dispose();
-                    var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    var testCancellationToken = context.TestCancellationToken;
+                    var testBodyTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(testCancellationToken);
                     context.TimeoutCancellationSource = testBodyTimeoutCts;
 
                     var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
@@ -273,13 +274,15 @@ internal class TestExecutor
                         ct => ExecuteTestAsync(executableTest, ct).AsTask(),
                         testTimeout.Value,
                         testBodyTimeoutCts,
-                        cancellationToken,
+                        testCancellationToken,
                         timeoutMessage).ConfigureAwait(false);
                 }
                 else
                 {
-                    // Fast path: no timeout — invoke directly, no CTS/TCS/WhenAny overhead
-                    await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                    // Fast path: no timeout — invoke directly, with no timeout-specific CTS/TCS/WhenAny overhead
+                    await ExecuteTestAsync(
+                        executableTest,
+                        executableTest.Context.TestCancellationToken).ConfigureAwait(false);
                 }
             }
             catch
@@ -307,11 +310,13 @@ internal class TestExecutor
                 // disposed later by TestCoordinator, so token copies captured mid-body stay valid — #6339.)
                 if (testTimeout.HasValue)
                 {
-                    executableTest.Context.SetCancellationToken(cancellationToken);
+                    executableTest.Context.RestoreTestCancellationToken();
                 }
             }
 
-            executableTest.SetResult(TestState.Passed);
+            executableTest.SetResult(executableTest.Context.IsTestCancellationRequested
+                ? TestState.Cancelled
+                : TestState.Passed);
         }
         catch (SkipTestException ex)
         {
@@ -320,6 +325,10 @@ internal class TestExecutor
             // TestCoordinator after the local capturedException is out of scope) can tag the span.
             executableTest.Context.SkipReason ??= ex.Reason;
             capturedException = ex;
+        }
+        catch (OperationCanceledException) when (executableTest.Context.IsTestCancellationRequested)
+        {
+            executableTest.SetResult(TestState.Cancelled);
         }
         catch (Exception ex)
         {
@@ -356,6 +365,18 @@ internal class TestExecutor
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
                 hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
+            }
+
+            // Keep cancellation open while a failed attempt hands control back to RetryHelper.
+            // Closing it here would create a gap where Cancel() could be lost before retry handling begins.
+            var canRetry = executableTest.Context.CurrentRetryAttempt
+                < executableTest.Context.Metadata.TestDetails.RetryLimit
+                && capturedException is not SkipTestException
+                && (capturedException is not null || hookException is not null);
+
+            if (!canRetry && executableTest.Context.CompleteTestCancellation())
+            {
+                executableTest.SetResult(TestState.Cancelled);
             }
         }
 
