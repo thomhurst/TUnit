@@ -314,7 +314,7 @@ internal class TestExecutor
                 }
             }
 
-            executableTest.SetResult(executableTest.Context.CompleteTestCancellation()
+            executableTest.SetResult(executableTest.Context.IsTestCancellationRequested
                 ? TestState.Cancelled
                 : TestState.Passed);
         }
@@ -337,8 +337,6 @@ internal class TestExecutor
         }
         finally
         {
-            executableTest.Context.CompleteTestCancellation();
-
             // After hooks must use CancellationToken.None to ensure cleanup runs even when cancelled
             // This matches the pattern used for After Class/Assembly hooks in TestCoordinator
 
@@ -367,6 +365,18 @@ internal class TestExecutor
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
                 hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
+            }
+
+            // Keep cancellation open while a failed attempt hands control back to RetryHelper.
+            // Closing it here would create a gap where Cancel() could be lost before retry handling begins.
+            var canRetry = executableTest.Context.CurrentRetryAttempt
+                < executableTest.Context.Metadata.TestDetails.RetryLimit
+                && capturedException is not SkipTestException
+                && (capturedException is not null || hookException is not null);
+
+            if (!canRetry && executableTest.Context.CompleteTestCancellation())
+            {
+                executableTest.SetResult(TestState.Cancelled);
             }
         }
 

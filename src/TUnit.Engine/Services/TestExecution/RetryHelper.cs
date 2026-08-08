@@ -36,7 +36,12 @@ internal static class RetryHelper
                 }
                 catch
                 {
-                    testContext.CompleteTestCancellation();
+                    if (testContext.CompleteTestCancellation())
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
                     throw;
                 }
 

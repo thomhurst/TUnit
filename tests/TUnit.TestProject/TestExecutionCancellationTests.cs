@@ -124,3 +124,77 @@ public sealed class CancelDuringRetryAttribute : RetryAttribute
         return Task.FromResult(true);
     }
 }
+
+[EngineTest(ExpectedResult.Failure)]
+[Retry(1)]
+public class CancelDuringRetryTransitionTests
+{
+    private const string StateRecordingRunId = "TUNIT_CANCELLATION_STATE_RUN_ID";
+    private static ITestExecution? _execution;
+
+    [Test]
+    public void FailBeforeCancellation()
+    {
+        _execution = TestContext.Current!.Execution;
+        throw new InvalidOperationException("Trigger retry.");
+    }
+
+    [After(Test)]
+    public void CancelAfterFailedAttempt() => TestContext.Current!.Execution.Cancel();
+
+    [After(Class)]
+    public static void RecordFinalState() => RecordState(nameof(CancelDuringRetryTransitionTests), _execution);
+
+    private static void RecordState(string className, ITestExecution? execution)
+    {
+        if (Environment.GetEnvironmentVariable(StateRecordingRunId) is not { Length: > 0 } runId)
+        {
+            return;
+        }
+
+        var directory = Path.Combine(Path.GetTempPath(), className, runId);
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "FinalState.txt"), execution?.Result?.State.ToString() ?? "No result");
+    }
+}
+
+[EngineTest(ExpectedResult.Failure)]
+[CancelAndThrowDuringRetry]
+public class CancelAndThrowDuringRetryTests
+{
+    private const string StateRecordingRunId = "TUNIT_CANCELLATION_STATE_RUN_ID";
+    private static ITestExecution? _execution;
+
+    [Test]
+    public void FailBeforeRetryDecision()
+    {
+        _execution = TestContext.Current!.Execution;
+        throw new InvalidOperationException("Trigger retry.");
+    }
+
+    [After(Class)]
+    public static void RecordFinalState()
+    {
+        if (Environment.GetEnvironmentVariable(StateRecordingRunId) is not { Length: > 0 } runId)
+        {
+            return;
+        }
+
+        var directory = Path.Combine(Path.GetTempPath(), nameof(CancelAndThrowDuringRetryTests), runId);
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "FinalState.txt"), _execution?.Result?.State.ToString() ?? "No result");
+    }
+}
+
+public sealed class CancelAndThrowDuringRetryAttribute : RetryAttribute
+{
+    public CancelAndThrowDuringRetryAttribute() : base(1)
+    {
+    }
+
+    public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
+    {
+        context.Execution.Cancel();
+        throw new InvalidOperationException("Retry decision failed after cancellation.");
+    }
+}
