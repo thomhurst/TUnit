@@ -305,46 +305,51 @@ internal sealed class TestCoordinator : ITestCoordinator
             TestExecutor.FinishTestActivity(test);
 #endif
 
-            switch (test.State)
+            try
             {
-                case TestState.NotStarted:
-                case TestState.WaitingForDependencies:
-                case TestState.Queued:
-                case TestState.Running:
-                    // This shouldn't happen
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
-                    break;
-                case TestState.Passed:
-                    await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
-                    break;
-                case TestState.Timeout:
-                case TestState.Failed:
-                    TestSessionContext.Current?.MarkFailure();
-                    await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
-                    break;
-                case TestState.Skipped:
-                    var skipReason = test.Context.SkipReason
-                                     ?? (test.Context.Execution.Result?.IsOverridden == true ? test.Context.Execution.Result.OverrideReason : null)
-                                     ?? "Skipped";
-                    await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
-                    break;
-                case TestState.Cancelled:
-                    TestSessionContext.Current?.MarkFailure();
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (test.State)
+                {
+                    case TestState.NotStarted:
+                    case TestState.WaitingForDependencies:
+                    case TestState.Queued:
+                    case TestState.Running:
+                        // This shouldn't happen
+                        await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Passed:
+                        await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Timeout:
+                    case TestState.Failed:
+                        TestSessionContext.Current?.MarkFailure();
+                        await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    case TestState.Skipped:
+                        var skipReason = test.Context.SkipReason
+                                         ?? (test.Context.Execution.Result?.IsOverridden == true ? test.Context.Execution.Result.OverrideReason : null)
+                                         ?? "Skipped";
+                        await _messageBus.Skipped(test.Context, skipReason).ConfigureAwait(false);
+                        break;
+                    case TestState.Cancelled:
+                        TestSessionContext.Current?.MarkFailure();
+                        await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
+            finally
+            {
+                // Dispose the per-test cancellation sources now that the body and every teardown phase — After(Test)
+                // hooks, instance/OnDispose, object cleanup, After(Class)/After(Assembly) and Last receivers —
+                // have all run. Keeping them alive this long means a token copy captured mid-body stayed backed
+                // by a live source throughout teardown instead of throwing ObjectDisposedException (#6339).
+                test.Context.DisposeLinkedCancellationTokenSources();
+                test.Context.TimeoutCancellationSource?.Dispose();
+                test.Context.TimeoutCancellationSource = null;
 
-            // Dispose the per-test cancellation sources now that the body and every teardown phase — After(Test)
-            // hooks, instance/OnDispose, object cleanup, After(Class)/After(Assembly) and Last receivers —
-            // have all run. Keeping them alive this long means a token copy captured mid-body stayed backed
-            // by a live source throughout teardown instead of throwing ObjectDisposedException (#6339).
-            test.Context.DisposeLinkedCancellationTokenSources();
-            test.Context.TimeoutCancellationSource?.Dispose();
-            test.Context.TimeoutCancellationSource = null;
-
-            test.Context.RemoveFromRegistry();
+                test.Context.RemoveFromRegistry();
+            }
         }
     }
 
