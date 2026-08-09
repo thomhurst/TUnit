@@ -616,7 +616,7 @@
   /* ============================== run view ============================== */
   .run-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 28px 80px; }
   .run-grid-1 { display: grid; grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
-  @media (max-width: 1100px) { .run-grid-1 { grid-template-columns: 1fr; } }
+  @media (max-width: 1100px) { .run-grid-1 { grid-template-columns: minmax(0, 1fr); } }
   .run-grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 16px; }
   @media (max-width: 1100px) { .run-grid-2 { grid-template-columns: 1fr; } }
 
@@ -656,7 +656,9 @@
   /* strip card */
   .strip-card { padding: 20px; }
   .strip-card .card-title { margin-bottom: 14px; }
-  .outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; overflow-x: auto; overflow-y: hidden; }
+  .outcome-strip-scroll { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+  .outcome-strip-content { width: max-content; min-width: 100%; }
+  .outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; }
   .outcome-strip .tick { flex: 1; min-width: 2px; border-radius: 2px; opacity: 0.85; transition: opacity 100ms, transform 100ms; cursor: pointer; }
   .outcome-strip .tick:hover { opacity: 1; transform: scaleY(1.06); }
   .outcome-strip .tick.pass { background: var(--pass); }
@@ -994,7 +996,7 @@
 
     /* run view: stacked, tighter */
     .run-wrap { padding: 20px 18px 80px; }
-    .run-grid-1, .run-grid-2 { grid-template-columns: 1fr; gap: 12px; }
+    .run-grid-1, .run-grid-2 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
     .donut-card { padding: 18px; }
     .panel-head { padding: 12px 16px; }
   }
@@ -1236,11 +1238,15 @@
 
       <div class="card strip-card">
         <div class="card-title">Outcome timeline</div>
-        <div class="outcome-strip" id="strip"></div>
-        <div class="strip-axis">
-          <span id="stripStart">start</span>
-          <span id="stripMid"></span>
-          <span id="stripEnd">end</span>
+        <div class="outcome-strip-scroll">
+          <div class="outcome-strip-content">
+            <div class="outcome-strip" id="strip"></div>
+            <div class="strip-axis">
+              <span id="stripStart">start</span>
+              <span id="stripMid"></span>
+              <span id="stripEnd">end</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

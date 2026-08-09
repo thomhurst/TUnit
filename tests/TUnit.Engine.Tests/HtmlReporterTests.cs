@@ -376,7 +376,7 @@ public class HtmlReporterTests
     }
 
     [Test]
-    public void GenerateHtml_Constrains_Outcome_Timeline_To_Its_Grid_Column()
+    public void GenerateHtml_EmitsOutcomeTimelineOverflowCss()
     {
         var html = HtmlReportGenerator.GenerateHtml(new ReportData
         {
@@ -392,7 +392,11 @@ public class HtmlReporterTests
         });
 
         html.ShouldContain("grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr)");
-        html.ShouldContain(".outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; overflow-x: auto; overflow-y: hidden; }");
+        html.ShouldContain("@media (max-width: 1100px) { .run-grid-1 { grid-template-columns: minmax(0, 1fr); } }");
+        html.ShouldContain(".run-grid-1, .run-grid-2 { grid-template-columns: minmax(0, 1fr); gap: 12px; }");
+        html.ShouldContain(".outcome-strip-scroll { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }");
+        html.ShouldContain(".outcome-strip-content { width: max-content; min-width: 100%; }");
+        html.ShouldContain("<div class=\"outcome-strip-scroll\">");
     }
 
     [Test]
