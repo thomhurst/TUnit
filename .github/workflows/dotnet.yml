@@ -26,6 +26,9 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -151,12 +154,19 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
+      - name: NuGet login
+        if: ${{ github.ref == 'refs/heads/main' && github.event.inputs.publish-packages == 'true' && matrix.os == 'ubuntu-latest' }}
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
           admin-token: ${{ secrets.ADMIN_TOKEN }}
           environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
-          nuget-apikey: ${{ secrets.NUGET__APIKEY }}
+          nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
 
       - name: Upload Diagnostic Logs
