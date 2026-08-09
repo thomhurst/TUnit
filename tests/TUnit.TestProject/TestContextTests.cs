@@ -7,6 +7,17 @@ namespace TUnit.TestProject;
 public class TestContextTests
 {
     [Test]
+    public async Task ResultsDirectory_Is_Exposed()
+    {
+        var resultsDirectory = TestContext.ResultsDirectory;
+
+        await Assert.That(Path.IsPathFullyQualified(resultsDirectory)).IsTrue();
+        await Assert.That(Directory.Exists(resultsDirectory)).IsTrue();
+        await Assert.That(resultsDirectory)
+            .IsEqualTo(TestContext.Configuration.Get("platformOptions:resultDirectory"));
+    }
+
+    [Test]
     public async Task Test()
     {
         var id = TestContext.Current!.Id;

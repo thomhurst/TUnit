@@ -53,6 +53,10 @@ Both `Output.WriteLine()` and `OutputWriter.WriteLine()` are valid - the `Output
 
 Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
 
+Use `TestContext.ResultsDirectory` to get the absolute Microsoft.Testing.Platform results
+directory. It respects configuration such as `--results-directory` and is suitable for files
+that should live alongside test reports.
+
 For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](./artifacts.md) guide.
 
 ## Test Isolation
