@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Configurations;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Logging;
@@ -77,6 +78,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var configuration = frameworkServiceProvider.GetConfiguration();
 
         TestContext.Configuration = new ConfigurationAdapter(configuration);
+        TestContext.ResultsDirectory = configuration.GetTestResultDirectory();
 
         // Register capabilities so they're available to test contexts
         Register<ITestFrameworkCapabilities>(capabilities);

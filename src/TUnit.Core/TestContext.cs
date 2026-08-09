@@ -231,6 +231,7 @@ public partial class TestContext : Context,
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
     private static IConfiguration? _configuration;
+    private static string? _resultsDirectory;
 
     /// <summary>
     /// Gets the test configuration. Throws a descriptive exception if accessed before initialization.
@@ -244,6 +245,22 @@ public partial class TestContext : Context,
             "If you are accessing this from a static constructor or field initializer, " +
             "consider moving the code to a test setup method or test body instead.");
         internal set => _configuration = value;
+    }
+
+    /// <summary>
+    /// Gets the absolute path to the directory where test results are written.
+    /// This respects Microsoft.Testing.Platform configuration, including the
+    /// <c>--results-directory</c> command-line option.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if accessed before the test engine initializes it.</exception>
+    public static string ResultsDirectory
+    {
+        get => _resultsDirectory ?? throw new InvalidOperationException(
+            "TestContext.ResultsDirectory has not been initialized. " +
+            "This property is only available after the TUnit test engine has started. " +
+            "If you are accessing this from a static constructor or field initializer, " +
+            "consider moving the code to a test setup method or test body instead.");
+        internal set => _resultsDirectory = value;
     }
 
     /// <summary>
