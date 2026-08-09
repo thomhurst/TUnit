@@ -376,6 +376,26 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void GenerateHtml_Constrains_Outcome_Timeline_To_Its_Grid_Column()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-08-09T00:00:00.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Windows",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldContain("grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr)");
+        html.ShouldContain(".outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; overflow-x: auto; overflow-y: hidden; }");
+    }
+
+    [Test]
     public void GenerateHtml_EmitsAttemptsArray_WhenTestWasRetried()
     {
         // Per-attempt status/duration drives the renderer's flaky panel + per-test

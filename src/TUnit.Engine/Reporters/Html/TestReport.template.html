@@ -615,7 +615,7 @@
 
   /* ============================== run view ============================== */
   .run-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 28px 80px; }
-  .run-grid-1 { display: grid; grid-template-columns: 320px 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .run-grid-1 { display: grid; grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
   @media (max-width: 1100px) { .run-grid-1 { grid-template-columns: 1fr; } }
   .run-grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 16px; }
   @media (max-width: 1100px) { .run-grid-2 { grid-template-columns: 1fr; } }
@@ -656,7 +656,7 @@
   /* strip card */
   .strip-card { padding: 20px; }
   .strip-card .card-title { margin-bottom: 14px; }
-  .outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; }
+  .outcome-strip { display: flex; gap: 1px; height: 60px; align-items: stretch; overflow-x: auto; overflow-y: hidden; }
   .outcome-strip .tick { flex: 1; min-width: 2px; border-radius: 2px; opacity: 0.85; transition: opacity 100ms, transform 100ms; cursor: pointer; }
   .outcome-strip .tick:hover { opacity: 1; transform: scaleY(1.06); }
   .outcome-strip .tick.pass { background: var(--pass); }
