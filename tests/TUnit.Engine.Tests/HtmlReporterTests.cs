@@ -376,6 +376,30 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void GenerateHtml_EmitsOutcomeTimelineOverflowCss()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-08-09T00:00:00.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Windows",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        html.ShouldContain("grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr)");
+        html.ShouldContain("@media (max-width: 1100px) { .run-grid-1 { grid-template-columns: minmax(0, 1fr); } }");
+        html.ShouldContain(".run-grid-1, .run-grid-2 { grid-template-columns: minmax(0, 1fr); gap: 12px; }");
+        html.ShouldContain(".outcome-strip-scroll { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }");
+        html.ShouldContain(".outcome-strip-content { width: max-content; min-width: 100%; }");
+        html.ShouldContain("<div class=\"outcome-strip-scroll\">");
+    }
+
+    [Test]
     public void GenerateHtml_EmitsAttemptsArray_WhenTestWasRetried()
     {
         // Per-attempt status/duration drives the renderer's flaky panel + per-test
