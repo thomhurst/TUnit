@@ -24700,6 +24700,23 @@ TUnit supports attaching artifacts at two levels:
 
 Attach files to individual tests using `TestContext.Current.Output.AttachArtifact()`.
 
+### Writing Artifacts to the Results Directory
+
+Use `TestContext.ResultsDirectory` to place generated files alongside reports and other
+artifacts. The property returns the absolute directory selected by Microsoft.Testing.Platform,
+including any `--results-directory` override.
+
+```csharp
+[Test]
+public async Task CaptureLog()
+{
+    var artifactPath = Path.Combine(TestContext.ResultsDirectory, "application.log");
+
+    await File.WriteAllTextAsync(artifactPath, "Diagnostic information");
+    TestContext.Current!.Output.AttachArtifact(artifactPath);
+}
+```
+
 ### Basic Usage
 
 The simplest way to attach an artifact is by providing just the file path:
@@ -30638,6 +30655,10 @@ TestContext.Current.Output.AttachArtifact(new Artifact
 Both `Output.WriteLine()` and `OutputWriter.WriteLine()` are valid - the `Output` property provides a convenient interface-based API, while `OutputWriter` gives direct access to the underlying TextWriter.
 
 Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
+
+Use `TestContext.ResultsDirectory` to get the absolute Microsoft.Testing.Platform results
+directory. It respects configuration such as `--results-directory` and is suitable for files
+that should live alongside test reports.
 
 For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](./artifacts.md) guide.
 
