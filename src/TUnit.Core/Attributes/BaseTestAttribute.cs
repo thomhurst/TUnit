@@ -21,6 +21,14 @@ public abstract class BaseTestAttribute : TUnitAttribute
     /// </summary>
     public readonly int Line;
 
+    /// <summary>
+    /// When set to <c>true</c>, suppresses the source file path and line number
+    /// that the compiler captures via <c>[CallerFilePath]</c> and <c>[CallerLineNumber]</c>.
+    /// This is useful for library-declared tests where the original source location
+    /// is meaningless to consumers who inherit those tests.
+    /// </summary>
+    public bool SuppressSourceLocation { get; set; }
+
     internal BaseTestAttribute(string file, int line)
     {
         File = file;

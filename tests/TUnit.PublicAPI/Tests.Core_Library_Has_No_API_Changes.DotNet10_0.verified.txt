@@ -207,6 +207,7 @@ namespace
     {
         public readonly string File;
         public readonly int Line;
+        public bool SuppressSourceLocation { get; set; }
     }
     [(.Method)]
     public sealed class BeforeAttribute : .HookAttribute
