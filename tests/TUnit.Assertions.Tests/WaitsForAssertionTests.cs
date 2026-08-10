@@ -8,17 +8,18 @@ public class WaitsForAssertionTests
     [Test]
     public async Task WaitsFor_Passes_Immediately_When_Assertion_Succeeds()
     {
-        var stopwatch = Stopwatch.StartNew();
-
         var value = 42;
+        var attemptCount = 0;
+
         await Assert.That(value).WaitsFor(
-            assert => assert.IsEqualTo(42),
+            assert =>
+            {
+                attemptCount++;
+                return assert.IsEqualTo(42);
+            },
             timeout: TimeSpan.FromSeconds(5));
 
-        stopwatch.Stop();
-
-        // Should complete very quickly since assertion passes immediately
-        await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromMilliseconds(100));
+        await Assert.That(attemptCount).IsEqualTo(1);
     }
 
     [Test]
