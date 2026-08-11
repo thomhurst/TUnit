@@ -132,10 +132,10 @@ internal class TypeErasedAssertion<T> : Assertion<object?>
         _innerAssertion = innerAssertion ?? throw new ArgumentNullException(nameof(innerAssertion));
     }
 
-    public override async Task<object?> AssertAsync()
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
         await _innerAssertion.AssertAsync();
-        return null;
+        return AssertionResult.Passed;
     }
 
     protected override string GetExpectation() => _innerAssertion.InternalGetExpectation();
