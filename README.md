@@ -29,7 +29,7 @@ public async Task Discount_Is_Applied(string tier, double subtotal, double expec
 }
 ```
 
-When a test fails, TUnit tells you what happened — including the actual expression you wrote:
+If using TUnit Assertions, when a test fails, TUnit tells you what happened — including the actual expression you wrote:
 
 ```
 Expected to be 80
