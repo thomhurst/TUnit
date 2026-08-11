@@ -7,7 +7,7 @@ sidebar_position: 4
 # Mock Library Benchmarks
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-08-09** from the latest CI run.
+These benchmarks were automatically generated on **2026-08-11** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.302
 :::
@@ -76,4 +76,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-08-09T03:02:07.270Z*
+*Last generated: 2026-08-11T02:59:33.302Z*
