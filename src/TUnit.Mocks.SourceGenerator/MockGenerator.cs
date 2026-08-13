@@ -210,12 +210,12 @@ public class MockGenerator : IIncrementalGenerator
             if (!string.IsNullOrEmpty(wrapperSource))
             {
                 spc.AddSource($"{fileName}_Mock.g.cs", wrapperSource);
+            }
 
-                var extensionSource = MockStaticExtensionBuilder.Build(model);
-                if (!string.IsNullOrEmpty(extensionSource))
-                {
-                    spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
-                }
+            var extensionSource = MockStaticExtensionBuilder.Build(model);
+            if (!string.IsNullOrEmpty(extensionSource))
+            {
+                spc.AddSource($"{fileName}_MockStaticExtension.g.cs", extensionSource);
             }
         }
         else if (model.IsPartialMock)
