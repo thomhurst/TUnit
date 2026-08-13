@@ -7,7 +7,7 @@ namespace TUnit.Mocks.SourceGenerator.Models;
 /// Pairs an equatable mock model with the source request that triggered it. Location data stays
 /// primitive so incremental state never retains a syntax tree.
 /// </summary>
-internal sealed record MockGenerationRequest(MockTypeModel Model, MockSourceLocation SourceLocation);
+internal readonly record struct MockGenerationRequest(MockTypeModel Model, MockSourceLocation SourceLocation);
 
 internal readonly record struct MockSourceLocation(
     string FilePath,

@@ -48,9 +48,7 @@ public class MockGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 "TUnit.Mocks.GenerateMockAttribute",
                 predicate: static (node, _) => true,
-                transform: static (ctx, ct) => CreateRequests(
-                    MockTypeDiscovery.TransformGenerateMockAttribute(ctx, ct),
-                    GetAttributeLocation(ctx, ct)))
+                transform: MockTypeDiscovery.TransformGenerateMockAttribute)
             .SelectMany((requests, _) => requests);
 
         // Step 1c: Find all IFoo.Mock() static extension invocations
@@ -72,19 +70,16 @@ public class MockGenerator : IIncrementalGenerator
                 var (mockOfAndAttribute, extensionInvocations) = pair;
                 var (mockOfRequests, attributeRequests) = mockOfAndAttribute;
                 var set = new HashSet<MockTypeModel>();
-                var models = new List<MockTypeModel>();
-                var locations = new List<MockSourceLocation>();
+                var requests = new List<MockGenerationRequest>();
 
-                AddDistinctRequests(mockOfRequests, set, models, locations);
-                AddDistinctRequests(attributeRequests, set, models, locations);
-                AddDistinctRequests(extensionInvocations, set, models, locations);
+                AddDistinctRequests(mockOfRequests, set, requests);
+                AddDistinctRequests(attributeRequests, set, requests);
+                AddDistinctRequests(extensionInvocations, set, requests);
 
                 // Flag types that would emit the same generated names before anything is written:
                 // duplicate hint names abort the generator and take every mock in the compilation
                 // with them. See issue #6505.
-                var annotatedModels = GeneratedNameCollisionDetector.Annotate(models);
-                return annotatedModels.Select((model, index) =>
-                    new MockGenerationRequest(model, locations[index]));
+                return GeneratedNameCollisionDetector.Annotate(requests);
             });
 
         // Step 3: Generate source for each unique type
@@ -127,15 +122,10 @@ public class MockGenerator : IIncrementalGenerator
         return requests.MoveToImmutable();
     }
 
-    private static Location GetAttributeLocation(GeneratorAttributeSyntaxContext context, CancellationToken ct)
-        => context.Attributes[0].ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
-           ?? context.TargetNode.GetLocation();
-
     private static void AddDistinctRequests(
         ImmutableArray<MockGenerationRequest> requests,
         HashSet<MockTypeModel> set,
-        List<MockTypeModel> models,
-        List<MockSourceLocation> locations)
+        List<MockGenerationRequest> distinctRequests)
     {
         foreach (var request in requests)
         {
@@ -144,8 +134,7 @@ public class MockGenerator : IIncrementalGenerator
                 continue;
             }
 
-            models.Add(request.Model);
-            locations.Add(request.SourceLocation);
+            distinctRequests.Add(request);
         }
     }
 
