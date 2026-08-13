@@ -624,16 +624,16 @@ internal static class MockTypeDiscovery
 
     /// <summary>
     /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
-    /// Extracts the type argument and builds a <see cref="MockTypeModel"/>.
+    /// Extracts the type argument and pairs each model with its attribute location.
     /// </summary>
-    public static ImmutableArray<MockTypeModel> TransformGenerateMockAttribute(
+    public static ImmutableArray<MockGenerationRequest> TransformGenerateMockAttribute(
         GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
         // The target symbol for an assembly attribute is the assembly itself
         // The attribute constructor argument is typeof(T)
         var compilation = context.SemanticModel.Compilation;
         var compilationAssembly = compilation.Assembly;
-        var models = ImmutableArray.CreateBuilder<MockTypeModel>();
+        var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>();
         foreach (var attr in context.Attributes)
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
@@ -654,13 +654,21 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            models.AddRange(BuildModelWithTransitiveDependencies(
+            var models = BuildModelWithTransitiveDependencies(
                 NormalizeSingleMockType(namedType),
                 isPartialMock: namedType.TypeKind == TypeKind.Class,
                 compilationAssembly,
-                compilation));
+                compilation);
+
+            var location = attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
+                           ?? context.TargetNode.GetLocation();
+            var sourceLocation = MockSourceLocation.From(location);
+            foreach (var model in models)
+            {
+                requests.Add(new MockGenerationRequest(model, sourceLocation));
+            }
         }
 
-        return models.ToImmutable();
+        return requests.ToImmutable();
     }
 }

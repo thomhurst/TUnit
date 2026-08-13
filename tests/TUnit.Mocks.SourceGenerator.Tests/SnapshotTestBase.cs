@@ -97,7 +97,8 @@ public abstract class SnapshotTestBase
     /// </summary>
     protected static (string[] Sources, IReadOnlyList<Diagnostic> Diagnostics) RunGeneratorForDiagnostics(
         string source,
-        IEnumerable<MetadataReference>? additionalReferences = null)
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        IIncrementalGenerator? generator = null)
     {
         var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Preview);
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
@@ -112,7 +113,7 @@ public abstract class SnapshotTestBase
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         ).WithReferences(refs);
 
-        var generator = new MockGenerator();
+        generator ??= new MockGenerator();
         GeneratorDriver driver = CSharpGeneratorDriver.Create([generator.AsSourceGenerator()], parseOptions: parseOptions);
 
         var runResult = driver.RunGenerators(compilation).GetRunResult();
