@@ -1730,6 +1730,31 @@ public class MockGeneratorTests : SnapshotTestBase
     }
 
     [Test]
+    public async Task Multiple_GenerateMock_Attributes_Generate_Every_Mock()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            [assembly: GenerateMock(typeof(IFirst))]
+            [assembly: GenerateMock(typeof(Amazon.SQS.IAmazonSQS))]
+
+            public interface IFirst
+            {
+                void Execute();
+            }
+            """;
+
+        var amazonSqsReference = Microsoft.CodeAnalysis.MetadataReference.CreateFromFile(
+            typeof(Amazon.SQS.IAmazonSQS).Assembly.Location);
+        var sources = RunGenerator(source, [amazonSqsReference]);
+
+        await Assert.That(sources.Any(generatedSource =>
+            generatedSource.Contains("IFirstMock", StringComparison.Ordinal))).IsTrue();
+        await Assert.That(sources.Any(generatedSource =>
+            generatedSource.Contains("IAmazonSQSMock", StringComparison.Ordinal))).IsTrue();
+    }
+
+    [Test]
     public Task Class_With_Constructor_Parameters_Extension_Discovery()
     {
         var source = """

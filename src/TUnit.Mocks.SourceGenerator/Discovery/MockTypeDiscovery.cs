@@ -633,6 +633,7 @@ internal static class MockTypeDiscovery
         // The attribute constructor argument is typeof(T)
         var compilation = context.SemanticModel.Compilation;
         var compilationAssembly = compilation.Assembly;
+        var models = ImmutableArray.CreateBuilder<MockTypeModel>();
         foreach (var attr in context.Attributes)
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
@@ -653,13 +654,13 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            return BuildModelWithTransitiveDependencies(
+            models.AddRange(BuildModelWithTransitiveDependencies(
                 NormalizeSingleMockType(namedType),
                 isPartialMock: namedType.TypeKind == TypeKind.Class,
                 compilationAssembly,
-                compilation);
+                compilation));
         }
 
-        return ImmutableArray<MockTypeModel>.Empty;
+        return models.ToImmutable();
     }
 }
