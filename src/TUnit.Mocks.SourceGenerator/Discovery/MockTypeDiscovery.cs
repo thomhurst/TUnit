@@ -624,9 +624,9 @@ internal static class MockTypeDiscovery
 
     /// <summary>
     /// Semantic transform for <c>[assembly: GenerateMock(typeof(T))]</c>.
-    /// Extracts the type argument and builds a <see cref="MockTypeModel"/>.
+    /// Extracts the type argument and pairs each model with its attribute location.
     /// </summary>
-    public static ImmutableArray<MockTypeModel> TransformGenerateMockAttribute(
+    public static ImmutableArray<MockGenerationRequest> TransformGenerateMockAttribute(
         GeneratorAttributeSyntaxContext context, CancellationToken ct)
     {
         // The target symbol for an assembly attribute is the assembly itself
@@ -653,13 +653,24 @@ internal static class MockTypeDiscovery
             if (namedType.IsValueType)
                 continue;
 
-            return BuildModelWithTransitiveDependencies(
+            var models = BuildModelWithTransitiveDependencies(
                 NormalizeSingleMockType(namedType),
                 isPartialMock: namedType.TypeKind == TypeKind.Class,
                 compilationAssembly,
                 compilation);
+
+            var location = attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
+                           ?? context.TargetNode.GetLocation();
+            var sourceLocation = MockSourceLocation.From(location);
+            var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>(models.Length);
+            foreach (var model in models)
+            {
+                requests.Add(new MockGenerationRequest(model, sourceLocation));
+            }
+
+            return requests.MoveToImmutable();
         }
 
-        return ImmutableArray<MockTypeModel>.Empty;
+        return ImmutableArray<MockGenerationRequest>.Empty;
     }
 }

@@ -23,28 +23,30 @@ namespace TUnit.Mocks.SourceGenerator.Discovery;
 internal static class GeneratedNameCollisionDetector
 {
     /// <summary>
-    /// Returns <paramref name="models"/> in input order, with <see cref="MockTypeModel.CollidesWith"/>
-    /// set on every model that shares its generated name with another.
+    /// Returns <paramref name="requests"/> in input order, with
+    /// <see cref="MockTypeModel.CollidesWith"/> set on every model that shares its generated name
+    /// with another. Each model remains paired with its original request location.
     /// </summary>
-    internal static List<MockTypeModel> Annotate(IEnumerable<MockTypeModel> models)
+    internal static List<MockGenerationRequest> Annotate(IEnumerable<MockGenerationRequest> requests)
     {
-        var ordered = models.ToList();
+        var ordered = requests.ToList();
 
         // The name alone is not the key: a multi-interface combo and the secondary setup surface
         // for the same (primary, interface) pair intentionally share a composite name and are told
         // apart by the hint-name suffix, so they must not be flagged.
-        var groups = new Dictionary<(bool IsSecondaryMemberSurface, string Name), List<MockTypeModel>>();
+        var groups = new Dictionary<(bool IsSecondaryMemberSurface, string Name), List<MockGenerationRequest>>();
 
-        foreach (var model in ordered)
+        foreach (var request in ordered)
         {
+            var model = request.Model;
             var key = (model.IsSecondaryMemberSurface, MockImplBuilder.GetCompositeSafeName(model));
 
             if (!groups.TryGetValue(key, out var group))
             {
-                groups[key] = group = new List<MockTypeModel>();
+                groups[key] = group = new List<MockGenerationRequest>();
             }
 
-            group.Add(model);
+            group.Add(request);
         }
 
         if (groups.Count == ordered.Count)
@@ -52,24 +54,25 @@ internal static class GeneratedNameCollisionDetector
             return ordered;
         }
 
-        var annotated = new List<MockTypeModel>(ordered.Count);
+        var annotated = new List<MockGenerationRequest>(ordered.Count);
 
-        foreach (var model in ordered)
+        foreach (var request in ordered)
         {
+            var model = request.Model;
             var group = groups[(model.IsSecondaryMemberSurface, MockImplBuilder.GetCompositeSafeName(model))];
 
             // Same target mocked in more than one mode (Mock.Of and Mock.Wrap of one type, say)
             // reaches this point as separate models sharing an identity. Only distinct targets
             // meeting at one name are a #6505 collision.
             var others = group
-                .Where(other => Identity(other) != Identity(model))
-                .Select(other => other.FullyQualifiedName)
+                .Where(other => Identity(other.Model) != Identity(model))
+                .Select(other => other.Model.FullyQualifiedName)
                 .Distinct()
                 .ToList();
 
             annotated.Add(others.Count == 0
-                ? model
-                : model with { CollidesWith = string.Join(", ", others) });
+                ? request
+                : request with { Model = model with { CollidesWith = string.Join(", ", others) } });
         }
 
         return annotated;
