@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using TUnit.Mocks.SourceGenerator.Builders;
 using TUnit.Mocks.SourceGenerator.Discovery;
@@ -8,6 +9,17 @@ namespace TUnit.Mocks.SourceGenerator;
 [Generator(LanguageNames.CSharp)]
 public class MockGenerator : IIncrementalGenerator
 {
+    private readonly Action<SourceProductionContext, MockTypeModel> _emitSources;
+
+    public MockGenerator() : this(EmitSources)
+    {
+    }
+
+    internal MockGenerator(Action<SourceProductionContext, MockTypeModel> emitSources)
+    {
+        _emitSources = emitSources;
+    }
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Always emit the TUnit.Mocks.Generated namespace so that global usings never fail
@@ -26,23 +38,29 @@ public class MockGenerator : IIncrementalGenerator
         var mockTypes = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: MockTypeDiscovery.IsMockOfInvocation,
-                transform: MockTypeDiscovery.TransformToModels)
-            .SelectMany((models, _) => models);
+                transform: static (ctx, ct) => CreateRequests(
+                    MockTypeDiscovery.TransformToModels(ctx, ct),
+                    ctx.Node.GetLocation()))
+            .SelectMany((requests, _) => requests);
 
         // Step 1b: Find all [assembly: GenerateMock(typeof(T))] attributes
         var attributeTypes = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Mocks.GenerateMockAttribute",
                 predicate: static (node, _) => true,
-                transform: MockTypeDiscovery.TransformGenerateMockAttribute)
-            .SelectMany((models, _) => models);
+                transform: static (ctx, ct) => CreateRequests(
+                    MockTypeDiscovery.TransformGenerateMockAttribute(ctx, ct),
+                    GetAttributeLocation(ctx, ct)))
+            .SelectMany((requests, _) => requests);
 
         // Step 1c: Find all IFoo.Mock() static extension invocations
         var extensionTypes = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: MockTypeDiscovery.IsMockExtensionInvocation,
-                transform: MockTypeDiscovery.TransformMockExtensionInvocation)
-            .SelectMany((models, _) => models);
+                transform: static (ctx, ct) => CreateRequests(
+                    MockTypeDiscovery.TransformMockExtensionInvocation(ctx, ct),
+                    ctx.Node.GetLocation()))
+            .SelectMany((requests, _) => requests);
 
         // Step 2: Merge all sources and deduplicate
         var distinctTypes = mockTypes
@@ -52,69 +70,134 @@ public class MockGenerator : IIncrementalGenerator
             .SelectMany((pair, _) =>
             {
                 var (mockOfAndAttribute, extensionInvocations) = pair;
-                var (mockOfTypes, attributeTypes) = mockOfAndAttribute;
+                var (mockOfRequests, attributeRequests) = mockOfAndAttribute;
                 var set = new HashSet<MockTypeModel>();
-                foreach (var m in mockOfTypes) set.Add(m);
-                foreach (var m in attributeTypes) set.Add(m);
-                foreach (var m in extensionInvocations) set.Add(m);
+                var models = new List<MockTypeModel>();
+                var locations = new List<MockSourceLocation>();
+
+                AddDistinctRequests(mockOfRequests, set, models, locations);
+                AddDistinctRequests(attributeRequests, set, models, locations);
+                AddDistinctRequests(extensionInvocations, set, models, locations);
 
                 // Flag types that would emit the same generated names before anything is written:
                 // duplicate hint names abort the generator and take every mock in the compilation
                 // with them. See issue #6505.
-                return GeneratedNameCollisionDetector.Annotate(set);
+                var annotatedModels = GeneratedNameCollisionDetector.Annotate(models);
+                return annotatedModels.Select((model, index) =>
+                    new MockGenerationRequest(model, locations[index]));
             });
 
         // Step 3: Generate source for each unique type
-        context.RegisterSourceOutput(distinctTypes, (spc, model) =>
+        context.RegisterSourceOutput(distinctTypes, GenerateMockSafely);
+    }
+
+    private void GenerateMockSafely(SourceProductionContext spc, MockGenerationRequest request)
+    {
+        try
         {
-            if (model.CollidesWith is not null)
+            _emitSources(spc, request.Model);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            spc.ReportDiagnostic(Diagnostic.Create(
+                Diagnostics.TM009_GenerationFailed,
+                request.SourceLocation.ToLocation(),
+                request.Model.FullyQualifiedName,
+                exception.GetType().Name,
+                exception.Message));
+        }
+    }
+
+    private static ImmutableArray<MockGenerationRequest> CreateRequests(
+        ImmutableArray<MockTypeModel> models,
+        Location location)
+    {
+        if (models.IsDefaultOrEmpty)
+        {
+            return ImmutableArray<MockGenerationRequest>.Empty;
+        }
+
+        var sourceLocation = MockSourceLocation.From(location);
+        var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>(models.Length);
+        foreach (var model in models)
+        {
+            requests.Add(new MockGenerationRequest(model, sourceLocation));
+        }
+
+        return requests.MoveToImmutable();
+    }
+
+    private static Location GetAttributeLocation(GeneratorAttributeSyntaxContext context, CancellationToken ct)
+        => context.Attributes[0].ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
+           ?? context.TargetNode.GetLocation();
+
+    private static void AddDistinctRequests(
+        ImmutableArray<MockGenerationRequest> requests,
+        HashSet<MockTypeModel> set,
+        List<MockTypeModel> models,
+        List<MockSourceLocation> locations)
+    {
+        foreach (var request in requests)
+        {
+            if (!set.Add(request.Model))
             {
-                spc.ReportDiagnostic(Diagnostic.Create(
-                    Diagnostics.TM008_GeneratedNameCollision,
-                    Location.None,
-                    model.FullyQualifiedName,
-                    MockImplBuilder.GetCompositeSafeName(model),
-                    model.CollidesWith));
-                return;
+                continue;
             }
 
-            if (model.IsSecondaryMemberSurface)
-            {
-                // Pair model: the shared setup/verify surface for one additional interface of a
-                // multi-type mock. Emitted once per (primary, interface) pair across all combos.
-                var secondaryMembersSource = MockMembersBuilder.Build(model);
-                spc.AddSource($"{GetSafeFileName(model)}_MockSecondaryMembers.g.cs", secondaryMembersSource);
-            }
-            else if (model.IsDelegateType)
-            {
-                // Delegate mock: generate members and delegate factory (no impl class)
-                GenerateDelegateMock(spc, model);
-            }
-            else if (model.LacksAccessibleConstructor)
-            {
-                // Unsubclassable class (every constructor private / cross-assembly internal).
-                // Emit only the static Mock() entry point so the call site still binds and the
-                // TM006 analyzer diagnostic is the single error the user sees, instead of a
-                // CS1729 pointing into generated code. See issue #6493.
-                GenerateUnconstructableClassStub(spc, model);
-            }
-            else if (model.IsWrapMock)
-            {
-                // Wrap mock: generate wrap impl, wrap factory, plus members
-                GenerateWrapMock(spc, model);
-            }
-            else if (model.AdditionalInterfaceNames.Length > 0)
-            {
-                // Multi-interface mock: generate impl + factory + secondary-member setup
-                // extensions. Primary members/raise come from the single-type model (also emitted).
-                GenerateMultiInterfaceMock(spc, model);
-            }
-            else
-            {
-                // Single-type mock: generate everything
-                GenerateSingleTypeMock(spc, model);
-            }
-        });
+            models.Add(request.Model);
+            locations.Add(request.SourceLocation);
+        }
+    }
+
+    internal static void EmitSources(SourceProductionContext spc, MockTypeModel model)
+    {
+        if (model.CollidesWith is not null)
+        {
+            spc.ReportDiagnostic(Diagnostic.Create(
+                Diagnostics.TM008_GeneratedNameCollision,
+                Location.None,
+                model.FullyQualifiedName,
+                MockImplBuilder.GetCompositeSafeName(model),
+                model.CollidesWith));
+            return;
+        }
+
+        if (model.IsSecondaryMemberSurface)
+        {
+            // Pair model: the shared setup/verify surface for one additional interface of a
+            // multi-type mock. Emitted once per (primary, interface) pair across all combos.
+            var secondaryMembersSource = MockMembersBuilder.Build(model);
+            spc.AddSource($"{GetSafeFileName(model)}_MockSecondaryMembers.g.cs", secondaryMembersSource);
+        }
+        else if (model.IsDelegateType)
+        {
+            // Delegate mock: generate members and delegate factory (no impl class)
+            GenerateDelegateMock(spc, model);
+        }
+        else if (model.LacksAccessibleConstructor)
+        {
+            // Unsubclassable class (every constructor private / cross-assembly internal).
+            // Emit only the static Mock() entry point so the call site still binds and the
+            // TM006 analyzer diagnostic is the single error the user sees, instead of a
+            // CS1729 pointing into generated code. See issue #6493.
+            GenerateUnconstructableClassStub(spc, model);
+        }
+        else if (model.IsWrapMock)
+        {
+            // Wrap mock: generate wrap impl, wrap factory, plus members
+            GenerateWrapMock(spc, model);
+        }
+        else if (model.AdditionalInterfaceNames.Length > 0)
+        {
+            // Multi-interface mock: generate impl + factory + secondary-member setup
+            // extensions. Primary members/raise come from the single-type model (also emitted).
+            GenerateMultiInterfaceMock(spc, model);
+        }
+        else
+        {
+            // Single-type mock: generate everything
+            GenerateSingleTypeMock(spc, model);
+        }
     }
 
     private static void GenerateSingleTypeMock(SourceProductionContext spc, MockTypeModel model)
