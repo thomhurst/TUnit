@@ -213,7 +213,12 @@
   overflow-x: auto;
 }
 
-.code code { color: inherit; background: none; border: 0; }
+.page .code code {
+  padding: 0 !important;
+  border: 0;
+  background: transparent !important;
+  color: inherit !important;
+}
 
 .resultRow {
   display: grid;
@@ -291,7 +296,14 @@
 .installGrid > div { padding: 1.4rem 2rem; border-left: 1px solid rgba(7, 17, 15, 0.18); }
 .installGrid > div:last-child { border-right: 1px solid rgba(7, 17, 15, 0.18); }
 .stepLabel { display: block; margin-bottom: 0.5rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65; }
-.installGrid code { padding: 0; border: 0; background: none; color: inherit; font-size: 0.8rem; white-space: nowrap; }
+.page .installGrid code {
+  padding: 0 !important;
+  border: 0;
+  background: transparent !important;
+  color: var(--ink) !important;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 
 .features,
 .ecosystem { padding: clamp(6rem, 10vw, 10rem) 0; }
