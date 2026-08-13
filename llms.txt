@@ -1,6 +1,6 @@
 # TUnit
 
-> Welcome to TUnit Testing
+> Fast, modern .NET testing
 
 This file contains links to documentation sections following the llmstxt.org standard.
 
