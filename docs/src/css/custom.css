@@ -9,34 +9,36 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #14b8a6;
-  --ifm-color-primary-dark: #0d9488;
-  --ifm-color-primary-darker: #0f766e;
-  --ifm-color-primary-darkest: #115e59;
-  --ifm-color-primary-light: #2dd4bf;
-  --ifm-color-primary-lighter: #5eead4;
-  --ifm-color-primary-lightest: #99f6e4;
+  --ifm-color-primary: #087c58;
+  --ifm-color-primary-dark: #076f4f;
+  --ifm-color-primary-darker: #06694b;
+  --ifm-color-primary-darkest: #05563e;
+  --ifm-color-primary-light: #098961;
+  --ifm-color-primary-lighter: #0a9066;
+  --ifm-color-primary-lightest: #0ba373;
+  --ifm-font-family-base: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ifm-heading-font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.1);
+  --docusaurus-highlighted-code-line-bg: rgba(8, 124, 88, 0.1);
   
   /* Custom Design System Variables */
-  --gradient-primary: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
-  --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  --bg-dark: #0a0e27;
-  --bg-dark-secondary: #1a1f3a;
-  --bg-surface: #1e293b;
-  --bg-code: #0f172a;
+  --gradient-primary: linear-gradient(135deg, #86f7c8 0%, #45dba4 100%);
+  --gradient-secondary: linear-gradient(135deg, #45dba4 0%, #6fe7ff 100%);
+  --bg-dark: #07110f;
+  --bg-dark-secondary: #0a1613;
+  --bg-surface: #0d211b;
+  --bg-code: #091914;
   
   /* Text Colors */
-  --text-primary: #f1f5f9;
-  --text-secondary: #e2e8f0;
-  --text-muted: #94a3b8;
-  --text-body: #cbd5e1;
+  --text-primary: #f4f4ec;
+  --text-secondary: #dbe6e2;
+  --text-muted: #91a39d;
+  --text-body: #b8c7c2;
   
   /* Borders and Effects */
-  --border-color: rgba(148, 163, 184, 0.1);
-  --shadow-primary: 0 4px 15px rgba(20, 184, 166, 0.3);
-  --shadow-hover: 0 10px 30px rgba(20, 184, 166, 0.2);
+  --border-color: rgba(134, 247, 200, 0.14);
+  --shadow-primary: 0 4px 15px rgba(134, 247, 200, 0.18);
+  --shadow-hover: 0 10px 30px rgba(134, 247, 200, 0.14);
   
   /* Syntax Highlighting */
   --syntax-keyword: #e879f9;
@@ -49,18 +51,18 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #14b8a6;
-  --ifm-color-primary-dark: #0d9488;
-  --ifm-color-primary-darker: #0f766e;
-  --ifm-color-primary-darkest: #115e59;
-  --ifm-color-primary-light: #2dd4bf;
-  --ifm-color-primary-lighter: #5eead4;
-  --ifm-color-primary-lightest: #99f6e4;
-  --docusaurus-highlighted-code-line-bg: rgba(20, 184, 166, 0.2);
-  --ifm-background-color: #0f172a;
-  --ifm-background-surface-color: #1e293b;
+  --ifm-color-primary: #86f7c8;
+  --ifm-color-primary-dark: #69eeb8;
+  --ifm-color-primary-darker: #5be9ae;
+  --ifm-color-primary-darkest: #2ed694;
+  --ifm-color-primary-light: #a3fbd6;
+  --ifm-color-primary-lighter: #b2fddd;
+  --ifm-color-primary-lightest: #dcfff0;
+  --docusaurus-highlighted-code-line-bg: rgba(134, 247, 200, 0.12);
+  --ifm-background-color: #091410;
+  --ifm-background-surface-color: #0d211b;
   --ifm-navbar-background-color: transparent;
-  --ifm-footer-background-color: #0a0e27;
+  --ifm-footer-background-color: #050c0a;
 }
 
 /* Import Google Fonts */
@@ -77,7 +79,7 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--ifm-font-family-base);
   overflow-x: hidden;
   width: 100%;
   margin: 0;
@@ -101,13 +103,13 @@ body {
 
 /* Better code block contrast */
 [data-theme='dark'] code {
-  background: rgba(20, 184, 166, 0.15) !important;
-  color: #67e8f9 !important;
+  background: rgba(134, 247, 200, 0.1) !important;
+  color: #b2fddd !important;
 }
 
 /* Enhanced syntax highlighting for all code blocks */
 [data-theme='dark'] .prism-code {
-  background: #1e293b !important;
+  background: var(--bg-code) !important;
 }
 
 /* Global fix for all CodeBlock components */
@@ -239,91 +241,98 @@ div[class*="codeScrollWrapper"] > div {
   opacity: 1 !important;
 }
 
-/* Navbar enhancements - Dark theme by default */
+/* Navbar — shared TUnit brand shell */
 .navbar {
-  backdrop-filter: blur(10px);
-  background: linear-gradient(90deg, rgba(10, 14, 39, 0.98) 0%, rgba(26, 31, 58, 0.98) 100%) !important;
-  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(7, 17, 15, 0.96) !important;
+  border-bottom: 1px solid rgba(134, 247, 200, 0.16);
+  box-shadow: none;
+  backdrop-filter: blur(18px);
 }
 
-/* Navbar text colors */
 .navbar__title {
-  color: var(--text-primary) !important;
-  font-family: 'Orbitron', 'Space Grotesk', monospace !important;
-  font-weight: 700;
-  font-size: 1.5rem !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-  background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+  color: #f4f4ec !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 650;
+  letter-spacing: -0.04em !important;
+  text-transform: none !important;
 }
 
 .navbar__link {
-  color: var(--text-body) !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  color: #aebeb9 !important;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease;
 }
 
 .navbar__link:hover {
-  color: #2dd4bf !important;
-  text-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+  color: #86f7c8 !important;
+  text-shadow: none;
 }
 
 .navbar__link--active {
-  color: #2dd4bf !important;
-  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #86f7c8 !important;
 }
 
-/* Navbar brand/logo text */
 .navbar__brand {
-  color: var(--text-primary) !important;
-  font-weight: 700;
-  transition: all 0.2s ease;
+  gap: 0.65rem;
+  color: #f4f4ec !important;
+  transition: opacity 0.2s ease;
+}
+
+.navbar__brand::before {
+  content: 'T';
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 3px;
+  background: #86f7c8;
+  color: #07110f;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .navbar__brand:hover {
-  color: #2dd4bf !important;
+  opacity: 0.82;
   text-decoration: none !important;
 }
 
-/* Hide the logo image since we have TUNIT text */
+/* SVG favicon uses legacy visual system; compact CSS mark is navbar-specific. */
 .navbar__logo {
   display: none !important;
 }
 
 /* Navbar items */
 .navbar__item {
-  color: var(--text-body) !important;
+  color: #aebeb9 !important;
 }
 
 /* Mobile menu toggle */
 .navbar__toggle {
-  color: #f1f5f9 !important;
+  color: #dbe6e2 !important;
 }
 
 /* Theme toggle button */
 [data-theme='dark'] .navbar__toggle {
-  color: #f1f5f9 !important;
+  color: #dbe6e2 !important;
 }
 
 /* Mobile Navbar Sidebar - Visual styling only */
 @media (max-width: 996px) {
   .navbar-sidebar {
-    background: #0f172a !important;
+    background: #07110f !important;
     height: 100vh !important;
     height: 100dvh !important; /* For better mobile support */
   }
   
   .navbar-sidebar__brand {
     background: transparent !important;
-    border-bottom: 1px solid rgba(20, 184, 166, 0.15) !important;
+    border-bottom: 1px solid rgba(134, 247, 200, 0.16) !important;
   }
   
   .navbar-sidebar__items {
@@ -333,146 +342,136 @@ div[class*="codeScrollWrapper"] > div {
   /* Link colors and hover effects */
   .navbar-sidebar .menu__link,
   .navbar-sidebar a {
-    color: #cbd5e1 !important;
+    color: #b8c7c2 !important;
     transition: all 0.2s ease !important;
   }
   
   .navbar-sidebar a:hover {
-    color: #2dd4bf !important;
-    background: rgba(20, 184, 166, 0.1) !important;
+    color: #86f7c8 !important;
+    background: rgba(134, 247, 200, 0.08) !important;
   }
   
   /* Active link styling */
   .navbar-sidebar .menu__link--active,
   .navbar-sidebar [aria-current="page"] {
-    color: #2dd4bf !important;
-    background: rgba(20, 184, 166, 0.15) !important;
+    color: #86f7c8 !important;
+    background: rgba(134, 247, 200, 0.12) !important;
   }
 }
 
 
 /* Search box styling */
 .DocSearch-Button {
-  background: rgba(20, 184, 166, 0.1) !important;
-  border: 1px solid rgba(20, 184, 166, 0.2) !important;
-  color: #cbd5e1 !important;
+  background: rgba(134, 247, 200, 0.06) !important;
+  border: 1px solid rgba(134, 247, 200, 0.18) !important;
+  border-radius: 3px !important;
+  color: #b8c7c2 !important;
 }
 
 .DocSearch-Button:hover {
-  background: rgba(20, 184, 166, 0.15) !important;
-  border-color: rgba(20, 184, 166, 0.3) !important;
+  background: rgba(134, 247, 200, 0.1) !important;
+  border-color: rgba(134, 247, 200, 0.35) !important;
 }
 
 .DocSearch-Button-Placeholder {
-  color: #94a3b8 !important;
+  color: #91a39d !important;
 }
 
 .DocSearch-Button-Key {
-  background: rgba(20, 184, 166, 0.2) !important;
-  border: 1px solid rgba(20, 184, 166, 0.3) !important;
-  color: #cbd5e1 !important;
+  background: rgba(134, 247, 200, 0.1) !important;
+  border: 1px solid rgba(134, 247, 200, 0.2) !important;
+  color: #b8c7c2 !important;
   box-shadow: none !important;
 }
 
 /* Ensure all navbar elements inherit the dark theme */
 .navbar * {
-  color: #cbd5e1;
+  color: #b8c7c2;
 }
 
 /* Light/dark mode toggle button styling */
 .navbar__items--right button[class*="toggle"] {
-  color: #cbd5e1 !important;
+  color: #b8c7c2 !important;
 }
 
 .navbar__items--right button[class*="toggle"]:hover {
-  background: rgba(20, 184, 166, 0.1) !important;
+  background: rgba(134, 247, 200, 0.08) !important;
 }
 
 /* Footer enhancements */
 .footer {
-  background: linear-gradient(180deg, #0f172a 0%, #0a0e27 100%) !important;
+  background: #050c0a !important;
   border-top: 1px solid var(--border-color);
 }
 
 /* Documentation page styling */
 [data-theme='dark'] {
-  /* Main content area */
-  --ifm-background-color: #0f172a !important;
-  --ifm-background-surface-color: #1e293b !important;
-  
-  /* Sidebar */
-  --ifm-sidebar-background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
-  --ifm-menu-color: #cbd5e1 !important;
-  --ifm-menu-color-active: #2dd4bf !important;
-  --ifm-menu-color-background-active: rgba(20, 184, 166, 0.1) !important;
-  --ifm-menu-color-background-hover: rgba(20, 184, 166, 0.05) !important;
-  
-  /* Breadcrumbs */
-  --ifm-breadcrumb-color-active: #2dd4bf !important;
+  --ifm-background-color: #091410 !important;
+  --ifm-background-surface-color: #0d211b !important;
+
+  --ifm-sidebar-background: #07110f !important;
+  --ifm-menu-color: #b8c7c2 !important;
+  --ifm-menu-color-active: #86f7c8 !important;
+  --ifm-menu-color-background-active: rgba(134, 247, 200, 0.1) !important;
+  --ifm-menu-color-background-hover: rgba(134, 247, 200, 0.05) !important;
+
+  --ifm-breadcrumb-color-active: #86f7c8 !important;
   --ifm-breadcrumb-item-background-active: transparent !important;
-  
-  /* Table of contents */
-  --ifm-toc-border-color: rgba(20, 184, 166, 0.1) !important;
-  --ifm-toc-link-color: #94a3b8 !important;
-  
-  /* Links */
-  --ifm-link-color: #2dd4bf !important;
-  --ifm-link-hover-color: #5eead4 !important;
-  
-  /* Cards and surfaces */
-  --ifm-card-background-color: #1e293b !important;
-  --ifm-card-border-radius: 0.75rem !important;
-  
-  /* Headings */
-  --ifm-heading-color: #f1f5f9 !important;
+
+  --ifm-toc-border-color: rgba(134, 247, 200, 0.12) !important;
+  --ifm-toc-link-color: #91a39d !important;
+
+  --ifm-link-color: #86f7c8 !important;
+  --ifm-link-hover-color: #b2fddd !important;
+
+  --ifm-card-background-color: #0d211b !important;
+  --ifm-card-border-radius: 3px !important;
+
+  --ifm-heading-color: #f4f4ec !important;
   --ifm-heading-font-weight: 600 !important;
-  
-  /* Pagination */
-  --ifm-pagination-nav-color-hover: rgba(20, 184, 166, 0.1) !important;
+
+  --ifm-pagination-nav-color-hover: rgba(134, 247, 200, 0.1) !important;
 }
 
 /* Sidebar styling */
 [data-theme='dark'] .theme-doc-sidebar-container {
-  background: linear-gradient(180deg, #1a1f3a 0%, #0f172a 100%) !important;
-  border-right: 1px solid rgba(20, 184, 166, 0.1) !important;
+  background: #07110f !important;
+  border-right: 1px solid rgba(134, 247, 200, 0.12) !important;
 }
 
 [data-theme='dark'] .menu__link {
-  color: #cbd5e1 !important;
+  color: #aebeb9 !important;
+  border-radius: 3px;
   transition: all 0.2s ease;
 }
 
 [data-theme='dark'] .menu__link:hover {
-  color: #f1f5f9 !important;
-  background: rgba(20, 184, 166, 0.05) !important;
+  color: #f4f4ec !important;
+  background: rgba(134, 247, 200, 0.05) !important;
 }
 
 [data-theme='dark'] .menu__link--active {
-  color: #2dd4bf !important;
-  background: rgba(20, 184, 166, 0.1) !important;
+  color: #86f7c8 !important;
+  background: rgba(134, 247, 200, 0.1) !important;
   font-weight: 600;
 }
 
 [data-theme='dark'] .menu__link--sublist-caret:after {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23cbd5e1" d="M6 4l4 4-4 4z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%2386f7c8" d="M6 4l4 4-4 4z"/></svg>') !important;
 }
 
 /* Breadcrumbs styling */
 [data-theme='dark'] .breadcrumbs__link {
-  color: #94a3b8 !important;
+  color: #91a39d !important;
   transition: color 0.2s ease;
 }
 
 [data-theme='dark'] .breadcrumbs__link:hover {
-  color: #2dd4bf !important;
+  color: #86f7c8 !important;
 }
 
 [data-theme='dark'] .breadcrumbs__item--active .breadcrumbs__link {
-  color: #2dd4bf !important;
-  background: linear-gradient(135deg, #14b8a6 0%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #86f7c8 !important;
 }
 
 /* Main content area */
@@ -481,117 +480,120 @@ div[class*="codeScrollWrapper"] > div {
 }
 
 [data-theme='dark'] article {
-  color: #cbd5e1 !important;
+  color: #c4d1cd !important;
 }
 
 [data-theme='dark'] article h1 {
-  color: #f1f5f9 !important;
+  color: #f4f4ec !important;
   font-size: 2.5rem !important;
-  font-weight: 700 !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.04em;
   margin-bottom: 1.5rem !important;
 }
 
 [data-theme='dark'] article h2 {
-  color: #e2e8f0 !important;
+  color: #eef3ef !important;
   font-size: 1.875rem !important;
   font-weight: 600 !important;
   margin-top: 2rem !important;
   margin-bottom: 1rem !important;
   padding-bottom: 0.5rem !important;
-  border-bottom: 1px solid rgba(20, 184, 166, 0.1) !important;
+  border-bottom: 1px solid rgba(134, 247, 200, 0.12) !important;
 }
 
 [data-theme='dark'] article h3 {
-  color: #e2e8f0 !important;
+  color: #eef3ef !important;
   font-size: 1.5rem !important;
   font-weight: 600 !important;
 }
 
 /* Table of contents on the right */
 [data-theme='dark'] .table-of-contents {
-  border-left: 1px solid rgba(20, 184, 166, 0.1) !important;
+  border-left: 1px solid rgba(134, 247, 200, 0.12) !important;
 }
 
 [data-theme='dark'] .table-of-contents__link {
-  color: #94a3b8 !important;
+  color: #91a39d !important;
   transition: all 0.2s ease;
 }
 
 [data-theme='dark'] .table-of-contents__link:hover {
-  color: #cbd5e1 !important;
+  color: #dbe6e2 !important;
 }
 
 [data-theme='dark'] .table-of-contents__link--active {
-  color: #2dd4bf !important;
+  color: #86f7c8 !important;
   font-weight: 600;
 }
 
 /* Pagination (Next/Previous) */
 [data-theme='dark'] .pagination-nav__link {
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%) !important;
-  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+  background: rgba(134, 247, 200, 0.04) !important;
+  border: 1px solid rgba(134, 247, 200, 0.12) !important;
+  border-radius: 3px;
   transition: all 0.3s ease;
 }
 
 [data-theme='dark'] .pagination-nav__link:hover {
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%) !important;
-  border-color: #14b8a6 !important;
+  background: rgba(134, 247, 200, 0.08) !important;
+  border-color: #86f7c8 !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+  box-shadow: 0 4px 18px rgba(134, 247, 200, 0.1);
 }
 
 [data-theme='dark'] .pagination-nav__label {
-  color: #94a3b8 !important;
+  color: #91a39d !important;
   font-size: 0.875rem !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
 }
 
 [data-theme='dark'] .pagination-nav__sublabel {
-  color: #e2e8f0 !important;
+  color: #eef3ef !important;
   font-weight: 600 !important;
 }
 
 /* Code blocks in docs */
 [data-theme='dark'] article pre {
-  background: #1e293b !important;
-  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+  background: #091914 !important;
+  border: 1px solid rgba(134, 247, 200, 0.13) !important;
+  border-radius: 3px !important;
 }
 
 /* Inline code */
 [data-theme='dark'] article code {
-  background: rgba(20, 184, 166, 0.15) !important;
-  color: #a5f3fc !important;
+  background: rgba(134, 247, 200, 0.1) !important;
+  color: #b2fddd !important;
   padding: 0.2rem 0.4rem !important;
-  border-radius: 0.25rem !important;
+  border-radius: 3px !important;
   font-weight: 500 !important;
 }
 
 /* Blockquotes */
 [data-theme='dark'] blockquote {
-  background: linear-gradient(90deg, rgba(20, 184, 166, 0.1) 0%, transparent 100%) !important;
-  border-left: 4px solid #14b8a6 !important;
-  color: #cbd5e1 !important;
+  background: linear-gradient(90deg, rgba(134, 247, 200, 0.08) 0%, transparent 100%) !important;
+  border-left: 4px solid #86f7c8 !important;
+  color: #c4d1cd !important;
 }
 
 /* Tables */
 [data-theme='dark'] table {
-  border: 1px solid rgba(20, 184, 166, 0.1) !important;
+  border: 1px solid rgba(134, 247, 200, 0.12) !important;
 }
 
 [data-theme='dark'] table thead {
-  background: rgba(20, 184, 166, 0.05) !important;
+  background: rgba(134, 247, 200, 0.06) !important;
 }
 
 [data-theme='dark'] table th {
-  border-color: rgba(20, 184, 166, 0.1) !important;
-  color: #e2e8f0 !important;
+  border-color: rgba(134, 247, 200, 0.12) !important;
+  color: #eef3ef !important;
   font-weight: 600 !important;
 }
 
 [data-theme='dark'] table td {
-  border-color: rgba(20, 184, 166, 0.1) !important;
-  color: #cbd5e1 !important;
+  border-color: rgba(134, 247, 200, 0.12) !important;
+  color: #c4d1cd !important;
 }
 
 /* Button hover and focus effects */
@@ -601,11 +603,11 @@ div[class*="codeScrollWrapper"] > div {
 
 .button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+  box-shadow: 0 4px 15px rgba(134, 247, 200, 0.18);
 }
 
 .button:focus-visible {
-  outline: 3px solid #14b8a6;
+  outline: 3px solid #86f7c8;
   outline-offset: 2px;
 }
 
@@ -673,14 +675,14 @@ div[class*="codeScrollWrapper"] > div {
     margin-right: 0;
   }
   
-  /* Add spacing between TUNIT text and burger menu */
+  /* Keep brand clear of mobile menu toggle. */
   .navbar__brand {
     margin-right: auto !important;
     padding-right: 1.5rem !important;
   }
   
   .navbar__title {
-    margin-left: 0.5rem !important;
+    margin-left: 0 !important;
   }
   
   
@@ -691,15 +693,12 @@ div[class*="codeScrollWrapper"] > div {
   }
   
   .navbar-sidebar .navbar__title {
-    font-family: 'Orbitron', 'Space Grotesk', monospace !important;
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.05em !important;
-    text-transform: uppercase !important;
-    background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 50%, #0ea5e9 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #f4f4ec !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 1.15rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.04em !important;
+    text-transform: none !important;
   }
   
   /* Fix dark mode toggle in mobile menu */

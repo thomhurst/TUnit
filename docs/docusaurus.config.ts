@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'TUnit',
-  tagline: 'Welcome to TUnit Testing',
+  tagline: 'Fast, modern .NET testing',
   favicon: 'img/tunit-favicon.svg',
 
   // Set the production url of your site here
@@ -101,7 +101,6 @@ const config: Config = {
         },
       },
     },
-    // Replace with your project's social card
     algolia: {
       // The application ID provided by Algolia
       appId: 'RLNKZO4OTO',
@@ -110,7 +109,7 @@ const config: Config = {
 
       indexName: 'tunit',
     },
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/tunit-social-card.png',
     navbar: {
       title: 'TUnit',
       logo: {
