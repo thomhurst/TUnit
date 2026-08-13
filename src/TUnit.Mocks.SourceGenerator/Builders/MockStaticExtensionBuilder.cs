@@ -8,6 +8,11 @@ internal static class MockStaticExtensionBuilder
 {
     public static string Build(MockTypeModel model)
     {
+        if (model.HasStaticAbstractMembers)
+        {
+            return BuildCore(model, WriteMockOfMethods);
+        }
+
         if (!MockWrapperTypeBuilder.CanGenerateWrapper(model))
             return string.Empty;
 
@@ -41,17 +46,7 @@ internal static class MockStaticExtensionBuilder
     {
         return BuildCore(model, (writer, mockableType, visibility) =>
         {
-            using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock()"))
-            {
-                writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>();");
-            }
-
-            writer.AppendLine();
-
-            using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock(global::TUnit.Mocks.MockBehavior behavior)"))
-            {
-                writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
-            }
+            WriteMockOfMethods(writer, mockableType, visibility);
 
             foreach (var ctor in model.Constructors)
             {
@@ -84,6 +79,21 @@ internal static class MockStaticExtensionBuilder
                 }
             }
         });
+    }
+
+    private static void WriteMockOfMethods(CodeWriter writer, string mockableType, string visibility)
+    {
+        using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock()"))
+        {
+            writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>();");
+        }
+
+        writer.AppendLine();
+
+        using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock(global::TUnit.Mocks.MockBehavior behavior)"))
+        {
+            writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior);");
+        }
     }
 
     private static string BuildCore(MockTypeModel model, Action<CodeWriter, string, string> writeBody)
