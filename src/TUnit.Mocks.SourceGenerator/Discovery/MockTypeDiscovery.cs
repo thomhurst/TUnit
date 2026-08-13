@@ -633,6 +633,7 @@ internal static class MockTypeDiscovery
         // The attribute constructor argument is typeof(T)
         var compilation = context.SemanticModel.Compilation;
         var compilationAssembly = compilation.Assembly;
+        var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>();
         foreach (var attr in context.Attributes)
         {
             if (attr.AttributeClass?.Name is not ("GenerateMockAttribute" or "GenerateMock"))
@@ -662,15 +663,12 @@ internal static class MockTypeDiscovery
             var location = attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
                            ?? context.TargetNode.GetLocation();
             var sourceLocation = MockSourceLocation.From(location);
-            var requests = ImmutableArray.CreateBuilder<MockGenerationRequest>(models.Length);
             foreach (var model in models)
             {
                 requests.Add(new MockGenerationRequest(model, sourceLocation));
             }
-
-            return requests.MoveToImmutable();
         }
 
-        return ImmutableArray<MockGenerationRequest>.Empty;
+        return requests.ToImmutable();
     }
 }

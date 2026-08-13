@@ -8,6 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" />
     <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
     <PackageReference Include="Microsoft.Kiota.Abstractions" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
