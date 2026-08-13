@@ -213,13 +213,6 @@
   overflow-x: auto;
 }
 
-.page .code code {
-  padding: 0 !important;
-  border: 0;
-  background: transparent !important;
-  color: inherit !important;
-}
-
 .resultRow {
   display: grid;
   grid-template-columns: auto 1fr auto;

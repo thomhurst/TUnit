@@ -1,5 +1,6 @@
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
+import {Highlight, themes} from 'prism-react-renderer';
 
 import styles from './index.module.css';
 
@@ -70,6 +71,24 @@ function Arrow(): JSX.Element {
   return <span aria-hidden="true">↗</span>;
 }
 
+function SyntaxPreview(): JSX.Element {
+  return (
+    <Highlight code={testCode} language="csharp" theme={themes.dracula}>
+      {({className, tokens, getLineProps, getTokenProps}) => (
+        <pre className={`${className} ${styles.code}`}>
+          {tokens.map((line, lineIndex) => (
+            <div key={lineIndex} {...getLineProps({line})}>
+              {line.map((token, tokenIndex) => (
+                <span key={tokenIndex} {...getTokenProps({token})} />
+              ))}
+            </div>
+          ))}
+        </pre>
+      )}
+    </Highlight>
+  );
+}
+
 function Hero(): JSX.Element {
   return (
     <header className={styles.hero}>
@@ -111,7 +130,7 @@ function Hero(): JSX.Element {
               <span>CheckoutTests.cs</span>
               <span className={styles.windowStatus}>TUnit</span>
             </div>
-            <pre className={styles.code}><code>{testCode}</code></pre>
+            <SyntaxPreview />
             <div className={styles.resultRow}>
               <div className={styles.resultIcon}>✓</div>
               <div>
