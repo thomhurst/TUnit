@@ -28,9 +28,10 @@ jobs:
           dotnet build -c Release -p:TestFramework=MSTEST
         working-directory: "tools/speed-comparison/UnifiedTests"
 
-      - name: Publish TUnit AOT
+      - name: Publish AOT
         run: |
           dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --use-current-runtime --output bin/Release-TUNIT-AOT/net10.0
+          dotnet publish -c Release -p:TestFramework=XUNIT3 -p:Aot=true --use-current-runtime --output bin/Release-XUNIT3-AOT/net10.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts

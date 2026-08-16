@@ -5,7 +5,7 @@ namespace UnifiedTests;
 
 [TestClass]
 #if XUNIT3
-public class SetupTeardownTests : IDisposable
+public class SetupTeardownTests : IAsyncLifetime
 #else
 public class SetupTeardownTests
 #endif
@@ -20,7 +20,7 @@ public class SetupTeardownTests
     [Before(Test)]
     public async Task Setup()
 #elif XUNIT3
-    public SetupTeardownTests()
+    public async ValueTask InitializeAsync()
 #elif NUNIT
     [SetUp]
     public async Task Setup()
@@ -31,13 +31,6 @@ public class SetupTeardownTests
     public async Task Setup()
 #endif
     {
-#if XUNIT3
-        SetupCore().GetAwaiter().GetResult();
-    }
-
-    private async Task SetupCore()
-    {
-#endif
         // Simulate expensive database connection initialization
         _databaseConnection = new byte[1024 * 100]; // 100KB allocation
         for (int i = 0; i < _databaseConnection.Length; i++)
@@ -67,7 +60,7 @@ public class SetupTeardownTests
     [After(Test)]
     public async Task Cleanup()
 #elif XUNIT3
-    public void Dispose()
+    public async ValueTask DisposeAsync()
 #elif NUNIT
     [TearDown]
     public async Task Cleanup()
@@ -78,13 +71,6 @@ public class SetupTeardownTests
     public async Task Cleanup()
 #endif
     {
-#if XUNIT3
-        CleanupCore().GetAwaiter().GetResult();
-    }
-
-    private async Task CleanupCore()
-    {
-#endif
         // Simulate database connection cleanup
         if (_databaseConnection != null)
         {
