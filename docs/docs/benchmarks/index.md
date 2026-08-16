@@ -7,9 +7,9 @@ sidebar_position: 1
 # Performance Benchmarks
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-08-09** from the latest CI run.
+These benchmarks were automatically generated on **2026-08-16** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.302
+**Environment:** Ubuntu Latest • .NET SDK 10.0.400
 :::
 
 ## 🚀 Runtime Benchmarks
@@ -37,8 +37,8 @@ These benchmarks compare TUnit against the most popular .NET testing frameworks:
 
 | Framework | Version Tested |
 |-----------|----------------|
-| **TUnit** | 1.64.0 |
-| **xUnit v3** | 3.2.2 |
+| **TUnit** | 1.65.0 |
+| **xUnit v3** | 4.0.0 |
 | **NUnit** | 4.6.1 |
 | **MSTest** | 4.3.3 |
 
@@ -56,8 +56,8 @@ The benchmarks measure real-world testing patterns:
 ### Environment
 
 - **OS**: Ubuntu Latest (GitHub Actions)
-- **Runtime**: .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
-- **SDK**: .NET SDK 10.0.302
+- **Runtime**: .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v4
+- **SDK**: .NET SDK 10.0.400
 - **Hardware**: GitHub Actions Standard Runner (Ubuntu)
 - **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
 
@@ -80,4 +80,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-08-09T00:23:17.061Z*
+*Last generated: 2026-08-16T00:18:52.420Z*
