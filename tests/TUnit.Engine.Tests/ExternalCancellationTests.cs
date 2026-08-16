@@ -62,6 +62,7 @@ public class ExternalCancellationTests(TestMode testMode) : InvokableTestBase(te
                     "--reflection"
                 ])
                 .WithWorkingDirectory(testProject.DirectoryName!)
+                .WithEnvironmentVariables(EnvironmentVariables.DisableHtmlReporterForChildProcess())
                 .WithValidation(CommandResultValidation.None),
 
             // Skip AOT mode for external cancellation (only test in CI)

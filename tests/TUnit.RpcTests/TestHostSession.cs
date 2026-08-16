@@ -56,6 +56,12 @@ internal sealed class TestHostSession : IAsyncDisposable
                 "--server",
                 "--client-port", port.ToString()
             ])
+            // The RPC host is an implementation detail of this suite. Keep the outer
+            // TUnit.RpcTests report, but do not generate or upload one per RPC run.
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
+            })
             .WithStandardOutputPipe(PipeTarget.Null)
             .WithStandardErrorPipe(PipeTarget.Null)
             .WithValidation(CommandResultValidation.None)
