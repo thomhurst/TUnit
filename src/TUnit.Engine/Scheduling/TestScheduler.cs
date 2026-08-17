@@ -92,42 +92,10 @@ internal sealed class TestScheduler : ITestScheduler
         if (_logger.IsDebugEnabled)
             await _logger.LogDebugAsync($"Scheduling execution of {testList.Count} tests").ConfigureAwait(false);
 
-        var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
-
-        var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
-
-        foreach (var (test, dependencyChain) in circularDependencies)
-        {
-            // Format the error message to match the expected format
-            var simpleNames = new List<string>(dependencyChain.Count);
-            foreach (var t in dependencyChain)
-            {
-                simpleNames.Add($"{t.Metadata.TestClassType.Name}.{t.Metadata.TestMethodName}");
-            }
-
-            var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
-            var exception = new CircularDependencyException(errorMessage);
-
-            // Mark all tests in the dependency chain as failed
-            foreach (var chainTest in dependencyChain)
-            {
-                if (testsInCircularDependencies.Add(chainTest))
-                {
-                    _testStateManager.MarkCircularDependencyFailed(chainTest, exception);
-                    TestSessionContext.Current?.MarkFailure();
-                    await _messageBus.Failed(chainTest.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
-                }
-            }
-        }
-
-        var executableTests = new List<AbstractExecutableTest>(testList.Count);
-        foreach (var test in testList)
-        {
-            if (!testsInCircularDependencies.Contains(test))
-            {
-                executableTests.Add(test);
-            }
-        }
+        var hasDependencies = HasDependencies(testList);
+        var executableTests = hasDependencies
+            ? await RemoveCircularDependenciesAsync(testList, cancellationToken).ConfigureAwait(false)
+            : testList;
 
         if (executableTests.Count == 0)
         {
@@ -144,7 +112,10 @@ internal sealed class TestScheduler : ITestScheduler
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
-        MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+        if (hasDependencies)
+        {
+            MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+        }
 
         // Suites with no global [NotInParallel] tests skip the runtime exclusion
         // lock entirely. Once enabled, the flag is monotonic — dynamic batches
@@ -169,6 +140,72 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         return true;
+    }
+
+    private static bool HasDependencies(List<AbstractExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            if (test.Dependencies.Length != 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async Task<List<AbstractExecutableTest>> RemoveCircularDependenciesAsync(
+        List<AbstractExecutableTest> tests,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(tests, cancellationToken);
+        HashSet<AbstractExecutableTest>? testsInCircularDependencies = null;
+
+        foreach (var (_, dependencyChain) in circularDependencies)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            testsInCircularDependencies ??= [];
+
+            var simpleNames = new List<string>(dependencyChain.Count);
+            foreach (var test in dependencyChain)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                simpleNames.Add($"{test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}");
+            }
+
+            var exception = new CircularDependencyException(
+                $"DependsOn Conflict: {string.Join(" > ", simpleNames)}");
+
+            foreach (var test in dependencyChain)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (testsInCircularDependencies.Add(test))
+                {
+                    _testStateManager.MarkCircularDependencyFailed(test, exception);
+                    TestSessionContext.Current?.MarkFailure();
+                    await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+                }
+            }
+        }
+
+        if (testsInCircularDependencies is null)
+        {
+            return tests;
+        }
+
+        var executableTests = new List<AbstractExecutableTest>(tests.Count - testsInCircularDependencies.Count);
+        foreach (var test in tests)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!testsInCircularDependencies.Contains(test))
+            {
+                executableTests.Add(test);
+            }
+        }
+
+        return executableTests;
     }
 
     #if NET
@@ -354,6 +391,13 @@ internal sealed class TestScheduler : ITestScheduler
 
                 if (!visitedDependencyTargets.Add(dependencyTarget))
                 {
+                    continue;
+                }
+
+                if (dependencyTarget.State == TestState.Failed &&
+                    dependencyTarget.Result?.Exception is CircularDependencyException)
+                {
+                    dependencyTarget.ExecutionTask ??= Task.CompletedTask;
                     continue;
                 }
 

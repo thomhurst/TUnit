@@ -1,6 +1,8 @@
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Scheduling;
+using TUnit.Engine.Services;
 using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.UnitTests;
@@ -113,6 +115,40 @@ public class TestRunnerTests
         await Assert.That(leaf.RequiresExecutionDedup).IsTrue();
     }
 
+    [Test, Timeout(5_000)]
+    public async Task ExecuteTestAsync_WithFailedCircularDependency_SkipsDependentWithoutReentry(
+        CancellationToken cancellationToken)
+    {
+        var runner = CreateRunner(out var coordinator);
+        var firstCycleTest = CreateTest("cycle-a");
+        var secondCycleTest = CreateTest("cycle-b", [firstCycleTest]);
+        firstCycleTest.Dependencies = [CreateResolvedDependency(secondCycleTest)];
+        var dependent = CreateTest("dependent", [firstCycleTest]);
+        var exception = new CircularDependencyException("cycle");
+        var stateManager = new TestStateManager();
+        stateManager.MarkCircularDependencyFailed(firstCycleTest, exception);
+        stateManager.MarkCircularDependencyFailed(secondCycleTest, exception);
+        TestScheduler.MarkDependencyRelatedTestsForExecutionDedup([dependent]);
+
+        await runner.ExecuteTestAsync(dependent, cancellationToken);
+
+        await Assert.That(dependent.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(coordinator.GetCallCount(firstCycleTest)).IsEqualTo(0);
+        await Assert.That(coordinator.GetCallCount(secondCycleTest)).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task DetectCircularDependencies_WithCancelledToken_Throws()
+    {
+        var detector = new CircularDependencyDetector();
+        var test = CreateTest("test");
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        await Assert.That(() => detector.DetectCircularDependencies([test], cancellationTokenSource.Token))
+            .ThrowsExactly<OperationCanceledException>();
+    }
+
     private static TestRunner CreateRunner(out FakeTestCoordinator coordinator)
     {
         coordinator = new FakeTestCoordinator();
@@ -160,15 +196,17 @@ public class TestRunnerTests
             Metadata = metadata,
             Arguments = [],
             Context = context,
-            Dependencies = dependencies?.Select(dependency => new ResolvedDependency
-            {
-                Test = dependency,
-                Metadata = TestDependency.FromMethodName(dependency.Metadata.TestMethodName)
-            }).ToArray() ?? []
+            Dependencies = dependencies?.Select(CreateResolvedDependency).ToArray() ?? []
         };
 
         return test;
     }
+
+    private static ResolvedDependency CreateResolvedDependency(AbstractExecutableTest dependency) => new()
+    {
+        Test = dependency,
+        Metadata = TestDependency.FromMethodName(dependency.Metadata.TestMethodName)
+    };
 
     private static TestMetadata<TestRunnerTests> CreateMetadata(string testId)
     {

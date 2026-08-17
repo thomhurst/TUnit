@@ -61,11 +61,13 @@ internal sealed class TestGroupingService : ITestGroupingService
     {
         var testCount = tests is ICollection<AbstractExecutableTest> collection ? collection.Count : 0;
         var testsWithKeys = new List<(AbstractExecutableTest Test, TestSortKey Key)>(testCount > 0 ? testCount : 16);
+        var hasParallelConstraints = false;
         foreach (var test in tests)
         {
             NotInParallelConstraint? notInParallelConstraint = null;
             foreach (var constraint in test.Context.ParallelConstraints)
             {
+                hasParallelConstraints = true;
                 if (constraint is NotInParallelConstraint nip)
                 {
                     notInParallelConstraint = nip;
@@ -93,6 +95,24 @@ internal sealed class TestGroupingService : ITestGroupingService
 
             return a.Key.NotInParallelOrder.CompareTo(b.Key.NotInParallelOrder);
         });
+
+        if (!hasParallelConstraints && traceMessages is null)
+        {
+            var orderedTests = new AbstractExecutableTest[testsWithKeys.Count];
+            for (var i = 0; i < testsWithKeys.Count; i++)
+            {
+                orderedTests[i] = testsWithKeys[i].Test;
+            }
+
+            return new GroupedTests
+            {
+                Parallel = orderedTests,
+                NotInParallel = [],
+                KeyedNotInParallel = [],
+                ParallelGroups = [],
+                ConstrainedParallelGroups = []
+            };
+        }
 
         var estimatedCount = testsWithKeys.Count;
         var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>(estimatedCount / 4);
