@@ -49,7 +49,7 @@ internal sealed class TestArgumentRegistrationService
         await _objectLifecycleService.RegisterArgumentsAsync(
             classArguments,
             testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
+            testDetails.MethodMetadata,
             testContext.InternalEvents,
             cancellationToken).ConfigureAwait(false);
 
@@ -57,7 +57,7 @@ internal sealed class TestArgumentRegistrationService
         await _objectLifecycleService.RegisterArgumentsAsync(
             methodArguments,
             testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
+            testDetails.MethodMetadata,
             testContext.InternalEvents,
             cancellationToken).ConfigureAwait(false);
 
