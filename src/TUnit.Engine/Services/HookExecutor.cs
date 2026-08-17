@@ -294,7 +294,7 @@ internal sealed class HookExecutor
             return;
         }
 
-        lock (assemblyContext)
+        lock (assemblyContext.SynchronizationLock)
         {
             if (assemblyContext.Activity is not null)
             {
@@ -324,7 +324,7 @@ internal sealed class HookExecutor
     private void FinishAssemblyActivity(Assembly assembly, bool hasErrors)
     {
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
-        lock (assemblyContext)
+        lock (assemblyContext.SynchronizationLock)
         {
             var activity = assemblyContext.Activity;
             if (activity is null)
@@ -488,7 +488,7 @@ internal sealed class HookExecutor
             return;
         }
 
-        lock (classContext)
+        lock (classContext.SynchronizationLock)
         {
             if (classContext.Activity is not null)
             {
@@ -525,7 +525,7 @@ internal sealed class HookExecutor
         Type testClass, bool hasErrors)
     {
         var classContext = _contextProvider.GetOrCreateClassContext(testClass);
-        lock (classContext)
+        lock (classContext.SynchronizationLock)
         {
             var activity = classContext.Activity;
             if (activity is null)

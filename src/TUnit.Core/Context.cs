@@ -78,7 +78,13 @@ public abstract class Context : IContext, IDisposable
     }
 
 #if NET
-    internal System.Diagnostics.Activity? Activity { get; set; }
+    private System.Diagnostics.Activity? _activity;
+
+    internal System.Diagnostics.Activity? Activity
+    {
+        get => Volatile.Read(ref _activity);
+        set => Volatile.Write(ref _activity, value);
+    }
     internal ExecutionContext? ExecutionContext { get; private set; }
 #endif
 

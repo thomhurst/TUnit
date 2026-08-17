@@ -202,17 +202,10 @@ internal class TestExecutor
             }
 #endif
 
-            Func<Assembly, ValueTask<List<Exception>>>? cancelledAfterAssemblyFactory = null;
-            if (hasAssemblyHooks)
-            {
-                cancelledAfterAssemblyFactory = _cancelledAfterAssemblyHookFactory;
-            }
-#if NET
-            else if (_hookExecutor.HasAssemblyActivity(testAssembly))
-            {
-                cancelledAfterAssemblyFactory = _finishAssemblyActivityFactory;
-            }
-#endif
+            var cancelledAfterAssemblyFactory = ResolveAssemblyCleanup(
+                testAssembly,
+                hasAssemblyHooks,
+                _cancelledAfterAssemblyHookFactory);
 
             if (cancelledAfterAssemblyFactory is not null)
             {
@@ -241,17 +234,10 @@ internal class TestExecutor
             }
 #endif
 
-            AfterClassExecutor? cancelledAfterClassFactory = null;
-            if (hasClassHooks)
-            {
-                cancelledAfterClassFactory = _cancelledAfterClassHookFactory;
-            }
-#if NET
-            else if (_hookExecutor.HasClassActivity(testClass))
-            {
-                cancelledAfterClassFactory = _finishClassActivityFactory;
-            }
-#endif
+            var cancelledAfterClassFactory = ResolveClassCleanup(
+                testClass,
+                hasClassHooks,
+                _cancelledAfterClassHookFactory);
 
             if (cancelledAfterClassFactory is not null)
             {
@@ -652,6 +638,47 @@ internal class TestExecutor
         }
     }
 
+    private Func<Assembly, ValueTask<List<Exception>>>? ResolveAssemblyCleanup(
+        Assembly assembly,
+        bool hasHooks,
+        Func<Assembly, ValueTask<List<Exception>>> hookFactory)
+    {
+        if (hasHooks)
+        {
+            return hookFactory;
+        }
+
+#if NET
+        if (_hookExecutor.HasAssemblyActivity(assembly))
+        {
+            return _finishAssemblyActivityFactory;
+        }
+#endif
+
+        return null;
+    }
+
+    private AfterClassExecutor? ResolveClassCleanup(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass,
+        bool hasHooks,
+        AfterClassExecutor hookFactory)
+    {
+        if (hasHooks)
+        {
+            return hookFactory;
+        }
+
+#if NET
+        if (_hookExecutor.HasClassActivity(testClass))
+        {
+            return _finishClassActivityFactory;
+        }
+#endif
+
+        return null;
+    }
+
     [UnconditionalSuppressMessage("Trimming", "IL2067",
         Justification = "The class cleanup delegate is invoked with the annotated testClass parameter.")]
     internal async Task<List<Exception>?> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
@@ -670,17 +697,10 @@ internal class TestExecutor
 
         if (flags.ShouldExecuteAfterClass)
         {
-            AfterClassExecutor? afterClassFactory = null;
-            if (HasClassHooks(testClass))
-            {
-                afterClassFactory = type => _hookExecutor.ExecuteAfterClassHooksAsync(type, cancellationToken);
-            }
-#if NET
-            else if (_hookExecutor.HasClassActivity(testClass))
-            {
-                afterClassFactory = _finishClassActivityFactory;
-            }
-#endif
+            var afterClassFactory = ResolveClassCleanup(
+                testClass,
+                HasClassHooks(testClass),
+                type => _hookExecutor.ExecuteAfterClassHooksAsync(type, cancellationToken));
 
             if (afterClassFactory is not null)
             {
@@ -695,17 +715,10 @@ internal class TestExecutor
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            Func<Assembly, ValueTask<List<Exception>>>? afterAssemblyFactory = null;
-            if (HasAssemblyHooks(testAssembly))
-            {
-                afterAssemblyFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken);
-            }
-#if NET
-            else if (_hookExecutor.HasAssemblyActivity(testAssembly))
-            {
-                afterAssemblyFactory = _finishAssemblyActivityFactory;
-            }
-#endif
+            var afterAssemblyFactory = ResolveAssemblyCleanup(
+                testAssembly,
+                HasAssemblyHooks(testAssembly),
+                assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken));
 
             if (afterAssemblyFactory is not null)
             {
