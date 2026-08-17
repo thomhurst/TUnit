@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { type JSX, useState, useMemo } from 'react';
 import styles from './styles.module.css';
 
 interface Assertion {

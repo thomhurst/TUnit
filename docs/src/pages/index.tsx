@@ -1,6 +1,7 @@
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import {Highlight, themes} from 'prism-react-renderer';
+import type {JSX} from 'react';
 
 import styles from './index.module.css';
 
