@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.PropertyInjection;
 
 namespace TUnit.Engine.Services;
 
@@ -21,30 +22,46 @@ internal sealed class TestArgumentRegistrationService
     /// for proper reference counting and disposal tracking.
     /// Property values are resolved lazily during test execution (not during discovery).
     /// </summary>
-    public async ValueTask RegisterTestArgumentsAsync(TestContext testContext, CancellationToken cancellationToken = default)
+    public ValueTask RegisterTestArgumentsAsync(TestContext testContext, CancellationToken cancellationToken = default)
     {
         TestContext.Current = testContext;
 
-        var classArguments = testContext.Metadata.TestDetails.TestClassArguments;
-        var methodArguments = testContext.Metadata.TestDetails.TestMethodArguments;
+        var testDetails = testContext.Metadata.TestDetails;
+        if (testDetails.TestClassArguments.Length == 0 &&
+            testDetails.TestMethodArguments.Length == 0 &&
+            !PropertyInjectionCache.GetOrCreatePlan(testDetails.ClassType).HasProperties)
+        {
+            return default;
+        }
+
+        return RegisterTestArgumentsCoreAsync(testContext, testDetails, cancellationToken);
+    }
+
+    private async ValueTask RegisterTestArgumentsCoreAsync(
+        TestContext testContext,
+        TestDetails testDetails,
+        CancellationToken cancellationToken)
+    {
+        var classArguments = testDetails.TestClassArguments;
+        var methodArguments = testDetails.TestMethodArguments;
 
         // Register class arguments (property injection during registration)
         await _objectLifecycleService.RegisterArgumentsAsync(
             classArguments,
             testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
+            testDetails.MethodMetadata,
             testContext.InternalEvents,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         // Register method arguments
         await _objectLifecycleService.RegisterArgumentsAsync(
             methodArguments,
             testContext.StateBag.Items,
-            testContext.Metadata.TestDetails.MethodMetadata,
+            testDetails.MethodMetadata,
             testContext.InternalEvents,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         // Register the test for tracking (inject properties and track objects for disposal)
-        await _objectLifecycleService.RegisterTestAsync(testContext, cancellationToken);
+        await _objectLifecycleService.RegisterTestAsync(testContext, cancellationToken).ConfigureAwait(false);
     }
 }
