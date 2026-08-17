@@ -32,6 +32,7 @@ public class FSharp
                 ]
             )
             .WithWorkingDirectory(testProject.DirectoryName!)
+            .WithEnvironmentVariables(EnvironmentVariables.DisableHtmlReporterForChildProcess())
             .WithValidation(CommandResultValidation.None);
 
         var result = await command.ExecuteBufferedAsync();

@@ -110,10 +110,7 @@ public abstract class InvokableTestBase(TestMode testMode)
 
     private static Dictionary<string, string?> BuildEnvironmentVariables(RunOptions runOptions)
     {
-        var environmentVariables = new Dictionary<string, string?>
-        {
-            ["TUNIT_DISABLE_HTML_REPORTER"] = "true"
-        };
+        var environmentVariables = EnvironmentVariables.DisableHtmlReporterForChildProcess();
 
         foreach (var (key, value) in runOptions.EnvironmentVariables)
         {

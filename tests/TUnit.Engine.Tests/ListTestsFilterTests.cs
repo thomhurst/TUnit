@@ -73,7 +73,7 @@ public class ListTestsFilterTests
         return await Cli.Wrap(executable.FullName)
             .WithArguments(arguments)
             .WithWorkingDirectory(testProject.DirectoryName!)
-            .WithEnvironmentVariables(new Dictionary<string, string?> { ["TUNIT_DISABLE_HTML_REPORTER"] = "true" })
+            .WithEnvironmentVariables(EnvironmentVariables.DisableHtmlReporterForChildProcess())
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync();
     }

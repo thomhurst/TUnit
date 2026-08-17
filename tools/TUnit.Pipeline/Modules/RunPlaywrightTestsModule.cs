@@ -34,6 +34,7 @@ public class RunPlaywrightTestsModule : TestBaseModule
                 EnvironmentVariables = new Dictionary<string, string?>
                 {
                     ["DISABLE_GITHUB_REPORTER"] = "true",
+                    ["TUNIT_DISABLE_HTML_REPORTER"] = "true",
                 }
             }
         ));
