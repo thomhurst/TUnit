@@ -37,16 +37,12 @@ internal class TestExecutor
     private readonly Func<CancellationToken, ValueTask> _beforeTestSessionHookFactory;
     private readonly Func<Assembly, CancellationToken, ValueTask> _beforeAssemblyHookFactory;
     private readonly Func<Assembly, ValueTask<List<Exception>>> _cancelledAfterAssemblyHookFactory;
-    private readonly AfterClassExecutor _cancelledAfterClassHookFactory;
+    private readonly AfterClassCleanup _cancelledAfterClassHookCleanup;
 #if NET
     private readonly Func<Assembly, ValueTask<List<Exception>>> _finishAssemblyActivityFactory;
-    private readonly AfterClassExecutor _finishClassActivityFactory;
+    private readonly AfterClassCleanup _finishClassActivityCleanup;
 #endif
 
-    [UnconditionalSuppressMessage("Trimming", "IL2067",
-        Justification = "Class cleanup delegates receive only test-class types annotated at the execution boundary.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2111",
-        Justification = "The annotated class cleanup method is captured as a delegate, not accessed through reflection.")]
     public TestExecutor(
         HookExecutor hookExecutor,
         TestLifecycleCoordinator lifecycleCoordinator,
@@ -65,10 +61,10 @@ internal class TestExecutor
         _beforeTestSessionHookFactory = ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct);
         _beforeAssemblyHookFactory = (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct);
         _cancelledAfterAssemblyHookFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None);
-        _cancelledAfterClassHookFactory = testClass => _hookExecutor.ExecuteAfterClassHooksAsync(testClass, CancellationToken.None);
+        _cancelledAfterClassHookCleanup = AfterClassCleanup.ForHooks(_hookExecutor, CancellationToken.None);
 #if NET
         _finishAssemblyActivityFactory = _hookExecutor.FinishAssemblyActivityAsync;
-        _finishClassActivityFactory = _hookExecutor.FinishClassActivityAsync;
+        _finishClassActivityCleanup = AfterClassCleanup.ForActivity(_hookExecutor);
 #endif
     }
 
@@ -234,18 +230,18 @@ internal class TestExecutor
             }
 #endif
 
-            var cancelledAfterClassFactory = ResolveClassCleanup(
+            var cancelledAfterClassCleanup = ResolveClassCleanup(
                 testClass,
                 hasClassHooks,
-                _cancelledAfterClassHookFactory);
+                _cancelledAfterClassHookCleanup);
 
-            if (cancelledAfterClassFactory is not null)
+            if (cancelledAfterClassCleanup is { } cleanup)
             {
                 // Register lifecycle cleanup on cancellation.
                 _afterHookPairTracker.RegisterAfterClassHook(
                     testClass,
                     cancellationToken,
-                    cancelledAfterClassFactory);
+                    cleanup);
             }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
@@ -658,21 +654,21 @@ internal class TestExecutor
         return null;
     }
 
-    private AfterClassExecutor? ResolveClassCleanup(
+    private AfterClassCleanup? ResolveClassCleanup(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         bool hasHooks,
-        AfterClassExecutor hookFactory)
+        AfterClassCleanup hookCleanup)
     {
         if (hasHooks)
         {
-            return hookFactory;
+            return hookCleanup;
         }
 
 #if NET
         if (_hookExecutor.HasClassActivity(testClass))
         {
-            return _finishClassActivityFactory;
+            return _finishClassActivityCleanup;
         }
 #endif
 
@@ -697,15 +693,15 @@ internal class TestExecutor
 
         if (flags.ShouldExecuteAfterClass)
         {
-            var afterClassFactory = ResolveClassCleanup(
+            var afterClassCleanup = ResolveClassCleanup(
                 testClass,
                 HasClassHooks(testClass),
-                type => _hookExecutor.ExecuteAfterClassHooksAsync(type, cancellationToken));
+                AfterClassCleanup.ForHooks(_hookExecutor, cancellationToken));
 
-            if (afterClassFactory is not null)
+            if (afterClassCleanup is { } cleanup)
             {
                 // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
-                var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, afterClassFactory).ConfigureAwait(false);
+                var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, cleanup).ConfigureAwait(false);
                 if (classExceptions.Count > 0)
                 {
                     (exceptions ??= []).AddRange(classExceptions);

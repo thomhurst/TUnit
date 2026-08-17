@@ -5,9 +5,46 @@ using TUnit.Core.Data;
 
 namespace TUnit.Engine.Services;
 
-internal delegate ValueTask<List<Exception>> AfterClassExecutor(
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-    Type testClass);
+internal readonly struct AfterClassCleanup
+{
+    private readonly HookExecutor _hookExecutor;
+    private readonly CancellationToken _cancellationToken;
+    private readonly bool _finishActivity;
+
+    private AfterClassCleanup(
+        HookExecutor hookExecutor,
+        CancellationToken cancellationToken,
+        bool finishActivity)
+    {
+        _hookExecutor = hookExecutor;
+        _cancellationToken = cancellationToken;
+        _finishActivity = finishActivity;
+    }
+
+    internal static AfterClassCleanup ForHooks(
+        HookExecutor hookExecutor,
+        CancellationToken cancellationToken)
+        => new(hookExecutor, cancellationToken, finishActivity: false);
+
+#if NET
+    internal static AfterClassCleanup ForActivity(HookExecutor hookExecutor)
+        => new(hookExecutor, CancellationToken.None, finishActivity: true);
+#endif
+
+    internal ValueTask<List<Exception>> ExecuteAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+    {
+#if NET
+        if (_finishActivity)
+        {
+            return _hookExecutor.FinishClassActivityAsync(testClass);
+        }
+#endif
+
+        return _hookExecutor.ExecuteAfterClassHooksAsync(testClass, _cancellationToken);
+    }
+}
 
 /// <summary>
 /// Responsible for ensuring After hooks run even when tests are cancelled.
@@ -114,7 +151,7 @@ internal sealed class AfterHookPairTracker
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
         CancellationToken sessionCancellationToken,
-        AfterClassExecutor afterHookExecutor)
+        AfterClassCleanup cleanup)
     {
         if (!_classHookRegistered.Add(testClass))
         {
@@ -123,9 +160,9 @@ internal sealed class AfterHookPairTracker
 
         var registration = sessionCancellationToken.Register(static state =>
         {
-            var (pairTracker, testClass, afterHookExecutor) = ((AfterHookPairTracker, Type, AfterClassExecutor))state!;
-            _ = pairTracker.GetOrCreateAfterClassTask(testClass, afterHookExecutor);
-        }, (this, testClass, afterHookExecutor));
+            var (pairTracker, testClass, cleanup) = ((AfterHookPairTracker, Type, AfterClassCleanup))state!;
+            _ = pairTracker.GetOrCreateAfterClassTask(testClass, cleanup);
+        }, (this, testClass, cleanup));
 
         _registrations.Add(registration);
     }
@@ -180,7 +217,7 @@ internal sealed class AfterHookPairTracker
     public ValueTask<List<Exception>> GetOrCreateAfterClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass,
-        AfterClassExecutor taskFactory)
+        AfterClassCleanup cleanup)
     {
         // Lock-free fast path avoids allocating a closure on the common cache-hit case.
         if (_afterClassTasks.TryGetValue(testClass, out var existingTask))
@@ -193,7 +230,7 @@ internal sealed class AfterHookPairTracker
         // behind a shared lock.
         var task = _afterClassTasks.GetOrAdd(
             testClass,
-            _ => taskFactory(testClass).AsTask());
+            _ => cleanup.ExecuteAsync(testClass).AsTask());
         return new ValueTask<List<Exception>>(task);
     }
 
