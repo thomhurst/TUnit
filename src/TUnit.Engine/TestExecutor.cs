@@ -1,9 +1,11 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Helpers;
@@ -20,6 +22,9 @@ namespace TUnit.Engine;
 /// </summary>
 internal class TestExecutor
 {
+    private static readonly ConcurrentDictionary<Type, bool> ClassHookPresenceCache = new();
+    private static readonly ConcurrentDictionary<Type, bool> TestHookPresenceCache = new();
+
     private readonly HookExecutor _hookExecutor;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly BeforeHookTaskCache _beforeHookTaskCache;
@@ -31,6 +36,12 @@ internal class TestExecutor
     // each time (these run on the hot path and the factory is only invoked on the first cache miss).
     private readonly Func<CancellationToken, ValueTask> _beforeTestSessionHookFactory;
     private readonly Func<Assembly, CancellationToken, ValueTask> _beforeAssemblyHookFactory;
+    private readonly Func<Assembly, ValueTask<List<Exception>>> _cancelledAfterAssemblyHookFactory;
+    private readonly AfterClassCleanup _cancelledAfterClassHookCleanup;
+#if NET
+    private readonly Func<Assembly, ValueTask<List<Exception>>> _finishAssemblyActivityFactory;
+    private readonly AfterClassCleanup _finishClassActivityCleanup;
+#endif
 
     public TestExecutor(
         HookExecutor hookExecutor,
@@ -49,6 +60,12 @@ internal class TestExecutor
 
         _beforeTestSessionHookFactory = ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct);
         _beforeAssemblyHookFactory = (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct);
+        _cancelledAfterAssemblyHookFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None);
+        _cancelledAfterClassHookCleanup = AfterClassCleanup.ForHooks(_hookExecutor, CancellationToken.None);
+#if NET
+        _finishAssemblyActivityFactory = _hookExecutor.FinishAssemblyActivityAsync;
+        _finishClassActivityCleanup = AfterClassCleanup.ForActivity(_hookExecutor);
+#endif
     }
 
 
@@ -59,6 +76,11 @@ internal class TestExecutor
     /// </summary>
     public async ValueTask EnsureTestSessionHooksExecutedAsync(CancellationToken cancellationToken)
     {
+        if (!HasTestSessionHooks())
+        {
+            return;
+        }
+
         // Get or create and cache Before hooks - these run only once
         await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
             _beforeTestSessionHookFactory,
@@ -82,9 +104,12 @@ internal class TestExecutor
     {
         var testClass = test.Metadata.TestClassType;
 
-        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
-            _beforeTestSessionHookFactory,
-            cancellationToken).ConfigureAwait(false);
+        if (HasTestSessionHooks())
+        {
+            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
+                _beforeTestSessionHookFactory,
+                cancellationToken).ConfigureAwait(false);
+        }
 
         // Flow AsyncLocals captured by BeforeTestSession into the BeforeAssembly hook, and likewise
         // BeforeAssembly into BeforeClass. This mirrors the RestoreExecutionContext chain in
@@ -92,14 +117,34 @@ internal class TestExecutor
         // it re-applies the same captured contexts).
         test.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-        await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
-            testClass.Assembly,
-            _beforeAssemblyHookFactory,
-            cancellationToken).ConfigureAwait(false);
+        var hasAssemblyHooks = HasAssemblyHooks(testClass.Assembly);
+        if (hasAssemblyHooks)
+        {
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
+                testClass.Assembly,
+                _beforeAssemblyHookFactory,
+                cancellationToken).ConfigureAwait(false);
+        }
+#if NET
+        else
+        {
+            _hookExecutor.TryStartAssemblyActivity(testClass.Assembly);
+        }
+#endif
 
         test.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-        await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+        var hasClassHooks = HasClassHooks(testClass);
+        if (hasClassHooks)
+        {
+            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+        }
+#if NET
+        else
+        {
+            _hookExecutor.TryStartClassActivity(testClass);
+        }
+#endif
 
         // Note: the caller (TestCoordinator) restores ClassContext.RestoreExecutionContext() right
         // before constructing the instance so AsyncLocals captured by BeforeAssembly/BeforeClass flow
@@ -117,13 +162,20 @@ internal class TestExecutor
 
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
+        var hasSessionHooks = HasTestSessionHooks();
+        var hasAssemblyHooks = HasAssemblyHooks(testAssembly);
+        var hasClassHooks = HasClassHooks(testClass);
+        var hasTestHooks = HasTestHooks(testClass);
 
         Exception? capturedException = null;
         Exception? hookException = null;
 
         try
         {
-            await EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
+            if (hasSessionHooks)
+            {
+                await EnsureTestSessionHooksExecutedAsync(cancellationToken).ConfigureAwait(false);
+            }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
                 executableTest.Context,
@@ -132,16 +184,33 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
-                testAssembly,
-                _beforeAssemblyHookFactory,
-                cancellationToken).ConfigureAwait(false);
+            if (hasAssemblyHooks)
+            {
+                await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
+                    testAssembly,
+                    _beforeAssemblyHookFactory,
+                    cancellationToken).ConfigureAwait(false);
+            }
+#if NET
+            else
+            {
+                _hookExecutor.TryStartAssemblyActivity(testAssembly);
+            }
+#endif
 
-            // Register After Assembly hook to run on cancellation (guarantees cleanup)
-            _afterHookPairTracker.RegisterAfterAssemblyHook(
+            var cancelledAfterAssemblyFactory = ResolveAssemblyCleanup(
                 testAssembly,
-                cancellationToken,
-                (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None));
+                hasAssemblyHooks,
+                _cancelledAfterAssemblyHookFactory);
+
+            if (cancelledAfterAssemblyFactory is not null)
+            {
+                // Register lifecycle cleanup on cancellation.
+                _afterHookPairTracker.RegisterAfterAssemblyHook(
+                    testAssembly,
+                    cancellationToken,
+                    cancelledAfterAssemblyFactory);
+            }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
                 executableTest.Context,
@@ -150,10 +219,30 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+            if (hasClassHooks)
+            {
+                await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+            }
+#if NET
+            else
+            {
+                _hookExecutor.TryStartClassActivity(testClass);
+            }
+#endif
 
-            // Register After Class hook to run on cancellation (guarantees cleanup)
-            _afterHookPairTracker.RegisterAfterClassHook(testClass, _hookExecutor, cancellationToken);
+            var cancelledAfterClassCleanup = ResolveClassCleanup(
+                testClass,
+                hasClassHooks,
+                _cancelledAfterClassHookCleanup);
+
+            if (cancelledAfterClassCleanup is { } cleanup)
+            {
+                // Register lifecycle cleanup on cancellation.
+                _afterHookPairTracker.RegisterAfterClassHook(
+                    testClass,
+                    cancellationToken,
+                    cleanup);
+            }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
                 executableTest.Context,
@@ -224,7 +313,10 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            if (hasTestHooks)
+            {
+                await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            }
 
             // Late stage test start receivers run after instance-level hooks (default behavior)
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken, EventReceiverStage.Late).ConfigureAwait(false);
@@ -343,7 +435,9 @@ internal class TestExecutor
             // Early stage test end receivers run before instance-level hooks
             var earlyStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Early).ConfigureAwait(false);
 
-            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false);
+            var hookExceptions = hasTestHooks
+                ? await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, CancellationToken.None).ConfigureAwait(false)
+                : [];
 
             // Late stage test end receivers run after instance-level hooks (default behavior)
             var lateStageExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, CancellationToken.None, EventReceiverStage.Late).ConfigureAwait(false);
@@ -403,6 +497,54 @@ internal class TestExecutor
         {
             ExceptionDispatchInfo.Capture(hookException).Throw();
         }
+    }
+
+    private static bool HasTestSessionHooks()
+        => !Sources.BeforeTestSessionHooks.IsEmpty || !Sources.AfterTestSessionHooks.IsEmpty;
+
+    private static bool HasAssemblyHooks(Assembly assembly)
+        => !Sources.BeforeEveryAssemblyHooks.IsEmpty ||
+           !Sources.AfterEveryAssemblyHooks.IsEmpty ||
+           Sources.BeforeAssemblyHooks.ContainsKey(assembly) ||
+           Sources.AfterAssemblyHooks.ContainsKey(assembly);
+
+    private static bool HasClassHooks(Type testClass)
+        => !Sources.BeforeEveryClassHooks.IsEmpty ||
+           !Sources.AfterEveryClassHooks.IsEmpty ||
+           ClassHookPresenceCache.GetOrAdd(testClass, static type =>
+               HasHooksInHierarchy(type, Sources.BeforeClassHooks, Sources.AfterClassHooks));
+
+    private static bool HasTestHooks(Type testClass)
+        => !Sources.BeforeEveryTestHooks.IsEmpty ||
+           !Sources.AfterEveryTestHooks.IsEmpty ||
+           TestHookPresenceCache.GetOrAdd(testClass, static type =>
+               HasHooksInHierarchy(type, Sources.BeforeTestHooks, Sources.AfterTestHooks));
+
+    private static bool HasHooksInHierarchy<TBeforeHook, TAfterHook>(
+        Type type,
+        ConcurrentDictionary<Type, ConcurrentBag<LazyHookEntry<TBeforeHook>>> beforeHooks,
+        ConcurrentDictionary<Type, ConcurrentBag<LazyHookEntry<TAfterHook>>> afterHooks)
+        where TBeforeHook : HookMethod
+        where TAfterHook : HookMethod
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            if (beforeHooks.ContainsKey(current) || afterHooks.ContainsKey(current))
+            {
+                return true;
+            }
+
+            if (current is { IsGenericType: true, IsGenericTypeDefinition: false })
+            {
+                var genericDefinition = current.GetGenericTypeDefinition();
+                if (beforeHooks.ContainsKey(genericDefinition) || afterHooks.ContainsKey(genericDefinition))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 #if NET
@@ -492,6 +634,49 @@ internal class TestExecutor
         }
     }
 
+    private Func<Assembly, ValueTask<List<Exception>>>? ResolveAssemblyCleanup(
+        Assembly assembly,
+        bool hasHooks,
+        Func<Assembly, ValueTask<List<Exception>>> hookFactory)
+    {
+        if (hasHooks)
+        {
+            return hookFactory;
+        }
+
+#if NET
+        if (_hookExecutor.HasAssemblyActivity(assembly))
+        {
+            return _finishAssemblyActivityFactory;
+        }
+#endif
+
+        return null;
+    }
+
+    private AfterClassCleanup? ResolveClassCleanup(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass,
+        bool hasHooks,
+        AfterClassCleanup hookCleanup)
+    {
+        if (hasHooks)
+        {
+            return hookCleanup;
+        }
+
+#if NET
+        if (_hookExecutor.HasClassActivity(testClass))
+        {
+            return _finishClassActivityCleanup;
+        }
+#endif
+
+        return null;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "The class cleanup delegate is invoked with the annotated testClass parameter.")]
     internal async Task<List<Exception>?> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
@@ -508,23 +693,39 @@ internal class TestExecutor
 
         if (flags.ShouldExecuteAfterClass)
         {
-            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
-            var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
-            if (classExceptions.Count > 0)
+            var afterClassCleanup = ResolveClassCleanup(
+                testClass,
+                HasClassHooks(testClass),
+                AfterClassCleanup.ForHooks(_hookExecutor, cancellationToken));
+
+            if (afterClassCleanup is { } cleanup)
             {
-                (exceptions ??= []).AddRange(classExceptions);
+                // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+                var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, cleanup).ConfigureAwait(false);
+                if (classExceptions.Count > 0)
+                {
+                    (exceptions ??= []).AddRange(classExceptions);
+                }
             }
         }
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
-            var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
+            var afterAssemblyFactory = ResolveAssemblyCleanup(
                 testAssembly,
-                (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
-            if (assemblyExceptions.Count > 0)
+                HasAssemblyHooks(testAssembly),
+                assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken));
+
+            if (afterAssemblyFactory is not null)
             {
-                (exceptions ??= []).AddRange(assemblyExceptions);
+                // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+                var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
+                    testAssembly,
+                    afterAssemblyFactory).ConfigureAwait(false);
+                if (assemblyExceptions.Count > 0)
+                {
+                    (exceptions ??= []).AddRange(assemblyExceptions);
+                }
             }
         }
 

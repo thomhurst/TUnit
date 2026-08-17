@@ -27,6 +27,7 @@ public class AssemblyHookContext : Context
     public required Assembly Assembly { get; init; }
 
     private readonly Lock _lock = new();
+    internal Lock SynchronizationLock => _lock;
     private readonly List<ClassHookContext> _testClasses = [];
     private TestContext[]? _cachedAllTests;
 

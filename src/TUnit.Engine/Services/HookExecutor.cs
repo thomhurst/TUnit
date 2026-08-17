@@ -162,17 +162,7 @@ internal sealed class HookExecutor
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
 
 #if NET
-        if (TUnitActivitySource.LifecycleSource.HasListeners())
-        {
-            var sessionActivity = _contextProvider.TestSessionContext.Activity;
-            assemblyContext.Activity = TUnitActivitySource.StartLifecycleActivity(
-                TUnitActivitySource.SpanTestAssembly,
-                System.Diagnostics.ActivityKind.Internal,
-                sessionActivity?.Context ?? default,
-                [
-                    new(TUnitActivitySource.TagAssemblyName, assembly.GetName().Name)
-                ]);
-        }
+        TryStartAssemblyActivity(assembly);
 #endif
 
         // Execute BeforeEvery(Assembly) hooks first (global hooks run before specific hooks)
@@ -291,25 +281,67 @@ internal sealed class HookExecutor
     }
 
 #if NET
-    private void FinishAssemblyActivity(Assembly assembly, bool hasErrors)
+    internal void TryStartAssemblyActivity(Assembly assembly)
     {
-        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
-        var activity = assemblyContext.Activity;
-
-        if (activity is null)
+        if (!TUnitActivitySource.LifecycleSource.HasListeners())
         {
             return;
         }
 
-        activity.SetTag(TUnitActivitySource.TagTestCount, assemblyContext.TestCount);
-
-        if (hasErrors)
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        if (assemblyContext.Activity is not null)
         {
-            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+            return;
         }
 
-        TUnitActivitySource.StopActivity(activity);
-        assemblyContext.Activity = null;
+        lock (assemblyContext.SynchronizationLock)
+        {
+            if (assemblyContext.Activity is not null)
+            {
+                return;
+            }
+
+            var sessionActivity = _contextProvider.TestSessionContext.Activity;
+            assemblyContext.Activity = TUnitActivitySource.StartLifecycleActivity(
+                TUnitActivitySource.SpanTestAssembly,
+                System.Diagnostics.ActivityKind.Internal,
+                sessionActivity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagAssemblyName, assembly.GetName().Name)
+                ]);
+        }
+    }
+
+    internal bool HasAssemblyActivity(Assembly assembly)
+        => _contextProvider.GetOrCreateAssemblyContext(assembly).Activity is not null;
+
+    internal ValueTask<List<Exception>> FinishAssemblyActivityAsync(Assembly assembly)
+    {
+        FinishAssemblyActivity(assembly, hasErrors: false);
+        return new ValueTask<List<Exception>>([]);
+    }
+
+    private void FinishAssemblyActivity(Assembly assembly, bool hasErrors)
+    {
+        var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
+        lock (assemblyContext.SynchronizationLock)
+        {
+            var activity = assemblyContext.Activity;
+            if (activity is null)
+            {
+                return;
+            }
+
+            activity.SetTag(TUnitActivitySource.TagTestCount, assemblyContext.TestCount);
+
+            if (hasErrors)
+            {
+                activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+            }
+
+            TUnitActivitySource.StopActivity(activity);
+            assemblyContext.Activity = null;
+        }
     }
 #endif
 
@@ -320,18 +352,7 @@ internal sealed class HookExecutor
         var classContext = _contextProvider.GetOrCreateClassContext(testClass);
 
 #if NET
-        if (TUnitActivitySource.LifecycleSource.HasListeners())
-        {
-            var assemblyActivity = classContext.AssemblyContext.Activity;
-            classContext.Activity = TUnitActivitySource.StartLifecycleActivity(
-                TUnitActivitySource.SpanTestSuite,
-                System.Diagnostics.ActivityKind.Internal,
-                assemblyActivity?.Context ?? default,
-                [
-                    new(TUnitActivitySource.TagTestSuiteName, testClass.Name),
-                    new(TUnitActivitySource.TagClassNamespace, testClass.Namespace)
-                ]);
-        }
+        TryStartClassActivity(testClass);
 #endif
 
         // Execute BeforeEvery(Class) hooks first (global hooks run before specific hooks)
@@ -452,27 +473,76 @@ internal sealed class HookExecutor
     }
 
 #if NET
+    internal void TryStartClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+    {
+        if (!TUnitActivitySource.LifecycleSource.HasListeners())
+        {
+            return;
+        }
+
+        var classContext = _contextProvider.GetOrCreateClassContext(testClass);
+        if (classContext.Activity is not null)
+        {
+            return;
+        }
+
+        lock (classContext.SynchronizationLock)
+        {
+            if (classContext.Activity is not null)
+            {
+                return;
+            }
+
+            var assemblyActivity = classContext.AssemblyContext.Activity;
+            classContext.Activity = TUnitActivitySource.StartLifecycleActivity(
+                TUnitActivitySource.SpanTestSuite,
+                System.Diagnostics.ActivityKind.Internal,
+                assemblyActivity?.Context ?? default,
+                [
+                    new(TUnitActivitySource.TagTestSuiteName, testClass.Name),
+                    new(TUnitActivitySource.TagClassNamespace, testClass.Namespace)
+                ]);
+        }
+    }
+
+    internal bool HasClassActivity(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+        => _contextProvider.GetOrCreateClassContext(testClass).Activity is not null;
+
+    internal ValueTask<List<Exception>> FinishClassActivityAsync(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass)
+    {
+        FinishClassActivity(testClass, hasErrors: false);
+        return new ValueTask<List<Exception>>([]);
+    }
+
     private void FinishClassActivity(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, bool hasErrors)
     {
         var classContext = _contextProvider.GetOrCreateClassContext(testClass);
-        var activity = classContext.Activity;
-
-        if (activity is null)
+        lock (classContext.SynchronizationLock)
         {
-            return;
+            var activity = classContext.Activity;
+            if (activity is null)
+            {
+                return;
+            }
+
+            activity.SetTag(TUnitActivitySource.TagTestCount, classContext.TestCount);
+
+            if (hasErrors)
+            {
+                activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+            }
+
+            TUnitActivitySource.StopActivity(activity);
+            classContext.Activity = null;
         }
-
-        activity.SetTag(TUnitActivitySource.TagTestCount, classContext.TestCount);
-
-        if (hasErrors)
-        {
-            activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
-        }
-
-        TUnitActivitySource.StopActivity(activity);
-        classContext.Activity = null;
     }
 #endif
 

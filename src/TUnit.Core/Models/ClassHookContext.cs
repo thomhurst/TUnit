@@ -29,6 +29,7 @@ public class ClassHookContext : Context
     public required Type ClassType { get; init; }
 
     private readonly Lock _lock = new();
+    internal Lock SynchronizationLock => _lock;
     private readonly HashSet<TestContext> _testSet = new(ReferenceEqualityComparer<TestContext>.Instance);
     private readonly List<TestContext> _tests = [];
 
