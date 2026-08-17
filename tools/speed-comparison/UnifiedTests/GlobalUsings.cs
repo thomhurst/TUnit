@@ -24,6 +24,7 @@ global using TestAttribute = Xunit.FactAttribute;
 global using DataDrivenTestAttribute = Xunit.TheoryAttribute;
 global using TestDataAttribute = Xunit.InlineDataAttribute;
 global using TestDataSourceAttribute = Xunit.MemberDataAttribute;
+[assembly: Xunit.v3.Parallelization(Mode = Xunit.Sdk.ParallelMode.All)]
 #elif NUNIT
 global using TestAttribute = NUnit.Framework.TestAttribute;
 global using DataDrivenTestAttribute = NUnit.Framework.TestAttribute;

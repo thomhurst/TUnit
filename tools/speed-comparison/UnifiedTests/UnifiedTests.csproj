@@ -45,7 +45,8 @@
 
     <!-- xUnit v3 packages -->
     <ItemGroup Condition="'$(TestFramework)' == 'XUNIT3'">
-        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.v3" Condition="'$(Aot)' != 'true'" />
+        <PackageReference Include="xunit.v3.aot" Condition="'$(Aot)' == 'true'" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -63,13 +64,13 @@
         <PackageReference Include="MSTest" />
     </ItemGroup>
 
-    <!-- AOT and SingleFile configurations for TUnit -->
-    <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(Aot)' == 'true'">
+    <!-- AOT and SingleFile configurations -->
+    <PropertyGroup Condition="'$(Aot)' == 'true'">
         <PublishAot>true</PublishAot>
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(SingleFile)' == 'true'">
+    <PropertyGroup Condition="'$(SingleFile)' == 'true'">
         <PublishSingleFile>true</PublishSingleFile>
         <SelfContained>true</SelfContained>
     </PropertyGroup>
