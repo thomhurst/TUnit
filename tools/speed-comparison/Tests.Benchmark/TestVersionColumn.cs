@@ -11,7 +11,7 @@ public class TestVersionColumn
         Console.WriteLine("Testing Framework Version Column:");
         Console.WriteLine("---------------------------------");
 
-        var methods = new[] { "TUnit", "TUnit_AOT", "Build_TUnit", "xUnit", "Build_xUnit", "xUnit3", "xUnit3_AOT", "Build_xUnit3", "NUnit", "Build_NUnit", "MSTest", "Build_MSTest" };
+        string[] methods = ["TUnit", "TUnit_AOT", "Build_TUnit", "xUnit", "Build_xUnit", "xUnit3", "xUnit3_AOT", "Build_xUnit3", "NUnit", "Build_NUnit", "MSTest", "Build_MSTest"];
 
         foreach (var method in methods)
         {
