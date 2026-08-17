@@ -92,41 +92,55 @@ internal sealed class TestScheduler : ITestScheduler
         if (_logger.IsDebugEnabled)
             await _logger.LogDebugAsync($"Scheduling execution of {testList.Count} tests").ConfigureAwait(false);
 
-        var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
+        var singleTest = testList.Count == 1 &&
+                         testList[0].Dependencies.Length == 0 &&
+                         testList[0].Context.ParallelConstraints.Count == 0
+            ? testList[0]
+            : null;
 
-        var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
-
-        foreach (var (test, dependencyChain) in circularDependencies)
+        List<AbstractExecutableTest> executableTests;
+        if (singleTest is null)
         {
-            // Format the error message to match the expected format
-            var simpleNames = new List<string>(dependencyChain.Count);
-            foreach (var t in dependencyChain)
+            var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
+
+            var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
+
+            foreach (var (test, dependencyChain) in circularDependencies)
             {
-                simpleNames.Add($"{t.Metadata.TestClassType.Name}.{t.Metadata.TestMethodName}");
+                // Format the error message to match the expected format
+                var simpleNames = new List<string>(dependencyChain.Count);
+                foreach (var t in dependencyChain)
+                {
+                    simpleNames.Add($"{t.Metadata.TestClassType.Name}.{t.Metadata.TestMethodName}");
+                }
+
+                var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
+                var exception = new CircularDependencyException(errorMessage);
+
+                // Mark all tests in the dependency chain as failed
+                foreach (var chainTest in dependencyChain)
+                {
+                    if (testsInCircularDependencies.Add(chainTest))
+                    {
+                        _testStateManager.MarkCircularDependencyFailed(chainTest, exception);
+                        TestSessionContext.Current?.MarkFailure();
+                        await _messageBus.Failed(chainTest.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+                    }
+                }
             }
 
-            var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
-            var exception = new CircularDependencyException(errorMessage);
-
-            // Mark all tests in the dependency chain as failed
-            foreach (var chainTest in dependencyChain)
+            executableTests = new List<AbstractExecutableTest>(testList.Count);
+            foreach (var test in testList)
             {
-                if (testsInCircularDependencies.Add(chainTest))
+                if (!testsInCircularDependencies.Contains(test))
                 {
-                    _testStateManager.MarkCircularDependencyFailed(chainTest, exception);
-                    TestSessionContext.Current?.MarkFailure();
-                    await _messageBus.Failed(chainTest.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+                    executableTests.Add(test);
                 }
             }
         }
-
-        var executableTests = new List<AbstractExecutableTest>(testList.Count);
-        foreach (var test in testList)
+        else
         {
-            if (!testsInCircularDependencies.Contains(test))
-            {
-                executableTests.Add(test);
-            }
+            executableTests = testList;
         }
 
         if (executableTests.Count == 0)
@@ -141,18 +155,25 @@ internal sealed class TestScheduler : ITestScheduler
         // Track static properties for disposal at session end
         _staticPropertyHandler.TrackStaticProperties();
 
-        // Group tests by their parallel constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+        if (singleTest is not null)
+        {
+            await ExecuteSingleTestAsync(singleTest, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            // Group tests by their parallel constraints
+            var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
-        MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+            MarkDependencyRelatedTestsForExecutionDedup(executableTests);
 
-        // Suites with no global [NotInParallel] tests skip the runtime exclusion
-        // lock entirely. Once enabled, the flag is monotonic — dynamic batches
-        // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
-        MarkGlobalNotInParallelTests(groupedTests);
+            // Suites with no global [NotInParallel] tests skip the runtime exclusion
+            // lock entirely. Once enabled, the flag is monotonic — dynamic batches
+            // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
+            MarkGlobalNotInParallelTests(groupedTests);
 
-        // Execute tests according to their grouping
-        await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+            // Execute tests according to their grouping
+            await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+        }
 
         var sessionHookExceptions = await _afterHookPairTracker.GetOrCreateAfterTestSessionTask(
             () => _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false) ?? [];
@@ -184,6 +205,21 @@ internal sealed class TestScheduler : ITestScheduler
         await ExecuteAllPhasesAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
         // Mark the queue as complete and wait for remaining dynamic tests to finish
+        _dynamicTestQueue.Complete();
+        await dynamicTestProcessingTask.ConfigureAwait(false);
+    }
+
+    #if NET
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
+    private async Task ExecuteSingleTestAsync(
+        AbstractExecutableTest test,
+        CancellationToken cancellationToken)
+    {
+        var dynamicTestProcessingTask = ProcessDynamicTestQueueAsync(cancellationToken);
+
+        await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
+
         _dynamicTestQueue.Complete();
         await dynamicTestProcessingTask.ConfigureAwait(false);
     }
