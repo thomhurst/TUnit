@@ -13,10 +13,10 @@ namespace TUnit.Engine;
 
 internal sealed class TestDiscoveryResult
 {
-    public IEnumerable<AbstractExecutableTest> Tests { get; }
+    public List<AbstractExecutableTest> Tests { get; }
     public ExecutionContext? ExecutionContext { get; }
 
-    public TestDiscoveryResult(IEnumerable<AbstractExecutableTest> tests, ExecutionContext? executionContext)
+    public TestDiscoveryResult(List<AbstractExecutableTest> tests, ExecutionContext? executionContext)
     {
         Tests = tests;
         ExecutionContext = executionContext;
@@ -114,10 +114,12 @@ internal sealed class TestDiscoveryService : IDataProducer
             filteredTests = [.. testsToInclude];
         }
 
-        await _testFilterService.RegisterTestsAsync(filteredTests, isForExecution).ConfigureAwait(false);
+        var finalTests = filteredTests as List<AbstractExecutableTest> ?? [.. filteredTests];
+
+        await _testFilterService.RegisterTestsAsync(finalTests, isForExecution).ConfigureAwait(false);
 
         var finalContext = ExecutionContext.Capture();
-        return new TestDiscoveryResult(filteredTests, finalContext);
+        return new TestDiscoveryResult(finalTests, finalContext);
     }
 
     // Project the resolved tests onto their contexts into a pre-sized list.
