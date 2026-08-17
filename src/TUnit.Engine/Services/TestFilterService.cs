@@ -63,33 +63,38 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private async Task RegisterTest(AbstractExecutableTest test, bool isForExecution)
     {
-        var discoveredTest = new DiscoveredTest<object>
-        {
-            TestContext = test.Context
-        };
-
-        var registeredContext = new TestRegisteredContext(test.Context)
-        {
-            DiscoveredTest = discoveredTest
-        };
-
-        test.Context.InternalDiscoveredTest = discoveredTest;
+        var registeredReceivers = test.Context.GetTestRegisteredReceivers();
 
         // Invoke event receivers BEFORE argument registration so that SkipAttribute
         // and other ITestRegisteredEventReceiver implementations can set SkipReason
         // before any potentially expensive data source initialization occurs.
         // This is critical for derived SkipAttribute subclasses (e.g., skip-in-CI attributes)
         // that need to prevent ClassDataSource initialization when the test should be skipped.
-        foreach (var receiver in test.Context.GetTestRegisteredReceivers())
+        if (registeredReceivers.Length > 0)
         {
-            try
+            var discoveredTest = new DiscoveredTest<object>
             {
-                await receiver.OnTestRegistered(registeredContext);
-            }
-            catch (Exception ex)
+                TestContext = test.Context
+            };
+
+            var registeredContext = new TestRegisteredContext(test.Context)
             {
-                await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
-                throw;
+                DiscoveredTest = discoveredTest
+            };
+
+            test.Context.InternalDiscoveredTest = discoveredTest;
+
+            foreach (var receiver in registeredReceivers)
+            {
+                try
+                {
+                    await receiver.OnTestRegistered(registeredContext);
+                }
+                catch (Exception ex)
+                {
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                    throw;
+                }
             }
         }
 
