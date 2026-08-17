@@ -107,6 +107,19 @@ internal sealed class TestBuilderPipeline
     {
         var metadataList = testMetadata as IReadOnlyList<TestMetadata> ?? testMetadata.ToList();
 
+        if (metadataList.Count == 0)
+        {
+            return [];
+        }
+
+        if (metadataList.Count == 1)
+        {
+            return await BuildTestsForMetadataAsync(
+                metadataList[0],
+                buildingContext,
+                cancellationToken).ConfigureAwait(false);
+        }
+
         var testGroups = await ParallelMap.SelectParallelAsync(
             metadataList,
             metadata => BuildTestsForMetadataAsync(metadata, buildingContext, cancellationToken),

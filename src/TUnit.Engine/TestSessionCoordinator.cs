@@ -50,12 +50,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     }
 
     public async Task ExecuteTests(
-        IEnumerable<AbstractExecutableTest> tests,
+        List<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
         IMessageBus messageBus,
         CancellationToken cancellationToken)
     {
-        var testList = tests.ToList();
+        var testList = tests;
 
         // Expand any deferred-enumeration placeholders into their real cases before counting/scheduling,
         // so the children flow through the normal pipeline (correct hooks + lifecycle counting).

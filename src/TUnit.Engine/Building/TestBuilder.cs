@@ -999,6 +999,11 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static void PopulateDependencies(AbstractExecutableTest test, List<TestDetails> dependencies)
     {
+        if (test.Dependencies.Length == 0)
+        {
+            return;
+        }
+
         var collected = new HashSet<TestDetails>();
         var visited = new HashSet<AbstractExecutableTest>();
         CollectAllDependencies(test, collected, visited);

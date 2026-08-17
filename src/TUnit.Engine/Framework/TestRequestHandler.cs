@@ -63,13 +63,11 @@ internal sealed class TestRequestHandler : IRequestHandler
         }
 #endif
 
-        var allTests = discoveryResult.Tests.ToArray();
-
         // Skip sending Discovered messages during execution - they're only needed for discovery requests
         // This saves significant time and allocations when running tests
 
         await serviceProvider.TestSessionCoordinator.ExecuteTests(
-            allTests,
+            discoveryResult.Tests,
             request.Filter,
             context.MessageBus,
             context.CancellationToken);
