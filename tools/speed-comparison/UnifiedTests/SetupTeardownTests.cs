@@ -11,10 +11,10 @@ public class SetupTeardownTests
 #endif
 {
     // Simulated expensive state
-    private byte[] _databaseConnection;
-    private List<string> _tempFiles;
-    private HttpClient _httpClient;
-    private StringBuilder _logBuilder;
+    private byte[] _databaseConnection = null!;
+    private List<string> _tempFiles = null!;
+    private HttpClient _httpClient = null!;
+    private StringBuilder _logBuilder = null!;
 
 #if TUNIT
     [Before(Test)]
