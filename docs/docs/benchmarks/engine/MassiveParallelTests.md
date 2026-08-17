@@ -9,7 +9,7 @@ sidebar_position: 5
 > Parallel execution stress tests
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-08-16** from the latest CI run.
+This benchmark was automatically generated on **2026-08-17** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.400
 :::
@@ -18,11 +18,12 @@ This benchmark was automatically generated on **2026-08-16** from the latest CI 
 
 | Framework | Version | Mean | Median | StdDev |
 |-----------|---------|------|--------|--------|
-| **TUnit** | 1.65.0 | 566.0 ms | 565.5 ms | 41.65 ms |
-| NUnit | 4.6.1 | 1,151.5 ms | 1,136.4 ms | 40.23 ms |
-| MSTest | 4.3.3 | 3,028.4 ms | 3,010.5 ms | 33.46 ms |
-| xUnit3 | 4.0.0 | 3,101.4 ms | 3,095.4 ms | 27.30 ms |
-| **TUnit (AOT)** | 1.65.0 | 218.0 ms | 217.2 ms | 1.54 ms |
+| **TUnit** | 1.65.0 | 537.0 ms | 536.9 ms | 21.20 ms |
+| NUnit | 4.6.1 | 1,134.8 ms | 1,126.3 ms | 21.66 ms |
+| MSTest | 4.3.3 | 3,085.7 ms | 3,082.5 ms | 36.57 ms |
+| xUnit3 | 4.0.0 | 1,384.1 ms | 1,374.8 ms | 60.88 ms |
+| **TUnit (AOT)** | 1.65.0 | 221.8 ms | 221.8 ms | 1.14 ms |
+| xUnit3_AOT | 4.0.0 | 677.9 ms | 677.9 ms | 3.03 ms |
 
 ## 📈 Visual Comparison
 
@@ -59,14 +60,14 @@ This benchmark was automatically generated on **2026-08-16** from the latest CI 
 }}%%
 xychart-beta
   title "MassiveParallelTests Performance Comparison"
-  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT"]
-  y-axis "Time (ms)" 0 --> 3722
-  bar [566, 1151.5, 3028.4, 3101.4, 218]
+  x-axis ["TUnit", "NUnit", "MSTest", "xUnit3", "TUnit_AOT", "xUnit3_AOT"]
+  y-axis "Time (ms)" 0 --> 3703
+  bar [537, 1134.8, 3085.7, 1384.1, 221.8, 677.9]
 ```
 
 ## 🎯 Key Insights
 
-This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using identical test scenarios.
+This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3, xUnit3_AOT using identical test scenarios.
 
 ---
 
@@ -74,4 +75,4 @@ This benchmark compares TUnit's performance against NUnit, MSTest, xUnit3 using 
 View the [benchmarks overview](/docs/benchmarks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-08-16T00:18:52.418Z*
+*Last generated: 2026-08-17T16:25:00.424Z*
