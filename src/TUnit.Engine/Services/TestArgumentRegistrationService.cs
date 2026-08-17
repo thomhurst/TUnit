@@ -51,7 +51,7 @@ internal sealed class TestArgumentRegistrationService
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
             testContext.InternalEvents,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         // Register method arguments
         await _objectLifecycleService.RegisterArgumentsAsync(
@@ -59,9 +59,9 @@ internal sealed class TestArgumentRegistrationService
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
             testContext.InternalEvents,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         // Register the test for tracking (inject properties and track objects for disposal)
-        await _objectLifecycleService.RegisterTestAsync(testContext, cancellationToken);
+        await _objectLifecycleService.RegisterTestAsync(testContext, cancellationToken).ConfigureAwait(false);
     }
 }

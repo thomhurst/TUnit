@@ -88,11 +88,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             {
                 try
                 {
-                    await receiver.OnTestRegistered(registeredContext);
+                    await receiver.OnTestRegistered(registeredContext).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}");
+                    await logger.LogErrorAsync($"Error in test registered event receiver: {ex.Message}").ConfigureAwait(false);
                     throw;
                 }
             }
@@ -115,7 +115,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             try
             {
-                await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context);
+                await testArgumentRegistrationService.RegisterTestArgumentsAsync(test.Context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             foreach (var test in testList)
             {
-                await RegisterTest(test, isForExecution);
+                await RegisterTest(test, isForExecution).ConfigureAwait(false);
             }
             return;
         }
