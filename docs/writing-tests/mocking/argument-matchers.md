@@ -1,0 +1,498 @@
+# Argument Matchers
+
+Argument matchers control which calls a setup or verification matches. The same matchers work in both contexts — the chain method determines whether it's a setup or verification.
+
+Static Import
+
+TUnit.Mocks automatically imports the `Arg` class via `global using static`, so you can call matcher methods directly — no `Arg.` prefix needed.
+
+## Quick Reference[​](#quick-reference "Direct link to Quick Reference")
+
+| Matcher                                 | Matches                                                                            |
+| --------------------------------------- | ---------------------------------------------------------------------------------- |
+| `Any()` / `Any<T>()`                    | Any value of type T (including null)                                               |
+| `AnyArgs()`                             | Shortcut for matching every argument with `Any()` (only on uniquely named methods) |
+| `Is<T>(value)`                          | Exact equality                                                                     |
+| `Is<T>(predicate)`                      | Values satisfying a predicate                                                      |
+| Raw value (e.g. `42`, `"hello"`)        | Exact equality (implicit conversion)                                               |
+| Inline lambda (e.g. `x => x > 5`)       | Predicate matching (all types)                                                     |
+| `Func<T?, bool>` variable               | Predicate matching (implicit conversion)                                           |
+| `IsNull<T>()`                           | Null only                                                                          |
+| `IsNotNull<T>()`                        | Any non-null value                                                                 |
+| `Matches(pattern)`                      | String matching a regex pattern                                                    |
+| `Matches(regex)`                        | String matching a compiled `Regex`                                                 |
+| `Contains<TCol, TElem>(item)`           | Collection containing an element                                                   |
+| `HasCount<T>(n)`                        | Collection with exactly n elements                                                 |
+| `IsEmpty<T>()`                          | Empty collection                                                                   |
+| `SequenceEquals<TCol, TElem>(expected)` | Collection matching element-by-element                                             |
+| `IsInRange<T>(min, max)`                | Value within an inclusive range                                                    |
+| `IsIn<T>(values)`                       | Value in a set                                                                     |
+| `IsNotIn<T>(values)`                    | Value not in a set                                                                 |
+| `Not<T>(inner)`                         | Negation of another matcher                                                        |
+| `RefStructArg<T>.Any`                   | Any value of a ref struct type (.NET 9+)                                           |
+
+## Basic Matchers[​](#basic-matchers "Direct link to Basic Matchers")
+
+### Any[​](#any "Direct link to Any")
+
+Matches any value, including null:
+
+```
+mock.GetUser(Any()).Returns(new User("Default"));
+
+
+
+svc.GetUser(1);    // matches
+
+svc.GetUser(999);  // matches
+```
+
+### AnyArgs — match every parameter with one token[​](#anyargs--match-every-parameter-with-one-token "Direct link to AnyArgs — match every parameter with one token")
+
+When you only care that a method was called and don't want to constrain any of its arguments, repeating `Any()` for each parameter gets noisy:
+
+```
+mock.Compute(Any(), Any(), Any(), Any(), Any()).Returns(42);
+```
+
+`AnyArgs()` is a shortcut that fills every matchable parameter with `Any<T>()` in one token:
+
+```
+mock.Compute(AnyArgs()).Returns(42);
+
+
+
+mock.Log(AnyArgs()).Throws<InvalidOperationException>();
+
+
+
+// Works for verification too
+
+mock.Compute(AnyArgs()).WasCalled(Times.Exactly(2));
+```
+
+The two forms are equivalent — `AnyArgs()` simply expands to one `Arg.Any<T>()` per parameter.
+
+When the shortcut is generated
+
+The `AnyArgs()` overload is only emitted when the method's name is unique on the mocked type. If the type has overloads of the same name (for example `Sum(int, int)` and `Sum(int, int, int)`), the shortcut would be ambiguous, so the generator omits it for those methods — use the explicit per-parameter form instead.
+
+The shortcut is also skipped for generic methods, methods with `out`, `ref`, or ref-struct parameters, and methods with fewer than two matchable parameters. Generic methods need typed arguments so C# can infer their method type parameters, and single-parameter methods are already as short with `Any()`.
+
+### Exact Value[​](#exact-value "Direct link to Exact Value")
+
+Match a specific value using equality:
+
+```
+mock.GetUser(Is(42)).Returns(new User("Alice"));
+
+mock.GetUser(Is(99)).Returns(new User("Bob"));
+
+
+
+svc.GetUser(42);  // returns Alice
+
+svc.GetUser(99);  // returns Bob
+
+svc.GetUser(1);   // no match — returns default
+```
+
+Implicit Conversion
+
+Raw values are implicitly converted to exact matchers, so these are equivalent:
+
+```
+mock.GetUser(Is(42)).Returns(new User("Alice"));
+
+mock.GetUser(42).Returns(new User("Alice")); // same thing
+```
+
+### Predicate[​](#predicate "Direct link to Predicate")
+
+Match values satisfying a condition:
+
+```
+mock.GetUser(Is<int>(id => id > 0)).Returns(new User("Valid"));
+
+mock.GetUser(Is<int>(id => id <= 0)).Throws<ArgumentException>();
+```
+
+### Inline Lambda Predicates[​](#inline-lambda-predicates "Direct link to Inline Lambda Predicates")
+
+You can write lambda predicates directly in mock setup and verification calls — no `Is<T>()` wrapper needed:
+
+```
+// Inline lambda — works for both value types and reference types
+
+mock.GetUser(id => id > 0).Returns(validUser);
+
+mock.Greet(name => name.StartsWith("A")).Returns("A-name");
+
+
+
+// Mix lambdas with Any() or raw values
+
+mock.Add(x => x > 5, Any()).Returns(100);
+
+mock.Search(name => name.Length > 3, 10).Returns(results);
+
+
+
+// Both parameters as lambdas
+
+mock.Add(x => x > 0, y => y % 2 == 0).Returns(42);
+```
+
+tip
+
+Inline lambdas are the recommended syntax. They work with all parameter types — value types (`int`, `bool`, etc.) and reference types (`string`, `object`, etc.) — thanks to source-generated `Func<T, bool>` overloads.
+
+You can also assign predicates to `Func<T?, bool>` variables for reuse:
+
+```
+Func<string?, bool> isEmail = s => s != null && s.Contains("@");
+
+Func<string?, bool> isLong = s => s != null && s.Length > 10;
+
+
+
+mock.SendEmail(isEmail, "Welcome", isLong).Returns(true);
+```
+
+### Null and NotNull[​](#null-and-notnull "Direct link to Null and NotNull")
+
+```
+mock.Process(IsNull<string>()).Returns("was null");
+
+mock.Process(IsNotNull<string>()).Returns("had value");
+```
+
+## String Matchers[​](#string-matchers "Direct link to String Matchers")
+
+### Regex Pattern[​](#regex-pattern "Direct link to Regex Pattern")
+
+```
+// Match strings against a regex pattern
+
+mock.Search(Matches(@"^user_\d+$")).Returns(new[] { "found" });
+
+
+
+svc.Search("user_42");   // matches
+
+svc.Search("admin_1");   // no match
+```
+
+### Compiled Regex[​](#compiled-regex "Direct link to Compiled Regex")
+
+```
+var pattern = new Regex(@"^user_\d+$", RegexOptions.Compiled);
+
+mock.Search(Matches(pattern)).Returns(new[] { "found" });
+```
+
+## Collection Matchers[​](#collection-matchers "Direct link to Collection Matchers")
+
+### Contains[​](#contains "Direct link to Contains")
+
+```
+mock.ProcessItems(Contains<List<int>, int>(42)).Returns(true);
+
+
+
+svc.ProcessItems(new List<int> { 1, 42, 3 }); // matches — contains 42
+
+svc.ProcessItems(new List<int> { 1, 2, 3 });  // no match
+```
+
+### HasCount[​](#hascount "Direct link to HasCount")
+
+```
+mock.ProcessItems(HasCount<List<int>>(3)).Returns(true);
+
+
+
+svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches — count is 3
+
+svc.ProcessItems(new List<int> { 1, 2 });     // no match
+```
+
+### IsEmpty[​](#isempty "Direct link to IsEmpty")
+
+```
+mock.ProcessItems(IsEmpty<List<int>>()).Returns(false);
+
+
+
+svc.ProcessItems(new List<int>());          // matches
+
+svc.ProcessItems(new List<int> { 1 });      // no match
+```
+
+### SequenceEquals[​](#sequenceequals "Direct link to SequenceEquals")
+
+```
+mock.ProcessItems(
+
+    SequenceEquals<List<int>, int>(new[] { 1, 2, 3 })
+
+).Returns(true);
+
+
+
+svc.ProcessItems(new List<int> { 1, 2, 3 }); // matches
+
+svc.ProcessItems(new List<int> { 3, 2, 1 }); // no match — wrong order
+```
+
+## Range and Set Matchers[​](#range-and-set-matchers "Direct link to Range and Set Matchers")
+
+### IsInRange[​](#isinrange "Direct link to IsInRange")
+
+```
+mock.SetAge(IsInRange(0, 120)).Returns(true);
+
+
+
+svc.SetAge(25);   // matches
+
+svc.SetAge(-1);   // no match
+
+svc.SetAge(200);  // no match
+```
+
+### IsIn / IsNotIn[​](#isin--isnotin "Direct link to IsIn / IsNotIn")
+
+```
+mock.GetRole(IsIn("admin", "editor", "viewer")).Returns(true);
+
+mock.GetRole(IsNotIn("admin", "superadmin")).Returns(false);
+```
+
+## Negation[​](#negation "Direct link to Negation")
+
+Wrap any matcher with `Not` to invert it:
+
+```
+mock.Process(Not(Is(0))).Returns("non-zero");
+
+// Matches any int except 0
+```
+
+## Argument Capture[​](#argument-capture "Direct link to Argument Capture")
+
+Every `Arg<T>` matcher automatically captures the values it sees:
+
+```
+var nameArg = Any<string>();
+
+mock.Greet(nameArg).Returns("Hi");
+
+
+
+svc.Greet("Alice");
+
+svc.Greet("Bob");
+
+svc.Greet("Charlie");
+
+
+
+// Access captured values
+
+var all = nameArg.Values;   // ["Alice", "Bob", "Charlie"]
+
+var last = nameArg.Latest;  // "Charlie"
+
+
+
+await Assert.That(nameArg.Values).Count().IsEqualTo(3);
+```
+
+tip
+
+Capture works in both setup and verification contexts. Store the `Arg<T>` in a variable, then inspect `.Values` or `.Latest` after exercising the code.
+
+## Params Array Parameters[​](#params-array-parameters "Direct link to Params Array Parameters")
+
+Methods with a `params T[]` parameter support two matching styles: per-element and whole-array.
+
+```
+public interface ICalculator
+
+{
+
+    int Sum(params int[] values);
+
+}
+```
+
+**Per-element** — pass one matcher per expected element. The setup matches only calls with exactly that many arguments, each satisfying its matcher:
+
+```
+mock.Sum(Is(1), Is(2), Is(3)).Returns(6);   // matches Sum(1, 2, 3) only
+
+mock.Sum(Is(1), Any<int>()).Returns(9);     // matches Sum(1, <anything>)
+
+mock.Sum().Returns(0);                      // matches Sum() — zero arguments
+
+mock.Sum(1, 2).Returns(3);                  // raw values work too (exact match)
+```
+
+**Whole-array** — pass a single matcher for the packed array:
+
+```
+mock.Sum(Any()).Returns(100);                          // any number of arguments, including none
+
+mock.Sum(Is<int[]>(a => a is { Length: > 2 })).Returns(7);  // predicate over the whole array
+```
+
+Both styles work for verification as well:
+
+```
+mock.Sum(Is(1), Is(2)).WasCalled(Times.Once);
+
+mock.Sum(Any()).WasCalled(Times.Exactly(2));
+```
+
+params object\[]
+
+For `params object[]` parameters, use raw values (`mock.Log(1, "two")`) or a typed matcher (`Is<object>(1)`). A bare `Is(1)` creates an `Arg<int>`, which cannot stand in for an `Arg<object>` element — TUnit.Mocks throws a descriptive error at setup time if you try.
+
+note
+
+Per-element matching is available only for `params T[]` **array** parameters. C# 13 `params` collections (e.g. `params IEnumerable<int>`) and `params Span<T>` fall back to whole-value matching — pass a single `Arg<T>` matcher for the whole collection.
+
+## Ref Struct Parameters[​](#ref-struct-parameters "Direct link to Ref Struct Parameters")
+
+Regular `Arg<T>` matchers cannot be used with ref struct types like `ReadOnlySpan<T>` or `Span<T>` because ref structs cannot be generic type arguments. On **.NET 9+**, TUnit.Mocks provides `RefStructArg<T>` which uses the `allows ref struct` anti-constraint to make these parameters visible in the setup and verification API.
+
+.NET 9+ Only
+
+`RefStructArg<T>` requires .NET 9 or later. On older target frameworks, ref struct parameters are excluded from the setup/verify API and all calls match regardless of the ref struct argument value.
+
+### Matching Any Value[​](#matching-any-value "Direct link to Matching Any Value")
+
+Currently, `RefStructArg<T>.Any` is the only supported matcher — it matches any value passed for that parameter:
+
+```
+public interface IBufferProcessor
+
+{
+
+    void Process(ReadOnlySpan<byte> data);
+
+    int Parse(ReadOnlySpan<char> text);
+
+}
+
+
+
+var mock = IBufferProcessor.Mock();
+
+
+
+// Setup — ref struct param is visible in the API
+
+mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).Callback(() => Console.WriteLine("called"));
+
+mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).Returns(42);
+
+
+
+// Verification
+
+mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
+```
+
+### Mixed Parameters[​](#mixed-parameters "Direct link to Mixed Parameters")
+
+When a method has both regular and ref struct parameters, use `Arg<T>` for the regular ones and `RefStructArg<T>` for the ref struct ones. Argument matching works on the regular parameters while the ref struct parameter matches any value:
+
+```
+public interface IMixedProcessor
+
+{
+
+    int Compute(int id, ReadOnlySpan<byte> data);
+
+}
+
+
+
+var mock = IMixedProcessor.Mock();
+
+
+
+// Match on 'id', accept any span value
+
+mock.Compute(1, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(100);
+
+mock.Compute(2, RefStructArg<ReadOnlySpan<byte>>.Any).Returns(200);
+
+
+
+var result = mock.Object.Compute(1, new byte[] { 0xFF }); // returns 100
+```
+
+### Limitations[​](#limitations "Direct link to Limitations")
+
+* **Only `.Any` matching** — exact value and predicate matching are not supported because ref struct values cannot be stored on the heap
+* **No argument capture** — `RefStructArg<T>` does not support `.Values` or `.Latest` like `Arg<T>` does
+* **Not available in typed callbacks** — ref struct parameters are excluded from the typed `Callback`/`Returns`/`Throws` delegate overloads (use the `Action<object?[]>` overload instead)
+
+## Custom Matchers[​](#custom-matchers "Direct link to Custom Matchers")
+
+Implement `IArgumentMatcher<T>` for reusable matching logic:
+
+```
+public class StringLengthMatcher : IArgumentMatcher<string>
+
+{
+
+    private readonly int _min;
+
+    private readonly int _max;
+
+
+
+    public StringLengthMatcher(int min, int max)
+
+    {
+
+        _min = min;
+
+        _max = max;
+
+    }
+
+
+
+    public bool Matches(string? value)
+
+        => value is not null && value.Length >= _min && value.Length <= _max;
+
+
+
+    public bool Matches(object? value)
+
+        => Matches(value as string);
+
+
+
+    public string Describe()
+
+        => $"string with length between {_min} and {_max}";
+
+}
+
+
+
+// Usage
+
+mock.Greet(Matches(new StringLengthMatcher(3, 50)))
+
+    .Returns("Valid name");
+```
+
+The `Describe()` method is used in verification failure messages to explain what was expected.

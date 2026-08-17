@@ -1,0 +1,277 @@
+# TUnit.Mocks
+
+TUnit.Mocks is a **source-generated, AOT-compatible** mocking framework. Because mocks are generated at compile time, it works with Native AOT, trimming, and single-file publishing — unlike traditional mocking libraries that rely on runtime proxy generation.
+
+While it integrates seamlessly with TUnit's assertion engine, TUnit.Mocks does **not require the TUnit test runner** and works with any test runner — xUnit, NUnit, MSTest, or no framework at all.
+
+## Installation[​](#installation "Direct link to Installation")
+
+Add the NuGet package to your test project:
+
+```
+dotnet add package TUnit.Mocks
+```
+
+For HTTP mocking or logging helpers, also add:
+
+```
+dotnet add package TUnit.Mocks.Http
+
+dotnet add package TUnit.Mocks.Logging
+```
+
+C# 14 Required
+
+TUnit.Mocks requires **C# 14** or later (`LangVersion` set to `14` or `preview`). If your project targets an older version, you will see error **TM004** at compile time.
+
+Generated namespaces
+
+The setup, verification and event surface is generated into `TUnit.Mocks.Generated`, which TUnit.Mocks adds as a global using. It does not matter which namespace the mocked type itself lives in. If you set `<TUnitMockImplicitUsings>disable</TUnitMockImplicitUsings>`, add `using TUnit.Mocks.Generated;` yourself or the setup methods will not be found.
+
+## Your First Mock[​](#your-first-mock "Direct link to Your First Mock")
+
+```
+using TUnit.Mocks;
+
+
+
+public interface IGreeter
+
+{
+
+    string Greet(string name);
+
+}
+
+
+
+public class GreeterTests
+
+{
+
+    [Test]
+
+    public async Task Greet_Returns_Configured_Value()
+
+    {
+
+        // Arrange — create a mock using the static extension syntax
+
+        var mock = IGreeter.Mock();
+
+
+
+        // Configure — set up a return value
+
+        mock.Greet(Any()).Returns("Hello!");
+
+
+
+        // Act — mock IS the interface, no .Object needed
+
+        IGreeter greeter = mock;
+
+        var result = greeter.Greet("Alice");
+
+
+
+        // Assert — verify the result and the call
+
+        await Assert.That(result).IsEqualTo("Hello!");
+
+        mock.Greet("Alice").WasCalled(Times.Once);
+
+    }
+
+}
+```
+
+The `Mock.Of<T>()` factory is also available as an alternative syntax:
+
+```
+var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock()
+```
+
+## Key Concepts[​](#key-concepts "Direct link to Key Concepts")
+
+### Creating Mocks[​](#creating-mocks "Direct link to Creating Mocks")
+
+| Factory Method                  | Use Case                                                                                                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `T.Mock()`                      | Mock an interface, abstract class, or concrete class — the recommended syntax ([details](#typed-mock-wrapper))                                        |
+| `Mock.OfDelegate<T>()`          | Mock a delegate (`Func<>`, `Action<>`, etc.)                                                                                                          |
+| `Mock.Wrap<T>(instance)`        | Wrap a real object with selective overrides                                                                                                           |
+| `Mock.Of<T1, T2>()`             | Mock multiple interfaces on a single object                                                                                                           |
+| `[GenerateMock(typeof(T))]`     | Generate a mock for interfaces with static abstract members ([details](/docs/writing-tests/mocking/setup.md#interfaces-with-static-abstract-members)) |
+| `Mock.HttpHandler()`            | Create a `MockHttpHandler` *(requires `TUnit.Mocks.Http`)*                                                                                            |
+| `Mock.HttpClient(baseAddress?)` | Create a `MockHttpClient` — an `HttpClient` with a `.Handler` property *(requires `TUnit.Mocks.Http`)*                                                |
+| `Mock.Logger()`                 | Create a `MockLogger` *(requires `TUnit.Mocks.Logging`)*                                                                                              |
+| `Mock.Logger<T>()`              | Create a `MockLogger<T>` implementing `ILogger<T>` *(requires `TUnit.Mocks.Logging`)*                                                                 |
+
+All factory methods accept an optional `MockBehavior` parameter:
+
+```
+var loose = IService.Mock();                           // loose (default)
+
+var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
+```
+
+### Global Default Mode[​](#global-default-mode "Direct link to Global Default Mode")
+
+In TUnit test projects, you can change the default mode for all mocks that are created without an explicit `MockBehavior`:
+
+```
+using TUnit.Core;
+
+using TUnit.Mocks;
+
+
+
+public class GlobalSetup
+
+{
+
+    [Before(HookType.TestDiscovery)]
+
+    public static void Configure(BeforeTestDiscoveryContext context)
+
+    {
+
+        context.Settings.Mocks.DefaultMode = MockBehavior.Strict;
+
+    }
+
+}
+```
+
+With this setting, `IService.Mock()`, `Mock.Of<IService>()`, `Mock.Wrap(instance)`, `Mock.OfDelegate<T>()`, and `new MockRepository()` use strict mode by default. Passing a `MockBehavior` still overrides the global default:
+
+```
+var strict = IService.Mock();                    // uses global strict default
+
+var loose = IService.Mock(MockBehavior.Loose);   // explicit override
+```
+
+### The Mock Wrapper[​](#the-mock-wrapper "Direct link to The Mock Wrapper")
+
+`T.Mock()` returns a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
+
+```
+var mock = IService.Mock();
+
+
+
+mock.GetUser(Any()).Returns(user);           // setup — .Returns() makes it a stub
+
+mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
+
+mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
+
+mock.Object                                  // the T instance (also available via direct cast)
+```
+
+### Typed Mock Wrapper[​](#typed-mock-wrapper "Direct link to Typed Mock Wrapper")
+
+For interfaces, `IMyInterface.Mock()` (a C# 14 static extension member) returns a specialized wrapper type that extends `Mock<T>` **and** implements the interface directly. This means the mock can be used anywhere the interface is expected — no `.Object` or cast needed:
+
+```
+var mock = IGreeter.Mock();
+
+
+
+// mock IS an IGreeter — assign directly, pass to methods, use in collections
+
+IGreeter greeter = mock;
+
+List<IGreeter> greeters = [mock];
+
+AcceptGreeter(mock);
+
+
+
+// Setup and verification work the same way
+
+mock.Greet(Any()).Returns("Hello!");
+
+mock.Greet("Alice").WasCalled();
+```
+
+`T.Mock()` is the recommended syntax for all types — interfaces, abstract classes, and concrete classes. For interfaces it returns a typed wrapper; for classes it returns `Mock<T>`. Constructor arguments are supported as strongly-typed parameters:
+
+```
+var strict = IGreeter.Mock(MockBehavior.Strict);
+
+var service = MyService.Mock("connectionString", 42);
+```
+
+note
+
+`T.Mock()` requires C# 14 / .NET 10 or later (it uses C# 14 static extension members). For older language versions, or for multi-interface mocks, interfaces with static abstract members, delegates, and wrap mocks, use the `Mock.Of<T>()` / `Mock.Wrap()` / `Mock.OfDelegate<T>()` factory methods.
+
+### Implicit Conversion[​](#implicit-conversion "Direct link to Implicit Conversion")
+
+`Mock<T>` also supports implicit conversion to `T` — so `T.Mock()` works without `.Object`:
+
+```
+var mock = IGreeter.Mock();
+
+IGreeter greeter = mock; // implicit conversion
+```
+
+### Loose vs Strict Mode[​](#loose-vs-strict-mode "Direct link to Loose vs Strict Mode")
+
+| Mode                  | Unconfigured methods                                                       | Default |
+| --------------------- | -------------------------------------------------------------------------- | ------- |
+| `MockBehavior.Loose`  | Return smart defaults (`0`, `""`, `false`, `null`, auto-mocked interfaces) | Yes     |
+| `MockBehavior.Strict` | Throw `MockStrictBehaviorException`                                        | No      |
+
+### Concise Argument Matching[​](#concise-argument-matching "Direct link to Concise Argument Matching")
+
+TUnit.Mocks imports matchers globally — no `Arg.` prefix needed. Raw values, inline lambdas, and `Any()` work directly as arguments:
+
+```
+var mock = IUserService.Mock();
+
+
+
+// Any() — matches everything
+
+mock.GetUser(Any()).Returns(user);
+
+
+
+// Raw values — implicit exact matching
+
+mock.GetUser(42).Returns(alice);
+
+
+
+// Inline lambdas — predicate matching directly in the call
+
+mock.GetUser(id => id > 0).Returns(validUser);
+
+mock.GetByRole(role => role == "admin").Returns(admins);
+
+
+
+// Mix lambdas with Any() or raw values
+
+mock.Search(name => name.StartsWith("A"), Any()).Returns(results);
+
+
+
+// Is<T>() — explicit predicate matching (also works)
+
+mock.GetUser(Is<int>(id => id > 0)).Returns(validUser);
+```
+
+See [Argument Matchers](/docs/writing-tests/mocking/argument-matchers.md) for the full API.
+
+## What's Next[​](#whats-next "Direct link to What's Next")
+
+* [Setup & Stubbing](/docs/writing-tests/mocking/setup.md) — configure return values, callbacks, exceptions, and property behaviors
+* [Verification](/docs/writing-tests/mocking/verification.md) — verify calls, ordering, and assertion integration
+* [Argument Matchers](/docs/writing-tests/mocking/argument-matchers.md) — match arguments with predicates, patterns, and capture values
+* [Advanced Features](/docs/writing-tests/mocking/advanced.md) — state machines, events, auto-mocking, diagnostics, and more
+* [HTTP Mocking](/docs/writing-tests/mocking/http.md) — mock `HttpClient` with `MockHttpHandler`
+* [Logging](/docs/writing-tests/mocking/logging.md) — capture and verify `ILogger` calls with `MockLogger`

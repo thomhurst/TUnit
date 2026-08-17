@@ -1,0 +1,833 @@
+# DateTime and Time Assertions
+
+TUnit provides comprehensive assertions for date and time types, including `DateTime`, `DateTimeOffset`, `DateOnly`, `TimeOnly`, and `TimeSpan`, with support for tolerance-based comparisons and specialized checks.
+
+## DateTime Equality with Tolerance[​](#datetime-equality-with-tolerance "Direct link to DateTime Equality with Tolerance")
+
+DateTime comparisons often need tolerance to account for timing variations:
+
+```
+[Test]
+
+public async Task DateTime_With_Tolerance()
+
+{
+
+    var now = DateTime.Now;
+
+    var almostNow = now.AddMilliseconds(50);
+
+
+
+    // Without tolerance - might fail
+
+    // await Assert.That(almostNow).IsEqualTo(now);
+
+
+
+    // With tolerance - passes
+
+    await Assert.That(almostNow).IsEqualTo(now).Within(TimeSpan.FromSeconds(1));
+
+}
+```
+
+### Tolerance Examples[​](#tolerance-examples "Direct link to Tolerance Examples")
+
+```
+[Test]
+
+public async Task Various_Tolerance_Values()
+
+{
+
+    var baseTime = new DateTime(2024, 1, 15, 10, 30, 0);
+
+
+
+    // Millisecond tolerance
+
+    var time1 = baseTime.AddMilliseconds(100);
+
+    await Assert.That(time1).IsEqualTo(baseTime).Within(TimeSpan.FromMilliseconds(500));
+
+
+
+    // Second tolerance
+
+    var time2 = baseTime.AddSeconds(5);
+
+    await Assert.That(time2).IsEqualTo(baseTime).Within(TimeSpan.FromSeconds(10));
+
+
+
+    // Minute tolerance
+
+    var time3 = baseTime.AddMinutes(2);
+
+    await Assert.That(time3).IsEqualTo(baseTime).Within(TimeSpan.FromMinutes(5));
+
+}
+```
+
+## DateTime Comparison[​](#datetime-comparison "Direct link to DateTime Comparison")
+
+Standard comparison operators work with DateTime:
+
+```
+[Test]
+
+public async Task DateTime_Comparison()
+
+{
+
+    var past = DateTime.Now.AddDays(-1);
+
+    var now = DateTime.Now;
+
+    var future = DateTime.Now.AddDays(1);
+
+
+
+    await Assert.That(now).IsGreaterThan(past);
+
+    await Assert.That(now).IsLessThan(future);
+
+    await Assert.That(past).IsLessThan(future);
+
+}
+```
+
+## DateTime-Specific Assertions[​](#datetime-specific-assertions "Direct link to DateTime-Specific Assertions")
+
+### IsToday / IsNotToday[​](#istoday--isnottoday "Direct link to IsToday / IsNotToday")
+
+```
+[Test]
+
+public async Task DateTime_Is_Today()
+
+{
+
+    var today = DateTime.Now;
+
+    await Assert.That(today).IsToday();
+
+
+
+    var yesterday = DateTime.Now.AddDays(-1);
+
+    await Assert.That(yesterday).IsNotToday();
+
+
+
+    var tomorrow = DateTime.Now.AddDays(1);
+
+    await Assert.That(tomorrow).IsNotToday();
+
+}
+```
+
+### IsUtc / IsNotUtc[​](#isutc--isnotutc "Direct link to IsUtc / IsNotUtc")
+
+```
+[Test]
+
+public async Task DateTime_Kind()
+
+{
+
+    var utc = DateTime.UtcNow;
+
+    await Assert.That(utc).IsUtc();
+
+
+
+    var local = DateTime.Now;
+
+    await Assert.That(local).IsNotUtc();
+
+
+
+    var unspecified = new DateTime(2024, 1, 15);
+
+    await Assert.That(unspecified).IsNotUtc();
+
+}
+```
+
+### IsLeapYear / IsNotLeapYear[​](#isleapyear--isnotleapyear "Direct link to IsLeapYear / IsNotLeapYear")
+
+```
+[Test]
+
+public async Task Leap_Year_Check()
+
+{
+
+    var leapYear = new DateTime(2024, 1, 1);
+
+    await Assert.That(leapYear).IsLeapYear();
+
+
+
+    var nonLeapYear = new DateTime(2023, 1, 1);
+
+    await Assert.That(nonLeapYear).IsNotLeapYear();
+
+}
+```
+
+### IsInFuture / IsInPast[​](#isinfuture--isinpast "Direct link to IsInFuture / IsInPast")
+
+Compares against local time:
+
+```
+[Test]
+
+public async Task Future_and_Past()
+
+{
+
+    var future = DateTime.Now.AddHours(1);
+
+    await Assert.That(future).IsInFuture();
+
+
+
+    var past = DateTime.Now.AddHours(-1);
+
+    await Assert.That(past).IsInPast();
+
+}
+```
+
+### IsInFutureUtc / IsInPastUtc[​](#isinfutureutc--isinpastutc "Direct link to IsInFutureUtc / IsInPastUtc")
+
+Compares against UTC time:
+
+```
+[Test]
+
+public async Task Future_and_Past_UTC()
+
+{
+
+    var futureUtc = DateTime.UtcNow.AddHours(1);
+
+    await Assert.That(futureUtc).IsInFutureUtc();
+
+
+
+    var pastUtc = DateTime.UtcNow.AddHours(-1);
+
+    await Assert.That(pastUtc).IsInPastUtc();
+
+}
+```
+
+### IsOnWeekend / IsOnWeekday[​](#isonweekend--isonweekday "Direct link to IsOnWeekend / IsOnWeekday")
+
+```
+[Test]
+
+public async Task Weekend_Check()
+
+{
+
+    var saturday = new DateTime(2024, 1, 6); // Saturday
+
+    await Assert.That(saturday).IsOnWeekend();
+
+
+
+    var monday = new DateTime(2024, 1, 8); // Monday
+
+    await Assert.That(monday).IsOnWeekday();
+
+    await Assert.That(monday).IsNotOnWeekend();
+
+}
+```
+
+### IsDaylightSavingTime / IsNotDaylightSavingTime[​](#isdaylightsavingtime--isnotdaylightsavingtime "Direct link to IsDaylightSavingTime / IsNotDaylightSavingTime")
+
+```
+[Test]
+
+public async Task Daylight_Saving_Time()
+
+{
+
+    var summer = new DateTime(2024, 7, 1); // Summer in Northern Hemisphere
+
+    var winter = new DateTime(2024, 1, 1); // Winter
+
+
+
+    // Results depend on timezone
+
+    if (TimeZoneInfo.Local.IsDaylightSavingTime(summer))
+
+    {
+
+        await Assert.That(summer).IsDaylightSavingTime();
+
+    }
+
+}
+```
+
+## DateTimeOffset[​](#datetimeoffset "Direct link to DateTimeOffset")
+
+DateTimeOffset includes timezone information:
+
+```
+[Test]
+
+public async Task DateTimeOffset_With_Tolerance()
+
+{
+
+    var now = DateTimeOffset.Now;
+
+    var almostNow = now.AddSeconds(1);
+
+
+
+    await Assert.That(almostNow).IsEqualTo(now).Within(TimeSpan.FromSeconds(5));
+
+}
+```
+
+```
+[Test]
+
+public async Task DateTimeOffset_Comparison()
+
+{
+
+    var earlier = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.FromHours(-8));
+
+    var later = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.FromHours(0));
+
+
+
+    // Same local time, but different UTC times
+
+    await Assert.That(later).IsGreaterThan(earlier);
+
+}
+```
+
+## DateOnly (.NET 8+)[​](#dateonly-net-8 "Direct link to DateOnly (.NET 8+)")
+
+DateOnly represents just a date without time:
+
+```
+[Test]
+
+public async Task DateOnly_Assertions()
+
+{
+
+    var date1 = new DateOnly(2024, 1, 15);
+
+    var date2 = new DateOnly(2024, 1, 15);
+
+
+
+    await Assert.That(date1).IsEqualTo(date2);
+
+}
+```
+
+### DateOnly with Days Tolerance[​](#dateonly-with-days-tolerance "Direct link to DateOnly with Days Tolerance")
+
+```
+[Test]
+
+public async Task DateOnly_With_Tolerance()
+
+{
+
+    var date1 = new DateOnly(2024, 1, 15);
+
+    var date2 = new DateOnly(2024, 1, 17);
+
+
+
+    await Assert.That(date2).IsEqualTo(date1).WithinDays(5);
+
+}
+```
+
+### DateOnly Comparison[​](#dateonly-comparison "Direct link to DateOnly Comparison")
+
+```
+[Test]
+
+public async Task DateOnly_Comparison()
+
+{
+
+    var earlier = new DateOnly(2024, 1, 1);
+
+    var later = new DateOnly(2024, 12, 31);
+
+
+
+    await Assert.That(later).IsGreaterThan(earlier);
+
+    await Assert.That(earlier).IsLessThan(later);
+
+}
+```
+
+## TimeOnly (.NET 8+)[​](#timeonly-net-8 "Direct link to TimeOnly (.NET 8+)")
+
+TimeOnly represents just time without a date:
+
+```
+[Test]
+
+public async Task TimeOnly_Assertions()
+
+{
+
+    var morning = new TimeOnly(9, 30, 0);
+
+    var evening = new TimeOnly(17, 45, 0);
+
+
+
+    await Assert.That(evening).IsGreaterThan(morning);
+
+}
+```
+
+### TimeOnly with Tolerance[​](#timeonly-with-tolerance "Direct link to TimeOnly with Tolerance")
+
+```
+[Test]
+
+public async Task TimeOnly_With_Tolerance()
+
+{
+
+    var time1 = new TimeOnly(10, 30, 0);
+
+    var time2 = new TimeOnly(10, 30, 5);
+
+
+
+    await Assert.That(time2).IsEqualTo(time1).Within(TimeSpan.FromSeconds(10));
+
+}
+```
+
+## TimeSpan[​](#timespan "Direct link to TimeSpan")
+
+TimeSpan represents a duration:
+
+```
+[Test]
+
+public async Task TimeSpan_Assertions()
+
+{
+
+    var duration1 = TimeSpan.FromMinutes(30);
+
+    var duration2 = TimeSpan.FromMinutes(30);
+
+
+
+    await Assert.That(duration1).IsEqualTo(duration2);
+
+}
+```
+
+### TimeSpan Comparison[​](#timespan-comparison "Direct link to TimeSpan Comparison")
+
+```
+[Test]
+
+public async Task TimeSpan_Comparison()
+
+{
+
+    var short_duration = TimeSpan.FromMinutes(5);
+
+    var long_duration = TimeSpan.FromHours(1);
+
+
+
+    await Assert.That(long_duration).IsGreaterThan(short_duration);
+
+    await Assert.That(short_duration).IsLessThan(long_duration);
+
+}
+```
+
+### TimeSpan Sign Checks[​](#timespan-sign-checks "Direct link to TimeSpan Sign Checks")
+
+```
+[Test]
+
+public async Task TimeSpan_Sign()
+
+{
+
+    var positive = TimeSpan.FromHours(1);
+
+    await Assert.That(positive).IsPositive();
+
+
+
+    var negative = TimeSpan.FromHours(-1);
+
+    await Assert.That(negative).IsNegative();
+
+}
+```
+
+## Practical Examples[​](#practical-examples "Direct link to Practical Examples")
+
+### Expiration Checks[​](#expiration-checks "Direct link to Expiration Checks")
+
+```
+[Test]
+
+public async Task Check_Token_Expiration()
+
+{
+
+    var token = CreateToken();
+
+    var expiresAt = token.ExpiresAt;
+
+
+
+    await Assert.That(expiresAt).IsInFuture();
+
+
+
+    // Or check if expired
+
+    var expiredToken = CreateExpiredToken();
+
+    await Assert.That(expiredToken.ExpiresAt).IsInPast();
+
+}
+```
+
+### Age Calculation[​](#age-calculation "Direct link to Age Calculation")
+
+```
+[Test]
+
+public async Task Calculate_Age()
+
+{
+
+    var birthDate = new DateTime(1990, 1, 1);
+
+    var age = DateTime.Now.Year - birthDate.Year;
+
+
+
+    if (DateTime.Now.DayOfYear < birthDate.DayOfYear)
+
+    {
+
+        age--;
+
+    }
+
+
+
+    await Assert.That(age).IsGreaterThanOrEqualTo(0);
+
+    await Assert.That(age).IsLessThan(150); // Reasonable max age
+
+}
+```
+
+### Business Days[​](#business-days "Direct link to Business Days")
+
+```
+[Test]
+
+public async Task Is_Business_Day()
+
+{
+
+    var monday = new DateTime(2024, 1, 8);
+
+
+
+    await Assert.That(monday).IsOnWeekday();
+
+    await Assert.That(monday.DayOfWeek).IsNotEqualTo(DayOfWeek.Saturday);
+
+    await Assert.That(monday.DayOfWeek).IsNotEqualTo(DayOfWeek.Sunday);
+
+}
+```
+
+### Scheduling[​](#scheduling "Direct link to Scheduling")
+
+```
+[Test]
+
+public async Task Scheduled_Time()
+
+{
+
+    var scheduledTime = new DateTime(2024, 12, 25, 9, 0, 0);
+
+
+
+    await Assert.That(scheduledTime.Month).IsEqualTo(12);
+
+    await Assert.That(scheduledTime.Day).IsEqualTo(25);
+
+    await Assert.That(scheduledTime.Hour).IsEqualTo(9);
+
+}
+```
+
+### Performance Timing[​](#performance-timing "Direct link to Performance Timing")
+
+```
+[Test]
+
+public async Task Operation_Duration()
+
+{
+
+    var start = DateTime.Now;
+
+    await PerformOperationAsync();
+
+    var end = DateTime.Now;
+
+
+
+    var duration = end - start;
+
+
+
+    await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(5));
+
+    await Assert.That(duration).IsPositive();
+
+}
+```
+
+### Date Range Validation[​](#date-range-validation "Direct link to Date Range Validation")
+
+```
+[Test]
+
+public async Task Date_Within_Range()
+
+{
+
+    var startDate = new DateTime(2024, 1, 1);
+
+    var endDate = new DateTime(2024, 12, 31);
+
+    var checkDate = new DateTime(2024, 6, 15);
+
+
+
+    await Assert.That(checkDate).IsGreaterThan(startDate);
+
+    await Assert.That(checkDate).IsLessThan(endDate);
+
+}
+```
+
+### Timestamp Validation[​](#timestamp-validation "Direct link to Timestamp Validation")
+
+```
+[Test]
+
+public async Task Record_Created_Recently()
+
+{
+
+    var record = await CreateRecordAsync();
+
+    var createdAt = record.CreatedAt;
+
+    var now = DateTime.UtcNow;
+
+
+
+    // Created within last minute
+
+    await Assert.That(createdAt).IsEqualTo(now).Within(TimeSpan.FromMinutes(1));
+
+    await Assert.That(createdAt).IsInPastUtc();
+
+}
+```
+
+## Working with Date Components[​](#working-with-date-components "Direct link to Working with Date Components")
+
+```
+[Test]
+
+public async Task Date_Components()
+
+{
+
+    var date = new DateTime(2024, 7, 15, 14, 30, 45);
+
+
+
+    await Assert.That(date.Year).IsEqualTo(2024);
+
+    await Assert.That(date.Month).IsEqualTo(7);
+
+    await Assert.That(date.Day).IsEqualTo(15);
+
+    await Assert.That(date.Hour).IsEqualTo(14);
+
+    await Assert.That(date.Minute).IsEqualTo(30);
+
+    await Assert.That(date.Second).IsEqualTo(45);
+
+}
+```
+
+## DayOfWeek Assertions[​](#dayofweek-assertions "Direct link to DayOfWeek Assertions")
+
+DayOfWeek has its own assertions:
+
+```
+[Test]
+
+public async Task Day_Of_Week_Checks()
+
+{
+
+    var dayOfWeek = DateTime.Now.DayOfWeek;
+
+
+
+    if (dayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+
+    {
+
+        await Assert.That(dayOfWeek).IsWeekend();
+
+    }
+
+    else
+
+    {
+
+        await Assert.That(dayOfWeek).IsWeekday();
+
+    }
+
+}
+```
+
+## Chaining DateTime Assertions[​](#chaining-datetime-assertions "Direct link to Chaining DateTime Assertions")
+
+```
+[Test]
+
+public async Task Chained_DateTime_Assertions()
+
+{
+
+    var date = DateTime.Now;
+
+
+
+    await Assert.That(date)
+
+        .IsToday()
+
+        .And.IsGreaterThan(DateTime.MinValue)
+
+        .And.IsLessThan(DateTime.MaxValue);
+
+}
+```
+
+## Common Patterns[​](#common-patterns "Direct link to Common Patterns")
+
+### Birthday Validation[​](#birthday-validation "Direct link to Birthday Validation")
+
+```
+[Test]
+
+public async Task Validate_Birthday()
+
+{
+
+    var birthday = new DateTime(1990, 5, 15);
+
+
+
+    await Assert.That(birthday).IsInPast();
+
+    await Assert.That(birthday).IsGreaterThan(new DateTime(1900, 1, 1));
+
+}
+```
+
+### Meeting Scheduler[​](#meeting-scheduler "Direct link to Meeting Scheduler")
+
+```
+[Test]
+
+public async Task Schedule_Meeting()
+
+{
+
+    var meetingTime = new DateTime(2024, 1, 15, 14, 0, 0);
+
+
+
+    await Assert.That(meetingTime).IsInFuture();
+
+    await Assert.That(meetingTime).IsOnWeekday();
+
+    await Assert.That(meetingTime.Hour).IsBetween(9, 17); // Business hours
+
+}
+```
+
+### Relative Time Checks[​](#relative-time-checks "Direct link to Relative Time Checks")
+
+```
+[Test]
+
+public async Task Within_Last_Hour()
+
+{
+
+    var timestamp = DateTime.Now.AddMinutes(-30);
+
+    var hourAgo = DateTime.Now.AddHours(-1);
+
+
+
+    await Assert.That(timestamp).IsGreaterThan(hourAgo);
+
+}
+```
+
+## See Also[​](#see-also "Direct link to See Also")
+
+* [Equality & Comparison](/docs/assertions/equality-and-comparison.md) - General comparison with tolerance
+* [Numeric Assertions](/docs/assertions/numeric.md) - Numeric components of dates
+* [Specialized Types](/docs/assertions/specialized-types.md) - Other time-related types

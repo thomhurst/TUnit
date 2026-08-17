@@ -1,0 +1,203 @@
+# Verification
+
+Verification uses the same methods as setup — the chain method (`.WasCalled()`, `.WasNeverCalled()`) makes it a verification instead of a setup.
+
+## Basic Verification[​](#basic-verification "Direct link to Basic Verification")
+
+```
+// Verify a method was called at least once
+
+mock.GetUser(42).WasCalled();
+
+
+
+// Verify exact call count
+
+mock.GetUser(42).WasCalled(Times.Once);
+
+
+
+// Verify never called
+
+mock.Delete(Any()).WasNeverCalled();
+```
+
+### Times[​](#times "Direct link to Times")
+
+| Expression                | Matches                               |
+| ------------------------- | ------------------------------------- |
+| `Times.Once`              | Exactly 1 call                        |
+| `Times.Never`             | Exactly 0 calls                       |
+| `Times.AtLeastOnce`       | 1 or more calls                       |
+| `Times.Exactly(n)`        | Exactly n calls                       |
+| `Times.AtLeast(n)`        | n or more calls                       |
+| `Times.AtMost(n)`         | n or fewer calls                      |
+| `Times.Between(min, max)` | Between min and max calls (inclusive) |
+
+### Custom Failure Messages[​](#custom-failure-messages "Direct link to Custom Failure Messages")
+
+```
+mock.GetUser(42).WasCalled(Times.Once, "GetUser should be called once during initialization");
+
+mock.Delete(Any()).WasNeverCalled("Delete should not be called in read-only mode");
+```
+
+## Property Verification[​](#property-verification "Direct link to Property Verification")
+
+Property verification mirrors the setup API — defaults to the **getter**:
+
+```
+// Getter verification
+
+mock.Name.WasCalled(Times.Once);           // getter called once
+
+mock.Name.Getter.WasCalled(Times.Once);    // explicit — same as above
+
+mock.Name.WasNeverCalled();                 // getter never accessed
+
+
+
+// Setter verification — any value
+
+mock.Count.Setter.WasCalled(Times.Exactly(3));
+
+mock.Count.Setter.WasNeverCalled();
+
+
+
+// Setter verification — specific value
+
+mock.Count.Set(42).WasCalled(Times.Once);
+
+mock.Count.Set(v => v > 0).WasCalled(Times.AtLeast(1));
+```
+
+## Argument Matching in Verification[​](#argument-matching-in-verification "Direct link to Argument Matching in Verification")
+
+Verification uses the same `Arg<T>` matchers as setup:
+
+```
+// Exact value
+
+mock.GetUser(42).WasCalled(Times.Once);
+
+
+
+// Any value
+
+mock.GetUser(Any()).WasCalled(Times.Exactly(3));
+
+
+
+// Predicate — inline lambda works directly
+
+mock.GetUser(id => id > 0).WasCalled(Times.AtLeast(1));
+```
+
+See [Argument Matchers](/docs/writing-tests/mocking/argument-matchers.md) for the full list of matchers.
+
+## Ordered Verification[​](#ordered-verification "Direct link to Ordered Verification")
+
+Verify calls occurred in a specific order **across one or more mocks**:
+
+```
+Mock.VerifyInOrder(() =>
+
+{
+
+    mockLogger.Log("Starting").WasCalled();
+
+    mockRepo.SaveAsync(Any()).WasCalled();
+
+    mockLogger.Log("Done").WasCalled();
+
+});
+```
+
+If calls occurred out of order, `VerifyInOrder` throws with a message showing the actual sequence.
+
+tip
+
+`VerifyInOrder` uses a global sequence counter — it works across multiple independent mock instances, not just within a single mock.
+
+## VerifyAll[​](#verifyall "Direct link to VerifyAll")
+
+Verify that **every setup** was invoked at least once:
+
+```
+mock.GetUser(Any()).Returns(new User("Alice"));
+
+mock.Delete(Any());
+
+
+
+svc.GetUser(1);
+
+svc.Delete(2);
+
+
+
+mock.VerifyAll(); // passes — both setups were invoked
+```
+
+If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
+
+## VerifyNoOtherCalls[​](#verifynoothercalls "Direct link to VerifyNoOtherCalls")
+
+Verify that all recorded calls have been explicitly verified:
+
+```
+svc.GetUser(1);
+
+svc.Delete(2);
+
+
+
+mock.GetUser(1).WasCalled(Times.Once);
+
+mock.Delete(2).WasCalled(Times.Once);
+
+
+
+mock.VerifyNoOtherCalls(); // passes — all calls accounted for
+```
+
+If there are unverified calls, `VerifyNoOtherCalls` throws listing them.
+
+## TUnit Assertion Integration[​](#tunit-assertion-integration "Direct link to TUnit Assertion Integration")
+
+Use TUnit's `Assert.That` pipeline for assertion-style verification with better error messages:
+
+```
+using TUnit.Mocks.Assertions;
+
+
+
+await Assert.That(mock.GetUser(42)).WasCalled(Times.Once);
+
+await Assert.That(mock.Delete(Any())).WasNeverCalled();
+
+
+
+// Property verification through assertions
+
+await Assert.That(mock.Name).WasCalled(Times.Once);
+```
+
+This integrates with TUnit's assertion engine — failures appear as assertion errors with expression trees in the output.
+
+## Inspecting Calls[​](#inspecting-calls "Direct link to Inspecting Calls")
+
+Access the raw call history for custom inspection:
+
+```
+var calls = mock.Invocations;
+
+
+
+await Assert.That(calls).Count().IsEqualTo(3);
+
+await Assert.That(calls[0].MemberName).IsEqualTo("GetUser");
+```
+
+Each `CallRecord` contains the member name, arguments, and sequence number.

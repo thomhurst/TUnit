@@ -1,0 +1,336 @@
+# Awaiting
+
+In TUnit you `await` your assertions, and this serves two purposes:
+
+* the `await` keyword is responsible for performing the assertion, before you call await we're building a chain of assertion rules.
+* it allows executing and asserting on `async` delegates without performing sync-over-async
+
+Because of this, your tests should be `async` and return a `Task`.
+
+Don't worry about forgetting to `await` - There's an analyzer built in that will notify you if you've missed any!<br /><!-- -->If you forget to `await`, your assertion will not actually be executed, and your test may pass when it should fail.
+
+This will error:
+
+```
+    [Test]
+
+    public void MyTest()
+
+    {
+
+        var result = Add(1, 2);
+
+
+
+        Assert.That(result).IsEqualTo(3);
+
+    }
+```
+
+This won't:
+
+```
+    [Test]
+
+    public async Task MyTest()
+
+    {
+
+        var result = Add(1, 2);
+
+
+
+        await Assert.That(result).IsEqualTo(3);
+
+    }
+```
+
+TUnit is able to take in asynchronous delegates. To be able to assert on these, we need to execute the code. We want to avoid sync-over-async, as this can cause problems and block the thread pool, slowing down your test suite. And with how fast .NET has become, the overhead of `Task`s and `async` methods shouldn't be noticeable.
+
+## Using Return Values from Awaited Assertions[​](#using-return-values-from-awaited-assertions "Direct link to Using Return Values from Awaited Assertions")
+
+When you `await` an assertion in TUnit, it returns a reference to the subject that was asserted on. This allows you to capture the validated value and use it in subsequent operations or assertions, creating a fluent and readable test flow.
+
+### Type Casting with Confidence[​](#type-casting-with-confidence "Direct link to Type Casting with Confidence")
+
+```
+[Test]
+
+public async Task CastAndUseSpecificType()
+
+{
+
+    object shape = new Circle { Radius = 5.0 };
+
+    
+
+    // Assert type and capture strongly-typed reference
+
+    var circle = await Assert.That(shape).IsTypeOf<Circle>();
+
+    
+
+    // Now you can use circle-specific properties without casting
+
+    await Assert.That(circle.Radius).IsEqualTo(5.0);
+
+    
+
+    var area = Math.PI * circle.Radius * circle.Radius;
+
+    await Assert.That(area).IsEqualTo(Math.PI * 25).Within(0.0001);
+
+}
+```
+
+## Complex Assertion Examples[​](#complex-assertion-examples "Direct link to Complex Assertion Examples")
+
+### Chaining Multiple Assertions[​](#chaining-multiple-assertions "Direct link to Chaining Multiple Assertions")
+
+You can chain multiple assertions together for more complex validations:
+
+```
+[Test]
+
+public async Task ComplexObjectValidation()
+
+{
+
+    var user = await GetUserAsync("john.doe");
+
+
+
+    // Chain multiple member assertions
+
+    await Assert.That(user)
+
+        .IsNotNull()
+
+        .And.Member(u => u.Email, email => email.IsEqualTo("john.doe@example.com"))
+
+        .And.Member(u => u.Age, age => age.IsGreaterThan(18))
+
+        .And.Member(u => u.Roles, roles => roles.Contains("Admin"));
+
+}
+```
+
+### Collection Assertions with Complex Conditions[​](#collection-assertions-with-complex-conditions "Direct link to Collection Assertions with Complex Conditions")
+
+```
+[Test]
+
+public async Task ComplexCollectionAssertions()
+
+{
+
+    var orders = await GetOrdersAsync();
+
+
+
+    // Assert multiple conditions on a collection
+
+    await Assert.That(orders)
+
+        .Count().IsGreaterThan(0)
+
+        .And.Contains(o => o.Status == OrderStatus.Completed)
+
+        .And.DoesNotContain(o => o.Total < 0)
+
+        .And.HasDistinctItems();
+
+
+
+    // Assert on filtered subset
+
+    var completedOrders = orders.Where(o => o.Status == OrderStatus.Completed);
+
+    await Assert.That(completedOrders)
+
+        .All(o => o.CompletedDate != null)
+
+        .And.Any(o => o.Total > 1000);
+
+}
+```
+
+### Async Operation Assertions[​](#async-operation-assertions "Direct link to Async Operation Assertions")
+
+```
+[Test]
+
+public async Task AsyncOperationAssertions()
+
+{
+
+    // Assert that async operation completes within time limit
+
+    await Assert.That(async () => await LongRunningOperationAsync())
+
+        .CompletesWithin(TimeSpan.FromSeconds(5));
+
+
+
+    // Assert that async operation throws specific exception
+
+    await Assert.That(async () => await RiskyOperationAsync())
+
+        .Throws<InvalidOperationException>()
+
+        .WithMessageContaining("connection failed");
+
+
+
+    // Assert on result of async operation
+
+    var result = await CalculateAsync(10, 20);
+
+    await Assert.That(result).IsEqualTo(30);
+
+}
+```
+
+### Exception Assertions with Details[​](#exception-assertions-with-details "Direct link to Exception Assertions with Details")
+
+```
+[Test]
+
+public async Task DetailedExceptionAssertions()
+
+{
+
+    var invalidData = new { Id = -1, Name = "" };
+
+
+
+    // Assert exception with specific message
+
+    await Assert.That(() => ProcessDataAsync(invalidData))
+
+        .Throws<ValidationException>()
+
+        .WithMessage("Validation failed");
+
+
+
+    // Assert ArgumentException with parameter name
+
+    await Assert.That(() => ProcessInvalidData(null))
+
+        .Throws<ArgumentException>()
+
+        .WithParameterName("data");
+
+
+
+    // Assert aggregate exception
+
+    var exception = await Assert.That(() => ParallelOperationAsync())
+
+        .Throws<AggregateException>();
+
+
+
+    await Assert.That(exception.InnerExceptions).Count().IsEqualTo(3);
+
+    await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
+
+}
+```
+
+### Custom Assertion Conditions[​](#custom-assertion-conditions "Direct link to Custom Assertion Conditions")
+
+```
+[Test]
+
+public async Task CustomAssertionConditions()
+
+{
+
+    var measurements = await GetMeasurementsAsync();
+
+    
+
+    // Use custom conditions for complex validations
+
+    await Assert.That(measurements)
+
+        .Satisfies(m => {
+
+            var average = m.Average();
+
+            var stdDev = CalculateStandardDeviation(m);
+
+            return stdDev < average * 0.1; // Less than 10% deviation
+
+        }, "Measurements should have low standard deviation");
+
+    
+
+    // Combine built-in and custom assertions
+
+    await Assert.That(measurements)
+
+        .Count().IsGreaterThan(100)
+
+        .And.All(m => m > 0)
+
+        .And.Satisfies(IsNormallyDistributed, "Data should be normally distributed");
+
+}
+```
+
+### Combining Or and And Conditions[​](#combining-or-and-and-conditions "Direct link to Combining Or and And Conditions")
+
+```
+[Test]
+
+public async Task ComplexLogicalConditions()
+
+{
+
+    var product = await GetProductAsync();
+
+
+
+    // Complex logical combinations
+
+    await Assert.That(product.Status)
+
+        .IsEqualTo(ProductStatus.Active)
+
+        .Or.IsEqualTo(ProductStatus.Pending);
+
+
+
+    await Assert.That(product.Price)
+
+        .IsGreaterThan(0)
+
+        .And.IsLessThan(10000);
+
+
+
+    // Category-based conditional checks
+
+    if (product.Category == "Electronics")
+
+    {
+
+        await Assert.That(product.Warranty).IsNotNull();
+
+    }
+
+    else if (product.Category == "Books")
+
+    {
+
+        await Assert.That(product.ISBN).IsNotNull();
+
+    }
+
+}
+```
+
+For more assertion examples, see the dedicated pages for [collections](/docs/assertions/collections.md), [strings](/docs/assertions/string.md), [numeric](/docs/assertions/numeric.md), and [datetime](/docs/assertions/datetime.md) assertions.

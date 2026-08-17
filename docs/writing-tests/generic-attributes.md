@@ -1,0 +1,833 @@
+# Generic Attributes
+
+TUnit provides generic versions of several attributes that offer enhanced type safety and better IDE support. These attributes allow you to specify types at compile time, reducing errors and improving code maintainability.
+
+## Generic Test Attributes[​](#generic-test-attributes "Direct link to Generic Test Attributes")
+
+### MethodDataSourceAttribute\<T>[​](#methoddatasourceattributet "Direct link to MethodDataSourceAttribute<T>")
+
+The generic version of `MethodDataSource` provides type safety for the class containing the data source method.
+
+```
+public class TestDataProviders
+
+{
+
+    public static IEnumerable<(int, int, int)> AdditionTestCases()
+
+    {
+
+        yield return (1, 2, 3);
+
+        yield return (5, 5, 10);
+
+        yield return (-1, 1, 0);
+
+    }
+
+}
+
+
+
+public class CalculatorTests
+
+{
+
+    [Test]
+
+    [MethodDataSource<TestDataProviders>(nameof(TestDataProviders.AdditionTestCases))]
+
+    public async Task Add_ShouldReturnCorrectSum(int a, int b, int expected)
+
+    {
+
+        var result = Calculator.Add(a, b);
+
+        await Assert.That(result).IsEqualTo(expected);
+
+    }
+
+}
+```
+
+Benefits over non-generic version:
+
+* Compile-time type checking
+* IDE refactoring support
+* Prevents typos in class names
+
+### ClassDataSourceAttribute\<T>[​](#classdatasourceattributet "Direct link to ClassDataSourceAttribute<T>")
+
+The generic version ensures type safety when referencing data source classes.
+
+`ClassDataSource<T>` injects a single instance of `T` into the test — it does **not** enumerate `T`. For per-row data (multiple test invocations), use [`MethodDataSource`](/docs/writing-tests/method-data-source.md) or a custom `DataSourceGeneratorAttribute<T>` instead.
+
+```
+public class DatabaseFixture : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public DbConnection Connection { get; private set; } = null!;
+
+
+
+    public async Task InitializeAsync()
+
+    {
+
+        Connection = await OpenConnectionAsync();
+
+    }
+
+
+
+    public async ValueTask DisposeAsync()
+
+    {
+
+        await Connection.DisposeAsync();
+
+    }
+
+}
+
+
+
+public class UserRepositoryTests
+
+{
+
+    [Test]
+
+    [ClassDataSource<DatabaseFixture>(Shared = SharedType.PerClass)]
+
+    public async Task FindUser_ReturnsExpected(DatabaseFixture fixture)
+
+    {
+
+        var user = await fixture.Connection.QueryUserAsync(id: 1);
+
+        await Assert.That(user.Name).IsEqualTo("Alice");
+
+    }
+
+}
+```
+
+For data rows from a class that exposes a sequence, use `MethodDataSource` against a method/property on that class:
+
+```
+public class UserTestData
+
+{
+
+    public static IEnumerable<User> All()
+
+    {
+
+        yield return new User { Id = 1, Name = "Alice" };
+
+        yield return new User { Id = 2, Name = "Bob" };
+
+    }
+
+}
+
+
+
+public class UserTests
+
+{
+
+    [Test]
+
+    [MethodDataSource<UserTestData>(nameof(UserTestData.All))]
+
+    public async Task ValidateUser_ShouldPass(User user)
+
+    {
+
+        var isValid = await UserValidator.ValidateAsync(user);
+
+        await Assert.That(isValid).IsTrue();
+
+    }
+
+}
+```
+
+### DependsOnAttribute\<T>[​](#dependsonattributet "Direct link to DependsOnAttribute<T>")
+
+The generic `DependsOn` attribute provides type-safe test dependency declarations.
+
+```
+public class OrderProcessingTests
+
+{
+
+    [Test]
+
+    public async Task CreateOrder()
+
+    {
+
+        // Create order logic
+
+    }
+
+    
+
+    [Test]
+
+    [DependsOn<OrderProcessingTests>(nameof(CreateOrder))]
+
+    public async Task ProcessPayment()
+
+    {
+
+        // This test depends on CreateOrder from the same class
+
+    }
+
+}
+
+
+
+public class ShippingTests
+
+{
+
+    [Test]
+
+    [DependsOn<OrderProcessingTests>(nameof(OrderProcessingTests.ProcessPayment))]
+
+    public async Task ShipOrder()
+
+    {
+
+        // This test depends on ProcessPayment from another class
+
+    }
+
+}
+```
+
+## Generic Data Source Attributes[​](#generic-data-source-attributes "Direct link to Generic Data Source Attributes")
+
+### DataSourceGeneratorAttribute\<T>[​](#datasourcegeneratorattributet "Direct link to DataSourceGeneratorAttribute<T>")
+
+Create strongly-typed data source generators by inheriting from `DataSourceGeneratorAttribute<T>` and overriding `GenerateDataSources`, which returns an `IEnumerable<Func<T>>` — each `Func<T>` produces one test row.
+
+```
+// Custom implementation
+
+public class RandomNumbersAttribute : DataSourceGeneratorAttribute<int>
+
+{
+
+    private readonly int _count;
+
+    private readonly int _min;
+
+    private readonly int _max;
+
+
+
+    public RandomNumbersAttribute(int count, int min = 0, int max = 100)
+
+    {
+
+        _count = count;
+
+        _min = min;
+
+        _max = max;
+
+    }
+
+
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+
+    {
+
+        var random = new Random();
+
+        for (int i = 0; i < _count; i++)
+
+        {
+
+            yield return () => random.Next(_min, _max);
+
+        }
+
+    }
+
+}
+
+
+
+// Usage
+
+[Test]
+
+[RandomNumbers(5, min: 1, max: 10)]
+
+public async Task TestWithRandomNumbers(int number)
+
+{
+
+    await Assert.That(number).IsBetween(1, 10);
+
+}
+```
+
+Overloads of `DataSourceGeneratorAttribute<T1, T2, ...>` (up to five type parameters) are available for tests with multiple parameters — they yield `Func<(T1, T2, ...)>` tuples.
+
+### AsyncDataSourceGeneratorAttribute\<T>[​](#asyncdatasourcegeneratorattributet "Direct link to AsyncDataSourceGeneratorAttribute<T>")
+
+For asynchronous data generation, inherit from `AsyncDataSourceGeneratorAttribute<T>` and override `GenerateDataSourcesAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`. Each yielded `Func<Task<T>>` produces one test row asynchronously, so the heavy work (DB queries, HTTP calls) can be deferred until the test actually runs.
+
+```
+// Custom implementation
+
+public class DatabaseUsersAttribute : AsyncDataSourceGeneratorAttribute<User>
+
+{
+
+    private readonly string _role;
+
+
+
+    public DatabaseUsersAttribute(string role)
+
+    {
+
+        _role = role;
+
+    }
+
+
+
+    protected override async IAsyncEnumerable<Func<Task<User>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
+
+    {
+
+        using var db = new DatabaseContext();
+
+        var users = await db.Users
+
+            .Where(u => u.Role == _role)
+
+            .ToListAsync();
+
+
+
+        foreach (var user in users)
+
+        {
+
+            yield return () => Task.FromResult(user);
+
+        }
+
+    }
+
+}
+
+
+
+// Usage
+
+[Test]
+
+[DatabaseUsers("Admin")]
+
+public async Task AdminUser_ShouldHaveFullPermissions(User adminUser)
+
+{
+
+    var permissions = await GetUserPermissions(adminUser);
+
+    await Assert.That(permissions).Contains(Permission.FullAccess);
+
+}
+```
+
+### TypedDataSourceAttribute\<T>[​](#typeddatasourceattributet "Direct link to TypedDataSourceAttribute<T>")
+
+`TypedDataSourceAttribute<T>` is the lowest-level extension point for a strongly-typed data source. Most users should prefer `DataSourceGeneratorAttribute<T>` (sync) or `AsyncDataSourceGeneratorAttribute<T>` (async) — both ultimately derive from this class. Override it directly only when you need full control over the async row-production pipeline.
+
+To inherit it, override `GetTypedDataRowsAsync`, which returns an `IAsyncEnumerable<Func<Task<T>>>`:
+
+```
+// Custom implementation
+
+public class SampleUsersAttribute : TypedDataSourceAttribute<User>
+
+{
+
+    public override async IAsyncEnumerable<Func<Task<User>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+
+    {
+
+        yield return () => Task.FromResult(new User { Id = 1, Name = "Alice", Role = "Admin" });
+
+        yield return () => Task.FromResult(new User { Id = 2, Name = "Bob", Role = "User" });
+
+        await Task.CompletedTask;
+
+    }
+
+}
+
+
+
+// Usage
+
+[Test]
+
+[SampleUsers]
+
+public async Task ValidateUser(User user)
+
+{
+
+    await Assert.That(user.Name).IsNotEmpty();
+
+}
+```
+
+## Complex Generic Scenarios[​](#complex-generic-scenarios "Direct link to Complex Generic Scenarios")
+
+### Combining Multiple Generic Attributes[​](#combining-multiple-generic-attributes "Direct link to Combining Multiple Generic Attributes")
+
+```
+public interface ITestScenario<TInput, TExpected>
+
+{
+
+    TInput Input { get; }
+
+    TExpected Expected { get; }
+
+}
+
+
+
+public class CalculationScenario : ITestScenario<(int, int), int>
+
+{
+
+    public (int, int) Input { get; set; }
+
+    public int Expected { get; set; }
+
+}
+
+
+
+public class ScenarioDataSource<TScenario> : TypedDataSourceAttribute<TScenario>
+
+    where TScenario : ITestScenario<(int, int), int>, new()
+
+{
+
+    public override IEnumerable<TScenario> GetData()
+
+    {
+
+        yield return new TScenario { Input = (1, 2), Expected = 3 };
+
+        yield return new TScenario { Input = (5, 5), Expected = 10 };
+
+    }
+
+}
+
+
+
+[Test]
+
+[ScenarioDataSource<CalculationScenario>]
+
+public async Task TestCalculation(CalculationScenario scenario)
+
+{
+
+    var (a, b) = scenario.Input;
+
+    var result = Calculator.Add(a, b);
+
+    await Assert.That(result).IsEqualTo(scenario.Expected);
+
+}
+```
+
+### Generic Test Base Classes[​](#generic-test-base-classes "Direct link to Generic Test Base Classes")
+
+⚠️ **Important Limitation**: C# does not allow generic type parameters to be used as attribute arguments. This is a known language limitation (see [dotnet/csharplang#124](https://github.com/dotnet/csharplang/issues/124)).
+
+The following code **WILL NOT COMPILE** due to error CS8968:
+
+```
+// ❌ This does NOT work - CS8968 error
+
+public abstract class EntityTestBase<TEntity, TId>
+
+    where TEntity : IEntity<TId>
+
+{
+
+    [Test]
+
+    [MethodDataSource<EntityTestBase<TEntity, TId>>(nameof(GetTestIds))]  // ❌ Error!
+
+    public async Task Entity_ShouldBeRetrievable(TId id) { }
+
+}
+```
+
+#### Workaround 1: Use InstanceMethodDataSource[​](#workaround-1-use-instancemethoddatasource "Direct link to Workaround 1: Use InstanceMethodDataSource")
+
+The recommended approach is to use `InstanceMethodDataSource` instead:
+
+```
+public abstract class EntityTestBase<TEntity, TId>
+
+    where TEntity : IEntity<TId>
+
+    where TId : IEquatable<TId>
+
+{
+
+    protected abstract TEntity CreateEntity(TId id);
+
+    protected abstract Task<TEntity> GetEntityAsync(TId id);
+
+
+
+    // ✅ This works - instance method data source
+
+    [Test]
+
+    [InstanceMethodDataSource(nameof(GetTestIds))]
+
+    public async Task Entity_ShouldBeRetrievable(TId id)
+
+    {
+
+        var entity = CreateEntity(id);
+
+        await SaveEntityAsync(entity);
+
+
+
+        var retrieved = await GetEntityAsync(id);
+
+        await Assert.That(retrieved.Id).IsEqualTo(id);
+
+    }
+
+
+
+    // Instance method (not static)
+
+    public IEnumerable<TId> GetTestIds()
+
+    {
+
+        return GetTestIdsCore();
+
+    }
+
+
+
+    protected abstract IEnumerable<TId> GetTestIdsCore();
+
+}
+
+
+
+public class UserEntityTests : EntityTestBase<User, Guid>
+
+{
+
+    protected override User CreateEntity(Guid id) =>
+
+        new User { Id = id, Name = "Test User" };
+
+
+
+    protected override Task<User> GetEntityAsync(Guid id) =>
+
+        UserRepository.GetByIdAsync(id);
+
+
+
+    protected override IEnumerable<Guid> GetTestIdsCore()
+
+    {
+
+        yield return Guid.NewGuid();
+
+        yield return Guid.NewGuid();
+
+    }
+
+}
+```
+
+#### Workaround 2: Create Concrete Base Classes[​](#workaround-2-create-concrete-base-classes "Direct link to Workaround 2: Create Concrete Base Classes")
+
+For a limited set of types, create non-generic derived classes:
+
+```
+// Base generic class (no data source attributes using generics)
+
+public abstract class EntityTestBase<TEntity, TId>
+
+    where TEntity : IEntity<TId>
+
+    where TId : IEquatable<TId>
+
+{
+
+    protected abstract TEntity CreateEntity(TId id);
+
+    protected abstract Task<TEntity> GetEntityAsync(TId id);
+
+
+
+    protected async Task Entity_ShouldBeRetrievable(TId id)
+
+    {
+
+        var entity = CreateEntity(id);
+
+        await SaveEntityAsync(entity);
+
+
+
+        var retrieved = await GetEntityAsync(id);
+
+        await Assert.That(retrieved.Id).IsEqualTo(id);
+
+    }
+
+}
+
+
+
+// Concrete base class for Guid-based entities
+
+public abstract class GuidEntityTestBase<TEntity> : EntityTestBase<TEntity, Guid>
+
+    where TEntity : IEntity<Guid>
+
+{
+
+    [Test]
+
+    [MethodDataSource<GuidEntityTestBase<TEntity>>(nameof(GetTestIds))]
+
+    public async Task TestEntity(Guid id)
+
+    {
+
+        await Entity_ShouldBeRetrievable(id);
+
+    }
+
+
+
+    public static IEnumerable<Guid> GetTestIds()
+
+    {
+
+        yield return Guid.NewGuid();
+
+        yield return Guid.NewGuid();
+
+    }
+
+}
+
+
+
+// Your test class
+
+public class UserEntityTests : GuidEntityTestBase<User>
+
+{
+
+    protected override User CreateEntity(Guid id) =>
+
+        new User { Id = id, Name = "Test User" };
+
+
+
+    protected override Task<User> GetEntityAsync(Guid id) =>
+
+        UserRepository.GetByIdAsync(id);
+
+}
+```
+
+## AOT Compatibility[​](#aot-compatibility "Direct link to AOT Compatibility")
+
+Generic attributes work well with AOT compilation, but there are some considerations:
+
+### DynamicallyAccessedMembers[​](#dynamicallyaccessedmembers "Direct link to DynamicallyAccessedMembers")
+
+When creating generic attributes that use reflection, add appropriate attributes:
+
+```
+public class ReflectiveDataSource<[DynamicallyAccessedMembers(
+
+    DynamicallyAccessedMemberTypes.PublicConstructors | 
+
+    DynamicallyAccessedMemberTypes.PublicProperties)] T> 
+
+    : TypedDataSourceAttribute<T> where T : new()
+
+{
+
+    public override IEnumerable<T> GetData()
+
+    {
+
+        var type = typeof(T);
+
+        var properties = type.GetProperties();
+
+        
+
+        // Create instances with different property values
+
+        foreach (var prop in properties)
+
+        {
+
+            var instance = new T();
+
+            // Set property values...
+
+            yield return instance;
+
+        }
+
+    }
+
+}
+```
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+### 1. Use Generic Attributes for Type Safety[​](#1-use-generic-attributes-for-type-safety "Direct link to 1. Use Generic Attributes for Type Safety")
+
+```
+// ❌ Non-generic - prone to errors
+
+[MethodDataSource(typeof(DataProvider), "GetData")]
+
+
+
+// ✅ Generic - compile-time safety
+
+[MethodDataSource<DataProvider>(nameof(DataProvider.GetData))]
+```
+
+### 2. Leverage Constraints[​](#2-leverage-constraints "Direct link to 2. Leverage Constraints")
+
+```
+public class ValidatableDataSource<T> : TypedDataSourceAttribute<T>
+
+    where T : IValidatable
+
+{
+
+    public override IEnumerable<T> GetData()
+
+    {
+
+        // Only return valid instances
+
+        return GenerateInstances().Where(x => x.IsValid());
+
+    }
+
+}
+```
+
+### 3. Create Reusable Generic Base Attributes[​](#3-create-reusable-generic-base-attributes "Direct link to 3. Create Reusable Generic Base Attributes")
+
+```
+public abstract class JsonFileDataSource<T> : TypedDataSourceAttribute<T>
+
+{
+
+    protected abstract string FilePath { get; }
+
+    
+
+    public override IEnumerable<T> GetData()
+
+    {
+
+        var json = File.ReadAllText(FilePath);
+
+        return JsonSerializer.Deserialize<List<T>>(json) 
+
+            ?? Enumerable.Empty<T>();
+
+    }
+
+}
+
+
+
+public class UserJsonDataSource : JsonFileDataSource<User>
+
+{
+
+    protected override string FilePath => "TestData/users.json";
+
+}
+```
+
+### 4. Document Generic Type Parameters[​](#4-document-generic-type-parameters "Direct link to 4. Document Generic Type Parameters")
+
+```
+/// <summary>
+
+/// Provides test data from a CSV file
+
+/// </summary>
+
+/// <typeparam name="T">The type to deserialize CSV rows into. 
+
+/// Must have a parameterless constructor.</typeparam>
+
+public class CsvDataSource<T> : TypedDataSourceAttribute<T> 
+
+    where T : new()
+
+{
+
+    // Implementation
+
+}
+```
+
+## Summary[​](#summary "Direct link to Summary")
+
+Generic attributes in TUnit provide:
+
+* **Type Safety**: Compile-time checking prevents runtime errors
+* **Better IDE Support**: Refactoring and navigation work correctly
+* **Cleaner Code**: No magic strings or typeof expressions
+* **AOT Compatibility**: Work well with ahead-of-time compilation
+* **Reusability**: Easy to create generic base attributes for common patterns
+
+Use generic attributes whenever possible to improve code quality and maintainability in your test suites.

@@ -1,0 +1,403 @@
+# Setup & Stubbing
+
+Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.
+
+## Method Setup[​](#method-setup "Direct link to Method Setup")
+
+### Return Values[​](#return-values "Direct link to Return Values")
+
+```
+// Fixed return value
+
+mock.GetUser(Any()).Returns(new User("Alice"));
+
+
+
+// Computed return value
+
+mock.GetUser(Any()).Returns(() => new User(DateTime.Now.ToString()));
+
+
+
+// Async methods — no special API needed
+
+mock.GetUserAsync(Any()).Returns(new User("Alice"));
+
+// TUnit.Mocks auto-wraps the value in Task<T> or ValueTask<T>
+```
+
+### Throwing Exceptions[​](#throwing-exceptions "Direct link to Throwing Exceptions")
+
+```
+// Throw a specific exception type
+
+mock.Delete(Any()).Throws<InvalidOperationException>();
+
+
+
+// Throw a specific instance
+
+mock.Delete(Any()).Throws(new ArgumentException("bad id"));
+```
+
+### Callbacks[​](#callbacks "Direct link to Callbacks")
+
+```
+// Simple callback
+
+var callCount = 0;
+
+mock.Process(Any())
+
+    .Callback(() => callCount++);
+
+
+
+// Callback with access to arguments
+
+mock.Process(Any())
+
+    .Callback((object?[] args) => Console.WriteLine($"Called with: {args[0]}"));
+```
+
+### Sequential Behaviors[​](#sequential-behaviors "Direct link to Sequential Behaviors")
+
+Use `.Then()` to define different behaviors for successive calls:
+
+```
+mock.GetValue(Any())
+
+    .Throws<InvalidOperationException>()   // 1st call: throws
+
+    .Then()
+
+    .Returns("retry-succeeded")             // 2nd call: returns value
+
+    .Then()
+
+    .Returns("cached");                     // 3rd+ calls: returns this value
+
+
+
+// Shorthand for sequential return values
+
+mock.GetValue(Any())
+
+    .ReturnsSequentially("first", "second", "third");
+
+// 1st: "first", 2nd: "second", 3rd+: "third" (last value repeats)
+```
+
+Chained setup behaviors without `.Then()` run together as a single invocation step. When multiple return behaviors are chained in one step, the last return wins:
+
+```
+mock.GetValue(Any())
+
+    .Returns("first")
+
+    .Returns("second");
+
+// Every call returns "second"
+```
+
+Use `.Then()` or `.ReturnsSequentially(...)` when each return should apply to a different invocation.
+
+### Void Methods[​](#void-methods "Direct link to Void Methods")
+
+Void methods support `Callback` and `Throws` (but not `Returns`):
+
+```
+mock.Log(Any())
+
+    .Callback(() => { /* side effect */ });
+
+
+
+mock.Log(Any())
+
+    .Throws<NotSupportedException>();
+```
+
+Void methods are also eagerly registered — calling `mock.Log(Any())` without chaining is sufficient to "allow" the call in strict mode.
+
+## Property Setup[​](#property-setup "Direct link to Property Setup")
+
+TUnit.Mocks uses C# 14 extension properties for a natural property API. The default behavior targets the **getter** (the most common case).
+
+### Getter Setup[​](#getter-setup "Direct link to Getter Setup")
+
+```
+// These are equivalent — both configure the getter
+
+mock.Name.Returns("Alice");
+
+mock.Name.Getter.Returns("Alice");
+```
+
+All method setup operations work on getters:
+
+```
+mock.Name.Throws<InvalidOperationException>();
+
+mock.Name.Callback(() => Console.WriteLine("Name accessed"));
+
+mock.Name.ReturnsSequentially("first", "second");
+```
+
+### Setter Setup[​](#setter-setup "Direct link to Setter Setup")
+
+```
+// React to any value being set
+
+mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
+
+
+
+// React to a specific value being set
+
+mock.Count.Set(Is(42)).Callback(() => Console.WriteLine("Count set to 42"));
+
+
+
+// Throw on setter
+
+mock.Name.Setter.Throws<NotSupportedException>();
+```
+
+### Auto-Tracking Properties[​](#auto-tracking-properties "Direct link to Auto-Tracking Properties")
+
+Call `SetupAllProperties()` to make properties behave like real auto-properties — setters store values, getters return them:
+
+```
+var mock = IEntity.Mock();
+
+mock.SetupAllProperties();
+
+
+
+mock.Object.Name = "Alice";
+
+var name = mock.Object.Name; // "Alice"
+
+
+
+mock.Object.Count = 10;
+
+var count = mock.Object.Count; // 10
+```
+
+Explicit setups take precedence over auto-tracked values.
+
+## Out and Ref Parameters[​](#out-and-ref-parameters "Direct link to Out and Ref Parameters")
+
+**Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
+
+```
+// Strongly-typed — named after the parameter, compile-time safe
+
+mock.TryGet("key")
+
+    .Returns(true)
+
+    .SetsOutValue("found-value");
+
+
+
+bool found = svc.TryGet("key", out var value);
+
+// found == true, value == "found-value"
+```
+
+**Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
+
+```
+mock.Swap(Any())
+
+    .SetsRefValue(99);
+
+
+
+int val = 42;
+
+svc.Swap(ref val);
+
+// val == 99
+```
+
+The method names are derived from the original parameter names — e.g. `out string value` produces `.SetsOutValue()`, `ref int count` produces `.SetsRefCount()`. This gives you IntelliSense discoverability and compile-time type safety.
+
+The untyped `.SetsOutParameter(index, value)` overload remains available for advanced scenarios but is hidden from IntelliSense on typed wrappers.
+
+## Partial Mocks[​](#partial-mocks "Direct link to Partial Mocks")
+
+Partial mocks wrap a real class. Unconfigured method calls execute the base implementation:
+
+```
+public abstract class Calculator
+
+{
+
+    public virtual int Add(int a, int b) => a + b;
+
+    public abstract int Multiply(int a, int b);
+
+}
+
+
+
+var mock = Calculator.Mock();
+
+mock.Multiply(Any(), Any()).Returns(99);
+
+
+
+mock.Object.Add(2, 3);      // 5 (base implementation)
+
+mock.Object.Multiply(2, 3); // 99 (mocked)
+```
+
+Pass constructor arguments for non-default constructors:
+
+```
+var mock = MyService.Mock("connectionString", 42);
+```
+
+## Interfaces with Static Abstract Members[​](#interfaces-with-static-abstract-members "Direct link to Interfaces with Static Abstract Members")
+
+Interfaces that have static abstract members (directly or inherited) cannot be used as type arguments in `Mock.Of<T>()` or with `IMyInterface.Mock()` — the compiler raises **CS8920** before the source generator runs.
+
+Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source generator produces a bridge interface (suffixed `_Mockable`) that provides default implementations for the static abstract members:
+
+```
+using TUnit.Mocks;
+
+
+
+[assembly: GenerateMock(typeof(IMyParseable))]
+
+
+
+public interface IMyParseable : IParsable<IMyParseable>
+
+{
+
+    string Format();
+
+}
+
+
+
+// In your test — use the generated bridge type:
+
+var mock = Mock.Of<TUnit_Mocks_Tests_IMyParseable_Mockable>();
+
+mock.Format().Returns("formatted");
+```
+
+The bridge type implements all the non-static members of the original interface, so you can set up and verify calls as normal.
+
+## Delegate Mocking[​](#delegate-mocking "Direct link to Delegate Mocking")
+
+Mock any delegate type:
+
+```
+var mock = Mock.OfDelegate<Func<string, int>>();
+
+mock.Invoke(Any()).Returns(42);
+
+
+
+Func<string, int> func = mock;
+
+var result = func("hello"); // 42
+```
+
+Works with `Action<>`, `Func<>`, and custom delegate types.
+
+## Wrapping Real Objects[​](#wrapping-real-objects "Direct link to Wrapping Real Objects")
+
+Wrap a real instance to selectively override methods while delegating unconfigured calls to the real implementation:
+
+```
+var realService = new ProductionService();
+
+var mock = Mock.Wrap(realService);
+
+
+
+// Override just one method
+
+mock.GetConfig().Returns(new TestConfig());
+
+
+
+// All other calls go to realService
+
+mock.Object.DoWork(); // calls realService.DoWork()
+```
+
+## Multi-Interface Mocks[​](#multi-interface-mocks "Direct link to Multi-Interface Mocks")
+
+Create a single mock that implements multiple interfaces:
+
+```
+var mock = Mock.Of<ILogger, IDisposable>();
+
+
+
+mock.Log(Any()); // ILogger method
+
+mock.Object.Log("test");
+
+
+
+((IDisposable)mock.Object).Dispose(); // IDisposable method
+```
+
+Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
+
+Members of the secondary interfaces appear directly on the mock, just like the primary's — setup, verify, and event raising all work the same way:
+
+```
+var mock = Mock.Of<ILogger, IDisposable>();
+
+
+
+mock.IsDisposed.Returns(true);      // IDisposable property setup
+
+mock.Dispose().WasCalled();         // IDisposable verification
+```
+
+When a secondary member's name collides with a member of another interface on the mock, it is exposed with a short interface prefix instead (e.g. `mock.IDisposable_Tag`).
+
+The primary type can also be a concrete class — useful for types like EF Core's `DbContext` that implement infrastructure interfaces explicitly:
+
+```
+var mock = Mock.Of<DbContext, IInfrastructure<IServiceProvider>>();
+
+mock.Instance.Returns(serviceProvider);
+
+
+
+((IInfrastructure<IServiceProvider>)mock.Object).Instance; // serviceProvider
+```
+
+Constructor arguments for class primaries are supported: `Mock.Of<MyService, IExtra>(arg1, arg2)`.
+
+## Setup Chaining[​](#setup-chaining "Direct link to Setup Chaining")
+
+Setup methods return chain objects that support additional behaviors:
+
+```
+mock.Process(Any())
+
+    .Returns(true)
+
+    .RaisesProcessCompleted(EventArgs.Empty)   // strongly-typed auto-raise event
+
+    .TransitionsTo("processed");               // state machine transition
+```
+
+The typed `.Raises{EventName}()` methods provide IntelliSense and compile-time safety for event parameters. The string-based `.Raises(eventName, args)` overload is also available.
+
+See [Advanced Features](/docs/writing-tests/mocking/advanced.md) for details on events and state machines.

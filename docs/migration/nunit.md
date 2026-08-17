@@ -1,0 +1,1309 @@
+# Migrating from NUnit
+
+Performance Boost
+
+Migrating from NUnit to TUnit can improve test execution speed. Check the [benchmarks](/docs/benchmarks/.md) to see how TUnit compares.
+
+## Quick Reference[​](#quick-reference "Direct link to Quick Reference")
+
+| NUnit                                         | TUnit                                                                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `[TestFixture]`                               | *(remove - not needed)*                                                                                      |
+| `[Test]`                                      | `[Test]`                                                                                                     |
+| `[TestCase(...)]`                             | `[Arguments(...)]`                                                                                           |
+| `[TestCaseSource(nameof(...))]`               | `[MethodDataSource(nameof(...))]`                                                                            |
+| `[Category("value")]`                         | `[Category("value")]` *(same)* or `[Property("Category", "value")]`                                          |
+| `[Ignore]`                                    | `[Skip]`                                                                                                     |
+| `[Explicit]`                                  | `[Explicit]`                                                                                                 |
+| `[SetUp]`                                     | `[Before(Test)]`                                                                                             |
+| `[TearDown]`                                  | `[After(Test)]`                                                                                              |
+| `[OneTimeSetUp]`                              | `[Before(Class)]`                                                                                            |
+| `[OneTimeTearDown]`                           | `[After(Class)]`                                                                                             |
+| `[SetUpFixture]` + `[OneTimeSetUp]`           | `[Before(Assembly)]` on static method                                                                        |
+| `[Values(...)]` on parameter                  | `[Matrix(...)]` on each parameter                                                                            |
+| `Assert.AreEqual(expected, actual)`           | `await Assert.That(actual).IsEqualTo(expected)`                                                              |
+| `Assert.That(actual, Is.EqualTo(expected))`   | `await Assert.That(actual).IsEqualTo(expected)`                                                              |
+| `Assert.Throws<T>(() => ...)`                 | `await Assert.ThrowsAsync<T>(() => ...)`                                                                     |
+| `TestContext.WriteLine(...)`                  | `TestContext` parameter with `context.Output.WriteLine(...)`                                                 |
+| `TestContext.AddTestAttachment(path, name)`   | `TestContext.Current!.Output.AttachArtifact(new Artifact { File = new FileInfo(path), DisplayName = name })` |
+| `CollectionAssert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEquivalentTo(expected)`                                                         |
+| `StringAssert.Contains(substring, text)`      | `await Assert.That(text).Contains(substring)`                                                                |
+
+## Automated Migration with Code Fixers[​](#automated-migration-with-code-fixers "Direct link to Automated Migration with Code Fixers")
+
+TUnit includes Roslyn analyzers and code fixers that automate most of the migration work. The `TUNU0001` diagnostic identifies NUnit code patterns and provides automatic fixes to convert them to TUnit equivalents.
+
+**What gets converted automatically:**
+
+* `[TestFixture]` → removed (not needed in TUnit)
+* `[Test]` → `[Test]` (stays the same)
+* `[TestCase(...)]` → `[Arguments(...)]`
+* `[TestCaseSource(nameof(...))]` → `[MethodDataSource(nameof(...))]`
+* `[SetUp]` → `[Before(Test)]`
+* `[TearDown]` → `[After(Test)]`
+* `[OneTimeSetUp]` → `[Before(Class)]`
+* `[OneTimeTearDown]` → `[After(Class)]`
+* `[Ignore]` → `[Skip]`
+* `[Category("...")]` → `[Property("Category", "...")]`
+* Classic assertions: `Assert.AreEqual(expected, actual)` → `await Assert.That(actual).IsEqualTo(expected)`
+* Constraint assertions: `Assert.That(actual, Is.EqualTo(expected))` → `await Assert.That(actual).IsEqualTo(expected)`
+* Test methods converted to `async Task` with `await` on assertions
+
+The code fixer handles roughly 80-90% of typical test suites automatically.
+
+**What requires manual adjustment:**
+
+* Custom `[TestCaseSource]` return types (convert `object[]` to tuples)
+* Complex async patterns or custom awaitable types
+* Custom fixtures or test base classes
+* `[SetUpFixture]` with namespace-scoped setup (convert to assembly hooks)
+* `TestContext.CurrentContext` static access (inject `TestContext` as parameter instead)
+* `Assert.Multiple` blocks (use assertion groups or multiple awaited assertions)
+
+If you find a common pattern that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
+
+### Prerequisites[​](#prerequisites "Direct link to Prerequisites")
+
+* .NET SDK 8.0 or later (for `dotnet format` with analyzer support)
+* TUnit packages installed in your test project
+
+### Step-by-Step Migration[​](#step-by-step-migration "Direct link to Step-by-Step Migration")
+
+Safety First
+
+Commit your changes or create a backup before running the code fixer. This allows you to review changes and revert if needed.
+
+**1. Install TUnit packages**
+
+Add the TUnit packages to your test project alongside NUnit (temporarily):
+
+```
+dotnet add package TUnit
+```
+
+**2. Disable TUnit's implicit usings (temporary)**
+
+Add these properties to your `.csproj` to prevent type name conflicts between NUnit and TUnit:
+
+```
+<PropertyGroup>
+
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+
+</PropertyGroup>
+```
+
+This allows the code fixer to distinguish between `NUnit.Framework.Assert` and `TUnit.Assertions.Assert`.
+
+**3. Rebuild the project**
+
+```
+dotnet build
+```
+
+This restores packages and loads the TUnit analyzers.
+
+Optional: Verify analyzer is working
+
+The `TUNU0001` diagnostic is information-level and won't appear in standard build output. If you want to verify the analyzer is detecting NUnit code before applying changes, run:
+
+```
+dotnet format analyzers --severity info --diagnostics TUNU0001 --verify-no-changes
+```
+
+This command checks for `TUNU0001` diagnostics without modifying any files. If NUnit code is detected, you'll see messages like "Would fix N files" or specific file paths that would be changed.
+
+**4. Run the automated code fixer**
+
+```
+dotnet format analyzers --severity info --diagnostics TUNU0001
+```
+
+This command applies all available fixes for the `TUNU0001` diagnostic. You'll see output indicating which files were modified.
+
+Multi-targeting Projects
+
+If your project targets multiple .NET versions (e.g., `net8.0;net9.0;net10.0`), you **must** specify a single target framework when running the code fixer. Multi-targeting can cause the code fixer to crash with the error `Changes must be within bounds of SourceText` due to a limitation in Roslyn's linked file handling.
+
+**Option 1:** Specify a single framework via command line:
+
+```
+dotnet format analyzers --severity info --diagnostics TUNU0001 --framework net10.0
+```
+
+**Option 2:** Temporarily modify your project file to single-target:
+
+```
+<!-- Before migration -->
+
+<TargetFramework>net10.0</TargetFramework>
+
+<!-- <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks> -->
+```
+
+Run the code fixer, then restore multi-targeting afterward. Replace `net10.0` with your project's highest supported target framework.
+
+**5. Remove the implicit usings workaround**
+
+Remove or comment out the properties you added in step 2:
+
+```
+<!-- Remove these lines -->
+
+<PropertyGroup>
+
+    <TUnitImplicitUsings>false</TUnitImplicitUsings>
+
+    <TUnitAssertionsImplicitUsings>false</TUnitAssertionsImplicitUsings>
+
+</PropertyGroup>
+```
+
+**6. Fix remaining issues manually**
+
+Build the project and address any remaining compilation errors:
+
+```
+dotnet build
+```
+
+Common manual fixes needed:
+
+* Add `using TUnit.Core;` and `using TUnit.Assertions;` if not using implicit usings
+* Convert data source methods to return tuples instead of `object[]`
+* Replace `TestContext.CurrentContext` with injected `TestContext` parameter
+* Update any custom assertion extensions
+
+**7. Remove NUnit packages**
+
+Once everything compiles and tests pass:
+
+```
+dotnet remove package NUnit
+
+dotnet remove package NUnit3TestAdapter
+```
+
+**8. Verify the migration**
+
+```
+dotnet build
+
+dotnet run -- --list-tests
+```
+
+### Troubleshooting[​](#troubleshooting "Direct link to Troubleshooting")
+
+**Code fixer doesn't run / no files changed:**
+
+* Ensure you rebuilt after adding TUnit packages
+* Check that `TUNU0001` warnings appear in build output
+* Try running with verbose output: `dotnet format analyzers --severity info --diagnostics TUNU0001 --verbosity detailed`
+
+**Build errors after running code fixer:**
+
+* Missing `await` keywords: ensure test methods are `async Task`
+* Ambiguous `Assert`: remove NUnit usings or fully qualify types
+* Type mismatch in data sources: convert `object[]` returns to tuples
+
+**Analyzers not loading:**
+
+* Verify TUnit package is installed: `dotnet list package`
+* Try cleaning and rebuilding: `dotnet clean && dotnet build`
+
+## Manual Migration Guide[​](#manual-migration-guide "Direct link to Manual Migration Guide")
+
+### Test Attributes[​](#test-attributes "Direct link to Test Attributes")
+
+`[TestFixture]` - Remove this attribute (not needed in TUnit)
+
+`[Test]` remains `[Test]`
+
+`[TestCase]` becomes `[Arguments]`
+
+`[TestCaseSource]` becomes `[MethodDataSource]`
+
+`[Category]` becomes `[Property("Category", "value")]`
+
+`[Ignore]` becomes `[Skip]`
+
+`[Explicit]` remains `[Explicit]`
+
+### Setup and Teardown[​](#setup-and-teardown "Direct link to Setup and Teardown")
+
+`[SetUp]` becomes `[Before(Test)]`
+
+`[TearDown]` becomes `[After(Test)]`
+
+`[OneTimeSetUp]` becomes `[Before(Class)]`
+
+`[OneTimeTearDown]` becomes `[After(Class)]`
+
+### Assertions[​](#assertions "Direct link to Assertions")
+
+#### Classic Assertions[​](#classic-assertions "Direct link to Classic Assertions")
+
+```
+// NUnit
+
+Assert.AreEqual(expected, actual);
+
+Assert.IsTrue(condition);
+
+Assert.IsNull(value);
+
+Assert.Greater(value1, value2);
+
+
+
+// TUnit
+
+await Assert.That(actual).IsEqualTo(expected);
+
+await Assert.That(condition).IsTrue();
+
+await Assert.That(value).IsNull();
+
+await Assert.That(value1).IsGreaterThan(value2);
+```
+
+#### Constraint-Based Assertions[​](#constraint-based-assertions "Direct link to Constraint-Based Assertions")
+
+```
+// NUnit
+
+Assert.That(actual, Is.EqualTo(expected));
+
+Assert.That(value, Is.True);
+
+Assert.That(value, Is.Null);
+
+Assert.That(text, Does.Contain("substring"));
+
+Assert.That(collection, Has.Count.EqualTo(5));
+
+
+
+// TUnit
+
+await Assert.That(actual).IsEqualTo(expected);
+
+await Assert.That(value).IsTrue();
+
+await Assert.That(value).IsNull();
+
+await Assert.That(text).Contains("substring");
+
+await Assert.That(collection).Count().IsEqualTo(5);
+```
+
+### Collection Assertions[​](#collection-assertions "Direct link to Collection Assertions")
+
+```
+// NUnit
+
+CollectionAssert.AreEqual(expected, actual);
+
+CollectionAssert.Contains(collection, item);
+
+CollectionAssert.IsEmpty(collection);
+
+
+
+// TUnit
+
+await Assert.That(actual).IsEquivalentTo(expected);
+
+await Assert.That(collection).Contains(item);
+
+await Assert.That(collection).IsEmpty();
+```
+
+### String Assertions[​](#string-assertions "Direct link to String Assertions")
+
+```
+// NUnit
+
+StringAssert.Contains(substring, text);
+
+StringAssert.StartsWith(prefix, text);
+
+StringAssert.EndsWith(suffix, text);
+
+
+
+// TUnit
+
+await Assert.That(text).Contains(substring);
+
+await Assert.That(text).StartsWith(prefix);
+
+await Assert.That(text).EndsWith(suffix);
+```
+
+### Exception Testing[​](#exception-testing "Direct link to Exception Testing")
+
+```
+// NUnit
+
+Assert.Throws<InvalidOperationException>(() => DoSomething());
+
+Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
+
+
+
+// TUnit
+
+await Assert.ThrowsAsync<InvalidOperationException>(() => DoSomething());
+
+await Assert.ThrowsAsync<InvalidOperationException>(async () => await DoSomethingAsync());
+```
+
+### Test Data Sources[​](#test-data-sources "Direct link to Test Data Sources")
+
+#### TestCaseSource[​](#testcasesource "Direct link to TestCaseSource")
+
+```
+// NUnit
+
+[TestCaseSource(nameof(TestData))]
+
+public void TestMethod(int value, string text)
+
+{
+
+    // Test implementation
+
+}
+
+
+
+private static IEnumerable TestData()
+
+{
+
+    yield return new object[] { 1, "one" };
+
+    yield return new object[] { 2, "two" };
+
+}
+
+
+
+// TUnit
+
+[MethodDataSource(nameof(TestData))]
+
+public async Task TestMethod(int value, string text)
+
+{
+
+    // Test implementation
+
+}
+
+
+
+private static IEnumerable<(int, string)> TestData()
+
+{
+
+    yield return (1, "one");
+
+    yield return (2, "two");
+
+}
+```
+
+### Parameterized Tests[​](#parameterized-tests "Direct link to Parameterized Tests")
+
+```
+// NUnit
+
+[TestCase(1, 2, 3)]
+
+[TestCase(10, 20, 30)]
+
+public void AdditionTest(int a, int b, int expected)
+
+{
+
+    Assert.AreEqual(expected, a + b);
+
+}
+
+
+
+// TUnit
+
+[Test]
+
+[Arguments(1, 2, 3)]
+
+[Arguments(10, 20, 30)]
+
+public async Task AdditionTest(int a, int b, int expected)
+
+{
+
+    await Assert.That(a + b).IsEqualTo(expected);
+
+}
+```
+
+### Test Output[​](#test-output "Direct link to Test Output")
+
+```
+// NUnit
+
+TestContext.WriteLine("Test output");
+
+TestContext.Out.WriteLine("More output");
+
+
+
+// TUnit (inject TestContext)
+
+public async Task MyTest(TestContext context)
+
+{
+
+    context.Output.WriteLine("Test output");
+
+    context.Output.WriteLine("More output");
+
+}
+```
+
+### Test Attachments[​](#test-attachments "Direct link to Test Attachments")
+
+```
+// NUnit
+
+[Test]
+
+public void TestWithAttachment()
+
+{
+
+    // Test logic
+
+    var logPath = "test-log.txt";
+
+    File.WriteAllText(logPath, "test logs");
+
+    
+
+    TestContext.AddTestAttachment(logPath, "Test Log");
+
+}
+
+
+
+// TUnit
+
+[Test]
+
+public async Task TestWithAttachment()
+
+{
+
+    // Test logic
+
+    var logPath = "test-log.txt";
+
+    await File.WriteAllTextAsync(logPath, "test logs");
+
+    
+
+    TestContext.Current!.Output.AttachArtifact(new Artifact
+
+    {
+
+        File = new FileInfo(logPath),
+
+        DisplayName = "Test Log",
+
+        Description = "Logs captured during test execution"  // Optional
+
+    });
+
+}
+```
+
+For more information about working with test artifacts, including session-level artifacts and best practices, see the [Test Artifacts guide](/docs/writing-tests/artifacts.md).
+
+### Combinatorial Testing[​](#combinatorial-testing "Direct link to Combinatorial Testing")
+
+#### Values and Combinatorial → Matrix[​](#values-and-combinatorial--matrix "Direct link to Values and Combinatorial → Matrix")
+
+**NUnit Code:**
+
+```
+public class CombinationTests
+
+{
+
+    [Test]
+
+    public void TestCombinations(
+
+        [Values(1, 2, 3)] int x,
+
+        [Values("a", "b")] string y)
+
+    {
+
+        Assert.That(x, Is.GreaterThan(0));
+
+        Assert.That(y, Is.Not.Null);
+
+    }
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+public class CombinationTests
+
+{
+
+    [Test]
+
+    public async Task TestCombinations(
+
+        [Matrix(1, 2, 3)] int x,
+
+        [Matrix("a", "b")] string y)
+
+    {
+
+        await Assert.That(x).IsGreaterThan(0);
+
+        await Assert.That(y).IsNotNull();
+
+    }
+
+}
+```
+
+**Key Changes:**
+
+* `[Values(...)]` attributes on parameters → `[Matrix(...)]` attributes on parameters
+* All combinations are automatically generated (3 × 2 = 6 test cases)
+* Each parameter gets its own `[Matrix]` attribute with the values to test
+
+### Test Fixture with Parameters[​](#test-fixture-with-parameters "Direct link to Test Fixture with Parameters")
+
+#### Parameterized TestFixture[​](#parameterized-testfixture "Direct link to Parameterized TestFixture")
+
+**NUnit Code:**
+
+```
+[TestFixture("Development")]
+
+[TestFixture("Staging")]
+
+[TestFixture("Production")]
+
+public class EnvironmentTests
+
+{
+
+    private readonly string _environment;
+
+
+
+    public EnvironmentTests(string environment)
+
+    {
+
+        _environment = environment;
+
+    }
+
+
+
+    [Test]
+
+    public void ConfigurationIsValid()
+
+    {
+
+        var config = LoadConfiguration(_environment);
+
+        Assert.That(config, Is.Not.Null);
+
+        Assert.That(config.IsValid, Is.True);
+
+    }
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+[Arguments("Development")]
+
+[Arguments("Staging")]
+
+[Arguments("Production")]
+
+public class EnvironmentTests(string environment)
+
+{
+
+    [Test]
+
+    public async Task ConfigurationIsValid()
+
+    {
+
+        var config = LoadConfiguration(environment);
+
+        await Assert.That(config).IsNotNull();
+
+        await Assert.That(config.IsValid).IsTrue();
+
+    }
+
+}
+```
+
+**Key Changes:**
+
+* `[TestFixture(...)]` with parameters → `[Arguments(...)]` on the class
+* Primary constructor for cleaner syntax
+* All tests in the class are repeated for each argument set
+
+### Complete Test Class Example[​](#complete-test-class-example "Direct link to Complete Test Class Example")
+
+**NUnit Code:**
+
+```
+[TestFixture]
+
+public class ProductServiceTests
+
+{
+
+    private IDatabase _database;
+
+    private ProductService _productService;
+
+
+
+    [OneTimeSetUp]
+
+    public void OneTimeSetup()
+
+    {
+
+        // Runs once before all tests in the class
+
+        _database = new InMemoryDatabase();
+
+        _database.Initialize();
+
+    }
+
+
+
+    [SetUp]
+
+    public void Setup()
+
+    {
+
+        // Runs before each test
+
+        _productService = new ProductService(_database);
+
+    }
+
+
+
+    [Test]
+
+    [Category("Unit")]
+
+    [TestCase("Widget", 10.99)]
+
+    [TestCase("Gadget", 25.50)]
+
+    public void CreateProduct_WithValidData_Succeeds(string name, decimal price)
+
+    {
+
+        var product = _productService.CreateProduct(name, price);
+
+
+
+        Assert.That(product, Is.Not.Null);
+
+        Assert.That(product.Name, Is.EqualTo(name));
+
+        Assert.That(product.Price, Is.EqualTo(price));
+
+    }
+
+
+
+    [Test]
+
+    [Category("Unit")]
+
+    public void GetProduct_WhenNotFound_ReturnsNull()
+
+    {
+
+        var product = _productService.GetProduct(999);
+
+        Assert.That(product, Is.Null);
+
+    }
+
+
+
+    [Test]
+
+    [TestCaseSource(nameof(InvalidProductData))]
+
+    public void CreateProduct_WithInvalidData_ThrowsException(string name, decimal price)
+
+    {
+
+        Assert.Throws<ArgumentException>(() => _productService.CreateProduct(name, price));
+
+    }
+
+
+
+    private static IEnumerable InvalidProductData()
+
+    {
+
+        yield return new object[] { "", 10.00 };
+
+        yield return new object[] { "Product", -5.00 };
+
+        yield return new object[] { null, 10.00 };
+
+    }
+
+
+
+    [TearDown]
+
+    public void TearDown()
+
+    {
+
+        // Runs after each test
+
+        _productService?.Dispose();
+
+    }
+
+
+
+    [OneTimeTearDown]
+
+    public void OneTimeTearDown()
+
+    {
+
+        // Runs once after all tests in the class
+
+        _database?.Dispose();
+
+    }
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+public class ProductServiceTests
+
+{
+
+    private IDatabase _database = null!;
+
+    private ProductService _productService = null!;
+
+
+
+    [Before(Class)]
+
+    public async Task ClassSetup()
+
+    {
+
+        // Runs once before all tests in the class
+
+        _database = new InMemoryDatabase();
+
+        await _database.InitializeAsync();
+
+    }
+
+
+
+    [Before(Test)]
+
+    public async Task Setup()
+
+    {
+
+        // Runs before each test
+
+        _productService = new ProductService(_database);
+
+    }
+
+
+
+    [Test]
+
+    [Property("Category", "Unit")]
+
+    [Arguments("Widget", 10.99)]
+
+    [Arguments("Gadget", 25.50)]
+
+    public async Task CreateProduct_WithValidData_Succeeds(string name, decimal price)
+
+    {
+
+        var product = _productService.CreateProduct(name, price);
+
+
+
+        await Assert.That(product).IsNotNull();
+
+        await Assert.That(product.Name).IsEqualTo(name);
+
+        await Assert.That(product.Price).IsEqualTo(price);
+
+    }
+
+
+
+    [Test]
+
+    [Property("Category", "Unit")]
+
+    public async Task GetProduct_WhenNotFound_ReturnsNull()
+
+    {
+
+        var product = _productService.GetProduct(999);
+
+        await Assert.That(product).IsNull();
+
+    }
+
+
+
+    [Test]
+
+    [MethodDataSource(nameof(InvalidProductData))]
+
+    public async Task CreateProduct_WithInvalidData_ThrowsException(string name, decimal price)
+
+    {
+
+        await Assert.ThrowsAsync<ArgumentException>(
+
+            () => _productService.CreateProduct(name, price));
+
+    }
+
+
+
+    private static IEnumerable<(string name, decimal price)> InvalidProductData()
+
+    {
+
+        yield return ("", 10.00m);
+
+        yield return ("Product", -5.00m);
+
+        yield return (null!, 10.00m);
+
+    }
+
+
+
+    [After(Test)]
+
+    public async Task Cleanup()
+
+    {
+
+        // Runs after each test
+
+        _productService?.Dispose();
+
+    }
+
+
+
+    [After(Class)]
+
+    public async Task ClassCleanup()
+
+    {
+
+        // Runs once after all tests in the class
+
+        _database?.Dispose();
+
+    }
+
+}
+```
+
+**Key Changes:**
+
+* `[TestFixture]` attribute removed (not needed)
+* `[OneTimeSetUp]` → `[Before(Class)]` (and can be async)
+* `[SetUp]` → `[Before(Test)]`
+* `[TearDown]` → `[After(Test)]`
+* `[OneTimeTearDown]` → `[After(Class)]`
+* `[TestCase(...)]` → `[Arguments(...)]`
+* Data sources return tuples instead of `object[]`
+* All assertions are awaited
+
+### Range Testing[​](#range-testing "Direct link to Range Testing")
+
+**NUnit Code:**
+
+```
+[Test]
+
+public void ProcessValue_WithRange([Range(1, 10)] int value)
+
+{
+
+    var result = ProcessValue(value);
+
+    Assert.That(result, Is.GreaterThan(0));
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+[Test]
+
+[MethodDataSource(nameof(GetRange))]
+
+public async Task ProcessValue_WithRange(int value)
+
+{
+
+    var result = ProcessValue(value);
+
+    await Assert.That(result).IsGreaterThan(0);
+
+}
+
+
+
+private static IEnumerable<int> GetRange()
+
+{
+
+    return Enumerable.Range(1, 10);
+
+}
+```
+
+### Custom Test Context Properties[​](#custom-test-context-properties "Direct link to Custom Test Context Properties")
+
+**NUnit Code:**
+
+```
+[Test]
+
+public void Test_WithContextProperties()
+
+{
+
+    TestContext.WriteLine($"Test Name: {TestContext.CurrentContext.Test.Name}");
+
+    TestContext.WriteLine($"Test Status: {TestContext.CurrentContext.Result.Outcome.Status}");
+
+
+
+    // Test implementation
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+[Test]
+
+public async Task Test_WithContextProperties(TestContext context)
+
+{
+
+    context.Output.WriteLine($"Test Name: {context.Metadata.TestName}");
+
+    context.Output.WriteLine($"Test ID: {context.Metadata.TestDetails.TestId}");
+
+    context.Output.WriteLine($"Class Name: {context.Metadata.TestDetails.ClassType.Name}");
+
+
+
+    // Test implementation
+
+}
+```
+
+### Assertion Constraint Mapping[​](#assertion-constraint-mapping "Direct link to Assertion Constraint Mapping")
+
+**NUnit Code:**
+
+```
+[Test]
+
+public void ComplexAssertions()
+
+{
+
+    var value = 42;
+
+    var text = "Hello World";
+
+    var list = new[] { 1, 2, 3, 4, 5 };
+
+
+
+    // Comparison assertions
+
+    Assert.That(value, Is.EqualTo(42));
+
+    Assert.That(value, Is.Not.EqualTo(0));
+
+    Assert.That(value, Is.GreaterThan(40));
+
+    Assert.That(value, Is.LessThanOrEqualTo(50));
+
+    Assert.That(value, Is.InRange(40, 45));
+
+
+
+    // String assertions
+
+    Assert.That(text, Does.StartWith("Hello"));
+
+    Assert.That(text, Does.EndWith("World"));
+
+    Assert.That(text, Does.Contain("llo Wor"));
+
+    Assert.That(text, Does.Match(@"^Hello"));
+
+
+
+    // Collection assertions
+
+    Assert.That(list, Has.Count.EqualTo(5));
+
+    Assert.That(list, Has.Member(3));
+
+    Assert.That(list, Has.All.GreaterThan(0));
+
+    Assert.That(list, Is.Ordered);
+
+
+
+    // Compound assertions
+
+    Assert.That(value, Is.GreaterThan(40).And.LessThan(50));
+
+    Assert.That(text, Is.Not.Null.And.Not.Empty);
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+[Test]
+
+public async Task ComplexAssertions()
+
+{
+
+    var value = 42;
+
+    var text = "Hello World";
+
+    var list = new[] { 1, 2, 3, 4, 5 };
+
+
+
+    // Comparison assertions
+
+    await Assert.That(value).IsEqualTo(42);
+
+    await Assert.That(value).IsNotEqualTo(0);
+
+    await Assert.That(value).IsGreaterThan(40);
+
+    await Assert.That(value).IsLessThanOrEqualTo(50);
+
+    await Assert.That(value).IsBetween(40, 45);
+
+
+
+    // String assertions
+
+    await Assert.That(text).StartsWith("Hello");
+
+    await Assert.That(text).EndsWith("World");
+
+    await Assert.That(text).Contains("llo Wor");
+
+    await Assert.That(text).Matches(@"^Hello");
+
+
+
+    // Collection assertions
+
+    await Assert.That(list).Count().IsEqualTo(5);
+
+    await Assert.That(list).Contains(3);
+
+    await Assert.That(list).All().Satisfy(item => item.IsGreaterThan(0));
+
+    await Assert.That(list).IsInOrder();
+
+
+
+    // Compound assertions (using And/Or)
+
+    await Assert.That(value).IsGreaterThan(40).And.IsLessThan(50);
+
+    await Assert.That(text).IsNotNull().And.IsNotEmpty();
+
+}
+```
+
+### SetUpFixture for Assembly-Level Hooks[​](#setupfixture-for-assembly-level-hooks "Direct link to SetUpFixture for Assembly-Level Hooks")
+
+**NUnit Code:**
+
+```
+[SetUpFixture]
+
+public class AssemblySetup
+
+{
+
+    [OneTimeSetUp]
+
+    public void RunBeforeAnyTests()
+
+    {
+
+        // Initialize resources needed by all tests
+
+        Console.WriteLine("Assembly setup running");
+
+    }
+
+
+
+    [OneTimeTearDown]
+
+    public void RunAfterAllTests()
+
+    {
+
+        // Cleanup resources
+
+        Console.WriteLine("Assembly cleanup running");
+
+    }
+
+}
+```
+
+**TUnit Equivalent:**
+
+```
+public static class AssemblyHooks
+
+{
+
+    [Before(Assembly)]
+
+    public static async Task AssemblySetup()
+
+    {
+
+        // Initialize resources needed by all tests
+
+        Console.WriteLine("Assembly setup running");
+
+    }
+
+
+
+    [After(Assembly)]
+
+    public static async Task AssemblyCleanup()
+
+    {
+
+        // Cleanup resources
+
+        Console.WriteLine("Assembly cleanup running");
+
+    }
+
+}
+```
+
+**Key Changes:**
+
+* `[SetUpFixture]` → simple static class
+* `[OneTimeSetUp]` → `[Before(Assembly)]`
+* `[OneTimeTearDown]` → `[After(Assembly)]`
+* Methods must be static
+* Can be async
+
+## Key Differences to Note[​](#key-differences-to-note "Direct link to Key Differences to Note")
+
+1. **Async by Default**: TUnit tests and assertions are async by default. Add `async Task` to your test methods and `await` assertions.
+
+2. **No TestFixture Required**: TUnit doesn't require a `[TestFixture]` attribute on test classes.
+
+3. **Fluent Assertions**: TUnit uses a fluent assertion style with `Assert.That()` as the starting point.
+
+4. **Dependency Injection**: TUnit has built-in support for dependency injection in test classes and methods.
+
+5. **Hooks Instead of Setup/Teardown**: TUnit uses `[Before]` and `[After]` attributes with `HookType` to specify when they run.
+
+6. **TestContext Injection**: Instead of a static `TestContext`, TUnit injects it as a parameter where needed.
+
+7. **Isolated Test Instances**: Each test runs in its own class instance (NUnit's default behavior can be different).
+
+## Code Coverage[​](#code-coverage "Direct link to Code Coverage")
+
+TUnit includes built-in code coverage support. Do **not** use Coverlet — it is incompatible with TUnit's Microsoft.Testing.Platform.
+
+See the [Code Coverage guide](/docs/extending/code-coverage.md) for setup and configuration.

@@ -1,0 +1,1105 @@
+# Extension Points
+
+TUnit provides several extension points that allow you to customize and extend the framework's behavior. These interfaces enable you to implement custom test execution logic, hook into the test lifecycle, and control parallel execution.
+
+## ITestExecutor[​](#itestexecutor "Direct link to ITestExecutor")
+
+The `ITestExecutor` interface allows you to customize how tests are executed. This is useful for scenarios like:
+
+* Adding custom logging or telemetry
+* Implementing custom retry logic
+* Wrapping test execution with special context
+* Implementing custom timeout behavior
+
+### Interface Definition[​](#interface-definition "Direct link to Interface Definition")
+
+```
+public interface ITestExecutor
+
+{
+
+    ValueTask ExecuteTest(TestContext context, Func<ValueTask> action);
+
+}
+```
+
+### Example Implementation[​](#example-implementation "Direct link to Example Implementation")
+
+```
+public class TimingTestExecutor : ITestExecutor
+
+{
+
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
+
+    {
+
+        var stopwatch = Stopwatch.StartNew();
+
+
+
+        try
+
+        {
+
+            await action();
+
+        }
+
+        finally
+
+        {
+
+            stopwatch.Stop();
+
+            context.WriteLine($"Test execution took: {stopwatch.ElapsedMilliseconds}ms");
+
+
+
+            // You could also send this to telemetry
+
+            TelemetryClient.TrackMetric("TestDuration", stopwatch.ElapsedMilliseconds);
+
+        }
+
+    }
+
+}
+```
+
+### Registering a Test Executor[​](#registering-a-test-executor "Direct link to Registering a Test Executor")
+
+To use your custom test executor, apply the `TestExecutorAttribute` at the assembly, class, or method level:
+
+```
+// Assembly-level (applies to all tests in the assembly)
+
+[assembly: TestExecutor<TimingTestExecutor>]
+
+
+
+// Or use the non-generic version
+
+[assembly: TestExecutor(typeof(TimingTestExecutor))]
+
+
+
+// Class-level (applies to all tests in the class)
+
+[TestExecutor<TimingTestExecutor>]
+
+public class MyTestClass
+
+{
+
+    [Test]
+
+    public async Task MyTest()
+
+    {
+
+        // Test logic here
+
+    }
+
+}
+
+
+
+// Method-level (applies to specific test)
+
+[Test]
+
+[TestExecutor<TimingTestExecutor>]
+
+public async Task MyTest()
+
+{
+
+    // Test logic here
+
+}
+```
+
+### STA Thread Example[​](#sta-thread-example "Direct link to STA Thread Example")
+
+A common use case for `ITestExecutor` is running tests on an STA thread (required by some COM / UI components on Windows):
+
+```
+[Test]
+
+[TestExecutor<STAThreadExecutor>]
+
+public async Task With_STA()
+
+{
+
+    await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.STA);
+
+}
+
+
+
+[Test]
+
+public async Task Without_STA()
+
+{
+
+    await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEqualTo(ApartmentState.MTA);
+
+}
+```
+
+## IHookExecutor[​](#ihookexecutor "Direct link to IHookExecutor")
+
+The `IHookExecutor` interface allows you to customize how setup and cleanup hooks are executed. This is useful for:
+
+* Adding error handling around hooks
+* Implementing hook-specific logging
+* Managing shared resources during hooks
+
+### Interface Definition[​](#interface-definition-1 "Direct link to Interface Definition")
+
+```
+public interface IHookExecutor
+
+{
+
+    ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteBeforeTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteBeforeAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteBeforeTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action);
+
+
+
+    ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteAfterTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteAfterAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action);
+
+}
+```
+
+**Note**: This interface has specific methods for each hook type (Before/After × TestDiscovery/TestSession/Assembly/Class/Test). Each method receives:
+
+* `MethodMetadata hookMethodInfo`: Information about the hook method being executed
+* A context object specific to the hook type
+* The `action` to execute (the actual hook logic)
+
+### Example Implementation[​](#example-implementation-1 "Direct link to Example Implementation")
+
+```
+public class LoggingHookExecutor : IHookExecutor
+
+{
+
+    public async ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action)
+
+    {
+
+        Console.WriteLine($"Before test discovery hook: {hookMethodInfo.MethodName}");
+
+        await action();
+
+    }
+
+
+
+    public async ValueTask ExecuteBeforeTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+
+    {
+
+        Console.WriteLine($"Before test session hook: {hookMethodInfo.MethodName}");
+
+        await action();
+
+    }
+
+
+
+    public async ValueTask ExecuteBeforeAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+
+    {
+
+        Console.WriteLine($"Before assembly hook: {hookMethodInfo.MethodName}");
+
+        await action();
+
+    }
+
+
+
+    public async ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+
+    {
+
+        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
+
+
+
+        try
+
+        {
+
+            await action();
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Console.WriteLine($"Hook failed: {ex.Message}");
+
+            throw;
+
+        }
+
+    }
+
+
+
+    public async ValueTask ExecuteBeforeTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
+
+    {
+
+        Console.WriteLine($"Before test hook: {hookMethodInfo.MethodName} for test {context.Metadata.TestName}");
+
+        await action();
+
+    }
+
+
+
+    public async ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action)
+
+    {
+
+        await action();
+
+        Console.WriteLine($"After test discovery hook: {hookMethodInfo.MethodName}");
+
+    }
+
+
+
+    public async ValueTask ExecuteAfterTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+
+    {
+
+        await action();
+
+        Console.WriteLine($"After test session hook: {hookMethodInfo.MethodName}");
+
+    }
+
+
+
+    public async ValueTask ExecuteAfterAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+
+    {
+
+        await action();
+
+        Console.WriteLine($"After assembly hook: {hookMethodInfo.MethodName}");
+
+    }
+
+
+
+    public async ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+
+    {
+
+        await action();
+
+        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.ClassType.Name}");
+
+    }
+
+
+
+    public async ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
+
+    {
+
+        await action();
+
+        Console.WriteLine($"After test hook: {hookMethodInfo.MethodName} for test {context.Metadata.TestName}");
+
+    }
+
+}
+```
+
+### Registering a Hook Executor[​](#registering-a-hook-executor "Direct link to Registering a Hook Executor")
+
+There are two ways to register a hook executor:
+
+#### 1. Using the `[HookExecutor<T>]` attribute[​](#1-using-the-hookexecutort-attribute "Direct link to 1-using-the-hookexecutort-attribute")
+
+Apply the `[HookExecutor<T>]` attribute directly to your hook methods:
+
+```
+// On a specific hook method
+
+[Before(Test)]
+
+[HookExecutor<LoggingHookExecutor>]
+
+public async Task SetUp(TestContext context)
+
+{
+
+    // This hook runs through the custom executor
+
+}
+
+
+
+[After(Class)]
+
+[HookExecutor<LoggingHookExecutor>]
+
+public static async Task ClassCleanup(ClassHookContext context)
+
+{
+
+    // This hook also runs through the custom executor
+
+}
+```
+
+You can also apply it at the class or assembly level to affect all hooks in that scope:
+
+```
+// Assembly-level (applies to all hooks in the assembly)
+
+[assembly: HookExecutor<LoggingHookExecutor>]
+
+
+
+// Class-level (applies to all hooks in the class)
+
+[HookExecutor<LoggingHookExecutor>]
+
+public class MyTestClass
+
+{
+
+    [Before(Test)]
+
+    public async Task SetUp(TestContext context) { }
+
+
+
+    [After(Test)]
+
+    public async Task TearDown(TestContext context) { }
+
+}
+```
+
+#### 2. Using `SetHookExecutor` programmatically[​](#2-using-sethookexecutor-programmatically "Direct link to 2-using-sethookexecutor-programmatically")
+
+You can set a hook executor at runtime via `ITestRegisteredEventReceiver`. This is useful when you want the same executor for both tests and hooks:
+
+```
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+
+public class DispatchAttribute : Attribute, ITestRegisteredEventReceiver
+
+{
+
+    public int Order => 0;
+
+
+
+    public ValueTask OnTestRegistered(TestRegisteredContext context)
+
+    {
+
+        var executor = new MyCustomExecutor();
+
+        context.SetTestExecutor(executor);
+
+        context.SetHookExecutor(executor);
+
+        return default;
+
+    }
+
+}
+
+
+
+// Usage
+
+[Dispatch]
+
+public class MyTestClass
+
+{
+
+    [Before(Test)]
+
+    public async Task SetUp(TestContext context)
+
+    {
+
+        // Runs through MyCustomExecutor
+
+    }
+
+
+
+    [Test]
+
+    public async Task MyTest()
+
+    {
+
+        // Also runs through MyCustomExecutor
+
+    }
+
+}
+```
+
+**Note:** `SetHookExecutor` applies to test-level hooks (`[Before(Test)]` / `[After(Test)]`). For session, assembly, or class-level hooks, use the `[HookExecutor<T>]` attribute directly on the hook method.
+
+## Event Receivers[​](#event-receivers "Direct link to Event Receivers")
+
+TUnit provides several event receiver interfaces that allow you to hook into different stages of the test lifecycle:
+
+### ITestDiscoveryEventReceiver[​](#itestdiscoveryeventreceiver "Direct link to ITestDiscoveryEventReceiver")
+
+Notified when a test is discovered during the discovery phase.
+
+```
+public interface ITestDiscoveryEventReceiver
+
+{
+
+    ValueTask OnTestDiscovered(DiscoveredTestContext context);
+
+}
+```
+
+### ITestRegisteredEventReceiver[​](#itestregisteredeventreceiver "Direct link to ITestRegisteredEventReceiver")
+
+Notified when a test is registered with the test engine.
+
+```
+public interface ITestRegisteredEventReceiver
+
+{
+
+    ValueTask OnTestRegistered(TestRegisteredContext context);
+
+}
+```
+
+### ITestStartEventReceiver[​](#iteststarteventreceiver "Direct link to ITestStartEventReceiver")
+
+Notified when a test starts execution.
+
+```
+public interface ITestStartEventReceiver
+
+{
+
+    ValueTask OnTestStart(TestContext context);
+
+}
+```
+
+### ITestEndEventReceiver[​](#itestendeventreceiver "Direct link to ITestEndEventReceiver")
+
+Notified when a test completes execution.
+
+```
+public interface ITestEndEventReceiver
+
+{
+
+    ValueTask OnTestEnd(TestContext context);
+
+}
+```
+
+### ITestRetryEventReceiver[​](#itestretryeventreceiver "Direct link to ITestRetryEventReceiver")
+
+Notified when a test is retried.
+
+```
+public interface ITestRetryEventReceiver
+
+{
+
+    ValueTask OnTestRetry(TestContext context, int retryAttempt);
+
+}
+```
+
+### Example Event Receiver Implementation[​](#example-event-receiver-implementation "Direct link to Example Event Receiver Implementation")
+
+```
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+
+public class TestReporterAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver
+
+{
+
+    public int Order => 0;
+
+
+
+    public async ValueTask OnTestStart(TestContext context)
+
+    {
+
+        await ReportingService.ReportTestStarted(
+
+            context.GetDisplayName(),
+
+            context.Metadata.TestDetails.ClassType.FullName,
+
+            context.Metadata.TestDetails.TestMethodArguments
+
+        );
+
+    }
+
+
+
+    public async ValueTask OnTestEnd(TestContext context)
+
+    {
+
+        await ReportingService.ReportTestCompleted(
+
+            context.GetDisplayName(),
+
+            context.Execution.Result?.State,
+
+            context.Execution.Result?.Duration,
+
+            context.Execution.Result?.Exception?.Message
+
+        );
+
+    }
+
+}
+```
+
+### Registering Event Receivers[​](#registering-event-receivers "Direct link to Registering Event Receivers")
+
+Event receivers are registered by implementing the interfaces in an attribute class, then applying that attribute at the assembly, class, or method level:
+
+```
+// Create an attribute that implements the event receiver interfaces
+
+[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method)]
+
+public class CustomEventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestEndEventReceiver
+
+{
+
+    public int Order => 0;
+
+    
+
+    public ValueTask OnTestStart(TestContext context)
+
+    {
+
+        Console.WriteLine($"Test starting: {context.GetDisplayName()}");
+
+        return default;
+
+    }
+
+    
+
+    public ValueTask OnTestEnd(TestContext context)
+
+    {
+
+        Console.WriteLine($"Test ended: {context.GetDisplayName()} - {context.Execution.Result?.State}");
+
+        return default;
+
+    }
+
+}
+
+
+
+// Apply at assembly level
+
+[assembly: CustomEventReceiver]
+
+
+
+// Or at class level
+
+[CustomEventReceiver]
+
+public class MyTestClass
+
+{
+
+    [Test]
+
+    public async Task MyTest() { }
+
+}
+
+
+
+// Or at method level
+
+[Test]
+
+[CustomEventReceiver]
+
+public async Task MyTest() { }
+```
+
+## Parallel Execution Control[​](#parallel-execution-control "Direct link to Parallel Execution Control")
+
+### IParallelLimit[​](#iparallellimit "Direct link to IParallelLimit")
+
+Controls the maximum degree of parallelism for tests.
+
+```
+public interface IParallelLimit
+
+{
+
+    int Limit { get; }
+
+}
+```
+
+Example:
+
+```
+public class DatabaseParallelLimit : IParallelLimit
+
+{
+
+    public int Limit => 5; // Max 5 database tests in parallel
+
+}
+
+
+
+[ParallelLimiter<DatabaseParallelLimit>]
+
+public class DatabaseTests
+
+{
+
+    // All tests in this class will be limited to 5 parallel executions
+
+}
+```
+
+### IParallelConstraint[​](#iparallelconstraint "Direct link to IParallelConstraint")
+
+Defines constraints for parallel execution. This is a marker interface with no members - it's used to identify types that represent parallel execution constraints.
+
+```
+public interface IParallelConstraint
+
+{
+
+}
+```
+
+**Note**: `IParallelConstraint` is a marker interface. The actual constraint logic is handled by TUnit's built-in constraint implementations like `NotInParallelConstraint` and `ParallelGroupConstraint`.
+
+Example:
+
+```
+public class FileAccessTests
+
+{
+
+    [Test]
+
+    [NotInParallel("SharedFile")]
+
+    public async Task Test1()
+
+    {
+
+        // This test won't run in parallel with other tests
+
+        // that have the same constraint key "SharedFile"
+
+        await File.WriteAllTextAsync("shared.txt", "test1");
+
+    }
+
+
+
+    [Test]
+
+    [NotInParallel("SharedFile")]
+
+    public async Task Test2()
+
+    {
+
+        // This test won't run in parallel with Test1
+
+        // because they share the same constraint key
+
+        await File.WriteAllTextAsync("shared.txt", "test2");
+
+    }
+
+
+
+    [Test]
+
+    [NotInParallel("Database")]
+
+    public async Task Test3()
+
+    {
+
+        // This test can run in parallel with Test1 and Test2
+
+        // because it has a different constraint key
+
+        await Database.ExecuteAsync("UPDATE users SET status = 'active'");
+
+    }
+
+}
+```
+
+You can also use the `NotInParallel` attribute without arguments to ensure tests don't run in parallel with any other tests:
+
+```
+[Test]
+
+[NotInParallel]
+
+public async Task GloballySerializedTest()
+
+{
+
+    // This test won't run in parallel with any other tests
+
+    // marked with [NotInParallel] (no constraint key)
+
+}
+```
+
+## IAsyncInitializer[​](#iasyncinitializer "Direct link to IAsyncInitializer")
+
+Provides async initialization support for test classes.
+
+```
+public interface IAsyncInitializer
+
+{
+
+    Task InitializeAsync();
+
+}
+```
+
+Example:
+
+```
+public class DatabaseTests : IAsyncInitializer
+
+{
+
+    private DatabaseConnection _connection;
+
+
+
+    public async Task InitializeAsync()
+
+    {
+
+        _connection = await DatabaseConnection.CreateAsync();
+
+        await _connection.MigrateAsync();
+
+    }
+
+
+
+    [Test]
+
+    public async Task TestDatabaseOperation()
+
+    {
+
+        // _connection is guaranteed to be initialized
+
+        await _connection.ExecuteAsync("SELECT 1");
+
+    }
+
+}
+```
+
+## IAsyncDiscoveryInitializer[​](#iasyncdiscoveryinitializer "Direct link to IAsyncDiscoveryInitializer")
+
+For scenarios requiring initialization during test discovery rather than execution, implement `IAsyncDiscoveryInitializer`:
+
+```
+namespace TUnit.Core.Interfaces;
+
+
+
+/// <summary>
+
+/// Initializes during test discovery phase, before test enumeration.
+
+/// Use when data sources need access to initialized data during discovery.
+
+/// </summary>
+
+public interface IAsyncDiscoveryInitializer : IAsyncInitializer;
+```
+
+**When to use:**
+
+* `InstanceMethodDataSource` accessing dynamically loaded data
+* Test case enumeration depends on async-loaded fixtures
+* Discovery-time data generation
+
+**Performance consideration:** Discovery runs frequently (IDE reloads, `--list-tests`, CI enumeration), so avoid expensive operations when possible. Prefer predefined data over discovery-time initialization when feasible.
+
+Example:
+
+```
+// Fixture that loads test cases during discovery
+
+public class TestCaseFixture : IAsyncDiscoveryInitializer, IAsyncDisposable
+
+{
+
+    private List<string> _testCases = [];
+
+
+
+    public async Task InitializeAsync()
+
+    {
+
+        // This runs during DISCOVERY, not just execution
+
+        _testCases = await LoadTestCasesFromDatabaseAsync();
+
+    }
+
+
+
+    public IEnumerable<string> GetTestCases() => _testCases;
+
+
+
+    public async ValueTask DisposeAsync()
+
+    {
+
+        _testCases.Clear();
+
+    }
+
+}
+
+
+
+public class MyTests
+
+{
+
+    [ClassDataSource<TestCaseFixture>(Shared = SharedType.PerClass)]
+
+    public required TestCaseFixture Fixture { get; init; }
+
+
+
+    public IEnumerable<string> TestCases => Fixture.GetTestCases();
+
+
+
+    [Test]
+
+    [InstanceMethodDataSource(nameof(TestCases))]
+
+    public async Task MyTest(string testCase)
+
+    {
+
+        // Tests are generated during discovery with initialized data
+
+        await Assert.That(testCase).IsNotNullOrEmpty();
+
+    }
+
+}
+```
+
+See [Property Injection - Discovery Phase Initialization](/docs/writing-tests/property-injection.md#discovery-phase-initialization) for detailed guidance and best practices.
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+1. **Keep Extensions Focused**: Each extension should have a single, clear responsibility.
+
+2. **Handle Exceptions Gracefully**: Always wrap the execution of the original body in try-catch blocks.
+
+3. **Avoid State**: Extensions should be stateless when possible. If state is needed, ensure it's thread-safe.
+
+4. **Document Behavior**: Clearly document what your extension does and any side effects.
+
+5. **Test Your Extensions**: Write tests for your custom extensions to ensure they behave correctly.
+
+6. **Consider Performance**: Extensions run for every test, so keep them lightweight.
+
+## Common Use Cases[​](#common-use-cases "Direct link to Common Use Cases")
+
+### Cross-Cutting Concerns[​](#cross-cutting-concerns "Direct link to Cross-Cutting Concerns")
+
+* Logging and telemetry
+* Performance monitoring
+* Resource management
+* Security context setup
+
+### Integration Testing[​](#integration-testing "Direct link to Integration Testing")
+
+* Database transaction management
+* HTTP client configuration
+* Mock server setup/teardown
+* Container orchestration
+
+### Compliance and Auditing[​](#compliance-and-auditing "Direct link to Compliance and Auditing")
+
+* Test execution auditing
+* Compliance logging
+* Screenshot capture for UI tests
+* Result archival
+
+## Example: Database Transaction Extension[​](#example-database-transaction-extension "Direct link to Example: Database Transaction Extension")
+
+Here's a complete example that wraps each test in a database transaction:
+
+```
+public class TransactionalTestExecutor : ITestExecutor
+
+{
+
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
+
+    {
+
+        // Get the database connection from DI
+
+        var dbContext = context.GetService<ApplicationDbContext>();
+
+
+
+        using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+
+
+        try
+
+        {
+
+            await action();
+
+
+
+            // Rollback instead of commit to keep tests isolated
+
+            await transaction.RollbackAsync();
+
+        }
+
+        catch
+
+        {
+
+            await transaction.RollbackAsync();
+
+            throw;
+
+        }
+
+    }
+
+}
+
+
+
+[TestExecutor<TransactionalTestExecutor>]
+
+public class DatabaseTests
+
+{
+
+    private readonly ApplicationDbContext _dbContext;
+
+
+
+    public DatabaseTests(ApplicationDbContext dbContext)
+
+    {
+
+        _dbContext = dbContext;
+
+    }
+
+
+
+    [Test]
+
+    public async Task CreateUser_ShouldAddToDatabase()
+
+    {
+
+        // This test runs in a transaction that's rolled back
+
+        var user = new User { Name = "Test User" };
+
+        _dbContext.Users.Add(user);
+
+        await _dbContext.SaveChangesAsync();
+
+
+
+        var count = await _dbContext.Users.CountAsync();
+
+        await Assert.That(count).IsEqualTo(1);
+
+    }
+
+}
+```
+
+This ensures that each test runs in isolation without affecting the database state.

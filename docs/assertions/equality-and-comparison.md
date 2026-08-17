@@ -1,0 +1,604 @@
+# Equality and Comparison Assertions
+
+TUnit provides comprehensive assertions for testing equality and comparing values. These assertions work with any type that implements the appropriate comparison interfaces.
+
+## Basic Equality[​](#basic-equality "Direct link to Basic Equality")
+
+### IsEqualTo[​](#isequalto "Direct link to IsEqualTo")
+
+Tests that two values are equal using the type's `Equals()` method or `==` operator:
+
+```
+[Test]
+
+public async Task Basic_Equality()
+
+{
+
+    var result = 5 + 5;
+
+    await Assert.That(result).IsEqualTo(10);
+
+
+
+    var name = "Alice";
+
+    await Assert.That(name).IsEqualTo("Alice");
+
+
+
+    var isValid = true;
+
+    await Assert.That(isValid).IsEqualTo(true);
+
+}
+```
+
+### IsNotEqualTo[​](#isnotequalto "Direct link to IsNotEqualTo")
+
+Tests that two values are not equal:
+
+```
+[Test]
+
+public async Task Not_Equal()
+
+{
+
+    var actual = CalculateResult();
+
+    await Assert.That(actual).IsNotEqualTo(0);
+
+
+
+    var username = GetUsername();
+
+    await Assert.That(username).IsNotEqualTo("admin");
+
+}
+```
+
+## Reference Equality[​](#reference-equality "Direct link to Reference Equality")
+
+### IsSameReferenceAs[​](#issamereferenceas "Direct link to IsSameReferenceAs")
+
+Tests that two references point to the exact same object instance:
+
+```
+[Test]
+
+public async Task Same_Reference()
+
+{
+
+    var original = new Person { Name = "Alice" };
+
+    var reference = original;
+
+
+
+    await Assert.That(reference).IsSameReferenceAs(original);
+
+}
+```
+
+### IsNotSameReferenceAs[​](#isnotsamereferenceas "Direct link to IsNotSameReferenceAs")
+
+Tests that two references point to different object instances:
+
+```
+[Test]
+
+public async Task Different_References()
+
+{
+
+    var person1 = new Person { Name = "Alice" };
+
+    var person2 = new Person { Name = "Alice" };
+
+
+
+    // Same values, different instances
+
+    await Assert.That(person1).IsNotSameReferenceAs(person2);
+
+    await Assert.That(person1).IsEqualTo(person2); // If equality is overridden
+
+}
+```
+
+## Comparison Assertions[​](#comparison-assertions "Direct link to Comparison Assertions")
+
+All comparison assertions work with types that implement `IComparable<T>` or `IComparable`.
+
+### IsGreaterThan[​](#isgreaterthan "Direct link to IsGreaterThan")
+
+```
+[Test]
+
+public async Task Greater_Than()
+
+{
+
+    var score = 85;
+
+    await Assert.That(score).IsGreaterThan(70);
+
+
+
+    var temperature = 25.5;
+
+    await Assert.That(temperature).IsGreaterThan(20.0);
+
+
+
+    var date = DateTime.Now;
+
+    await Assert.That(date).IsGreaterThan(DateTime.Now.AddDays(-1));
+
+}
+```
+
+### IsGreaterThanOrEqualTo[​](#isgreaterthanorequalto "Direct link to IsGreaterThanOrEqualTo")
+
+```
+[Test]
+
+public async Task Greater_Than_Or_Equal()
+
+{
+
+    var passingGrade = 60;
+
+    await Assert.That(passingGrade).IsGreaterThanOrEqualTo(60);
+
+
+
+    var age = 18;
+
+    await Assert.That(age).IsGreaterThanOrEqualTo(18); // Exactly 18 passes
+
+}
+```
+
+### IsLessThan[​](#islessthan "Direct link to IsLessThan")
+
+```
+[Test]
+
+public async Task Less_Than()
+
+{
+
+    var response_time = 150; // milliseconds
+
+    await Assert.That(response_time).IsLessThan(200);
+
+
+
+    var price = 49.99m;
+
+    await Assert.That(price).IsLessThan(50.00m);
+
+}
+```
+
+### IsLessThanOrEqualTo[​](#islessthanorequalto "Direct link to IsLessThanOrEqualTo")
+
+```
+[Test]
+
+public async Task Less_Than_Or_Equal()
+
+{
+
+    var maxRetries = 3;
+
+    var actualRetries = 3;
+
+    await Assert.That(actualRetries).IsLessThanOrEqualTo(maxRetries);
+
+}
+```
+
+## Range Assertions[​](#range-assertions "Direct link to Range Assertions")
+
+### IsBetween[​](#isbetween "Direct link to IsBetween")
+
+Tests that a value falls within a range (inclusive):
+
+```
+[Test]
+
+public async Task Between_Values()
+
+{
+
+    var percentage = 75;
+
+    await Assert.That(percentage).IsBetween(0, 100);
+
+
+
+    var temperature = 22.5;
+
+    await Assert.That(temperature).IsBetween(20.0, 25.0);
+
+
+
+    var age = 30;
+
+    await Assert.That(age).IsBetween(18, 65);
+
+}
+```
+
+Boundary values are included:
+
+```
+[Test]
+
+public async Task Between_Includes_Boundaries()
+
+{
+
+    await Assert.That(0).IsBetween(0, 10);    // ✅ Passes
+
+    await Assert.That(10).IsBetween(0, 10);   // ✅ Passes
+
+    await Assert.That(5).IsBetween(0, 10);    // ✅ Passes
+
+}
+```
+
+## Numeric-Specific Assertions[​](#numeric-specific-assertions "Direct link to Numeric-Specific Assertions")
+
+### IsPositive[​](#ispositive "Direct link to IsPositive")
+
+Tests that a numeric value is greater than zero:
+
+```
+[Test]
+
+public async Task Positive_Numbers()
+
+{
+
+    var profit = 1500.50m;
+
+    await Assert.That(profit).IsPositive();
+
+
+
+    var count = 5;
+
+    await Assert.That(count).IsPositive();
+
+
+
+    // Works with all numeric types
+
+    await Assert.That(1.5).IsPositive();      // double
+
+    await Assert.That(1.5f).IsPositive();     // float
+
+    await Assert.That(1.5m).IsPositive();     // decimal
+
+    await Assert.That((byte)1).IsPositive();  // byte
+
+    await Assert.That((short)1).IsPositive(); // short
+
+    await Assert.That(1L).IsPositive();       // long
+
+}
+```
+
+### IsNegative[​](#isnegative "Direct link to IsNegative")
+
+Tests that a numeric value is less than zero:
+
+```
+[Test]
+
+public async Task Negative_Numbers()
+
+{
+
+    var loss = -500.25m;
+
+    await Assert.That(loss).IsNegative();
+
+
+
+    var temperature = -5;
+
+    await Assert.That(temperature).IsNegative();
+
+}
+```
+
+## Tolerance for Floating-Point Numbers[​](#tolerance-for-floating-point-numbers "Direct link to Tolerance for Floating-Point Numbers")
+
+When comparing floating-point numbers, you can specify a tolerance to account for rounding errors:
+
+### Double Tolerance[​](#double-tolerance "Direct link to Double Tolerance")
+
+```
+[Test]
+
+public async Task Double_With_Tolerance()
+
+{
+
+    var actual = 1.0 / 3.0; // 0.333333...
+
+    var expected = 0.333;
+
+
+
+    // Without tolerance - might fail due to precision
+
+    // await Assert.That(actual).IsEqualTo(expected);
+
+
+
+    // With tolerance - passes
+
+    await Assert.That(actual).IsEqualTo(expected).Within(0.001);
+
+}
+```
+
+### Float Tolerance[​](#float-tolerance "Direct link to Float Tolerance")
+
+```
+[Test]
+
+public async Task Float_With_Tolerance()
+
+{
+
+    float actual = 3.14159f;
+
+    float expected = 3.14f;
+
+
+
+    await Assert.That(actual).IsEqualTo(expected).Within(0.01f);
+
+}
+```
+
+### Decimal Tolerance[​](#decimal-tolerance "Direct link to Decimal Tolerance")
+
+```
+[Test]
+
+public async Task Decimal_With_Tolerance()
+
+{
+
+    decimal price = 19.995m;
+
+    decimal expected = 20.00m;
+
+
+
+    await Assert.That(price).IsEqualTo(expected).Within(0.01m);
+
+}
+```
+
+### Long Tolerance[​](#long-tolerance "Direct link to Long Tolerance")
+
+```
+[Test]
+
+public async Task Long_With_Tolerance()
+
+{
+
+    var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+    long timestamp = now;
+
+    long expected = now + 50; // Simulate small drift
+
+
+
+    // Allow 100ms difference
+
+    await Assert.That(timestamp).IsEqualTo(expected).Within(100L);
+
+}
+```
+
+## Chaining Comparisons[​](#chaining-comparisons "Direct link to Chaining Comparisons")
+
+Combine multiple comparison assertions:
+
+```
+[Test]
+
+public async Task Chained_Comparisons()
+
+{
+
+    var score = 85;
+
+
+
+    await Assert.That(score)
+
+        .IsGreaterThan(0)
+
+        .And.IsLessThan(100)
+
+        .And.IsGreaterThanOrEqualTo(80);
+
+}
+```
+
+Or use `IsBetween` for simpler range checks:
+
+```
+[Test]
+
+public async Task Range_Check_Simplified()
+
+{
+
+    var score = 85;
+
+
+
+    // Instead of chaining IsGreaterThan and IsLessThan:
+
+    await Assert.That(score).IsBetween(0, 100);
+
+}
+```
+
+## Custom Equality Comparers[​](#custom-equality-comparers "Direct link to Custom Equality Comparers")
+
+You can provide custom equality comparers for collections and complex types:
+
+```
+[Test]
+
+public async Task Custom_Comparer()
+
+{
+
+    var people1 = new[] { new Person("Alice"), new Person("Bob") };
+
+    var people2 = new[] { new Person("ALICE"), new Person("BOB") };
+
+
+
+    // Case-insensitive name comparison
+
+    var comparer = new PersonNameComparer();
+
+
+
+    await Assert.That(people1)
+
+        .IsEquivalentTo(people2)
+
+        .Using(comparer);
+
+}
+
+
+
+public class PersonNameComparer : IEqualityComparer<Person>
+
+{
+
+    public bool Equals(Person? x, Person? y) =>
+
+        string.Equals(x?.Name, y?.Name, StringComparison.OrdinalIgnoreCase);
+
+
+
+    public int GetHashCode(Person obj) =>
+
+        obj.Name?.ToLowerInvariant().GetHashCode() ?? 0;
+
+}
+```
+
+Or use a predicate:
+
+```
+[Test]
+
+public async Task Custom_Equality_Predicate()
+
+{
+
+    var people1 = new[] { new Person("Alice"), new Person("Bob") };
+
+    var people2 = new[] { new Person("ALICE"), new Person("BOB") };
+
+
+
+    await Assert.That(people1)
+
+        .IsEquivalentTo(people2)
+
+        .Using((p1, p2) => string.Equals(p1.Name, p2.Name,
+
+                          StringComparison.OrdinalIgnoreCase));
+
+}
+```
+
+## Working with Value Types and Records[​](#working-with-value-types-and-records "Direct link to Working with Value Types and Records")
+
+Equality works naturally with value types and records:
+
+```
+public record Point(int X, int Y);
+
+
+
+[Test]
+
+public async Task Record_Equality()
+
+{
+
+    var point1 = new Point(10, 20);
+
+    var point2 = new Point(10, 20);
+
+
+
+    // Records have built-in value equality
+
+    await Assert.That(point1).IsEqualTo(point2);
+
+    await Assert.That(point1).IsNotSameReferenceAs(point2);
+
+}
+```
+
+```
+public struct Coordinate
+
+{
+
+    public double Latitude { get; init; }
+
+    public double Longitude { get; init; }
+
+}
+
+
+
+[Test]
+
+public async Task Struct_Equality()
+
+{
+
+    var coord1 = new Coordinate { Latitude = 47.6, Longitude = -122.3 };
+
+    var coord2 = new Coordinate { Latitude = 47.6, Longitude = -122.3 };
+
+
+
+    await Assert.That(coord1).IsEqualTo(coord2);
+
+}
+```
+
+## See Also[​](#see-also "Direct link to See Also")
+
+* [Numeric Assertions](/docs/assertions/numeric.md) - Additional numeric-specific assertions
+* [DateTime Assertions](/docs/assertions/datetime.md) - Time-based comparisons with tolerance
+* [Collections](/docs/assertions/collections.md) - Comparing collections
+* [Strings](/docs/assertions/string.md) - String equality with options

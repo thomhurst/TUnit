@@ -1,0 +1,189 @@
+# Tips & Pitfalls
+
+TUnit-specific tips to avoid common mistakes.
+
+## Always Await Assertions[​](#always-await-assertions "Direct link to Always Await Assertions")
+
+TUnit assertions won't execute without `await` — the test passes silently. A built-in analyzer warns about this, but it remains the most common TUnit mistake. See [Awaiting Assertions](/docs/assertions/awaiting.md) for details and examples.
+
+## New Instance Per Test[​](#new-instance-per-test "Direct link to New Instance Per Test")
+
+TUnit creates a **new instance** of your test class for every test method. Instance fields are never shared between tests:
+
+```
+public class MyTests
+
+{
+
+    private int _value;  // reset to 0 for every test
+
+
+
+    [Test, NotInParallel]
+
+    public void Test1()
+
+    {
+
+        _value = 99;
+
+    }
+
+
+
+    [Test, NotInParallel]
+
+    public async Task Test2()
+
+    {
+
+        // Fails! _value is 0 — this is a different instance
+
+        await Assert.That(_value).IsEqualTo(99);
+
+    }
+
+}
+```
+
+If you genuinely need shared state, use `static` fields — but prefer making tests independent or using `[ClassDataSource<>]` instead.
+
+## Use \[DependsOn] for Test Ordering[​](#use-dependson-for-test-ordering "Direct link to Use \[DependsOn] for Test Ordering")
+
+When tests must run in a specific order, use `[DependsOn]`. Unlike `[NotInParallel(Order = N)]`, it preserves parallelism for unrelated tests:
+
+```
+[Test]
+
+public async Task Step1_CreateUser()
+
+{
+
+    // Runs first
+
+}
+
+
+
+[Test]
+
+[DependsOn(nameof(Step1_CreateUser))]
+
+public async Task Step2_UpdateUser()
+
+{
+
+    // Runs after Step1 completes
+
+    // Other unrelated tests still run in parallel
+
+}
+
+
+
+[Test]
+
+[DependsOn(nameof(Step2_UpdateUser))]
+
+public async Task Step3_DeleteUser()
+
+{
+
+    // Runs after Step2 completes
+
+}
+```
+
+`[DependsOn]` explicitly declares dependencies and supports depending on multiple tests. If you find yourself ordering many tests, consider whether they should be a single test or use proper setup/teardown instead.
+
+See [Parallelism](/docs/execution/parallelism.md) for `[NotInParallel]`, parallel groups, and concurrency configuration.
+
+## Sharing Expensive Resources[​](#sharing-expensive-resources "Direct link to Sharing Expensive Resources")
+
+For expensive setup shared across tests (web servers, databases, containers), use `[ClassDataSource<>]` with `IAsyncInitializer` and `IAsyncDisposable`:
+
+```
+public class TestWebServer : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public WebApplicationFactory<Program>? Factory { get; private set; }
+
+
+
+    public async Task InitializeAsync()
+
+    {
+
+        Factory = new WebApplicationFactory<Program>();
+
+        await Task.CompletedTask;
+
+    }
+
+
+
+    public async ValueTask DisposeAsync()
+
+    {
+
+        if (Factory != null)
+
+            await Factory.DisposeAsync();
+
+    }
+
+}
+
+
+
+[ClassDataSource<TestWebServer>(Shared = SharedType.PerTestSession)]
+
+public class ApiTests(TestWebServer server)
+
+{
+
+    [Test]
+
+    public async Task Can_call_endpoint()
+
+    {
+
+        var client = server.Factory!.CreateClient();
+
+        var response = await client.GetAsync("/api/health");
+
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+
+    }
+
+
+
+    [Test]
+
+    public async Task Can_get_users()
+
+    {
+
+        var client = server.Factory!.CreateClient();
+
+        var response = await client.GetAsync("/api/users");
+
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+
+    }
+
+}
+```
+
+This approach gives you type-safe constructor injection, automatic lifecycle management, and cross-class sharing via `SharedType`.
+
+See [ClassDataSource](/docs/writing-tests/class-data-source.md) for all sharing options.
+
+## Choosing the Right Hook Level[​](#choosing-the-right-hook-level "Direct link to Choosing the Right Hook Level")
+
+* **`[Before(Test)]` / `[After(Test)]`** — runs before/after each test (most common)
+* **`[Before(Class)]` / `[After(Class)]`** — runs once per test class
+* **`[Before(Assembly)]` / `[After(Assembly)]`** — runs once per test assembly
+
+For shared resources, prefer `[ClassDataSource<>]` over class/assembly hooks — it handles lifecycle automatically and works across multiple test classes.

@@ -1,0 +1,366 @@
+# Test Context
+
+All tests have a `TestContext` object available to them.
+
+This can be accessed statically via `TestContext.Current`.
+
+Access information about the test, including things like the test name, containing class, custom properties, categories, etc.
+
+Useful for a generic `AfterEachTest` for all tests, but with logic to execute for only certain tests.
+
+```
+if (TestContext.Current?.Metadata.TestDetails.CustomProperties.ContainsKey("SomeProperty") == true)
+
+{
+
+    // Do something
+
+}
+```
+
+The context has a `Result` object (nullable), accessed via `Execution.Result`. It's null until an `AfterEachTest` method runs, since results are only available after test completion.
+
+Use the result to conditionally execute cleanup logic:
+
+```
+if (TestContext.Current?.Execution.Result?.State == TestState.Failed)
+
+{
+
+    // Take a screenshot?
+
+}
+```
+
+## Test Output and Artifacts[​](#test-output-and-artifacts "Direct link to Test Output and Artifacts")
+
+The `TestContext` provides multiple ways to write output and attach artifacts:
+
+```
+// Write to standard output (modern interface-based approach)
+
+TestContext.Current!.Output.WriteLine("Debug information");
+
+
+
+// Alternative: Direct TextWriter access (also valid)
+
+TestContext.Current!.OutputWriter.WriteLine("Debug information");
+
+
+
+// Write to error output
+
+TestContext.Current.Output.WriteError("Warning: something unexpected happened");
+
+
+
+// Attach an artifact (file, screenshot, log, etc.)
+
+TestContext.Current.Output.AttachArtifact(new Artifact
+
+{
+
+    File = new FileInfo("path/to/logfile.log"),
+
+    DisplayName = "Application Logs",
+
+    Description = "Logs captured during test execution"
+
+});
+```
+
+Both `Output.WriteLine()` and `OutputWriter.WriteLine()` are valid - the `Output` property provides a convenient interface-based API, while `OutputWriter` gives direct access to the underlying TextWriter.
+
+Artifacts are particularly useful for debugging test failures, especially in integration tests. You can attach screenshots, logs, videos, configuration files, or any other files that help diagnose issues.
+
+Use `TestContext.ResultsDirectory` to get the absolute Microsoft.Testing.Platform results directory. It respects configuration such as `--results-directory` and is suitable for files that should live alongside test reports.
+
+For complete information about working with test artifacts, including session-level artifacts, best practices, and common use cases, see the [Test Artifacts](/docs/writing-tests/artifacts.md) guide.
+
+## Test Isolation[​](#test-isolation "Direct link to Test Isolation")
+
+The `TestContext` provides built-in helpers for creating isolated resource names, ensuring parallel tests don't interfere with each other. Access them via `TestContext.Current!.Isolation`:
+
+```
+// Get a unique ID for this test instance
+
+var id = TestContext.Current!.Isolation.UniqueId;  // e.g. 42
+
+
+
+// Create isolated resource names
+
+var tableName = TestContext.Current!.Isolation.GetIsolatedName("todos");  // "Test_42_todos"
+
+var topicName = TestContext.Current!.Isolation.GetIsolatedName("orders"); // "Test_42_orders"
+
+
+
+// Create isolated key prefixes
+
+var prefix = TestContext.Current!.Isolation.GetIsolatedPrefix();       // "test_42_"
+
+var dotPrefix = TestContext.Current!.Isolation.GetIsolatedPrefix("."); // "test.42."
+```
+
+These are useful for any test that needs unique resource names — database tables, message queue topics, cache keys, blob storage paths, etc. — without requiring a specific base class.
+
+ASP.NET Core Tests
+
+If you're using `TUnit.AspNetCore`, the `WebApplicationTest` base class provides the same helpers as `protected` methods (`GetIsolatedName`, `GetIsolatedPrefix`). Both share the same underlying counter, so IDs are unique across all test types.
+
+## Test Parameters[​](#test-parameters "Direct link to Test Parameters")
+
+`TestContext.Parameters` provides access to custom key-value parameters passed at runtime via the `--test-parameter` command-line option:
+
+```
+// Run with: dotnet run --test-parameter environment=staging
+
+if (TestContext.Parameters.TryGetValue("environment", out var values))
+
+{
+
+    var environment = values.First(); // "staging"
+
+}
+```
+
+See the [Test Parameters](/docs/execution/parameters.md) guide for full details.
+
+## Custom Properties[​](#custom-properties "Direct link to Custom Properties")
+
+Custom properties can be added to a test using the `[Property]` attribute. Properties are key-value pairs of strings that serve multiple purposes:
+
+* **Test filtering**: Filter tests at the command line with `dotnet run --treenode-filter /*/*/*/*[PropertyName=PropertyValue]`
+* **Runtime logic**: Access properties in setup/cleanup hooks via `TestContext` to conditionally execute logic
+* **Inheritance**: Apply `[Property]` on a base class and all sub-class tests inherit it
+
+```
+public class MyTestClass
+
+{
+
+    [Test]
+
+    [Property("Category", "Integration")]
+
+    public async Task MyTest(CancellationToken cancellationToken)
+
+    {
+
+        // Access the property at runtime
+
+        var properties = TestContext.Current!.Metadata.TestDetails.CustomProperties;
+
+        if (properties.ContainsKey("Category"))
+
+        {
+
+            // Conditional logic based on property
+
+        }
+
+    }
+
+}
+```
+
+## Data Source Attributes[​](#data-source-attributes "Direct link to Data Source Attributes")
+
+The context exposes the data source attribute instances that generated the current test's arguments:
+
+* `Metadata.ClassDataSource` — the attribute that generated the test class's constructor arguments
+* `Metadata.MethodDataSource` — the attribute that generated the test method's arguments
+
+Both are never null: for tests without a data source they return a no-op `NoDataSource` singleton, so you can pattern-match without null checks.
+
+This is useful when a fixture needs to know how it was shared. For example, a fixture can read its own `Shared` scope and `Key` during `InitializeAsync`:
+
+```
+public class MyFixture : IAsyncInitializer
+
+{
+
+    public Task InitializeAsync()
+
+    {
+
+        if (TestContext.Current?.Metadata.MethodDataSource is ClassDataSourceAttribute<MyFixture> attribute)
+
+        {
+
+            var sharedType = attribute.Shared; // e.g. SharedType.Keyed
+
+            var key = attribute.Key;           // e.g. "MyKey"
+
+        }
+
+
+
+        return Task.CompletedTask;
+
+    }
+
+}
+
+
+
+public class MyTests
+
+{
+
+    [Test]
+
+    [ClassDataSource<MyFixture>(Shared = SharedType.Keyed, Key = "MyKey")]
+
+    public void MyTest(MyFixture fixture)
+
+    {
+
+    }
+
+}
+```
+
+Note that shared fixtures (`PerTestSession`, `PerClass`, `Keyed`, etc.) are initialized once, by the first test that uses them — inside `InitializeAsync`, `TestContext.Current` refers to that first test.
+
+If you only need the sharing key, implementing `IKeyedDataSource` on the fixture is a simpler alternative: TUnit sets its `Key` property before `InitializeAsync` is called.
+
+## Dependency Injection[​](#dependency-injection "Direct link to Dependency Injection")
+
+**Note**: `TestContext` does NOT provide direct access to dependency injection services. The internal service provider in `TestContext` is exclusively for TUnit framework services and is not meant for user-provided dependencies.
+
+If you need dependency injection in your tests, use the `DependencyInjectionDataSourceAttribute<TScope>` helper class to set up your own DI container. See the [Dependency Injection guide](/docs/writing-tests/dependency-injection.md) for complete details and examples.
+
+## TestBuilderContext[​](#testbuildercontext "Direct link to TestBuilderContext")
+
+In addition to `TestContext`, TUnit also provides `TestBuilderContext` which is available during the test discovery and building phase. This is particularly useful when you need context information in data generators or other scenarios that run before test execution.
+
+### When to Use TestBuilderContext vs TestContext[​](#when-to-use-testbuildercontext-vs-testcontext "Direct link to When to Use TestBuilderContext vs TestContext")
+
+**Use `TestBuilderContext.Current` when:**
+
+* Writing data generators that need test information
+* During test discovery phase
+* In scenarios that run before `TestContext` is available
+* When you need to pass data from discovery time to execution time
+
+**Use `TestContext.Current` when:**
+
+* During test execution
+* In test methods, Before/After hooks
+* When you need test results or execution-specific information
+* When accessing test output writers
+
+### Accessing TestBuilderContext[​](#accessing-testbuildercontext "Direct link to Accessing TestBuilderContext")
+
+```
+public static IEnumerable<object[]> MyDataGenerator()
+
+{
+
+    var context = TestBuilderContext.Current;
+
+    if (context != null)
+
+    {
+
+        // Access test information during data generation
+
+        Console.WriteLine($"Generating data for: {context.TestMetadata.Name}");
+
+        Console.WriteLine($"Test class: {context.TestMetadata.Class.Type.Name}");
+
+        Console.WriteLine($"Assembly: {context.TestMetadata.Class.Assembly.Name}");
+
+        
+
+        // Store data for later use during test execution
+
+        context.StateBag["GenerationTime"] = DateTime.Now;
+
+    }
+
+    
+
+    yield return new object[] { 1, 2, 3 };
+
+}
+```
+
+### Sharing Data Between Discovery and Execution[​](#sharing-data-between-discovery-and-execution "Direct link to Sharing Data Between Discovery and Execution")
+
+The `StateBag` property on `TestBuilderContext` is carried forward to `TestContext`, allowing you to pass data from discovery time to execution time:
+
+```
+// In your data generator
+
+public static IEnumerable<object[]> TestData()
+
+{
+
+    var builderContext = TestBuilderContext.Current;
+
+    if (builderContext != null)
+
+    {
+
+        builderContext.StateBag["DataGeneratedAt"] = DateTime.Now;
+
+        builderContext.StateBag["GeneratorVersion"] = "1.0";
+
+    }
+
+    
+
+    yield return new object[] { "test" };
+
+}
+
+
+
+// In your test
+
+[Test]
+
+[MethodDataSource(nameof(TestData))]
+
+public void MyTest(string value)
+
+{
+
+    // Access the data stored during generation
+
+    var generatedAt = TestContext.Current.StateBag["DataGeneratedAt"];
+
+    var version = TestContext.Current.StateBag["GeneratorVersion"];
+
+    
+
+    Console.WriteLine($"Data was generated at: {generatedAt}");
+
+}
+```
+
+### Available Properties[​](#available-properties "Direct link to Available Properties")
+
+`TestBuilderContext` provides:
+
+* `TestMetadata` - The `MethodMetadata` for the test method being built, including:
+
+  <!-- -->
+
+  * `Name` - The test method name
+  * `Class` - The `ClassMetadata` for the containing class (`Type`, `Name`, `Namespace`, `Assembly`, parameters, properties, etc.)
+  * `Parameters`, `ReturnType`, `GenericTypeCount`, and more
+
+* `StateBag` - A dictionary for storing custom data, copied forward to `TestContext`
+
+* `Events` - Test events that can be subscribed to
+
+* `DataSourceAttribute` - The data source attribute driving the current build, if any
+
+* `DefinitionId` - A unique identifier for this context
+
+Note: `TestBuilderContext.Current` will be `null` if accessed outside of test discovery/building phase.

@@ -1,0 +1,1781 @@
+# ASP.NET Core Integration Testing
+
+TUnit provides first-class support for ASP.NET Core integration testing through the `TUnit.AspNetCore` package. This package enables per-test isolation with shared infrastructure, making it easy to write fast, parallel integration tests.
+
+Use `TestWebApplicationFactory<T>`, not the vanilla `WebApplicationFactory<T>`
+
+If you inherit from `Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<T>` directly, you'll lose three things you almost certainly want:
+
+* **Trace correlation** — server-side spans won't link back to the test that triggered them.
+* **Per-test logging** — `ILogger` output from inside your app won't appear under the right test.
+* **Test context** — `TestContext.Current` won't resolve inside request handlers.
+
+`TestWebApplicationFactory<T>` sets all of this up for you. If you can't change the inheritance (e.g. you're migrating from an existing setup), wrap your factory instead:
+
+```
+var traced = new TracedWebApplicationFactory<Program>(myExistingFactory);
+
+var client = traced.CreateClient(); // tracing + logging now wired up
+```
+
+The `TUnit0064` analyzer (warning) flags direct `WebApplicationFactory<T>` inheritance and offers a code fix that rewrites the base type to `TestWebApplicationFactory<T>`.
+
+See [Distributed Tracing](/docs/guides/distributed-tracing.md) for what happens under the hood.
+
+## Installation[​](#installation "Direct link to Installation")
+
+```
+dotnet add package TUnit.AspNetCore
+```
+
+## Quick Start[​](#quick-start "Direct link to Quick Start")
+
+### 1. Create a Test Factory[​](#1-create-a-test-factory "Direct link to 1. Create a Test Factory")
+
+Create a factory that extends `TestWebApplicationFactory<TEntryPoint>`:
+
+```
+using TUnit.AspNetCore;
+
+using TUnit.Core.Interfaces;
+
+
+
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+
+{
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        // Configure shared services and settings
+
+        builder.ConfigureAppConfiguration((context, config) =>
+
+        {
+
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+
+            {
+
+                { "ConnectionStrings:Default", "Server=localhost;Database=TestDb" }
+
+            });
+
+        });
+
+    }
+
+}
+```
+
+### 2. Create a Test Base Class[​](#2-create-a-test-base-class "Direct link to 2. Create a Test Base Class")
+
+Create a base class that extends `WebApplicationTest<TFactory, TEntryPoint>`:
+
+```
+using TUnit.AspNetCore;
+
+
+
+public abstract class TestsBase : WebApplicationTest<WebApplicationFactory, Program>
+
+{
+
+}
+```
+
+### 3. Write Tests[​](#3-write-tests "Direct link to 3. Write Tests")
+
+```
+public class TodoApiTests : TestsBase
+
+{
+
+    [Test]
+
+    public async Task GetTodos_ReturnsOk()
+
+    {
+
+        var client = Factory.CreateClient();
+
+
+
+        var response = await client.GetAsync("/todos");
+
+
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+    }
+
+}
+```
+
+`TestWebApplicationFactory<T>` wires up these behaviors automatically:
+
+* **Client-side tracing**: `CreateClient()` / `CreateDefaultClient()` return an `HttpClient` that propagates `traceparent`, `baggage`, and `X-TUnit-TestId` headers to the SUT.
+* **SUT `IHttpClientFactory` tracing**: Every pipeline built inside the SUT via `AddHttpClient<T>()`, named clients, or typed clients also gets those headers prepended — outbound calls from your app to downstream services correlate with the originating test. Opt out per-test with `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`.
+* **SUT-side OpenTelemetry**: The SUT's `TracerProvider` is augmented with the `TUnitTestCorrelationProcessor` (stamps the `tunit.test.id` baggage item onto every span as a tag) and ASP.NET Core + HttpClient instrumentation. Spans emitted inside the SUT stay queryable per-test in backends like Jaeger or Seq, even when third-party libraries break the parent-chain. Opt out per-test with `WebApplicationTestOptions.AutoConfigureOpenTelemetry = false`.
+* **Correlated logging**: Server-side `ILogger` output is routed to the test that triggered the request.
+* **Hosted-service context hygiene**: `IHostedService.StartAsync` runs under `ExecutionContext.SuppressFlow()` so background work doesn't inherit the first test's `Activity.Current`.
+
+## Core Concepts[​](#core-concepts "Direct link to Core Concepts")
+
+### Why Test Isolation Matters[​](#why-test-isolation-matters "Direct link to Why Test Isolation Matters")
+
+Critical for Parallel Execution
+
+TUnit runs tests in parallel by default. Without proper isolation, tests will interfere with each other, causing flaky failures that are difficult to debug.
+
+When tests share resources like database tables, message queues, or cache keys, you'll encounter problems:
+
+| Shared Resource | What Goes Wrong                                              |
+| --------------- | ------------------------------------------------------------ |
+| Database table  | Test A inserts a record, Test B's `COUNT(*)` assertion fails |
+| Message queue   | Test A consumes Test B's messages                            |
+| Cache key       | Test A overwrites Test B's cached data                       |
+| Redis key       | Test A deletes keys that Test B is using                     |
+| S3 bucket path  | Test A's cleanup deletes Test B's files                      |
+
+**The solution**: Give each test its own isolated resources using `GetIsolatedName()` and `GetIsolatedPrefix()`:
+
+```
+protected override async Task SetupAsync()
+
+{
+
+    // Each test gets unique resources that no other test will touch
+
+    var tableName = GetIsolatedName("todos");      // "Test_42_todos"
+
+    var queueName = GetIsolatedName("events");     // "Test_42_events"
+
+    var cachePrefix = GetIsolatedPrefix();         // "test_42_"
+
+
+
+    await CreateTableAsync(tableName);
+
+    await CreateQueueAsync(queueName);
+
+}
+```
+
+This ensures:
+
+* Tests can run in parallel without interference
+* Test failures are deterministic and reproducible
+* You can run the same test multiple times (with `[Repeat]`) safely
+
+### WebApplicationTest Pattern[​](#webapplicationtest-pattern "Direct link to WebApplicationTest Pattern")
+
+The `WebApplicationTest<TFactory, TEntryPoint>` base class provides:
+
+* **Per-test isolation**: Each test gets its own delegating factory via `WithWebHostBuilder`
+* **Shared infrastructure**: The global factory (containers, connections) is shared across tests
+* **Parallel execution**: Tests run in parallel with complete isolation
+* **Lifecycle hooks**: Async setup runs before sync configuration
+
+### Lifecycle Order[​](#lifecycle-order "Direct link to Lifecycle Order")
+
+Understanding the execution order is critical for writing correct tests. Here's the complete verified order:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+
+│                    TEST LIFECYCLE                               │
+
+├─────────────────────────────────────────────────────────────────┤
+
+│  1. ConfigureTestOptions        Set test options (HTTP capture) │
+
+│  2. SetupAsync                  Async setup (create tables)     │
+
+│  ───────────────────────────────────────────────────────────    │
+
+│  3. Factory.ConfigureWebHost    Base factory configuration      │
+
+│  4. Factory.ConfigureStartup... Base factory startup config     │
+
+│  ───────────────────────────────────────────────────────────    │
+
+│  5. ConfigureWebHostBuilder     Escape hatch (low-level access) │
+
+│  6. ConfigureTestConfiguration  Test config (overrides factory) │
+
+│  7. ConfigureTestServices       Test services (overrides)       │
+
+│  ───────────────────────────────────────────────────────────    │
+
+│  8. Application Startup         Server starts                   │
+
+│  ───────────────────────────────────────────────────────────    │
+
+│  9. Test Method Executes        Your test code runs             │
+
+│ 10. Factory Disposed            Cleanup                         │
+
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+
+| Hook                                    | Scope    | Purpose                                           |
+| --------------------------------------- | -------- | ------------------------------------------------- |
+| `ConfigureTestOptions`                  | Per-test | Enable features like HTTP capture                 |
+| `SetupAsync`                            | Per-test | Async operations before config (create DB tables) |
+| `Factory.ConfigureWebHost`              | Shared   | Base configuration for all tests                  |
+| `Factory.ConfigureStartupConfiguration` | Shared   | Base startup configuration                        |
+| `ConfigureWebHostBuilder`               | Per-test | Low-level escape hatch                            |
+| `ConfigureTestConfiguration`            | Per-test | Override factory configuration                    |
+| `ConfigureTestServices`                 | Per-test | Override factory services                         |
+
+Tests Can Override Factory
+
+The order is designed so that **tests can override factory defaults**. Factory configuration runs first (steps 3-4), then test-specific configuration (steps 5-7) can override those values.
+
+Factory Methods Run Once
+
+`Factory.ConfigureWebHost` and `Factory.ConfigureStartupConfiguration` run **once per test session** (when the factory is first used), not per-test. If different test classes need fundamentally different factory configurations, use different factory classes.
+
+## Override Methods[​](#override-methods "Direct link to Override Methods")
+
+### ConfigureTestOptions[​](#configuretestoptions "Direct link to ConfigureTestOptions")
+
+Use to configure test-level options before anything else runs:
+
+```
+protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+
+{
+
+    options.EnableHttpExchangeCapture = true;  // Capture HTTP requests/responses
+
+}
+```
+
+This runs **first** in the lifecycle, before `SetupAsync`. Use it to enable features that affect how the test infrastructure is set up.
+
+### SetupAsync[​](#setupasync "Direct link to SetupAsync")
+
+Use for async operations that must complete before the factory is created:
+
+```
+public class TodoTests : TestsBase
+
+{
+
+    protected string TableName { get; private set; } = null!;
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        TableName = GetIsolatedName("todos");
+
+        await CreateTableAsync(TableName);
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        // TableName is already set from SetupAsync
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:TableName", TableName }
+
+        });
+
+    }
+
+}
+```
+
+### ConfigureTestServices[​](#configuretestservices "Direct link to ConfigureTestServices")
+
+Use for DI configuration:
+
+```
+protected override void ConfigureTestServices(IServiceCollection services)
+
+{
+
+    // Replace a service with a mock
+
+    services.ReplaceService<IEmailService>(new FakeEmailService());
+
+
+
+    // Add test-specific services
+
+    services.AddSingleton<ITestHelper, TestHelper>();
+
+}
+```
+
+### ConfigureTestConfiguration[​](#configuretestconfiguration "Direct link to ConfigureTestConfiguration")
+
+Use for app configuration:
+
+```
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+{
+
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+
+    {
+
+        { "Feature:Enabled", "true" },
+
+        { "Api:BaseUrl", "https://test.example.com" }
+
+    });
+
+}
+```
+
+### ConfigureWebHostBuilder[​](#configurewebhostbuilder "Direct link to ConfigureWebHostBuilder")
+
+Escape hatch for advanced scenarios:
+
+```
+protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
+
+{
+
+    builder.UseEnvironment("Staging");
+
+    builder.UseSetting("MyFeature:Enabled", "true");
+
+    builder.ConfigureKestrel(options => options.AddServerHeader = false);
+
+}
+```
+
+## Test Isolation Helpers[​](#test-isolation-helpers "Direct link to Test Isolation Helpers")
+
+Available on All Tests
+
+The isolation helpers (`UniqueId`, `GetIsolatedName`, `GetIsolatedPrefix`) are also available on `TestContext.Current!.Isolation` for any test — not just ASP.NET Core tests. Use `TestContext.Current!.Isolation.GetIsolatedName("resource")` when you don't inherit from `WebApplicationTest`. Both share the same counter, so IDs are unique across all test types.
+
+### GetIsolatedName[​](#getisolatedname "Direct link to GetIsolatedName")
+
+Creates a unique name for resources like database tables:
+
+```
+// In a test with UniqueId = 42:
+
+var tableName = GetIsolatedName("todos");  // Returns "Test_42_todos"
+
+var topicName = GetIsolatedName("orders"); // Returns "Test_42_orders"
+```
+
+### GetIsolatedPrefix[​](#getisolatedprefix "Direct link to GetIsolatedPrefix")
+
+Creates a unique prefix for key-based resources:
+
+```
+// In a test with UniqueId = 42:
+
+var prefix = GetIsolatedPrefix();       // Returns "test_42_"
+
+var dotPrefix = GetIsolatedPrefix("."); // Returns "test.42."
+```
+
+## Container Integration[​](#container-integration "Direct link to Container Integration")
+
+### With Testcontainers[​](#with-testcontainers "Direct link to With Testcontainers")
+
+```
+public class InMemoryDatabase : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder()
+
+        .WithImage("postgres:16-alpine")
+
+        .Build();
+
+
+
+    public async Task InitializeAsync() => await Container.StartAsync();
+
+    public async ValueTask DisposeAsync() => await Container.DisposeAsync();
+
+}
+
+
+
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+
+{
+
+    [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+
+    public InMemoryDatabase Database { get; init; } = null!;
+
+
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        builder.ConfigureAppConfiguration((_, config) =>
+
+        {
+
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+
+            {
+
+                { "Database:ConnectionString", Database.Container.GetConnectionString() }
+
+            });
+
+        });
+
+    }
+
+}
+```
+
+### Per-Test Table Isolation[​](#per-test-table-isolation "Direct link to Per-Test Table Isolation")
+
+```
+public abstract class TodoTestBase : TestsBase
+
+{
+
+    [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+
+    public InMemoryDatabase Database { get; init; } = null!;
+
+
+
+    protected string TableName { get; private set; } = null!;
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        TableName = GetIsolatedName("todos");
+
+        await CreateTableAsync(TableName);
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:TableName", TableName }
+
+        });
+
+    }
+
+
+
+    [After(Test)]
+
+    public async Task CleanupTable()
+
+    {
+
+        await DropTableAsync(TableName);
+
+    }
+
+
+
+    private async Task CreateTableAsync(string name) { /* ... */ }
+
+    private async Task DropTableAsync(string name) { /* ... */ }
+
+}
+```
+
+### Per-Test Schema Isolation with EF Core[​](#per-test-schema-isolation-with-ef-core "Direct link to Per-Test Schema Isolation with EF Core")
+
+For EF Core Code First applications, use per-test PostgreSQL schemas instead of per-test table names. This works with EF Core's model conventions and provides complete isolation:
+
+```
+// 1. DbContext with dynamic schema support
+
+public class TodoDbContext : DbContext
+
+{
+
+    public string SchemaName { get; set; }
+
+    public DbSet<Todo> Todos => Set<Todo>();
+
+
+
+    // IConfiguration is optional: resolved via DI in the app, absent when
+
+    // constructing standalone (e.g. in SetupAsync for EnsureCreatedAsync).
+
+    public TodoDbContext(DbContextOptions<TodoDbContext> options, IConfiguration? config = null)
+
+        : base(options)
+
+    {
+
+        SchemaName = config?["Database:Schema"] ?? "public";
+
+    }
+
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+    {
+
+        modelBuilder.HasDefaultSchema(SchemaName);
+
+        modelBuilder.Entity<Todo>(entity =>
+
+        {
+
+            entity.HasKey(t => t.Id);
+
+            entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
+
+        });
+
+    }
+
+}
+
+
+
+// 2. Model cache key factory (required for multiple schemas)
+
+public class SchemaModelCacheKeyFactory : IModelCacheKeyFactory
+
+{
+
+    public object Create(DbContext context, bool designTime)
+
+    {
+
+        return context is TodoDbContext todoContext
+
+            ? (context.GetType(), todoContext.SchemaName, designTime)
+
+            : (object)(context.GetType(), designTime);
+
+    }
+
+}
+
+
+
+// 3. Test base class with schema-per-test isolation
+
+public abstract class EfCoreTodoTestBase : WebApplicationTest<EfCoreWebApplicationFactory, Program>
+
+{
+
+    [ClassDataSource<InMemoryDatabase>(Shared = SharedType.PerTestSession)]
+
+    public InMemoryDatabase Database { get; init; } = null!;
+
+
+
+    protected string SchemaName { get; private set; } = null!;
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        SchemaName = GetIsolatedName("schema");
+
+
+
+        // Create schema via raw SQL
+
+        await using var connection = new NpgsqlConnection(
+
+            Database.Container.GetConnectionString());
+
+        await connection.OpenAsync();
+
+        await using var cmd = connection.CreateCommand();
+
+        cmd.CommandText = $"CREATE SCHEMA IF NOT EXISTS \"{SchemaName}\"";
+
+        await cmd.ExecuteNonQueryAsync();
+
+
+
+        // Create tables via EF Core
+
+        var options = new DbContextOptionsBuilder<TodoDbContext>()
+
+            .UseNpgsql(Database.Container.GetConnectionString())
+
+            .ReplaceService<IModelCacheKeyFactory, SchemaModelCacheKeyFactory>()
+
+            .Options;
+
+
+
+        await using var dbContext = new TodoDbContext(options) { SchemaName = SchemaName };
+
+        await dbContext.Database.EnsureCreatedAsync();
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:Schema", SchemaName }
+
+        });
+
+    }
+
+
+
+    [After(Test)]
+
+    public async Task CleanupSchema()
+
+    {
+
+        await using var connection = new NpgsqlConnection(
+
+            Database.Container.GetConnectionString());
+
+        await connection.OpenAsync();
+
+        await using var cmd = connection.CreateCommand();
+
+        cmd.CommandText = $"DROP SCHEMA IF EXISTS \"{SchemaName}\" CASCADE";
+
+        await cmd.ExecuteNonQueryAsync();
+
+    }
+
+}
+```
+
+**Key differences from raw SQL approach:**
+
+* Uses `EnsureCreatedAsync()` instead of manual `CREATE TABLE` statements
+* Isolation is at the **schema level** rather than the table name level
+* `IModelCacheKeyFactory` ensures EF Core caches a separate model per schema
+* Cleanup uses `DROP SCHEMA ... CASCADE` to remove all tables at once
+
+See the full working example in `examples/TUnit.Example.Asp.Net.TestProject/EfCore/`.
+
+## HTTP Exchange Capture[​](#http-exchange-capture "Direct link to HTTP Exchange Capture")
+
+Capture and inspect HTTP requests/responses for assertions:
+
+```
+public class CaptureTests : TestsBase
+
+{
+
+    protected override WebApplicationTestOptions Options => new()
+
+    {
+
+        EnableHttpExchangeCapture = true
+
+    };
+
+
+
+    [Test]
+
+    public async Task RequestIsCaptured()
+
+    {
+
+        var client = Factory.CreateClient();
+
+
+
+        await client.GetAsync("/api/todos");
+
+
+
+        await Assert.That(HttpCapture).IsNotNull();
+
+        await Assert.That(HttpCapture!.Last!.Response.StatusCode)
+
+            .IsEqualTo(HttpStatusCode.OK);
+
+    }
+
+}
+```
+
+### Capture Options[​](#capture-options "Direct link to Capture Options")
+
+`WebApplicationTestOptions` only exposes the `EnableHttpExchangeCapture` toggle. Body capture settings (`CaptureRequestBody`, `CaptureResponseBody`, `MaxBodySize`) live on the `HttpExchangeCapture` service itself. To configure them, register `HttpExchangeCapture` explicitly inside `ConfigureTestServices`:
+
+```
+using TUnit.AspNetCore.Interception;
+
+
+
+public class CaptureTests : TestsBase
+
+{
+
+    protected override WebApplicationTestOptions Options => new()
+
+    {
+
+        EnableHttpExchangeCapture = true
+
+    };
+
+
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+
+    {
+
+        services.AddHttpExchangeCapture(capture =>
+
+        {
+
+            capture.CaptureRequestBody = true;
+
+            capture.CaptureResponseBody = true;
+
+            capture.MaxBodySize = 1024 * 1024; // 1MB limit
+
+        });
+
+    }
+
+}
+```
+
+### Inspecting Captured Exchanges[​](#inspecting-captured-exchanges "Direct link to Inspecting Captured Exchanges")
+
+```
+// Get the last exchange
+
+var last = HttpCapture!.Last;
+
+
+
+// Get all exchanges
+
+var all = HttpCapture!.Exchanges;
+
+
+
+// Inspect request
+
+await Assert.That(last!.Request.Method).IsEqualTo("POST");
+
+await Assert.That(last.Request.Path).IsEqualTo("/api/todos");
+
+await Assert.That(last.Request.Body).Contains("\"title\"");
+
+
+
+// Inspect response
+
+await Assert.That(last.Response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+
+await Assert.That(last.Response.Body).Contains("\"id\"");
+```
+
+## TUnit Logging Integration[​](#tunit-logging-integration "Direct link to TUnit Logging Integration")
+
+`TUnit.AspNetCore` automatically integrates your app's `Microsoft.Extensions.Logging.ILogger` output with TUnit's test output. No manual setup is required when using `TestWebApplicationFactory`.
+
+### Automatic Logging (Per-Test Factory)[​](#automatic-logging-per-test-factory "Direct link to Automatic Logging (Per-Test Factory)")
+
+When using `WebApplicationTest` with per-test isolated factories, app-level `ILogger` output automatically appears in each test's output:
+
+```
+public class MyTests : TestsBase
+
+{
+
+    [Test]
+
+    public async Task GetTodos_LogsAppear()
+
+    {
+
+        var client = Factory.CreateClient();
+
+        var response = await client.GetAsync("/todos");
+
+
+
+        // App-level ILogger output automatically appears in the test output
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+    }
+
+}
+```
+
+`TestWebApplicationFactory` registers a per-test `TUnitLoggerProvider` for each isolated factory, so every `ILogger` call within the request pipeline is routed to the correct test's output.
+
+### Automatic Logging (Shared Factory)[​](#automatic-logging-shared-factory "Direct link to Automatic Logging (Shared Factory)")
+
+When a single `WebApplicationFactory` is shared across all tests, server-side logs are automatically correlated with the originating test. Use `CreateClient()` (or `CreateDefaultClient()`) to create an `HttpClient` that propagates the test context automatically:
+
+```
+public class SharedAppTests
+
+{
+
+    [ClassDataSource<SharedFactory>(Shared = SharedType.PerTestSession)]
+
+    public SharedFactory Factory { get; set; } = null!;
+
+
+
+    [Test]
+
+    public async Task GetTodos_LogsRouteToThisTest()
+
+    {
+
+        var client = Factory.CreateClient();
+
+
+
+        var response = await client.GetAsync("/todos");
+
+
+
+        // Server-side logs automatically appear in THIS test's output
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+    }
+
+}
+```
+
+How it works
+
+Under the hood, `TestWebApplicationFactory` automatically registers a `CorrelatedTUnitLoggerProvider` and `TUnitTestContextMiddleware`. `CreateClient()` and `CreateDefaultClient()` prepend both `ActivityPropagationHandler` and `TUnitTestIdHandler`, so requests propagate the current trace context and the TUnit test ID automatically. The middleware resolves the test context on the server side, and the correlated logger routes each log entry to the correct test's output.
+
+### Duplicate Prevention[​](#duplicate-prevention "Direct link to Duplicate Prevention")
+
+When both per-test and correlated loggers are active (e.g., isolated factories inheriting shared factory configuration), TUnit automatically deduplicates log output. Per-test logging takes priority, and the correlated logger skips entries for test contexts that already have a per-test logger registered.
+
+### Standalone Logging (No ASP.NET Core)[​](#standalone-logging-no-aspnet-core "Direct link to Standalone Logging (No ASP.NET Core)")
+
+For `IHost`-based apps or generic DI scenarios without ASP.NET Core, use the `TUnit.Logging.Microsoft` package directly:
+
+```
+dotnet add package TUnit.Logging.Microsoft
+```
+
+```
+using TUnit.Logging.Microsoft;
+
+
+
+// Via ILoggingBuilder
+
+builder.Logging.AddTUnit(TestContext.Current!);
+
+
+
+// Or via IServiceCollection
+
+services.AddTUnitLogging(TestContext.Current!);
+```
+
+All log output is routed through TUnit's console interceptor and sink pipeline, so logs appear in test output, IDE test explorers, and the console (when using `--output Detailed`).
+
+## Best Practices[​](#best-practices "Direct link to Best Practices")
+
+### 1. Always Isolate Shared Resources[​](#1-always-isolate-shared-resources "Direct link to 1. Always Isolate Shared Resources")
+
+Golden Rule
+
+If a resource is shared (database, queue, cache), each test must use its own isolated instance of that resource.
+
+```
+// ❌ BAD: All tests share the same table - will cause flaky failures
+
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+{
+
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+
+    {
+
+        { "Database:TableName", "todos" }  // Shared = flaky!
+
+    });
+
+}
+
+
+
+// ✅ GOOD: Each test gets its own table
+
+protected override async Task SetupAsync()
+
+{
+
+    TableName = GetIsolatedName("todos");  // "Test_42_todos"
+
+    await CreateTableAsync(TableName);
+
+}
+
+
+
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+{
+
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+
+    {
+
+        { "Database:TableName", TableName }  // Isolated = reliable!
+
+    });
+
+}
+```
+
+Common resources that need isolation:
+
+* **Database tables**: Use `GetIsolatedName("tablename")`
+* **Message queues/topics**: Use `GetIsolatedName("queue")`
+* **Cache keys**: Use `GetIsolatedPrefix()` as a key prefix
+* **Blob storage paths**: Use `GetIsolatedPrefix()` as a path prefix
+* **Redis keys**: Use `GetIsolatedPrefix()` as a key prefix
+
+### 2. Use Base Classes for Common Setup[​](#2-use-base-classes-for-common-setup "Direct link to 2. Use Base Classes for Common Setup")
+
+```
+// Shared base for all tests
+
+public abstract class TestsBase : WebApplicationTest<WebApplicationFactory, Program>
+
+{
+
+}
+
+
+
+// Specialized base for database tests
+
+public abstract class DatabaseTestBase : TestsBase
+
+{
+
+    protected override async Task SetupAsync()
+
+    {
+
+        await CreateSchemaAsync();
+
+    }
+
+}
+
+
+
+// Actual tests
+
+public class UserTests : DatabaseTestBase
+
+{
+
+    [Test]
+
+    public async Task CreateUser_Works() { /* ... */ }
+
+}
+```
+
+### 3. Clean Up Resources[​](#3-clean-up-resources "Direct link to 3. Clean Up Resources")
+
+```
+[After(Test)]
+
+public async Task Cleanup()
+
+{
+
+    await CleanupTestDataAsync();
+
+}
+```
+
+### 4. Inject Containers at Factory Level[​](#4-inject-containers-at-factory-level "Direct link to 4. Inject Containers at Factory Level")
+
+```
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+
+{
+
+    // Shared across all tests
+
+    [ClassDataSource<PostgresContainer>(Shared = SharedType.PerTestSession)]
+
+    public PostgresContainer Postgres { get; init; } = null!;
+
+
+
+    [ClassDataSource<RedisContainer>(Shared = SharedType.PerTestSession)]
+
+    public RedisContainer Redis { get; init; } = null!;
+
+}
+```
+
+## Complete Example[​](#complete-example "Direct link to Complete Example")
+
+```
+// Container wrapper
+
+public class InMemoryPostgres : IAsyncInitializer, IAsyncDisposable
+
+{
+
+    public PostgreSqlContainer Container { get; } = new PostgreSqlBuilder().Build();
+
+    public async Task InitializeAsync() => await Container.StartAsync();
+
+    public async ValueTask DisposeAsync() => await Container.DisposeAsync();
+
+}
+
+
+
+// Factory with shared container
+
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+
+{
+
+    [ClassDataSource<InMemoryPostgres>(Shared = SharedType.PerTestSession)]
+
+    public InMemoryPostgres Postgres { get; init; } = null!;
+
+
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        builder.ConfigureAppConfiguration((_, config) =>
+
+        {
+
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+
+            {
+
+                { "Database:ConnectionString", Postgres.Container.GetConnectionString() }
+
+            });
+
+        });
+
+    }
+
+}
+
+
+
+// Base class
+
+public abstract class TestsBase : WebApplicationTest<WebApplicationFactory, Program>
+
+{
+
+}
+
+
+
+// Test base with table isolation
+
+public abstract class TodoTestBase : TestsBase
+
+{
+
+    [ClassDataSource<InMemoryPostgres>(Shared = SharedType.PerTestSession)]
+
+    public InMemoryPostgres Postgres { get; init; } = null!;
+
+
+
+    protected string TableName { get; private set; } = null!;
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        TableName = GetIsolatedName("todos");
+
+        await CreateTableAsync();
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:TableName", TableName }
+
+        });
+
+    }
+
+
+
+    [After(Test)]
+
+    public async Task Cleanup() => await DropTableAsync();
+
+
+
+    private async Task CreateTableAsync() { /* ... */ }
+
+    private async Task DropTableAsync() { /* ... */ }
+
+}
+
+
+
+// Actual tests
+
+public class TodoApiTests : TodoTestBase
+
+{
+
+    [Test]
+
+    public async Task CreateTodo_ReturnsCreated()
+
+    {
+
+        var client = Factory.CreateClient();
+
+
+
+        var response = await client.PostAsJsonAsync("/todos", new { Title = "Test" });
+
+
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Created);
+
+    }
+
+
+
+    [Test, Repeat(5)]
+
+    public async Task ParallelTests_AreIsolated()
+
+    {
+
+        var client = Factory.CreateClient();
+
+
+
+        // Each repetition has its own table
+
+        await client.PostAsJsonAsync("/todos", new { Title = "Isolated" });
+
+
+
+        var todos = await client.GetFromJsonAsync<List<Todo>>("/todos");
+
+        await Assert.That(todos!.Count).IsEqualTo(1);  // Always 1, not 5
+
+    }
+
+}
+```
+
+## Migrating from Basic WebApplicationFactory[​](#migrating-from-basic-webapplicationfactory "Direct link to Migrating from Basic WebApplicationFactory")
+
+If you're currently using `WebApplicationFactory<TEntryPoint>` directly:
+
+**Before:**
+
+```
+public class MyTests
+
+{
+
+    [ClassDataSource<WebAppFactory>(Shared = SharedType.PerTestSession)]
+
+    public required WebAppFactory Factory { get; init; }
+
+
+
+    [Test]
+
+    public async Task Test1()
+
+    {
+
+        var client = Factory.CreateClient();
+
+        // Tests share state - not isolated!
+
+    }
+
+}
+```
+
+**After:**
+
+```
+public class MyTests : WebApplicationTest<WebAppFactory, Program>
+
+{
+
+    [Test]
+
+    public async Task Test1()
+
+    {
+
+        var client = Factory.CreateClient();  // Isolated per test!
+
+    }
+
+}
+```
+
+The key benefits:
+
+* Each test gets its own isolated factory via `WithWebHostBuilder`
+* `SetupAsync` enables async initialization before factory creation
+* `ConfigureTestServices` and `ConfigureTestConfiguration` are per-test
+* Built-in isolation helpers (`GetIsolatedName`, `GetIsolatedPrefix`)
+
+## FAQ & Troubleshooting[​](#faq--troubleshooting "Direct link to FAQ & Troubleshooting")
+
+### Why does my test configuration not override the factory?[​](#why-does-my-test-configuration-not-override-the-factory "Direct link to Why does my test configuration not override the factory?")
+
+**Problem:** You set a value in `ConfigureTestConfiguration` but the factory's value is still used.
+
+**Solution:** Make sure you're using the same configuration key. The test configuration runs **after** the factory configuration (step 6 vs steps 3-4), so it should override. Check that:
+
+1. You're using `AddInMemoryCollection` which adds to the config sources
+2. The configuration key path is exactly the same
+3. You're not accidentally reading from a different source (e.g., `appsettings.json`)
+
+```
+// Factory sets default
+
+protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+{
+
+    builder.ConfigureAppConfiguration((_, config) =>
+
+    {
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "Database:ConnectionString", "factory-default" }
+
+        });
+
+    });
+
+}
+
+
+
+// Test overrides - this WILL work because it runs after
+
+protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+{
+
+    config.AddInMemoryCollection(new Dictionary<string, string?>
+
+    {
+
+        { "Database:ConnectionString", "test-specific-value" }  // This wins!
+
+    });
+
+}
+```
+
+### Why can't I access SetupAsync results in ConfigureTestOptions?[​](#why-cant-i-access-setupasync-results-in-configuretestoptions "Direct link to Why can't I access SetupAsync results in ConfigureTestOptions?")
+
+**Problem:** You want to use a value from `SetupAsync` in `ConfigureTestOptions`, but `ConfigureTestOptions` runs first.
+
+**Solution:** This is by design. `ConfigureTestOptions` runs before `SetupAsync` because test options affect how the infrastructure is set up. If you need async setup before options, consider:
+
+1. Moving the logic to a `[Before(Test)]` method that runs even earlier
+2. Using lazy initialization in `SetupAsync`
+
+### Why are my parallel tests interfering with each other?[​](#why-are-my-parallel-tests-interfering-with-each-other "Direct link to Why are my parallel tests interfering with each other?")
+
+**Problem:** Tests that pass individually fail when run in parallel.
+
+**Solution:** You're sharing resources without isolation. Use `GetIsolatedName()` and `GetIsolatedPrefix()`:
+
+```
+// BAD: All parallel tests share the same table
+
+var tableName = "todos";
+
+
+
+// GOOD: Each test gets its own table
+
+var tableName = GetIsolatedName("todos");  // "Test_42_todos", "Test_43_todos", etc.
+```
+
+### Can I have different factory configurations for different test classes?[​](#can-i-have-different-factory-configurations-for-different-test-classes "Direct link to Can I have different factory configurations for different test classes?")
+
+**Problem:** Test class A needs PostgreSQL, test class B needs SQLite.
+
+**Solution:** Create different factory classes:
+
+```
+public class PostgresFactory : TestWebApplicationFactory<Program>
+
+{
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        // PostgreSQL configuration
+
+    }
+
+}
+
+
+
+public class SqliteFactory : TestWebApplicationFactory<Program>
+
+{
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        // SQLite configuration
+
+    }
+
+}
+
+
+
+public class PostgresTests : WebApplicationTest<PostgresFactory, Program> { }
+
+public class SqliteTests : WebApplicationTest<SqliteFactory, Program> { }
+```
+
+### What's the difference between Factory and GlobalFactory?[​](#whats-the-difference-between-factory-and-globalfactory "Direct link to What's the difference between Factory and GlobalFactory?")
+
+| Property        | Type                                 | Scope    | Use Case                                               |
+| --------------- | ------------------------------------ | -------- | ------------------------------------------------------ |
+| `Factory`       | `WebApplicationFactory<TEntryPoint>` | Per-test | Creating HTTP clients, accessing services              |
+| `GlobalFactory` | `TFactory` (your custom type)        | Shared   | Accessing custom factory properties (containers, etc.) |
+
+```
+public class MyTests : WebApplicationTest<WebApplicationFactory, Program>
+
+{
+
+    [Test]
+
+    public async Task Example()
+
+    {
+
+        // Use Factory for per-test operations
+
+        var client = Factory.CreateClient();
+
+        var services = Factory.Services;
+
+
+
+        // Use GlobalFactory to access custom properties
+
+        var connectionString = GlobalFactory.Database.Container.GetConnectionString();
+
+    }
+
+}
+```
+
+### Why does my service registration not work?[​](#why-does-my-service-registration-not-work "Direct link to Why does my service registration not work?")
+
+**Problem:** You register a service in `ConfigureTestServices` but the old implementation is still used.
+
+**Solution:** Use `ReplaceService` instead of `AddSingleton`:
+
+```
+protected override void ConfigureTestServices(IServiceCollection services)
+
+{
+
+    // BAD: Adds a second registration, original may still be resolved
+
+    services.AddSingleton<IEmailService, FakeEmailService>();
+
+
+
+    // GOOD: Removes existing registration and adds new one
+
+    services.ReplaceService<IEmailService>(new FakeEmailService());
+
+}
+```
+
+### How do I debug lifecycle issues?[​](#how-do-i-debug-lifecycle-issues "Direct link to How do I debug lifecycle issues?")
+
+Create a test that logs all lifecycle events:
+
+```
+public class LifecycleDebugTest : WebApplicationTest<WebApplicationFactory, Program>
+
+{
+
+    protected override void ConfigureTestOptions(WebApplicationTestOptions options)
+
+    {
+
+        Console.WriteLine("1. ConfigureTestOptions");
+
+    }
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        Console.WriteLine("2. SetupAsync");
+
+        await base.SetupAsync();
+
+    }
+
+
+
+    protected override void ConfigureWebHostBuilder(IWebHostBuilder builder)
+
+    {
+
+        Console.WriteLine("5. ConfigureWebHostBuilder");
+
+    }
+
+
+
+    protected override void ConfigureTestConfiguration(IConfigurationBuilder config)
+
+    {
+
+        Console.WriteLine("6. ConfigureTestConfiguration");
+
+    }
+
+
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+
+    {
+
+        Console.WriteLine("7. ConfigureTestServices");
+
+    }
+
+
+
+    [Test]
+
+    public async Task Debug_Lifecycle()
+
+    {
+
+        Console.WriteLine("9. Test executing");
+
+        _ = Factory.CreateClient();
+
+        await Assert.That(true).IsTrue();
+
+    }
+
+}
+```
+
+### Can I run async code in ConfigureTestServices?[​](#can-i-run-async-code-in-configuretestservices "Direct link to Can I run async code in ConfigureTestServices?")
+
+**Problem:** ASP.NET Core's configuration methods are synchronous, but you need async initialization.
+
+**Solution:** Do async work in `SetupAsync`, then use the results in sync methods:
+
+```
+public class MyTest : TestsBase
+
+{
+
+    private string _authToken = null!;
+
+
+
+    protected override async Task SetupAsync()
+
+    {
+
+        // Async work here
+
+        _authToken = await GetAuthTokenAsync();
+
+    }
+
+
+
+    protected override void ConfigureTestServices(IServiceCollection services)
+
+    {
+
+        // Use the result from SetupAsync
+
+        services.AddSingleton(new AuthConfig { Token = _authToken });
+
+    }
+
+}
+```
+
+### Why does my Program.cs run before ConfigureWebHost's ConfigureAppConfiguration?[​](#why-does-my-programcs-run-before-configurewebhosts-configureappconfiguration "Direct link to Why does my Program.cs run before ConfigureWebHost's ConfigureAppConfiguration?")
+
+**Problem:** You set configuration values in `ConfigureWebHost` using `ConfigureAppConfiguration`, but your app's `Program.cs` doesn't see them during startup. Your breakpoint in Program.cs hits **before** the `ConfigureAppConfiguration` callback.
+
+```
+// Factory - this approach has a timing issue!
+
+protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+{
+
+    Console.WriteLine("ConfigureWebHost called");  // This runs first...
+
+
+
+    builder.ConfigureAppConfiguration((_, config) =>
+
+    {
+
+        Console.WriteLine("ConfigureAppConfiguration callback");  // ...but THIS runs AFTER Program.cs!
+
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "SomeKey", "SomeValue" }
+
+        });
+
+    });
+
+}
+
+
+
+// Program.cs - this runs BEFORE ConfigureAppConfiguration callback!
+
+var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Configuration["SomeKey"] != "SomeValue")
+
+{
+
+    throw new InvalidOperationException("SomeKey not found!");  // This throws!
+
+}
+```
+
+**Root Cause:** This is **expected behavior** of ASP.NET Core's `WebApplicationFactory`. The `ConfigureAppConfiguration` callbacks registered in `ConfigureWebHost` are **deferred** and run **after** your app's `Program.cs` code, not before.
+
+**Solution:** Use `ConfigureStartupConfiguration` instead, which uses `builder.UseSetting()` to apply configuration **before** your app's `Program.cs` runs:
+
+```
+public class WebApplicationFactory : TestWebApplicationFactory<Program>
+
+{
+
+    /// <summary>
+
+    /// Use ConfigureStartupConfiguration for configuration your Program.cs needs during startup.
+
+    /// This runs BEFORE Program.cs.
+
+    /// </summary>
+
+    protected override void ConfigureStartupConfiguration(IConfigurationBuilder configurationBuilder)
+
+    {
+
+        configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+
+        {
+
+            { "SomeKey", "SomeValue" },  // Available when Program.cs runs!
+
+            { "Database:ConnectionString", "..." }
+
+        });
+
+    }
+
+
+
+    /// <summary>
+
+    /// ConfigureWebHost can still be used for other customizations,
+
+    /// but NOT for configuration that Program.cs needs during startup.
+
+    /// </summary>
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+
+    {
+
+        // Safe to use ConfigureAppConfiguration for config that's only
+
+        // needed AFTER the app has started (e.g., in controllers, services)
+
+    }
+
+}
+```
+
+**When to use each method:**
+
+| Method                                           | Runs When         | Use For                                    |
+| ------------------------------------------------ | ----------------- | ------------------------------------------ |
+| `ConfigureStartupConfiguration`                  | Before Program.cs | Configuration needed during app startup    |
+| `ConfigureWebHost` + `ConfigureAppConfiguration` | After Program.cs  | Configuration only needed after app starts |
+
+## API Reference[​](#api-reference "Direct link to API Reference")
+
+### WebApplicationTest Properties[​](#webapplicationtest-properties "Direct link to WebApplicationTest Properties")
+
+| Property        | Type                                 | Description                              |
+| --------------- | ------------------------------------ | ---------------------------------------- |
+| `UniqueId`      | `int`                                | Unique identifier for this test instance |
+| `GlobalFactory` | `TFactory`                           | Shared factory (your custom type)        |
+| `Factory`       | `WebApplicationFactory<TEntryPoint>` | Per-test isolated factory                |
+| `Services`      | `IServiceProvider`                   | DI container from per-test factory       |
+| `HttpCapture`   | `HttpExchangeCapture?`               | Captured HTTP exchanges (if enabled)     |
+
+### WebApplicationTest Methods[​](#webapplicationtest-methods "Direct link to WebApplicationTest Methods")
+
+| Method                                      | Description                                      |
+| ------------------------------------------- | ------------------------------------------------ |
+| `GetIsolatedName(string baseName)`          | Returns `"Test_{UniqueId}_{baseName}"`           |
+| `GetIsolatedPrefix(string separator = "_")` | Returns `"test{separator}{UniqueId}{separator}"` |
+
+### WebApplicationTestOptions[​](#webapplicationtestoptions "Direct link to WebApplicationTestOptions")
+
+| Property                    | Type   | Default | Description                     |
+| --------------------------- | ------ | ------- | ------------------------------- |
+| `EnableHttpExchangeCapture` | `bool` | `false` | Capture HTTP requests/responses |
+
+### Service Collection Extensions[​](#service-collection-extensions "Direct link to Service Collection Extensions")
+
+| Method                              | Description                                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ReplaceService<T>(instance)`       | Replace service with instance                                                                        |
+| `ReplaceService<T>(factory)`        | Replace service with factory                                                                         |
+| `ReplaceService<TService, TImpl>()` | Replace service with implementation                                                                  |
+| `RemoveService<T>()`                | Remove service registration                                                                          |
+| `AddTUnitLogging(context)`          | Add per-test TUnit logging provider (auto-registered by `TestWebApplicationFactory`)                 |
+| `AddCorrelatedTUnitLogging()`       | Add correlated logging for shared web app scenarios (auto-registered by `TestWebApplicationFactory`) |
+
+### Logging Extensions (TUnit.Logging.Microsoft)[​](#logging-extensions-tunitloggingmicrosoft "Direct link to Logging Extensions (TUnit.Logging.Microsoft)")
+
+| Method                                        | Description                                  |
+| --------------------------------------------- | -------------------------------------------- |
+| `ILoggingBuilder.AddTUnit(context)`           | Add TUnit logger provider to logging builder |
+| `IServiceCollection.AddTUnitLogging(context)` | Add TUnit logging via service collection     |
+
+### WebApplicationFactory Extensions[​](#webapplicationfactory-extensions "Direct link to WebApplicationFactory Extensions")
+
+| Method                          | Description                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CreateClientWithTestContext()` | Obsolete compatibility helper. Prefer `CreateClient()` or `CreateDefaultClient()`, which already inject test context and trace propagation. |
+
+### Logging Types (Auto-Registered)[​](#logging-types-auto-registered "Direct link to Logging Types (Auto-Registered)")
+
+These types are automatically registered by `TestWebApplicationFactory` and typically don't need to be used directly:
+
+| Type                            | Description                                                         |
+| ------------------------------- | ------------------------------------------------------------------- |
+| `TUnitTestIdHandler`            | `DelegatingHandler` that propagates test context ID via HTTP header |
+| `TUnitTestContextMiddleware`    | Middleware that resolves test context from request header           |
+| `CorrelatedTUnitLoggerProvider` | Logger provider that resolves test context per log call             |
+| `TUnitLoggerProvider`           | Per-test logger provider bound to a specific `TestContext`          |
