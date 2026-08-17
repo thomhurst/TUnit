@@ -94,7 +94,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         var hasDependencies = HasDependencies(testList);
         var executableTests = hasDependencies
-            ? await RemoveCircularDependenciesAsync(testList).ConfigureAwait(false)
+            ? await RemoveCircularDependenciesAsync(testList, cancellationToken).ConfigureAwait(false)
             : testList;
 
         if (executableTests.Count == 0)
@@ -156,16 +156,22 @@ internal sealed class TestScheduler : ITestScheduler
     }
 
     private async Task<List<AbstractExecutableTest>> RemoveCircularDependenciesAsync(
-        List<AbstractExecutableTest> tests)
+        List<AbstractExecutableTest> tests,
+        CancellationToken cancellationToken)
     {
-        var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(tests);
-        var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
+        cancellationToken.ThrowIfCancellationRequested();
+        var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(tests, cancellationToken);
+        HashSet<AbstractExecutableTest>? testsInCircularDependencies = null;
 
         foreach (var (_, dependencyChain) in circularDependencies)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            testsInCircularDependencies ??= [];
+
             var simpleNames = new List<string>(dependencyChain.Count);
             foreach (var test in dependencyChain)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 simpleNames.Add($"{test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}");
             }
 
@@ -174,6 +180,7 @@ internal sealed class TestScheduler : ITestScheduler
 
             foreach (var test in dependencyChain)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (testsInCircularDependencies.Add(test))
                 {
                     _testStateManager.MarkCircularDependencyFailed(test, exception);
@@ -183,7 +190,7 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        if (testsInCircularDependencies.Count == 0)
+        if (testsInCircularDependencies is null)
         {
             return tests;
         }
@@ -191,6 +198,7 @@ internal sealed class TestScheduler : ITestScheduler
         var executableTests = new List<AbstractExecutableTest>(tests.Count - testsInCircularDependencies.Count);
         foreach (var test in tests)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!testsInCircularDependencies.Contains(test))
             {
                 executableTests.Add(test);
@@ -383,6 +391,13 @@ internal sealed class TestScheduler : ITestScheduler
 
                 if (!visitedDependencyTargets.Add(dependencyTarget))
                 {
+                    continue;
+                }
+
+                if (dependencyTarget.State == TestState.Failed &&
+                    dependencyTarget.Result?.Exception is CircularDependencyException)
+                {
+                    dependencyTarget.ExecutionTask ??= Task.CompletedTask;
                     continue;
                 }
 

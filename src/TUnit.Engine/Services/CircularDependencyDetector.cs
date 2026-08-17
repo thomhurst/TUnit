@@ -12,10 +12,13 @@ internal sealed class CircularDependencyDetector
     /// Detects circular dependencies in the given collection of tests
     /// </summary>
     /// <param name="tests">Tests to analyze for circular dependencies</param>
+    /// <param name="cancellationToken">Token used to cancel graph traversal</param>
     /// <returns>List of tests with circular dependencies and their dependency chains</returns>
     public List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)> DetectCircularDependencies(
-        IEnumerable<AbstractExecutableTest> tests)
+        IEnumerable<AbstractExecutableTest> tests,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         var circularDependencies = new List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)>();
         var visitedStates = new Dictionary<string, VisitState>(capacity: testList.Count);
@@ -23,6 +26,7 @@ internal sealed class CircularDependencyDetector
 
         foreach (var test in testList)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (visitedStates.ContainsKey(test.TestId))
             {
                 continue;
@@ -32,7 +36,7 @@ internal sealed class CircularDependencyDetector
             pathBuffer.Clear();
 
             // Typical cycle depth is small (2-5 tests), pre-size to 4
-            if (HasCycleDfs(test, testList, visitedStates, pathBuffer))
+            if (HasCycleDfs(test, visitedStates, pathBuffer, cancellationToken))
             {
                 // Found a cycle - add all tests in the cycle to circular dependencies
                 var cycle = new List<AbstractExecutableTest>(pathBuffer);
@@ -52,10 +56,11 @@ internal sealed class CircularDependencyDetector
 
     private bool HasCycleDfs(
         AbstractExecutableTest test,
-        IList<AbstractExecutableTest> allTests,
         Dictionary<string, VisitState> visitedStates,
-        List<AbstractExecutableTest> currentPath)
+        List<AbstractExecutableTest> currentPath,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (visitedStates.TryGetValue(test.TestId, out var state))
         {
             if (state == VisitState.Visiting)
@@ -78,7 +83,8 @@ internal sealed class CircularDependencyDetector
         // Check all dependencies
         foreach (var dependency in test.Dependencies)
         {
-            if (HasCycleDfs(dependency.Test, allTests, visitedStates, currentPath))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (HasCycleDfs(dependency.Test, visitedStates, currentPath, cancellationToken))
             {
                 return true;
             }
