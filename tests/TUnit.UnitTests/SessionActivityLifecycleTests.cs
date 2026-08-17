@@ -30,6 +30,13 @@ public class SessionActivityLifecycleTests
     private static (HookExecutor Executor, TestSessionContext SessionContext) CreateHookExecutor(
         string? testFilter = null)
     {
+        var (executor, sessionContext, _) = CreateLifecycleHookExecutor(testFilter);
+        return (executor, sessionContext);
+    }
+
+    private static (HookExecutor Executor, TestSessionContext SessionContext, StubContextProvider ContextProvider)
+        CreateLifecycleHookExecutor(string? testFilter = null)
+    {
         var beforeDiscovery = new BeforeTestDiscoveryContext { TestFilter = testFilter };
         var discoveryContext = new TestDiscoveryContext(beforeDiscovery) { TestFilter = testFilter };
         var sessionContext = new TestSessionContext(discoveryContext)
@@ -45,7 +52,7 @@ public class SessionActivityLifecycleTests
         // so we pass null — the executor will never call it in these tests.
         var executor = new HookExecutor(hookDelegateBuilder, contextProvider, null!);
 
-        return (executor, sessionContext);
+        return (executor, sessionContext, contextProvider);
     }
 
     [Test]
@@ -220,6 +227,38 @@ public class SessionActivityLifecycleTests
     }
 
     [Test]
+    public async Task HooklessAssemblyAndClassActivities_PreserveLifecycleHierarchy()
+    {
+        var (executor, sessionContext, contextProvider) = CreateLifecycleHookExecutor();
+        var testClass = typeof(SessionActivityLifecycleTests);
+        var assembly = testClass.Assembly;
+
+        using var scope = new ActivityListenerScope();
+
+        executor.TryStartSessionActivity();
+        executor.TryStartAssemblyActivity(assembly);
+        executor.TryStartClassActivity(testClass);
+
+        var assemblyContext = contextProvider.GetOrCreateAssemblyContext(assembly);
+        var classContext = contextProvider.GetOrCreateClassContext(testClass);
+        var assemblyActivity = assemblyContext.Activity;
+        var classActivity = classContext.Activity;
+
+        await Assert.That(assemblyActivity).IsNotNull();
+        await Assert.That(assemblyActivity!.ParentId).IsEqualTo(sessionContext.Activity!.Id);
+        await Assert.That(classActivity).IsNotNull();
+        await Assert.That(classActivity!.ParentId).IsEqualTo(assemblyActivity.Id);
+
+        await executor.FinishClassActivityAsync(testClass);
+        await executor.FinishAssemblyActivityAsync(assembly);
+
+        await Assert.That(classActivity.IsStopped).IsTrue();
+        await Assert.That(assemblyActivity.IsStopped).IsTrue();
+        await Assert.That(classContext.Activity).IsNull();
+        await Assert.That(assemblyContext.Activity).IsNull();
+    }
+
+    [Test]
     public async Task DiscoverySpan_InSameTrace_WhenParentedUnderSession()
     {
         var (executor, sessionContext) = CreateHookExecutor();
@@ -290,6 +329,9 @@ public class SessionActivityLifecycleTests
     /// </summary>
     private sealed class StubContextProvider(TestSessionContext sessionContext) : IContextProvider
     {
+        private readonly ConcurrentDictionary<Assembly, AssemblyHookContext> _assemblyContexts = new();
+        private readonly ConcurrentDictionary<Type, ClassHookContext> _classContexts = new();
+
         public BeforeTestDiscoveryContext BeforeTestDiscoveryContext =>
             throw new NotSupportedException();
 
@@ -299,14 +341,21 @@ public class SessionActivityLifecycleTests
         public TestSessionContext TestSessionContext => sessionContext;
 
         public AssemblyHookContext GetOrCreateAssemblyContext(Assembly assembly) =>
-            throw new NotSupportedException();
+            _assemblyContexts.GetOrAdd(assembly, static (key, context) => new AssemblyHookContext(context)
+            {
+                Assembly = key
+            }, sessionContext);
 
         public ClassHookContext GetOrCreateClassContext(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |
                                         DynamicallyAccessedMemberTypes.PublicProperties |
                                         DynamicallyAccessedMemberTypes.PublicMethods)]
             Type classType) =>
-            throw new NotSupportedException();
+            _classContexts.GetOrAdd(classType, static (key, provider) =>
+                new ClassHookContext(provider.GetOrCreateAssemblyContext(key.Assembly))
+                {
+                    ClassType = key
+                }, this);
 
         public TestContext CreateTestContext(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |

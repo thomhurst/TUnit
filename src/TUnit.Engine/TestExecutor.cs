@@ -36,7 +36,17 @@ internal class TestExecutor
     // each time (these run on the hot path and the factory is only invoked on the first cache miss).
     private readonly Func<CancellationToken, ValueTask> _beforeTestSessionHookFactory;
     private readonly Func<Assembly, CancellationToken, ValueTask> _beforeAssemblyHookFactory;
+    private readonly Func<Assembly, ValueTask<List<Exception>>> _cancelledAfterAssemblyHookFactory;
+    private readonly AfterClassExecutor _cancelledAfterClassHookFactory;
+#if NET
+    private readonly Func<Assembly, ValueTask<List<Exception>>> _finishAssemblyActivityFactory;
+    private readonly AfterClassExecutor _finishClassActivityFactory;
+#endif
 
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "Class cleanup delegates receive only test-class types annotated at the execution boundary.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2111",
+        Justification = "The annotated class cleanup method is captured as a delegate, not accessed through reflection.")]
     public TestExecutor(
         HookExecutor hookExecutor,
         TestLifecycleCoordinator lifecycleCoordinator,
@@ -54,6 +64,12 @@ internal class TestExecutor
 
         _beforeTestSessionHookFactory = ct => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(ct);
         _beforeAssemblyHookFactory = (assembly, ct) => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, ct);
+        _cancelledAfterAssemblyHookFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None);
+        _cancelledAfterClassHookFactory = testClass => _hookExecutor.ExecuteAfterClassHooksAsync(testClass, CancellationToken.None);
+#if NET
+        _finishAssemblyActivityFactory = _hookExecutor.FinishAssemblyActivityAsync;
+        _finishClassActivityFactory = _hookExecutor.FinishClassActivityAsync;
+#endif
     }
 
 
@@ -105,20 +121,34 @@ internal class TestExecutor
         // it re-applies the same captured contexts).
         test.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-        if (HasAssemblyHooks(testClass.Assembly))
+        var hasAssemblyHooks = HasAssemblyHooks(testClass.Assembly);
+        if (hasAssemblyHooks)
         {
             await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(
                 testClass.Assembly,
                 _beforeAssemblyHookFactory,
                 cancellationToken).ConfigureAwait(false);
         }
+#if NET
+        else
+        {
+            _hookExecutor.TryStartAssemblyActivity(testClass.Assembly);
+        }
+#endif
 
         test.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-        if (HasClassHooks(testClass))
+        var hasClassHooks = HasClassHooks(testClass);
+        if (hasClassHooks)
         {
             await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
         }
+#if NET
+        else
+        {
+            _hookExecutor.TryStartClassActivity(testClass);
+        }
+#endif
 
         // Note: the caller (TestCoordinator) restores ClassContext.RestoreExecutionContext() right
         // before constructing the instance so AsyncLocals captured by BeforeAssembly/BeforeClass flow
@@ -164,12 +194,33 @@ internal class TestExecutor
                     testAssembly,
                     _beforeAssemblyHookFactory,
                     cancellationToken).ConfigureAwait(false);
+            }
+#if NET
+            else
+            {
+                _hookExecutor.TryStartAssemblyActivity(testAssembly);
+            }
+#endif
 
-                // Register After Assembly hook to run on cancellation (guarantees cleanup)
+            Func<Assembly, ValueTask<List<Exception>>>? cancelledAfterAssemblyFactory = null;
+            if (hasAssemblyHooks)
+            {
+                cancelledAfterAssemblyFactory = _cancelledAfterAssemblyHookFactory;
+            }
+#if NET
+            else if (_hookExecutor.HasAssemblyActivity(testAssembly))
+            {
+                cancelledAfterAssemblyFactory = _finishAssemblyActivityFactory;
+            }
+#endif
+
+            if (cancelledAfterAssemblyFactory is not null)
+            {
+                // Register lifecycle cleanup on cancellation.
                 _afterHookPairTracker.RegisterAfterAssemblyHook(
                     testAssembly,
                     cancellationToken,
-                    (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, CancellationToken.None));
+                    cancelledAfterAssemblyFactory);
             }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
@@ -182,9 +233,33 @@ internal class TestExecutor
             if (hasClassHooks)
             {
                 await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
+            }
+#if NET
+            else
+            {
+                _hookExecutor.TryStartClassActivity(testClass);
+            }
+#endif
 
-                // Register After Class hook to run on cancellation (guarantees cleanup)
-                _afterHookPairTracker.RegisterAfterClassHook(testClass, _hookExecutor, cancellationToken);
+            AfterClassExecutor? cancelledAfterClassFactory = null;
+            if (hasClassHooks)
+            {
+                cancelledAfterClassFactory = _cancelledAfterClassHookFactory;
+            }
+#if NET
+            else if (_hookExecutor.HasClassActivity(testClass))
+            {
+                cancelledAfterClassFactory = _finishClassActivityFactory;
+            }
+#endif
+
+            if (cancelledAfterClassFactory is not null)
+            {
+                // Register lifecycle cleanup on cancellation.
+                _afterHookPairTracker.RegisterAfterClassHook(
+                    testClass,
+                    cancellationToken,
+                    cancelledAfterClassFactory);
             }
 
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
@@ -577,6 +652,8 @@ internal class TestExecutor
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "The class cleanup delegate is invoked with the annotated testClass parameter.")]
     internal async Task<List<Exception>?> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
@@ -593,23 +670,53 @@ internal class TestExecutor
 
         if (flags.ShouldExecuteAfterClass)
         {
-            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
-            var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, _hookExecutor, cancellationToken).ConfigureAwait(false);
-            if (classExceptions.Count > 0)
+            AfterClassExecutor? afterClassFactory = null;
+            if (HasClassHooks(testClass))
             {
-                (exceptions ??= []).AddRange(classExceptions);
+                afterClassFactory = type => _hookExecutor.ExecuteAfterClassHooksAsync(type, cancellationToken);
+            }
+#if NET
+            else if (_hookExecutor.HasClassActivity(testClass))
+            {
+                afterClassFactory = _finishClassActivityFactory;
+            }
+#endif
+
+            if (afterClassFactory is not null)
+            {
+                // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+                var classExceptions = await _afterHookPairTracker.GetOrCreateAfterClassTask(testClass, afterClassFactory).ConfigureAwait(false);
+                if (classExceptions.Count > 0)
+                {
+                    (exceptions ??= []).AddRange(classExceptions);
+                }
             }
         }
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
-            var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
-                testAssembly,
-                (assembly) => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
-            if (assemblyExceptions.Count > 0)
+            Func<Assembly, ValueTask<List<Exception>>>? afterAssemblyFactory = null;
+            if (HasAssemblyHooks(testAssembly))
             {
-                (exceptions ??= []).AddRange(assemblyExceptions);
+                afterAssemblyFactory = assembly => _hookExecutor.ExecuteAfterAssemblyHooksAsync(assembly, cancellationToken);
+            }
+#if NET
+            else if (_hookExecutor.HasAssemblyActivity(testAssembly))
+            {
+                afterAssemblyFactory = _finishAssemblyActivityFactory;
+            }
+#endif
+
+            if (afterAssemblyFactory is not null)
+            {
+                // Use AfterHookPairTracker to prevent double execution if already triggered by cancellation
+                var assemblyExceptions = await _afterHookPairTracker.GetOrCreateAfterAssemblyTask(
+                    testAssembly,
+                    afterAssemblyFactory).ConfigureAwait(false);
+                if (assemblyExceptions.Count > 0)
+                {
+                    (exceptions ??= []).AddRange(assemblyExceptions);
+                }
             }
         }
 
