@@ -32,7 +32,7 @@ const config: Config = {
   },
 
   plugins: [
-    'docusaurus-plugin-llms',
+    '@signalwire/docusaurus-plugin-llms-txt',
   ],
 
   headTags: [
