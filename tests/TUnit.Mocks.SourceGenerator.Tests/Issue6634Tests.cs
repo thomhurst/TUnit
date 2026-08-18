@@ -171,6 +171,69 @@ public class Issue6634Tests : SnapshotTestBase
         await Assert.That(generated).Contains("public static global::TUnit.Mocks.Mock<global::ExternalLib.PublicClient> Mock(global::ExternalLib.PublicClient.Options options)");
     }
 
+    [Test]
+    public async Task Wrap_Preserves_Constructor_With_Protected_Parameter()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public class WrappedClient
+            {
+                protected WrappedClient(State state) { }
+
+                protected class State { }
+
+                public virtual string Call() => "real";
+            }
+            """);
+        var source = """
+            using TUnit.Mocks;
+
+            public class Test
+            {
+                public void Run(ExternalLib.WrappedClient instance) => Mock.Wrap(instance);
+            }
+            """;
+
+        var generated = string.Join(Environment.NewLine, RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(generated).Contains("WrappedClientWrapMockImpl");
+        await Assert.That(generated).Contains(": base(default(global::ExternalLib.WrappedClient.State)!)");
+    }
+
+    [Test]
+    public Task Constructor_Emission_And_Overload_Visibility_Snapshot()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public class SnapshotClient
+            {
+                protected SnapshotClient() { }
+
+                protected SnapshotClient(ProtectedState state) { }
+
+                protected SnapshotClient(InternalState state) { }
+
+                protected SnapshotClient(PublicState state) { }
+
+                protected class ProtectedState { }
+
+                protected internal class InternalState { }
+
+                public class PublicState { }
+            }
+
+            public class Test
+            {
+                public void Run() => Mock.Of<SnapshotClient>();
+            }
+            """;
+
+        return VerifyGeneratorOutput(source);
+    }
+
     private static async Task<string> GenerateFromExternalLibrary(string externalLibrary, string typeName)
     {
         var reference = CreateExternalAssemblyReference(externalLibrary);
@@ -184,7 +247,7 @@ public class Issue6634Tests : SnapshotTestBase
         string source,
         MetadataReference? reference = null)
     {
-        var references = reference is null ? null : new[] { reference };
+        MetadataReference[]? references = reference is null ? null : [reference];
         var errors = GetGeneratedCompilationErrors(source, references)
             .Where(diagnostic => diagnostic.Id is "CS0051" or "CS0122")
             .Select(diagnostic => diagnostic.ToString())

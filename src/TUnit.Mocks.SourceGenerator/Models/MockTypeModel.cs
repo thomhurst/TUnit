@@ -152,7 +152,11 @@ internal sealed record MockConstructorModel : IEquatable<MockConstructorModel>
 
     public bool Equals(MockConstructorModel? other)
     {
-        if (other is null) return false;
+        if (other is null)
+        {
+            return false;
+        }
+
         return Parameters.Equals(other.Parameters)
             && HasPubliclyAccessibleParameterTypes == other.HasPubliclyAccessibleParameterTypes;
     }

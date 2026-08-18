@@ -201,6 +201,34 @@ public class InaccessibleConstructorMockAnalyzerTests
     }
 
     [Test]
+    public async Task Wrap_With_Protected_Parameter_Does_Not_Report_TM006()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test(ExternalLib.WrappedClient instance)
+                {
+                    TUnit.Mocks.Mock.Wrap(instance);
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class WrappedClient
+                {
+                    protected WrappedClient(State state) { }
+
+                    protected class State { }
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
     public async Task Cross_Assembly_Protected_Internal_Parameter_Reports_TM006()
     {
         await Verifier.VerifyAnalyzerWithLibraryAsync(

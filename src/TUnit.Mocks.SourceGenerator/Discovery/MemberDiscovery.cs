@@ -846,17 +846,33 @@ internal static class MemberDiscovery
     }
 
     /// <summary>
-    /// Discovers constructors usable by both the generated subclass and its non-derived factory.
+    /// Discovers constructors usable by the generated subclass. Partial-mock factories also need
+    /// to name every parameter type; wrap factories only accept an existing instance.
     /// </summary>
-    public static EquatableArray<MockConstructorModel> DiscoverConstructors(INamedTypeSymbol typeSymbol, Compilation compilation)
+    public static EquatableArray<MockConstructorModel> DiscoverConstructors(
+        INamedTypeSymbol typeSymbol,
+        Compilation compilation,
+        bool requiresFactoryAccessibleParameterTypes)
     {
         var constructors = new List<MockConstructorModel>();
 
         foreach (var ctor in typeSymbol.InstanceConstructors)
         {
-            if (ctor.DeclaredAccessibility == Accessibility.Private) continue;
-            if (!IsMemberAccessible(ctor, compilation.Assembly)) continue;
-            if (!ctor.Parameters.All(p => TypeAccessibility.IsAccessibleFromAssembly(p.Type, compilation))) continue;
+            if (ctor.DeclaredAccessibility == Accessibility.Private)
+            {
+                continue;
+            }
+
+            if (!IsMemberAccessible(ctor, compilation.Assembly))
+            {
+                continue;
+            }
+
+            if (requiresFactoryAccessibleParameterTypes
+                && !ctor.Parameters.All(p => TypeAccessibility.IsAccessibleFromAssembly(p.Type, compilation)))
+            {
+                continue;
+            }
 
             constructors.Add(new MockConstructorModel
             {

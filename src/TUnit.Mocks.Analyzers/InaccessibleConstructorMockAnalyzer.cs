@@ -33,7 +33,7 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var target = ResolveMockTarget(context, invocation);
+        var target = ResolveMockTarget(context, invocation, out var isWrapMock);
 
         if (target is not { TypeKind: TypeKind.Class } namedType)
         {
@@ -46,7 +46,10 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (HasAccessibleConstructor(namedType, context.Compilation))
+        if (HasAccessibleConstructor(
+                namedType,
+                context.Compilation,
+                requiresFactoryAccessibleParameterTypes: !isWrapMock))
         {
             return;
         }
@@ -64,8 +67,12 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     /// Resolves the mocked type from either entry point: the generic <c>Mock.Of&lt;T&gt;()</c> /
     /// <c>Mock.Wrap&lt;T&gt;()</c> form, or the generated <c>T.Mock()</c> static extension.
     /// </summary>
-    private static INamedTypeSymbol? ResolveMockTarget(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static INamedTypeSymbol? ResolveMockTarget(
+        SyntaxNodeAnalysisContext context,
+        InvocationExpressionSyntax invocation,
+        out bool isWrapMock)
     {
+        isWrapMock = false;
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
         if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
@@ -75,6 +82,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
 
         if (IsMockEntryPointMethod(methodSymbol))
         {
+            isWrapMock = methodSymbol.Name == "Wrap";
+
             // The multi-type overloads — Of<T1, T2>() through Of<T1, T2, T3, T4>() — return
             // Mock<T1>: T1 is the type the impl subclasses, T2..T4 are interfaces layered on it,
             // and MockTypeDiscovery reuses T1's constructors for the multi-type model. So the
@@ -134,15 +143,24 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// Mirrors <c>MemberDiscovery.DiscoverConstructors</c>. The constructor must be reachable from
     /// the generated subclass, while every parameter type must also be nameable by its non-derived
-    /// factory. A target left with no such constructor is exactly the case this rule reports. Keep
-    /// both implementations in step; they live in separate assemblies with no shared project.
+    /// factory for partial mocks. Wrap factories accept an existing instance, so only subclass
+    /// accessibility applies there. A target left with no such constructor is exactly the case
+    /// this rule reports. Keep both implementations in step; they live in separate assemblies
+    /// with no shared project.
     /// </summary>
-    private static bool HasAccessibleConstructor(INamedTypeSymbol type, Compilation compilation)
+    private static bool HasAccessibleConstructor(
+        INamedTypeSymbol type,
+        Compilation compilation,
+        bool requiresFactoryAccessibleParameterTypes)
     {
-        return type.InstanceConstructors.Any(ctor => IsChainable(ctor, compilation));
+        return type.InstanceConstructors.Any(
+            ctor => IsChainable(ctor, compilation, requiresFactoryAccessibleParameterTypes));
     }
 
-    private static bool IsChainable(IMethodSymbol ctor, Compilation compilation)
+    private static bool IsChainable(
+        IMethodSymbol ctor,
+        Compilation compilation,
+        bool requiresFactoryAccessibleParameterTypes)
     {
         // DiscoverConstructors rejects private constructors outright, same-assembly or not —
         // a subclass can never chain to one.
@@ -152,7 +170,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
         }
 
         return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilation.Assembly)
-               && ctor.Parameters.All(p => IsTypeAccessibleFromAssembly(p.Type, compilation));
+               && (!requiresFactoryAccessibleParameterTypes
+                   || ctor.Parameters.All(p => IsTypeAccessibleFromAssembly(p.Type, compilation)));
     }
 
     /// <summary>

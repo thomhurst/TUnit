@@ -106,13 +106,15 @@ internal static class MockTypeDiscovery
             if (namedType.TypeKind != TypeKind.Class || namedType.IsSealed || namedType.IsValueType)
                 return ImmutableArray<MockTypeModel>.Empty;
 
-            // Wrap uses the same model as partial mock but with IsWrapMock flag
-            var wrapModel = BuildSingleTypeModel(namedType, isPartialMock: true, compilationAssembly, compilation);
+            var wrapModel = BuildSingleTypeModel(
+                namedType,
+                isPartialMock: true,
+                compilationAssembly,
+                compilation,
+                isWrapMock: true);
             if (wrapModel is null)
                 return ImmutableArray<MockTypeModel>.Empty;
 
-            // Set IsWrapMock flag
-            wrapModel = wrapModel with { IsWrapMock = true };
             return ImmutableArray.Create(wrapModel);
         }
 
@@ -414,7 +416,12 @@ internal static class MockTypeDiscovery
         return builder.MoveToImmutable();
     }
 
-    private static MockTypeModel? BuildSingleTypeModel(INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
+    private static MockTypeModel? BuildSingleTypeModel(
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        bool isWrapMock = false)
     {
         // An interface with abstract members this compilation can't access (e.g. `internal`
         // members declared in another assembly) cannot be implemented by any type we could emit,
@@ -429,7 +436,10 @@ internal static class MockTypeDiscovery
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
-            ? MemberDiscovery.DiscoverConstructors(namedType, compilation)
+            ? MemberDiscovery.DiscoverConstructors(
+                namedType,
+                compilation,
+                requiresFactoryAccessibleParameterTypes: !isWrapMock)
             : EquatableArray<MockConstructorModel>.Empty;
 
         return new MockTypeModel
@@ -441,6 +451,7 @@ internal static class MockTypeDiscovery
             IsInterface = namedType.TypeKind == TypeKind.Interface,
             IsAbstract = namedType.IsAbstract,
             IsPartialMock = isPartialMock,
+            IsWrapMock = isWrapMock,
             TypeParameters = new EquatableArray<MockTypeParameterModel>(GetTypeParameterModels(namedType)),
             Methods = methods,
             Properties = properties,
