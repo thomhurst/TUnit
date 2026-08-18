@@ -6,6 +6,35 @@ namespace TUnit.Mocks.SourceGenerator.Tests;
 public class MockGeneratorDiagnosticTests : SnapshotTestBase
 {
     [Test]
+    public async Task Attribute_Without_Usable_Constructor_Reports_TM006_At_Attribute()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            [assembly: GenerateMock(typeof(UnconstructableClient))]
+
+            public class UnconstructableClient
+            {
+                protected UnconstructableClient(State state) { }
+
+                protected class State { }
+            }
+            """;
+
+        var (sources, diagnostics) = RunGeneratorForDiagnostics(source);
+
+        var diagnostic = diagnostics.Single(d => d.Id == "TM006");
+        var expectedStart = source.IndexOf(
+            "GenerateMock(typeof(UnconstructableClient))",
+            StringComparison.Ordinal);
+
+        await Assert.That(diagnostic.Severity).IsEqualTo(DiagnosticSeverity.Error);
+        await Assert.That(diagnostic.GetMessage()).Contains("global::UnconstructableClient");
+        await Assert.That(diagnostic.Location.SourceSpan.Start).IsEqualTo(expectedStart);
+        await Assert.That(sources.Any(s => s.Contains("UnconstructableClientMockImpl", StringComparison.Ordinal))).IsFalse();
+    }
+
+    [Test]
     public async Task Unexpected_Generation_Failure_Reports_Diagnostic_And_Does_Not_Stop_Other_Mocks()
     {
         var source = """

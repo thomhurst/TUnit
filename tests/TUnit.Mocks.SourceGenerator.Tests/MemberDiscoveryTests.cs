@@ -9,17 +9,12 @@ public class MemberDiscoveryTests : SnapshotTestBase
     [Test]
     public void Constructor_Discovery_Observes_Cancellation()
     {
-        var syntaxTree = CSharpSyntaxTree.ParseText("""
+        var compilation = CreateCompilation("""
             public class CancelableClient
             {
                 public CancelableClient() { }
             }
             """);
-        var compilation = CSharpCompilation.Create(
-                "TestAssembly",
-                [syntaxTree],
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-            .WithReferences(GetCachedReferences());
         var type = compilation.GetTypeByMetadataName("CancelableClient")!;
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
@@ -32,5 +27,41 @@ public class MemberDiscoveryTests : SnapshotTestBase
                 requiresFactoryAccessibleParameterTypes: true,
                 cancellationToken: cancellationTokenSource.Token);
         });
+    }
+
+    [Test]
+    public void Transitive_Interface_Discovery_Observes_Cancellation()
+    {
+        var compilation = CreateCompilation("""
+            public interface IRoot
+            {
+                IChild Child { get; }
+            }
+
+            public interface IChild { }
+            """);
+        var type = compilation.GetTypeByMetadataName("IRoot")!;
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() =>
+        {
+            MockTypeDiscovery.DiscoverTransitiveInterfaceTypes(
+                type,
+                [],
+                compilation.Assembly,
+                compilation,
+                cancellationTokenSource.Token);
+        });
+    }
+
+    private static CSharpCompilation CreateCompilation(string source)
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(source);
+        return CSharpCompilation.Create(
+                "TestAssembly",
+                [syntaxTree],
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+            .WithReferences(GetCachedReferences());
     }
 }

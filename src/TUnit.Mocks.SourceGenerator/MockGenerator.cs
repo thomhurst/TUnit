@@ -51,6 +51,20 @@ public class MockGenerator : IIncrementalGenerator
                 transform: MockTypeDiscovery.TransformGenerateMockAttribute)
             .SelectMany((requests, _) => requests);
 
+        // Attribute-only requests have no invocation for the TM006 analyzer to inspect.
+        context.RegisterSourceOutput(attributeTypes, static (spc, request) =>
+        {
+            if (!request.Model.LacksAccessibleConstructor)
+            {
+                return;
+            }
+
+            spc.ReportDiagnostic(Diagnostic.Create(
+                Diagnostics.TM006_CannotMockTypeWithoutAccessibleConstructor,
+                request.SourceLocation.ToLocation(),
+                request.Model.FullyQualifiedName));
+        });
+
         // Step 1c: Find all IFoo.Mock() static extension invocations
         var extensionTypes = context.SyntaxProvider
             .CreateSyntaxProvider(

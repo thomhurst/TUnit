@@ -264,7 +264,7 @@ internal static class MockTypeDiscovery
     /// type that a generated impl references must itself be generated, otherwise the boundary type
     /// references a factory that was never emitted (CS0400). See issue #6264.
     /// </summary>
-    private static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
+    internal static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
         INamedTypeSymbol type,
         HashSet<string> visited,
         IAssemblySymbol? compilationAssembly,
@@ -299,6 +299,8 @@ internal static class MockTypeDiscovery
 
         foreach (var member in members)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             // Skip static members — static abstract return types should not be auto-mocked
             if (member.IsStatic) continue;
 
