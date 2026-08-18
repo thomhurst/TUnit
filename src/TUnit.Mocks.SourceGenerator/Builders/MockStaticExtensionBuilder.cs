@@ -65,15 +65,16 @@ internal static class MockStaticExtensionBuilder
 
                 var argList = string.Join(", ",
                     ctor.Parameters.Select(p => p.Name));
+                var overloadVisibility = ctor.HasPubliclyAccessibleParameterTypes ? visibility : "internal";
 
-                using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithoutBehavior})"))
+                using (writer.Block($"{overloadVisibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithoutBehavior})"))
                 {
                     writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>({argList});");
                 }
 
                 writer.AppendLine();
 
-                using (writer.Block($"{visibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithBehavior})"))
+                using (writer.Block($"{overloadVisibility} static global::TUnit.Mocks.Mock<{mockableType}> Mock({parameterListWithBehavior})"))
                 {
                     writer.AppendLine($"return global::TUnit.Mocks.Mock.Of<{mockableType}>(behavior, {argList});");
                 }

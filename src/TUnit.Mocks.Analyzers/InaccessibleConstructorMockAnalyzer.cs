@@ -46,7 +46,7 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (HasAccessibleConstructor(namedType, context.Compilation.Assembly))
+        if (HasAccessibleConstructor(namedType, context.Compilation))
         {
             return;
         }
@@ -132,21 +132,17 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Mirrors the generator's constructor discovery — <c>MemberDiscovery.DiscoverConstructors</c>
-    /// → <c>IsMemberAccessible</c> → <c>AreMemberSignatureTypesAccessible</c>. A generated subclass
-    /// can chain to a constructor only when the constructor itself is reachable AND every one of
-    /// its parameter types is: the generator drops a constructor whose signature mentions an
-    /// inaccessible type, and a target left with none is exactly the case this rule reports.
-    /// Keep the two in step; they live in separate assemblies with no shared project.
-    /// Protected (and protected internal) constructors are reachable precisely because the
-    /// generated impl derives from the target.
+    /// Mirrors <c>MemberDiscovery.DiscoverConstructors</c>. The constructor must be reachable from
+    /// the generated subclass, while every parameter type must also be nameable by its non-derived
+    /// factory. A target left with no such constructor is exactly the case this rule reports. Keep
+    /// both implementations in step; they live in separate assemblies with no shared project.
     /// </summary>
-    private static bool HasAccessibleConstructor(INamedTypeSymbol type, IAssemblySymbol compilationAssembly)
+    private static bool HasAccessibleConstructor(INamedTypeSymbol type, Compilation compilation)
     {
-        return type.InstanceConstructors.Any(ctor => IsChainable(ctor, compilationAssembly));
+        return type.InstanceConstructors.Any(ctor => IsChainable(ctor, compilation));
     }
 
-    private static bool IsChainable(IMethodSymbol ctor, IAssemblySymbol compilationAssembly)
+    private static bool IsChainable(IMethodSymbol ctor, Compilation compilation)
     {
         // DiscoverConstructors rejects private constructors outright, same-assembly or not —
         // a subclass can never chain to one.
@@ -155,8 +151,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return false;
         }
 
-        return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilationAssembly)
-               && ctor.Parameters.All(p => IsTypeAccessible(p.Type, compilationAssembly));
+        return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilation.Assembly)
+               && ctor.Parameters.All(p => IsTypeAccessibleFromAssembly(p.Type, compilation));
     }
 
     /// <summary>
@@ -181,31 +177,35 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
                || declaringAssembly.GivesAccessTo(compilationAssembly);
     }
 
-    private static bool IsTypeAccessible(ITypeSymbol type, IAssemblySymbol compilationAssembly)
+    private static bool IsTypeAccessibleFromAssembly(ITypeSymbol type, Compilation compilation)
     {
-        // Type parameters are always accessible.
-        if (type is ITypeParameterSymbol)
+        switch (type)
         {
-            return true;
-        }
+            case ITypeParameterSymbol:
+                return true;
 
-        // Pointer types can't appear in a generated override signature, even same-assembly.
-        if (type is IPointerTypeSymbol or IFunctionPointerTypeSymbol)
-        {
-            return false;
-        }
+            case IPointerTypeSymbol or IFunctionPointerTypeSymbol:
+                return false;
 
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            return IsTypeAccessible(arrayType.ElementType, compilationAssembly);
-        }
+            case IArrayTypeSymbol array:
+                return IsTypeAccessibleFromAssembly(array.ElementType, compilation);
 
-        if (!IsAssemblyReachable(type.DeclaredAccessibility, type.ContainingAssembly, compilationAssembly))
-        {
-            return false;
-        }
+            case INamedTypeSymbol named:
+                if (!compilation.IsSymbolAccessibleWithin(named, compilation.Assembly))
+                {
+                    return false;
+                }
 
-        return type is not INamedTypeSymbol namedType
-               || namedType.TypeArguments.All(arg => IsTypeAccessible(arg, compilationAssembly));
+                if (named.ContainingType is not null
+                    && !IsTypeAccessibleFromAssembly(named.ContainingType, compilation))
+                {
+                    return false;
+                }
+
+                return named.TypeArguments.All(arg => IsTypeAccessibleFromAssembly(arg, compilation));
+
+            default:
+                return true;
+        }
     }
 }

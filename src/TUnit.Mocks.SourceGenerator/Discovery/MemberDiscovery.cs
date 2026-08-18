@@ -846,19 +846,22 @@ internal static class MemberDiscovery
     }
 
     /// <summary>
-    /// Discovers all accessible constructors of a class type for partial mock generation.
+    /// Discovers constructors usable by both the generated subclass and its non-derived factory.
     /// </summary>
-    public static EquatableArray<MockConstructorModel> DiscoverConstructors(INamedTypeSymbol typeSymbol, IAssemblySymbol? compilationAssembly = null)
+    public static EquatableArray<MockConstructorModel> DiscoverConstructors(INamedTypeSymbol typeSymbol, Compilation compilation)
     {
         var constructors = new List<MockConstructorModel>();
 
         foreach (var ctor in typeSymbol.InstanceConstructors)
         {
             if (ctor.DeclaredAccessibility == Accessibility.Private) continue;
-            if (!IsMemberAccessible(ctor, compilationAssembly)) continue;
+            if (!IsMemberAccessible(ctor, compilation.Assembly)) continue;
+            if (!ctor.Parameters.All(p => TypeAccessibility.IsAccessibleFromAssembly(p.Type, compilation))) continue;
 
             constructors.Add(new MockConstructorModel
             {
+                HasPubliclyAccessibleParameterTypes = ctor.Parameters.All(
+                    p => TypeAccessibility.IsEffectivelyPublic(p.Type)),
                 Parameters = new EquatableArray<MockParameterModel>(
                     ctor.Parameters.Select(p => new MockParameterModel
                     {

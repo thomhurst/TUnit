@@ -144,11 +144,24 @@ internal sealed record MockConstructorModel : IEquatable<MockConstructorModel>
 {
     public EquatableArray<MockParameterModel> Parameters { get; init; } = EquatableArray<MockParameterModel>.Empty;
 
+    /// <summary>
+    /// Whether generated constructor convenience overloads may remain public without exposing a
+    /// less-accessible parameter type.
+    /// </summary>
+    public bool HasPubliclyAccessibleParameterTypes { get; init; }
+
     public bool Equals(MockConstructorModel? other)
     {
         if (other is null) return false;
-        return Parameters.Equals(other.Parameters);
+        return Parameters.Equals(other.Parameters)
+            && HasPubliclyAccessibleParameterTypes == other.HasPubliclyAccessibleParameterTypes;
     }
 
-    public override int GetHashCode() => Parameters.GetHashCode();
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            return (Parameters.GetHashCode() * 397) ^ HasPubliclyAccessibleParameterTypes.GetHashCode();
+        }
+    }
 }

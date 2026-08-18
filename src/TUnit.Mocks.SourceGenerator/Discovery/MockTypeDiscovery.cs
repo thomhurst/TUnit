@@ -193,7 +193,7 @@ internal static class MockTypeDiscovery
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
             // The secondary setup extensions surface additional-interface types in public
             // signatures, so the whole multi model must drop to internal if ANY type is.
-            IsPublic = IsEffectivelyPublic(namedType) && additionalTypes.All(IsEffectivelyPublic),
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(namedType) && additionalTypes.All(TypeAccessibility.IsEffectivelyPublic),
             UseFallbackNamespace = singleTypeModel.UseFallbackNamespace
         };
 
@@ -390,7 +390,7 @@ internal static class MockTypeDiscovery
             Properties = EquatableArray<MockMemberModel>.Empty,
             Events = EquatableArray<MockEventModel>.Empty,
             AllInterfaces = EquatableArray<string>.Empty,
-            IsPublic = IsEffectivelyPublic(delegateType),
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(delegateType),
             UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, delegateType),
         };
     }
@@ -429,7 +429,7 @@ internal static class MockTypeDiscovery
 
         // Discover constructors for partial mocks of classes
         var constructors = isPartialMock && namedType.TypeKind == TypeKind.Class
-            ? MemberDiscovery.DiscoverConstructors(namedType, compilationAssembly)
+            ? MemberDiscovery.DiscoverConstructors(namedType, compilation)
             : EquatableArray<MockConstructorModel>.Empty;
 
         return new MockTypeModel
@@ -452,7 +452,7 @@ internal static class MockTypeDiscovery
             ),
             Constructors = constructors,
             HasStaticAbstractMembers = methods.Any(m => m.IsStaticAbstract) || properties.Any(p => p.IsStaticAbstract) || events.Any(e => e.IsStaticAbstract),
-            IsPublic = IsEffectivelyPublic(namedType),
+            IsPublic = TypeAccessibility.IsEffectivelyPublic(namedType),
             UseFallbackNamespace = MockNamespaceConflictDetector.HasConflict(compilation, namedType)
         };
     }
@@ -514,45 +514,6 @@ internal static class MockTypeDiscovery
             IPointerTypeSymbol pointer => ContainsTypeParameters(pointer.PointedAtType),
             _ => false
         };
-    }
-
-    /// <summary>
-    /// True if every part of <paramref name="type"/>'s signature is publicly accessible: the
-    /// type itself, every enclosing type, and (recursively) every generic type argument and
-    /// array element. Mock wrappers built for types that are not effectively public must
-    /// themselves be emitted as <c>internal</c> to avoid CS9338 / CS0051 — including the
-    /// case where a public generic interface is closed over an internal type argument
-    /// (e.g. <c>ILogger&lt;InternalClass&gt;</c>). See issues #5426 and #5453.
-    /// </summary>
-    private static bool IsEffectivelyPublic(ITypeSymbol type)
-    {
-        switch (type)
-        {
-            case ITypeParameterSymbol:
-                // Bound at use site by the consumer; not the discovery point's concern.
-                return true;
-
-            case IArrayTypeSymbol array:
-                return IsEffectivelyPublic(array.ElementType);
-
-            case INamedTypeSymbol named:
-                for (INamedTypeSymbol? t = named; t is not null; t = t.ContainingType)
-                {
-                    if (t.DeclaredAccessibility != Accessibility.Public)
-                        return false;
-                }
-                foreach (var typeArg in named.TypeArguments)
-                {
-                    if (!IsEffectivelyPublic(typeArg))
-                        return false;
-                }
-                return true;
-
-            default:
-                // Pointers, function pointers, dynamic, error types — not expected in
-                // mockable signatures.
-                return true;
-        }
     }
 
     // ─── T.Mock() static extension discovery ─────────────────────────
