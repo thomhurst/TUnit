@@ -111,7 +111,8 @@ internal static class MockTypeDiscovery
                 isPartialMock: true,
                 compilationAssembly,
                 compilation,
-                isWrapMock: true);
+                isWrapMock: true,
+                cancellationToken: ct);
             if (wrapModel is null)
                 return ImmutableArray<MockTypeModel>.Empty;
 
@@ -130,7 +131,12 @@ internal static class MockTypeDiscovery
 
         if (method.TypeArguments.Length == 1)
         {
-            return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly, compilation);
+            return BuildModelWithTransitiveDependencies(
+                NormalizeSingleMockType(namedType),
+                isPartialMock,
+                compilationAssembly,
+                compilation,
+                ct);
         }
 
         // Multi-type mock: validate additional type args are all interfaces
@@ -150,7 +156,13 @@ internal static class MockTypeDiscovery
         }
 
         // Build single-type model for primary type (generates setup/verify/raise)
-        var singleTypeModel = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly, compilation);
+        var singleTypeModel = BuildSingleTypeModel(
+            namedType,
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            isWrapMock: false,
+            cancellationToken: ct);
         if (singleTypeModel is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
@@ -158,10 +170,12 @@ internal static class MockTypeDiscovery
         // these, members returning user interfaces reference CreateAutoMock factories that are
         // never generated when only Mock.Of<T1,T2>() appears in the assembly.
         var visited = new HashSet<string>();
-        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, compilationAssembly, compilation);
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(
+            namedType, visited, compilationAssembly, compilation, ct);
         foreach (var additionalType in additionalTypes)
         {
-            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(additionalType, visited, compilationAssembly, compilation));
+            transitiveModels.AddRange(DiscoverTransitiveInterfaceTypes(
+                additionalType, visited, compilationAssembly, compilation, ct));
         }
 
         // Build multi-type model (generates impl + factory)
@@ -206,7 +220,13 @@ internal static class MockTypeDiscovery
         var pairModels = new List<MockTypeModel>();
         foreach (var additionalType in additionalTypes)
         {
-            var standalone = BuildSingleTypeModel(additionalType, isPartialMock: false, compilationAssembly, compilation);
+            var standalone = BuildSingleTypeModel(
+                additionalType,
+                isPartialMock: false,
+                compilationAssembly,
+                compilation,
+                isWrapMock: false,
+                cancellationToken: ct);
             if (standalone is null)
             {
                 mapsBuilder.Add(EquatableArray<int>.Empty);
@@ -245,12 +265,17 @@ internal static class MockTypeDiscovery
     /// references a factory that was never emitted (CS0400). See issue #6264.
     /// </summary>
     private static List<MockTypeModel> DiscoverTransitiveInterfaceTypes(
-        INamedTypeSymbol type, HashSet<string> visited, IAssemblySymbol? compilationAssembly, Compilation compilation)
+        INamedTypeSymbol type,
+        HashSet<string> visited,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
     {
         var results = new List<MockTypeModel>();
         // Mark the entry type as visited so a member returning it (a self-cycle) is skipped.
         visited.Add(NormalizeTransitiveInterfaceReturnType(type).GetFullyQualifiedName());
-        CollectTransitiveInterfaceTypes(type, visited, results, compilationAssembly, compilation);
+        CollectTransitiveInterfaceTypes(
+            type, visited, results, compilationAssembly, compilation, cancellationToken);
         return results;
     }
 
@@ -261,7 +286,9 @@ internal static class MockTypeDiscovery
     /// </summary>
     private static void CollectTransitiveInterfaceTypes(
         INamedTypeSymbol type, HashSet<string> visited, List<MockTypeModel> results,
-        IAssemblySymbol? compilationAssembly, Compilation compilation)
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
     {
         // Collect all members from the type and its interfaces
         var members = new List<ISymbol>(type.GetMembers());
@@ -309,12 +336,19 @@ internal static class MockTypeDiscovery
             // Add returns false if already discovered/visited — skip without re-walking.
             if (!visited.Add(namedReturn.GetFullyQualifiedName())) continue;
 
-            var model = BuildSingleTypeModel(namedReturn, isPartialMock: false, compilationAssembly, compilation);
+            var model = BuildSingleTypeModel(
+                namedReturn,
+                isPartialMock: false,
+                compilationAssembly,
+                compilation,
+                isWrapMock: false,
+                cancellationToken: cancellationToken);
             if (model is null) continue;
 
             results.Add(model);
             // Recurse into the transitive type's members, accumulating into the same list.
-            CollectTransitiveInterfaceTypes(namedReturn, visited, results, compilationAssembly, compilation);
+            CollectTransitiveInterfaceTypes(
+                namedReturn, visited, results, compilationAssembly, compilation, cancellationToken);
         }
     }
 
@@ -398,14 +432,25 @@ internal static class MockTypeDiscovery
     }
 
     private static ImmutableArray<MockTypeModel> BuildModelWithTransitiveDependencies(
-        INamedTypeSymbol namedType, bool isPartialMock, IAssemblySymbol? compilationAssembly, Compilation compilation)
+        INamedTypeSymbol namedType,
+        bool isPartialMock,
+        IAssemblySymbol? compilationAssembly,
+        Compilation compilation,
+        CancellationToken cancellationToken)
     {
-        var model = BuildSingleTypeModel(namedType, isPartialMock, compilationAssembly, compilation);
+        var model = BuildSingleTypeModel(
+            namedType,
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            isWrapMock: false,
+            cancellationToken: cancellationToken);
         if (model is null)
             return ImmutableArray<MockTypeModel>.Empty;
 
         var visited = new HashSet<string>();
-        var transitiveModels = DiscoverTransitiveInterfaceTypes(namedType, visited, compilationAssembly, compilation);
+        var transitiveModels = DiscoverTransitiveInterfaceTypes(
+            namedType, visited, compilationAssembly, compilation, cancellationToken);
 
         if (transitiveModels.Count == 0)
             return ImmutableArray.Create(model);
@@ -421,7 +466,8 @@ internal static class MockTypeDiscovery
         bool isPartialMock,
         IAssemblySymbol? compilationAssembly,
         Compilation compilation,
-        bool isWrapMock = false)
+        bool isWrapMock,
+        CancellationToken cancellationToken)
     {
         // An interface with abstract members this compilation can't access (e.g. `internal`
         // members declared in another assembly) cannot be implemented by any type we could emit,
@@ -439,7 +485,8 @@ internal static class MockTypeDiscovery
             ? MemberDiscovery.DiscoverConstructors(
                 namedType,
                 compilation,
-                requiresFactoryAccessibleParameterTypes: !isWrapMock)
+                requiresFactoryAccessibleParameterTypes: !isWrapMock,
+                cancellationToken: cancellationToken)
             : EquatableArray<MockConstructorModel>.Empty;
 
         return new MockTypeModel
@@ -589,7 +636,12 @@ internal static class MockTypeDiscovery
         var isPartialMock = namedType.TypeKind == TypeKind.Class;
         var compilation = context.SemanticModel.Compilation;
         var compilationAssembly = compilation.Assembly;
-        return BuildModelWithTransitiveDependencies(NormalizeSingleMockType(namedType), isPartialMock, compilationAssembly, compilation);
+        return BuildModelWithTransitiveDependencies(
+            NormalizeSingleMockType(namedType),
+            isPartialMock,
+            compilationAssembly,
+            compilation,
+            ct);
     }
 
     // ─── [assembly: GenerateMock(typeof(T))] discovery ────────────────────
@@ -630,7 +682,8 @@ internal static class MockTypeDiscovery
                 NormalizeSingleMockType(namedType),
                 isPartialMock: namedType.TypeKind == TypeKind.Class,
                 compilationAssembly,
-                compilation);
+                compilation,
+                ct);
 
             var location = attr.ApplicationSyntaxReference?.GetSyntax(ct).GetLocation()
                            ?? context.TargetNode.GetLocation();

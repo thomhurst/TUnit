@@ -852,12 +852,15 @@ internal static class MemberDiscovery
     public static EquatableArray<MockConstructorModel> DiscoverConstructors(
         INamedTypeSymbol typeSymbol,
         Compilation compilation,
-        bool requiresFactoryAccessibleParameterTypes)
+        bool requiresFactoryAccessibleParameterTypes,
+        CancellationToken cancellationToken)
     {
         var constructors = new List<MockConstructorModel>();
 
         foreach (var ctor in typeSymbol.InstanceConstructors)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (ctor.DeclaredAccessibility == Accessibility.Private)
             {
                 continue;
