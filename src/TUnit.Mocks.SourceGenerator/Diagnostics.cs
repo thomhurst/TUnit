@@ -5,10 +5,21 @@ namespace TUnit.Mocks.SourceGenerator;
 /// <summary>
 /// Diagnostics reported by the generator itself. Everything the analyzer can see at a call site
 /// belongs in TUnit.Mocks.Analyzers (TM001-TM007); this file is for failures only the generator
-/// can observe, such as whole-compilation name collisions and unexpected generation failures.
+/// can observe, such as attribute-only requests, whole-compilation name collisions, and
+/// unexpected generation failures.
 /// </summary>
 internal static class Diagnostics
 {
+    public static readonly DiagnosticDescriptor TM006_CannotMockTypeWithoutAccessibleConstructor = new(
+        id: "TM006",
+        title: "Cannot mock type without an accessible constructor",
+        messageFormat: "Cannot mock '{0}' because it has no accessible constructor. Use a factory method or model-builder the library provides instead.",
+        category: "TUnit.Mocks",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "TUnit.Mocks generates a subclass to intercept calls, and every constructor of a subclass must chain to a base constructor. When all of the target's constructors are private (or internal in another assembly), no subclass can be declared, so the type cannot be mocked. Many libraries expose a factory for such types (e.g. Azure's ServiceBusModelFactory) — use that to build the value instead."
+    );
+
     public static readonly DiagnosticDescriptor TM008_GeneratedNameCollision = new(
         id: "TM008",
         title: "Mocked types produce the same generated name",

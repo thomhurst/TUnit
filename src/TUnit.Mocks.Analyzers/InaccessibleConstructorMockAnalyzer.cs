@@ -33,7 +33,7 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var target = ResolveMockTarget(context, invocation);
+        var target = ResolveMockTarget(context, invocation, out var isWrapMock);
 
         if (target is not { TypeKind: TypeKind.Class } namedType)
         {
@@ -46,7 +46,10 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (HasAccessibleConstructor(namedType, context.Compilation.Assembly))
+        if (HasAccessibleConstructor(
+                namedType,
+                context.Compilation,
+                requiresFactoryAccessibleParameterTypes: !isWrapMock))
         {
             return;
         }
@@ -64,8 +67,12 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     /// Resolves the mocked type from either entry point: the generic <c>Mock.Of&lt;T&gt;()</c> /
     /// <c>Mock.Wrap&lt;T&gt;()</c> form, or the generated <c>T.Mock()</c> static extension.
     /// </summary>
-    private static INamedTypeSymbol? ResolveMockTarget(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static INamedTypeSymbol? ResolveMockTarget(
+        SyntaxNodeAnalysisContext context,
+        InvocationExpressionSyntax invocation,
+        out bool isWrapMock)
     {
+        isWrapMock = false;
         var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken);
 
         if (symbolInfo.Symbol is not IMethodSymbol methodSymbol)
@@ -75,6 +82,8 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
 
         if (IsMockEntryPointMethod(methodSymbol))
         {
+            isWrapMock = methodSymbol.Name == "Wrap";
+
             // The multi-type overloads — Of<T1, T2>() through Of<T1, T2, T3, T4>() — return
             // Mock<T1>: T1 is the type the impl subclasses, T2..T4 are interfaces layered on it,
             // and MockTypeDiscovery reuses T1's constructors for the multi-type model. So the
@@ -132,21 +141,26 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
     }
 
     /// <summary>
-    /// Mirrors the generator's constructor discovery — <c>MemberDiscovery.DiscoverConstructors</c>
-    /// → <c>IsMemberAccessible</c> → <c>AreMemberSignatureTypesAccessible</c>. A generated subclass
-    /// can chain to a constructor only when the constructor itself is reachable AND every one of
-    /// its parameter types is: the generator drops a constructor whose signature mentions an
-    /// inaccessible type, and a target left with none is exactly the case this rule reports.
-    /// Keep the two in step; they live in separate assemblies with no shared project.
-    /// Protected (and protected internal) constructors are reachable precisely because the
-    /// generated impl derives from the target.
+    /// Mirrors <c>MemberDiscovery.DiscoverConstructors</c>. The constructor must be reachable from
+    /// the generated subclass, while every parameter type must also be nameable by its non-derived
+    /// factory for partial mocks. Wrap factories accept an existing instance, so only subclass
+    /// accessibility applies there. A target left with no such constructor is exactly the case
+    /// this rule reports. Keep both implementations in step; they live in separate assemblies
+    /// with no shared project.
     /// </summary>
-    private static bool HasAccessibleConstructor(INamedTypeSymbol type, IAssemblySymbol compilationAssembly)
+    private static bool HasAccessibleConstructor(
+        INamedTypeSymbol type,
+        Compilation compilation,
+        bool requiresFactoryAccessibleParameterTypes)
     {
-        return type.InstanceConstructors.Any(ctor => IsChainable(ctor, compilationAssembly));
+        return type.InstanceConstructors.Any(
+            ctor => IsChainable(ctor, compilation, requiresFactoryAccessibleParameterTypes));
     }
 
-    private static bool IsChainable(IMethodSymbol ctor, IAssemblySymbol compilationAssembly)
+    private static bool IsChainable(
+        IMethodSymbol ctor,
+        Compilation compilation,
+        bool requiresFactoryAccessibleParameterTypes)
     {
         // DiscoverConstructors rejects private constructors outright, same-assembly or not —
         // a subclass can never chain to one.
@@ -155,8 +169,9 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
             return false;
         }
 
-        return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilationAssembly)
-               && ctor.Parameters.All(p => IsTypeAccessible(p.Type, compilationAssembly));
+        return IsAssemblyReachable(ctor.DeclaredAccessibility, ctor.ContainingAssembly, compilation.Assembly)
+               && (!requiresFactoryAccessibleParameterTypes
+                   || ctor.Parameters.All(p => IsTypeAccessibleFromAssembly(p.Type, compilation)));
     }
 
     /// <summary>
@@ -181,31 +196,35 @@ public class InaccessibleConstructorMockAnalyzer : DiagnosticAnalyzer
                || declaringAssembly.GivesAccessTo(compilationAssembly);
     }
 
-    private static bool IsTypeAccessible(ITypeSymbol type, IAssemblySymbol compilationAssembly)
+    private static bool IsTypeAccessibleFromAssembly(ITypeSymbol type, Compilation compilation)
     {
-        // Type parameters are always accessible.
-        if (type is ITypeParameterSymbol)
+        switch (type)
         {
-            return true;
-        }
+            case ITypeParameterSymbol:
+                return true;
 
-        // Pointer types can't appear in a generated override signature, even same-assembly.
-        if (type is IPointerTypeSymbol or IFunctionPointerTypeSymbol)
-        {
-            return false;
-        }
+            case IPointerTypeSymbol or IFunctionPointerTypeSymbol:
+                return false;
 
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            return IsTypeAccessible(arrayType.ElementType, compilationAssembly);
-        }
+            case IArrayTypeSymbol array:
+                return IsTypeAccessibleFromAssembly(array.ElementType, compilation);
 
-        if (!IsAssemblyReachable(type.DeclaredAccessibility, type.ContainingAssembly, compilationAssembly))
-        {
-            return false;
-        }
+            case INamedTypeSymbol named:
+                if (!compilation.IsSymbolAccessibleWithin(named, compilation.Assembly))
+                {
+                    return false;
+                }
 
-        return type is not INamedTypeSymbol namedType
-               || namedType.TypeArguments.All(arg => IsTypeAccessible(arg, compilationAssembly));
+                if (named.ContainingType is not null
+                    && !IsTypeAccessibleFromAssembly(named.ContainingType, compilation))
+                {
+                    return false;
+                }
+
+                return named.TypeArguments.All(arg => IsTypeAccessibleFromAssembly(arg, compilation));
+
+            default:
+                return true;
+        }
     }
 }

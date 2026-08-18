@@ -201,6 +201,209 @@ public class InaccessibleConstructorMockAnalyzerTests
     }
 
     [Test]
+    public async Task Wrap_With_Protected_Parameter_Does_Not_Report_TM006()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test(ExternalLib.WrappedClient instance)
+                {
+                    TUnit.Mocks.Mock.Wrap(instance);
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class WrappedClient
+                {
+                    protected WrappedClient(State state) { }
+
+                    protected class State { }
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Cross_Assembly_Protected_Internal_Parameter_Reports_TM006()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.GrpcClient>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class GrpcClient
+                {
+                    protected GrpcClient(ClientBaseConfiguration configuration) { }
+
+                    protected internal class ClientBaseConfiguration { }
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
+                .WithLocation(0)
+                .WithArguments("GrpcClient")
+        );
+    }
+
+    [Test]
+    public async Task Cross_Assembly_Protected_Internal_Parameter_With_Parameterless_Fallback_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<ExternalLib.GrpcClient>();
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class GrpcClient
+                {
+                    protected GrpcClient() { }
+
+                    protected GrpcClient(ClientBaseConfiguration configuration) { }
+
+                    protected internal class ClientBaseConfiguration { }
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Protected_Only_Parameter_In_Same_Assembly_Reports_TM006()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public class Service
+            {
+                protected Service(State state) { }
+
+                protected class State { }
+            }
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<Service>()|};
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
+                .WithLocation(0)
+                .WithArguments("Service")
+        );
+    }
+
+    [Test]
+    public async Task Inaccessible_Parameter_Inside_Generic_Array_Reports_TM006()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    {|#0:TUnit.Mocks.Mock.Of<ExternalLib.CompositeClient>()|};
+                }
+            }
+            """,
+            """
+            namespace ExternalLib
+            {
+                public class CompositeClient
+                {
+                    protected CompositeClient(System.Collections.Generic.List<State[]> states) { }
+
+                    protected internal class State { }
+                }
+            }
+            """,
+            Verifier.Diagnostic(Rules.TM006_CannotMockTypeWithoutAccessibleConstructor)
+                .WithLocation(0)
+                .WithArguments("CompositeClient")
+        );
+    }
+
+    [Test]
+    public async Task Protected_Internal_Parameter_With_InternalsVisibleTo_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerWithLibraryAsync(
+            MockStub + """
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<ExternalLib.FriendClient>();
+                }
+            }
+            """,
+            """
+            using System.Runtime.CompilerServices;
+
+            [assembly: InternalsVisibleTo("TestProject")]
+
+            namespace ExternalLib
+            {
+                public class FriendClient
+                {
+                    protected FriendClient(State state) { }
+
+                    protected internal class State { }
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Protected_Internal_Parameter_In_Same_Assembly_Does_Not_Report()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            MockStub + """
+
+            public class Service
+            {
+                protected Service(State state) { }
+
+                protected internal class State { }
+            }
+
+            public class TestClass
+            {
+                public void Test()
+                {
+                    TUnit.Mocks.Mock.Of<Service>();
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
     public async Task Public_Constructor_Does_Not_Report()
     {
         await Verifier.VerifyAnalyzerAsync(
