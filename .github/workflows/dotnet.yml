@@ -36,11 +36,9 @@ jobs:
         run: |
           printf '%s\tpriority:%s\n' \
             'http://archive.ubuntu.com/ubuntu/' '1' \
-            'http://azure.archive.ubuntu.com/ubuntu/' '2' |
-            sudo tee /etc/apt/ubuntu-mirrors.txt > /dev/null
-          sudo sed -i -E \
-            's#https?://azure\.archive\.ubuntu\.com/ubuntu/?#mirror+file:/etc/apt/ubuntu-mirrors.txt#' \
-            /etc/apt/sources.list.d/ubuntu.sources
+            'http://azure.archive.ubuntu.com/ubuntu/' '2' \
+            'https://security.ubuntu.com/ubuntu/' '3' |
+            sudo tee /etc/apt/apt-mirrors.txt > /dev/null
 
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
