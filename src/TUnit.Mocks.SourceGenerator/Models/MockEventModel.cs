@@ -48,6 +48,12 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
     public bool IsStaticAbstract { get; init; }
 
     /// <summary>
+    /// Whether non-derived generated code in the consumer assembly can name the event handler
+    /// type. Inaccessible events remain implemented but get no typed raise surface.
+    /// </summary>
+    public bool IsSignatureAccessibleFromAssembly { get; init; } = true;
+
+    /// <summary>
     /// Which type in a multi-type mock owns this event: 0 = the primary type,
     /// n = 1-based index into <see cref="MockTypeModel.AdditionalInterfaceNames"/>.
     /// </summary>
@@ -75,6 +81,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             && AdditionalExplicitInterfaceNames.Equals(other.AdditionalExplicitInterfaceNames)
             && OverrideAccessModifier == other.OverrideAccessModifier
             && IsStaticAbstract == other.IsStaticAbstract
+            && IsSignatureAccessibleFromAssembly == other.IsSignatureAccessibleFromAssembly
             && OwnerTypeIndex == other.OwnerTypeIndex
             && RaiseParameterList == other.RaiseParameterList
             && ObsoleteAttribute == other.ObsoleteAttribute;
@@ -92,6 +99,7 @@ internal sealed record MockEventModel : IEquatable<MockEventModel>
             hash = hash * 31 + (DeclaringInterfaceName?.GetHashCode() ?? 0);
             hash = hash * 31 + AdditionalExplicitInterfaceNames.GetHashCode();
             hash = hash * 31 + OverrideAccessModifier.GetHashCode();
+            hash = hash * 31 + IsSignatureAccessibleFromAssembly.GetHashCode();
             hash = hash * 31 + ObsoleteAttribute.GetHashCode();
             hash = hash * 31 + OwnerTypeIndex;
             return hash;

@@ -136,6 +136,207 @@ public class Issue6634Tests : SnapshotTestBase
     }
 
     [Test]
+    public async Task Inaccessible_Generic_Constraint_Is_Omitted_From_Member_Surface()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class GenericClient
+            {
+                protected GenericClient() { }
+
+                protected abstract void Handle<T>(T value) where T : State;
+
+                protected internal class State { }
+
+                public abstract void Ping<T>(T value);
+            }
+            """);
+        var source = MockSource("ExternalLib.GenericClient");
+        var sources = RunGenerator(source, [reference]);
+        var memberSurface = GetMemberSurface(sources);
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(string.Join(Environment.NewLine, sources)).Contains("protected override void Handle<T>(T value)");
+        await Assert.That(memberSurface).DoesNotContain("Handle");
+        await Assert.That(memberSurface).Contains("Ping<T>");
+    }
+
+    [Test]
+    public async Task Inaccessible_Overload_Does_Not_Suppress_AnyArgs_Helper()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class OverloadClient
+            {
+                protected OverloadClient() { }
+
+                public abstract string Search(string query, int count);
+
+                protected abstract string Search(State state, int count);
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.OverloadClient");
+        var memberSurface = GetMemberSurface(RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(memberSurface).Contains(
+            "Search(this global::TUnit.Mocks.Mock<global::ExternalLib.OverloadClient> mock, global::TUnit.Mocks.Arguments.AnyArgs _)");
+    }
+
+    [Test]
+    public async Task Inaccessible_Params_Overload_Does_Not_Suppress_AnyArg_Helper()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class ParamsClient
+            {
+                protected ParamsClient() { }
+
+                public abstract int Pack(params int[] values);
+
+                protected abstract int Pack(params State[] values);
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.ParamsClient");
+        var memberSurface = GetMemberSurface(RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(memberSurface).Contains("global::TUnit.Mocks.Arguments.AnyArg values");
+    }
+
+    [Test]
+    public async Task Inaccessible_Property_Type_Is_Omitted_From_Member_Surface()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class PropertyClient
+            {
+                protected PropertyClient() { }
+
+                protected abstract State Hidden { get; }
+
+                public abstract string Visible { get; }
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.PropertyClient");
+        var memberSurface = GetMemberSurface(RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(memberSurface).DoesNotContain("Hidden");
+        await Assert.That(memberSurface).Contains("Visible");
+    }
+
+    [Test]
+    public async Task Inaccessible_Indexer_Types_Are_Omitted_From_Member_Surface()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class IndexerClient
+            {
+                protected IndexerClient() { }
+
+                protected abstract State this[State state] { get; }
+
+                public abstract string this[int index] { get; }
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.IndexerClient");
+        var memberSurface = GetMemberSurface(RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(memberSurface).DoesNotContain("IndexerClient.State");
+        await Assert.That(memberSurface).Contains("global::TUnit.Mocks.Arguments.Arg<int> index");
+    }
+
+    [Test]
+    public async Task Inaccessible_Event_Type_Has_No_Typed_Raise_Surface()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class EventClient
+            {
+                protected EventClient() { }
+
+                protected abstract event System.EventHandler<State>? Hidden;
+
+                public abstract event System.EventHandler? Visible;
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.EventClient");
+        var memberSurface = GetMemberSurface(RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(memberSurface).DoesNotContain("RaiseHidden");
+        await Assert.That(memberSurface).Contains("RaiseVisible");
+    }
+
+    [Test]
+    public async Task Inaccessible_Method_Emits_No_Dangling_RefStruct_Setter_Delegate()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public ref struct Buffer { }
+
+            public abstract class ReaderClient
+            {
+                protected ReaderClient() { }
+
+                protected abstract void Read(State state, ref Buffer buffer);
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.ReaderClient");
+        var generated = string.Join(Environment.NewLine, RunGenerator(source, [reference]));
+
+        await AssertNoCompilerErrors(source, reference, "CS0051", "CS0122", "CS0246");
+        await Assert.That(generated).DoesNotContain("ReaderClient_Read_M0_Buffer_RefSetter");
+    }
+
+    [Test]
+    public async Task Unresolved_Signature_Type_Does_Not_Abort_Generation_Or_Leak_Into_Surface()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public abstract class ErrorClient
+            {
+                public abstract MissingType Transform(MissingType value);
+            }
+
+            public class Test
+            {
+                public void Run() => Mock.Of<ErrorClient>();
+            }
+            """;
+
+        var (sources, diagnostics) = RunGeneratorForDiagnostics(source);
+        var generatorErrors = diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToList();
+        var memberSurface = GetMemberSurface(sources);
+
+        await Assert.That(generatorErrors).IsEmpty();
+        await Assert.That(string.Join(Environment.NewLine, sources)).Contains("Transform");
+        await Assert.That(memberSurface).DoesNotContain("Transform");
+    }
+
+    [Test]
     public async Task Inaccessible_Types_Are_Found_Inside_Arrays_And_Generic_Arguments()
     {
         var generated = await GenerateFromExternalLibrary("""
@@ -346,18 +547,27 @@ public class Issue6634Tests : SnapshotTestBase
         return string.Join(Environment.NewLine, RunGenerator(source, [reference]));
     }
 
-    private static async Task AssertNoAccessibilityErrors(
+    private static Task AssertNoAccessibilityErrors(
         string source,
         MetadataReference? reference = null)
+        => AssertNoCompilerErrors(source, reference, "CS0051", "CS0122");
+
+    private static async Task AssertNoCompilerErrors(
+        string source,
+        MetadataReference? reference,
+        params string[] diagnosticIds)
     {
         MetadataReference[]? references = reference is null ? null : [reference];
         var errors = GetGeneratedCompilationErrors(source, references)
-            .Where(diagnostic => diagnostic.Id is "CS0051" or "CS0122")
+            .Where(diagnostic => diagnosticIds.Contains(diagnostic.Id, StringComparer.Ordinal))
             .Select(diagnostic => diagnostic.ToString())
             .ToList();
 
         await Assert.That(errors).IsEmpty();
     }
+
+    private static string GetMemberSurface(string[] sources)
+        => sources.Single(source => source.Contains("_MockMemberExtensions", StringComparison.Ordinal));
 
     private static string MockSource(string typeName) => $$"""
         using TUnit.Mocks;
