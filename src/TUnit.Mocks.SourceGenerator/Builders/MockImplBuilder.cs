@@ -1208,7 +1208,8 @@ internal static class MockImplBuilder
             ? ""
             : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
         var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
-        using (writer.Block($"internal void Raise_{evt.Name}({raiseParams})"))
+        var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
+        using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
         {
             if (string.IsNullOrEmpty(invokeArgs))
             {
@@ -1242,7 +1243,8 @@ internal static class MockImplBuilder
             ? ""
             : string.Join(", ", evt.RaiseParameterList.Select(p => $"{p.FullyQualifiedType} {p.Name}"));
         var invokeArgs = string.IsNullOrEmpty(evt.InvokeArgs) ? "" : evt.InvokeArgs;
-        using (writer.Block($"internal void Raise_{evt.Name}({raiseParams})"))
+        var raiseAccessModifier = evt.IsSignatureAccessibleFromAssembly ? "internal" : "private";
+        using (writer.Block($"{raiseAccessModifier} void Raise_{evt.Name}({raiseParams})"))
         {
             if (string.IsNullOrEmpty(invokeArgs))
             {
@@ -1589,9 +1591,13 @@ internal static class MockImplBuilder
     /// struct out/ref params. Generic mock types and generic methods are excluded — their
     /// param types may reference type parameters that aren't fully bound at delegate-decl
     /// time and would require an <c>allows ref struct</c> constraint (C# 13, net9.0+ runtime).
+    /// Methods absent from the setup surface cannot register a setter and must not reference its
+    /// otherwise-unemitted delegate from the implementation.
     /// </summary>
     internal static bool SupportsClosedRefStructSetter(MockTypeModel model, MockMemberModel method)
-        => !method.IsGenericMethod && model.TypeParameters.Length == 0;
+        => method.IsSignatureAccessibleFromAssembly
+            && !method.IsGenericMethod
+            && model.TypeParameters.Length == 0;
 
     internal static string EmitArgsArrayVariable(CodeWriter writer, MockMemberModel method)
     {

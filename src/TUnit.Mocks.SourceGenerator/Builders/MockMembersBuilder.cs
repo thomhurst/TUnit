@@ -71,7 +71,7 @@ internal static class MockMembersBuilder
         // name appends the interface; for everything else it equals GetSafeName(FullyQualifiedName).
         var safeName = MockImplBuilder.GetCompositeSafeName(model);
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        var instanceEvents = model.Events.Where(e => !e.IsStaticAbstract).ToArray();
+        var instanceEvents = model.Events.Where(IsConfigurableEvent).ToArray();
         var hasEvents = instanceEvents.Length > 0;
         var mockNamespace = MockImplBuilder.GetMockNamespace(model);
 
@@ -104,7 +104,7 @@ internal static class MockMembersBuilder
                 // setup/verify. Static abstract methods legitimately use ExplicitInterfaceName
                 // for bridge interface generation and still need setup extensions.
                 var instanceMethods = new EquatableArray<MockMemberModel>(
-                    model.Methods.Where(m => m.ExplicitInterfaceName is null || m.IsStaticAbstract).ToImmutableArray());
+                    model.Methods.Where(IsConfigurableMethod).ToImmutableArray());
                 var methodsWithDisambiguation = ApplyOutDisambiguation(instanceMethods);
 
                 // Methods
@@ -118,7 +118,9 @@ internal static class MockMembersBuilder
                 // Properties -- extension properties via C# 14 extension blocks
                 // (skip ref struct properties — can't use PropertyMockCall<RefStruct>)
                 var memberProps = model.Properties
-                    .Where(p => p.IsConfigurableSurfaceProperty && (p.ExplicitInterfaceName is null || p.IsStaticAbstract))
+                    .Where(p => p.IsSignatureAccessibleFromAssembly
+                        && p.IsConfigurableSurfaceProperty
+                        && (p.ExplicitInterfaceName is null || p.IsStaticAbstract))
                     .ToList();
                 if (memberProps.Count > 0)
                 {
@@ -132,6 +134,7 @@ internal static class MockMembersBuilder
                 // Each indexer overload (different parameter signature) gets its own pair.
                 var indexers = model.Properties
                     .Where(p => p.IsIndexer
+                        && p.IsSignatureAccessibleFromAssembly
                         && !p.IsStaticAbstract
                         && !p.IsRefStructReturn
                         && !p.IsReturnTypeStaticAbstractInterface)
@@ -178,7 +181,7 @@ internal static class MockMembersBuilder
 
         // The out/ref setter delegates stay beside the mocked type: the generated impl references
         // them through GetGlobalMockNamespacePrefix, and they are named from the type's short name.
-        EmitOutRefSetterDelegateNamespace(writer, model, hasEvents, mockNamespace);
+        EmitOutRefSetterDelegateNamespace(writer, model, mockNamespace);
 
         return writer.ToString();
     }
@@ -186,13 +189,21 @@ internal static class MockMembersBuilder
     /// <summary>Methods that get a typed call wrapper — the shared filter for both emission passes.</summary>
     private static IEnumerable<MockMemberModel> WrappedMethods(MockTypeModel model, bool hasEvents)
         => model.Methods.Where(m =>
-            (m.ExplicitInterfaceName is null || m.IsStaticAbstract)
+            IsConfigurableMethod(m)
             && ShouldGenerateTypedWrapper(m, model, hasEvents));
 
-    private static void EmitOutRefSetterDelegateNamespace(CodeWriter writer, MockTypeModel model, bool hasEvents, string mockNamespace)
+    private static bool IsConfigurableMethod(MockMemberModel method)
+        => method.IsSignatureAccessibleFromAssembly
+            && (method.ExplicitInterfaceName is null || method.IsStaticAbstract);
+
+    private static bool IsConfigurableEvent(MockEventModel evt)
+        => evt.IsSignatureAccessibleFromAssembly && !evt.IsStaticAbstract;
+
+    private static void EmitOutRefSetterDelegateNamespace(CodeWriter writer, MockTypeModel model, string mockNamespace)
     {
-        var methodsNeedingDelegates = WrappedMethods(model, hasEvents)
-            .Where(m => MockImplBuilder.SupportsClosedRefStructSetter(model, m)
+        var methodsNeedingDelegates = model.Methods
+            .Where(m => !m.IsStaticAbstract
+                     && MockImplBuilder.SupportsClosedRefStructSetter(model, m)
                      && m.Parameters.Any(p => p.Direction is ParameterDirection.Out or ParameterDirection.Ref
                                            && p.IsNonSpanRefStruct))
             .ToList();
@@ -1079,7 +1090,7 @@ internal static class MockMembersBuilder
             ? method.UnwrappedReturnType
             : method.ReturnType;
 
-        var hasEvents = model.Events.Any(e => !e.IsStaticAbstract);
+        var hasEvents = model.Events.Any(IsConfigurableEvent);
         var useTypedWrapper = ShouldGenerateTypedWrapper(method, model, hasEvents);
 
         string returnType;
@@ -1223,9 +1234,8 @@ internal static class MockMembersBuilder
 
         // Name uniqueness: same set of methods that drive extension-method emission.
         int sameNameCount = 0;
-        foreach (var m in model.Methods)
+        foreach (var m in model.Methods.Where(IsConfigurableMethod))
         {
-            if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
             if (m.Name == method.Name) sameNameCount++;
         }
         if (sameNameCount > 1) return;
@@ -1607,7 +1617,7 @@ internal static class MockMembersBuilder
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
         var constraints = MockImplBuilder.GetConstraintClauses(model);
         bool first = true;
-        foreach (var evt in model.Events.Where(e => !e.IsStaticAbstract))
+        foreach (var evt in model.Events.Where(IsConfigurableEvent))
         {
             if (!first) writer.AppendLine();
             first = false;
@@ -1765,10 +1775,9 @@ internal static class MockMembersBuilder
 
         // Two same-name params methods that differ only in element type (e.g. M(params int[]) and
         // M(params string[])) would both produce this AnyArg-slotted signature — skip on collision.
-        foreach (var m in model.Methods)
+        foreach (var m in model.Methods.Where(IsConfigurableMethod))
         {
             if (m.MemberId == method.MemberId || m.Name != method.Name) continue;
-            if (m.ExplicitInterfaceName is not null && !m.IsStaticAbstract) continue;
             if (m.TypeParameters.Length != method.TypeParameters.Length) continue;
             var mLast = m.Parameters.Length > 0 ? m.Parameters[m.Parameters.Length - 1] : null;
             if (mLast is null || mLast.ParamsElementType is null || mLast.Direction != ParameterDirection.In) continue;

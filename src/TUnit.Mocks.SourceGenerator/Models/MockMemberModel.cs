@@ -73,6 +73,13 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
     public string? AutoMockFactoryMethod { get; init; }
 
     /// <summary>
+    /// Whether non-derived generated code in the consumer assembly can name every type in this
+    /// member's signature. Inaccessible members still need an override when abstract, but cannot
+    /// have setup or verification extensions generated for them.
+    /// </summary>
+    public bool IsSignatureAccessibleFromAssembly { get; init; } = true;
+
+    /// <summary>
     /// Which type in a multi-type mock owns this member: 0 = the primary type,
     /// n = 1-based index into <see cref="MockTypeModel.AdditionalInterfaceNames"/>.
     /// Always 0 for single-type mocks. Members shared between the primary and an
@@ -173,6 +180,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             && IsRefStructReturn == other.IsRefStructReturn
             && IsStaticAbstract == other.IsStaticAbstract
             && AutoMockFactoryMethod == other.AutoMockFactoryMethod
+            && IsSignatureAccessibleFromAssembly == other.IsSignatureAccessibleFromAssembly
             && OwnerTypeIndex == other.OwnerTypeIndex
             && IsReturnTypeStaticAbstractInterface == other.IsReturnTypeStaticAbstractInterface
             && SpanReturnElementType == other.SpanReturnElementType
@@ -195,6 +203,7 @@ internal sealed record MockMemberModel : IEquatable<MockMemberModel>
             hash = hash * 31 + GetterAccessModifier.GetHashCode();
             hash = hash * 31 + SetterAccessModifier.GetHashCode();
             hash = hash * 31 + (AutoMockFactoryMethod?.GetHashCode() ?? 0);
+            hash = hash * 31 + IsSignatureAccessibleFromAssembly.GetHashCode();
             hash = hash * 31 + OwnerTypeIndex;
             hash = hash * 31 + IsReturnTypeStaticAbstractInterface.GetHashCode();
             hash = hash * 31 + (ExplicitInterfaceName?.GetHashCode() ?? 0);

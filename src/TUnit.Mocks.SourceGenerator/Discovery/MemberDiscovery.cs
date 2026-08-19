@@ -364,7 +364,7 @@ internal static class MemberDiscovery
                         }
 
                         var explicitName = RequiresExplicitImpl(primaryClassSymbol, evt) ? interfaceFqn : null;
-                        state.Events.Add(Tag(CreateEventModel(evt, explicitName, interfaceFqn), ownerTypeIndex));
+                        state.Events.Add(Tag(CreateEventModel(evt, explicitName, interfaceFqn, compilation: compilation), ownerTypeIndex));
                         break;
                     }
                 }
@@ -511,7 +511,7 @@ internal static class MemberDiscovery
                         if (evt.IsAbstract || evt.IsVirtual || evt.IsOverride)
                         {
                             if (!seenEvents.Add(key)) continue;
-                            events.Add(CreateEventModel(evt, null, compilationAssembly: compilationAssembly));
+                            events.Add(CreateEventModel(evt, null, compilationAssembly: compilationAssembly, compilation: compilation));
                         }
                         else
                         {
@@ -748,11 +748,20 @@ internal static class MemberDiscovery
             OverrideAccessModifier = GetOverrideAccessModifier(method, compilationAssembly),
             IsRefStructReturn = returnType.IsRefLikeType,
             AutoMockFactoryMethod = autoMockFactoryMethod,
+            IsSignatureAccessibleFromAssembly = IsMethodSignatureAccessibleFromAssembly(method, compilation),
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
             SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null,
             ObsoleteAttribute = GetObsoleteAttributeSyntax(method)
         };
     }
+
+    private static bool IsMethodSignatureAccessibleFromAssembly(IMethodSymbol method, Compilation compilation)
+        => TypeAccessibility.IsAccessibleFromAssembly(method.ReturnType, compilation)
+            && method.Parameters.All(parameter =>
+                TypeAccessibility.IsAccessibleFromAssembly(parameter.Type, compilation))
+            && method.TypeParameters.All(typeParameter =>
+                typeParameter.ConstraintTypes.All(constraint =>
+                    TypeAccessibility.IsAccessibleFromAssembly(constraint, compilation)));
 
     /// <summary>
     /// When a property with the same name appears from multiple interfaces, merge getter/setter
@@ -819,6 +828,7 @@ internal static class MemberDiscovery
             SetterAccessModifier = GetAccessorAccessModifier(property.SetMethod, overrideAccessModifier, compilationAssembly),
             IsRefStructReturn = property.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(property.Type, compilation),
+            IsSignatureAccessibleFromAssembly = IsPropertySignatureAccessibleFromAssembly(property, compilation),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(property.Type),
             SpanReturnElementType = property.Type.IsRefLikeType ? GetSpanElementType(property.Type) : null,
             ObsoleteAttribute = propertyObsolete,
@@ -826,6 +836,11 @@ internal static class MemberDiscovery
             SetterObsoleteAttribute = GetAccessorObsoleteAttributeSyntax(propertyObsolete, property.SetMethod)
         };
     }
+
+    private static bool IsPropertySignatureAccessibleFromAssembly(IPropertySymbol property, Compilation compilation)
+        => TypeAccessibility.IsAccessibleFromAssembly(property.Type, compilation)
+            && property.Parameters.All(parameter =>
+                TypeAccessibility.IsAccessibleFromAssembly(parameter.Type, compilation));
 
     /// <summary>Returns the [Obsolete] attribute for a single accessor, but only when the
     /// containing property is NOT itself marked obsolete. When the property is marked, the
@@ -944,6 +959,7 @@ internal static class MemberDiscovery
             SetterAccessModifier = GetAccessorAccessModifier(indexer.SetMethod, overrideAccessModifier, compilationAssembly),
             IsRefStructReturn = indexer.Type.IsRefLikeType,
             AutoMockFactoryMethod = GetAutoMockFactoryMethod(indexer.Type, compilation),
+            IsSignatureAccessibleFromAssembly = IsPropertySignatureAccessibleFromAssembly(indexer, compilation),
             IsReturnTypeStaticAbstractInterface = IsInterfaceWithStaticAbstractMembers(indexer.Type),
             SpanReturnElementType = indexer.Type.IsRefLikeType ? GetSpanElementType(indexer.Type) : null,
             ObsoleteAttribute = indexerObsolete,
@@ -991,7 +1007,7 @@ internal static class MemberDiscovery
         return $"{globalPrefix}{baseName}MockFactory.CreateAutoMock<{typeArguments}>";
     }
 
-    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null)
+    private static MockEventModel CreateEventModel(IEventSymbol evt, string? explicitInterfaceName, string? declaringInterfaceName = null, IAssemblySymbol? compilationAssembly = null, Compilation compilation = null!)
     {
         var eventHandlerType = evt.Type.GetFullyQualifiedNameWithNullability();
 
@@ -1052,6 +1068,7 @@ internal static class MemberDiscovery
             ExplicitInterfaceName = explicitInterfaceName,
             DeclaringInterfaceName = declaringInterfaceName,
             OverrideAccessModifier = GetOverrideAccessModifier(evt, compilationAssembly),
+            IsSignatureAccessibleFromAssembly = TypeAccessibility.IsAccessibleFromAssembly(evt.Type, compilation),
             RaiseParameterList = raiseParameterList,
             ObsoleteAttribute = GetObsoleteAttributeSyntax(evt)
         };
@@ -1335,7 +1352,7 @@ internal static class MemberDiscovery
                 var key = $"E:{evt.Name}";
                 if (!seenEvents.Add(key)) break;
 
-                var model = CreateEventModel(evt, interfaceFqn) with
+                var model = CreateEventModel(evt, interfaceFqn, compilation: compilation) with
                 {
                     IsStaticAbstract = true
                 };
