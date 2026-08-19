@@ -13,6 +13,9 @@ internal static class TypeAccessibility
     {
         switch (type)
         {
+            case IErrorTypeSymbol:
+                return false;
+
             case ITypeParameterSymbol:
                 return true;
 

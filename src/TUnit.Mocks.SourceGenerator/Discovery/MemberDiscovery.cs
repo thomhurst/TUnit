@@ -748,11 +748,17 @@ internal static class MemberDiscovery
             OverrideAccessModifier = GetOverrideAccessModifier(method, compilationAssembly),
             IsRefStructReturn = returnType.IsRefLikeType,
             AutoMockFactoryMethod = autoMockFactoryMethod,
+            IsSignatureAccessibleFromAssembly = IsMethodSignatureAccessibleFromAssembly(method, compilation),
             IsReturnTypeStaticAbstractInterface = returnTypeHasStaticAbstract,
             SpanReturnElementType = returnType.IsRefLikeType ? GetSpanElementType(returnType) : null,
             ObsoleteAttribute = GetObsoleteAttributeSyntax(method)
         };
     }
+
+    private static bool IsMethodSignatureAccessibleFromAssembly(IMethodSymbol method, Compilation compilation)
+        => TypeAccessibility.IsAccessibleFromAssembly(method.ReturnType, compilation)
+            && method.Parameters.All(parameter =>
+                TypeAccessibility.IsAccessibleFromAssembly(parameter.Type, compilation));
 
     /// <summary>
     /// When a property with the same name appears from multiple interfaces, merge getter/setter

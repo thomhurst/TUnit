@@ -104,7 +104,8 @@ internal static class MockMembersBuilder
                 // setup/verify. Static abstract methods legitimately use ExplicitInterfaceName
                 // for bridge interface generation and still need setup extensions.
                 var instanceMethods = new EquatableArray<MockMemberModel>(
-                    model.Methods.Where(m => m.ExplicitInterfaceName is null || m.IsStaticAbstract).ToImmutableArray());
+                    model.Methods.Where(m => m.IsSignatureAccessibleFromAssembly
+                        && (m.ExplicitInterfaceName is null || m.IsStaticAbstract)).ToImmutableArray());
                 var methodsWithDisambiguation = ApplyOutDisambiguation(instanceMethods);
 
                 // Methods
@@ -186,7 +187,8 @@ internal static class MockMembersBuilder
     /// <summary>Methods that get a typed call wrapper — the shared filter for both emission passes.</summary>
     private static IEnumerable<MockMemberModel> WrappedMethods(MockTypeModel model, bool hasEvents)
         => model.Methods.Where(m =>
-            (m.ExplicitInterfaceName is null || m.IsStaticAbstract)
+            m.IsSignatureAccessibleFromAssembly
+            && (m.ExplicitInterfaceName is null || m.IsStaticAbstract)
             && ShouldGenerateTypedWrapper(m, model, hasEvents));
 
     private static void EmitOutRefSetterDelegateNamespace(CodeWriter writer, MockTypeModel model, bool hasEvents, string mockNamespace)

@@ -4,12 +4,29 @@ namespace TUnit.Mocks.SourceGenerator.Tests;
 
 /// <summary>
 /// Regression: https://github.com/thomhurst/TUnit/issues/6634
-/// Constructor discovery runs in the generated subclass context, where protected nested types are
-/// accessible. Constructor models also feed a non-derived factory and static extension methods,
-/// whose signatures cannot name those types unless the consumer assembly has internal access.
+/// Generated subclasses can name protected nested types in constructor and member signatures.
+/// Their non-derived factories and setup extensions cannot, so those public surfaces must omit
+/// inaccessible signatures without dropping overrides required to instantiate abstract clients.
 /// </summary>
 public class Issue6634Tests : SnapshotTestBase
 {
+    private const string GrpcStyleExternalLibrary = """
+        namespace ExternalLib;
+
+        public abstract class GrpcClient
+        {
+            protected GrpcClient() { }
+
+            protected abstract GrpcClient NewInstance(ClientBaseConfiguration configuration);
+
+            protected internal class ClientBaseConfiguration { }
+
+            public GrpcClient Clone() => NewInstance(new ClientBaseConfiguration());
+
+            public abstract string Call();
+        }
+        """;
+
     [Test]
     public async Task Grpc_Style_Constructor_With_Protected_Internal_State_Is_Omitted()
     {
@@ -30,6 +47,92 @@ public class Issue6634Tests : SnapshotTestBase
 
         await Assert.That(generated).Contains("engine) : base()");
         await Assert.That(generated).DoesNotContain("ClientBaseConfiguration");
+    }
+
+    [Test]
+    public async Task Grpc_Style_Abstract_Method_With_Protected_Internal_State_Is_Mockable()
+    {
+        var reference = CreateExternalAssemblyReference(GrpcStyleExternalLibrary);
+        var source = GrpcMockSource();
+        var generated = string.Join(Environment.NewLine, RunGenerator(source, [reference]));
+
+        await AssertNoAccessibilityErrors(source, reference);
+        await Assert.That(generated).Contains(
+            "protected override global::ExternalLib.GrpcClient NewInstance(global::ExternalLib.GrpcClient.ClientBaseConfiguration configuration)");
+        await Assert.That(generated).Contains("public override string Call()");
+    }
+
+    [Test]
+    public Task Grpc_Style_Abstract_Method_Generation_Snapshot()
+    {
+        var reference = CreateExternalAssemblyReference(GrpcStyleExternalLibrary);
+
+        return VerifyGeneratorOutput(GrpcMockSource(), [reference]);
+    }
+
+    [Test]
+    public async Task Composite_Inaccessible_Method_Parameter_Is_Mockable()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class CompositeClient
+            {
+                protected CompositeClient() { }
+
+                protected abstract CompositeClient NewInstance(
+                    System.Collections.Generic.IReadOnlyDictionary<string, State[]> states);
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.CompositeClient");
+
+        await AssertNoAccessibilityErrors(source, reference);
+    }
+
+    [Test]
+    public async Task Inaccessible_Method_Return_Type_Is_Mockable()
+    {
+        var reference = CreateExternalAssemblyReference("""
+            namespace ExternalLib;
+
+            public abstract class StateClient
+            {
+                protected StateClient() { }
+
+                protected abstract State GetState();
+
+                protected internal class State { }
+            }
+            """);
+        var source = MockSource("ExternalLib.StateClient");
+
+        await AssertNoAccessibilityErrors(source, reference);
+    }
+
+    [Test]
+    public async Task Protected_Method_Parameter_Is_Omitted_Even_In_Same_Assembly()
+    {
+        var source = """
+            using TUnit.Mocks;
+
+            public abstract class LocalClient
+            {
+                protected LocalClient() { }
+
+                protected abstract LocalClient NewInstance(State state);
+
+                protected class State { }
+            }
+
+            public class Test
+            {
+                public void Run() => Mock.Of<LocalClient>();
+            }
+            """;
+
+        await AssertNoAccessibilityErrors(source);
     }
 
     [Test]
@@ -262,6 +365,20 @@ public class Issue6634Tests : SnapshotTestBase
         public class Test
         {
             public void Run() => Mock.Of<{{typeName}}>();
+        }
+        """;
+
+    private static string GrpcMockSource() => """
+        using TUnit.Mocks;
+
+        public class Test
+        {
+            public void Run()
+            {
+                var mock = Mock.Of<ExternalLib.GrpcClient>();
+                mock.Call().Returns("mocked");
+                _ = mock.Object.Clone();
+            }
         }
         """;
 }
