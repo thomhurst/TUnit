@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.9" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.10" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.5.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.0" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.11.0" />
