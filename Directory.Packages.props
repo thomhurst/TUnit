@@ -15,7 +15,7 @@
     <PackageVersion Include="CliWrap" Version="3.10.5" />
     <PackageVersion Include="FakeItEasy" Version="9.0.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="FsCheck" Version="3.3.4" />
+    <PackageVersion Include="FsCheck" Version="3.4.0" />
     <PackageVersion Include="FSharp.Core" Version="10.1.400" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.8" />
