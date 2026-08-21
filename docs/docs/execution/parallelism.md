@@ -2,6 +2,8 @@
 sidebar_position: 10
 ---
 
+<!-- doc-test-ignore-file: Examples depend on application repositories, APIs, and shared limiter declarations. -->
+
 # Controlling Parallelism
 
 TUnit runs all tests in parallel by default. This page covers three attributes that give you fine-grained control when you need it.
@@ -161,6 +163,7 @@ With a limit of `2`, at most two of these 20 test invocations execute at the sam
 
 ### Assembly-Level Limiter
 
+<!-- doc-test-ignore: Assembly attribute depends on MyParallelLimit from the preceding snippet. -->
 ```csharp
 [assembly: ParallelLimiter<MyParallelLimit>]
 ```

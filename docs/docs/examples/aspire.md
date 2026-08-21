@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Samples depend on generated AppHost project types and application-specific resources. -->
+
 # Aspire Integration Testing
 
 TUnit provides first-class support for [Aspire](https://aspire.dev/get-started/what-is-aspire/) integration testing through the `TUnit.Aspire` package. This package eliminates the boilerplate of managing an Aspire distributed application in tests, handling the full lifecycle (build, start, wait for resources, stop, dispose) automatically.

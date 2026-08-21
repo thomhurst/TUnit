@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Consumer example depends on the fictional MyCompany.Testing library and its application services. -->
+
 # Libraries
 
 When building a reusable library that defines shared hooks, custom attributes, base classes, or data sources for TUnit, reference **`TUnit.Core`** instead of the main `TUnit` package. The `TUnit` package configures a project as an executable test suite; `TUnit.Core` provides all the models and attributes needed for authoring test infrastructure without the test runner wiring.

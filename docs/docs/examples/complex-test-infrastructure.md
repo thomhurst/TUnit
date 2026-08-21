@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Samples depend on application-specific container and service infrastructure. -->
+
 # Complex Test Infrastructure Orchestration
 
 TUnit provides a property injection system that can help orchestrate complex test infrastructure setups. This page demonstrates how TUnit handles test setups that typically require manual coordination in traditional testing approaches.

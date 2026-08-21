@@ -2,6 +2,8 @@
 sidebar_position: 20
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Distributed Tracing
 
 This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Tempo, or the Aspire dashboard. If you just want a working setup, start with [OpenTelemetry Tracing](/docs/examples/opentelemetry). If you're hitting problems, jump straight to its [Troubleshooting](/docs/examples/opentelemetry#troubleshooting) section.
@@ -53,6 +55,7 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Point the OTLP exporter at Seq's ingestion endpoint:
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddOtlpExporter(opts =>
 {
@@ -73,6 +76,7 @@ test.case.result.status = 'fail'           -- only failures
 
 ### Jaeger or Tempo
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
 ```
@@ -109,6 +113,7 @@ TUnit handles this automatically: a module initializer in `TUnit.Core` replaces 
 
 For the SUT side, if it shares the test process (e.g. `TestWebApplicationFactory<T>`), alignment flows automatically. For out-of-process SUTs that don't reference `TUnit.Core`, align the propagator yourself on startup — either match `DistributedContextPropagator.Current` or, if you use the OpenTelemetry SDK:
 
+<!-- doc-test-contextual -->
 ```csharp
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
@@ -143,6 +148,7 @@ Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `Traced
 
 Opt out per-test when the SUT already instruments its own outbound HTTP (for example via the OpenTelemetry HttpClient instrumentation) by setting `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`:
 
+<!-- doc-test-ignore: Override is a fragment from a TestWebApplicationFactory subclass. -->
 ```csharp
 protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 {
@@ -166,6 +172,7 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Read the endpoint from `AutoReceiver.Endpoint` and plumb it into the SUT:
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.OpenTelemetry;
 
@@ -176,6 +183,7 @@ process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/pr
 
 For the receiver to associate incoming spans with the right test, register the SUT's trace ID before it runs:
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Engine.Reporters.Html;
 

@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Parameters
 
 TUnit allows you to pass custom key-value parameters to your tests at runtime using the `--test-parameter` command-line option. These parameters are accessible via `TestContext.Parameters`.
@@ -49,6 +51,7 @@ public class MyTests
 
 ### Environment-specific configuration
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SetupEnvironment()
@@ -62,6 +65,7 @@ public void SetupEnvironment()
 
 ### Conditional test logic
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IntegrationTest()
@@ -77,6 +81,7 @@ public async Task IntegrationTest()
 
 ### Passing secrets or connection strings
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DatabaseTest()

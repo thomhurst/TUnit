@@ -2,6 +2,8 @@
 sidebar_position: 5
 ---
 
+<!-- doc-test-ignore-file: Advanced examples depend on application interfaces and build on prior mock setup. -->
+
 # Advanced Features
 
 ## Events

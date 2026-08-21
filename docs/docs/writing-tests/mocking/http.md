@@ -2,6 +2,8 @@
 sidebar_position: 6
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # HTTP Mocking
 
 `TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.
@@ -12,6 +14,7 @@ dotnet add package TUnit.Mocks.Http
 
 ## Getting Started
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Mocks;
 
@@ -36,6 +39,7 @@ public async Task Fetches_Users_From_Api()
 
 `Mock.HttpClient()` returns a `MockHttpClient` — a subclass of `HttpClient` with a `.Handler` property for configuring setups and verifying calls:
 
+<!-- doc-test-contextual -->
 ```csharp
 // With base address (most common)
 using var client = Mock.HttpClient("https://api.example.com");
@@ -57,6 +61,7 @@ All setup is done through `client.Handler` (or directly on a `MockHttpHandler` i
 
 ### By HTTP Method
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnGet("/api/users").RespondWithJson("""[{"id": 1}]""");
 client.Handler.OnPost("/api/users").Respond(HttpStatusCode.Created);
@@ -66,6 +71,7 @@ client.Handler.OnDelete("/api/users/1").Respond(HttpStatusCode.NoContent);
 
 ### Any Request
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 ```
@@ -74,6 +80,7 @@ client.Handler.OnAnyRequest().Respond(HttpStatusCode.OK);
 
 Use `OnRequest` with a fluent matcher for complex conditions:
 
+<!-- doc-test-contextual -->
 ```csharp
 // Match by path prefix
 client.Handler.OnRequest(r => r.Method(HttpMethod.Get).PathStartsWith("/api/v2"))
@@ -116,6 +123,7 @@ client.Handler.OnRequest(r => r.Matching(msg => msg.RequestUri?.Port == 8080))
 
 ### Basic Responses
 
+<!-- doc-test-contextual -->
 ```csharp
 // Status code only
 client.Handler.OnGet("/health").Respond(HttpStatusCode.OK);
@@ -131,6 +139,7 @@ client.Handler.OnGet("/api/version").RespondWithString("1.0.0");
 
 For more control, use the response builder:
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnGet("/api/data")
     .Respond(HttpStatusCode.OK)
@@ -142,6 +151,7 @@ client.Handler.OnGet("/api/data")
 
 Build responses based on the incoming request:
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnPost("/api/echo")
     .Respond()
@@ -157,6 +167,7 @@ client.Handler.OnPost("/api/echo")
 
 ### Simulating Delays
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnGet("/api/slow")
     .Respond(HttpStatusCode.OK)
@@ -165,6 +176,7 @@ client.Handler.OnGet("/api/slow")
 
 ### Throwing Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.OnGet("/api/failing")
     .Throws("Connection refused");
@@ -177,6 +189,7 @@ client.Handler.OnGet("/api/timeout")
 
 Return different responses for successive requests to the same endpoint:
 
+<!-- doc-test-contextual -->
 ```csharp
 var setup = client.Handler.OnGet("/api/status");
 setup.RespondWithString("starting");
@@ -192,6 +205,7 @@ setup.Then().RespondWithString("complete");
 
 By default, unmatched requests return **404 Not Found**. You can change this:
 
+<!-- doc-test-contextual -->
 ```csharp
 // Change default status code
 client.Handler.WithDefaultStatus(HttpStatusCode.ServiceUnavailable);
@@ -204,6 +218,7 @@ client.Handler.ThrowOnUnmatched();
 
 ### Verify Call Count
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.Once);
 client.Handler.Verify(r => r.Method(HttpMethod.Delete), Times.Never);
@@ -211,12 +226,14 @@ client.Handler.Verify(r => r.Method(HttpMethod.Delete), Times.Never);
 
 ### Verify No Unmatched Requests
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.VerifyNoUnmatchedRequests();
 ```
 
 ### Inspect Captured Requests
 
+<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(client.Handler.Requests).Count().IsEqualTo(2);
 await Assert.That(client.Handler.Requests[0].Method).IsEqualTo(HttpMethod.Get);
@@ -241,6 +258,7 @@ Each `CapturedRequest` provides:
 
 `Mock.HttpClientFactory()` returns a factory whose `CreateClient` produces non-disposing `HttpClient`s sharing one `MockHttpHandler`, so captured requests survive `using` blocks in the system under test.
 
+<!-- doc-test-contextual -->
 ```csharp
 var factory = Mock.HttpClientFactory().WithBaseAddress("https://api.example.com");
 factory.Handler.OnGet("/api/users").RespondWithJson("""[{"id":1}]""");
@@ -255,6 +273,7 @@ factory.Handler.Verify(r => r.Method(HttpMethod.Get).Path("/api/users"), Times.O
 
 For typed/named clients registered via `services.AddHttpClient("users")`, assign a dedicated handler (and optionally base address) per name. Name lookups are case-insensitive, matching `IHttpClientFactory` semantics. Unregistered names fall back to `factory.Handler`.
 
+<!-- doc-test-contextual -->
 ```csharp
 var factory = Mock.HttpClientFactory()
     .WithHandler("users", Mock.HttpHandler())
@@ -268,6 +287,7 @@ factory.HandlerFor("orders").OnPost("/").Respond(HttpStatusCode.Created);
 
 ## Reset
 
+<!-- doc-test-contextual -->
 ```csharp
 client.Handler.Reset(); // clears all setups and captured requests
 ```

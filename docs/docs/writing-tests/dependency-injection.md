@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Examples depend on application services and custom DI attributes declared outside each snippet. -->
+
 # Dependency Injection
 
 TUnit provides two mechanisms for controlling how test classes are constructed: the low-level `IClassConstructor` interface and the higher-level `DependencyInjectionDataSourceAttribute<TScope>` helper. Both are registered via attributes and give full control over how constructor arguments are resolved.

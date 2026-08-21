@@ -2,6 +2,8 @@
 sidebar_position: 12
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Specialized Type Assertions
 
 TUnit provides assertions for many specialized .NET types beyond the common primitives. This page covers GUID, HTTP, file system, networking, and other specialized assertions.
@@ -12,6 +14,7 @@ TUnit provides assertions for many specialized .NET types beyond the common prim
 
 Tests whether a GUID is empty (`Guid.Empty`):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task GUID_Is_Empty()
@@ -26,6 +29,7 @@ public async Task GUID_Is_Empty()
 
 Practical usage:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Entity_Has_Valid_ID()
@@ -43,6 +47,7 @@ public async Task Entity_Has_Valid_ID()
 
 Tests for 2xx success status codes:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Success_Status()
@@ -55,6 +60,7 @@ public async Task HTTP_Success_Status()
 
 Works with all 2xx codes:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Success_Codes()
@@ -68,6 +74,7 @@ public async Task Various_Success_Codes()
 
 ### IsNotSuccess
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Not_Success()
@@ -81,6 +88,7 @@ public async Task HTTP_Not_Success()
 
 Tests for 4xx client error status codes:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Client_Error()
@@ -96,6 +104,7 @@ public async Task HTTP_Client_Error()
 
 Tests for 5xx server error status codes:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Server_Error()
@@ -110,6 +119,7 @@ public async Task HTTP_Server_Error()
 
 Tests for 3xx redirection status codes:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Redirection()
@@ -124,6 +134,7 @@ public async Task HTTP_Redirection()
 
 ### IsCancellationRequested / IsNotCancellationRequested
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CancellationToken_Is_Requested()
@@ -145,6 +156,7 @@ public async Task CancellationToken_Not_Requested()
 
 ### CanBeCanceled / CannotBeCanceled
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Token_Can_Be_Canceled()
@@ -167,6 +179,7 @@ public async Task Default_Token_Cannot_Be_Canceled()
 
 ### IsLetter / IsNotLetter
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Letter()
@@ -181,6 +194,7 @@ public async Task Char_Is_Letter()
 
 ### IsDigit / IsNotDigit
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Digit()
@@ -194,6 +208,7 @@ public async Task Char_Is_Digit()
 
 ### IsWhiteSpace / IsNotWhiteSpace
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_WhiteSpace()
@@ -208,6 +223,7 @@ public async Task Char_Is_WhiteSpace()
 
 ### IsUpper / IsNotUpper
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Upper()
@@ -221,6 +237,7 @@ public async Task Char_Is_Upper()
 
 ### IsLower / IsNotLower
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Lower()
@@ -234,6 +251,7 @@ public async Task Char_Is_Lower()
 
 ### IsPunctuation / IsNotPunctuation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Char_Is_Punctuation()
@@ -252,6 +270,7 @@ public async Task Char_Is_Punctuation()
 
 #### Exists / DoesNotExist
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Exists()
@@ -272,6 +291,7 @@ public async Task Directory_Does_Not_Exist()
 
 #### HasFiles / IsEmpty
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Has_Files()
@@ -296,6 +316,7 @@ public async Task Directory_Is_Empty()
 
 #### HasSubdirectories / HasNoSubdirectories
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Directory_Has_Subdirectories()
@@ -310,6 +331,7 @@ public async Task Directory_Has_Subdirectories()
 
 #### Exists / DoesNotExist
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Exists()
@@ -334,6 +356,7 @@ public async Task File_Does_Not_Exist()
 
 #### IsReadOnly / IsNotReadOnly
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_ReadOnly()
@@ -354,6 +377,7 @@ public async Task File_Is_ReadOnly()
 
 #### IsHidden / IsNotHidden
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_Hidden()
@@ -372,6 +396,7 @@ public async Task File_Is_Hidden()
 
 #### IsSystem / IsNotSystem
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_System()
@@ -388,6 +413,7 @@ public async Task File_Is_System()
 
 #### IsExecutable / IsNotExecutable
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Is_Executable()
@@ -405,6 +431,7 @@ public async Task File_Is_Executable()
 
 ### IsIPv4 / IsNotIPv4
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IP_Is_IPv4()
@@ -425,6 +452,7 @@ public async Task IP_Not_IPv4()
 
 ### IsIPv6 / IsNotIPv6
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IP_Is_IPv6()
@@ -447,6 +475,7 @@ public async Task IP_Not_IPv6()
 
 ### IsValueCreated / IsNotValueCreated
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Lazy_Value_Not_Created()
@@ -466,6 +495,7 @@ public async Task Lazy_Value_Not_Created()
 
 ### CanRead / CannotRead
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Read()
@@ -478,6 +508,7 @@ public async Task Stream_Can_Read()
 
 ### CanWrite / CannotWrite
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Write()
@@ -498,6 +529,7 @@ public async Task Stream_Cannot_Write()
 
 ### CanSeek / CannotSeek
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Stream_Can_Seek()
@@ -510,6 +542,7 @@ public async Task Stream_Can_Seek()
 
 ### CanTimeout / CannotTimeout
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Network_Stream_Can_Timeout()
@@ -524,6 +557,7 @@ public async Task Network_Stream_Can_Timeout()
 
 ### HasExited / HasNotExited
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Process_Has_Not_Exited()
@@ -541,6 +575,7 @@ public async Task Process_Has_Not_Exited()
 
 ### IsResponding / IsNotResponding
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Process_Is_Responding()
@@ -555,6 +590,7 @@ public async Task Process_Is_Responding()
 
 ### IsAlive / IsNotAlive
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Thread_Is_Alive()
@@ -571,6 +607,7 @@ public async Task Thread_Is_Alive()
 
 ### IsBackground / IsNotBackground
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Thread_Is_Background()
@@ -584,6 +621,7 @@ public async Task Thread_Is_Background()
 
 ### IsThreadPoolThread / IsNotThreadPoolThread
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_ThreadPool_Thread()
@@ -599,6 +637,7 @@ public async Task Check_ThreadPool_Thread()
 
 ### IsAlive / IsNotAlive
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task WeakReference_Is_Alive()
@@ -620,6 +659,7 @@ public async Task WeakReference_Is_Alive()
 
 ### IsAbsoluteUri / IsNotAbsoluteUri
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task URI_Is_Absolute()
@@ -642,6 +682,7 @@ public async Task URI_Is_Relative()
 
 ### IsUtf8 / IsNotUtf8
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Encoding_Is_UTF8()
@@ -664,6 +705,7 @@ public async Task Encoding_Not_UTF8()
 
 Version comparisons using standard comparison operators:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Version_Comparison()
@@ -680,6 +722,7 @@ public async Task Version_Comparison()
 
 ### IsWeekend / IsNotWeekend
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Day_Is_Weekend()
@@ -691,6 +734,7 @@ public async Task Day_Is_Weekend()
 
 ### IsWeekday / IsNotWeekday
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Day_Is_Weekday()
@@ -707,6 +751,7 @@ public async Task Day_Is_Weekday()
 
 ### API Testing
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task API_Returns_Success()
@@ -720,6 +765,7 @@ public async Task API_Returns_Success()
 
 ### File Upload Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Uploaded_File_Validation()
@@ -734,6 +780,7 @@ public async Task Uploaded_File_Validation()
 
 ### Configuration Directory Check
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Config_Directory_Setup()
@@ -747,6 +794,7 @@ public async Task Config_Directory_Setup()
 
 ### Network Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Server_IP_Is_Valid()

@@ -2,6 +2,8 @@
 sidebar_position: 1
 ---
 
+<!-- doc-test-ignore-file: Tutorial builds one custom assertion across multiple dependent snippets. -->
+
 # Custom Assertions
 
 The TUnit Assertions can be easily extended so that you can create your own assertions.

@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Hooks
 
 Hooks let you run code at specific points in the test lifecycle using `[Before]` / `[BeforeEvery]` and `[After]` / `[AfterEvery]` attributes. Most simple setup belongs in the constructor; use hooks for async operations or shared resource management.
@@ -8,6 +10,7 @@ For the full execution order, see [Test Lifecycle](lifecycle.md).
 
 Hook methods can be synchronous or asynchronous:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SynchronousSetup()  // ✅ Valid
@@ -41,6 +44,7 @@ public async Task AsyncCleanup()  // ✅ Valid
 
 Hooks can optionally accept a context object and/or a `CancellationToken`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public async Task Setup(TestContext context, CancellationToken cancellationToken)
@@ -70,6 +74,7 @@ public async Task Setup(TestContext context, CancellationToken cancellationToken
 
 A common pattern in `[After]` hooks is checking whether the test failed:
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task Cleanup(TestContext context, CancellationToken cancellationToken)
@@ -212,6 +217,7 @@ public class MyTestClass
 
 Setting `AsyncLocal` values in `[Before]` hooks is supported. Call `context.AddAsyncLocalValues()` to propagate them into the test framework:
 
+<!-- doc-test-contextual -->
 ```csharp
 [BeforeEvery(Class)]
 public static void BeforeClass(ClassHookContext context)

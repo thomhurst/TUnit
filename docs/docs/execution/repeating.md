@@ -30,6 +30,11 @@ public class MyTestClass
         await Assert.That(result).IsEqualTo(5);
     }
 }
+
+public static class Calculator
+{
+    public static int Add(int left, int right) => left + right;
+}
 ```
 
 This produces 4 test runs in total: the original plus 3 repeats. In the test explorer, they appear as:

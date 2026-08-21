@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Examples depend on application services and infrastructure declared outside each snippet. -->
+
 # Property Injection
 
 TUnit's AOT-compatible property injection system makes it easy to initialize properties on your test class with compile-time safety and excellent performance.

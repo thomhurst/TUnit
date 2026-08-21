@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Advanced examples depend on application models and intentionally contrast invalid generic attribute forms. -->
+
 # Generic Attributes
 
 TUnit provides generic versions of several attributes that offer enhanced type safety and better IDE support. These attributes allow you to specify types at compile time, reducing errors and improving code maintainability.
@@ -423,6 +425,7 @@ public class ReflectiveDataSource<[DynamicallyAccessedMembers(
 
 ### 1. Use Generic Attributes for Type Safety
 
+<!-- doc-test-ignore: Attribute comparison omits the target test method and application DataProvider. -->
 ```csharp
 // ❌ Non-generic - prone to errors
 [MethodDataSource(typeof(DataProvider), "GetData")]

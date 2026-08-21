@@ -169,6 +169,11 @@ jobs:
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
           publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
 
+      - name: Compile documentation snippets
+        if: matrix.os == 'ubuntu-latest'
+        shell: pwsh
+        run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath . -Version $env:PackageVersion
+
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.1
         if: always()

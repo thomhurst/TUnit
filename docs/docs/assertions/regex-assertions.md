@@ -2,6 +2,8 @@
 sidebar_position: 13
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Regex Assertions
 
 The `.Matches()` method allows you to validate strings against regular expressions and assert on capture groups, match positions, and match lengths. This is useful when you need to validate structured text like emails, phone numbers, dates, or extract specific parts of a string.
@@ -9,23 +11,26 @@ The `.Matches()` method allows you to validate strings against regular expressio
 ## Basic Usage
 
 ```csharp
-[Test]
-public async Task BasicRegexAssertions()
+public partial class RegexTests
 {
-    var email = "john.doe@example.com";
-
-    // Assert that string matches a pattern
-    await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
-
-    // Use a compiled Regex object
-    var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
-    await Assert.That(email).Matches(emailRegex);
-
-    // Use source-generated regex (C# 11+)
     [GeneratedRegex(@"^[\w.]+@[\w.]+$")]
-    static partial Regex EmailRegex();
+    private static partial Regex EmailRegex();
 
-    await Assert.That(email).Matches(EmailRegex());
+    [Test]
+    public async Task BasicRegexAssertions()
+    {
+        var email = "john.doe@example.com";
+
+        // Assert that string matches a pattern
+        await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
+
+        // Use a compiled Regex object
+        var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
+        await Assert.That(email).Matches(emailRegex);
+
+        // Use source-generated regex (C# 11+)
+        await Assert.That(email).Matches(EmailRegex());
+    }
 }
 ```
 
@@ -35,6 +40,7 @@ The key advantage of regex assertions is the ability to assert on capture groups
 
 ### Named Groups
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task NamedGroupAssertions()
@@ -52,6 +58,7 @@ public async Task NamedGroupAssertions()
 
 ### Indexed Groups
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IndexedGroupAssertions()
@@ -73,6 +80,7 @@ public async Task IndexedGroupAssertions()
 
 When a regex matches multiple times in a string, you can access specific matches using `.Match(index)`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MultipleMatchAssertions()
@@ -97,6 +105,7 @@ public async Task MultipleMatchAssertions()
 
 To assert on where a match occurs or how long it is, use `.Match(index)` to select a match from the collection, then assert on the resulting `RegexMatch` (you can also combine this with `Regex.Match(...)` directly if you need more detailed inspection):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task PositionAndLengthAssertions()
@@ -119,6 +128,7 @@ public async Task PositionAndLengthAssertions()
 
 ## Complex Patterns with Multiple Groups
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexPatternAssertions()
@@ -137,6 +147,7 @@ public async Task ComplexPatternAssertions()
 
 ## Product Information Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ProductCodeValidation()
@@ -154,6 +165,7 @@ public async Task ProductCodeValidation()
 
 ## URL Parsing
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task UrlParsingAssertions()
@@ -175,6 +187,7 @@ public async Task UrlParsingAssertions()
 
 The `Matches(string)` overload does not take `RegexOptions`. To apply options like case-insensitivity, construct a `Regex` (or use a source-generated regex) with the desired options and pass it to `Matches`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task RegexOptionsAssertions()
@@ -220,6 +233,7 @@ public partial class MyTests
 
 Handle optional capture groups that may be empty:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task OptionalGroupAssertions()
@@ -244,6 +258,7 @@ public async Task OptionalGroupAssertions()
 
 ## Complete Example
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CompleteEmailValidation()
@@ -269,6 +284,7 @@ public async Task CompleteEmailValidation()
 
 The regex assertions surface standard exceptions for common error cases. Wrap the call in an `Assert.That(() => ...)` delegate and assert on the thrown exception type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task RegexAssertionErrors()

@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Ordering & Dependencies
 
 ## Ordering with [Order]
@@ -57,6 +59,7 @@ If you have multiple tests with the same name, but different parameter types, th
 :::
 
 e.g.:
+<!-- doc-test-contextual -->
 ```csharp
 public void Test1(string value1, int value2) { ... }
 
@@ -68,6 +71,7 @@ This means you can create more complex test suites, without having to compromise
 
 For example, performing some operations on a database and asserting a count at the end:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task AddUser1() 
@@ -143,6 +147,7 @@ Use argument values or other properties to select the specific test context you 
 
 Example:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task AddItemToBag() 
@@ -165,6 +170,7 @@ public async Task DeleteItemFromBag()
 
 If your test depends on another test, by default, if that dependency fails, then your test that depends on it will not start. This can be bypassed by adding the property `ProceedOnFailure = true` to the `DependsOnAttribute`. Your test suite will still fail due to that test, but it allows you to proceed with other tests if you require it. For example, CRUD testing, and wanting to perform a delete after all your other tests, regardless of if they passed.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Test1() 

@@ -2,6 +2,8 @@
 sidebar_position: 6.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Collection Assertions
 
 TUnit provides comprehensive assertions for testing collections, including membership, count, ordering, and equivalency checks. These assertions work with any `IEnumerable<T>`.
@@ -12,6 +14,7 @@ TUnit provides comprehensive assertions for testing collections, including membe
 
 Tests that a collection contains a specific item:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Contains_Item()
@@ -25,6 +28,7 @@ public async Task Collection_Contains_Item()
 
 Works with any collection type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Collection_Types()
@@ -44,6 +48,7 @@ public async Task Various_Collection_Types()
 
 Tests that a collection contains an item matching a predicate, and returns that item:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Contains_Matching_Item()
@@ -66,6 +71,7 @@ public async Task Collection_Contains_Matching_Item()
 
 Tests that a collection does not contain a specific item:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Does_Not_Contain()
@@ -81,6 +87,7 @@ public async Task Collection_Does_Not_Contain()
 
 Tests that no items match the predicate:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Does_Not_Contain_Matching()
@@ -102,6 +109,7 @@ public async Task Collection_Does_Not_Contain_Matching()
 
 Tests that a collection has an exact count:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Has_Count()
@@ -116,6 +124,7 @@ public async Task Collection_Has_Count()
 
 Get the count for further assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Count_With_Comparison()
@@ -135,6 +144,7 @@ public async Task Count_With_Comparison()
 
 Count items that satisfy an assertion, allowing you to reuse existing assertion methods:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Count_With_Inner_Assertion()
@@ -168,6 +178,7 @@ public async Task Count_Strings_With_Inner_Assertion()
 
 Count assertions preserve the collection type, allowing you to chain additional collection assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Count_With_Chaining()
@@ -198,6 +209,7 @@ public async Task Count_With_Chaining()
 
 Tests that a collection has no items:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Is_Empty()
@@ -213,6 +225,7 @@ public async Task Collection_Is_Empty()
 
 Tests that a collection has at least one item:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Is_Not_Empty()
@@ -227,6 +240,7 @@ public async Task Collection_Is_Not_Empty()
 
 Tests that a collection has exactly one item, and returns that item:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_Has_Single_Item()
@@ -241,6 +255,7 @@ public async Task Collection_Has_Single_Item()
 
 Use `.Item` to continue assertions directly against the single item:
 
+<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(users)
     .HasSingleItem()
@@ -253,6 +268,7 @@ await Assert.That(users)
 
 Tests that a collection is sorted in ascending order:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_In_Ascending_Order()
@@ -263,6 +279,7 @@ public async Task Collection_In_Ascending_Order()
 }
 ```
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Strings_In_Order()
@@ -277,6 +294,7 @@ public async Task Strings_In_Order()
 
 Tests that a collection is sorted in descending order:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collection_In_Descending_Order()
@@ -291,6 +309,7 @@ public async Task Collection_In_Descending_Order()
 
 Tests that a collection is ordered by a specific property:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Ordered_By_Property()
@@ -310,6 +329,7 @@ public async Task Ordered_By_Property()
 
 Tests that a collection is ordered by a property in descending order:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Ordered_By_Descending()
@@ -331,6 +351,7 @@ public async Task Ordered_By_Descending()
 
 Tests that all items satisfy a condition:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Items_Match()
@@ -345,6 +366,7 @@ public async Task All_Items_Match()
 
 The single parameter overload will match T from `IEnumerable<T>` - Giving you the relevant assertions for that type.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Satisfy_With_Property()
@@ -364,6 +386,7 @@ public async Task All_Satisfy_With_Property()
 
 You can also map to other types by accessing properties an such - And then assert on those specific values:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Satisfy_With_Mapper()
@@ -387,6 +410,7 @@ public async Task All_Satisfy_With_Mapper()
 
 Tests that at least one item satisfies a condition:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Any_Item_Matches()
@@ -405,6 +429,7 @@ Collection equivalency checks whether two collections contain the same elements.
 
 Tests that two collections contain the same items. By default, order is ignored (use `CollectionOrdering.Matching` to require matching order):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collections_Are_Equivalent()
@@ -418,6 +443,7 @@ public async Task Collections_Are_Equivalent()
 
 Different collection types:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Different_Collection_Types()
@@ -431,6 +457,7 @@ public async Task Different_Collection_Types()
 
 #### With Custom Comparer
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equivalent_With_Comparer()
@@ -446,6 +473,7 @@ public async Task Equivalent_With_Comparer()
 
 #### With Custom Equality Predicate
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equivalent_With_Predicate()
@@ -472,6 +500,7 @@ public async Task Equivalent_With_Predicate()
 
 By default, `IsEquivalentTo` ignores the order of elements:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equivalent_Ignoring_Order()
@@ -488,6 +517,7 @@ public async Task Equivalent_Ignoring_Order()
 
 To require elements to be in the same order, pass `CollectionOrdering.Matching`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Equivalent_With_Matching_Order()
@@ -501,6 +531,7 @@ public async Task Equivalent_With_Matching_Order()
 
 This will fail if elements are in different positions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Equivalent_Different_Order()
@@ -517,6 +548,7 @@ public async Task Not_Equivalent_Different_Order()
 
 Tests that collections are not equivalent:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Collections_Not_Equivalent()
@@ -538,6 +570,7 @@ The default behavior (ignoring order) is ideal for:
 - Checking API responses where element order doesn't matter
 - Testing collection transformations that may reorder elements
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Database_Query_Results()
@@ -558,6 +591,7 @@ Use order-sensitive comparison when:
 - Checking sequences where position matters
 - Testing priority queues or ordered data structures
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Sorted_Query_Results()
@@ -577,6 +611,7 @@ public async Task Sorted_Query_Results()
 
 If you need multiple order-sensitive assertions in the same test, consider extracting a helper or being explicit:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Multiple_Order_Sensitive_Checks()
@@ -592,6 +627,7 @@ public async Task Multiple_Order_Sensitive_Checks()
 
 For ordered comparisons, you can also use `IsInOrder()`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Verify_Ordering_Separately()
@@ -610,6 +646,7 @@ public async Task Verify_Ordering_Separately()
 
 ### Deep Comparison with IsEquivalentTo
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Structurally_Equal()
@@ -632,6 +669,7 @@ public async Task Structurally_Equal()
 
 ### IsNotEquivalentTo for Deep Comparison
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Structurally_Equal()
@@ -656,6 +694,7 @@ public async Task Not_Structurally_Equal()
 
 Tests that all items in a collection are unique:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Items_Distinct()
@@ -668,6 +707,7 @@ public async Task All_Items_Distinct()
 
 Fails if duplicates exist:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Duplicates_Fail()
@@ -683,6 +723,7 @@ public async Task Duplicates_Fail()
 
 ### Filtering Results
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Filter_And_Assert()
@@ -698,6 +739,7 @@ public async Task Filter_And_Assert()
 
 ### LINQ Query Results
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task LINQ_Query_Results()
@@ -719,6 +761,7 @@ public async Task LINQ_Query_Results()
 
 ### Sorting Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Verify_Sorting()
@@ -733,6 +776,7 @@ public async Task Verify_Sorting()
 
 ### API Response Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task API_Returns_Expected_Items()
@@ -748,6 +792,7 @@ public async Task API_Returns_Expected_Items()
 
 ### Collection Transformation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Map_And_Verify()
@@ -770,6 +815,7 @@ public async Task Map_And_Verify()
 
 ## Empty vs Null Collections
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Empty_vs_Null()
@@ -787,6 +833,7 @@ public async Task Empty_vs_Null()
 
 ## Nested Collections
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nested_Collections()
@@ -809,6 +856,7 @@ public async Task Nested_Collections()
 
 ## Chaining Collection Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Collection_Assertions()
@@ -830,6 +878,7 @@ public async Task Chained_Collection_Assertions()
 
 ### Materialize IEnumerable
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Materialize_Before_Multiple_Assertions()
@@ -849,6 +898,7 @@ public async Task Materialize_Before_Multiple_Assertions()
 
 ## Working with HashSet and SortedSet
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HashSet_Assertions()
@@ -876,6 +926,7 @@ public async Task SortedSet_Assertions()
 
 ### Validate All Items
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Each_Item()
@@ -895,6 +946,7 @@ public async Task Validate_Each_Item()
 
 Or more elegantly:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_All_With_Assertion()

@@ -34,15 +34,9 @@ public class MyTestClass
     {
         // Some properties/methods/whatever!
 
-        public async Task InitializeAsync()
-        {
-            await StartServer();
-        }
+        public Task InitializeAsync() => Task.CompletedTask; // start server
 
-        public async ValueTask DisposeAsync()
-        {
-            await StopServer();
-        }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask; // stop server
     }
 }
 ```
@@ -55,6 +49,7 @@ If you are using an overload that supports injecting multiple classes at once (e
 
 E.g.
 
+<!-- doc-test-ignore: Illustrative overload uses placeholder Value1 through Value5 application types. -->
 ```csharp
 [Test]
     [ClassDataSource<Value1, Value2, Value3, Value4, Value5>

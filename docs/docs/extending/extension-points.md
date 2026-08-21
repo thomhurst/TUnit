@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Examples depend on application-specific executors, attributes, fixtures, and services. -->
+
 # Extension Points
 
 TUnit provides several extension points that allow you to customize and extend the framework's behavior. These interfaces enable you to implement custom test execution logic, hook into the test lifecycle, and control parallel execution.

@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Examples use application-specific containers, resources, and benchmark fixtures. -->
+
 # Performance Best Practices
 
 This guide provides recommendations for optimizing test performance and ensuring your TUnit test suite runs efficiently.

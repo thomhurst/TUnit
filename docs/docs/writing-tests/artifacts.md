@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Artifacts
 
 Test artifacts are files (screenshots, logs, videos, JSON dumps, etc.) that you can attach to your tests. They are invaluable for debugging test failures, especially in integration tests and end-to-end tests.
@@ -16,6 +18,7 @@ Use `TestContext.ResultsDirectory` to place generated files alongside reports an
 artifacts. The property returns the absolute directory selected by Microsoft.Testing.Platform,
 including any `--results-directory` override.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CaptureLog()
@@ -31,6 +34,7 @@ public async Task CaptureLog()
 
 The simplest way to attach an artifact is by providing just the file path:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyIntegrationTest()
@@ -54,6 +58,7 @@ public async Task MyIntegrationTest()
 
 For more control, you can create an `Artifact` object directly:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyIntegrationTest()
@@ -108,6 +113,7 @@ public class MyTests
 
 You can attach multiple artifacts to a single test:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexIntegrationTest()
@@ -147,6 +153,7 @@ Attach files to the entire test session using `TestSessionContext.Current.AddArt
 
 ### Basic Usage
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(TestSession)]
 public static void SetupTestSession()
@@ -169,6 +176,7 @@ public static void SetupTestSession()
 
 Attach configuration files to document the test environment:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(TestSession)]
 public static void DocumentTestEnvironment()
@@ -198,6 +206,7 @@ public static void DocumentTestEnvironment()
 
 Generate and attach performance reports for the entire test session:
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(TestSession)]
 public static void GeneratePerformanceReport()
@@ -238,6 +247,7 @@ public class Artifact
 
 Consider cleaning up temporary artifact files after test execution to avoid accumulating files:
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(TestSession)]
 public static void CleanupArtifacts()
@@ -254,6 +264,7 @@ public static void CleanupArtifacts()
 
 Create a unique directory for each test's artifacts:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SetupTestArtifactDirectory()
@@ -286,6 +297,7 @@ public void MyTest()
 
 For large artifacts (videos, extensive logs), consider only attaching them when tests fail:
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task ConditionalArtifactAttachment()
@@ -311,6 +323,7 @@ public async Task ConditionalArtifactAttachment()
 
 Provide clear, descriptive names and descriptions for your artifacts:
 
+<!-- doc-test-contextual -->
 ```csharp
 // ❌ Not descriptive
 TestContext.Current!.Output.AttachArtifact(new Artifact
@@ -332,6 +345,7 @@ TestContext.Current!.Output.AttachArtifact(new Artifact
 
 Always ensure the file exists before attaching:
 
+<!-- doc-test-contextual -->
 ```csharp
 var logPath = "path/to/logfile.log";
 
@@ -353,6 +367,7 @@ else
 
 ### Browser Testing with Playwright
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task CapturePlaywrightArtifacts()
@@ -389,6 +404,7 @@ public async Task CapturePlaywrightArtifacts()
 
 ### API Testing
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ApiIntegrationTest()
@@ -424,6 +440,7 @@ public async Task ApiIntegrationTest()
 
 ### Database Testing
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DatabaseIntegrationTest()

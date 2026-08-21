@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Comparisons require an isolated MSTest compilation and application fixtures. -->
+
 # Migrating from MSTest
 
 :::from-mstest Performance Boost

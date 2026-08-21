@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Examples depend on optional exporters, application processors, and surrounding tracing setup. -->
+
 # OpenTelemetry Tracing
 
 TUnit emits `System.Diagnostics.Activity` trace spans at every level of the test lifecycle. When you configure an OpenTelemetry exporter (or any `ActivityListener`), you get distributed tracing for your test runs automatically. When no listener is attached, the cost is zero.
@@ -238,6 +240,7 @@ Swap the exporter in the setup code above. Each exporter needs its own NuGet pac
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
 ```
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
 ```
@@ -248,6 +251,7 @@ dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
 dotnet add package OpenTelemetry.Exporter.Zipkin
 ```
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddZipkinExporter(opts => opts.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
 ```
@@ -322,6 +326,11 @@ For manual setups, add this processor to your tracer builder:
 using System.Diagnostics;
 using OpenTelemetry;
 
+// Usage:
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .AddProcessor(new TUnitTagProcessor())
+    .Build();
+
 public sealed class TUnitTagProcessor : BaseProcessor<Activity>
 {
     public override void OnStart(Activity activity)
@@ -333,9 +342,6 @@ public sealed class TUnitTagProcessor : BaseProcessor<Activity>
         }
     }
 }
-
-// then in your tracer builder:
-.AddProcessor(new TUnitTagProcessor())
 ```
 
 Register the correlation processor **before** any synchronous exporter (`SimpleExportProcessor`-based). The built-in `TUnitTestCorrelationProcessor` tags at both `OnStart` and `OnEnd`, and a `SimpleExport`-wrapped exporter that runs first would serialize the activity before the tag is applied. `BatchExportProcessor` (the default for OTLP/Jaeger/Zipkin) defers serialization, so order doesn't matter there.

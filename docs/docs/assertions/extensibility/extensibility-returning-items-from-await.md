@@ -2,6 +2,8 @@
 sidebar_position: 4
 ---
 
+<!-- doc-test-ignore-file: Tutorial builds one custom assertion across multiple dependent snippets. -->
+
 # Returning Data via `await`
 
 Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.

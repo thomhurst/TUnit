@@ -2,6 +2,8 @@
 sidebar_position: 7
 ---
 
+<!-- doc-test-ignore-file: Examples depend on application containers and fixtures declared outside each snippet. -->
+
 # Nested Data Sources with Initialization
 
 When writing integration tests, you often need complex test fixtures that depend on other initialized resources. TUnit's nested data source initialization feature makes this elegant and automatic.

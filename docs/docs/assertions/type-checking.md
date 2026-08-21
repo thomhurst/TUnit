@@ -2,12 +2,15 @@
 sidebar_position: 5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Type Checking
 
 TUnit assertions check types at compile time wherever possible. This gives faster feedback and catches mistakes before your build pipeline runs.
 
 For example, this wouldn't compile because we're comparing an `int` and a `string`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()
@@ -24,6 +27,7 @@ When you need to verify types at runtime — for example, when working with poly
 
 Tests that a value is exactly the specified type (not a subclass):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exact_Type()
@@ -38,6 +42,7 @@ public async Task Exact_Type()
 
 Tests that a value can be assigned to the specified type, including base classes and interfaces:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Assignable_To_Base_Or_Interface()
@@ -53,6 +58,7 @@ public async Task Assignable_To_Base_Or_Interface()
 
 Tests that a value is **not** exactly the specified type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Exact_Type()
@@ -67,6 +73,7 @@ public async Task Not_Exact_Type()
 
 Tests that a value cannot be assigned to the specified type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Assignable()
@@ -81,6 +88,7 @@ public async Task Not_Assignable()
 
 Tests that a value of the specified type can be assigned to a variable of this value's type. This is the reverse of `IsAssignableTo`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Assignable_From_Derived()
@@ -96,6 +104,7 @@ public async Task Assignable_From_Derived()
 
 Tests that a value of the specified type cannot be assigned to a variable of this value's type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Assignable_From()
@@ -110,6 +119,7 @@ public async Task Not_Assignable_From()
 
 Type assertions also work on delegate return values, letting you verify the type returned by a method or lambda:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Delegate_Return_Type()

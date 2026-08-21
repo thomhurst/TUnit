@@ -2,6 +2,8 @@
 sidebar_position: 3.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Boolean Assertions
 
 TUnit provides simple, expressive assertions for testing boolean values. These assertions work with both `bool` and `bool?` (nullable boolean) types.
@@ -12,6 +14,7 @@ TUnit provides simple, expressive assertions for testing boolean values. These a
 
 Tests that a boolean value is `true`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Value_Is_True()
@@ -28,6 +31,7 @@ public async Task Value_Is_True()
 
 Tests that a boolean value is `false`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Value_Is_False()
@@ -44,6 +48,7 @@ public async Task Value_Is_False()
 
 You can also use `IsEqualTo()` for boolean comparisons:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Using_IsEqualTo()
@@ -64,6 +69,7 @@ However, `IsTrue()` and `IsFalse()` are more expressive and recommended for bool
 
 Both assertions work with nullable booleans (`bool?`):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nullable_Boolean_True()
@@ -92,6 +98,7 @@ public async Task Nullable_Boolean_False()
 
 If a nullable boolean is `null`, both `IsTrue()` and `IsFalse()` will fail:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nullable_Boolean_Null()
@@ -111,6 +118,7 @@ public async Task Nullable_Boolean_Null()
 
 Boolean assertions can be chained with other assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_With_Other_Assertions()
@@ -127,6 +135,7 @@ public async Task Chained_With_Other_Assertions()
 
 ### Validation Results
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Email_Validation()
@@ -141,6 +150,7 @@ public async Task Email_Validation()
 
 ### Permission Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task User_Permissions()
@@ -155,6 +165,7 @@ public async Task User_Permissions()
 
 ### State Flags
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Service_State()
@@ -171,6 +182,7 @@ public async Task Service_State()
 
 ### Feature Flags
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Feature_Toggles()
@@ -186,6 +198,7 @@ public async Task Feature_Toggles()
 
 When testing the boolean result of a comparison, use the specific assertion instead for clearer failure messages:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Prefer_Specific_Assertions()

@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: bUnit examples depend on Razor components and their application test context. -->
+
 # Engine Modes
 
 TUnit supports two execution modes, providing flexibility for different development and deployment scenarios.

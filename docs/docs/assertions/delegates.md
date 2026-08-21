@@ -8,7 +8,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
 
 ```csharp
     [Test]
-    public async Task MyTest()
+    public async Task ThrowsNothing()
     {
         await Assert.That(() =>
         {
@@ -19,7 +19,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
     // or
 
     [Test]
-    public async Task MyTest()
+    public async Task ThrowsArgumentNullException()
     {
         await Assert.That(() =>
         {
@@ -30,7 +30,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
     // or 
 
     [Test]
-    public async Task MyTest()
+    public async Task AssertThrowsAsync()
     {
         var argumentNullException = await Assert.ThrowsAsync<ArgumentNullException>(() =>
         {

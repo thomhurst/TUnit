@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Fragments intentionally compare old and new contextual member access. -->
+
 # TestContext Interface Organization Migration Guide
 
 ## Overview
@@ -240,6 +242,7 @@ public void Setup()
 
 IntelliSense now groups related functionality together, making it easier to find what you need:
 
+<!-- doc-test-ignore: Trailing dots intentionally illustrate IntelliSense member discovery. -->
 ```csharp
 TestContext.Current.Execution.  // Shows only execution-related members
 TestContext.Current.Metadata.   // Shows only metadata-related members

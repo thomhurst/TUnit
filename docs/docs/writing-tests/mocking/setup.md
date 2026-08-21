@@ -2,6 +2,8 @@
 sidebar_position: 2
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Setup & Stubbing
 
 Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.
@@ -10,6 +12,7 @@ Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.T
 
 ### Return Values
 
+<!-- doc-test-contextual -->
 ```csharp
 // Fixed return value
 mock.GetUser(Any()).Returns(new User("Alice"));
@@ -24,6 +27,7 @@ mock.GetUserAsync(Any()).Returns(new User("Alice"));
 
 ### Throwing Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 // Throw a specific exception type
 mock.Delete(Any()).Throws<InvalidOperationException>();
@@ -34,6 +38,7 @@ mock.Delete(Any()).Throws(new ArgumentException("bad id"));
 
 ### Callbacks
 
+<!-- doc-test-contextual -->
 ```csharp
 // Simple callback
 var callCount = 0;
@@ -49,6 +54,7 @@ mock.Process(Any())
 
 Use `.Then()` to define different behaviors for successive calls:
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.GetValue(Any())
     .Throws<InvalidOperationException>()   // 1st call: throws
@@ -66,6 +72,7 @@ mock.GetValue(Any())
 Chained setup behaviors without `.Then()` run together as a single invocation step.
 When multiple return behaviors are chained in one step, the last return wins:
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.GetValue(Any())
     .Returns("first")
@@ -80,6 +87,7 @@ different invocation.
 
 Void methods support `Callback` and `Throws` (but not `Returns`):
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.Log(Any())
     .Callback(() => { /* side effect */ });
@@ -96,6 +104,7 @@ TUnit.Mocks uses C# 14 extension properties for a natural property API. The defa
 
 ### Getter Setup
 
+<!-- doc-test-contextual -->
 ```csharp
 // These are equivalent — both configure the getter
 mock.Name.Returns("Alice");
@@ -104,6 +113,7 @@ mock.Name.Getter.Returns("Alice");
 
 All method setup operations work on getters:
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.Name.Throws<InvalidOperationException>();
 mock.Name.Callback(() => Console.WriteLine("Name accessed"));
@@ -112,6 +122,7 @@ mock.Name.ReturnsSequentially("first", "second");
 
 ### Setter Setup
 
+<!-- doc-test-contextual -->
 ```csharp
 // React to any value being set
 mock.Count.Setter.Callback(() => Console.WriteLine("Count was set"));
@@ -127,6 +138,7 @@ mock.Name.Setter.Throws<NotSupportedException>();
 
 Call `SetupAllProperties()` to make properties behave like real auto-properties — setters store values, getters return them:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = IEntity.Mock();
 mock.SetupAllProperties();
@@ -144,6 +156,7 @@ Explicit setups take precedence over auto-tracked values.
 
 **Out parameters** are excluded from setup signatures. Use the generated strongly-typed `.SetsOut{Name}()` methods to assign their values:
 
+<!-- doc-test-contextual -->
 ```csharp
 // Strongly-typed — named after the parameter, compile-time safe
 mock.TryGet("key")
@@ -156,6 +169,7 @@ bool found = svc.TryGet("key", out var value);
 
 **Ref parameters** are included in setup signatures and participate in argument matching. Use `.SetsRef{Name}()` to assign output values:
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.Swap(Any())
     .SetsRefValue(99);
@@ -189,6 +203,7 @@ mock.Object.Multiply(2, 3); // 99 (mocked)
 
 Pass constructor arguments for non-default constructors:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = MyService.Mock("connectionString", 42);
 ```
@@ -199,6 +214,7 @@ Interfaces that have static abstract members (directly or inherited) cannot be u
 
 Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source generator produces a bridge interface (suffixed `_Mockable`) that provides default implementations for the static abstract members:
 
+<!-- doc-test-ignore: Example intentionally starts with a CS8920 interface and requires isolated mock source generation. -->
 ```csharp
 using TUnit.Mocks;
 
@@ -220,6 +236,7 @@ The bridge type implements all the non-static members of the original interface,
 
 Mock any delegate type:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = Mock.OfDelegate<Func<string, int>>();
 mock.Invoke(Any()).Returns(42);
@@ -234,6 +251,7 @@ Works with `Action<>`, `Func<>`, and custom delegate types.
 
 Wrap a real instance to selectively override methods while delegating unconfigured calls to the real implementation:
 
+<!-- doc-test-contextual -->
 ```csharp
 var realService = new ProductionService();
 var mock = Mock.Wrap(realService);
@@ -249,6 +267,7 @@ mock.Object.DoWork(); // calls realService.DoWork()
 
 Create a single mock that implements multiple interfaces:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
@@ -262,6 +281,7 @@ Supports up to 4 interfaces: `Mock.Of<T1, T2, T3, T4>()`.
 
 Members of the secondary interfaces appear directly on the mock, just like the primary's — setup, verify, and event raising all work the same way:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = Mock.Of<ILogger, IDisposable>();
 
@@ -273,6 +293,7 @@ When a secondary member's name collides with a member of another interface on th
 
 The primary type can also be a concrete class — useful for types like EF Core's `DbContext` that implement infrastructure interfaces explicitly:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = Mock.Of<DbContext, IInfrastructure<IServiceProvider>>();
 mock.Instance.Returns(serviceProvider);
@@ -286,6 +307,7 @@ Constructor arguments for class primaries are supported: `Mock.Of<MyService, IEx
 
 Setup methods return chain objects that support additional behaviors:
 
+<!-- doc-test-contextual -->
 ```csharp
 mock.Process(Any())
     .Returns(true)
