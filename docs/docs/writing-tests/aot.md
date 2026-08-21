@@ -1,5 +1,3 @@
-<!-- doc-test-ignore-file: Diagnostic examples intentionally contain invalid generic and reflection patterns. -->
-
 # AOT Compatibility and Generic Tests
 
 TUnit's source generation mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like generic tests and complex data sources.
@@ -29,8 +27,8 @@ public class GenericTests
         var value1 = default(T1);
         var value2 = default(T2);
         
-        await Assert.That(value1).IsNotNull().Or.IsEqualTo(default(T1));
-        await Assert.That(value2).IsNotNull().Or.IsEqualTo(default(T2));
+        await Assert.That(value1).IsEqualTo(default(T1));
+        await Assert.That(value2).IsEqualTo(default(T2));
     }
 }
 ```
@@ -54,16 +52,7 @@ public class GenericTestClass<T>
     {
         var defaultValue = default(T);
         
-        // For reference types, default should be null
-        // For value types, default should be the type's default value
-        if (typeof(T).IsValueType)
-        {
-            await Assert.That(defaultValue).IsNotNull();
-        }
-        else
-        {
-            await Assert.That(defaultValue).IsNull();
-        }
+        await Assert.That(defaultValue).IsEqualTo(default(T));
     }
 
     [Test]
@@ -290,6 +279,7 @@ public async Task GenericTest<T>()
 
 ### Data Source Diagnostics
 
+<!-- doc-test-ignore: Example intentionally uses an undefined reflection-based generator beside its corrected form. -->
 ```csharp
 public class DataSourceDiagnostics
 {
