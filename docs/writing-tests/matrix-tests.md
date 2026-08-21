@@ -17,8 +17,6 @@ using TUnit.Assertions;
 
 using TUnit.Assertions.Extensions;
 
-using TUnit.Assertions.Extensions.Is;
-
 using TUnit.Core;
 
 
@@ -81,8 +79,6 @@ using TUnit.Assertions;
 
 using TUnit.Assertions.Extensions;
 
-using TUnit.Assertions.Extensions.Is;
-
 using TUnit.Core;
 
 
@@ -138,8 +134,6 @@ You can also specify a method that will return an `IEnumerable<T>` of values.
 using TUnit.Assertions;
 
 using TUnit.Assertions.Extensions;
-
-using TUnit.Assertions.Extensions.Is;
 
 using TUnit.Core;
 
@@ -230,8 +224,6 @@ Use exclusions to keep your test matrix manageable and avoid unnecessary or inva
 using TUnit.Assertions;
 
 using TUnit.Assertions.Extensions;
-
-using TUnit.Assertions.Extensions.Is;
 
 using TUnit.Core;
 

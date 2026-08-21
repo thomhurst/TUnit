@@ -188,7 +188,7 @@ Class-level and assembly-level hooks must be static:
 
 [Before(Class)]
 
-public void ClassSetup() { }
+public void IncorrectClassSetup() { }
 
 
 

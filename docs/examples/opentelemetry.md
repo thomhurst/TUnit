@@ -401,6 +401,16 @@ using OpenTelemetry;
 
 
 
+// Usage:
+
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+
+    .AddProcessor(new TUnitTagProcessor())
+
+    .Build();
+
+
+
 public sealed class TUnitTagProcessor : BaseProcessor<Activity>
 
 {
@@ -422,12 +432,6 @@ public sealed class TUnitTagProcessor : BaseProcessor<Activity>
     }
 
 }
-
-
-
-// then in your tracer builder:
-
-.AddProcessor(new TUnitTagProcessor())
 ```
 
 Register the correlation processor **before** any synchronous exporter (`SimpleExportProcessor`-based). The built-in `TUnitTestCorrelationProcessor` tags at both `OnStart` and `OnEnd`, and a `SimpleExport`-wrapped exporter that runs first would serialize the activity before the tag is applied. `BatchExportProcessor` (the default for OTLP/Jaeger/Zipkin) defers serialization, so order doesn't matter there.

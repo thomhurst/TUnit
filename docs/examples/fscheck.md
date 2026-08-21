@@ -60,6 +60,12 @@ Property tests can return:
 * **`Property`** - For advanced FsCheck properties with custom generators
 
 ```
+using FsCheck;
+
+using FsCheck.Fluent;
+
+
+
 // Boolean property
 
 [Test, FsCheckProperty]
@@ -231,6 +237,12 @@ public bool PositiveNumbersArePositive(int value)
 For simple ranges, use `Gen.Choose` directly:
 
 ```
+using FsCheck;
+
+using FsCheck.Fluent;
+
+
+
 public class PositiveIntArbitrary
 
 {
@@ -253,6 +265,12 @@ public class PositiveIntArbitrary
 For custom types, compose generators using LINQ:
 
 ```
+using FsCheck;
+
+using FsCheck.Fluent;
+
+
+
 public class Person
 
 {

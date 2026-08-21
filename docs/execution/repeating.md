@@ -40,6 +40,16 @@ public class MyTestClass
     }
 
 }
+
+
+
+public static class Calculator
+
+{
+
+    public static int Add(int left, int right) => left + right;
+
+}
 ```
 
 This produces 4 test runs in total: the original plus 3 repeats. In the test explorer, they appear as:

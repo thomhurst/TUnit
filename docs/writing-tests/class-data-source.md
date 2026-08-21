@@ -47,23 +47,11 @@ public class MyTestClass
 
 
 
-        public async Task InitializeAsync()
-
-        {
-
-            await StartServer();
-
-        }
+        public Task InitializeAsync() => Task.CompletedTask; // start server
 
 
 
-        public async ValueTask DisposeAsync()
-
-        {
-
-            await StopServer();
-
-        }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask; // stop server
 
     }
 

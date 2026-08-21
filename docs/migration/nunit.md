@@ -458,15 +458,21 @@ public async Task AdditionTest(int a, int b, int expected)
 ```
 // NUnit
 
-TestContext.WriteLine("Test output");
+public void NUnitTest()
 
-TestContext.Out.WriteLine("More output");
+{
+
+    NUnit.Framework.TestContext.WriteLine("Test output");
+
+    NUnit.Framework.TestContext.Out.WriteLine("More output");
+
+}
 
 
 
 // TUnit (inject TestContext)
 
-public async Task MyTest(TestContext context)
+public void TUnitTest(TUnit.Core.TestContext context)
 
 {
 

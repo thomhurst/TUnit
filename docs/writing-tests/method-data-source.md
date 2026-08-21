@@ -26,6 +26,10 @@ Returning a `Func<T>` ensures that each test gets a fresh object.<br /><!-- -->I
 Here's the simplest example — a method that returns a single `Func<T>`, creating one test case:
 
 ```
+public record AdditionTestData(int Value1, int Value2, int ExpectedResult);
+
+
+
 public static class MyTestDataSources
 
 {

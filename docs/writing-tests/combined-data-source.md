@@ -493,6 +493,10 @@ public async Task MatrixWay(
 **MixedParameters:**
 
 ```
+public static IEnumerable<string> GetStrings() => ["a", "b"];
+
+
+
 [Test]
 
 [CombinedDataSources]

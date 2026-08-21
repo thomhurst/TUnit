@@ -196,6 +196,10 @@ dotnet build -c Release -p:TestFramework=MSTEST
 ### 2. Execution Phase[​](#2-execution-phase "Direct link to 2. Execution Phase")
 
 ```
+using BenchmarkDotNet.Attributes;
+
+
+
 [Benchmark]
 
 public async Task TUnit()

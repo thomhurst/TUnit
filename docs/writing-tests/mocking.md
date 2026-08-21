@@ -167,7 +167,7 @@ mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it
 
 mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
 
-mock.Object                                  // the T instance (also available via direct cast)
+_ = mock.Object;                            // the T instance (also available via direct cast)
 ```
 
 ### Typed Mock Wrapper[​](#typed-mock-wrapper "Direct link to Typed Mock Wrapper")

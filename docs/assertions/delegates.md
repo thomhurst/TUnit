@@ -5,7 +5,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
 ```
     [Test]
 
-    public async Task MyTest()
+    public async Task ThrowsNothing()
 
     {
 
@@ -27,7 +27,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
 
     [Test]
 
-    public async Task MyTest()
+    public async Task ThrowsArgumentNullException()
 
     {
 
@@ -49,7 +49,7 @@ TUnit can execute your delegates for you, and this allows you to assert on the d
 
     [Test]
 
-    public async Task MyTest()
+    public async Task AssertThrowsAsync()
 
     {
 

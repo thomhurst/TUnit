@@ -43,9 +43,9 @@ public class GenericTests
 
         
 
-        await Assert.That(value1).IsNotNull().Or.IsEqualTo(default(T1));
+        await Assert.That(value1).IsEqualTo(default(T1));
 
-        await Assert.That(value2).IsNotNull().Or.IsEqualTo(default(T2));
+        await Assert.That(value2).IsEqualTo(default(T2));
 
     }
 
@@ -85,25 +85,7 @@ public class GenericTestClass<T>
 
         
 
-        // For reference types, default should be null
-
-        // For value types, default should be the type's default value
-
-        if (typeof(T).IsValueType)
-
-        {
-
-            await Assert.That(defaultValue).IsNotNull();
-
-        }
-
-        else
-
-        {
-
-            await Assert.That(defaultValue).IsNull();
-
-        }
+        await Assert.That(defaultValue).IsEqualTo(default(T));
 
     }
 
