@@ -17,7 +17,7 @@
     <PackageReference Include="TUnit.AspNetCore" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
     <PackageReference Include="TUnit.Aspire" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
     <PackageReference Include="TUnit.Aspire.Core" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
-    <PackageReference Include="TUnit.Assertions" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Assertions" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
     <PackageReference Include="TUnit.Assertions.Should" VersionOverride="$(TUnitAssertionsShouldPackageVersion)" ExcludeAssets="analyzers" />
     <PackageReference Include="TUnit.FsCheck" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
     <PackageReference Include="TUnit.Logging.Microsoft" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
@@ -49,7 +49,12 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="GlobalUsings.cs" />
-    <Compile Include="$(GeneratedSnippetsDirectory)\Snippet*.g.cs" Link="Generated\%(Filename)%(Extension)" />
+    <Compile Include="$(GeneratedSnippetsDirectory)/Snippet*.g.cs" Link="Generated/%(Filename)%(Extension)" />
   </ItemGroup>
+
+  <Target Name="ValidateGeneratedSnippetsDirectory" BeforeTargets="CoreCompile">
+    <Error Condition="'$(GeneratedSnippetsDirectory)' == ''"
+           Text="GeneratedSnippetsDirectory must be set. Run scripts/Verify-DocSnippets.ps1." />
+  </Target>
 
 </Project>

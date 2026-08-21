@@ -4,7 +4,6 @@ namespace TUnit.DocTests;
 
 internal abstract class SnippetContext
 {
-    protected static readonly CancellationToken CancellationToken = default;
     protected static readonly CancellationToken cancellationToken = default;
     protected static readonly CancellationToken ct = default;
 }

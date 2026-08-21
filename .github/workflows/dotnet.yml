@@ -172,7 +172,7 @@ jobs:
       - name: Compile documentation snippets
         if: matrix.os == 'ubuntu-latest'
         shell: pwsh
-        run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath . -Version $env:Version
+        run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath . -Version $env:PackageVersion
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.1

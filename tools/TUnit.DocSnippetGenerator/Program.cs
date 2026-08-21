@@ -375,8 +375,15 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
         return builder.ToString();
     }
 
+    if (snippet.Mode == SnippetMode.Statements && snippet.SplitBefore is not null)
+    {
+        throw new InvalidOperationException(
+            $"Statement snippet {snippet.SourcePath}:{snippet.Line} cannot have a split marker.");
+    }
+
     var memberSource = source;
     string? statementSource = null;
+    var splitStatementLine = snippet.Line;
     if (snippet.SplitBefore is not null)
     {
         var splitIndex = source.IndexOf(snippet.SplitBefore, StringComparison.Ordinal);
@@ -388,9 +395,16 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
 
         memberSource = source[..splitIndex].TrimEnd();
         statementSource = source[splitIndex..];
+        splitStatementLine += source[..splitIndex].Count(character => character == '\n');
     }
 
     var containsExtensionMethod = Regex.IsMatch(memberSource, @"(?:\(|,)\s*this\s+[A-Za-z_]");
+    if (snippet.Mode == SnippetMode.Statements && containsExtensionMethod)
+    {
+        throw new InvalidOperationException(
+            $"Statement snippet {snippet.SourcePath}:{snippet.Line} cannot contain an extension method.");
+    }
+
     builder.AppendLine($"namespace {generatedNamespace};");
 
     if (containsExtensionMethod)
@@ -441,10 +455,9 @@ static string GenerateSource(Snippet snippet, int index, ISet<string> emittedAss
 
     if (statementSource is not null)
     {
-        var statementLine = snippet.Line + source[..source.IndexOf(snippet.SplitBefore!, StringComparison.Ordinal)].Count(character => character == '\n');
         builder.AppendLine("    public static async Task CompileAsync()")
             .AppendLine("    {")
-            .AppendLine($"#line {statementLine} \"{snippet.SourcePath}\"");
+            .AppendLine($"#line {splitStatementLine} \"{snippet.SourcePath}\"");
         foreach (var line in statementSource.Split('\n'))
         {
             builder.Append("        ").AppendLine(line);
