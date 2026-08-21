@@ -2,6 +2,8 @@
 sidebar_position: 12
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Specialized Type Assertions
 
 TUnit provides assertions for many specialized .NET types beyond the common primitives. This page covers GUID, HTTP, file system, networking, and other specialized assertions.

@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Artifacts
 
 Test artifacts are files (screenshots, logs, videos, JSON dumps, etc.) that you can attach to your tests. They are invaluable for debugging test failures, especially in integration tests and end-to-end tests.

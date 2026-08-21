@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Hooks
 
 Hooks let you run code at specific points in the test lifecycle using `[Before]` / `[BeforeEvery]` and `[After]` / `[AfterEvery]` attributes. Most simple setup belongs in the constructor; use hooks for async operations or shared resource management.

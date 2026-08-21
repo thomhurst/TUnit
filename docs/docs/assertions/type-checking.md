@@ -2,6 +2,8 @@
 sidebar_position: 5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Type Checking
 
 TUnit assertions check types at compile time wherever possible. This gives faster feedback and catches mistakes before your build pipeline runs.

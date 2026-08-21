@@ -2,6 +2,8 @@
 sidebar_position: 11
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Task and Async Assertions
 
 TUnit provides specialized assertions for testing `Task` and `Task<T>` objects, including state checking, completion timeouts, and async exception handling.

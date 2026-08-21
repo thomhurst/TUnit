@@ -2,6 +2,8 @@
 sidebar_position: 4.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Numeric Assertions
 
 TUnit provides comprehensive assertions for testing numeric values, including specialized assertions for positive/negative values and comparison assertions with tolerance support.

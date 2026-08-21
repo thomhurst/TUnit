@@ -2,6 +2,8 @@
 sidebar_position: 7
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Logging
 
 `TUnit.Mocks.Logging` provides `MockLogger` — a simple `ILogger` implementation that captures log entries for inspection and verification.

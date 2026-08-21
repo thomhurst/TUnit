@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Exception Handling
 
 When a test fails, TUnit throws an exception. Most of the time you don't need to think about this — the framework handles it and reports the failure. But there are a couple of exception types you might want to throw yourself.

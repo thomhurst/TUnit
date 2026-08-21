@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Ordering & Dependencies
 
 ## Ordering with [Order]

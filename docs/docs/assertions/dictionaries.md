@@ -2,6 +2,8 @@
 sidebar_position: 6.8
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Dictionary Assertions
 
 TUnit provides specialized assertions for testing dictionaries (`IReadOnlyDictionary<TKey, TValue>`), including key and value membership checks. Dictionaries also inherit all collection assertions.

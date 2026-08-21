@@ -2,6 +2,8 @@
 sidebar_position: 11
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Combining Assertions
 
 TUnit provides several ways to combine multiple assertions within a single test: chaining with `.And` and `.Or`, and grouping with `Assert.Multiple()`.

@@ -2,6 +2,8 @@
 sidebar_position: 8
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Exception Assertions
 
 TUnit provides comprehensive assertions for testing that code throws (or doesn't throw) exceptions, with rich support for validating exception types, messages, and properties.

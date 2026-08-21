@@ -2,6 +2,8 @@
 sidebar_position: 5.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # String Assertions
 
 TUnit provides rich assertions for testing strings, including substring matching, pattern matching, length checks, and various string comparison options.

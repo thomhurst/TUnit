@@ -2,6 +2,8 @@
 sidebar_position: 2
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Setup & Stubbing
 
 Methods are called directly on `Mock<T>` — the chain method (`.Returns()`, `.Throws()`, etc.) makes it a setup.

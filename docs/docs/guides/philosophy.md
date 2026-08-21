@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Philosophy
 
 TUnit does some things differently from other .NET testing frameworks. This page explains the thinking behind those choices.

@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Test Parameters
 
 TUnit allows you to pass custom key-value parameters to your tests at runtime using the `--test-parameter` command-line option. These parameters are accessible via `TestContext.Parameters`.

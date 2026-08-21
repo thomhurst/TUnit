@@ -2,6 +2,8 @@
 sidebar_position: 1
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Awaiting
 
 In TUnit you `await` your assertions, and this serves two purposes:

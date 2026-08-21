@@ -25,6 +25,7 @@ var documents = new[] { Path.Combine(repositoryRoot, "README.md") }
 var snippets = new List<Snippet>();
 var documentedPackages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 var contextualSnippets = 0;
+var contextualFiles = new HashSet<string>(StringComparer.Ordinal);
 var excludedSnippets = 0;
 var excludedFiles = 0;
 
@@ -49,7 +50,7 @@ for (var index = 0; index < snippets.Count; index++)
 }
 
 Console.WriteLine($"Generated {snippets.Count} C# documentation snippets.");
-Console.WriteLine($"Skipped {contextualSnippets} contextual snippets, {excludedSnippets} explicit snippets, and {excludedFiles} files.");
+Console.WriteLine($"Skipped {contextualSnippets} snippets declared contextual by {contextualFiles.Count} files, {excludedSnippets} explicit snippets, and {excludedFiles} files.");
 Console.WriteLine($"Documented TUnit packages: {string.Join(", ", documentedPackages.Order())}");
 return 0;
 
@@ -68,18 +69,32 @@ void ReadDocument(string documentPath)
         return;
     }
 
+    var contextualFileDirective = lines
+        .Select(line => Regex.Match(line.Trim(), "^<!--\\s*doc-test-contextual-file:\\s*(.+?)\\s*-->$"))
+        .FirstOrDefault(match => match.Success);
+    if (lines.Any(line => line.Trim().StartsWith("<!-- doc-test-contextual-file", StringComparison.Ordinal)) &&
+        contextualFileDirective?.Success != true)
+    {
+        throw new InvalidOperationException(
+            $"Malformed doc-test-contextual-file directive in {relativePath}. Include a non-empty reason.");
+    }
+
     var csharpOrdinal = 0;
 
     for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
     {
-        if (Regex.IsMatch(lines[lineIndex], "^```csharp\\s*$"))
+        var csharpFence = Regex.Match(lines[lineIndex], "^(?<indent>[ \\t]*)```csharp\\s*$");
+        if (csharpFence.Success)
         {
             csharpOrdinal++;
             var startLine = lineIndex + 2;
+            var indentation = csharpFence.Groups["indent"].Value;
             var body = new List<string>();
-            for (lineIndex++; lineIndex < lines.Length && !Regex.IsMatch(lines[lineIndex], "^```\\s*$"); lineIndex++)
+            for (lineIndex++; lineIndex < lines.Length && !Regex.IsMatch(lines[lineIndex], "^\\s*```\\s*$"); lineIndex++)
             {
-                body.Add(lines[lineIndex]);
+                body.Add(lines[lineIndex].StartsWith(indentation, StringComparison.Ordinal)
+                    ? lines[lineIndex][indentation.Length..]
+                    : lines[lineIndex]);
             }
 
             if (lineIndex >= lines.Length)
@@ -103,6 +118,7 @@ void ReadDocument(string documentPath)
             }
 
             var source = string.Join('\n', body);
+            source = Regex.Replace(source, "(?m)^\\s*#:[^\\r\\n]*$", string.Empty);
             source = Regex.Replace(source, "(?m)^([ \\t]*)(?:\\.\\.\\.|…)\\s*;?\\s*$", string.Empty);
             source = Regex.Replace(source, "\\{\\s*(?:\\.\\.\\.|…)\\s*\\}", "{ }");
             var sourceWithoutComments = Regex.Replace(source, "(?s)/\\*.*?\\*/", string.Empty);
@@ -139,9 +155,13 @@ void ReadDocument(string documentPath)
                 mode = ClassifyWithUsageSplit(sourceWithoutUsings, relativePath, csharpOrdinal, out splitBefore);
             }
 
-            if (mode != SnippetMode.Declaration && !explicitMode.Success && !splitMode.Success)
+            if (mode != SnippetMode.Declaration &&
+                !explicitMode.Success &&
+                !splitMode.Success &&
+                contextualFileDirective?.Success == true)
             {
                 contextualSnippets++;
+                contextualFiles.Add(relativePath);
                 continue;
             }
 
@@ -162,12 +182,12 @@ void ReadDocumentedPackages(IReadOnlyList<string> lines)
 {
     for (var lineIndex = 0; lineIndex < lines.Count; lineIndex++)
     {
-        if (!Regex.IsMatch(lines[lineIndex], "^```(?:bash|sh|shell|powershell|pwsh)\\s*$"))
+        if (!Regex.IsMatch(lines[lineIndex], "^\\s*```(?:bash|sh|shell|powershell|pwsh)\\s*$"))
         {
             continue;
         }
 
-        for (lineIndex++; lineIndex < lines.Count && !Regex.IsMatch(lines[lineIndex], "^```\\s*$"); lineIndex++)
+        for (lineIndex++; lineIndex < lines.Count && !Regex.IsMatch(lines[lineIndex], "^\\s*```\\s*$"); lineIndex++)
         {
             var match = Regex.Match(lines[lineIndex].Trim(), "^dotnet add package\\s+(TUnit(?:\\.[A-Za-z0-9_.-]+)?)\\b");
             if (match.Success)

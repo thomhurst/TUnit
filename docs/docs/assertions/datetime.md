@@ -2,6 +2,8 @@
 sidebar_position: 7.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # DateTime and Time Assertions
 
 TUnit provides comprehensive assertions for date and time types, including `DateTime`, `DateTimeOffset`, `DateOnly`, `TimeOnly`, and `TimeSpan`, with support for tolerance-based comparisons and specialized checks.

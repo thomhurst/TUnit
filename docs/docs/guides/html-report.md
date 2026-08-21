@@ -2,6 +2,8 @@
 sidebar_position: 10
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # HTML Test Report
 
 TUnit automatically generates a rich HTML test report after every test run. No configuration is needed — the report is always on by default.

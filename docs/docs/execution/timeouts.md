@@ -2,6 +2,8 @@
 sidebar_position: 5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Timeouts
 
 If you want to stop a test after a specified amount of time, add a `[Timeout]` attribute onto your test method or class. This takes an `int` of how many milliseconds a test can execute for.

@@ -2,6 +2,8 @@
 sidebar_position: 9
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Type Assertions
 
 TUnit provides comprehensive assertions for testing types and type properties. These assertions work with both runtime values and `Type` objects themselves.

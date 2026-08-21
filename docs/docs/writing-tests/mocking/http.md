@@ -2,6 +2,8 @@
 sidebar_position: 6
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # HTTP Mocking
 
 `TUnit.Mocks.Http` provides `MockHttpHandler` — a drop-in `HttpMessageHandler` replacement for testing code that uses `HttpClient`.

@@ -2,6 +2,8 @@
 sidebar_position: 2
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Equality and Comparison Assertions
 
 TUnit provides comprehensive assertions for testing equality and comparing values. These assertions work with any type that implements the appropriate comparison interfaces.

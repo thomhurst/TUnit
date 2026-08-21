@@ -1,3 +1,5 @@
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Framework Differences
 
 TUnit is inspired by NUnit and xUnit — they're excellent frameworks that have served the .NET community well. TUnit was built to address some pain points around parallelism, lifecycle hooks, test isolation, and extensibility.

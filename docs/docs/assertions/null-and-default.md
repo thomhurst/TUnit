@@ -2,6 +2,8 @@
 sidebar_position: 2.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Null and Default Value Assertions
 
 TUnit provides assertions for testing null values and default values. These assertions integrate with C#'s nullability annotations to provide better compile-time safety.

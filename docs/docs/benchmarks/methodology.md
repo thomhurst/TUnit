@@ -4,6 +4,8 @@ description: How TUnit's performance benchmarks are measured and compared
 sidebar_position: 2
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Benchmark Methodology
 
 This page explains how TUnit's performance benchmarks are conducted to ensure fair, accurate, and reproducible results.

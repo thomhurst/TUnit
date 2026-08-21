@@ -2,6 +2,8 @@
 sidebar_position: 1
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Getting Started with Assertions
 
 TUnit provides a comprehensive, fluent assertion library that makes your tests readable and expressive. This guide introduces the core concepts and gets you started with writing assertions.

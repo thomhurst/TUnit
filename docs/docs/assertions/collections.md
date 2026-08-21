@@ -2,6 +2,8 @@
 sidebar_position: 6.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Collection Assertions
 
 TUnit provides comprehensive assertions for testing collections, including membership, count, ordering, and equivalency checks. These assertions work with any `IEnumerable<T>`.

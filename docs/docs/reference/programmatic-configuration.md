@@ -2,6 +2,8 @@
 sidebar_position: 4
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Programmatic Configuration
 
 ## Overview

@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Verification
 
 Verification uses the same methods as setup — the chain method (`.WasCalled()`, `.WasNeverCalled()`) makes it a verification instead of a setup.

@@ -2,6 +2,8 @@
 sidebar_position: 3.5
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Boolean Assertions
 
 TUnit provides simple, expressive assertions for testing boolean values. These assertions work with both `bool` and `bool?` (nullable boolean) types.

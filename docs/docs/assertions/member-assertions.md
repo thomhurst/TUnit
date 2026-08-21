@@ -2,6 +2,8 @@
 sidebar_position: 12
 ---
 
+<!-- doc-test-contextual-file: Examples include fragments whose variables and helpers are defined by surrounding prose. -->
+
 # Member Assertions
 
 The `.Member()` method allows you to assert on object properties while maintaining the parent object's context for chaining. This is useful when you need to validate multiple properties of the same object.
