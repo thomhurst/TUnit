@@ -31,6 +31,15 @@ jobs:
       id-token: write
 
     steps:
+      - name: Configure Ubuntu mirror fallback
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          printf '%s\tpriority:%s\n' \
+            'http://archive.ubuntu.com/ubuntu/' '1' \
+            'http://azure.archive.ubuntu.com/ubuntu/' '2' \
+            'https://security.ubuntu.com/ubuntu/' '3' |
+            sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@main
