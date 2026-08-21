@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Tutorial splits fictional SomeClass and formatter declarations across snippets. -->
+
 # Argument Formatters
 
 When writing data-driven tests, especially with custom classes as arguments, the test explorer may only show the class name, making it hard to distinguish test cases.  

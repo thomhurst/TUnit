@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Samples depend on application models, database clients, Dapper, and AutoFixture. -->
+
 # Data Source Generators
 
 TUnit provides several base classes for creating custom data source generators:
@@ -19,7 +21,7 @@ namespace MyTestProject;
 
 public class AutoFixtureGeneratorAttribute<T1, T2, T3> : DataSourceGeneratorAttribute<T1, T2, T3>
 {
-    public override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<(T1, T2, T3)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
@@ -32,7 +34,7 @@ public class MyTestClass(SomeClass1 someClass1, SomeClass2 someClass2, SomeClass
 {
     [Test]
     [AutoFixtureGenerator<int, string, bool>]
-    public async Task Test((int value, string value2, bool value3))
+    public async Task Test(int value, string value2, bool value3)
     {
         // ...
     }
@@ -70,7 +72,7 @@ public class DatabaseDataGeneratorAttribute<T> : AsyncDataSourceGeneratorAttribu
         _connectionString = connectionString;
     }
     
-    public override async IAsyncEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<T>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
@@ -79,16 +81,19 @@ public class DatabaseDataGeneratorAttribute<T> : AsyncDataSourceGeneratorAttribu
         
         foreach (var entity in entities)
         {
-            yield return () => entity;
+            yield return () => Task.FromResult(entity);
         }
     }
 }
 
-[Test]
-[DatabaseDataGenerator<Customer>("Server=localhost;Database=TestDb;")]
-public async Task TestCustomerBehavior(Customer customer)
+public class CustomerTests
 {
-    // Test with real customer data from database
+    [Test]
+    [DatabaseDataGenerator<Customer>("Server=localhost;Database=TestDb;")]
+    public async Task TestCustomerBehavior(Customer customer)
+    {
+        // Test with real customer data from database
+    }
 }
 ```
 
@@ -116,7 +121,7 @@ public class AutoFixtureGeneratorAttribute : UntypedDataSourceGeneratorAttribute
         _types = types;
     }
     
-    public override IEnumerable<Func<object?[]>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var fixture = new Fixture();
         
@@ -124,11 +129,14 @@ public class AutoFixtureGeneratorAttribute : UntypedDataSourceGeneratorAttribute
     }
 }
 
-[Test]
-[AutoFixtureGenerator(typeof(Customer), typeof(Order), typeof(Product))]
-public async Task TestWithDynamicTypes(Customer customer, Order order, Product product)
+public class DynamicTests
 {
-    // AutoFixture will generate test data for all three parameters
+    [Test]
+    [AutoFixtureGenerator(typeof(Customer), typeof(Order), typeof(Product))]
+    public async Task TestWithDynamicTypes(Customer customer, Order order, Product product)
+    {
+        // AutoFixture will generate test data for all three parameters
+    }
 }
 
 // You can also use it at the class level

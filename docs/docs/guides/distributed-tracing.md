@@ -53,6 +53,7 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Point the OTLP exporter at Seq's ingestion endpoint:
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddOtlpExporter(opts =>
 {
@@ -73,6 +74,7 @@ test.case.result.status = 'fail'           -- only failures
 
 ### Jaeger or Tempo
 
+<!-- doc-test-ignore: Fluent fragment continues the OpenTelemetry builder configured above. -->
 ```csharp
 .AddOtlpExporter(opts => opts.Endpoint = new Uri("http://localhost:4317"))
 ```
@@ -143,6 +145,7 @@ Use [`TestWebApplicationFactory<T>`](/docs/examples/aspnet) or wrap with `Traced
 
 Opt out per-test when the SUT already instruments its own outbound HTTP (for example via the OpenTelemetry HttpClient instrumentation) by setting `WebApplicationTestOptions.AutoPropagateHttpClientFactory = false`:
 
+<!-- doc-test-ignore: Override is a fragment from a TestWebApplicationFactory subclass. -->
 ```csharp
 protected override void ConfigureTestOptions(WebApplicationTestOptions options)
 {

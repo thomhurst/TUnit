@@ -128,3 +128,23 @@ dotnet test --treenode-filter "/*/*/ClassB/*"
 - [ ] If performance-critical: profiled before/after
 - [ ] If using reflection: tested AOT, added annotations
 - [ ] No `.received.txt` files staged
+
+---
+
+## Documentation Snippets
+
+CI compiles standalone C# declaration fences in `README.md` and `docs/docs` against packages produced by the pipeline.
+
+Use a directive immediately before a fence when its context needs to be explicit:
+
+```markdown
+<!-- doc-test-member -->
+<!-- doc-test-statements -->
+<!-- doc-test-ignore: Reason this fence cannot compile independently. -->
+```
+
+Use `<!-- doc-test-ignore-file: Reason. -->` for a page whose examples share application-specific context. Ignore directives require a reason. Run the check against local packages with:
+
+```powershell
+./scripts/Verify-DocSnippets.ps1 -PackagesPath <package-directory> -Version <semver>
+```

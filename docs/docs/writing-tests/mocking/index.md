@@ -127,7 +127,7 @@ var mock = IService.Mock();
 mock.GetUser(Any()).Returns(user);           // setup — .Returns() makes it a stub
 mock.GetUser(42).WasCalled(Times.Once);      // verify — .WasCalled() makes it a check
 mock.RaiseOnMessage("hi");                   // raise events — Raise{EventName}()
-mock.Object                                  // the T instance (also available via direct cast)
+_ = mock.Object;                            // the T instance (also available via direct cast)
 ```
 
 ### Typed Mock Wrapper

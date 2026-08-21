@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Tutorial builds a custom identifier attribute across dependent snippets and uses an application database. -->
+
 # Instrumenting: Global Test IDs
 
 There are plenty use cases for having a unique identifier for each test in your test suite. If you're engineering tests that connect to a data source, you might want to ensure data isolation between the tests. One way to do that is cleaning up the data source after each test, but that prevents you from running tests cleanly in parallel, and it requires you to write either very intelligent or a lot of cleanup code. Additionally, bugs can cause data to leak between tests and make your tests flaky.
@@ -42,6 +44,7 @@ static class TestContextExtensions
 
 Assign unique identifiers to all tests in the assembly by decorating in `AssemblyInfo.cs`:
 
+<!-- doc-test-ignore: Assembly attribute depends on AssignTestIdentifiersAttribute from the preceding snippet. -->
 ```csharp
 [assembly: AssignTestIdentifiers]
 ```

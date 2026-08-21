@@ -2,6 +2,8 @@
 sidebar_position: 4
 ---
 
+<!-- doc-test-ignore-file: Matcher examples are contextual continuations of application mock setup. -->
+
 # Argument Matchers
 
 Argument matchers control which calls a setup or verification matches. The same matchers work in both contexts — the chain method determines whether it's a setup or verification.

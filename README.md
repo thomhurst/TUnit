@@ -125,11 +125,13 @@ await Assert.That(order.Items)
 
 Defining your own assertion is one attribute on a plain method — TUnit generates the fluent extension for you:
 
+<!-- doc-test-member: split-before=// Now available -->
 ```csharp
 [GenerateAssertion]
 public static bool IsPositive(this int value) => value > 0;
 
 // Now available on Assert.That:
+var account = new { Balance = 1 };
 await Assert.That(account.Balance).IsPositive();
 ```
 
@@ -140,8 +142,8 @@ Inject anything into your test classes with `[ClassDataSource<T>]`. Implement `I
 ```csharp
 public class PostgresContainer : IAsyncInitializer, IAsyncDisposable
 {
-    public Task InitializeAsync() { /* start container */ }
-    public ValueTask DisposeAsync() { /* stop container */ }
+    public Task InitializeAsync() => Task.CompletedTask; // start container
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask; // stop container
 }
 
 public class OrderRepositoryTests
@@ -220,7 +222,7 @@ public class WindowsOnlyAttribute : SkipAttribute
 {
     public WindowsOnlyAttribute() : base("Windows only") { }
 
-    public override Task<bool> ShouldSkip(TestContext testContext)
+    public override Task<bool> ShouldSkip(TestRegisteredContext testContext)
         => Task.FromResult(!OperatingSystem.IsWindows());
 }
 
@@ -253,6 +255,7 @@ public class HealthCheckTests(ApiFactory factory)
 
 Spin up your whole distributed app once per test session, with resource log forwarding and OpenTelemetry capture built in:
 
+<!-- doc-test-ignore: Aspire sample depends on the generated Projects.MyApp_AppHost type. -->
 ```csharp
 public class AppFixture : AspireFixture<Projects.MyApp_AppHost>;
 

@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Custom skip examples depend on application availability checks and operations. -->
+
 # Skipping Tests
 
 If you want to simply skip a test, just place a `[Skip(reason)]` attribute on your test with an explanation of why you're skipping it.
@@ -33,6 +35,7 @@ public class WindowsOnlyAttribute() : SkipAttribute("This test is only supported
 }
 ```
 
+<!-- doc-test-ignore: Usage depends on WindowsOnlyAttribute from the preceding snippet. -->
 ```csharp
 using TUnit.Core;
 

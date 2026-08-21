@@ -11,6 +11,11 @@ using TUnit.Core;
 
 namespace MyTestProject;
 
+public class Calculator
+{
+    public int Add(int left, int right) => left + right;
+}
+
 public class CalculatorTests
 {
     [Test]

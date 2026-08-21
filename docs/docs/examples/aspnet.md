@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Samples depend on application Program, services, models, and infrastructure spread across the guide. -->
+
 # ASP.NET Core Integration Testing
 
 TUnit provides first-class support for ASP.NET Core integration testing through the `TUnit.AspNetCore` package. This package enables per-test isolation with shared infrastructure, making it easy to write fast, parallel integration tests.
@@ -1025,6 +1027,7 @@ public class MyTest : TestsBase
 
 **Problem:** You set configuration values in `ConfigureWebHost` using `ConfigureAppConfiguration`, but your app's `Program.cs` doesn't see them during startup. Your breakpoint in Program.cs hits **before** the `ConfigureAppConfiguration` callback.
 
+<!-- doc-test-ignore: Contrasts a factory override with separate application Program.cs top-level statements. -->
 ```csharp
 // Factory - this approach has a timing issue!
 protected override void ConfigureWebHost(IWebHostBuilder builder)

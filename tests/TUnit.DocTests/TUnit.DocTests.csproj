@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RunAnalyzers>false</RunAnalyzers>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.AspNetCore" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Aspire" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Aspire.Core" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Assertions" VersionOverride="$(TUnitPackageVersion)" />
+    <PackageReference Include="TUnit.Assertions.Should" VersionOverride="$(TUnitAssertionsShouldPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.FsCheck" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Logging.Microsoft" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Mocks" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Mocks.Assertions" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Mocks.Http" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Mocks.Logging" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.OpenTelemetry" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+    <PackageReference Include="TUnit.Playwright" VersionOverride="$(TUnitPackageVersion)" ExcludeAssets="analyzers" />
+
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="FsCheck" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="Testcontainers.Kafka" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="GlobalUsings.cs" />
+    <Compile Include="$(GeneratedSnippetsDirectory)\Snippet*.g.cs" Link="Generated\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

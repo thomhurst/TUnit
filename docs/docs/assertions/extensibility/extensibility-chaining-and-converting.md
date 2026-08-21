@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+<!-- doc-test-ignore-file: Examples depend on custom application assertions and HTTP response models defined across separate snippets. -->
+
 # Chaining and Converting
 
 TUnit allows you to chain assertions that change the type being asserted, enabling fluent and expressive test code.
@@ -11,6 +13,7 @@ Chaining is especially helpful when you want to perform multiple assertions on a
 
 For example:
 
+<!-- doc-test-ignore: Depends on an application-provided HTTP response and custom assertions defined below. -->
 ```csharp
         HttpResponseMessage response = ...;
 

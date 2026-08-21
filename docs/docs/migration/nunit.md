@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Comparisons require an isolated NUnit compilation and application fixtures. -->
+
 # Migrating from NUnit
 
 :::from-nunit Performance Boost
@@ -352,11 +354,14 @@ public async Task AdditionTest(int a, int b, int expected)
 
 ```csharp
 // NUnit
-TestContext.WriteLine("Test output");
-TestContext.Out.WriteLine("More output");
+public void NUnitTest()
+{
+    NUnit.Framework.TestContext.WriteLine("Test output");
+    NUnit.Framework.TestContext.Out.WriteLine("More output");
+}
 
 // TUnit (inject TestContext)
-public async Task MyTest(TestContext context)
+public void TUnitTest(TUnit.Core.TestContext context)
 {
     context.Output.WriteLine("Test output");
     context.Output.WriteLine("More output");

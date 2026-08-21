@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Diagnostic examples intentionally contain invalid generic and reflection patterns. -->
+
 # AOT Compatibility and Generic Tests
 
 TUnit's source generation mode provides compile-time safety and performance benefits, but requires specific patterns for advanced scenarios like generic tests and complex data sources.
@@ -264,6 +266,7 @@ AOT mode provides helpful compile-time diagnostics for common issues:
 
 ### Generic Test Diagnostics
 
+<!-- doc-test-ignore: Example intentionally contains the TUnit0058 failure beside its corrected form. -->
 ```csharp
 // ❌ This will generate TUnit0058 error
 [Test]

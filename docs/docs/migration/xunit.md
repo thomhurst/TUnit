@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Comparisons require an isolated xUnit compilation and application fixtures. -->
+
 # Migrating from xUnit.net
 
 :::from-xunit Performance Boost

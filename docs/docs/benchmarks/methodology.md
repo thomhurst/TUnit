@@ -156,6 +156,8 @@ dotnet build -c Release -p:TestFramework=MSTEST
 
 ### 2. Execution Phase
 ```csharp
+using BenchmarkDotNet.Attributes;
+
 [Benchmark]
 public async Task TUnit()
 {

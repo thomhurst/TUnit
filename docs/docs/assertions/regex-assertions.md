@@ -9,23 +9,26 @@ The `.Matches()` method allows you to validate strings against regular expressio
 ## Basic Usage
 
 ```csharp
-[Test]
-public async Task BasicRegexAssertions()
+public partial class RegexTests
 {
-    var email = "john.doe@example.com";
-
-    // Assert that string matches a pattern
-    await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
-
-    // Use a compiled Regex object
-    var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
-    await Assert.That(email).Matches(emailRegex);
-
-    // Use source-generated regex (C# 11+)
     [GeneratedRegex(@"^[\w.]+@[\w.]+$")]
-    static partial Regex EmailRegex();
+    private static partial Regex EmailRegex();
 
-    await Assert.That(email).Matches(EmailRegex());
+    [Test]
+    public async Task BasicRegexAssertions()
+    {
+        var email = "john.doe@example.com";
+
+        // Assert that string matches a pattern
+        await Assert.That(email).Matches(@"^[\w.]+@[\w.]+$");
+
+        // Use a compiled Regex object
+        var emailRegex = new Regex(@"^[\w.]+@[\w.]+$");
+        await Assert.That(email).Matches(emailRegex);
+
+        // Use source-generated regex (C# 11+)
+        await Assert.That(email).Matches(EmailRegex());
+    }
 }
 ```
 

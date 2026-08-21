@@ -1,3 +1,5 @@
+<!-- doc-test-ignore-file: Integration examples depend on external frameworks and application message types. -->
+
 # Logging
 
 TUnit provides a flexible logging system that captures all test output and routes it to configurable destinations called "log sinks".

@@ -2,6 +2,8 @@
 sidebar_position: 2
 ---
 
+<!-- doc-test-ignore-file: Independent examples intentionally reuse generated assertion names that collide in one compilation. -->
+
 # Source Generator Assertions
 
 TUnit provides source generators to simplify creating custom assertions. Instead of manually writing assertion classes and extension methods, you can decorate your methods with attributes and let the generator do the work.
@@ -21,6 +23,7 @@ The `[GenerateAssertion]` attribute allows you to turn any method into a full as
 
 ### Basic Example
 
+<!-- doc-test-declaration: split-before=// Usage in tests: -->
 ```csharp
 using System.ComponentModel;
 using TUnit.Assertions.Attributes;

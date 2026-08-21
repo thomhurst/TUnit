@@ -199,6 +199,7 @@ Interfaces that have static abstract members (directly or inherited) cannot be u
 
 Use `[assembly: GenerateMock(typeof(T))]` to work around this. The source generator produces a bridge interface (suffixed `_Mockable`) that provides default implementations for the static abstract members:
 
+<!-- doc-test-ignore: Example intentionally starts with a CS8920 interface and requires isolated mock source generation. -->
 ```csharp
 using TUnit.Mocks;
 
