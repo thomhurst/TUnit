@@ -14,6 +14,7 @@ TUnit provides assertions for testing null values and default values. These asse
 
 Tests that a value is `null`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Null_Value()
@@ -30,6 +31,7 @@ public async Task Null_Value()
 
 Tests that a value is not `null`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Null_Value()
@@ -46,6 +48,7 @@ public async Task Not_Null_Value()
 
 When you use `IsNotNull()`, C#'s nullability analysis understands that the value is non-null afterward:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nullability_Flow()
@@ -62,6 +65,7 @@ public async Task Nullability_Flow()
 
 This works with chaining too:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_After_Null_Check()
@@ -81,6 +85,7 @@ public async Task Chained_After_Null_Check()
 
 Tests that a value equals the default value for its type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Default_Values()
@@ -108,6 +113,7 @@ public async Task Default_Values()
 
 Tests that a value is not the default value for its type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Default_Values()
@@ -132,6 +138,7 @@ public async Task Not_Default_Values()
 
 For reference types, default equals `null`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Reference_Type_Defaults()
@@ -150,6 +157,7 @@ public async Task Reference_Type_Defaults()
 
 For value types, default is the zero-initialized value:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Value_Type_Defaults()
@@ -179,6 +187,7 @@ public async Task Value_Type_Defaults()
 
 Nullable value types (`T?`) are reference types, so their default is `null`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Nullable_Value_Type_Defaults()
@@ -197,6 +206,7 @@ public async Task Nullable_Value_Type_Defaults()
 
 ### Optional Parameters and Returns
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Optional_Return_Value()
@@ -213,6 +223,7 @@ public async Task Optional_Return_Value()
 
 ### Initialization Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Uninitialized_Field()
@@ -231,6 +242,7 @@ public async Task Uninitialized_Field()
 
 ### Dependency Injection Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Constructor_Injection()
@@ -245,6 +257,7 @@ public async Task Constructor_Injection()
 
 ### Lazy Initialization
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Lazy_Property()
@@ -265,6 +278,7 @@ public async Task Lazy_Property()
 
 Use `Assert.Multiple()` to check multiple null conditions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_All_Required_Fields()
@@ -284,6 +298,7 @@ public async Task Validate_All_Required_Fields()
 
 Or chain them:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Required_Fields_With_Chaining()
@@ -301,6 +316,7 @@ public async Task Required_Fields_With_Chaining()
 
 ### Structs
 
+<!-- doc-test-contextual -->
 ```csharp
 public struct Rectangle
 {
@@ -321,6 +337,7 @@ public async Task Struct_Default()
 
 ### Records
 
+<!-- doc-test-contextual -->
 ```csharp
 public record Person(string Name, int Age);
 
@@ -348,6 +365,7 @@ public async Task Record_Struct_Default()
 
 ### Empty Collections vs Null
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Empty_vs_Null()
@@ -363,6 +381,7 @@ public async Task Empty_vs_Null()
 
 ### Empty Strings vs Null
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Empty_String_vs_Null()
@@ -378,6 +397,7 @@ public async Task Empty_String_vs_Null()
 
 ### Default GUID
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task GUID_Default()
@@ -392,6 +412,7 @@ public async Task GUID_Default()
 
 ### Default DateTime
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTime_Default()
@@ -407,6 +428,7 @@ public async Task DateTime_Default()
 
 ### Validate Required Dependencies
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Dependencies_Provided()
@@ -421,6 +443,7 @@ public async Task All_Dependencies_Provided()
 
 ### Validate Optional Features
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Optional_Feature_Not_Enabled()
@@ -436,6 +459,7 @@ public async Task Optional_Feature_Not_Enabled()
 
 ### State Machine Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task State_Transitions()

@@ -14,6 +14,7 @@ TUnit provides comprehensive assertions for testing that code throws (or doesn't
 
 Tests that a delegate throws a specific exception type (or a subclass):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Code_Throws_Exception()
@@ -25,6 +26,7 @@ public async Task Code_Throws_Exception()
 
 Works with any exception type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Exception_Types()
@@ -44,6 +46,7 @@ public async Task Various_Exception_Types()
 
 Tests that a delegate throws the exact exception type (not a subclass):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Throws_Exact_Type()
@@ -61,6 +64,7 @@ public async Task Throws_Exact_Type()
 
 Use when the exception type is only known at runtime. On a synchronous delegate, fluent chaining only supports the generic `Throws<T>()` / `ThrowsExactly<T>()` forms, so reach for the static `Assert.Throws(Type, Action)` helper instead. On an async delegate you can call `ThrowsAsync(Type)` directly.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Throws_Runtime_Type_Sync()
@@ -88,6 +92,7 @@ public async Task Throws_Runtime_Type_Async()
 
 Tests that code does not throw any exception:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Code_Does_Not_Throw()
@@ -104,6 +109,7 @@ public async Task Code_Does_Not_Throw()
 
 For async operations, use async delegates:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Async_Throws_Exception()
@@ -113,6 +119,7 @@ public async Task Async_Throws_Exception()
 }
 ```
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Async_Does_Not_Throw()
@@ -128,6 +135,7 @@ public async Task Async_Does_Not_Throw()
 
 Tests that the exception has an exact message:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exception_With_Exact_Message()
@@ -142,6 +150,7 @@ public async Task Exception_With_Exact_Message()
 
 Tests that the exception message contains a substring:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exception_Message_Contains()
@@ -154,6 +163,7 @@ public async Task Exception_Message_Contains()
 
 #### Case-Insensitive
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Message_Contains_Ignoring_Case()
@@ -169,6 +179,7 @@ public async Task Message_Contains_Ignoring_Case()
 
 Tests that the exception message does not contain a substring:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Message_Does_Not_Contain()
@@ -183,6 +194,7 @@ public async Task Message_Does_Not_Contain()
 
 Tests that the exception message matches a pattern:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Message_Matches_Pattern()
@@ -195,6 +207,7 @@ public async Task Message_Matches_Pattern()
 
 Or with a `StringMatcher`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Message_Matches_With_Matcher()
@@ -213,6 +226,7 @@ public async Task Message_Matches_With_Matcher()
 
 For `ArgumentException` and its subclasses, you can assert on the parameter name:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ArgumentException_With_Parameter_Name()
@@ -231,6 +245,7 @@ void ValidateUser(User user)
 
 Combine with message assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ArgumentException_Parameter_And_Message()
@@ -254,6 +269,7 @@ void SetAge(int age)
 
 Assert on the inner exception:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exception_With_Inner_Exception()
@@ -275,6 +291,7 @@ public async Task Exception_With_Inner_Exception()
 
 Chain to assert on the inner exception type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Inner_Exception_Type()
@@ -302,6 +319,7 @@ void ThrowWithInner()
 
 ### Validation Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Email_Throws()
@@ -315,6 +333,7 @@ public async Task Validate_Email_Throws()
 
 ### Null Argument Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Null_Argument_Throws()
@@ -327,6 +346,7 @@ public async Task Null_Argument_Throws()
 
 ### File Operations
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task File_Not_Found()
@@ -339,6 +359,7 @@ public async Task File_Not_Found()
 
 ### Network Operations
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task HTTP_Request_Fails()
@@ -350,6 +371,7 @@ public async Task HTTP_Request_Fails()
 
 ### Database Operations
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Duplicate_Key_Violation()
@@ -362,6 +384,7 @@ public async Task Duplicate_Key_Violation()
 
 ### Division by Zero
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Division_By_Zero()
@@ -377,6 +400,7 @@ public async Task Division_By_Zero()
 
 ### Index Out of Range
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Array_Index_Out_Of_Range()
@@ -390,6 +414,7 @@ public async Task Array_Index_Out_Of_Range()
 
 ### Invalid Cast
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Invalid_Cast()
@@ -403,6 +428,7 @@ public async Task Invalid_Cast()
 
 ### Custom Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 public class BusinessRuleException : Exception
 {
@@ -432,6 +458,7 @@ public async Task Custom_Exception_With_Properties()
 
 ### Using Assert.Multiple
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Multiple_Exception_Scenarios()
@@ -454,6 +481,7 @@ public async Task Multiple_Exception_Scenarios()
 
 When using `Throws<T>()`, subclasses are accepted:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exception_Inheritance()
@@ -469,6 +497,7 @@ public async Task Exception_Inheritance()
 
 Use `ThrowsExactly<T>()` if you need the exact type:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Exact_Exception_Type()
@@ -484,6 +513,7 @@ public async Task Exact_Exception_Type()
 
 ## Aggregate Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Aggregate_Exception()
@@ -499,6 +529,7 @@ public async Task Aggregate_Exception()
 
 ## Chaining Exception Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Exception_Assertions()
@@ -515,6 +546,7 @@ public async Task Chained_Exception_Assertions()
 
 ### ThrowsNothing vs Try-Catch
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Explicit_No_Exception()
@@ -532,6 +564,7 @@ public async Task Explicit_No_Exception()
 
 ### Expected Failures
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Expected_Validation_Failure()
@@ -546,6 +579,7 @@ public async Task Expected_Validation_Failure()
 
 ### Defensive Programming
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Guard_Clause_Validation()
@@ -558,6 +592,7 @@ public async Task Guard_Clause_Validation()
 
 ### State Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Invalid_State_Operation()
@@ -573,6 +608,7 @@ public async Task Invalid_State_Operation()
 
 ### Configuration Errors
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Missing_Configuration()
@@ -585,6 +621,7 @@ public async Task Missing_Configuration()
 
 ## Timeout Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Operation_Timeout()
@@ -598,6 +635,7 @@ public async Task Operation_Timeout()
 
 ## Re-throwing Exceptions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Wrapper_Exception()
@@ -619,6 +657,7 @@ public async Task Wrapper_Exception()
 
 ## Exception Assertions with Async/Await
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Async_Exception_Handling()

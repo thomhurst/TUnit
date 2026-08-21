@@ -45,6 +45,7 @@ In TUnit, you can inject a `TestContext` into your teardown method, or call `Tes
 
 xUnit assertions have the classic problem of unclear argument order:
 
+<!-- doc-test-contextual -->
 ```csharp
 var one = 2;
 Assert.Equal(1, one);   // is 1 the expected or actual?
@@ -97,6 +98,7 @@ In other frameworks, running tests in a specific order usually means disabling p
 
 TUnit has `[DependsOn(...)]` — a test waits for its dependencies to finish, without disabling parallelism for everything else:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Test1() { ... }

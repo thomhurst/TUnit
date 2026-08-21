@@ -14,6 +14,7 @@ TUnit provides comprehensive assertions for testing equality and comparing value
 
 Tests that two values are equal using the type's `Equals()` method or `==` operator:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Basic_Equality()
@@ -33,6 +34,7 @@ public async Task Basic_Equality()
 
 Tests that two values are not equal:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Not_Equal()
@@ -51,6 +53,7 @@ public async Task Not_Equal()
 
 Tests that two references point to the exact same object instance:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Same_Reference()
@@ -66,6 +69,7 @@ public async Task Same_Reference()
 
 Tests that two references point to different object instances:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Different_References()
@@ -85,6 +89,7 @@ All comparison assertions work with types that implement `IComparable<T>` or `IC
 
 ### IsGreaterThan
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Greater_Than()
@@ -102,6 +107,7 @@ public async Task Greater_Than()
 
 ### IsGreaterThanOrEqualTo
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Greater_Than_Or_Equal()
@@ -116,6 +122,7 @@ public async Task Greater_Than_Or_Equal()
 
 ### IsLessThan
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Less_Than()
@@ -130,6 +137,7 @@ public async Task Less_Than()
 
 ### IsLessThanOrEqualTo
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Less_Than_Or_Equal()
@@ -146,6 +154,7 @@ public async Task Less_Than_Or_Equal()
 
 Tests that a value falls within a range (inclusive):
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Between_Values()
@@ -163,6 +172,7 @@ public async Task Between_Values()
 
 Boundary values are included:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Between_Includes_Boundaries()
@@ -179,6 +189,7 @@ public async Task Between_Includes_Boundaries()
 
 Tests that a numeric value is greater than zero:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Positive_Numbers()
@@ -203,6 +214,7 @@ public async Task Positive_Numbers()
 
 Tests that a numeric value is less than zero:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Negative_Numbers()
@@ -221,6 +233,7 @@ When comparing floating-point numbers, you can specify a tolerance to account fo
 
 ### Double Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Double_With_Tolerance()
@@ -238,6 +251,7 @@ public async Task Double_With_Tolerance()
 
 ### Float Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Float_With_Tolerance()
@@ -251,6 +265,7 @@ public async Task Float_With_Tolerance()
 
 ### Decimal Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Decimal_With_Tolerance()
@@ -264,6 +279,7 @@ public async Task Decimal_With_Tolerance()
 
 ### Long Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Long_With_Tolerance()
@@ -281,6 +297,7 @@ public async Task Long_With_Tolerance()
 
 Combine multiple comparison assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Comparisons()
@@ -296,6 +313,7 @@ public async Task Chained_Comparisons()
 
 Or use `IsBetween` for simpler range checks:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Range_Check_Simplified()
@@ -311,6 +329,7 @@ public async Task Range_Check_Simplified()
 
 You can provide custom equality comparers for collections and complex types:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Custom_Comparer()
@@ -338,6 +357,7 @@ public class PersonNameComparer : IEqualityComparer<Person>
 
 Or use a predicate:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Custom_Equality_Predicate()
@@ -356,6 +376,7 @@ public async Task Custom_Equality_Predicate()
 
 Equality works naturally with value types and records:
 
+<!-- doc-test-contextual -->
 ```csharp
 public record Point(int X, int Y);
 
@@ -371,6 +392,7 @@ public async Task Record_Equality()
 }
 ```
 
+<!-- doc-test-contextual -->
 ```csharp
 public struct Coordinate
 {

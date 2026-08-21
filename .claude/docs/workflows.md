@@ -140,10 +140,11 @@ Use a directive immediately before a fence when its context needs to be explicit
 ```markdown
 <!-- doc-test-member -->
 <!-- doc-test-statements -->
+<!-- doc-test-contextual -->
 <!-- doc-test-ignore: Reason this fence cannot compile independently. -->
 ```
 
-Use `<!-- doc-test-contextual-file: Reason. -->` when a page's member and statement fragments depend on surrounding prose; full declarations still compile, and explicit member or statement directives opt individual fragments back in. Use `<!-- doc-test-ignore-file: Reason. -->` when no snippets on a page can compile independently. These directives require a reason.
+Use `<!-- doc-test-contextual -->` on each fence that depends on surrounding prose. Its page must declare `<!-- doc-test-contextual-file: Reason. -->`, so unmarked fences still compile and cannot be silently excluded by page-level configuration. Use `<!-- doc-test-ignore-file: Reason. -->` when no snippets on a page can compile independently. File directives require a reason.
 
 Run the check against local packages with:
 

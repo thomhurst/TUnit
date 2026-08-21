@@ -113,6 +113,7 @@ TUnit handles this automatically: a module initializer in `TUnit.Core` replaces 
 
 For the SUT side, if it shares the test process (e.g. `TestWebApplicationFactory<T>`), alignment flows automatically. For out-of-process SUTs that don't reference `TUnit.Core`, align the propagator yourself on startup — either match `DistributedContextPropagator.Current` or, if you use the OpenTelemetry SDK:
 
+<!-- doc-test-contextual -->
 ```csharp
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
@@ -171,6 +172,7 @@ Install [`TUnit.OpenTelemetry`](/docs/examples/opentelemetry#option-a-zero-confi
 
 Read the endpoint from `AutoReceiver.Endpoint` and plumb it into the SUT:
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.OpenTelemetry;
 
@@ -181,6 +183,7 @@ process.StartInfo.EnvironmentVariables["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/pr
 
 For the receiver to associate incoming spans with the right test, register the SUT's trace ID before it runs:
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Engine.Reporters.Html;
 

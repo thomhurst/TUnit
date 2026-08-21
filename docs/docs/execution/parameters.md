@@ -51,6 +51,7 @@ public class MyTests
 
 ### Environment-specific configuration
 
+<!-- doc-test-contextual -->
 ```csharp
 [Before(Test)]
 public void SetupEnvironment()
@@ -64,6 +65,7 @@ public void SetupEnvironment()
 
 ### Conditional test logic
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task IntegrationTest()
@@ -79,6 +81,7 @@ public async Task IntegrationTest()
 
 ### Passing secrets or connection strings
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DatabaseTest()

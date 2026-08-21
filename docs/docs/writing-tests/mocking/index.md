@@ -67,6 +67,7 @@ public class GreeterTests
 
 The `Mock.Of<T>()` factory is also available as an alternative syntax:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock()
 ```
@@ -89,6 +90,7 @@ var mock = Mock.Of<IGreeter>(); // equivalent to IGreeter.Mock()
 
 All factory methods accept an optional `MockBehavior` parameter:
 
+<!-- doc-test-contextual -->
 ```csharp
 var loose = IService.Mock();                           // loose (default)
 var strict = IService.Mock(MockBehavior.Strict);       // throws on unconfigured calls
@@ -114,6 +116,7 @@ public class GlobalSetup
 
 With this setting, `IService.Mock()`, `Mock.Of<IService>()`, `Mock.Wrap(instance)`, `Mock.OfDelegate<T>()`, and `new MockRepository()` use strict mode by default. Passing a `MockBehavior` still overrides the global default:
 
+<!-- doc-test-contextual -->
 ```csharp
 var strict = IService.Mock();                    // uses global strict default
 var loose = IService.Mock(MockBehavior.Loose);   // explicit override
@@ -123,6 +126,7 @@ var loose = IService.Mock(MockBehavior.Loose);   // explicit override
 
 `T.Mock()` returns a `Mock<T>` wrapper (for interfaces, a generated subclass that also implements the interface). Extension methods are generated directly on `Mock<T>` for each member of the mocked type, and the chain methods (`.Returns()`, `.WasCalled()`, etc.) disambiguate between setup and verification:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = IService.Mock();
 
@@ -136,6 +140,7 @@ _ = mock.Object;                            // the T instance (also available vi
 
 For interfaces, `IMyInterface.Mock()` (a C# 14 static extension member) returns a specialized wrapper type that extends `Mock<T>` **and** implements the interface directly. This means the mock can be used anywhere the interface is expected — no `.Object` or cast needed:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = IGreeter.Mock();
 
@@ -151,6 +156,7 @@ mock.Greet("Alice").WasCalled();
 
 `T.Mock()` is the recommended syntax for all types — interfaces, abstract classes, and concrete classes. For interfaces it returns a typed wrapper; for classes it returns `Mock<T>`. Constructor arguments are supported as strongly-typed parameters:
 
+<!-- doc-test-contextual -->
 ```csharp
 var strict = IGreeter.Mock(MockBehavior.Strict);
 var service = MyService.Mock("connectionString", 42);
@@ -164,6 +170,7 @@ var service = MyService.Mock("connectionString", 42);
 
 `Mock<T>` also supports implicit conversion to `T` — so `T.Mock()` works without `.Object`:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = IGreeter.Mock();
 IGreeter greeter = mock; // implicit conversion
@@ -180,6 +187,7 @@ IGreeter greeter = mock; // implicit conversion
 
 TUnit.Mocks imports matchers globally — no `Arg.` prefix needed. Raw values, inline lambdas, and `Any()` work directly as arguments:
 
+<!-- doc-test-contextual -->
 ```csharp
 var mock = IUserService.Mock();
 

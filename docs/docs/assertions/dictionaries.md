@@ -14,6 +14,7 @@ TUnit provides specialized assertions for testing dictionaries (`IReadOnlyDictio
 
 Tests that a dictionary contains a specific key:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Contains_Key()
@@ -32,6 +33,7 @@ public async Task Dictionary_Contains_Key()
 
 #### With Custom Comparer
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Contains_Key_With_Comparer()
@@ -52,6 +54,7 @@ public async Task Contains_Key_With_Comparer()
 
 Tests that a dictionary does not contain a specific key:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Does_Not_Contain_Key()
@@ -73,6 +76,7 @@ public async Task Dictionary_Does_Not_Contain_Key()
 
 Tests that a dictionary contains a specific value:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Contains_Value()
@@ -95,6 +99,7 @@ Dictionaries inherit all collection assertions since they implement `IEnumerable
 
 ### Count
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Count()
@@ -112,6 +117,7 @@ public async Task Dictionary_Count()
 
 ### IsEmpty / IsNotEmpty
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Empty()
@@ -126,6 +132,7 @@ public async Task Dictionary_Empty()
 
 ### Contains (KeyValuePair)
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Contains_Pair()
@@ -142,6 +149,7 @@ public async Task Dictionary_Contains_Pair()
 
 ### All Pairs Match Condition
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Values_Positive()
@@ -159,6 +167,7 @@ public async Task All_Values_Positive()
 
 ### Any Pair Matches Condition
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Any_Key_Starts_With()
@@ -178,6 +187,7 @@ public async Task Any_Key_Starts_With()
 
 ### Configuration Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Configuration_Has_Required_Keys()
@@ -195,6 +205,7 @@ public async Task Configuration_Has_Required_Keys()
 
 ### HTTP Headers Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Response_Headers()
@@ -213,6 +224,7 @@ public async Task Response_Headers()
 
 ### Lookup Table Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Lookup_Table()
@@ -233,6 +245,7 @@ public async Task Lookup_Table()
 
 ### Cache Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Cache_Contains_Entry()
@@ -254,6 +267,7 @@ public async Task Cache_Contains_Entry()
 
 ### Accessing Values After Key Check
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Get_Value_After_Key_Check()
@@ -274,6 +288,7 @@ public async Task Get_Value_After_Key_Check()
 
 ### TryGetValue Pattern
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TryGetValue_Pattern()
@@ -294,6 +309,7 @@ public async Task TryGetValue_Pattern()
 
 ### Keys Collection
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Keys()
@@ -317,6 +333,7 @@ public async Task Dictionary_Keys()
 
 ### Values Collection
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionary_Values()
@@ -342,6 +359,7 @@ public async Task Dictionary_Values()
 
 ### Same Key-Value Pairs
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Dictionaries_Are_Equivalent()
@@ -365,6 +383,7 @@ public async Task Dictionaries_Are_Equivalent()
 
 ## Chaining Dictionary Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_Dictionary_Assertions()
@@ -390,6 +409,7 @@ public async Task Chained_Dictionary_Assertions()
 
 ### ConcurrentDictionary
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Concurrent_Dictionary()
@@ -406,6 +426,7 @@ public async Task Concurrent_Dictionary()
 
 ### ReadOnlyDictionary
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ReadOnly_Dictionary()
@@ -421,6 +442,7 @@ public async Task ReadOnly_Dictionary()
 
 ### SortedDictionary
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Sorted_Dictionary()
@@ -442,6 +464,7 @@ public async Task Sorted_Dictionary()
 
 ### Null Dictionary
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Null_Dictionary()
@@ -454,6 +477,7 @@ public async Task Null_Dictionary()
 
 ### Empty vs Null
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Empty_vs_Null_Dictionary()
@@ -471,6 +495,7 @@ public async Task Empty_vs_Null_Dictionary()
 
 ### Required Configuration Keys
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Required_Keys_Present()
@@ -487,6 +512,7 @@ public async Task All_Required_Keys_Present()
 
 Or with `Assert.Multiple`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task All_Required_Keys_Present_Multiple()
@@ -506,6 +532,7 @@ public async Task All_Required_Keys_Present_Multiple()
 
 ### Metadata Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Metadata()
@@ -522,6 +549,7 @@ public async Task Validate_Metadata()
 
 ### Feature Flags
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Feature_Flags()

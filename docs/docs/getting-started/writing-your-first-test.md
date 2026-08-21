@@ -81,6 +81,7 @@ Tests will pass if they execute successfully without any exceptions.
 
 Test methods can be either synchronous or asynchronous:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public void SynchronousTest()  // ✅ Valid - synchronous test

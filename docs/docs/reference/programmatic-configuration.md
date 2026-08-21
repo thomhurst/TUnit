@@ -95,6 +95,7 @@ When the same setting is configured in multiple places, the following priority o
 
 Your test project sets a conservative parallelism limit in code:
 
+<!-- doc-test-contextual -->
 ```csharp
 context.Settings.Parallelism.MaximumParallelTests = 1;
 ```

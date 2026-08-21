@@ -10,6 +10,7 @@ The `.Member()` method allows you to assert on object properties while maintaini
 
 ## Basic Usage
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task BasicMemberAssertions()
@@ -32,6 +33,7 @@ public async Task BasicMemberAssertions()
 
 The key advantage of `.Member()` is that it returns to the parent context after each assertion, allowing you to chain multiple property checks:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MemberAssertionsWithFullContext()
@@ -51,6 +53,7 @@ public async Task MemberAssertionsWithFullContext()
 
 Member assertions support nested properties:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task NestedPropertyAssertions()
@@ -69,6 +72,7 @@ public async Task NestedPropertyAssertions()
 
 You can perform complex assertions on member values, including collections:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexMemberAssertions()
@@ -90,6 +94,7 @@ public async Task ComplexMemberAssertions()
 
 Member assertions work with both `.And` and `.Or` combinators:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MemberAssertionsWithOrLogic()
@@ -111,6 +116,7 @@ public async Task MemberAssertionsWithOrLogic()
 
 ## Complete Example
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexObjectValidation()
@@ -128,6 +134,7 @@ public async Task ComplexObjectValidation()
 
 ## Nested Object Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task NestedObjectAssertions()

@@ -10,6 +10,7 @@ Most frameworks make you opt into parallelism. TUnit flips that — tests run in
 
 This also nudges you toward better test design. If your tests can't run in parallel, they're probably sharing state they shouldn't be. When they genuinely do need exclusive access to something (a shared file, a database, a hardware device), you opt out explicitly:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test, NotInParallel]
 public async Task ModifiesSharedConfigFile() { ... }
@@ -25,6 +26,7 @@ If you need shared state, use `static`. That makes the sharing visible to anyone
 
 All assertions return `Task` and must be awaited. This is probably TUnit's most controversial decision.
 
+<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(result).IsEqualTo(expected);
 ```
@@ -47,6 +49,7 @@ The trade-off is that some older tools only work with VSTest — Coverlet being 
 
 TUnit's assertions are extension methods on specific types, not generic methods that accept anything. Intellisense only shows assertions that make sense for what you're testing. You can't accidentally check if a string is negative, because that method doesn't exist on strings.
 
+<!-- doc-test-contextual -->
 ```csharp
 await Assert.That(user.Email)
     .IsNotNull()

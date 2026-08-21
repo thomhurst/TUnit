@@ -12,6 +12,7 @@ TUnit provides comprehensive assertions for date and time types, including `Date
 
 DateTime comparisons often need tolerance to account for timing variations:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTime_With_Tolerance()
@@ -29,6 +30,7 @@ public async Task DateTime_With_Tolerance()
 
 ### Tolerance Examples
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Various_Tolerance_Values()
@@ -53,6 +55,7 @@ public async Task Various_Tolerance_Values()
 
 Standard comparison operators work with DateTime:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTime_Comparison()
@@ -71,6 +74,7 @@ public async Task DateTime_Comparison()
 
 ### IsToday / IsNotToday
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTime_Is_Today()
@@ -88,6 +92,7 @@ public async Task DateTime_Is_Today()
 
 ### IsUtc / IsNotUtc
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTime_Kind()
@@ -105,6 +110,7 @@ public async Task DateTime_Kind()
 
 ### IsLeapYear / IsNotLeapYear
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Leap_Year_Check()
@@ -121,6 +127,7 @@ public async Task Leap_Year_Check()
 
 Compares against local time:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Future_and_Past()
@@ -137,6 +144,7 @@ public async Task Future_and_Past()
 
 Compares against UTC time:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Future_and_Past_UTC()
@@ -151,6 +159,7 @@ public async Task Future_and_Past_UTC()
 
 ### IsOnWeekend / IsOnWeekday
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Weekend_Check()
@@ -166,6 +175,7 @@ public async Task Weekend_Check()
 
 ### IsDaylightSavingTime / IsNotDaylightSavingTime
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Daylight_Saving_Time()
@@ -185,6 +195,7 @@ public async Task Daylight_Saving_Time()
 
 DateTimeOffset includes timezone information:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTimeOffset_With_Tolerance()
@@ -196,6 +207,7 @@ public async Task DateTimeOffset_With_Tolerance()
 }
 ```
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateTimeOffset_Comparison()
@@ -212,6 +224,7 @@ public async Task DateTimeOffset_Comparison()
 
 DateOnly represents just a date without time:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateOnly_Assertions()
@@ -225,6 +238,7 @@ public async Task DateOnly_Assertions()
 
 ### DateOnly with Days Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateOnly_With_Tolerance()
@@ -238,6 +252,7 @@ public async Task DateOnly_With_Tolerance()
 
 ### DateOnly Comparison
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DateOnly_Comparison()
@@ -254,6 +269,7 @@ public async Task DateOnly_Comparison()
 
 TimeOnly represents just time without a date:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TimeOnly_Assertions()
@@ -267,6 +283,7 @@ public async Task TimeOnly_Assertions()
 
 ### TimeOnly with Tolerance
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TimeOnly_With_Tolerance()
@@ -282,6 +299,7 @@ public async Task TimeOnly_With_Tolerance()
 
 TimeSpan represents a duration:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TimeSpan_Assertions()
@@ -295,6 +313,7 @@ public async Task TimeSpan_Assertions()
 
 ### TimeSpan Comparison
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TimeSpan_Comparison()
@@ -309,6 +328,7 @@ public async Task TimeSpan_Comparison()
 
 ### TimeSpan Sign Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task TimeSpan_Sign()
@@ -325,6 +345,7 @@ public async Task TimeSpan_Sign()
 
 ### Expiration Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Check_Token_Expiration()
@@ -342,6 +363,7 @@ public async Task Check_Token_Expiration()
 
 ### Age Calculation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Calculate_Age()
@@ -361,6 +383,7 @@ public async Task Calculate_Age()
 
 ### Business Days
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Is_Business_Day()
@@ -375,6 +398,7 @@ public async Task Is_Business_Day()
 
 ### Scheduling
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Scheduled_Time()
@@ -389,6 +413,7 @@ public async Task Scheduled_Time()
 
 ### Performance Timing
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Operation_Duration()
@@ -406,6 +431,7 @@ public async Task Operation_Duration()
 
 ### Date Range Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Date_Within_Range()
@@ -421,6 +447,7 @@ public async Task Date_Within_Range()
 
 ### Timestamp Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Record_Created_Recently()
@@ -437,6 +464,7 @@ public async Task Record_Created_Recently()
 
 ## Working with Date Components
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Date_Components()
@@ -456,6 +484,7 @@ public async Task Date_Components()
 
 DayOfWeek has its own assertions:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Day_Of_Week_Checks()
@@ -475,6 +504,7 @@ public async Task Day_Of_Week_Checks()
 
 ## Chaining DateTime Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Chained_DateTime_Assertions()
@@ -492,6 +522,7 @@ public async Task Chained_DateTime_Assertions()
 
 ### Birthday Validation
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Validate_Birthday()
@@ -505,6 +536,7 @@ public async Task Validate_Birthday()
 
 ### Meeting Scheduler
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Schedule_Meeting()
@@ -519,6 +551,7 @@ public async Task Schedule_Meeting()
 
 ### Relative Time Checks
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task Within_Last_Hour()

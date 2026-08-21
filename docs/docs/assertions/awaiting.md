@@ -17,6 +17,7 @@ If you forget to `await`, your assertion will not actually be executed, and your
 
 This will error:
 
+<!-- doc-test-contextual -->
 ```csharp
     [Test]
     public void MyTest()
@@ -29,6 +30,7 @@ This will error:
 
 This won't: 
 
+<!-- doc-test-contextual -->
 ```csharp
     [Test]
     public async Task MyTest()
@@ -48,6 +50,7 @@ When you `await` an assertion in TUnit, it returns a reference to the subject th
 
 ### Type Casting with Confidence
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CastAndUseSpecificType()
@@ -71,6 +74,7 @@ public async Task CastAndUseSpecificType()
 
 You can chain multiple assertions together for more complex validations:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexObjectValidation()
@@ -88,6 +92,7 @@ public async Task ComplexObjectValidation()
 
 ### Collection Assertions with Complex Conditions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexCollectionAssertions()
@@ -111,6 +116,7 @@ public async Task ComplexCollectionAssertions()
 
 ### Async Operation Assertions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task AsyncOperationAssertions()
@@ -132,6 +138,7 @@ public async Task AsyncOperationAssertions()
 
 ### Exception Assertions with Details
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task DetailedExceptionAssertions()
@@ -159,6 +166,7 @@ public async Task DetailedExceptionAssertions()
 
 ### Custom Assertion Conditions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CustomAssertionConditions()
@@ -183,6 +191,7 @@ public async Task CustomAssertionConditions()
 
 ### Combining Or and And Conditions
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ComplexLogicalConditions()

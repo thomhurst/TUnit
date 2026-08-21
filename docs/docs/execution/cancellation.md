@@ -4,6 +4,7 @@
 
 Call `TestContext.Execution.Cancel()` to request cooperative cancellation of the current test without affecting other tests or the test session:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ProcessMessages(CancellationToken cancellationToken)

@@ -8,6 +8,7 @@ When a test fails, TUnit throws an exception. Most of the time you don't need to
 
 If a test can't run because of some runtime condition, throw `SkipTestException`. The test will be reported as skipped rather than failed.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task RequiresExternalService()
@@ -25,6 +26,7 @@ public async Task RequiresExternalService()
 
 If a test can't determine a pass/fail result, throw `InconclusiveTestException`.
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task CheckFeatureFlag()
@@ -44,6 +46,7 @@ public async Task CheckFeatureFlag()
 
 In an `[After(Test)]` hook, you can check whether the test failed via `TestContext`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [After(Test)]
 public async Task TakeScreenshotOnFailure(TestContext context)

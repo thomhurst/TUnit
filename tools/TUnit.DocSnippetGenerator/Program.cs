@@ -50,7 +50,7 @@ for (var index = 0; index < snippets.Count; index++)
 }
 
 Console.WriteLine($"Generated {snippets.Count} C# documentation snippets.");
-Console.WriteLine($"Skipped {contextualSnippets} snippets declared contextual by {contextualFiles.Count} files, {excludedSnippets} explicit snippets, and {excludedFiles} files.");
+Console.WriteLine($"Skipped {contextualSnippets} explicitly contextual snippets declared by {contextualFiles.Count} files, {excludedSnippets} explicit snippets, and {excludedFiles} files.");
 Console.WriteLine($"Documented TUnit packages: {string.Join(", ", documentedPackages.Order())}");
 return 0;
 
@@ -131,12 +131,20 @@ void ReadDocument(string documentPath)
 
             var explicitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member|statements)\\s*-->$");
             var splitMode = Regex.Match(directive, "^<!--\\s*doc-test-(declaration|member):\\s*split-before=(.+?)\\s*-->$");
+            var contextualMode = Regex.IsMatch(directive, "^<!--\\s*doc-test-contextual\\s*-->$");
             if (directive.StartsWith("<!-- doc-test-", StringComparison.Ordinal) &&
                 !explicitMode.Success &&
-                !splitMode.Success)
+                !splitMode.Success &&
+                !contextualMode)
             {
                 throw new InvalidOperationException(
                     $"Unknown or malformed doc-test directive before {relativePath}:{startLine}.");
+            }
+
+            if (contextualMode && contextualFileDirective?.Success != true)
+            {
+                throw new InvalidOperationException(
+                    $"Contextual C# fence {relativePath}#{csharpOrdinal} requires a doc-test-contextual-file directive with a reason.");
             }
 
             var (usings, sourceWithoutUsings) = ExtractUsings(source);
@@ -155,10 +163,7 @@ void ReadDocument(string documentPath)
                 mode = ClassifyWithUsageSplit(sourceWithoutUsings, relativePath, csharpOrdinal, out splitBefore);
             }
 
-            if (mode != SnippetMode.Declaration &&
-                !explicitMode.Success &&
-                !splitMode.Success &&
-                contextualFileDirective?.Success == true)
+            if (contextualMode)
             {
                 contextualSnippets++;
                 contextualFiles.Add(relativePath);

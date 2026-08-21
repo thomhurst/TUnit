@@ -158,6 +158,7 @@ TUnit's test body runs under a per-test `System.Diagnostics.Activity`. Because `
 
 For example, an integration test using `WebApplicationFactory`:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task GetUsers_ReturnsOk()
@@ -179,6 +180,7 @@ The HTML report groups each test under its class. Backends like Seq, Jaeger, and
 
 If your test communicates with an external service that runs in a **separate process** (and therefore has a different trace context), you can manually link its trace to the test:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task ProcessOrder_SendsNotification()
@@ -199,6 +201,7 @@ Linked traces appear as a separate **"Linked Trace"** section below the test's m
 
 You can access the current test's `Activity` to parent external work explicitly:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task MyTest()

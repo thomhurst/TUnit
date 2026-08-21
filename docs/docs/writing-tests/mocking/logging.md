@@ -18,6 +18,7 @@ Unlike `TUnit.Mocks`, the logging helpers are plain classes — no source genera
 
 ## Getting Started
 
+<!-- doc-test-contextual -->
 ```csharp
 using TUnit.Mocks;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,7 @@ public async Task Service_Logs_On_Startup()
 
 ## Creating a Logger
 
+<!-- doc-test-contextual -->
 ```csharp
 // Untyped logger
 var logger = Mock.Logger();
@@ -54,6 +56,7 @@ ILogger<MyService> iLogger = logger;
 
 ## Inspecting Entries
 
+<!-- doc-test-contextual -->
 ```csharp
 logger.LogInformation("User {UserId} logged in", 42);
 logger.LogWarning("Disk space low");
@@ -85,6 +88,7 @@ Each `LogEntry` provides:
 
 Build verification queries with filters:
 
+<!-- doc-test-contextual -->
 ```csharp
 // By level
 logger.VerifyLog().AtLevel(LogLevel.Error).WasCalled(Times.Once);
@@ -108,6 +112,7 @@ logger.VerifyLog()
 
 ### Shorthand Methods
 
+<!-- doc-test-contextual -->
 ```csharp
 // Verify message at level (at least once)
 logger.VerifyLog(LogLevel.Error, "connection failed");
@@ -124,6 +129,7 @@ logger.VerifyNoLogs();
 
 ### Never Called
 
+<!-- doc-test-contextual -->
 ```csharp
 logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
 ```
@@ -132,6 +138,7 @@ logger.VerifyLog().AtLevel(LogLevel.Error).WasNeverCalled();
 
 Retrieve entries matching specific criteria:
 
+<!-- doc-test-contextual -->
 ```csharp
 // By level
 var errors = logger.GetLogs(LogLevel.Error);
@@ -148,6 +155,7 @@ var matching = logger.VerifyLog()
 
 ## Reset
 
+<!-- doc-test-contextual -->
 ```csharp
 logger.Clear(); // removes all captured entries
 ```
@@ -156,6 +164,7 @@ logger.Clear(); // removes all captured entries
 
 Pass `Mock.Logger<T>()` anywhere `ILogger<T>` is expected:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 public async Task OrderService_Logs_Errors()

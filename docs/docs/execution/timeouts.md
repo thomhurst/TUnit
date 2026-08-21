@@ -42,6 +42,7 @@ If the HTTP call takes longer than 30 seconds, `cancellationToken` is cancelled,
 
 When a test has both `[Timeout]` and `[Retry]`, each retry attempt gets its own fresh timeout. If the first attempt times out at 5 seconds, the retry starts from zero with a new 5-second window:
 
+<!-- doc-test-contextual -->
 ```csharp
 [Test]
 [Timeout(5_000)]
