@@ -6,7 +6,7 @@
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.100.10" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.5.1" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.1" />
-    <PackageVersion Include="Azure.Data.Tables" Version="12.11.0" />
+    <PackageVersion Include="Azure.Data.Tables" Version="12.12.0" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.1" />
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
