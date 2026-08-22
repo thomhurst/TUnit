@@ -3877,6 +3877,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         MethodDeclarationSyntax methodSyntax,
         AttributeData testAttribute)
     {
+        if (HasSuppressSourceLocation(testAttribute))
+        {
+            return new TestSourceLocation("", 0, 0, 0, 0);
+        }
+
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
         var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
@@ -3898,6 +3903,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AttributeData testAttribute,
         InheritsTestsClassMetadata classInfo)
     {
+        if (HasSuppressSourceLocation(testAttribute))
+        {
+            return new TestSourceLocation("", 0, 0, 0, 0);
+        }
+
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
         var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
 
@@ -3951,6 +3961,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // use zero-valued columns to indicate that the precise character range could not be determined.
         var resolvedLineNumber = lineNumber > 0 ? lineNumber : 0;
         return new TestSourceLocation(filePath, resolvedLineNumber, 0, resolvedLineNumber, 0);
+    }
+
+    private static bool HasSuppressSourceLocation(AttributeData testAttribute)
+    {
+        return testAttribute.NamedArguments
+            .Any(a => a.Key == "SuppressSourceLocation" && a.Value.Value is true);
     }
 
     /// <summary>

@@ -1375,12 +1375,24 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static string? ExtractFilePath(MethodInfo method)
     {
-        return method.GetCustomAttribute<TestAttribute>()?.File;
+        var attr = method.GetCustomAttribute<BaseTestAttribute>();
+        if (attr is null)
+        {
+            return null;
+        }
+
+        return attr.SuppressSourceLocation ? "" : attr.File;
     }
 
     private static int? ExtractLineNumber(MethodInfo method)
     {
-        return method.GetCustomAttribute<TestAttribute>()?.Line;
+        var attr = method.GetCustomAttribute<BaseTestAttribute>();
+        if (attr is null)
+        {
+            return null;
+        }
+
+        return attr.SuppressSourceLocation ? 0 : attr.Line;
     }
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
