@@ -19,7 +19,7 @@ internal static class TUnit_TestProject_CustomDisplayNameTests__TestSource
         {
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetProperty("Order", typeof(int)),
                 Type = typeof(int),
                 Name = "Order",
                 IsStatic = false,
