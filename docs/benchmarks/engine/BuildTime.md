@@ -4,7 +4,7 @@
 
 Last Updated
 
-This benchmark was automatically generated on **2026-08-17** from the latest CI run.
+This benchmark was automatically generated on **2026-08-23** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 10.0.400
 
@@ -14,10 +14,10 @@ Compilation time comparison across frameworks:
 
 | Framework     | Version | Mean       | Median     | StdDev   |
 | ------------- | ------- | ---------- | ---------- | -------- |
-| **TUnit**     | 1.65.0  | 995.0 ms   | 986.3 ms   | 47.43 ms |
-| Build\_NUnit  | 4.6.1   | 945.9 ms   | 937.1 ms   | 56.25 ms |
-| Build\_MSTest | 4.3.3   | 1,220.5 ms | 1,228.3 ms | 84.45 ms |
-| Build\_xUnit3 | 4.0.0   | 938.7 ms   | 897.0 ms   | 87.80 ms |
+| **TUnit**     | 1.65.38 | 917.6 ms   | 918.9 ms   | 26.90 ms |
+| Build\_NUnit  | 4.6.1   | 893.9 ms   | 899.1 ms   | 12.39 ms |
+| Build\_MSTest | 4.3.3   | 1,036.7 ms | 1,037.3 ms | 13.77 ms |
+| Build\_xUnit3 | 4.0.0   | 862.9 ms   | 861.3 ms   | 12.60 ms |
 
 ## 📈 Visual Comparison[​](#-visual-comparison "Direct link to 📈 Visual Comparison")
 
@@ -29,4 +29,4 @@ Methodology
 
 View the [benchmarks overview](/docs/benchmarks/.md) for methodology details and environment information.
 
-*Last generated: 2026-08-17T16:25:00.426Z*
+*Last generated: 2026-08-23T00:20:42.433Z*
