@@ -34,7 +34,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
         {
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property1", typeof(global::System.ValueTuple<int, string, bool>)),
                 Type = typeof(global::System.ValueTuple<int, string, bool>),
                 Name = "Property1",
                 IsStatic = false,
@@ -45,7 +45,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             },
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property2", typeof(global::System.ValueTuple<int, string, bool>)),
                 Type = typeof(global::System.ValueTuple<int, string, bool>),
                 Name = "Property2",
                 IsStatic = false,
@@ -56,7 +56,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             },
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property3", typeof(global::System.ValueTuple<int, string, bool>)),
                 Type = typeof(global::System.ValueTuple<int, string, bool>),
                 Name = "Property3",
                 IsStatic = false,
@@ -67,7 +67,7 @@ internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests__TestSou
             },
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetProperty("Property4", typeof(global::System.ValueTuple<int, string, bool>)),
                 Type = typeof(global::System.ValueTuple<int, string, bool>),
                 Name = "Property4",
                 IsStatic = false,

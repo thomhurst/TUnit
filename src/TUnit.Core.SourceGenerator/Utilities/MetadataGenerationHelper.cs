@@ -301,7 +301,8 @@ internal static class MetadataGenerationHelper
     {
         var safeTypeNameForReflection = containingType.GloballyQualified();
         // For type parameters, we need to use typeof(object) instead of typeof(T)
-        var safePropertyTypeName = CodeGenerationHelpers.ContainsTypeParameter(property.Type) ? "object" : property.Type.GloballyQualified();
+        var containsTypeParameter = CodeGenerationHelpers.ContainsTypeParameter(property.Type);
+        var safePropertyTypeName = containsTypeParameter ? "object" : property.Type.GloballyQualified();
 
         writer.AppendLine("new global::TUnit.Core.PropertyMetadata");
         writer.AppendLine("{");
@@ -310,7 +311,11 @@ internal static class MetadataGenerationHelper
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
 
-        writer.AppendLine($"ReflectionInfo = typeof({safeTypeNameForReflection}).GetProperty(\"{property.Name}\"),");
+        var reflectionInfo = containsTypeParameter
+            ? $"typeof({safeTypeNameForReflection}).GetProperty(\"{property.Name}\")"
+            : $"typeof({safeTypeNameForReflection}).GetProperty(\"{property.Name}\", typeof({safePropertyTypeName}))";
+
+        writer.AppendLine($"ReflectionInfo = {reflectionInfo},");
         writer.AppendLine($"Type = typeof({safePropertyTypeName}),");
         writer.AppendLine($"Name = \"{property.Name}\",");
         writer.AppendLine($"IsStatic = {property.IsStatic.ToString().ToLower()},");

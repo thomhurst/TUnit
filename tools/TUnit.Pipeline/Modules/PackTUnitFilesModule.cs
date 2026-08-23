@@ -18,8 +18,11 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<PublishMockTestsAOTModule>]
 public class PackTUnitFilesModule : Module<List<PackedProject>>
 {
-    // Packages in beta get a "-beta" suffix appended to their version.
-    // Remove entries from this set once a package is considered stable.
+    // Packages in beta ship with a "-beta" suffix appended to their version. The suffix is
+    // stamped by the project file itself (see TUnit.Assertions.Should.csproj) so it never
+    // leaks into the versions of the sibling packages it depends on; this set only records
+    // the resulting package version. Keep it in sync with those project files, and remove
+    // entries once a package is considered stable.
     private static readonly HashSet<string> BetaPackages =
     [
         "TUnit.Assertions.Should"
@@ -38,14 +41,13 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         foreach (var project in projects.ValueOrDefault!)
         {
             var projectName = project.NameWithoutExtension;
-            var isBeta = BetaPackages.Contains(projectName);
-            var packageVersion = isBeta
+            var packageVersion = BetaPackages.Contains(projectName)
                 ? $"{version.SemVer!}-beta"
                 : version.SemVer!;
 
             var properties = new List<KeyValue>
             {
-                new KeyValue("PackageVersion", packageVersion),
+                new KeyValue("PackageVersion", version.SemVer!),
                 new KeyValue("AssemblyVersion", version.AssemblySemVer!),
                 new KeyValue("FileVersion", version.AssemblySemFileVer!),
                 new KeyValue("InformationalVersion", version.InformationalVersion!),

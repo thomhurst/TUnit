@@ -23,7 +23,7 @@ internal static class TUnit_TestProject_Bugs__1924_None_BaseClass__TestSource
         {
             new global::TUnit.Core.PropertyMetadata
             {
-                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetProperty("Data"),
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass).GetProperty("Data", typeof(global::TUnit.TestProject.Bugs._1924.DataClass)),
                 Type = typeof(global::TUnit.TestProject.Bugs._1924.DataClass),
                 Name = "Data",
                 IsStatic = false,
