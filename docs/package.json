@@ -57,7 +57,7 @@
     "dompurify": "3.4.14",
     "node-forge": "1.4.0",
     "picomatch": "4.0.5",
-    "svgo": "4.0.2",
+    "svgo": "4.1.0",
     "yaml": "2.9.0"
   }
 }
