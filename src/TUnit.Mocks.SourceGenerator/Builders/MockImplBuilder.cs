@@ -588,7 +588,7 @@ internal static class MockImplBuilder
         var signatureReturnType = (method.IsVoid && !method.IsAsync) ? "void" : method.ReturnType;
         var paramList = GetParameterList(method);
         var typeParams = GetTypeParameterList(method);
-        var constraints = GetConstraintClauses(method);
+        var constraints = GetConstraintClauses(method, forExplicitImplementation: method.ExplicitInterfaceName is not null);
 
         writer.AppendLineIfNotEmpty(method.ObsoleteAttribute);
 
@@ -599,7 +599,7 @@ internal static class MockImplBuilder
                 // Return type is compatible (e.g. IEnumerable.GetEnumerator → IEnumerable<T>.GetEnumerator)
                 // — delegate to the public method.
                 var argPassList = GetArgPassList(method);
-                writer.AppendLine($"{signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints} => {EscapeIdentifier(method.Name)}({argPassList});");
+                writer.AppendLine($"{signatureReturnType} {method.ExplicitInterfaceName}.{EscapeIdentifier(method.Name)}{typeParams}({paramList}){constraints} => {EscapeIdentifier(method.Name)}{typeParams}({argPassList});");
             }
             else
             {
