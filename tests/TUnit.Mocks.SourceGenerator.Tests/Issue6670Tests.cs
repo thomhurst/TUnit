@@ -8,35 +8,43 @@ namespace TUnit.Mocks.SourceGenerator.Tests;
 /// </summary>
 public class Issue6670Tests : SnapshotTestBase
 {
+    private const string Source = """
+        using System.Collections.Generic;
+        using TUnit.Mocks;
+
+        public interface ITest : ITestParent
+        {
+            new IList<T> Get<T>() where T : notnull;
+        }
+
+        public interface ITestParent
+        {
+            IEnumerable<T> Get<T>() where T : notnull;
+        }
+
+        public class TestUsage
+        {
+            void M()
+            {
+                var mock = ITest.Mock();
+            }
+        }
+        """;
+
     [Test]
     public async Task Hidden_Generic_Interface_Method_Does_Not_Repeat_Constraints_On_Explicit_Implementation()
     {
-        var source = """
-            using System.Collections.Generic;
-            using TUnit.Mocks;
+        var errors = GetGeneratedCompilationErrors(Source);
+        var genericImplementationErrors = errors
+            .Where(error => error.Id is "CS0411" or "CS0460")
+            .ToList();
 
-            public interface ITest : ITestParent
-            {
-                new IList<T> Get<T>() where T : notnull;
-            }
+        await Assert.That(genericImplementationErrors).IsEmpty();
+    }
 
-            public interface ITestParent
-            {
-                IEnumerable<T> Get<T>() where T : notnull;
-            }
-
-            public class TestUsage
-            {
-                void M()
-                {
-                    var mock = ITest.Mock();
-                }
-            }
-            """;
-
-        var errors = GetGeneratedCompilationErrors(source);
-        var constraintErrors = errors.Where(error => error.Id == "CS0460").ToList();
-
-        await Assert.That(constraintErrors).IsEmpty();
+    [Test]
+    public Task Hidden_Generic_Interface_Method_Generation_Snapshot()
+    {
+        return VerifyGeneratorOutput(Source);
     }
 }
