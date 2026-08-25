@@ -1,30 +1,28 @@
 using TUnit.Mocks;
-using TUnit.Mocks.Generated;
 
-namespace TUnit.TestProject.Bugs._6670;
+namespace TUnit.Mocks.Tests;
 
-public interface ITest : ITestParent
+public interface IIssue6670Test : IIssue6670TestParent
 {
     new IList<T> Get<T>() where T : notnull;
 }
 
-public interface ITestParent
+public interface IIssue6670TestParent
 {
     IEnumerable<T> Get<T>() where T : notnull;
 }
 
-public class Issue6670MockTests
+public class Issue6670Tests
 {
-    private readonly ITestMock _test = ITest.Mock();
-
     [Test]
     public async Task Hidden_Generic_Interface_Method_Mock_Works()
     {
+        var mock = IIssue6670Test.Mock();
         var configured = new List<string> { "configured" };
-        _test.Get<string>().Returns(configured);
+        mock.Get<string>().Returns(configured);
 
-        ITest derived = _test;
-        ITestParent parent = _test;
+        IIssue6670Test derived = mock;
+        IIssue6670TestParent parent = mock;
 
         await Assert.That(derived.Get<string>()).IsSameReferenceAs(configured);
         await Assert.That(parent.Get<string>()).IsSameReferenceAs(configured);
