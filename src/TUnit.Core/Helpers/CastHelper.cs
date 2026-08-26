@@ -52,10 +52,13 @@ public static class CastHelper
 
         if (value is Array { Rank: 1 } source)
         {
+            // Honour a non-zero lower bound (Array.CreateInstance with explicit bounds) rather than
+            // assuming the source is zero-based; the result is always a normal zero-based T[].
+            var lowerBound = source.GetLowerBound(0);
             var result = new T[source.Length];
             for (var i = 0; i < result.Length; i++)
             {
-                result[i] = Cast<T>(source.GetValue(i))!;
+                result[i] = Cast<T>(source.GetValue(lowerBound + i))!;
             }
 
             return result;

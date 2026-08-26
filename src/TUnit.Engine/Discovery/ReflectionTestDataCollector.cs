@@ -1930,10 +1930,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                                     // An array whose runtime type isn't the parameter's (e.g. an object[]
                                     // from a MatrixAttribute subclass for a MyEnum[] parameter, issue #6678):
                                     // convert element-wise rather than forcing it into a single element.
+                                    var sourceLowerBound = sourceArray.GetLowerBound(0);
                                     var convertedArray = Array.CreateInstance(paramsElementType, sourceArray.Length);
                                     for (var i = 0; i < sourceArray.Length; i++)
                                     {
-                                        convertedArray.SetValue(CastHelper.Cast(paramsElementType, sourceArray.GetValue(i)), i);
+                                        convertedArray.SetValue(CastHelper.Cast(paramsElementType, sourceArray.GetValue(sourceLowerBound + i)), i);
                                     }
                                     castedArgs[regularParamsCount] = convertedArray;
                                 }

@@ -1,4 +1,6 @@
-﻿namespace TUnit.TestProject;
+﻿using TUnit.Assertions.Enums;
+
+namespace TUnit.TestProject;
 
 public class ArgsAsArrayTests
 {
@@ -95,7 +97,7 @@ public class ArgsAsArrayTests
             ? [ConfigKind.Ai, ConfigKind.Sample]
             : [ConfigKind.Sample, ConfigKind.NoWindow, ConfigKind.Mcp];
 
-        await Assert.That(configs).IsEquivalentTo(expected);
+        await Assert.That(configs).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -103,7 +105,17 @@ public class ArgsAsArrayTests
     public async Task TrailingParamsArray_ObjectArrayFromMatrix(
         [MatrixArray([ConfigKind.Ai, ConfigKind.Mcp])] params ConfigKind[] configs)
     {
-        await Assert.That(configs).IsEquivalentTo([ConfigKind.Ai, ConfigKind.Mcp]);
+        await Assert.That(configs).IsEquivalentTo([ConfigKind.Ai, ConfigKind.Mcp], CollectionOrdering.Matching);
+    }
+
+    // A rank-1 array with a non-zero lower bound (`object[*]`) must convert too — the loop has to
+    // start at GetLowerBound(0), not 0.
+    [Test]
+    [MatrixDataSource]
+    public async Task TrailingArray_NonZeroLowerBoundArrayFromMatrix(
+        [NonZeroLowerBoundMatrix] ConfigKind[] configs)
+    {
+        await Assert.That(configs).IsEquivalentTo([ConfigKind.NoWindow, ConfigKind.Mcp], CollectionOrdering.Matching);
     }
 
     // C# params expansion is preserved: an int[] is itself an `object`, so it lands as one element
@@ -132,4 +144,16 @@ public sealed class MatrixArrayAttribute(object[] first, object[]? second = null
 {
     public override object?[] GetObjects(DataGeneratorMetadata dataGeneratorMetadata)
         => new object?[] { first, second, third }.Where(array => array is not null).ToArray();
+}
+
+// Supplies a single rank-1 object array whose lower bound is 1 rather than 0.
+public sealed class NonZeroLowerBoundMatrixAttribute : MatrixAttribute
+{
+    public override object?[] GetObjects(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        var array = Array.CreateInstance(typeof(object), [2], [1]);
+        array.SetValue(ConfigKind.NoWindow, 1);
+        array.SetValue(ConfigKind.Mcp, 2);
+        return [array];
+    }
 }
