@@ -2224,6 +2224,7 @@ namespace .Helpers
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
         public static object? CastIfNeeded([.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..Interfaces)]  type, object? value) { }
+        public static T[] ToTrailingArray<[.(..PublicParameterlessConstructor)]  T>(object value) { }
     }
     public static class ClassConstructorHelper
     {

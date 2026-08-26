@@ -30,6 +30,41 @@ public static class CastHelper
     }
 
     /// <summary>
+    /// Binds a single non-null argument to a trailing <c>T[]</c> parameter when the argument is not
+    /// already a <c>T[]</c>. Applies C# params expansion first (a <typeparamref name="T"/> value becomes
+    /// a one-element array), then converts any other array element-wise, and otherwise wraps the
+    /// converted scalar.
+    /// </summary>
+    /// <remarks>
+    /// The element-wise branch exists because data sources often supply arrays whose runtime type is
+    /// not the parameter's — e.g. an <c>object[]</c> from a custom <see cref="MatrixAttribute"/> for a
+    /// <c>MyEnum[]</c> parameter (issue #6678). Without it the whole array would be forced into a single
+    /// element and fail to cast. The <typeparamref name="T"/> check runs first so a <c>params object[]</c>
+    /// parameter still receives an <c>int[]</c> argument as one element, matching C#.
+    /// AOT-safe: allocates via <c>new T[]</c> and converts through <see cref="Cast{T}"/>.
+    /// </remarks>
+    public static T[] ToTrailingArray<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object value)
+    {
+        if (value is T element)
+        {
+            return [element];
+        }
+
+        if (value is Array { Rank: 1 } source)
+        {
+            var result = new T[source.Length];
+            for (var i = 0; i < result.Length; i++)
+            {
+                result[i] = Cast<T>(source.GetValue(i))!;
+            }
+
+            return result;
+        }
+
+        return [Cast<T>(value)!];
+    }
+
+    /// <summary>
     /// Returns the value as-is if it's null or already assignable to the target type;
     /// otherwise delegates to <see cref="Cast"/> to apply conversion operators.
     /// Unlike <see cref="Cast"/>, null input always returns null (no default-value creation for value types).

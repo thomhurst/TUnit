@@ -146,8 +146,11 @@ public static class TupleArgumentHelper
                         // - null (passed as null, not as array with null element)
                         // - T[] (passed directly, not wrapped in another array)
                         // - T (wrapped in array with single element)
+                        // Anything else goes through CastHelper.ToTrailingArray, which also converts an
+                        // array of a different runtime type element-wise (e.g. an object[] supplied by a
+                        // MatrixAttribute subclass for a MyEnum[] parameter — issue #6678).
                         var singleArg = $"{argumentsArrayName}[{regularParamCount}]";
-                        var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : new {elementType.GloballyQualified()}[] {{ global::TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({singleArg}) }})";
+                        var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<{elementType.GloballyQualified()}>({singleArg}))";
                         argumentExpressions.Add(checkAndCast);
                     }
                     else
